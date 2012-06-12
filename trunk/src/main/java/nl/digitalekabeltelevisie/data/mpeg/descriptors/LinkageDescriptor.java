@@ -142,7 +142,6 @@ public class LinkageDescriptor extends Descriptor {
 	private int bouquetID;
 
 	// TODO handle linkage_type ==0x05
-	// TODO handle linkage_type ==0x0C EN 301 192
 	// TODO handle linkage_type ==0x0D 300468
 
 	// linkage type=09 is software update, oui = http://standards.ieee.org/regauth/oui/oui.txt
@@ -152,7 +151,7 @@ public class LinkageDescriptor extends Descriptor {
 		super(b, offset,parent);
 		transportStreamId = getInt(b,offset+2,2,MASK_16BITS);
 		originalNetworkId = getInt(b,offset+4,2,MASK_16BITS);
-		serviceId = getInt(b,offset+6,2,MASK_16BITS);
+		serviceId =  getInt(b,offset+6,2,MASK_16BITS);
 		linkageType = getInt(b,offset+8,1,MASK_8BITS);
 		if(linkageType==0x08){ // mobile hand-over
 			int r =0;
