@@ -52,6 +52,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.EACEMStreamIdentifierDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.MessageDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUEventNameDescriptor;
@@ -179,6 +180,12 @@ public final class DescriptorFactory {
 				break;
 			case 0x88:
 				d = new HDSimulcastLogicalChannelDescriptor(data, t + offset, tableSection);
+				break;
+			}
+		} else if (private_data_specifier == 0x29) { // Nordig
+			switch (Utils.getUnsignedByte(data[t + offset])) {
+			case 0x83:
+				d = new NordigLogicalChannelDescriptorV1(data, t + offset, tableSection);
 				break;
 			}
 		} else if (private_data_specifier == 0x40) { // CI Plus LLP
