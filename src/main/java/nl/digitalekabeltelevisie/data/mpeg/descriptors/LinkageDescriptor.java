@@ -47,6 +47,8 @@ public class LinkageDescriptor extends Descriptor {
 	private static Logger logger = Logger.getLogger(LinkageDescriptor.class.getName());
 
 	private List<OUIEntry> ouiList = new ArrayList<OUIEntry>();
+	private List<Platform> platformList = new ArrayList<Platform>();
+	private List<NordigBootLoader> bootLoaderList = new ArrayList<NordigBootLoader>();
 
 	public class OUIEntry implements TreeNode{
 
@@ -72,7 +74,6 @@ public class LinkageDescriptor extends Descriptor {
 
 	}
 
-	private List<Platform> platformList = new ArrayList<Platform>();
 
 	public class Platform implements TreeNode{
 		/**
@@ -112,6 +113,38 @@ public class LinkageDescriptor extends Descriptor {
 			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("platform_name_length",platformName.getLength() ,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("platform_name",platformName ,null)));
+			return s;
+		}
+	}
+
+	public class NordigBootLoader implements TreeNode{
+
+		/**
+		 * @param manufacturer_id
+		 * @param version_id
+		 * @param private_id
+		 * @param start_time
+		 */
+		private NordigBootLoader(int manufacturer_id, byte[] version_id,
+				long private_id, byte[] start_time) {
+			super();
+			this.manufacturer_id = manufacturer_id;
+			this.version_id = version_id;
+			this.private_id = private_id;
+			this.start_time = start_time;
+		}
+
+		private final int manufacturer_id;
+		private final byte[] version_id; // 64 bits, 8 bytes
+		private final long private_id;
+		private final byte[] start_time;
+
+		public DefaultMutableTreeNode getJTreeNode(final int modus){
+			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("bootloader"));
+			s.add(new DefaultMutableTreeNode(new KVP("manufacturer_id",manufacturer_id,null)));
+			s.add(new DefaultMutableTreeNode(new KVP("version_id",version_id,null)));
+			s.add(new DefaultMutableTreeNode(new KVP("private_id",private_id,null)));
+			s.add(new DefaultMutableTreeNode(new KVP("start_time",start_time,Utils.getUTCFormattedString(start_time))));
 			return s;
 		}
 	}
@@ -212,6 +245,21 @@ public class LinkageDescriptor extends Descriptor {
 				privateDataByte = Utils.copyOfRange(b, offset+10, offset+descriptorLength+2);
 			}
 
+		}else if(linkageType==0x81){ // 13.2.6 NorDig linkage for bootloader 
+			// TODO, this is a private usage, but not indicated by a private_data_specifier_descriptor: 0x5F 
+			// just assume it is nordig?
+			int s = 9; // private data, if any, starts at position 9 
+			while(s+17 <= descriptorLength){ // bootloader = 19 bytes
+				int manufacturer_id = getInt(b,offset+s,2,MASK_16BITS);
+				byte[] version_id = Utils.copyOfRange(b, offset+s+2, offset+s+10); // 64 bits, 8 bytes
+				long private_id = getLong(b, offset+s+10, 4, MASK_32BITS);
+				byte[] start_time =  Utils.copyOfRange(b, offset+s+14, offset+s+19);
+				final NordigBootLoader nordigBootLoader = new NordigBootLoader(manufacturer_id, version_id, private_id, start_time);
+				bootLoaderList.add(nordigBootLoader);
+				s +=19;
+			}
+			privateDataByte = Utils.copyOfRange(b, offset+s, offset+descriptorLength+2);
+
 		}else{
 			logger.log(Level.INFO,"LinkageDescriptor, not implemented linkageType: "+linkageType +"("+getLinkageTypeString(linkageType)+"), called from:"+parent);
 			privateDataByte = Utils.copyOfRange(b, offset+9, offset+descriptorLength+2);
@@ -254,6 +302,8 @@ public class LinkageDescriptor extends Descriptor {
 			if(tableType==0x02){
 				t.add(new DefaultMutableTreeNode(new KVP("bouquet_id",bouquetID ,null)));
 			}
+		}else if(linkageType==0x81){
+			addListJTree(t,bootLoaderList,modus,"Nordig BootLoader");
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
 		return t;
