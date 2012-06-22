@@ -101,6 +101,11 @@ public class TeletextDescriptor extends Descriptor {
 		}
 
 
+		public String getIso639LanguageCode() {
+			return iso639LanguageCode;
+		}
+
+
 	}
 
 	public TeletextDescriptor(final byte[] b, final int offset, final TableSection parent) {

@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class EIT extends AbstractPSITabel{
 
-	private Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
+	private final Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
 
 	public class ServiceListing implements HTMLSource {
 		private final int tableID;
@@ -141,6 +141,10 @@ public class EIT extends AbstractPSITabel{
 				(eit.get(tableId).get(tableIdExtension)!=null) &&
 				(eit.get(tableId).get(tableIdExtension).length >section) &&
 				(eit.get(tableId).get(tableIdExtension)[section]!=null));
+	}
+
+	public Map<Integer, HashMap<Integer, EITsection[]>> getEITsectionsMap() {
+		return eit;
 	}
 
 
