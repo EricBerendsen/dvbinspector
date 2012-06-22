@@ -112,5 +112,9 @@ public class PAT extends AbstractPSITabel{
 		return false;
 	}
 
+	public PATsection[] getPATsections() {
+		return pat;
+	}
+
 
 }
