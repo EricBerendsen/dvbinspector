@@ -40,7 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ServiceListDescriptor extends Descriptor {
 
-	private List<Service> serviceList = new ArrayList<Service>();
+	private final List<Service> serviceList = new ArrayList<Service>();
 
 
 	public class Service implements TreeNode{
@@ -125,6 +125,10 @@ public class ServiceListDescriptor extends Descriptor {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		addListJTree(t,serviceList,modus,"service_list");
 		return t;
+	}
+
+	public List<Service> getServiceList() {
+		return serviceList;
 	}
 
 }
