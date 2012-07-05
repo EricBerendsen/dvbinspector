@@ -36,6 +36,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 
 
+// based on TS 101 191 V1.4.1 (2004-06) DVB mega-frame for Single Frequency Network (SFN) synchronization
 public class MegaFrameInitializationPacket implements TreeNode{
 
 

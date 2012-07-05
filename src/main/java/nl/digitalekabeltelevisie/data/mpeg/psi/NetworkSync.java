@@ -27,14 +27,17 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 
+import static nl.digitalekabeltelevisie.util.Utils.addToList;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+
+//based on TS 101 191 V1.4.1 (2004-06) DVB mega-frame for Single Frequency Network (SFN) synchronization
 
 public class NetworkSync extends AbstractPSITabel{
 
@@ -55,10 +58,8 @@ public class NetworkSync extends AbstractPSITabel{
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NetworkSync"));
 
+		addToList(t,megaFrameList,modus);
 
-		for (final Iterator<MegaFrameInitializationPacket>iterator =megaFrameList.iterator(); iterator.hasNext();) {
-			t.add(iterator.next().getJTreeNode(modus));
-		}
 		return t;
 	}
 
