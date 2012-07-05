@@ -101,12 +101,11 @@ public class LogicalChannelDescriptor extends Descriptor {
 		while (t<descriptorLength) {
 			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
 			final int visible = getInt(b,offset+t+4,1,0x80) >>7;
-		final int reserved = getInt(b,offset+t+4,1,0x7C) >>2;
-		// TODO chNumber is 14 bits in Nordig specs, 10 in dgtvi.it !! (10 in Holland, so for now 10 bits it is)
-		final int chNumber=getInt(b, offset+t+4,2,MASK_10BITS);
-		final LogicalChannel s = new LogicalChannel(serviceId, visible, reserved, chNumber);
-		channelList.add(s);
-		t+=4;
+			final int reserved = getInt(b,offset+t+4,1,0x7C) >>2;
+			final int chNumber=getInt(b, offset+t+4,2,MASK_10BITS);
+			final LogicalChannel s = new LogicalChannel(serviceId, visible, reserved, chNumber);
+			channelList.add(s);
+			t+=4;
 		}
 	}
 

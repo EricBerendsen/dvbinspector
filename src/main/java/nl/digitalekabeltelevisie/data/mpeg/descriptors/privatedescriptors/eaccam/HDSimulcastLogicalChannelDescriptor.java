@@ -97,13 +97,11 @@ public class HDSimulcastLogicalChannelDescriptor extends Descriptor {
 
 			final int serviceId=getInt(b, offset+t+2,2,0xFFFF);
 			final int visisble = (b[offset+t+4] & 0x80) >>7;
-		// TODO chNumber is 14 bits in Nordig specs, 10 in dgtvi.it !! (10 in Holland, so for now 10 bits it is)
-		final int chNumber=getInt(b, offset+t+4,2,0x03FF);
+			final int chNumber=getInt(b, offset+t+4,2,0x03FF);
 
-
-		final LogicalChannel s = new LogicalChannel(serviceId, visisble, chNumber);
-		channelList.add(s);
-		t+=4;
+			final LogicalChannel s = new LogicalChannel(serviceId, visisble, chNumber);
+			channelList.add(s);
+			t+=4;
 		}
 	}
 
