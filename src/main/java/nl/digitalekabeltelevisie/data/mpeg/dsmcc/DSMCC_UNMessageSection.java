@@ -206,6 +206,16 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 	// for DSI for SSU
 	public class GroupInfo implements TreeNode{
+		
+		// TODO should also contain 
+		//		GroupInfoLength 	2
+		//		for (i=0; i < GroupInfoLength; i++) { 	
+		//			GroupInfoByte 	1
+		//		}
+		
+		// according to http://www.interactivetvweb.org/tutorials/dtv_intro/dsmcc/data_carousel
+		// Table 6: GroupInfoIndication structure of 8.1.1 DownloadServerInitiate message (DSI) of ETSI TS 102 006 V1.3.2 (2008-07)
+		// is not very clear, indentation is wrong 
 
 		public GroupInfo(final byte[]data, final int offset){
 			groupId= Utils.getLong(data, offset, 4, Utils.MASK_32BITS);
@@ -359,7 +369,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 				offset += 2;
 				groupInfoByte = Utils.getBytes(privateDataByte, offset, groupInfoLength);
 				offset += groupInfoLength;
-				privateDataLen2 = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS);
+				privateDataLen2 = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS); // this gives exception for nordig DVB-t 746000000.ts pid 8006. 
 				offset += 2;
 				privateDataByte2 = Utils.getBytes(privateDataByte, offset, privateDataLen2);
 				offset += privateDataLen2;

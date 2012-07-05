@@ -42,7 +42,6 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 /**
  * Contains all DSM-CC information from single PID. Make a separation by TableID (all other sections contain just one table ID, this can have 0x38 - 0x3f)
  * 
- * TODO change to represent all data for one carousel. Might be different PIDS
  * single PID may be shared by multiple carousels
  * 
  * table_id: 0x3B (59) => DSM-CC - U-N messages (DSI or DII) (first implemented
