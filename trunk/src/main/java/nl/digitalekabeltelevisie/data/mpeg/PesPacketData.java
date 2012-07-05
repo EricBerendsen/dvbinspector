@@ -96,19 +96,19 @@ public class PesPacketData  implements TreeNode{
 
 
 
-	public PesPacketData(final int pesStreamID, final int pesLength,final PID parent, final long packetNo,final TransportStream transportStream) {
-		this.stream_id = pesStreamID;
-		this.noBytes = pesLength;
-		this.parentPID = parent;
-		this.packet_no=packetNo;
-		this.transportStream=transportStream;
-		if(pesLength!=0){
-			this.data= new byte[pesLength+6];
-		}else{
-			this.data= new byte[20000]; // start default for video, should be able to handle small frames.
-		}
-
-	}
+//	public PesPacketData(final int pesStreamID, final int pesLength,final PID parent, final long packetNo,final TransportStream transportStream) {
+//		this.stream_id = pesStreamID;
+//		this.noBytes = pesLength;
+//		this.parentPID = parent;
+//		this.packet_no=packetNo;
+//		this.transportStream=transportStream;
+//		if(pesLength!=0){
+//			this.data= new byte[pesLength+6];
+//		}else{
+//			this.data= new byte[20000]; // start default for video, should be able to handle small frames.
+//		}
+//
+//	}
 	public PesPacketData(final int pesStreamID, final int pesLength) {
 		this.stream_id = pesStreamID;
 		this.noBytes = pesLength;
@@ -119,6 +119,7 @@ public class PesPacketData  implements TreeNode{
 		}
 
 	}
+	
 	protected PesPacketData(final PesPacketData pesPacket){
 		this.stream_id = pesPacket.getPesStreamID();
 

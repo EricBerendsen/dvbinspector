@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ApplicationSignallingDescriptor;
@@ -155,7 +156,7 @@ public class PsiSectionData {
 							transportStream.getPsi().getDsms().update(new TableSection(this,parentPID));
 						}
 					} catch (final RuntimeException re) {
-						logger.warning("RuntimeException in readBytes PSI data:"+re);
+						logger.log(Level.WARNING, "RuntimeException in readBytes PSI data: pid="+pid, re);
 					}
 				}
 
@@ -170,7 +171,7 @@ public class PsiSectionData {
 					}
 
 				} catch (final RuntimeException re) {
-					logger.warning("RuntimeException in readBytes PIDs:"+re);
+					logger.log(Level.WARNING, "RuntimeException in readBytes PIDs: pid="+pid, re);
 				}
 
 				complete=true;
