@@ -80,7 +80,6 @@ public class BIOPModuleInfo implements TreeNode {
 		t.add(new DefaultMutableTreeNode(new KVP("taps_count",taps_count ,null)));
 		addListJTree(t,taps,modus,"BIOP::Taps");
 		t.add(new DefaultMutableTreeNode(new KVP("userInfoLength",userInfoLength ,null)));
-		//t.add(desc.getJTreeNode(modus));
 		Utils.addListJTree(t,descriptors,modus,"descriptors");
 
 		return t;
