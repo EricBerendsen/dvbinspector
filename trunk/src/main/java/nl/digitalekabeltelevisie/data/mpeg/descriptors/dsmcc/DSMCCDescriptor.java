@@ -23,7 +23,6 @@
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
  * 
- * Based on TS 102 006
  */
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
