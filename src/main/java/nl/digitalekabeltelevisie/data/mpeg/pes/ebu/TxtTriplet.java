@@ -326,8 +326,8 @@ Triplet implements TreeNode {
 			str +="column "+address+", ";
 			if(mode == 0){ //Foreground Colour
 				final int clut = (data & 0x18)>>3;
-		final int clutEntry = (data & 0x7);
-		str += "clut "+clut+", entry "+clutEntry;
+				final int clutEntry = (data & 0x7);
+				str += "clut "+clut+", entry "+clutEntry;
 			}
 			if(mode == 3){ //Background Colour
 				final int clut = (data & 0x18)>>3;
@@ -362,11 +362,6 @@ Triplet implements TreeNode {
 				// Address triplet with Mode Description = 10 000 and Data = 0101010. See clause 12.2.4.
 				str += ""+(char)G0_sets[0][data]+"";
 			}
-			if(mode > 16){ //char from G0 set w/ diacr.
-
-				str += (char)data + "+ " + (char)G2_sets[0][64+ (mode & 0xF)]+"  ";  // no typo, need G2_sets, but I don't understand why......????
-				str += (char)getCombinedCharacter(data, mode & 0xF);
-			}
 		}else{
 			if(mode==0x04){// set active position
 				int row;
@@ -379,7 +374,7 @@ Triplet implements TreeNode {
 			}
 			// PDC related
 			if(mode==0x08){// PDC - Country of Origin and Programme Source
-				str += "Country of Origin "+ (address&0x3F)+", Programme Source "+ (data&0x03F); //ETSI EN 300 231 V1.3.1 says in §7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
+				str += "Country of Origin "+ (address&0x3F)+", Programme Source "+ (data&0x03F); //ETSI EN 300 231 V1.3.1 says in ï¿½7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
 			}
 			if(mode==0x09){// PDC - Month & Day
 				str += "Month "+ (address&0xF)+", Day "+ ((data&0x30)>>4)+""+(data&0x0F);
