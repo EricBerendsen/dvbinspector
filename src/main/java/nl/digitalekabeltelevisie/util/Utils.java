@@ -49,7 +49,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.DVBtree;
@@ -457,16 +456,6 @@ public final class Utils {
 
 
 
-	/**
-	 * 
-	 * return a java String of the DVB String, according to ETSI EN 300 468 V1.11.1 Annex A (normative): Coding of text characters
-	 * @param dvbString
-	 * @return
-	 */
-	public static String getString(final DVBString dvbString) {
-		return getString(dvbString.getData(),dvbString.getOffset()+1, dvbString.getLength());
-	}
-
 
 	/**
 	 * 
@@ -483,10 +472,9 @@ public final class Utils {
 		if(length<=0){
 			return "";
 		}
-		if((b[offset]<0x20)&&(b[offset]>=0)){
+		Charset charset = null;
+		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
 			final int selectorByte=b[offset];
-			Charset charset = null;
-
 			try {
 				if((selectorByte>0)&&(selectorByte<=0x0b)){
 					charset = Charset.forName("ISO-8859-"+(selectorByte+4));
@@ -512,9 +500,25 @@ public final class Utils {
 			if(charset==null){
 				charset = Charset.forName("ISO-8859-1");
 			}
-			return new String(b, offset, length, charset);
 		}
-		return Iso6937ToUnicode.convert(b, offset, length); //default for DVB
+		
+		// filter Single byte control codes
+
+		byte[] filteredBytes = new byte[length];  // length is enough, might need less
+		int filteredLength=0;
+		
+		for (int i = offset; i < (offset+length); i++) {
+			if(b[i]>-97){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f)){
+				filteredBytes[filteredLength++]=b[i];
+			}
+			
+		}
+		
+		if(charset==null){
+			return Iso6937ToUnicode.convert(filteredBytes, 0, filteredLength); //default for DVB
+		}else{
+			return new String(filteredBytes, 0, filteredLength,charset);
+		}
 	}
 
 	public static String getISO8859_1String(final byte b[], final int offset, final int length) {
@@ -634,7 +638,7 @@ public final class Utils {
 	}
 
 
-	// ETSI EN 300 706 V1.2.1 ß11.3.3 Page Function Coding
+	// ETSI EN 300 706 V1.2.1 ¬ß11.3.3 Page Function Coding
 	public static String getMIPPageFunctionString(final int pageCode){
 		if((0x02<=pageCode)&&(pageCode<=0x4f)){
 			return "Normal page, #sub pages "+pageCode;
@@ -808,15 +812,34 @@ public final class Utils {
 	public static <U extends TreeNode>void addListJTree(final DefaultMutableTreeNode parent,final Collection<U> itemList, final int modus, final String label) {
 		if((itemList!=null)&&(itemList.size()!=0)){
 			if(simpleModus(modus)){ // simple layout
-				for (final Iterator<U> iter = itemList.iterator(); iter.hasNext();) {
-					parent.add(iter.next().getJTreeNode(modus));
-				}
+				addToList(parent, itemList, modus);
 			}else{
 				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(new KVP(label +": "+ itemList.size()+" entries"));
-				for (final Iterator<U> iter = itemList.iterator(); iter.hasNext();) {
-					descriptorListNode.add(iter.next().getJTreeNode(modus));
-				}
+				addToList(descriptorListNode, itemList, modus);
 				parent.add(descriptorListNode);
+			}
+		}
+	}
+
+
+
+	public static <U> void addToList(final DefaultMutableTreeNode parent,
+			final Collection<U> itemList, final int modus) {
+		if(countListModus(modus)){
+			int count = 0;
+			for (final Iterator<U> iter = itemList.iterator(); iter.hasNext();) {
+				DefaultMutableTreeNode node = ((TreeNode) iter.next()).getJTreeNode(modus);
+				Object userObject = node.getUserObject();
+				if (userObject instanceof KVP) {
+					KVP kvp = (KVP)userObject;
+					kvp.appendLabel(" ["+Integer.toString(count)+"]");
+					count++;
+				}
+				parent.add(node);
+			}
+		}else{
+			for (final Iterator<U> iter = itemList.iterator(); iter.hasNext();) {
+				parent.add(((TreeNode) iter.next()).getJTreeNode(modus));
 			}
 		}
 	}
@@ -900,44 +923,44 @@ public final class Utils {
 			case '>': sb.append("&gt;"); break;
 			case '&': sb.append("&amp;"); break;
 			case '"': sb.append("&quot;"); break;
-			case '‡': sb.append("&agrave;");break;
-			case '¿': sb.append("&Agrave;");break;
-			case '‚': sb.append("&acirc;");break;
-			case '¬': sb.append("&Acirc;");break;
-			case '‰': sb.append("&auml;");break;
-			case 'ƒ': sb.append("&Auml;");break;
-			case 'Â': sb.append("&aring;");break;
-			case '≈': sb.append("&Aring;");break;
-			case 'Ê': sb.append("&aelig;");break;
-			case '∆': sb.append("&AElig;");break;
-			case 'Á': sb.append("&ccedil;");break;
-			case '«': sb.append("&Ccedil;");break;
-			case 'È': sb.append("&eacute;");break;
-			case '…': sb.append("&Eacute;");break;
-			case 'Ë': sb.append("&egrave;");break;
-			case '»': sb.append("&Egrave;");break;
-			case 'Í': sb.append("&ecirc;");break;
-			case ' ': sb.append("&Ecirc;");break;
-			case 'Î': sb.append("&euml;");break;
-			case 'À': sb.append("&Euml;");break;
-			case 'Ô': sb.append("&iuml;");break;
-			case 'œ': sb.append("&Iuml;");break;
-			case 'Ù': sb.append("&ocirc;");break;
-			case '‘': sb.append("&Ocirc;");break;
-			case 'ˆ': sb.append("&ouml;");break;
-			case '÷': sb.append("&Ouml;");break;
-			case '¯': sb.append("&oslash;");break;
-			case 'ÿ': sb.append("&Oslash;");break;
-			case 'ﬂ': sb.append("&szlig;");break;
-			case '˘': sb.append("&ugrave;");break;
-			case 'Ÿ': sb.append("&Ugrave;");break;
-			case '˚': sb.append("&ucirc;");break;
-			case '€': sb.append("&Ucirc;");break;
-			case '¸': sb.append("&uuml;");break;
-			case '‹': sb.append("&Uuml;");break;
-			case 'Æ': sb.append("&reg;");break;
-			case '©': sb.append("&copy;");break;
-			case 'Ä': sb.append("&euro;"); break;
+			case '√†': sb.append("&agrave;");break;
+			case '√Ä': sb.append("&Agrave;");break;
+			case '√¢': sb.append("&acirc;");break;
+			case '√Ç': sb.append("&Acirc;");break;
+			case '√§': sb.append("&auml;");break;
+			case '√Ñ': sb.append("&Auml;");break;
+			case '√•': sb.append("&aring;");break;
+			case '√Ö': sb.append("&Aring;");break;
+			case '√¶': sb.append("&aelig;");break;
+			case '√Ü': sb.append("&AElig;");break;
+			case '√ß': sb.append("&ccedil;");break;
+			case '√á': sb.append("&Ccedil;");break;
+			case '√©': sb.append("&eacute;");break;
+			case '√â': sb.append("&Eacute;");break;
+			case '√®': sb.append("&egrave;");break;
+			case '√à': sb.append("&Egrave;");break;
+			case '√™': sb.append("&ecirc;");break;
+			case '√ä': sb.append("&Ecirc;");break;
+			case '√´': sb.append("&euml;");break;
+			case '√ã': sb.append("&Euml;");break;
+			case '√Ø': sb.append("&iuml;");break;
+			case '√è': sb.append("&Iuml;");break;
+			case '√¥': sb.append("&ocirc;");break;
+			case '√î': sb.append("&Ocirc;");break;
+			case '√∂': sb.append("&ouml;");break;
+			case '√ñ': sb.append("&Ouml;");break;
+			case '√∏': sb.append("&oslash;");break;
+			case '√ò': sb.append("&Oslash;");break;
+			case '√ü': sb.append("&szlig;");break;
+			case '√π': sb.append("&ugrave;");break;
+			case '√ô': sb.append("&Ugrave;");break;
+			case '√ª': sb.append("&ucirc;");break;
+			case '√õ': sb.append("&Ucirc;");break;
+			case '√º': sb.append("&uuml;");break;
+			case '√ú': sb.append("&Uuml;");break;
+			case '¬Æ': sb.append("&reg;");break;
+			case '¬©': sb.append("&copy;");break;
+			case '‚Ç¨': sb.append("&euro;"); break;
 			default:  sb.append(c); break;
 			}
 		}
@@ -957,6 +980,9 @@ public final class Utils {
 		return ((m&DVBtree.PACKET_MODUS)!=0);
 	}
 
+	public static boolean countListModus(final int m){
+		return ((m&DVBtree.COUNT_LIST_ITEMS_MODUS)!=0);
+	}
 	public static String stripLeadingZeros(final String s) {
 		final int len = s.length()-1; // leave at least one zero if that is the only char
 		int st = 0;
@@ -1173,9 +1199,9 @@ public final class Utils {
 		switch (s) {
 		case 0: return "forbidden";
 		case 1: return "1,0 (Square Sample)";
-		case 2 : return "3˜4";
-		case 3 : return "9˜16";
-		case 4 : return "1˜2,21";
+		case 2 : return "3√∑4";
+		case 3 : return "9√∑16";
+		case 4 : return "1√∑2,21";
 
 		default:
 			return "reserved";

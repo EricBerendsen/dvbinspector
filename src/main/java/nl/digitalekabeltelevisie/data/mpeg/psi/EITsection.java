@@ -261,13 +261,13 @@ public class EITsection extends TableSection implements HTMLSource {
 			if(shortDesc.size()>0){
 				b.append("<b><span style=\"background-color: white\">");
 				final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
-				b.append(Utils.escapeHTML(Utils.getString(shortEventDescriptor.getEventName()))).append("</span></b>&nbsp;");
-				b.append(Utils.escapeHTML(Utils.getString(shortEventDescriptor.getText())));
+				b.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b>&nbsp;");
+				b.append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
 			}
 			//List<Descriptor> extendedDesc = Descriptor.findDescriptorsInList(descList, 0x4E);
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
 			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
-				b.append(Utils.escapeHTML(Utils.getString(extEvent.getText())));
+				b.append(Utils.escapeHTML(extEvent.getText().toString()));
 			}
 
 			b.append("<br>");
