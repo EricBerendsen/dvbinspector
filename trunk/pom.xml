@@ -6,14 +6,14 @@
 	<groupId>nl.digitalekabeltelevisie</groupId>
 	<artifactId>DVBinspector</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.4</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<name>DVBinspector</name>
 	
 <properties>
     <maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
     <buildNumber>${maven.build.timestamp}</buildNumber>
-</properties>
-
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ </properties>
 	
 	<build>
 		<finalName>${project.artifactId}</finalName>
@@ -27,6 +27,7 @@
 				<configuration>
 					<source>1.5</source>
 					<target>1.5</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
 
