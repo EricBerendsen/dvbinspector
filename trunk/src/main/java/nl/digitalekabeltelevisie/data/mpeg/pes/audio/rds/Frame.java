@@ -40,11 +40,7 @@ public class Frame implements TreeNode {
 	private static Logger	logger	= Logger.getLogger(Frame.class.getName());
 
 	private byte[] data;
-	/**
-	 * @param start
-	 * @param stop
-	 * @param uecp TODO
-	 */
+
 	public Frame(final byte[] data, final int start, final int stop) {
 		super();
 		this.data = data;
