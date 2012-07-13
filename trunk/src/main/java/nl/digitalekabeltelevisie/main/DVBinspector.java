@@ -30,7 +30,9 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -53,7 +55,9 @@ import javax.swing.event.ChangeListener;
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
 import nl.digitalekabeltelevisie.gui.AboutAction;
 import nl.digitalekabeltelevisie.gui.BarChart;
 import nl.digitalekabeltelevisie.gui.BitRateChart;
@@ -113,7 +117,28 @@ public class DVBinspector implements ChangeListener{
 			// TODO test if file exists
 			final TransportStream ts = new TransportStream(filename);
 			inspector.transportStream = ts;
-		}
+
+			try {
+				inspector.transportStream.parseStream();
+				if(args.length>=2){
+
+					PID[] pids = ts.getPids();
+			        Map<Integer, AbstractPesHandler> pesHandlerMap = new HashMap<Integer, AbstractPesHandler>();
+					for (int i = 1; i < args.length; i++) {
+						int pid=Integer.parseInt(args[i]);
+						PID p= pids[pid];
+			            if (p != null) {
+			                pesHandlerMap.put(Integer.valueOf(p.getPid()), p.getPesHandler());
+			            }
+			        }
+			        ts.parseStream(pesHandlerMap);					
+				}
+			} catch (final IOException e) {
+				logger.log(Level.WARNING, "error parsing transportStream", e);
+			}
+			
+
+}
 
 		inspector.run();
 	}
@@ -123,14 +148,14 @@ public class DVBinspector implements ChangeListener{
 		defaultPrivateDataSpecifier = prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
 		modus = prefs.getInt(DVBinspector.DEFAULT_VIEW_MODUS,0);
 
-		try {
-			if(transportStream!=null){
-				transportStream.parseStream();
-			}
-		} catch (final IOException e) {
-			logger.log(Level.WARNING, "error parsing transportStream", e);
-		}
-
+//		try {
+//			if(transportStream!=null){
+//				transportStream.parseStream();
+//			}
+//		} catch (final IOException e) {
+//			logger.log(Level.WARNING, "error parsing transportStream", e);
+//		}
+//
 
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
 		KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
@@ -236,6 +261,11 @@ public class DVBinspector implements ChangeListener{
 		packetViewMenu.addActionListener(packetViewAction);
 		viewTreeMenu.add(packetViewMenu);
 
+		final JCheckBoxMenuItem countListViewMenu = new JCheckBoxMenuItem("Count List Items");
+		countListViewMenu.setSelected((modus&DVBtree.COUNT_LIST_ITEMS_MODUS)!=0);
+		final Action countListViewAction= new ToggleViewAction(this, DVBtree.COUNT_LIST_ITEMS_MODUS);
+		countListViewMenu.addActionListener(countListViewAction);
+		viewTreeMenu.add(countListViewMenu);
 
 		privateDataSubMenu = new JMenu("Private Data Specifier Default");
 		final ButtonGroup group = new ButtonGroup();
@@ -243,6 +273,7 @@ public class DVBinspector implements ChangeListener{
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x00, "none",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x16, "Casema",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x28, "EACEM",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x29, "Nordig",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x40, "CI Plus LLP",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x600, "UPC",defaultPrivateDataSpecifier);
 		viewTreeMenu.add(privateDataSubMenu);
