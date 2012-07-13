@@ -95,6 +95,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public static final int SIMPLE_MODUS=0x1;
 	public static final int PSI_ONLY_MODUS=0x2;
 	public static final int PACKET_MODUS=0x4;
+	public static final int COUNT_LIST_ITEMS_MODUS=0x8;
 
 	private int mod=0;
 	private TransportStream ts;

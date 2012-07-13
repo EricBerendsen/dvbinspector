@@ -226,6 +226,10 @@ public class KVP{
 		this.label = label;
 	}
 
+	public void appendLabel(final String labelAppend) {
+		this.label = label + labelAppend;
+	}
+
 	public String getValue() {
 		return value;
 	}
@@ -273,8 +277,10 @@ public class KVP{
 					b.append("0x").append(Utils.toHexString(byteValue, byteStart, showLen)).append(" \"").append(
 							Utils.toSafeString(byteValue, byteStart, showLen)).append("\"");
 				}
-			} else if (fieldType == FIELD_TYPE_DVBSTRING) {
-				b.append(Utils.getString(dvbStringValue));
+			} else if (fieldType == FIELD_TYPE_DVBSTRING) {// TODO make distinction between plain text, and HTML view,
+				// to support character emphasis on A.1 Control codes ETSI EN 300 468 V1.11.1 (2010-04) 
+				
+				b.append(dvbStringValue.toString());
 			}
 			if (description != null) {
 				b.append(" => ").append(description);
@@ -375,44 +381,8 @@ public class KVP{
 	public HTMLSource getHTMLSource(){
 		if(fieldType == FIELD_TYPE_BYTES){
 			return new HTMLSource() {
-
-
-
 				public String getHTML() {
-
 					return Utils.getHTML(byteValue, byteStart, byteLen);
-
-					//					StringBuilder b= new StringBuilder();
-					//					b.append("<html><code>");
-					//					// header line
-					//					b.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0001 0203 0405 0607 0809 0A0B 0C0D 0E0F 0123456789ABCDEF<br>");
-					//					int lines=1+(byteLen-1)/16;
-					//					for (int l = 0; l < lines; l++) {
-					//						int start=l*16;
-					//						b.append(Utils.toHexString(start,6));
-					//						b.append(' ');
-					//						b.append("<span style=\"background-color: white\">");
-					//						int len=(l==lines-1)?(byteLen-(l*16)):16; // if last line calculate bytes left, else 16
-					//
-					//						// show byte as hex
-					//						for (int i = 0; i < 16; i++) {
-					//							if(i<len){
-					//								b.append(Utils.toHexString(byteValue,  byteStart+l*16+i, 1));
-					//							}else{
-					//								b.append("&nbsp;&nbsp;");
-					//							}
-					//							// after every second byte insert space
-					//							if(i%2!=0){
-					//								b.append("&nbsp;");
-					//							}
-					//						}
-					//
-					//						// string representation at end of line
-					//						b.append(Utils.escapeHTML(Utils.toSafeString(byteValue, byteStart+l*16, len))).append("</span><br>");
-					//					}
-					//
-					//					b.append("</code></html>");
-					//					return b.toString();
 				}
 			};
 

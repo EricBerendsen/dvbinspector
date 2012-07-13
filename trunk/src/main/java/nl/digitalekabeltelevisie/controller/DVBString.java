@@ -57,7 +57,7 @@ public class DVBString {
 
 	@Override
 	public String toString(){
-		return getString(this);
+		return getString(data,this.getOffset()+1, this.getLength());
 	}
 
 	public String getEncodingString(){
@@ -117,10 +117,6 @@ public class DVBString {
 		return "illegal value";
 	}
 
-
-	public byte[] getData() {
-		return data;
-	}
 
 
 
