@@ -104,7 +104,7 @@ public class BATsection extends TableSection {
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("transport_stream"));
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("transport_stream:",transportStreamID,null));
 
 			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id", transportStreamID, null)));
 			t.add(new DefaultMutableTreeNode(new KVP("original_network_id", originalNetworkID, Utils
