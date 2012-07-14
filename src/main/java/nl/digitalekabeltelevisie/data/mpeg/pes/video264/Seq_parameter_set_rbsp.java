@@ -276,4 +276,148 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		
 	}
 
+	public int getProfile_idc() {
+		return profile_idc;
+	}
+
+	public int getConstraint_set0_flag() {
+		return constraint_set0_flag;
+	}
+
+	public int getConstraint_set1_flag() {
+		return constraint_set1_flag;
+	}
+
+	public int getConstraint_set2_flag() {
+		return constraint_set2_flag;
+	}
+
+	public int getConstraint_set3_flag() {
+		return constraint_set3_flag;
+	}
+
+	public int getConstraint_set4_flag() {
+		return constraint_set4_flag;
+	}
+
+	public int getConstraint_set5_flag() {
+		return constraint_set5_flag;
+	}
+
+	public int getReserved_zero_2bits() {
+		return reserved_zero_2bits;
+	}
+
+	public int getLevel_idc() {
+		return level_idc;
+	}
+
+	public int getSeq_parameter_set_id() {
+		return seq_parameter_set_id;
+	}
+
+	public int getChroma_format_idc() {
+		return chroma_format_idc;
+	}
+
+	public int getSeparate_colour_plane_flag() {
+		return separate_colour_plane_flag;
+	}
+
+	public int getBit_depth_luma_minus8() {
+		return bit_depth_luma_minus8;
+	}
+
+	public int getBit_depth_chroma_minus8() {
+		return bit_depth_chroma_minus8;
+	}
+
+	public int getQpprime_y_zero_transform_bypass_flag() {
+		return qpprime_y_zero_transform_bypass_flag;
+	}
+
+	public int getSeq_scaling_matrix_present_flag() {
+		return seq_scaling_matrix_present_flag;
+	}
+
+	public int[] getSeq_scaling_list_present_flag() {
+		return seq_scaling_list_present_flag;
+	}
+
+	public int[][] getDelta_scale() {
+		return delta_scale;
+	}
+
+	public int[] getDeltas_read() {
+		return deltas_read;
+	}
+
+	public int getLog2_max_frame_num_minus4() {
+		return log2_max_frame_num_minus4;
+	}
+
+	public int getPic_order_cnt_type() {
+		return pic_order_cnt_type;
+	}
+
+	public int getLog2_max_pic_order_cnt_lsb_minus4() {
+		return log2_max_pic_order_cnt_lsb_minus4;
+	}
+
+	public int getMax_num_ref_frames() {
+		return max_num_ref_frames;
+	}
+
+	public int getGaps_in_frame_num_value_allowed_flag() {
+		return gaps_in_frame_num_value_allowed_flag;
+	}
+
+	public int getPic_width_in_mbs_minus1() {
+		return pic_width_in_mbs_minus1;
+	}
+
+	public int getPic_height_in_map_units_minus1() {
+		return pic_height_in_map_units_minus1;
+	}
+
+	public int getFrame_mbs_only_flag() {
+		return frame_mbs_only_flag;
+	}
+
+	public int getMb_adaptive_frame_field_flag() {
+		return mb_adaptive_frame_field_flag;
+	}
+
+	public int getDirect_8x8_inference_flag() {
+		return direct_8x8_inference_flag;
+	}
+
+	public int getFrame_cropping_flag() {
+		return frame_cropping_flag;
+	}
+
+	public int getFrame_crop_left_offset() {
+		return frame_crop_left_offset;
+	}
+
+	public int getFrame_crop_right_offset() {
+		return frame_crop_right_offset;
+	}
+
+	public int getFrame_crop_top_offset() {
+		return frame_crop_top_offset;
+	}
+
+	public int getFrame_crop_bottom_offset() {
+		return frame_crop_bottom_offset;
+	}
+
+	public int getVui_parameters_present_flag() {
+		return vui_parameters_present_flag;
+	}
+
+	public VuiParameters getVui_parameters() {
+		return vui_parameters;
+	}
+
 }

@@ -57,4 +57,8 @@ public class Filler_data_rbsp extends RBSP {
 		return t;
 	}
 
+	public int getFillerCount() {
+		return fillerCount;
+	}
+
 }

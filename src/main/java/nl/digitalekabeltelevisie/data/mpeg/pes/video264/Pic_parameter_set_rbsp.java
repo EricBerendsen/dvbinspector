@@ -146,4 +146,88 @@ public class Pic_parameter_set_rbsp extends RBSP {
 		return t;
 	}
 
+	public int getPic_parameter_set_id() {
+		return pic_parameter_set_id;
+	}
+
+	public int getSeq_parameter_set_id() {
+		return seq_parameter_set_id;
+	}
+
+	public int getEntropy_coding_mode_flag() {
+		return entropy_coding_mode_flag;
+	}
+
+	public int getPic_order_present_flag() {
+		return pic_order_present_flag;
+	}
+
+	public int getNum_slice_groups_minus1() {
+		return num_slice_groups_minus1;
+	}
+
+	public int getNum_ref_idx_l0_active_minus1() {
+		return num_ref_idx_l0_active_minus1;
+	}
+
+	public int getNum_ref_idx_l1_active_minus1() {
+		return num_ref_idx_l1_active_minus1;
+	}
+
+	public int getWeighted_pred_flag() {
+		return weighted_pred_flag;
+	}
+
+	public int getWeighted_bipred_idc() {
+		return weighted_bipred_idc;
+	}
+
+	public int getPic_init_qp_minus26() {
+		return pic_init_qp_minus26;
+	}
+
+	public int getPic_init_qs_minus26() {
+		return pic_init_qs_minus26;
+	}
+
+	public int getChroma_qp_index_offset() {
+		return chroma_qp_index_offset;
+	}
+
+	public int getDeblocking_filter_control_present_flag() {
+		return deblocking_filter_control_present_flag;
+	}
+
+	public int getConstrained_intra_pred_flag() {
+		return constrained_intra_pred_flag;
+	}
+
+	public int getRedundant_pic_cnt_present_flag() {
+		return redundant_pic_cnt_present_flag;
+	}
+
+	public int getTransform_8x8_mode_flag() {
+		return transform_8x8_mode_flag;
+	}
+
+	public int getPic_scaling_matrix_present_flag() {
+		return pic_scaling_matrix_present_flag;
+	}
+
+	public int[] getSeq_scaling_list_present_flag() {
+		return seq_scaling_list_present_flag;
+	}
+
+	public int[][] getDelta_scale() {
+		return delta_scale;
+	}
+
+	public int[] getDeltas_read() {
+		return deltas_read;
+	}
+
+	public int getSecond_chroma_qp_index_offset() {
+		return second_chroma_qp_index_offset;
+	}
+
 }

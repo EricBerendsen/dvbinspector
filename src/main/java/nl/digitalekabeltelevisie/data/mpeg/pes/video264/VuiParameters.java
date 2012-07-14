@@ -224,4 +224,132 @@ public class VuiParameters implements TreeNode {
 		}
 	}
 
+	public int getAspect_ratio_info_present_flag() {
+		return aspect_ratio_info_present_flag;
+	}
+
+	public int getAspect_ratio_idc() {
+		return aspect_ratio_idc;
+	}
+
+	public int getSar_width() {
+		return sar_width;
+	}
+
+	public int getSar_height() {
+		return sar_height;
+	}
+
+	public int getOverscan_info_present_flag() {
+		return overscan_info_present_flag;
+	}
+
+	public int getOverscan_appropriate_flag() {
+		return overscan_appropriate_flag;
+	}
+
+	public int getVideo_signal_type_present_flag() {
+		return video_signal_type_present_flag;
+	}
+
+	public int getVideo_format() {
+		return video_format;
+	}
+
+	public int getVideo_full_range_flag() {
+		return video_full_range_flag;
+	}
+
+	public int getColour_description_present_flag() {
+		return colour_description_present_flag;
+	}
+
+	public int getColour_primaries() {
+		return colour_primaries;
+	}
+
+	public int getTransfer_characteristics() {
+		return transfer_characteristics;
+	}
+
+	public int getMatrix_coefficients() {
+		return matrix_coefficients;
+	}
+
+	public int getChroma_loc_info_present_flag() {
+		return chroma_loc_info_present_flag;
+	}
+
+	public int getChroma_sample_loc_type_top_field() {
+		return chroma_sample_loc_type_top_field;
+	}
+
+	public int getChroma_sample_loc_type_bottom_field() {
+		return chroma_sample_loc_type_bottom_field;
+	}
+
+	public int getTiming_info_present_flag() {
+		return timing_info_present_flag;
+	}
+
+	public int getNum_units_in_tick() {
+		return num_units_in_tick;
+	}
+
+	public int getTime_scale() {
+		return time_scale;
+	}
+
+	public int getFixed_frame_rate_flag() {
+		return fixed_frame_rate_flag;
+	}
+
+	public int getNal_hrd_parameters_present_flag() {
+		return nal_hrd_parameters_present_flag;
+	}
+
+	public int getVcl_hrd_parameters_present_flag() {
+		return vcl_hrd_parameters_present_flag;
+	}
+
+	public int getLow_delay_hrd_flag() {
+		return low_delay_hrd_flag;
+	}
+
+	public int getPic_struct_present_flag() {
+		return pic_struct_present_flag;
+	}
+
+	public int getBitstream_restriction_flag() {
+		return bitstream_restriction_flag;
+	}
+
+	public int getMotion_vectors_over_pic_boundaries_flag() {
+		return motion_vectors_over_pic_boundaries_flag;
+	}
+
+	public int getMax_bytes_per_pic_denom() {
+		return max_bytes_per_pic_denom;
+	}
+
+	public int getMax_bits_per_mb_denom() {
+		return max_bits_per_mb_denom;
+	}
+
+	public int getLog2_max_mv_length_horizontal() {
+		return log2_max_mv_length_horizontal;
+	}
+
+	public int getLog2_max_mv_length_vertical() {
+		return log2_max_mv_length_vertical;
+	}
+
+	public int getNum_reorder_frames() {
+		return num_reorder_frames;
+	}
+
+	public int getMax_dec_frame_buffering() {
+		return max_dec_frame_buffering;
+	}
+
 }
