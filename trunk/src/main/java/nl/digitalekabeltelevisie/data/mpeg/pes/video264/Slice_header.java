@@ -80,4 +80,16 @@ public class Slice_header implements TreeNode {
 		
 	}
 
+	public int getFirst_mb_in_slice() {
+		return first_mb_in_slice;
+	}
+
+	public int getSlice_type() {
+		return slice_type;
+	}
+
+	public int getPic_parameter_set_id() {
+		return pic_parameter_set_id;
+	}
+
 }

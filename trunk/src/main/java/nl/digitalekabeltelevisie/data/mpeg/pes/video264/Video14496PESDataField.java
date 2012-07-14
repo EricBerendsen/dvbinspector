@@ -96,6 +96,12 @@ public class Video14496PESDataField extends PesPacketData implements TreeNode {
 
 
 
+	public List<NALUnit> getNalUnits() {
+		return nalUnits;
+	}
+
+
+
 
 
 }

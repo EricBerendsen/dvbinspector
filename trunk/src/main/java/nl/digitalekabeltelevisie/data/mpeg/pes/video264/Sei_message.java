@@ -135,5 +135,25 @@ public class Sei_message implements TreeNode{
 		}
 		
 	}
+
+	public int getPayloadType() {
+		return payloadType;
+	}
+
+	public int getLast_payload_type_byte() {
+		return last_payload_type_byte;
+	}
+
+	public int getPayloadSize() {
+		return payloadSize;
+	}
+
+	public int getLast_payload_size_byte() {
+		return last_payload_size_byte;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
 	
 }

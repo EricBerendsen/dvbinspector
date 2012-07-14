@@ -37,6 +37,20 @@ import nl.digitalekabeltelevisie.util.BitSource;
 public class NALUnit implements TreeNode {
 
 	private static final Logger	logger	= Logger.getLogger(NALUnit.class.getName());
+	private final byte[] bytes;
+	private final int offset;
+	private final int numBytesInNALunit;
+	
+	private final int forbidden_zero_bit;
+	private final int nal_ref_idc;
+	private final int nal_unit_type;
+	protected BitSource bs;
+	
+	private final byte[]rbsp_byte;
+	private int numBytesInRBSP=0;
+	
+	private RBSP rbsp = null;
+
 
 	/**
 	 * @param bytes
@@ -92,20 +106,6 @@ public class NALUnit implements TreeNode {
 	}
 
 
-	private final byte[] bytes;
-	private final int offset;
-	private final int numBytesInNALunit;
-	
-	private final int forbidden_zero_bit;
-	private final int nal_ref_idc;
-	private final int nal_unit_type;
-	protected BitSource bs;
-	
-	private final byte[]rbsp_byte;
-	private int numBytesInRBSP=0;
-	
-	private RBSP rbsp = null;
-
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NALUnit ("+getNALUnitTypeString(nal_unit_type)+")"));
@@ -142,6 +142,46 @@ public class NALUnit implements TreeNode {
 		default:
 			return "reserved";
 		}
+	}
+
+
+	public byte[] getBytes() {
+		return bytes;
+	}
+
+
+	public int getNumBytesInNALunit() {
+		return numBytesInNALunit;
+	}
+
+
+	public int getForbidden_zero_bit() {
+		return forbidden_zero_bit;
+	}
+
+
+	public int getNal_ref_idc() {
+		return nal_ref_idc;
+	}
+
+
+	public int getNal_unit_type() {
+		return nal_unit_type;
+	}
+
+
+	public byte[] getRbsp_byte() {
+		return rbsp_byte;
+	}
+
+
+	public int getNumBytesInRBSP() {
+		return numBytesInRBSP;
+	}
+
+
+	public RBSP getRbsp() {
+		return rbsp;
 	}
 
 }

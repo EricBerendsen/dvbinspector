@@ -56,4 +56,8 @@ public class Slice_layer_without_partitioning_rbsp extends RBSP {
 		return t;
 	}
 
+	public Slice_header getSlice_header() {
+		return slice_header;
+	}
+
 }

@@ -64,4 +64,8 @@ public class Sei_rbsp extends RBSP {
 		return s;
 	}
 
+	public List<Sei_message> getSei_messages() {
+		return sei_messages;
+	}
+
 }

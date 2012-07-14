@@ -47,4 +47,8 @@ public class Access_unit_delimiter_rbsp extends RBSP {
 		return r.toString();
 	}
 
+	public int getPrimary_pic_type() {
+		return primary_pic_type;
+	}
+
 }
