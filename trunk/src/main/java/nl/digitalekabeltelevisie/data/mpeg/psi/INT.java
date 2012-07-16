@@ -40,7 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
- *	based on EN 301 192 ง 8.4.4
+ *	based on EN 301 192 ยง 8.4.4
  *
  */
 public class INT extends AbstractPSITabel{

@@ -515,7 +515,7 @@ public class Descriptor implements TreeNode {
 
 	public static String formatOrbitualPosition(final String f) {
 		final StringBuilder s = new StringBuilder();
-		s.append(f.substring(0, 3)).append('.').append(f.substring(3, 4)).append("°");
+		s.append(f.substring(0, 3)).append('.').append(f.substring(3, 4)).append("Â°");
 		return Utils.stripLeadingZeros(s.toString());
 	}
 

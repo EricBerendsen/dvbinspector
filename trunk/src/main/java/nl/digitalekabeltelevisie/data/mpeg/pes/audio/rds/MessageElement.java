@@ -169,8 +169,8 @@ public class MessageElement implements TreeNode{
 		case 0x41: return "ODA identification group usage sequence";
 		case 0x42: return "ODA free-format group";
 		case 0x43: return "ODA relative priority group sequence";
-		case 0x44: return "ODA “Burst mode” control";
-		case 0x45: return "ODA “Spinning Wheel” timing control";
+		case 0x44: return "ODA â€œBurst modeâ€ control";
+		case 0x45: return "ODA â€œSpinning Wheelâ€ timing control";
 		case 0x46: return "ODA Data / Radiotext Plus tags"; //http://cvs.tuxbox.org/tuxbox/apps/tuxbox/enigma/src/rds_text.cpp?rev=1.4&view=markup
 		case 0x47: return "ODA Data command access right";
 		case 0x48: return "DAB Dynamic Label command";

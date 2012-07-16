@@ -48,6 +48,10 @@ public class UserData extends VideoMPEG2Section {
 	private int active_format_flag;
 	private int active_format;
 	private boolean isAFD=false;
+	// TODO ??? support ATSC , containing afd and cc data ??
+	// see ATSC Digital Television Standard: Part 4 – MPEG-2 Video System Characteristics
+	// Document A/53 Part 4:2009, 7 August 2009 http://www.atsc.org/cms/standards/a53/a_53-Part-4-2009.pdf
+	// 6.2.3 ATSC Picture User Data Semantics
 
 
 	/**

@@ -153,7 +153,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 				b=0;
 			}
 
-			// alternative, see http://www.intersil.com/data/an/an9717.pdf, R´G´B´ Generation
+			// alternative, see http://www.intersil.com/data/an/an9717.pdf, R'G'B' Generation
 
 			//			r = (int) ((y - 16) * 1.164 + 1.596 * (cr - 128));
 			//			g = (int) ((y - 16) * 1.164 - (0.813 * (cr - 128)) - 0.391 * (cb - 128));

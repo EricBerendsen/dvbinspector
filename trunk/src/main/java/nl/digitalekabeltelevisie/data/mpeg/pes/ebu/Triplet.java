@@ -36,7 +36,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 
 /**
  *	representation of the value encoded Hamming 24/18
- * @see ง 8.3 ETSI EN 300 706
+ * @see ยง 8.3 ETSI EN 300 706
  * 
  * transmission Order
  * Byte N Byte N + 1 Byte N + 2

@@ -199,6 +199,8 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 					final RegionCompositionSegment rc = regionCompositionsSegments.get(region.getRegion_id());
 					if(rc!=null){
 						final CLUTDefinitionSegment cds = clutDefinitions.get(rc.getCLUTId());
+						
+						//TODO fix 2 bit CLUT (or other error). PID 1037, segment 68 of  "07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts" 
 
 
 						// this woould fill the region

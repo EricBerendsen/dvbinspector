@@ -261,7 +261,7 @@ public class DVBinspector implements ChangeListener{
 		packetViewMenu.addActionListener(packetViewAction);
 		viewTreeMenu.add(packetViewMenu);
 
-		final JCheckBoxMenuItem countListViewMenu = new JCheckBoxMenuItem("Count List Items");
+		final JCheckBoxMenuItem countListViewMenu = new JCheckBoxMenuItem("Number List Items");
 		countListViewMenu.setSelected((modus&DVBtree.COUNT_LIST_ITEMS_MODUS)!=0);
 		final Action countListViewAction= new ToggleViewAction(this, DVBtree.COUNT_LIST_ITEMS_MODUS);
 		countListViewMenu.addActionListener(countListViewAction);

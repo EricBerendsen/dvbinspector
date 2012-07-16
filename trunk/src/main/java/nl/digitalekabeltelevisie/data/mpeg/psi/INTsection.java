@@ -25,7 +25,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
  * 
- * 	based on EN 301 192 ง 8.4.4
+ * 	based on EN 301 192 ยง 8.4.4
  */
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
