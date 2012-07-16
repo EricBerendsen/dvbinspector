@@ -171,7 +171,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 		// magazine specific
 		// 13 triplets, Hamming 24/18 coded
 
-		// § ETSI EN 300 706 V1.2.1 9.4.2.1 Page Function and Page Coding
+		// Â§ ETSI EN 300 706 V1.2.1 9.4.2.1 Page Function and Page Coding
 
 		final List<Triplet> tripletList = getTripletList();
 		addListJTree(s, tripletList, modus, "triplet_list");
@@ -653,7 +653,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 	}
 
-	//ETSI EN 300 708 V1.2.1 § 6.4
+	//ETSI EN 300 708 V1.2.1 Â§ 6.4
 	public int getDataChannel(){
 		final int magazine_and_packet_address = getInt(data_block, 4+offset, 2,MASK_16BITS);
 		int r = (magazine_and_packet_address & 0x4000) >>13 ;
@@ -784,7 +784,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 		final int uren = invtab[(timeOffset&0x1E)<<3];
 		final StringBuilder b = new StringBuilder().append(uren);
 		if((timeOffset&0x20)!=0){
-			b.append('½');
+			b.append('Â½');
 		}
 		if((timeOffset&0x01)!=0){
 			b.append(" hour(s), negative offset (west of Greenwich)");

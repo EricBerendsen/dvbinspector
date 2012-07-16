@@ -97,7 +97,7 @@ public class PID implements TreeNode{
 
 	/**
 	 * 
-	 * This inner class is a helper that collects and groups TSPackets for the containing PID into PsiSectionData´s . If this PID contains PES data, the bytes are ignored.
+	 * This inner class is a helper that collects and groups TSPackets for the containing PID into PsiSectionData's . If this PID contains PES data, the bytes are ignored.
 	 * @author Eric Berendsen
 	 *
 	 */
@@ -134,7 +134,7 @@ public class PID implements TreeNode{
 							available-=bytes_read;
 						}
 
-						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix –'0000 0000 0000 0000 0000 0001' (0x000001)
+						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
 					}else if((data[0]==0)&&(data[1]==0)&&(data[2]==1)){
 						type = PES;
 

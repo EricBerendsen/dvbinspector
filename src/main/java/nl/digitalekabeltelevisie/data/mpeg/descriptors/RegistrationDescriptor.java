@@ -44,6 +44,8 @@ public class RegistrationDescriptor extends Descriptor {
 		super(b, offset,parent);
 
 		formatIdentifier = getBytes(b,offset+2,4);
+		// see http://www.smpte-ra.org/mpegreg/mpegreg.html for list
+		// TODO implement resource file for lookup?
 		additionalIdentificationInfo = getBytes(b,offset+6,descriptorLength-4);
 
 	}

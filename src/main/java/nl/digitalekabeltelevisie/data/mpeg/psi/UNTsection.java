@@ -48,7 +48,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen Represents a section of the Updata Notification Table.
- * @see PsiSectionData#isUNTSection(int) based on TS 102 006, ง 9.4
+ * @see PsiSectionData#isUNTSection(int) based on TS 102 006, ยง 9.4
  */
 public class UNTsection extends TableSection {
 

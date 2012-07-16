@@ -491,6 +491,8 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
 	public BufferedImage getImage() {
+		
+		//TODO check for objectCodingMethod characters (like in 07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts, PID 1036, segment 19 
 		BufferedImage bi=null;
 		final WritableRaster wr = getRaster();
 		if(wr==null){

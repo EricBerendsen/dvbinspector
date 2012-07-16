@@ -72,7 +72,7 @@ public abstract class AbstractPesHandler{
 					// type = PSI;
 					throw new IllegalStateException("Found PSI data in PESHandler...");
 
-					//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix –'0000 0000 0000 0000 0000 0001' (0x000001)
+					//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
 				}else if((data[0]==0)&&(data[1]==0)&&(data[2]==1)){
 					//type = PES;
 					pesStreamID = getInt(data, 3, 1, MASK_8BITS);

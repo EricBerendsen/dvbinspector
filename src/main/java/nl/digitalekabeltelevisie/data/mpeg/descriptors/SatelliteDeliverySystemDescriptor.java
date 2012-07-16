@@ -87,10 +87,10 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor {
 
 	public static String getPolarizationString(final int pol) {
 		switch (pol) {
-		case 0x00: return "linear – horizontal";
-		case 0x01: return "linear – vertical";
-		case 0x02: return "Circular – left";
-		case 0x03: return "Circular – right";
+		case 0x00: return "linear - horizontal";
+		case 0x01: return "linear - vertical";
+		case 0x02: return "Circular - left";
+		case 0x03: return "Circular - right";
 		default: return "illegal value";		}
 	}
 

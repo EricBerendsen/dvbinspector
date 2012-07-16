@@ -124,7 +124,7 @@ public class TransportStream implements TreeNode{
 
 	/**
 	 * 
-	 * Creates a new Transport stream based on the supplied file. After contruction the TransportStream is not comlete, first parseStream() has to be called!
+	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
 	 * @param fileName name of the file to be read (null not permitted).
 	 */
 	public TransportStream(final String fileName) {
@@ -133,7 +133,7 @@ public class TransportStream implements TreeNode{
 
 	/**
 	 * 
-	 * Creates a new Transport stream based on the supplied file. After contruction the TransportStream is not comlete, first parseStream() has to be called!
+	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
 	 * @param file the file to be read (null not permitted).
 	 */
 	public TransportStream(final File file) {
@@ -166,7 +166,7 @@ public class TransportStream implements TreeNode{
 			if((bytes_read==MPEGConstants.packet_length)&&
 					(buf[0]==MPEGConstants.sync_byte) &&
 					((next==-1)||(next==MPEGConstants.sync_byte))) {
-				//aleays push back first byte of next packet
+				//always push back first byte of next packet
 				if((next!=-1)) {
 					fileStream.unread(next);
 				}
@@ -219,7 +219,7 @@ public class TransportStream implements TreeNode{
 			if((bytes_read==MPEGConstants.packet_length)&&
 					(buf[0]==MPEGConstants.sync_byte) &&
 					((next==-1)||(next==MPEGConstants.sync_byte))) {
-				//aleays push back first byte of next packet
+				//always push back first byte of next packet
 				if((next!=-1)) {
 					fileStream.unread(next);
 				}

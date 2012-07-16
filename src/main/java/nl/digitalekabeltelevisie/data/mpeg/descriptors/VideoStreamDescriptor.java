@@ -190,13 +190,13 @@ public class VideoStreamDescriptor extends Descriptor {
 	public static String getFrameRateString(final int frameRateCode) {
 		switch (frameRateCode) {
 		case 0: return "forbidden";
-		case 1: return "24000÷1001 (23,976...)";
+		case 1: return "24000Ã·1001 (23,976...)";
 		case 2: return "24 or 23,976";
 		case 3: return "25";
-		case 4: return "30 000÷1001 (29,97...) or 23,976";
+		case 4: return "30 000Ã·1001 (29,97...) or 23,976";
 		case 5: return "30 or 23,976 24,0 29,97";
 		case 6: return "50 or 25,0";
-		case 7: return "60 000÷1001 (59,94...) or 23,976 29,97";
+		case 7: return "60 000Ã·1001 (59,94...) or 23,976 29,97";
 		case 8: return "60 or 23,976 24,0 29,97 30,0 59,94";
 		default: return "reserved";
 		}

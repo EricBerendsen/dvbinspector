@@ -374,7 +374,7 @@ Triplet implements TreeNode {
 			}
 			// PDC related
 			if(mode==0x08){// PDC - Country of Origin and Programme Source
-				str += "Country of Origin "+ (address&0x3F)+", Programme Source "+ (data&0x03F); //ETSI EN 300 231 V1.3.1 says in �7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
+				str += "Country of Origin "+ (address&0x3F)+", Programme Source "+ (data&0x03F); //ETSI EN 300 231 V1.3.1 says in §7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
 			}
 			if(mode==0x09){// PDC - Month & Day
 				str += "Month "+ (address&0xF)+", Day "+ ((data&0x30)>>4)+""+(data&0x0F);

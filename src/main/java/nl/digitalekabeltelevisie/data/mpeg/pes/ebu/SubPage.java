@@ -766,9 +766,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				mot.add(pop.getJTreeNode(modus, level + " DRCS " + i + " "));
 			}
 
-			// ETSI EN 300 706 ง 10.6.6 Number of Enhancement Pages defines next byte numbers with respect to entire line.
+			// ETSI EN 300 706 ยง 10.6.6 Number of Enhancement Pages defines next byte numbers with respect to entire line.
 			// getRawByte uses only bytes from the data part, so the offset is off by 6.
-			final int mag1 = getHammingReverseByte(txtDataField.getRawByte(34)); // byte 40 in ETSI EN 300 706 ง 10.6.6
+			final int mag1 = getHammingReverseByte(txtDataField.getRawByte(34)); // byte 40 in ETSI EN 300 706 ยง 10.6.6
 			final int mag2 = getHammingReverseByte(txtDataField.getRawByte(35));
 
 			final DefaultMutableTreeNode noPagesNode = new DefaultMutableTreeNode(new KVP("Number of Enhancement Pages"));
