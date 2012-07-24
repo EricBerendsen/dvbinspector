@@ -6,11 +6,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.DSMCCDescriptorFactory;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class VuiParameters implements TreeNode {
 
+	// TODO add hrd_parameters( ) as found in D:\ts\cypheros\Testbild H264 1080p alternating video_full_range_flag.ts and Testbild H264 1080p alternating video_full_range_flag.ts
+	// SEE E.1.2 HRD parameters syntax
 	private static Logger	logger	= Logger.getLogger(VuiParameters.class.getName());
 	
 	private int aspect_ratio_info_present_flag;
