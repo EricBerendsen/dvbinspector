@@ -47,7 +47,7 @@ public class Sei_message implements TreeNode{
 		
 		payloadType = 0;
 		while( bitSource.nextBits(8) == 0xFF ) {
-			int ff_byte =bitSource.f(8);
+			/* int ff_byte = */ bitSource.f(8); 
 			payloadType += 255;
 		}
 		last_payload_type_byte = bitSource.u(8);
@@ -55,7 +55,7 @@ public class Sei_message implements TreeNode{
 		
 		payloadSize = 0;
 		while( bitSource.nextBits( 8 ) == 0xFF) {
-			int ff_byte=bitSource.f(8); /* equal to 0xFF */ 
+			/* int ff_byte= */ bitSource.f(8); /* equal to 0xFF */ 
 			payloadSize += 255;
 		}
 		last_payload_size_byte= bitSource.u(8);

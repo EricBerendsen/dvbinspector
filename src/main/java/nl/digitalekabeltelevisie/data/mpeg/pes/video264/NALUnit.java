@@ -78,7 +78,7 @@ public class NALUnit implements TreeNode {
 				rbsp_byte[ numBytesInRBSP++ ]=bs.readSignedByte(8); // All b(8)
 				rbsp_byte[ numBytesInRBSP++ ]=bs.readSignedByte(8);// All b(8)
 				i += 2;
-				byte  emulation_prevention_three_byte =bs.readSignedByte(8); // equal to 0x03 */ All f(8) ignore result
+				/* emulation_prevention_three_byte =*/ bs.readSignedByte(8); // equal to 0x03 */ All f(8) ignore result
 			} else{
 				rbsp_byte[ numBytesInRBSP++ ]= bs.readSignedByte(8);
 			}

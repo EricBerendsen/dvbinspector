@@ -42,7 +42,7 @@ public class Filler_data_rbsp extends RBSP {
 		super(rbsp_bytes, numBytesInRBSP);
 
 		while(bitSource.nextBits(8 ) == 0xFF){
-			int ff_byte = bitSource.readBits(8); /* equal to 0xFF */
+			/* ff_byte =*/ bitSource.readBits(8); /* equal to 0xFF */
 			fillerCount++;
 		}
 	}
