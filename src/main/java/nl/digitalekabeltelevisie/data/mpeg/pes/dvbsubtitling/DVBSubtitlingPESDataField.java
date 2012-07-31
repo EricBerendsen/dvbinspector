@@ -29,9 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -66,11 +69,13 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 	private final int data_identifier;
 
-	private final DisplayDefinitionSegment displayDefinitionSegment = null;
+	private DisplayDefinitionSegment displayDefinitionSegment = null;
 	private final Map<Integer, RegionCompositionSegment> regionCompositionsSegments = new HashMap<Integer, RegionCompositionSegment>();
 	private final Map<Integer, CLUTDefinitionSegment> clutDefinitions= new HashMap<Integer, CLUTDefinitionSegment>();
 	private final Map<Integer, ObjectDataSegment> objects= new HashMap<Integer, ObjectDataSegment>();
-	private static BufferedImage bgImage;
+	private static BufferedImage bgImage576;
+	private static BufferedImage bgImage720;
+	private static BufferedImage bgImage1080;
 
 	private static final ClassLoader classLoader = DVBSubtitlingPESDataField.class.getClassLoader();
 
@@ -82,12 +87,14 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 	static {
 		try {
-			//		    FileInputStream fileInputStream = new FileInputStream(new File("monitors.bmp"));
-			//		    bgImage = ImageIO.read( (fileInputStream));
-			final InputStream fileInputStream = classLoader.getResourceAsStream("monitors.bmp");
-			bgImage = ImageIO.read(fileInputStream);
+			InputStream fileInputStream = classLoader.getResourceAsStream("monitors576.bmp");
+			bgImage576 = ImageIO.read(fileInputStream);
+			fileInputStream = classLoader.getResourceAsStream("monitors720.bmp");
+			bgImage720 = ImageIO.read(fileInputStream);
+			fileInputStream = classLoader.getResourceAsStream("monitors1080.bmp");
+			bgImage1080 = ImageIO.read(fileInputStream);
 		} catch (final Exception e) {
-			logger.log(Level.WARNING, "error reading image monitors.bmp:", e);
+			logger.log(Level.WARNING, "error reading image ", e);
 		}
 
 	}
@@ -106,10 +113,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 * @param pts
 	 */
 	public DVBSubtitlingPESDataField(final PesPacketData pesPacket){
-		//int streamId,              byte[] data,       int offset,                int len, long pts) {
-		//(pesData.getPesStreamID(), pesData.getData(), pesData.getPesDataStart(), pesData.getPesDataLen(), pesData.getPts());
 
-		//byte[] data, int offset, int len,long pts) {
 		super(pesPacket);
 
 		final int offset = getPesDataStart();
@@ -118,7 +122,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 
 		int t = 2;
-		while (data[offset + t] == 0x0f) { // sync byter
+		while (data[offset + t] == 0x0f) { // sync byte
 			Segment segment;
 			final int segment_type = getInt(data, offset + t + 1, 1, MASK_8BITS);
 			switch (segment_type) {
@@ -142,6 +146,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 				break;
 			case 0x14:
 				segment = new DisplayDefinitionSegment(data, offset + t);
+				displayDefinitionSegment = (DisplayDefinitionSegment)segment;
 				break;
 
 			default:
@@ -161,15 +166,12 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		//		DefaultMutableTreeNode s = new DefaultMutableTreeNode(
-		//				new KVP("DVBSubtitlingSegments",this));
 
 		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
 		s.setUserObject(new KVP("DVBSubtitlingSegments",this));
 
 		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier, getDataIDString(data_identifier))));
 		s.add(new DefaultMutableTreeNode(new KVP("subtitle_stream_id",subtitle_stream_id, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
 		addListJTree(s, segmentList, modus, "segments");
 		return s;
 	}
@@ -181,10 +183,16 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	public BufferedImage getImage() {
 		int width=720;
 		int height=576;
+		BufferedImage bgImage = bgImage576;
 		// display_definition_segment for other size
 		if(displayDefinitionSegment!=null){
 			width = displayDefinitionSegment.getDisplayWidth()+1;
 			height = displayDefinitionSegment.getDisplayHeight()+1;
+			if(height==1080){
+				bgImage = bgImage1080;
+			}else if(height==720){
+				bgImage = bgImage720;
+			}
 			// TODO handle display_window_flag and display_window_horizontal_position_minimum, etc
 		}
 		final BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
@@ -198,36 +206,54 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 				for(final PageCompositionSegment.Region region :pcSegment.getRegions()){
 					final RegionCompositionSegment rc = regionCompositionsSegments.get(region.getRegion_id());
 					if(rc!=null){
-						final CLUTDefinitionSegment cds = clutDefinitions.get(rc.getCLUTId());
-						
+						int clutId = rc.getCLUTId();
+						CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
 						//TODO fix 2 bit CLUT (or other error). PID 1037, segment 68 of  "07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts" 
 
-
-						// this woould fill the region
-						//						if((rc.getRegionFillFlag()==1)&&(cds!=null)){
-						//							int index = 0;
-						//							switch (rc.getRegionDepth()) {
-						//							case 1:
-						//								index = rc.getRegion2BitPixelCode();
-						//								break;
-						//							case 2:
-						//								index = rc.getRegion4BitPixelCode();
-						//								break;
-						//							case 3:
-						//								index = rc.getRegion8BitPixelCode();
-						//								break;
-						//							}
-						//
-						//							gd.setColor(new Color(cds.getColorModel(rc.getRegionDepth()).getRGB(index)));
-						//							Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight());
-						//							gd.fill(rect);
-						//						}
-						//gd.draw3DRect(region.getRegion_horizontal_address() , region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight(), true);
+						//fill the region
+							if((rc.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
+								int index = 0;
+								switch (rc.getRegionDepth()) {
+								case 1: // 2 bit
+									index = rc.getRegion2BitPixelCode();
+									break;
+								case 2: // 4 bit. TODO  if the region depth is 8 bit while the region_level_of_compatibility specifies that a 4-bit CLUT is within the minimum requirements.
+									// ETSI EN 300 743 V1.3.1 (2006-11) P 25 bottom.
+									index = rc.getRegion4BitPixelCode();
+									break;
+								case 3:
+									index = rc.getRegion8BitPixelCode();
+									break;
+								}
+	
+								IndexColorModel colorModel = clutDefinitionSegment.getColorModel(rc.getRegionDepth());
+								int rgb = colorModel.getRGB(index);
+								Color bgColor = new Color(rgb,true);
+								gd.setColor(bgColor);
+								Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight());
+								gd.fill(rect);
+							}
+							// next line only for debugging..
+							//gd.draw3DRect(region.getRegion_horizontal_address() , region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight(), true);
 						for(final RegionCompositionSegment.RegionObject regionObject: rc.getRegionObjects()){
-							if(cds!=null){
-								final ColorModel cm = clutDefinitions.get(rc.getCLUTId()).getColorModel(rc.getRegionDepth());
+							if(clutDefinitionSegment!=null){
+								// This is the colorModel for this region composition segment
+								final ColorModel cm = clutDefinitionSegment.getColorModel(rc.getRegionDepth());
 
-								final WritableRaster raster = objects.get(regionObject.getObject_id()).getRaster();
+							
+
+								int object_id = regionObject.getObject_id();
+								ObjectDataSegment objectDataSegment = objects.get(object_id);
+								// objectDataSegment (or one or both of its PixelDataSubBlocks) can have a bit_map_table, which means we have to remap the CLUT
+								// not clear from specs, where can bit_map_table occur, only at start of PixelDataSubBlocks, or anywhere?
+								// do top_field and bottom_field always have the same bit_map_table?
+								// assume for now always and only at start of PixelDataSubBlocks, and always same for top and lower.
+								
+								//clutDefinitionSegment.getCLUTEntries();
+								
+								
+								
+								final WritableRaster raster = objectDataSegment.getRaster();
 								final BufferedImage i = new BufferedImage(cm, raster, false, null);
 								gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
 							}
