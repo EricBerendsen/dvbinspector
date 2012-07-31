@@ -451,7 +451,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 		final StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < b.length; i++) {
 			final byte ch = b[i];
-			if((ch>=32)&&(ch<127)){
+			if((ch>=32)&&(ch<127)){ // For text version of single line  national option charset subset is ignored because it can not be derived from only the line itself. Need pageheader for that.
 				buf.append((char)ch);
 			}else{  // empty space
 				buf.append(' ');
@@ -474,7 +474,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 				buf.append("&lt;");
 			}else if(ch==0x26){ //&
 				buf.append("&amp;");
-			}else if((ch>32)&&(ch<127)){  // TODO something about national option charset subset
+			}else if((ch>32)&&(ch<127)){  // For HTML version of single line  national option charset subset is ignored because it can not be derived from only the line itself. Need pageheader for that. 
 				buf.append((char)ch);
 			}else if((ch>=0)&&(ch<=7)){ //12.2 Spacing attributes
 				fg=getHTMLColorString(ch);
