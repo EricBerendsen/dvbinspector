@@ -154,7 +154,7 @@ public class CompatibilityDescriptor implements TreeNode {
 				final int subDescriptorCount = Utils.getInt(data, t + 10, 1, Utils.MASK_8BITS);
 
 				t +=11;
-				// TODO subDescriptors
+				//  subDescriptors
 				final List<SubDescriptor>	subDescriptors	= new ArrayList<SubDescriptor>();
 				for (int j = 0; j < subDescriptorCount; j++) {
 					final int subDescriptorType = Utils.getInt(data, t, 1, Utils.MASK_8BITS);
