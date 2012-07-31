@@ -56,9 +56,16 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class ObjectDataSegment extends Segment implements TreeNode, ImageSource {
 
+	private static Logger	logger	= Logger.getLogger(ObjectDataSegment.class.getName());
+
+	
+	// for coding of pixels
 	private final List<PixelDataSubBlock> topFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
 	private final List<PixelDataSubBlock> bottomFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
-	private static Logger	logger	= Logger.getLogger(ObjectDataSegment.class.getName());
+	
+	// For coded as a string of characters
+	private int number_of_codes;
+	private String character_code_string;
 
 
 	/**
@@ -74,6 +81,12 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 		protected byte[] pixels;
 		protected int no_pixels;
+		
+		//private List<Integer> bit_map_table = new ArrayList<Integer>();
+		
+		private int [] table_2_to_4_bit_map_table = null;
+		private int [] table_2_to_8_bit_map_table = null;
+		private int [] table_4_to_8_bit_map_table = null;
 
 		public PixelDataSubBlock(final byte[] data, final int offset) {
 			this.data_block = data;
@@ -84,9 +97,27 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("pixel-data_sub-block "+getDataTypeString(dataType)));
 			s.add(new DefaultMutableTreeNode(new KVP("data_type",dataType,getDataTypeString(dataType))));
-			if((dataType >-0x10 )&&(dataType <= 0x12)){ // pixels
+			if((dataType >=0x10 )&&(dataType <= 0x12)){ // pixels
 				s.add(new DefaultMutableTreeNode(new KVP("no_pixels",no_pixels,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("pixels",pixels,0,no_pixels,null)));
+			}else if(dataType ==0x20 ){ // 2_to_4_bit_map_table data
+				if(table_2_to_4_bit_map_table!=null){
+					for (int i = 0; i < table_2_to_4_bit_map_table.length; i++) {
+						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_2_to_4_bit_map_table[i],null)));
+					}
+				}
+			}else if(dataType ==0x21 ){ // 2_to_8-bit_map-table data data
+				if(table_2_to_8_bit_map_table!=null){
+					for (int i = 0; i < table_2_to_8_bit_map_table.length; i++) {
+						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_2_to_8_bit_map_table[i],null)));
+					}
+				}
+			}else if(dataType ==0x22 ){ // 4_to_8-bit_map-table data
+				if(table_4_to_8_bit_map_table!=null){
+					for (int i = 0; i < table_4_to_8_bit_map_table.length; i++) {
+						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_4_to_8_bit_map_table[i],null)));
+					}
+				}
 			}
 
 			return s;
@@ -110,7 +141,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			 * n always <= 284, so ass longs initial size pixels > 284 this will work
 			 * otherwise need to increase size with at least n bytes
 			 */
-			if(no_pixels>= pixels.length){
+			if((n+no_pixels)>= pixels.length){
 				pixels = Arrays.copyOf(pixels, no_pixels *2);
 			}
 			Arrays.fill(pixels,no_pixels,no_pixels+n,p);
@@ -142,6 +173,34 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			return pixels;
 		}
 
+//		public void addMapEntry(int bits) {
+//			bit_map_table.add(bits);
+//			
+//		}
+
+		public int[] getTable_2_to_4_bit_map_table() {
+			return table_2_to_4_bit_map_table;
+		}
+
+		public void setTable_2_to_4_bit_map_table(int[] table_2_to_4_bit_map_table) {
+			this.table_2_to_4_bit_map_table = table_2_to_4_bit_map_table;
+		}
+
+		public int[] getTable_2_to_8_bit_map_table() {
+			return table_2_to_8_bit_map_table;
+		}
+
+		public void setTable_2_to_8_bit_map_table(int[] table_2_to_8_bit_map_table) {
+			this.table_2_to_8_bit_map_table = table_2_to_8_bit_map_table;
+		}
+
+		public int[] getTable_4_to_8_bit_map_table() {
+			return table_4_to_8_bit_map_table;
+		}
+
+		public void setTable_4_to_8_bit_map_table(int[] table_4_to_8_bit_map_table) {
+			this.table_4_to_8_bit_map_table = table_4_to_8_bit_map_table;
+		}
 	}
 
 	/**
@@ -151,12 +210,24 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	public ObjectDataSegment(final byte[] data, final int offset) {
 		super(data, offset);
 
-		if(getObjectCodingMethod()==0){
+		if(getObjectCodingMethod()==0){ // coding of pixels
 			int processed_length = 0;
 			processed_length = readFieldDataBlock(data, offset+13, getTopFieldDataBlockLength(), topFieldDataBlocks);
 			processed_length = readFieldDataBlock(data, offset+13+processed_length, getBottomFieldDataBlockLength(),bottomFieldDataBlocks);
 
 
+		}else if(getObjectCodingMethod()==1){ // coded as a string of characters
+			number_of_codes = getInt(data,offset+9, 1, MASK_8BITS);
+			int[] text = new int[number_of_codes];
+			for(int i = 0; i < number_of_codes; i ++){
+				int character_code = (int)getLong(data,offset+10+i*2, 2, MASK_16BITS);
+				text[i]=character_code;
+			}
+			// TODO Specifies a character through its index number in the character table identified in the subtitle_descriptor 
+			// (7.2.5 Object data segment, ETSI EN 300 743 V1.3.1 (2006-11)
+			// subtitling descriptor specifies only a language, not a character table
+			// ISO language may also contain something else than language...
+			character_code_string = new String(text,0,number_of_codes);
 		}
 	}
 
@@ -210,10 +281,12 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @param b
 	 */
 	private static void two_to_4_bit_map_table(final BitSource bs, final PixelDataSubBlock b) {
+		int [] table = new int[4];
 		for (int i = 0; i < 4; i++) {
 			final int bits = bs.readBits(4);
-			b.addPixel(Utils.getInt2UnsignedByte(bits));
+			table[i]=bits;
 		}
+		b.setTable_2_to_4_bit_map_table(table);
 	}
 
 	/**
@@ -221,10 +294,12 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @param b
 	 */
 	private static void two_to_8_bit_map_table(final BitSource bs, final PixelDataSubBlock b) {
+		int [] table = new int[4];
 		for (int i = 0; i < 4; i++) {
-			final int bits = bs.readBits(8);
-			b.addPixel(Utils.getInt2UnsignedByte(bits));
+			final int bits = bs.readBits(4);
+			table[i]=bits;
 		}
+		b.setTable_2_to_8_bit_map_table(table);
 	}
 
 	/**
@@ -232,10 +307,12 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @param b
 	 */
 	private static void four_to_8_bit_map_table(final BitSource bs, final PixelDataSubBlock b) {
-		for (int i = 0; i < 16; i++) {
-			final int bits = bs.readBits(8);
-			b.addPixel(Utils.getInt2UnsignedByte(bits));
+		int [] table = new int[16];
+		for (int i = 0; i < 4; i++) {
+			final int bits = bs.readBits(4);
+			table[i]=bits;
 		}
+		b.setTable_4_to_8_bit_map_table(table);
 	}
 
 
@@ -385,6 +462,10 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			addListJTree(s, topFieldDataBlocks,modus,"top field pixel-data_sub-block");
 			addListJTree(s, bottomFieldDataBlocks,modus,"bottom field pixel-data_sub-block");
 
+		}else if(getObjectCodingMethod()==1){
+			s.add(new DefaultMutableTreeNode(new KVP("number_of_codes", number_of_codes, null)));
+			s.add(new DefaultMutableTreeNode(new KVP("character_codes", character_code_string, null)));
+			
 		}
 
 
@@ -492,17 +573,22 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 */
 	public BufferedImage getImage() {
 		
-		//TODO check for objectCodingMethod characters (like in 07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts, PID 1036, segment 19 
-		BufferedImage bi=null;
-		final WritableRaster wr = getRaster();
-		if(wr==null){
+		// check for objectCodingMethod characters (like in 07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts, PID 1036, segment 19
+		
+		if(getObjectCodingMethod()==0){
+			BufferedImage bi=null;
+			final WritableRaster wr = getRaster();
+			if(wr==null){
+				return null;
+			}
+	
+			final IndexColorModel cm =  CLUTDefinitionSegment.getDefault_CLUT_4bitColorModel();
+	
+			bi = new BufferedImage(cm, wr, false, null);
+			return bi;
+		}else{
 			return null;
 		}
-
-		final IndexColorModel cm =  CLUTDefinitionSegment.getDefault_CLUT_4bitColorModel();
-
-		bi = new BufferedImage(cm, wr, false, null);
-		return bi;
 	}
 
 	/**
@@ -578,6 +664,26 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		}
 		final DataBuffer dBuffer = new DataBufferByte(dataBuffer, width * height);
 		return Raster.createInterleavedRaster(dBuffer,width,height,width,1,new int[]{0},null);
+	}
+
+	public List<PixelDataSubBlock> getTopFieldDataBlocks() {
+		return topFieldDataBlocks;
+	}
+
+	public List<PixelDataSubBlock> getBottomFieldDataBlocks() {
+		return bottomFieldDataBlocks;
+	}
+
+	public static Logger getLogger() {
+		return logger;
+	}
+
+	public int getNumber_of_codes() {
+		return number_of_codes;
+	}
+
+	public String getCharacter_code_string() {
+		return character_code_string;
 	}
 
 
