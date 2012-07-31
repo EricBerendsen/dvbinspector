@@ -633,7 +633,7 @@ public final class Utils {
 		case 0x7f: return"IPMP stream";
 
 		default:
-			return "illegal value";
+			return "illegal/unknown value";
 		}
 	}
 
