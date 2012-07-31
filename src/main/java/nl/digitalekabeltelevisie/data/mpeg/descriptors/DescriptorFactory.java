@@ -219,6 +219,9 @@ public final class DescriptorFactory {
 		case 0x03:
 			d = new AudioStreamDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x04:
+			d = new HierarchyDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x05:
 			d = new RegistrationDescriptor(data, t + offset, tableSection);
 			break;
@@ -254,6 +257,10 @@ public final class DescriptorFactory {
 			break;
 		case 0x11:
 			d = new STDDescriptor(data, t + offset, tableSection);
+			break;
+			// 0x12 IBP_descriptor as found in iso/conformance/hhi.m2t
+		case 0x12:
+			d = new IBPDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x13:
 			d = new CarouselIdentifierDescriptor(data, t + offset, tableSection);

@@ -33,63 +33,50 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
-public class AudioStreamDescriptor extends Descriptor {
+public class IBPDescriptor extends Descriptor {
+	
+	// based on ITU-T Rec. H.222.0 (2000 E)/ ISO/IEC 13818-1 : 2000 (E) p 74 2.6.34 IBP descriptor
 
-	private final int freeFormatFlag;
-	private final int id;
-	private final int layer;
-	private final int variableRateAudioIndicator;
-	private final int reserved;
+	private int closed_gop_flag;
+	private int identical_gop_flag;
+	private int max_gop_length;
 
 
-	public AudioStreamDescriptor(final byte[] b, final int offset, final TableSection parent) {
+	public IBPDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
-		freeFormatFlag = Utils.getInt(b, offset+2, 1, 0x80)>>7;
-		id = Utils.getInt(b, offset+2, 1, 0x40)>>6;
-		layer = Utils.getInt(b, offset+2, 1, 0x30)>>4;
-		variableRateAudioIndicator = Utils.getInt(b, offset+2, 1, 0x08)>>3;
-		reserved = Utils.getInt(b, offset+2, 1, 0x07);
+		closed_gop_flag = Utils.getInt(b, offset+2, 1, 0x80)>>7;
+		identical_gop_flag = Utils.getInt(b, offset+2, 1, 0x40)>>6;
+		max_gop_length = Utils.getInt(b, offset+2, 2, Utils.MASK_14BITS);
 
 
 	}
 
-	@Override
-	public String toString() {
-		return super.toString() + " freeFormatFlag"+freeFormatFlag ;
-	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("free_format_flag",freeFormatFlag ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ID",id ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("layer",layer ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("variable_rate_audio_indicator",variableRateAudioIndicator ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("closed_gop_flag",closed_gop_flag ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("identical_gop_flag",identical_gop_flag ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("max_gop_length",max_gop_length ,null)));
 
 
 		return t;
 	}
 
-	public int getFreeFormatFlag() {
-		return freeFormatFlag;
+
+	public int getClosed_gop_flag() {
+		return closed_gop_flag;
 	}
 
 
-	public int getLayer() {
-		return layer;
+	public int getIdentical_gop_flag() {
+		return identical_gop_flag;
 	}
 
-	public int getId() {
-		return id;
+
+	public int getMax_gop_length() {
+		return max_gop_length;
 	}
 
-	public int getVariableRateAudioIndicator() {
-		return variableRateAudioIndicator;
-	}
-
-	public int getReserved() {
-		return reserved;
-	}
 
 }
