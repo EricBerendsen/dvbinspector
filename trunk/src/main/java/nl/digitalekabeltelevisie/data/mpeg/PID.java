@@ -341,7 +341,7 @@ public class PID implements TreeNode{
 
 		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",(scrambled)?"true":"false",null)));
 		if(!scrambled){
-			t.add(new DefaultMutableTreeNode(new KVP("type",(type==PSI)?"PSI":"PES",null)));
+			t.add(new DefaultMutableTreeNode(new KVP("type",(type==PSI)?"PSI":((type==PES)?"PES":"-"),null)));
 		}
 		if(firstPCR!=null){
 			t.add(new DefaultMutableTreeNode(new KVP("First PCR",firstPCR.getProgram_clock_reference(),printPCRTime(firstPCR.getProgram_clock_reference()))));
