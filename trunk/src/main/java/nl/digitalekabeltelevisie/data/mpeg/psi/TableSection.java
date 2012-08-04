@@ -28,6 +28,7 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 
 import java.util.Formatter;
 
@@ -201,8 +202,8 @@ public class TableSection implements TreeNode{
 		case 0x05: return "ISO_IEC_14496_object_descriptor_section"; // MPEG2 13818-1
 
 		// DVBSnoop dvb_str.c
-		case 0x06: return "Metadata Table";				// $$$ TODO H.222.0 AMD1
-		case 0x07: return "IPMP_Control_Information_section (ISO 13818-11)";  // $$$ TODO H.222.0 AMD1
+		case 0x06: return "Metadata Table";				// H.222.0 AMD1
+		case 0x07: return "IPMP_Control_Information_section (ISO 13818-11)";  //  H.222.0 AMD1
 
 		case 0x38: return "ISO/IEC 13818-6 reserved";
 		case 0x39: return "ISO/IEC 13818-6 reserved";
@@ -363,7 +364,7 @@ public class TableSection implements TreeNode{
 		if(bitrate>0){
 			if(count>=2){
 				final Formatter formatter = new Formatter();
-				final float repRate=((float)(last-first)*188*8)/((count-1)*bitrate);
+				final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
 				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 			}
 		}

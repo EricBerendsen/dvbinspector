@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
+
 import java.util.Arrays;
 
 import nl.digitalekabeltelevisie.util.Utils;
@@ -108,9 +110,9 @@ public class TSPacket {
 	 */
 	public byte[] getData(){
 		if((isAdaptationFieldControl()==1)) { //payload only
-			return Utils.copyOfRange(buffer,4, 188);
+			return Utils.copyOfRange(buffer,4, packet_length);
 		}else if((isAdaptationFieldControl()==3)) { //Adaptation followed by payload
-			return Utils.copyOfRange(buffer, 4+Utils.getUnsignedByte(buffer[4])+1,188);
+			return Utils.copyOfRange(buffer, 4+Utils.getUnsignedByte(buffer[4])+1,packet_length);
 		}
 		return null;
 	}

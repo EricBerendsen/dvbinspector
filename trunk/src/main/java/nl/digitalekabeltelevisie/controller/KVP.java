@@ -34,13 +34,25 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Holder for names/values (and explanations) that takes care of formatting and presentation.
- * 
- * Data type can be one of String, int, long, byte[], DVBString.
- * 
- * 
- * 
- * Used to show values in JTree, but also able to do HTML escaping.
- * For usage in JTree the method toString returns the presentation string. Default this is formatted as label: value => description
+ * Started out as KeyValuePair, as soon as the third argument explanation was added the name was obsolete.
+ * Now (ab)used for everything related to presentation.  
+ * <p>
+ * Presentation is controlled by the static variables numberDisplay and stringDisplay. So all field in the same JVM will be presented in the same way (May be a problem if a application with GUI is also used to generate HTML files, using the same KVP mechanism).
+ * <p>
+ * For usage in JTree the method toString returns the presentation string.
+ * <p> 
+ * Most simple form is <code>KVP kvp = KVP("label");</code>, this will create a KVP with no data value. Is used as parent for grouping descendants.<br>
+ * Normal usage is   <code>KVP kvp = KVP("label", 11);</code>,  this will create a KVP with data of type int, and value 11. When  numberDisplay == NUMBER_DISPLAY_BOTH it will be shown in both decimal and hexadecimal, so the output of toString will be "label: 0xB (11)".<br> 
+ * Extended usage is   <code>KVP kvp = KVP("label", 23,"explanation");</code>,  this will create a KVP with data of type int, and value 23. When  numberDisplay == NUMBER_DISPLAY_BOTH it will be shown in both decimal and hexadecimal, so the output of toString will be "label: 0x17 (23) => explanation".<br> 
+ * <p> 
+ * Data type can be none, or one of String, int, long, byte[], DVBString.
+ * <p> 
+ * Can also be used to associate some other attributes with the label/value, like a {@link HTMLSource} or a {@link ImageSource}
+ * If either one of these fields is not null, it means there is extra data (HTML text and/or image) available for display. In DVB Inspector it is shown in the right panel.   
+ * <p>
+ * Also there can be a <code>JMenuItem</code> and owner associated with the KVP (always together). 
+ * This is used by DVB Inspector to show a sub menu for some items, and associate it with a handler (owner)
+ *  
  * 
  * @author Eric Berendsen
  *
@@ -71,18 +83,11 @@ public class KVP{
 	public static final byte	NUMBER_DISPLAY_HEX			= 2;
 	public static final byte	NUMBER_DISPLAY_BOTH			= 3;
 
-	private static byte	stringDisplay				= 1;	// 1 - plain, 2 -
-	// javascript
-	// escaped (quotes
-	// removed), 3 -
-	// HTML fragments
-	// '<' and '&'
-	// escaped, 4 - AWT
-	// HTML (html
-	// segments include
-	// <html> tag,
-	// otherwise plain
-	// text
+	private static byte	stringDisplay				= 1;	
+	// 1 - plain, 
+	// 2 - javascript escaped (quotes removed), 
+	// 3 - HTML fragments '<' and '&' escaped, 
+	// 4 - AWT HTML (html segments include <html> tag,  otherwise plain text
 	public static final byte	STRING_DISPLAY_PLAIN		= 1;
 	public static final byte	STRING_DISPLAY_JAVASCRIPT	= 2;
 	public static final byte	STRING_DISPLAY_HTML_FRAGMENTS	= 3;
@@ -101,16 +106,30 @@ public class KVP{
 	 */
 	public static final byte	FIELD_TYPE_LABEL			= 5;
 	public static final byte	FIELD_TYPE_DVBSTRING		= 6;
-	public static final byte	FIELD_TYPE_HTML				= 7; //a HTML type for presentation where possible,
-	// has to have a plain text alternative
+	/**
+	 * 	used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
+	 * 	DO NOT confuse this with the KVP having a htmlSource, that is completely unrelated. 
+	 *  The FIELD_TYPE_HTML is used for presentation in the JTREE, and serves as enhancement to the plain String label. 
+	 *  For example, when presenting teletext lines, the label can show the plain ascii version of the line, while the value can have the same line as HTML fragment with colors
+	 * 	both label and value should have the same semantics, only one of them will be presented.
+ 
+	 */
+	public static final byte	FIELD_TYPE_HTML				= 7; 
+	
 
 
+	/**
+	 * if imageSource is set, means there is a image to display with this KVP. In DVB Inspector is will be shown in the right panel. (example, teletext page, or DVB subtitle)
+	 */
 	private ImageSource imageSource;
+	/**
+	 * if htmlSource is set, means there is a html fragment to display with this KVP. In DVB Inspector is will be shown in the right panel. (example, hex dump of byte[]. or EPG)
+	 */
 	private HTMLSource 	htmlSource;
 
-	public HTMLSource getHtmlSource() {
-		return htmlSource;
-	}
+//	public HTMLSource getHtmlSource() {
+//		return htmlSource;
+//	}
 
 	public void setHtmlSource(final HTMLSource htmlSource) {
 		this.htmlSource = htmlSource;
@@ -357,9 +376,11 @@ public class KVP{
 
 	/**
 	 * @param subMenu the subMenu to set
+	 * @param owner the owner to set
 	 */
-	public void setSubMenu(final JMenuItem subMenu) {
+	public void setSubMenuAndOwner(final JMenuItem subMenu,final Object owner) {
 		this.subMenu = subMenu;
+		this.owner = owner;
 	}
 
 
@@ -371,12 +392,6 @@ public class KVP{
 	}
 
 
-	/**
-	 * @param owner the owner to set
-	 */
-	public void setOwner(final Object owner) {
-		this.owner = owner;
-	}
 
 	public HTMLSource getHTMLSource(){
 		if(fieldType == FIELD_TYPE_BYTES){

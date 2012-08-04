@@ -28,6 +28,7 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 
 import java.util.Formatter;
 import java.util.logging.Logger;
@@ -42,7 +43,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
 
 /**
- * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets talles are built, PES packets are (initially) only counted.
+ * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets tables are built, PES packets are (initially) only counted.
  * Does not store all data packets for this PID
  */
 public class PID implements TreeNode{
@@ -238,7 +239,7 @@ public class PID implements TreeNode{
 				}
 				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
 					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
-					bitRate = ((packetsDiff *188 *27000000*8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
+					bitRate = ((packetsDiff *packet_length * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
 					lastPCR = newPCR;
 					lastPCRpacketNo = packet.getPacketNo();
 					pcr_count++;
@@ -329,8 +330,7 @@ public class PID implements TreeNode{
 		if((abstractPesHandler!=null)&&(!scrambled)){
 			final JMenuItem pesMenu = new JMenuItem("Parse PES data");
 			pesMenu.setActionCommand("parse");
-			kvp.setSubMenu(pesMenu);
-			kvp.setOwner(this);
+			kvp.setSubMenuAndOwner(pesMenu,this);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
@@ -374,7 +374,7 @@ public class PID implements TreeNode{
 		final long bitrate=getParentTransportStream().getBitRate();
 		if((bitrate>0)&&(count>=2)){
 			final Formatter formatter = new Formatter();
-			final float repRate=((float)(last-first)*188*8)/((count-1)*bitrate);
+			final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
 			return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 		}
 		return null;

@@ -31,7 +31,11 @@ import java.awt.Paint;
 
 /**
  * @author Eric Berendsen
+ * 
+ * Used as a label for the Charts as produced by jfreechart..
+ * 
  */
+
 @SuppressWarnings("rawtypes")
 public class ChartLabel implements Comparable {
 

@@ -28,6 +28,7 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -89,7 +90,7 @@ public class TransportStream implements TreeNode{
 	 */
 	private PID [] pids = new PID [8192];
 	/**
-	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations.
+	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and 
 	 */
 	private short [] packet_pid;
 	/**
@@ -139,7 +140,7 @@ public class TransportStream implements TreeNode{
 	public TransportStream(final File file) {
 		this.file = file;
 		final long len = file.length();
-		final int max_packets = (int)(len / 188l);
+		final int max_packets = (int)(len / packet_length);
 		packet_pid = new short [max_packets];
 	}
 
@@ -149,7 +150,7 @@ public class TransportStream implements TreeNode{
 	 */
 	public void parseStream() throws IOException {
 		final PushbackInputStream fileStream = getInputStream();
-		final byte [] buf = new byte[MPEGConstants.packet_length];
+		final byte [] buf = new byte[packet_length];
 		long count=0;
 		no_packets = 0;
 
@@ -288,24 +289,12 @@ public class TransportStream implements TreeNode{
 		return no_packets;
 	}
 
-	public void setNo_packets(final int no_packets) {
-		this.no_packets = no_packets;
-	}
-
 	public PID[] getPids() {
 		return pids;
 	}
 
-	public void setPids(final PID[] pids) {
-		this.pids = pids;
-	}
-
 	public PSI getPsi() {
 		return psi;
-	}
-
-	public void setPsi(final PSI psi) {
-		this.psi = psi;
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
@@ -547,7 +536,7 @@ public class TransportStream implements TreeNode{
 				final long diffPacket = last.getPacket_no() - first.getPacket_no();
 				final long timeDiffMills =   getUTCmillis(last.getUTC_time())- getUTCmillis(first.getUTC_time());
 				if(timeDiffMills>0){ // shit happens... capture.guangdong  has 10 with same timestamp....
-					bitRateTDT = (diffPacket * 188 * 8 * 1000)/timeDiffMills;
+					bitRateTDT = (diffPacket * packet_length * 8 * 1000)/timeDiffMills;
 				}
 
 			}
@@ -560,7 +549,7 @@ public class TransportStream implements TreeNode{
 			if(tdtSectionList.size()>=1){
 				final TDTsection first = tdtSectionList.get(0);
 				final Calendar firstTime = getUTCCalender(first.getUTC_time());
-				final long millsIntoStream= (first.getPacket_no() *188 * 8 * 1000)/getBitRate();
+				final long millsIntoStream= (first.getPacket_no() *packet_length * 8 * 1000)/getBitRate();
 				firstTime.add(Calendar.MILLISECOND, (int)-millsIntoStream);
 				zeroTime = firstTime;
 			}
@@ -610,10 +599,6 @@ public class TransportStream implements TreeNode{
 		return packet_pid;
 	}
 
-	public void setPacket_pid(final short[] packet_pid) {
-		this.packet_pid = packet_pid;
-	}
-
 	public short getPacket_pid(final int t) {
 		return packet_pid[t];
 	}
@@ -657,13 +642,13 @@ public class TransportStream implements TreeNode{
 			if(zeroTime==null){
 				final Calendar now=new GregorianCalendar();
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * 188 * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * 188 * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
 
 				r = now.get(Calendar.YEAR)+"/"+ (now.get(Calendar.MONTH)+1)+"/"+now.get(Calendar.DAY_OF_MONTH)+" "+now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
@@ -678,13 +663,13 @@ public class TransportStream implements TreeNode{
 			if(zeroTime==null){
 				final Calendar now=new GregorianCalendar();
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * 188 * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * 188 * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
 
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
