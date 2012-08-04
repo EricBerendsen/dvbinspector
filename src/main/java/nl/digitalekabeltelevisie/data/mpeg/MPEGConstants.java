@@ -37,4 +37,5 @@ public final class MPEGConstants {
 	}
 	public final static byte sync_byte=0x47;
 	public final static int	packet_length=188;
+	public final static int system_clock_frequency=27000000;
 }

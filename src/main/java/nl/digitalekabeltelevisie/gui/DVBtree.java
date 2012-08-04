@@ -465,7 +465,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param e
 	 */
 	private void showContextMenu(final MouseEvent e) {
-		//TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
 		final TreePath path = tree.getSelectionPath();
 		treeMenuItem.setEnabled(path!=null);
 		copyMenuItem.setEnabled(path!=null);
@@ -475,26 +474,26 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			popup.remove(3);
 		}
 
-		//		viewMenuItem.set
 		//		add optional menu
 		DefaultMutableTreeNode dmtn;
 
 		if(path!=null){
 			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 			final KVP kvp=(KVP)dmtn.getUserObject();
-			if(kvp.getSubMenu()!=null){
+			JMenuItem subMenu = kvp.getSubMenu();
+			if(subMenu!=null){
 				final Object owner =  kvp.getOwner();
 				if(owner instanceof PID){ // if PID has a owner, it is a PES that has not been parsed yet.
 					final PID p = (PID) owner;
 					final AbstractPesHandler pesH = p.getPesHandler();
 					if(!pesH.isInitialized()){
-						kvp.getSubMenu().addActionListener(this);
-						popup.add(kvp.getSubMenu());
+						subMenu.addActionListener(this);
+						popup.add(subMenu);
 					}
 				}else{
-					kvp.getSubMenu().removeActionListener(this);
-					kvp.getSubMenu().addActionListener(this);
-					popup.add(kvp.getSubMenu());
+					subMenu.removeActionListener(this);
+					subMenu.addActionListener(this);
+					popup.add(subMenu);
 				}
 			}
 		}

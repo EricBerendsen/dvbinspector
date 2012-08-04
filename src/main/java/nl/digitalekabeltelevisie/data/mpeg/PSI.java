@@ -52,28 +52,24 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.UNTs;
 public class PSI {
 
 
-	private PAT pat = new PAT(this);
-	private CAT cat = new CAT(this);
-	private BAT bat = new BAT(this);
-	private NIT nit = new NIT(this);
-	private SDT sdt = new SDT(this);
-	private PMTs pmts = new PMTs(this);
-	private EIT eit = new EIT(this);
-	private TDT tdt = new TDT(this);
-	private TOT tot = new TOT(this);
-	private NetworkSync networkSync = new NetworkSync(this);
-	private INT int_table = new INT(this);
-	private UNTs unt_table = new UNTs(this);
-	private AITs ait_table = new AITs(this);
-	private DSMCCs dsm_table = new DSMCCs(this);
+	private final PAT pat = new PAT(this);
+	private final CAT cat = new CAT(this);
+	private final BAT bat = new BAT(this);
+	private final NIT nit = new NIT(this);
+	private final SDT sdt = new SDT(this);
+	private final PMTs pmts = new PMTs(this);
+	private final EIT eit = new EIT(this);
+	private final TDT tdt = new TDT(this);
+	private final TOT tot = new TOT(this);
+	private final NetworkSync networkSync = new NetworkSync(this);
+	private final INT int_table = new INT(this);
+	private final UNTs unt_table = new UNTs(this);
+	private final AITs ait_table = new AITs(this);
+	private final DSMCCs dsm_table = new DSMCCs(this);
 
 	public NIT getNit() {
 		return nit;
 	}
-	public void setNit(final NIT nitOther) {
-		this.nit = nitOther;
-	}
-
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PSI"));
@@ -97,83 +93,41 @@ public class PSI {
 		return pmts;
 	}
 
-	public void setPmts(final PMTs pmts) {
-		this.pmts = pmts;
-	}
-
 	public PAT getPat() {
 		return pat;
-	}
-	public void setPat(final PAT pat) {
-		this.pat = pat;
 	}
 	public SDT getSdt() {
 		return sdt;
 	}
-	public void setSdt(final SDT sdt) {
-		this.sdt = sdt;
-	}
 	public CAT getCat() {
 		return cat;
-	}
-	public void setCat(final CAT cat) {
-		this.cat = cat;
 	}
 	public TOT getTot() {
 		return tot;
 	}
-	public void setTot(final TOT tot) {
-		this.tot = tot;
-	}
 	public TDT getTdt() {
 		return tdt;
-	}
-	public void setTdt(final TDT tdt) {
-		this.tdt = tdt;
 	}
 	public BAT getBat() {
 		return bat;
 	}
-	public void setBat(final BAT bat) {
-		this.bat = bat;
-	}
 	public EIT getEit() {
 		return eit;
-	}
-	public void setEit(final EIT eit) {
-		this.eit = eit;
 	}
 	public INT getInt() {
 		return int_table;
 	}
-	public void setInt(final INT int_table) {
-		this.int_table = int_table;
-	}
-
 	public UNTs getUnts() {
 		return unt_table;
 	}
-	public void setUnt(final UNTs unt_table) {
-		this.unt_table = unt_table;
-	}
-
 	public AITs getAits() {
 		return ait_table;
-	}
-	public void setAit(final AITs ait_table) {
-		this.ait_table = ait_table;
 	}
 	public DSMCCs getDsms() {
 		return dsm_table;
 	}
-	public void setDsms(final DSMCCs dsm_table) {
-		this.dsm_table = dsm_table;
-	}
 	public NetworkSync getNetworkSync() {
 		return networkSync;
-	}
-	public void setNetworkSync(final NetworkSync networkSync) {
-		this.networkSync = networkSync;
 	}
 
 }

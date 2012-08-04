@@ -215,8 +215,7 @@ public class ServiceDSMCC implements TreeNode {
 
 				final JMenuItem objectMenu = new JMenuItem("Export (sub)tree...");
 				objectMenu.setActionCommand("export");
-				kvp.setSubMenu(objectMenu);
-				kvp.setOwner(dsmFile);
+				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
 				final List<Binding> bindings = dir.getBindingList();
 				for(final Binding binding:bindings){
 					final BIOPName biopName = binding.getBiopName();
@@ -232,8 +231,7 @@ public class ServiceDSMCC implements TreeNode {
 				final DSMFile dsmFile = new DSMFile(biopMessage,label);
 				kvp.setHtmlSource(dsmFile);
 
-				kvp.setSubMenu(objectMenu);
-				kvp.setOwner(dsmFile);
+				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
 
 			}
 			return treeNode;

@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
- * This class represents a PSI table, without inerpreting it.
+ * This class represents a PSI table, without interpreting it.
  *
  */
 public class GeneralPSITable extends AbstractPSITabel{

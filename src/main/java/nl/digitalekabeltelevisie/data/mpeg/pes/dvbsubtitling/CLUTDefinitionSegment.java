@@ -88,6 +88,15 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		0xff555555, 0xff7f5555, 0xff557f55, 0xff7f7f55, 0xff55557f, 0xff7f557f, 0xff557f7f, 0xff7f7f7f
 
 	};
+	
+	private static int [] default_2_to_4_bit_map_table = {0x0,0x7,0x8,0xf};
+	private static int [] default_2_to_8_bit_map_table = {0x00,0x77,0x88,0xff};
+	private static int [] default_4_to_8_bit_map_table = {0x00,0x11,0x22,0x33,
+														  0x44,0x55,0x66,0x77,
+														  0x88,0x99,0xaa,0xbb,
+														  0xcc,0xdd,0xee,0xff
+														  };
+
 
 	public class CLUTEntry implements TreeNode {
 		private final int CLUT_entry_id;
