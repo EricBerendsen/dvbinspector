@@ -48,7 +48,7 @@ public class Sei_rbsp extends RBSP {
 		super(rbsp_bytes, numBytesInRBSP);
 		Sei_message sei_message = new Sei_message(bitSource);
 		sei_messages.add(sei_message);
-		while( bitSource.nextBits(8)!= 0x80){ // 0x80
+		while((bitSource.available()>=8)&&( bitSource.nextBits(8)!= 0x80)){ // 0x80
 			sei_message = new Sei_message(bitSource);
 			sei_messages.add(sei_message);
 		}

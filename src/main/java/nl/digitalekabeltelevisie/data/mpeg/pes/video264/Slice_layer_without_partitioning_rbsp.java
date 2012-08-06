@@ -43,7 +43,6 @@ public class Slice_layer_without_partitioning_rbsp extends RBSP {
 			int numBytesInRBSP) {
 		super(rbsp_bytes, numBytesInRBSP);
 		slice_header = new Slice_header(bitSource);
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)

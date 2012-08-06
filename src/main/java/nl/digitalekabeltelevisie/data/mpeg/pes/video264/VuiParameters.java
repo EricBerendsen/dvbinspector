@@ -1,6 +1,31 @@
-package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
+/**
+ * 
+ *  http://www.digitalekabeltelevisie.nl/dvb_inspector
+ * 
+ *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * 
+ *  This file is part of DVB Inspector.
+ * 
+ *  DVB Inspector is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  DVB Inspector is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  The author requests that he be notified of any application, applet, or
+ *  other binary that makes use of this code, but that's more out of curiosity
+ *  than anything and is not required.
+ * 
+ */
 
-import java.util.logging.Logger;
+package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -10,9 +35,6 @@ import nl.digitalekabeltelevisie.util.BitSource;
 
 public class VuiParameters implements TreeNode {
 
-	// TODO add hrd_parameters( ) as found in D:\ts\cypheros\Testbild H264 1080p alternating video_full_range_flag.ts and Testbild H264 1080p alternating video_full_range_flag.ts
-	// SEE E.1.2 HRD parameters syntax
-	private static Logger	logger	= Logger.getLogger(VuiParameters.class.getName());
 	
 	private int aspect_ratio_info_present_flag;
 	private int aspect_ratio_idc;
@@ -39,7 +61,9 @@ public class VuiParameters implements TreeNode {
 
 
 	private int nal_hrd_parameters_present_flag;
+	private HrdParameters nal_hrd_parameters;
 	private int vcl_hrd_parameters_present_flag;
+	private HrdParameters vcl_hrd_parameters;
 	private int low_delay_hrd_flag;
 	private int pic_struct_present_flag;
 	private int bitstream_restriction_flag;
@@ -50,6 +74,7 @@ public class VuiParameters implements TreeNode {
 	private int log2_max_mv_length_vertical;
 	private int num_reorder_frames;
 	private int max_dec_frame_buffering;
+
 
 	public VuiParameters(BitSource bitSource) {
 		aspect_ratio_info_present_flag=bitSource.u(1);
@@ -90,13 +115,11 @@ public class VuiParameters implements TreeNode {
 		
 		nal_hrd_parameters_present_flag=bitSource.u(1);
 		if( nal_hrd_parameters_present_flag!=0 ){
-			logger.warning("  nal_hrd_parameters_present_flag!=0 not implemented");
-			//hrd_parameters( )
+			nal_hrd_parameters = new HrdParameters(bitSource);
 		}
 		vcl_hrd_parameters_present_flag=bitSource.u(1);
 		if( vcl_hrd_parameters_present_flag!=0 ){
-			logger.warning("  vcl_hrd_parameters_present_flag!=0 not implemented");
-			//hrd_parameters( )
+			vcl_hrd_parameters = new HrdParameters(bitSource);
 		}
 		if( nal_hrd_parameters_present_flag!=0 || vcl_hrd_parameters_present_flag!=0 ){
 			low_delay_hrd_flag=bitSource.u(1);
@@ -157,13 +180,11 @@ public class VuiParameters implements TreeNode {
 
 		t.add(new DefaultMutableTreeNode(new KVP("nal_hrd_parameters_present_flag",nal_hrd_parameters_present_flag,null)));
 		if( nal_hrd_parameters_present_flag!=0 ){
-			//logger.warning("  nal_hrd_parameters_present_flag!=0 not implemented");
-			//hrd_parameters( )
+			t.add(nal_hrd_parameters.getJTreeNode(modus));
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("vcl_hrd_parameters_present_flag",vcl_hrd_parameters_present_flag,null)));
 		if( vcl_hrd_parameters_present_flag!=0 ){
-			//logger.warning("  vcl_hrd_parameters_present_flag!=0 not implemented");
-			//hrd_parameters( )
+			t.add(vcl_hrd_parameters.getJTreeNode(modus));
 		}
 		if( nal_hrd_parameters_present_flag!=0 || vcl_hrd_parameters_present_flag!=0 ){
 			t.add(new DefaultMutableTreeNode(new KVP("low_delay_hrd_flag",low_delay_hrd_flag,null)));
