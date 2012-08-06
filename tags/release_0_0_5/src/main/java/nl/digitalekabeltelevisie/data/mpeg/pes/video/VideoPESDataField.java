@@ -1,0 +1,210 @@
+/**
+ * 
+ *  http://www.digitalekabeltelevisie.nl/dvb_inspector
+ * 
+ *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * 
+ *  This file is part of DVB Inspector.
+ * 
+ *  DVB Inspector is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  DVB Inspector is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *  The author requests that he be notified of any application, applet, or
+ *  other binary that makes use of this code, but that's more out of curiosity
+ *  than anything and is not required.
+ * 
+ */
+
+package nl.digitalekabeltelevisie.data.mpeg.pes.video;
+
+import static nl.digitalekabeltelevisie.util.Utils.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+
+/**
+ * @author Eric Berendsen
+ * 
+ */
+
+public class VideoPESDataField extends PesPacketData implements TreeNode {
+
+
+
+
+
+	private final List<VideoMPEG2Section> sections= new ArrayList<VideoMPEG2Section>();
+
+	public VideoPESDataField(final PesPacketData pesPacket) {
+		//public VideoPESDataField(byte[] data, int offset, int len, long pts) {
+		super(pesPacket);
+
+		int i = pesDataStart;
+		while((i<(data.length))&&(i>=0)){
+			i = indexOf(data, new byte[]{0,0,1},i);
+			if(i>=0){
+				VideoMPEG2Section section;
+				if(getUnsignedByte(data[i+3])==0x00){
+					section = new PictureHeader(data,i+3);
+				}else if(getUnsignedByte(data[i+3])==0xB2){
+					section = new UserData(data,i+3);
+				}else if(getUnsignedByte(data[i+3])==0xB3){
+					section = new SequenceHeader(data,i+3);
+				}else if(getUnsignedByte(data[i+3])==0xB5){ // extension, use extension_start_code_identifier to make sub selection
+					final int extensionStartCode = (getUnsignedByte(data[i+4])&0xF0)>>4;
+					if(extensionStartCode==1){ // Sequence extension
+						section = new SequenceExtension(data,i+3);
+					}else if(extensionStartCode==8){ // Sequence extension
+						section = new PictureCodingExtension(data,i+3);
+					}else{
+						section = new ExtensionHeader(data,i+3); // default Base Extension
+					}
+				}else if(getUnsignedByte(data[i+3])==0xB8){
+					section = new GroupOfPicturesHeader(data,i+3);
+				}else{
+					section = new VideoMPEG2Section(data,i+3);
+				}
+				sections.add(section);
+				i+=3;
+			}
+		}
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
+	 */
+	@Override
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		final List<VideoMPEG2Section> picts = findSectionInList(sections, 0);
+		final StringBuilder type = new StringBuilder();
+		if((picts!=null)&&(picts.size()>0)){
+			type.append(" (Pictures ");
+			for(final VideoMPEG2Section section: picts) {
+				type.append(((PictureHeader)section).getPictureCodingTypeShortString());
+			}
+			type.append(")");
+		}
+		//DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("PES Packet"+type));
+		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+		s.setUserObject(new KVP("Video PES Packet"+type));
+		//s.add(new DefaultMutableTreeNode(new KVP("data",data,offset,data.length-offset,null)));
+		addListJTree(s,sections,modus,"Sections");
+		return s;
+	}
+
+
+
+	public static String getStartCodeString(final int startCode) {
+		if ((startCode >= 1) && (startCode <= 0xAF)) {
+			return "slice_start_code ";
+		}
+		switch (startCode) {
+		case 0x00:
+			return "picture_start_code";
+		case 0xB0:
+			return "reserved";
+		case 0xB1:
+			return "reserved";
+		case 0xB2:
+			return "user_data_start_code";
+		case 0xB3:
+			return "sequence_header_code";
+		case 0xB4:
+			return "sequence_error_code";
+		case 0xB5:
+			return "extension_start_code";
+		case 0xB6:
+			return "reserved";
+		case 0xB7:
+			return "sequence_end_code";
+		case 0xB8:
+			return "group_start_code";
+		case 0xB9:
+			return "MPEG_program_stream_end (PS)";
+		case 0xBA:
+			return "MPEG_pack_start (PS)";
+		case 0xBB:
+			return "MPEG_system_header_start (PS)";
+		default:
+			return "unknown/error";
+		}
+	}
+
+	public static String getSectionTypeString(final int startCode) {
+		if ((startCode >= 1) && (startCode <= 0xAF)) {
+			return "Slice " + startCode;
+		}
+		switch (startCode) {
+		case 0x00:
+			return "Picture header";
+		case 0xB0:
+			return "reserved";
+		case 0xB1:
+			return "reserved";
+		case 0xB2:
+			return "User Data";
+		case 0xB3:
+			return "Sequence header";
+		case 0xB4:
+			return "sequence_error_code";
+		case 0xB5:
+			return "Extension data";
+		case 0xB6:
+			return "reserved";
+		case 0xB7:
+			return "sequence_end_code";
+		case 0xB8:
+			return "Group Of Pictures";
+		case 0xB9:
+			return "MPEG_program_stream_end (PS)";
+		case 0xBA:
+			return "MPEG_pack_start (PS)";
+		case 0xBB:
+			return "MPEG_system_header_start (PS)";
+		default:
+			return "unknown/error";
+		}
+	}
+
+	/**
+	 * @param sectionList List of  sections to besearched
+	 * @param startCode code of target section
+	 * @return List of all sections matching startCode
+	 */
+	public static List<VideoMPEG2Section> findSectionInList(final List<VideoMPEG2Section> sectionList, final int startCode) {
+
+		final List<VideoMPEG2Section> result = new ArrayList<VideoMPEG2Section>();
+		for (final VideoMPEG2Section element : sectionList) {
+			if (element.getStartCode() == startCode) {
+				result.add(element);
+			}
+		}
+		return result;
+	}
+
+
+	public List<VideoMPEG2Section> getSections() {
+		return sections;
+	}
+
+
+}
