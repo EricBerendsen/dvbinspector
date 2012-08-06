@@ -88,14 +88,6 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		0xff555555, 0xff7f5555, 0xff557f55, 0xff7f7f55, 0xff55557f, 0xff7f557f, 0xff557f7f, 0xff7f7f7f
 
 	};
-	
-	private static int [] default_2_to_4_bit_map_table = {0x0,0x7,0x8,0xf};
-	private static int [] default_2_to_8_bit_map_table = {0x00,0x77,0x88,0xff};
-	private static int [] default_4_to_8_bit_map_table = {0x00,0x11,0x22,0x33,
-														  0x44,0x55,0x66,0x77,
-														  0x88,0x99,0xaa,0xbb,
-														  0xcc,0xdd,0xee,0xff
-														  };
 
 
 	public class CLUTEntry implements TreeNode {
@@ -396,29 +388,6 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		return clutEntries;
 	}
 
-	/**
-	 * @return
-	 */
-	public int getRegionLevelOfCompatibility() {
-		return getInt(data_block, offset + 12, 1, 0xE0) >> 5;
-	}
-
-	public static String getRegionLevelOfCompatibilityString(final int type) {
-
-		switch (type) {
-
-		case 0x0:
-			return "reserved";
-		case 0x1:
-			return "2-bit/entry CLUT required";
-		case 0x2:
-			return "4-bit/entry CLUT required";
-		case 0x3:
-			return "8-bit/entry CLUT required";
-		default:
-			return "reserved";
-		}
-	}
 	public static IndexColorModel getDefault_CLUT_2bitColorModel(){
 		return getIndexColorModel(2,4,default_CLUT_2bit, 0,true,0,DataBuffer.TYPE_BYTE);
 	}
@@ -431,23 +400,6 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		return getIndexColorModel(8,256,default_CLUT_8bit, 0,true,0,DataBuffer.TYPE_BYTE);
 	}
 
-
-	public static String getRegionDepthString(final int type) {
-
-		switch (type) {
-
-		case 0x0:
-			return "reserved";
-		case 0x1:
-			return "2 bit";
-		case 0x2:
-			return "4 bit";
-		case 0x3:
-			return "8 bit";
-		default:
-			return "reserved";
-		}
-	}
 
 	public IndexColorModel getColorModel(final int regionDepth){
 
