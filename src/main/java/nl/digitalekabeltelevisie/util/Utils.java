@@ -923,44 +923,147 @@ public final class Utils {
 			case '>': sb.append("&gt;"); break;
 			case '&': sb.append("&amp;"); break;
 			case '"': sb.append("&quot;"); break;
-			case 'à': sb.append("&agrave;");break;
-			case 'À': sb.append("&Agrave;");break;
-			case 'â': sb.append("&acirc;");break;
-			case 'Â': sb.append("&Acirc;");break;
-			case 'ä': sb.append("&auml;");break;
-			case 'Ä': sb.append("&Auml;");break;
-			case 'å': sb.append("&aring;");break;
-			case 'Å': sb.append("&Aring;");break;
-			case 'æ': sb.append("&aelig;");break;
-			case 'Æ': sb.append("&AElig;");break;
-			case 'ç': sb.append("&ccedil;");break;
-			case 'Ç': sb.append("&Ccedil;");break;
-			case 'é': sb.append("&eacute;");break;
-			case 'É': sb.append("&Eacute;");break;
-			case 'è': sb.append("&egrave;");break;
-			case 'È': sb.append("&Egrave;");break;
-			case 'ê': sb.append("&ecirc;");break;
-			case 'Ê': sb.append("&Ecirc;");break;
-			case 'ë': sb.append("&euml;");break;
-			case 'Ë': sb.append("&Euml;");break;
-			case 'ï': sb.append("&iuml;");break;
-			case 'Ï': sb.append("&Iuml;");break;
-			case 'ô': sb.append("&ocirc;");break;
-			case 'Ô': sb.append("&Ocirc;");break;
-			case 'ö': sb.append("&ouml;");break;
-			case 'Ö': sb.append("&Ouml;");break;
-			case 'ø': sb.append("&oslash;");break;
-			case 'Ø': sb.append("&Oslash;");break;
-			case 'ß': sb.append("&szlig;");break;
-			case 'ù': sb.append("&ugrave;");break;
-			case 'Ù': sb.append("&Ugrave;");break;
-			case 'û': sb.append("&ucirc;");break;
-			case 'Û': sb.append("&Ucirc;");break;
-			case 'ü': sb.append("&uuml;");break;
-			case 'Ü': sb.append("&Uuml;");break;
-			case '®': sb.append("&reg;");break;
-			case '©': sb.append("&copy;");break;
+			case '\'':sb.append("&apos;"); break;
 			case '€': sb.append("&euro;"); break;
+			case '™': sb.append("&trade;"); break;
+
+			
+//			case 'à': sb.append("&agrave;");break;
+//			case 'À': sb.append("&Agrave;");break;
+//			case 'â': sb.append("&acirc;");break;
+//			case 'Â': sb.append("&Acirc;");break;
+//			case 'ä': sb.append("&auml;");break;
+//			case 'Ä': sb.append("&Auml;");break;
+//			case 'å': sb.append("&aring;");break;
+//			case 'Å': sb.append("&Aring;");break;
+//			case 'æ': sb.append("&aelig;");break;
+//			case 'Æ': sb.append("&AElig;");break;
+//			case 'ç': sb.append("&ccedil;");break;
+//			case 'Ç': sb.append("&Ccedil;");break;
+//			case 'é': sb.append("&eacute;");break;
+//			case 'É': sb.append("&Eacute;");break;
+//			case 'è': sb.append("&egrave;");break;
+//			case 'È': sb.append("&Egrave;");break;
+//			case 'ê': sb.append("&ecirc;");break;
+//			case 'Ê': sb.append("&Ecirc;");break;
+//			case 'ë': sb.append("&euml;");break;
+//			case 'Ë': sb.append("&Euml;");break;
+//			case 'ï': sb.append("&iuml;");break;
+//			case 'Ï': sb.append("&Iuml;");break;
+//			case 'ô': sb.append("&ocirc;");break;
+//			case 'Ô': sb.append("&Ocirc;");break;
+//			case 'ö': sb.append("&ouml;");break;
+//			case 'Ö': sb.append("&Ouml;");break;
+//			case 'ø': sb.append("&oslash;");break;
+//			case 'Ø': sb.append("&Oslash;");break;
+//			case 'ß': sb.append("&szlig;");break;
+//			case 'ù': sb.append("&ugrave;");break;
+//			case 'Ù': sb.append("&Ugrave;");break;
+//			case 'û': sb.append("&ucirc;");break;
+//			case 'Û': sb.append("&Ucirc;");break;
+//			case 'ü': sb.append("&uuml;");break; //
+//			case 'Ü': sb.append("&Uuml;");break;
+//			 case '®': sb.append("&reg;");break;
+//			 case '©': sb.append("&copy;");break;
+			
+			// extra chars based on http://www.w3schools.com/tags/ref_entities.asp
+			
+			case '¡': sb.append("&iexcl;");break; // 	inverted exclamation mark
+			case '¢': sb.append("&cent;");break; // 	cent
+			case '£': sb.append("&pound;");break; // 	pound
+			case '¤': sb.append("&curren;");break; // 	currency
+			case '¥': sb.append("&yen;");break; // 	yen
+			case '¦': sb.append("&brvbar;");break; // 	broken vertical bar
+			case '§': sb.append("&sect;");break; // 	section
+			case '¨': sb.append("&uml;");break; // 	spacing diaeresis
+			case '©': sb.append("&copy;");break; // 	copyright
+			case 'ª': sb.append("&ordf;");break; // 	feminine ordinal indicator
+			case '«': sb.append("&laquo;");break; // 	angle quotation mark (left)
+			case '¬': sb.append("&not;");break; // 	negation
+			case '\u00AD': sb.append("&shy;");break; // 	soft hyphen
+			case '®': sb.append("&reg;");break; // 	registered trademark
+			case '¯': sb.append("&macr;");break; // 	spacing macron
+			case '°': sb.append("&deg;");break; // 	degree
+			case '±': sb.append("&plusmn;");break; // 	plus-or-minus 
+			case '²': sb.append("&sup2;");break; // 	superscript 2
+			case '³': sb.append("&sup3;");break; // 	superscript 3
+			case '´': sb.append("&acute;");break; // 	spacing acute
+			case 'µ': sb.append("&micro;");break; // 	micro
+			case '¶': sb.append("&para;");break; // 	paragraph
+			case '·': sb.append("&middot;");break; // 	middle dot
+			case '¸': sb.append("&cedil;");break; // 	spacing cedilla
+			case '¹': sb.append("&sup1;");break; // 	superscript 1
+			case 'º': sb.append("&ordm;");break; // 	masculine ordinal indicator
+			case '»': sb.append("&raquo;");break; // 	angle quotation mark (right)
+			case '¼': sb.append("&frac14;");break; // 	fraction 1/4
+			case '½': sb.append("&frac12;");break; // 	fraction 1/2
+			case '¾': sb.append("&frac34;");break; // 	fraction 3/4
+			case '¿': sb.append("&iquest;");break; // 	inverted question mark
+			case '×': sb.append("&times;");break; // 	multiplication
+			case '÷': sb.append("&divide;");break; // 	division
+			
+			case 'À': sb.append("&Agrave;");break; // 	capital a, grave accent
+			case 'Á': sb.append("&Aacute;");break; // 	capital a, acute accent
+			case 'Â': sb.append("&Acirc;");break; // 	capital a, circumflex accent
+			case 'Ã': sb.append("&Atilde;");break; // 	capital a, tilde
+			case 'Ä': sb.append("&Auml;");break; // 	capital a, umlaut mark
+			case 'Å': sb.append("&Aring;");break; // 	capital a, ring
+			case 'Æ': sb.append("&AElig;");break; // 	capital ae
+			case 'Ç': sb.append("&Ccedil;");break; // 	capital c, cedilla
+			case 'È': sb.append("&Egrave;");break; // 	capital e, grave accent
+			case 'É': sb.append("&Eacute;");break; // 	capital e, acute accent
+			case 'Ê': sb.append("&Ecirc;");break; // 	capital e, circumflex accent
+			case 'Ë': sb.append("&Euml;");break; // 	capital e, umlaut mark
+			case 'Ì': sb.append("&Igrave;");break; // 	capital i, grave accent
+			case 'Í': sb.append("&Iacute;");break; // 	capital i, acute accent
+			case 'Î': sb.append("&Icirc;");break; // 	capital i, circumflex accent
+			case 'Ï': sb.append("&Iuml;");break; // 	capital i, umlaut mark
+			case 'Ð': sb.append("&ETH;");break; // 	capital eth, Icelandic
+			case 'Ñ': sb.append("&Ntilde;");break; // 	capital n, tilde
+			case 'Ò': sb.append("&Ograve;");break; // 	capital o, grave accent
+			case 'Ó': sb.append("&Oacute;");break; // 	capital o, acute accent
+			case 'Ô': sb.append("&Ocirc;");break; // 	capital o, circumflex accent
+			case 'Õ': sb.append("&Otilde;");break; // 	capital o, tilde
+			case 'Ö': sb.append("&Ouml;");break; // 	capital o, umlaut mark
+			case 'Ø': sb.append("&Oslash;");break; // 	capital o, slash
+			case 'Ù': sb.append("&Ugrave;");break; // 	capital u, grave accent
+			case 'Ú': sb.append("&Uacute;");break; // 	capital u, acute accent
+			case 'Û': sb.append("&Ucirc;");break; // 	capital u, circumflex accent
+			case 'Ü': sb.append("&Uuml;");break; // 	capital u, umlaut mark
+			case 'Ý': sb.append("&Yacute;");break; // 	capital y, acute accent
+			case 'Þ': sb.append("&THORN;");break; // 	capital THORN, Icelandic
+			case 'ß': sb.append("&szlig;");break; // 	small sharp s, German
+			case 'à': sb.append("&agrave;");break; // 	small a, grave accent
+			case 'á': sb.append("&aacute;");break; // 	small a, acute accent
+			case 'â': sb.append("&acirc;");break; // 	small a, circumflex accent
+			case 'ã': sb.append("&atilde;");break; // 	small a, tilde
+			case 'ä': sb.append("&auml;");break; // 	small a, umlaut mark
+			case 'å': sb.append("&aring;");break; // 	small a, ring
+			case 'æ': sb.append("&aelig;");break; // 	small ae
+			case 'ç': sb.append("&ccedil;");break; // 	small c, cedilla
+			case 'è': sb.append("&egrave;");break; // 	small e, grave accent
+			case 'é': sb.append("&eacute;");break; // 	small e, acute accent
+			case 'ê': sb.append("&ecirc;");break; // 	small e, circumflex accent
+			case 'ë': sb.append("&euml;");break; // 	small e, umlaut mark
+			case 'ì': sb.append("&igrave;");break; // 	small i, grave accent
+			case 'í': sb.append("&iacute;");break; // 	small i, acute accent
+			case 'î': sb.append("&icirc;");break; // 	small i, circumflex accent
+			case 'ï': sb.append("&iuml;");break; // 	small i, umlaut mark
+			case 'ð': sb.append("&eth;");break; // 	small eth, Icelandic
+			case 'ñ': sb.append("&ntilde;");break; // 	small n, tilde
+			case 'ò': sb.append("&ograve;");break; // 	small o, grave accent
+			case 'ó': sb.append("&oacute;");break; // 	small o, acute accent
+			case 'ô': sb.append("&ocirc;");break; // 	small o, circumflex accent
+			case 'õ': sb.append("&otilde;");break; // 	small o, tilde
+			case 'ö': sb.append("&ouml;");break; // 	small o, umlaut mark
+			case 'ø': sb.append("&oslash;");break; // 	small o, slash
+			case 'ù': sb.append("&ugrave;");break; // 	small u, grave accent
+			case 'ú': sb.append("&uacute;");break; // 	small u, acute accent
+			case 'û': sb.append("&ucirc;");break; // 	small u, circumflex accent
+			case 'ü': sb.append("&uuml;");break; // 	small u, umlaut mark
+			case 'ý': sb.append("&yacute;");break; // 	small y, acute accent
+			case 'þ': sb.append("&thorn;");break; // 	small thorn, Icelandic
+			case 'ÿ': sb.append("&yuml;");break; // 	small y, umlaut mark
 			default:  sb.append(c); break;
 			}
 		}
