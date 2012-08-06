@@ -30,10 +30,10 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 import java.io.InputStream;
@@ -177,7 +177,16 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	}
 
 
-	/* (non-Javadoc)
+	/**
+	 * Renders an image of the subtitles in this PESPacket.
+	 * <p> 
+	 * Known issues/todo's;
+	 * <ol> 
+	 * <li>a display set can be spread across multiple PES</li>
+	 * <li>Page ID is ignored</li>
+	 * <li>only handles page_state== page refresh or new page, not incremental update </li>
+	 * <li>nice to have; emulate decoder pixel depths of 2, 4 and 8 bits.</li> 
+	 * </ol>
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
 	public BufferedImage getImage() {
@@ -205,41 +214,40 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 			if(element.getSegmentType()==0x10 ){// page composition segment)
 				final PageCompositionSegment pcSegment = (PageCompositionSegment)element;
 				for(final PageCompositionSegment.Region region :pcSegment.getRegions()){
-					final RegionCompositionSegment rc = regionCompositionsSegments.get(region.getRegion_id());
-					if(rc!=null){
-						int clutId = rc.getCLUTId();
+					final RegionCompositionSegment regionCompositionSegment = regionCompositionsSegments.get(region.getRegion_id());
+					if(regionCompositionSegment!=null){
+						int clutId = regionCompositionSegment.getCLUTId();
 						CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
-						//TODO fix 2 bit CLUT (or other error). PID 1037, segment 68 of  "07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts" 
 
 						//fill the region
-							if((rc.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
+							if((regionCompositionSegment.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
 								int index = 0;
-								switch (rc.getRegionDepth()) {
+								switch (regionCompositionSegment.getRegionDepth()) {
 								case 1: // 2 bit
-									index = rc.getRegion2BitPixelCode();
+									index = regionCompositionSegment.getRegion2BitPixelCode();
 									break;
 								case 2: // 4 bit. TODO  if the region depth is 8 bit while the region_level_of_compatibility specifies that a 4-bit CLUT is within the minimum requirements.
 									// ETSI EN 300 743 V1.3.1 (2006-11) P 25 bottom.
-									index = rc.getRegion4BitPixelCode();
+									index = regionCompositionSegment.getRegion4BitPixelCode();
 									break;
 								case 3:
-									index = rc.getRegion8BitPixelCode();
+									index = regionCompositionSegment.getRegion8BitPixelCode();
 									break;
 								}
 	
-								IndexColorModel colorModel = clutDefinitionSegment.getColorModel(rc.getRegionDepth());
+								IndexColorModel colorModel = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
 								int rgb = colorModel.getRGB(index);
 								Color bgColor = new Color(rgb,true);
 								gd.setColor(bgColor);
-								Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight());
+								Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), regionCompositionSegment.getRegionWidth(), regionCompositionSegment.getRegionHeight());
 								gd.fill(rect);
 							}
 							// next line only for debugging..
 							//gd.draw3DRect(region.getRegion_horizontal_address() , region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight(), true);
-						for(final RegionCompositionSegment.RegionObject regionObject: rc.getRegionObjects()){
+						for(final RegionCompositionSegment.RegionObject regionObject: regionCompositionSegment.getRegionObjects()){
 							if(clutDefinitionSegment!=null){
 								// This is the colorModel for this region composition segment
-								final ColorModel cm = clutDefinitionSegment.getColorModel(rc.getRegionDepth());
+								final IndexColorModel cm = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
 
 							
 
@@ -252,11 +260,22 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 								
 								//clutDefinitionSegment.getCLUTEntries();
 								
-								
-								
-								final WritableRaster raster = objectDataSegment.getRaster();
-								final BufferedImage i = new BufferedImage(cm, raster, false, null);
-								gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+								// for now only coding of pixels is supported, at least string of characters should not cause exceptions
+								if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
+									final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
+									final BufferedImage i = new BufferedImage(cm, raster, false, null);
+									gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+								}else if(objectDataSegment.getObjectCodingMethod()==1){
+									final BufferedImage i = new BufferedImage(regionCompositionSegment.getRegionWidth(),regionCompositionSegment.getRegionHeight(),BufferedImage.TYPE_BYTE_INDEXED,cm);
+									Graphics2D graphics = i.createGraphics();
+									// Font type/size is never defined in standard, this looks OK.
+									Font font = new Font("Arial", Font.BOLD,30);
+									graphics.setFont(font);
+									graphics.setColor(new Color(cm.getRGB(regionObject.getForeground_pixel_code())));
+									graphics.setBackground(new Color(cm.getRGB(regionObject.getBackground_pixel_code())));
+									graphics.drawString(objectDataSegment.getCharacter_code_string(), 0, 30);
+									gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+								}
 							}
 						}
 					}
