@@ -87,11 +87,11 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 	static {
 		try {
-			InputStream fileInputStream = classLoader.getResourceAsStream("monitors576.bmp");
+			InputStream fileInputStream = classLoader.getResourceAsStream("monitors576.jpg");
 			bgImage576 = ImageIO.read(fileInputStream);
-			fileInputStream = classLoader.getResourceAsStream("monitors720.bmp");
+			fileInputStream = classLoader.getResourceAsStream("monitors720.jpg");
 			bgImage720 = ImageIO.read(fileInputStream);
-			fileInputStream = classLoader.getResourceAsStream("monitors1080.bmp");
+			fileInputStream = classLoader.getResourceAsStream("monitors1080.jpg");
 			bgImage1080 = ImageIO.read(fileInputStream);
 		} catch (final Exception e) {
 			logger.log(Level.WARNING, "error reading image ", e);
