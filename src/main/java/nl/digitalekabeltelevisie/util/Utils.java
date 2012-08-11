@@ -923,7 +923,7 @@ public final class Utils {
 			case '>': sb.append("&gt;"); break;
 			case '&': sb.append("&amp;"); break;
 			case '"': sb.append("&quot;"); break;
-			case '\'':sb.append("&apos;"); break;
+			//case '\'':sb.append("&apos;"); break;
 			case '€': sb.append("&euro;"); break;
 			case '™': sb.append("&trade;"); break;
 
