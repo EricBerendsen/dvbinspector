@@ -335,8 +335,10 @@ public class PesPacketData  implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("PES_packet_length",noBytes,null)));
 		if(noBytes==0){
 			t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("data",data,0,bytesRead,null)));
+		}else{
+			t.add(new DefaultMutableTreeNode(new KVP("data",data,null))); 
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("data",data,null))); // TODO handle where noBytes=0
 
 		if((stream_id!=program_stream_map)
 				&& (stream_id != padding_stream)
