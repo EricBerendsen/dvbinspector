@@ -29,6 +29,8 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 
 
+import java.awt.image.BufferedImage;
+
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
@@ -39,16 +41,39 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
  */
 public class Video138182Handler  extends AbstractPesHandler implements TreeNode {
 
+
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler#processPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
 	public void processPesDataBytes(final PesPacketData pesData){
-		//int streamId, byte[] data, int offset,int len, long pts) {
-		//(pesData.getPesStreamID(), pesData.getData(), pesData.getPesDataStart(), pesData.getPesDataLen(), pesData.getPts());
-		//videoFields.add(new VideoPESDataField(pesData.getData(),pesData.getPesDataStart(),pesData.getPesDataLen(),pesData.getPts()));
 		pesPackets.add(new VideoPESDataField(pesData));
 
+	}
+
+	/**
+	 * find IFrame closest to the supplied pts, and return it's image in the requested size (height * width)
+	 * @param height
+	 * @param width
+	 * @param pts
+	 * @return
+	 */
+	public BufferedImage getImage(int height, int width, long pts) {
+		VideoPESDataField resultPES = null;
+		
+		long diff = Long.MAX_VALUE;
+		for (PesPacketData pesPacket : pesPackets) { // iterate over all video frames, in case pts wraps around
+			VideoPESDataField video = (VideoPESDataField)pesPacket;
+			if(video.isIFrame() && (Math.abs(video.getPts() - pts) <diff)){
+				resultPES = video; 
+				diff = Math.abs(video.getPts() - pts);
+			}
+		}
+		if(resultPES!=null){
+			return resultPES.getImage(width,height);
+		}else{
+			return null;
+		}
 	}
 
 }

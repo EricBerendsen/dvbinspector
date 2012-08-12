@@ -63,6 +63,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
@@ -460,7 +461,11 @@ public class TransportStream implements TreeNode{
 						}else if(!pids[comp_pid].getShortLabel().contains(short_compt_type)){
 							pids[comp_pid].setShortLabel(pids[comp_pid].getShortLabel()+'/'+short_compt_type);
 						}
-						pids[comp_pid].setPesHandler(abstractPesHandler);
+						if(abstractPesHandler!=null){
+							abstractPesHandler.setTransportStream(this);
+							abstractPesHandler.setPID(pids[comp_pid]);
+							pids[comp_pid].setPesHandler(abstractPesHandler);
+						}
 					}
 				}
 				final int PCR_pid = section.getPcrPid();
@@ -689,6 +694,19 @@ public class TransportStream implements TreeNode{
 	 */
 	public void setDefaultPrivateDataSpecifier(final long defaultPrivateDataSpecifier) {
 		this.defaultPrivateDataSpecifier = defaultPrivateDataSpecifier;
+	}
+
+	public PMTsection getPMTforPID(int thisPID) {
+		PMTs pmts = getPsi().getPmts();
+		for (PMTsection[] pmTsections : pmts) {
+			PMTsection pmt = pmTsections[0];
+			for(Component component :pmt.getComponentenList()){
+				if(component.getElementaryPID()==thisPID){
+					return pmt;
+				}
+			}
+		}
+		return null;
 	}
 
 
