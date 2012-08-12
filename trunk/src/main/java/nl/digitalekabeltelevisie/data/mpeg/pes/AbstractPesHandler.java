@@ -35,8 +35,10 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 /**
  * @author Eric Berendsen
@@ -44,7 +46,17 @@ import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
  */
 public abstract class AbstractPesHandler{
 
+
 	private PesPacketData pesData= null;
+	private TransportStream transportStream = null;
+
+	public TransportStream getTransportStream() {
+		return transportStream;
+	}
+
+	public void setTransportStream(TransportStream transportStream) {
+		this.transportStream = transportStream;
+	}
 
 	private int pesStreamID =-1;
 	private int pesLength =-1;
@@ -55,8 +67,8 @@ public abstract class AbstractPesHandler{
 	private boolean initialized = false;
 
 	protected final List<PesPacketData>	pesPackets	= new ArrayList<PesPacketData>();
+	private PID pid;
 
-	//public abstract void processPesDataBytes(int streamId, byte[] data,int offset,int len, long pts);
 	public abstract void processPesDataBytes(PesPacketData pesData);
 
 	public void processTSPacket(final TSPacket packet)
@@ -70,7 +82,7 @@ public abstract class AbstractPesHandler{
 				// at least one byte plus pointer available
 				if((data[0]!=0)||(data[1]!=0)){ //starting PSI section after ofset
 					// type = PSI;
-					throw new IllegalStateException("Found PSI data in PESHandler...");
+					throw new IllegalStateException("Found PSI data in PESHandler, PID type changed over time (not illegal, however not supported...)");
 
 					//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
 				}else if((data[0]==0)&&(data[1]==0)&&(data[2]==1)){
@@ -78,7 +90,7 @@ public abstract class AbstractPesHandler{
 					pesStreamID = getInt(data, 3, 1, MASK_8BITS);
 					pesLength=getInt(data,4,2, 0xFFFF);
 					//for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-					pesData = new PesPacketData(pesStreamID,pesLength);
+					pesData = new PesPacketData(pesStreamID,pesLength,this);
 					pesData.readBytes(data, 0, data.length);
 
 				}
@@ -93,7 +105,7 @@ public abstract class AbstractPesHandler{
 				pesStreamID = getInt(data, 3, 1, MASK_8BITS);
 				pesLength=getInt(data,4,2, 0xFFFF);
 				// for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-				pesData = new PesPacketData(pesStreamID,pesLength);
+				pesData = new PesPacketData(pesStreamID,pesLength,this);
 				pesData.readBytes(data, 0, data.length);
 			}else{
 				// already in a packet,needs more data
@@ -119,5 +131,16 @@ public abstract class AbstractPesHandler{
 	public List<PesPacketData> getPesPackets() {
 		return pesPackets;
 	}
+
+	public void setPID(PID pid) {
+		this.pid = pid;
+		
+	}
+	
+	public PID getPID() {
+		return pid;
+		
+	}
+
 
 }

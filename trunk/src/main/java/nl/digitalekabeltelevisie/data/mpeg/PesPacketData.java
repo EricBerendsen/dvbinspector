@@ -35,6 +35,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
 
 /**
  * Represent a PES packet, which can correspond to a MPEG frame, (or a complete group of frames) or Audio packet, or DVB subtitle, or teletextext..
@@ -66,8 +67,15 @@ public class PesPacketData  implements TreeNode{
 
 
 	protected long packet_no=0;
-	private TransportStream transportStream;
-	protected PID parentPID;
+	protected AbstractPesHandler pesHandler;
+	public AbstractPesHandler getPesHandler() {
+		return pesHandler;
+	}
+
+	public void setPesHandler(AbstractPesHandler pesHandler) {
+		this.pesHandler = pesHandler;
+	}
+
 	protected int pesDataStart;
 	protected int pesDataLen;
 
@@ -94,24 +102,10 @@ public class PesPacketData  implements TreeNode{
 	public static int ISO_IEC14496_1_FlexMux_stream = 0xFB;
 	public static int program_stream_directory = 0xFF;
 
-
-
-//	public PesPacketData(final int pesStreamID, final int pesLength,final PID parent, final long packetNo,final TransportStream transportStream) {
-//		this.stream_id = pesStreamID;
-//		this.noBytes = pesLength;
-//		this.parentPID = parent;
-//		this.packet_no=packetNo;
-//		this.transportStream=transportStream;
-//		if(pesLength!=0){
-//			this.data= new byte[pesLength+6];
-//		}else{
-//			this.data= new byte[20000]; // start default for video, should be able to handle small frames.
-//		}
-//
-//	}
-	public PesPacketData(final int pesStreamID, final int pesLength) {
+	public PesPacketData(final int pesStreamID, final int pesLength,AbstractPesHandler pesHandler) {
 		this.stream_id = pesStreamID;
 		this.noBytes = pesLength;
+		this.pesHandler = pesHandler;
 		if(pesLength!=0){
 			this.data= new byte[pesLength+6];
 		}else{
@@ -125,9 +119,8 @@ public class PesPacketData  implements TreeNode{
 
 		this.data = pesPacket.getData();
 		this.noBytes = pesPacket.getNoBytes();
-		this.parentPID = pesPacket.getParentPID();
+		this.pesHandler = pesPacket.getPesHandler();
 		this.packet_no= pesPacket.getPacket_no();
-		this.transportStream= pesPacket.getTransportStream();
 		this.pesDataStart = pesPacket.getPesDataStart();
 		this.bytesRead = pesPacket.bytesRead;
 		processPayload();
@@ -164,9 +157,6 @@ public class PesPacketData  implements TreeNode{
 		this.packet_no = packet_no;
 	}
 
-	public int getPid() {
-		return parentPID.getPid();
-	}
 
 
 
@@ -202,20 +192,6 @@ public class PesPacketData  implements TreeNode{
 	 */
 	public void setPesStreamID(final int pesStreamID) {
 		this.stream_id = pesStreamID;
-	}
-
-	/**
-	 * @return the transportStream
-	 */
-	public TransportStream getTransportStream() {
-		return transportStream;
-	}
-
-	/**
-	 * @param transportStream the transportStream to set
-	 */
-	public void setTransportStream(final TransportStream transportStream) {
-		this.transportStream = transportStream;
 	}
 
 	/**
@@ -372,19 +348,19 @@ public class PesPacketData  implements TreeNode{
 				&& (stream_id != ITU_T_Rec_H_222_1typeE)){
 
 			t.add(new DefaultMutableTreeNode(new KVP("markerBits",getMarkerBits(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_scrambling_control",getPes_scrambling_control(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_priority",getPes_priority(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("data_alignment_indicator",getData_alignment_indicator(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("copyright",getCopyright(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("original_or_copy",getOriginal_or_copy(),null)));
+			t.add(new DefaultMutableTreeNode(new KVP("pes_scrambling_control",getPes_scrambling_control(),getPes_scrambling_control()==0?"Not scrambled":"User-defined")));
+			t.add(new DefaultMutableTreeNode(new KVP("pes_priority",getPes_priority(),getPes_priority()==1?"higher":"normal")));
+			t.add(new DefaultMutableTreeNode(new KVP("data_alignment_indicator",getData_alignment_indicator(),getData_alignment_indicator()==1?"PES packet header is immediately followed by the video start code or audio syncword indicated in the data_stream_alignment_descriptor":"alignment not defined")));
+			t.add(new DefaultMutableTreeNode(new KVP("copyright",getCopyright(),getCopyright()==1?"packet payload is protected by copyright":"not defined whether the material is protected by copyright")));
+			t.add(new DefaultMutableTreeNode(new KVP("original_or_copy",getOriginal_or_copy(),getOriginal_or_copy()==1?"contents of the associated PES packet payload is an original":"contents of the associated PES packet payload is a copy")));
 
-			t.add(new DefaultMutableTreeNode(new KVP("pts_dts_flags",getPts_dts_flags(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("escr_flag",getEscr_flag(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("es_rate_flag",getEs_rate_flag(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("dsm_trick_mode_flag",getDsm_trick_mode_flag() ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("additional_copy_info_flag",getAdditional_copy_info_flag(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_crc_flag",getPes_crc_flag(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_extension_flag",getPes_extension_flag() ,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("pts_dts_flags",getPts_dts_flags(),getPts_dts_flagsString())));
+			t.add(new DefaultMutableTreeNode(new KVP("escr_flag",getEscr_flag(),getEscr_flag()==1?"ESCR base and extension fields are present":"no ESCR fields are present")));
+			t.add(new DefaultMutableTreeNode(new KVP("es_rate_flag",getEs_rate_flag(),getEs_rate_flag()==1?"ES_rate field is present":"no ES_rate field is present")));
+			t.add(new DefaultMutableTreeNode(new KVP("dsm_trick_mode_flag",getDsm_trick_mode_flag() ,getDsm_trick_mode_flag()==1?"8-bit trick mode field is present":"8-bit trick mode field is not present")));
+			t.add(new DefaultMutableTreeNode(new KVP("additional_copy_info_flag",getAdditional_copy_info_flag(),getAdditional_copy_info_flag()==1?"additional_copy_info field is present":"additional_copy_info field is not present")));
+			t.add(new DefaultMutableTreeNode(new KVP("pes_crc_flag",getPes_crc_flag(),getPes_crc_flag()==1?"CRC field is present":"CRC field is not present")));
+			t.add(new DefaultMutableTreeNode(new KVP("pes_extension_flag",getPes_extension_flag() ,getPes_extension_flag()==1?"extension field is present":"extension field is not present")));
 			t.add(new DefaultMutableTreeNode(new KVP("pes_header_data_length",getPes_header_data_length(),null)));
 			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)) {
 				t.add(new DefaultMutableTreeNode(new KVP("pts",pts,printTimebase90kHz(pts))));
@@ -399,6 +375,22 @@ public class PesPacketData  implements TreeNode{
 			t.add(new DefaultMutableTreeNode(new KVP("PES_packet_data_byte3",data,6,noBytes,null)));
 		}
 		return t;
+	}
+
+	private String getPts_dts_flagsString() {
+		switch (getPts_dts_flags()) {
+		case 0:
+			return "no PTS or DTS fields shall be present in the PES packet header";
+		case 1:
+			return "forbidden value";
+		case 2:
+			return "PTS fields shall be present in the PES packet header";
+		case 3:
+			return "both the PTS fields and DTS fields shall be present in the PES packet header";
+
+		default:
+			return "illegal value (program error)";
+		}
 	}
 
 	public static String getStreamIDDescription(final int streamId){
@@ -479,12 +471,6 @@ public class PesPacketData  implements TreeNode{
 		this.pts = pts;
 	}
 
-	/**
-	 * @return the parentPID
-	 */
-	public PID getParentPID() {
-		return parentPID;
-	}
 
 
 

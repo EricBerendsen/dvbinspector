@@ -38,20 +38,13 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
 public class TxtService implements TreeNode{
-	/**
-	 * 
-	 */
 
-	/**
-	 * @param handler
-	 */
 	TxtService() {
 		super();
 	}
 
 	private final Magazine[] magazineList = new Magazine[8];
 	private final List<TxtDataField>[] packet8_30 = new ArrayList[16]; // lines , desgnation code should be
-	//private TxtDataField[] packet8_31 = new TxtDataField[16]; // lines
 	private final List<TxtDataField>[] packet8_31 =new ArrayList[16]; // lines
 
 	void addTxtDataField(final TxtDataField txtDataField){

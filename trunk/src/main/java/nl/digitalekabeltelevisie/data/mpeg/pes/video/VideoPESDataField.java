@@ -29,6 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,13 +38,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
  * @author Eric Berendsen
  * 
  */
 
-public class VideoPESDataField extends PesPacketData implements TreeNode {
+public class VideoPESDataField extends PesPacketData implements TreeNode, ImageSource {
 
 
 
@@ -105,7 +107,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode {
 		}
 		//DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("PES Packet"+type));
 		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
-		s.setUserObject(new KVP("Video PES Packet"+type));
+		s.setUserObject(new KVP("Video PES Packet"+type,this));
 		//s.add(new DefaultMutableTreeNode(new KVP("data",data,offset,data.length-offset,null)));
 		addListJTree(s,sections,modus,"Sections");
 		return s;
@@ -204,6 +206,49 @@ public class VideoPESDataField extends PesPacketData implements TreeNode {
 
 	public List<VideoMPEG2Section> getSections() {
 		return sections;
+	}
+
+
+	@Override
+	public BufferedImage getImage() {
+
+		if(isIFrame()){
+			MpvDecoder mpvDecoder = new MpvDecoder();
+			mpvDecoder.decodeArray(data, false, false, false, 0);
+		    
+			return mpvDecoder.getImage();
+		}else{
+			return null;
+		}
+		
+	}
+
+
+	public BufferedImage getImage(int w, int h) {
+
+		if(isIFrame()){
+			MpvDecoder mpvDecoder = new MpvDecoder();
+			mpvDecoder.decodeArray(data, false, false, false, 0);
+		    
+			return mpvDecoder.getImage(w,h);
+		}else{
+			return null;
+		}
+		
+	}
+
+	public boolean isIFrame() {
+		
+		final List<VideoMPEG2Section> picts = findSectionInList(sections, 0);
+		if((picts!=null)&&(picts.size()>0)){
+			for(final VideoMPEG2Section section: picts) {
+				if(((PictureHeader)section).getPicture_coding_type()==1){
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 
