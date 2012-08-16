@@ -49,13 +49,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
@@ -74,22 +69,20 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	private static Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
 
 	private final int data_identifier;
+	private int subtitle_stream_id;
 
 	private DisplayDefinitionSegment displayDefinitionSegment = null;
 	private final Map<Integer, RegionCompositionSegment> regionCompositionsSegments = new HashMap<Integer, RegionCompositionSegment>();
 	private final Map<Integer, CLUTDefinitionSegment> clutDefinitions= new HashMap<Integer, CLUTDefinitionSegment>();
 	private final Map<Integer, ObjectDataSegment> objects= new HashMap<Integer, ObjectDataSegment>();
-	private static BufferedImage bgImage576;
-	private static BufferedImage bgImage720;
-	private static BufferedImage bgImage1080;
+	public static BufferedImage bgImage576;
+	public static BufferedImage bgImage720;
+	public static BufferedImage bgImage1080;
 
 	private static final ClassLoader classLoader = DVBSubtitlingPESDataField.class.getClassLoader();
 
 
-	/**
-	 * 
-	 */
-	private int subtitle_stream_id;
+
 
 	static {
 		try {
@@ -197,6 +190,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 * <li>only handles page_state== page refresh or new page, not incremental update </li>
 	 * <li>nice to have; emulate decoder pixel depths of 2, 4 and 8 bits.</li> 
 	 * </ol>
+	 * This is different from the getImage in DisplaySet as this draws directly on the background, not on regions.
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
 	public BufferedImage getImage() {
@@ -210,7 +204,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 				// TODO handle display_window_flag and display_window_horizontal_position_minimum, etc
 				// need some test data for it, is it ever used???
 			}
-			BufferedImage bgImage = getBGImage(height, width);
+			BufferedImage bgImage = pesHandler.getBGImage(height, width,pts);
 			final BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 			final Graphics2D gd = img.createGraphics();
 			gd.drawImage(bgImage, 0, 0,null);
@@ -255,18 +249,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 									// This is the colorModel for this region composition segment
 									final IndexColorModel cm = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
 	
-								
-	
 									int object_id = regionObject.getObject_id();
 									ObjectDataSegment objectDataSegment = objects.get(object_id);
-									// objectDataSegment (or one or both of its PixelDataSubBlocks) can have a bit_map_table, which means we have to remap the CLUT
-									// not clear from specs, where can bit_map_table occur, only at start of PixelDataSubBlocks, or anywhere?
-									// do top_field and bottom_field always have the same bit_map_table?
-									// assume for now always and only at start of PixelDataSubBlocks, and always same for top and lower.
 									
-									//clutDefinitionSegment.getCLUTEntries();
-									
-									// for now only coding of pixels is supported, at least string of characters should not cause exceptions
 									if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
 										final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
 										final BufferedImage i = new BufferedImage(cm, raster, false, null);
@@ -296,59 +281,19 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 		}
 	}
 
-	private BufferedImage getBGImage(int height, int width) {
-		
-		BufferedImage bgImage = null;
-		// try to get video BG
-		// first get PMT to which this PES belongs
-		PMTsection pmt = pesHandler.getTransportStream().getPMTforPID(pesHandler.getPID().getPid());
-		// then get PID with ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream (0x02)
-		if(pmt!=null){
-			int videoPID = findVideoPid(pmt);
-			if(videoPID>0){
-				// see if it has a PESHandler (i.e. not scrambled) and if it is already parsed
-				PID pid = pesHandler.getTransportStream().getPids()[videoPID];
-				if(pid!=null){ // in partial stream the video PID may be missing 
-					AbstractPesHandler pesHandler = pid.getPesHandler();
-					if((pesHandler!=null)&& 
-						pesHandler.isInitialized() && 
-						(pesHandler instanceof Video138182Handler)){
-						Video138182Handler videoHandler = (Video138182Handler)pesHandler;
-						bgImage=videoHandler.getImage(height, width, pts);
-						
-					}
-				}
-			}
-		}
-		
-		if(bgImage==null){ // no life image, use default
-			bgImage = bgImage576;
-			// display_definition_segment for other size
-			if(height==1080){
-				bgImage = bgImage1080;
-			}else if(height==720){
-				bgImage = bgImage720;
-			}
-		}
-		return bgImage;
-	}
-
-	private int findVideoPid(PMTsection pmt) {
-		int videoPID=0;
-		for(Component component :pmt.getComponentenList()){
-			if(component.getStreamtype()==0x02){ // TODO should we also use 0x01 (ISO/IEC 11172 Video)?
-				videoPID= component.getElementaryPID();
-				break;
-			}
-		}
-		return videoPID;
-	}
-
 	/**
 	 * @return
 	 */
 	public List<Segment> getSegmentList() {
 		return segmentList;
+	}
+
+	public int getData_identifier() {
+		return data_identifier;
+	}
+
+	public int getSubtitle_stream_id() {
+		return subtitle_stream_id;
 	}
 
 	/**

@@ -51,6 +51,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.DVBtree;
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -397,6 +399,14 @@ public final class Utils {
 		return b+256;
 	}
 
+	
+	public static byte getSignedByte(final int b){
+		if(b<=127){
+			return (byte)b;
+		}
+		return (byte)(b-256);
+	}
+
 	public static byte getInt2UnsignedByte(final int b){
 		if(b<=127){
 			return (byte)b;
@@ -486,6 +496,10 @@ public final class Utils {
 						offset+=3;
 						length-=3;
 					}
+				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
+					charset = Charset.forName("UTF-8");
+					offset++;
+					length--;
 				}
 			} catch (final IllegalCharsetNameException e) {
 				logger.info("IllegalCharsetNameException in getString:"+e);
@@ -1305,6 +1319,19 @@ public final class Utils {
 
 		b.append("</code>");
 		return b.toString();
+	}
+
+
+
+	public static int findMPEG2VideoPid(PMTsection pmt) {
+		int videoPID=0;
+		for(Component component :pmt.getComponentenList()){
+			if(component.getStreamtype()==0x02){ // TODO should we also use 0x01 (ISO/IEC 11172 Video)?
+				videoPID= component.getElementaryPID();
+				break;
+			}
+		}
+		return videoPID;
 	}
 }
 
