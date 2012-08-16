@@ -75,8 +75,7 @@ public class ContentIdentifierDescriptor extends Descriptor {
 				s.add(new DefaultMutableTreeNode(new KVP("crid_length",cridLength,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("crid_byte",cridByte,null)));
 
-			}
-			if(cridLocation==1){
+			}else if(cridLocation==1){
 				s.add(new DefaultMutableTreeNode(new KVP("crid_ref",cridRef,null)));
 			}
 			return s;
@@ -97,18 +96,21 @@ public class ContentIdentifierDescriptor extends Descriptor {
 			int crid_len=0;
 			int cridRef=0;
 			final int type = getInt(b,offset+2+r, 1, 0xFC)>>2;
-		final int location= getInt(b,offset+2+r, 1, Utils.MASK_2BITS);
-		if(location==0){
-			crid_len=getInt(b,offset+3+r, 1, Utils.MASK_8BITS);
-			crid_byte = Utils.copyOfRange(b, offset+4+r, offset+r+4+crid_len);
-			r+=2+crid_len;
-		}
-		if(location==1){
-			cridRef=getInt(b,offset+3+r, 2, Utils.MASK_16BITS);
-			r+=3;
-		}
-		final CridEntry cridEntry = new CridEntry(type, location,crid_len,crid_byte,cridRef);
-		cridEntryList.add(cridEntry);
+			final int location= getInt(b,offset+2+r, 1, Utils.MASK_2BITS);
+			if(location==0){
+				crid_len=getInt(b,offset+3+r, 1, Utils.MASK_8BITS);
+				crid_byte = Utils.copyOfRange(b, offset+4+r, offset+r+4+crid_len);
+				r+=2+crid_len;
+			}else if(location==1){
+				cridRef=getInt(b,offset+3+r, 2, Utils.MASK_16BITS);
+				r+=3;
+			}else{ // location ==2 or 3, not defined, so we don't know how much data to expect. Just break out of loop..
+				
+				r+=2;
+				break;
+			}
+			final CridEntry cridEntry = new CridEntry(type, location,crid_len,crid_byte,cridRef);
+			cridEntryList.add(cridEntry);
 
 		}
 	}

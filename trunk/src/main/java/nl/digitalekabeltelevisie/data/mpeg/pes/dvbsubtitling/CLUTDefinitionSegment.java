@@ -363,7 +363,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 			final int CLUT_entry_id = getInt(data_block, offset + 8 + t, 1,
 					MASK_8BITS);
 			final int flag_2bit = getInt(data_block, offset + 9 + t, 1, 0x80) >> 7;
-		final int flag_4bit = getInt(data_block, offset + 9 + t, 1, 0x40) >> 6;
+			final int flag_4bit = getInt(data_block, offset + 9 + t, 1, 0x40) >> 6;
 			final int flag_8bit = getInt(data_block, offset + 9 + t, 1, 0x20) >> 5;
 			final int full_range_flag = getInt(data_block, offset + 9 + t, 1, 0x01);
 			int y_value, cr_value, cb_value, t_value;
@@ -398,6 +398,20 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 
 	public static IndexColorModel getDefault_CLUT_8bitColorModel(){
 		return getIndexColorModel(8,256,default_CLUT_8bit, 0,true,0,DataBuffer.TYPE_BYTE);
+	}
+
+	public static IndexColorModel getDefaultColorModel(final int regionDepth){
+
+		switch (regionDepth) {
+		case 1: // 2 bit
+			return getDefault_CLUT_2bitColorModel();
+		case 2: // 4 bit
+			return getDefault_CLUT_4bitColorModel();
+		case 3:
+			return getDefault_CLUT_8bitColorModel();
+		default:
+			return null;
+		}
 	}
 
 

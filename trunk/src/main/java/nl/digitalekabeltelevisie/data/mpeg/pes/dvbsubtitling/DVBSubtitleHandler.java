@@ -27,6 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
@@ -36,14 +41,39 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
  *
  */
 public class DVBSubtitleHandler extends AbstractPesHandler implements TreeNode {
+	
+	private Titles titles = null; 
 
 
 	@Override
 	public void processPesDataBytes(final PesPacketData pesData) {
-		final DVBSubtitlingPESDataField title = new DVBSubtitlingPESDataField(pesData);
-		pesPackets.add(title);
+		final DVBSubtitlingPESDataField titlePesPacket = new DVBSubtitlingPESDataField(pesData);
+		pesPackets.add(titlePesPacket);
+		if((titlePesPacket.getPesStreamID()==0xBD)// "private_stream_1". 
+				&&(titlePesPacket.getData_identifier()==0x20) // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20.
+				&&(titlePesPacket.getSubtitle_stream_id()==0)){ // A DVB subtitling stream shall be identified by the value 0x00.
+			if(titles==null){
+				titles = new Titles();
+			}
+			titles.add(titlePesPacket);
+		}
+		
 
 
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
+	 */
+	@Override
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
+
+		if(titles!=null){
+			s.add(titles.getJTreeNode(modus));
+		}
+		return s;
 	}
 
 }

@@ -29,6 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,10 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitlingPESDataField;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen
@@ -140,6 +145,45 @@ public abstract class AbstractPesHandler{
 	public PID getPID() {
 		return pid;
 		
+	}
+
+	public BufferedImage getBGImage(int height, int width, long pts) {
+		
+		BufferedImage bgImage = null;
+		// try to get video BG
+		// first get PMT to which this PES belongs
+		// this ASS U MEs this PES is used by only one service. 
+		// Also ignores Page ID. 
+		PMTsection pmt = getTransportStream().getPMTforPID(getPID().getPid());
+		// then get PID with ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream (0x02)
+		if(pmt!=null){
+			int videoPID = Utils.findMPEG2VideoPid(pmt);
+			if(videoPID>0){
+				// see if it has a PESHandler (i.e. not scrambled) and if it is already parsed
+				PID pid = getTransportStream().getPids()[videoPID];
+				if(pid!=null){ // in partial stream the video PID may be missing 
+					AbstractPesHandler pesHandler = pid.getPesHandler();
+					if((pesHandler!=null)&& 
+						pesHandler.isInitialized() && 
+						(pesHandler instanceof Video138182Handler)){
+						Video138182Handler videoHandler = (Video138182Handler)pesHandler;
+						bgImage=videoHandler.getImage(height, width, pts);
+						
+					}
+				}
+			}
+		}
+		
+		if(bgImage==null){ // no life image, use default
+			bgImage = DVBSubtitlingPESDataField.bgImage576;
+			// display_definition_segment for other size
+			if(height==1080){
+				bgImage = DVBSubtitlingPESDataField.bgImage1080;
+			}else if(height==720){
+				bgImage = DVBSubtitlingPESDataField.bgImage720;
+			}
+		}
+		return bgImage;
 	}
 
 
