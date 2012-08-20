@@ -29,7 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
@@ -219,7 +224,33 @@ public class DisplaySet implements TreeNode, ImageSource {
 				if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
 					final WritableRaster raster = objectDataSegment.getRaster(rcs.getRegionDepth());
 					regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
-				} // TODO chars
+				}else if(objectDataSegment.getObjectCodingMethod()==1){ // chars
+					Font font = new Font("Arial", Font.BOLD,30);
+					// can not draw on raster directly, create img,draw on it and get its raster
+					
+					// first determine needed dimensions of image, so create another tmp image to get size
+					BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED);
+					Graphics2D g2d = tmp.createGraphics();
+					g2d.setFont(font);
+					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+					FontRenderContext fontRenderContext  = g2d.getFontRenderContext();
+					String txt = objectDataSegment.getCharacter_code_string();
+					Rectangle2D rect = font.getStringBounds(txt, fontRenderContext);
+					
+					// now we can create the image to draw on
+					
+					IndexColorModel icm = CLUTDefinitionSegment.getDefaultColorModel(rcs.getRegionDepth());
+					BufferedImage tmp2 = new BufferedImage((int)rect.getWidth(),(int)rect.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,icm);
+					g2d = tmp2.createGraphics();
+					g2d.setFont(font);
+					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+					g2d.setBackground(new Color(icm.getRGB(regionObject.getBackground_pixel_code())));
+					g2d.setColor(new Color(icm.getRGB(regionObject.getForeground_pixel_code())));
+					g2d.drawString(txt, 0, (int)-rect.getY());
+					WritableRaster raster = tmp2.getRaster();
+					
+					regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
+				}
 			}
 		}
 	}
