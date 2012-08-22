@@ -373,6 +373,7 @@ public class PID implements TreeNode{
 	private String getRepetitionRate(final long count,final long last, final long  first) {
 		final long bitrate=getParentTransportStream().getBitRate();
 		if((bitrate>0)&&(count>=2)){
+			@SuppressWarnings("resource")
 			final Formatter formatter = new Formatter();
 			final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
 			return "repetition rate: "+formatter.format("%3.3f seconds",repRate);

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.logging.Logger;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -47,9 +45,6 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
  *
  */
 public class PesPacketData  implements TreeNode{
-
-
-	private static Logger logger = Logger.getLogger(PesPacketData.class.getName());
 
 	protected byte [] data ;
 	protected int stream_id = 0;
