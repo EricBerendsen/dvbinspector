@@ -76,6 +76,11 @@ import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
 import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
+/**
+ * DVBTree is the container for the JTree. Also sets up menu items 
+ * @author Eric
+ *
+ */
 public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
 	/**
 	 * 
