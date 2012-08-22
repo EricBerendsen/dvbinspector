@@ -34,6 +34,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Holder for names/values (and explanations) that takes care of formatting and presentation.
+ * Main use is as userObject for DefaultMutableTreeNode, where it's toString method determines what is presented in the tree.
  * Started out as KeyValuePair, as soon as the third argument explanation was added the name was obsolete.
  * Now (ab)used for everything related to presentation.  
  * <p>
