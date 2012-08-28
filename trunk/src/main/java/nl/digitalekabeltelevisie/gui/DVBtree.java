@@ -73,7 +73,7 @@ import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
 /**
@@ -304,9 +304,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final KVP kvp = (KVP)dmtn.getUserObject();
 				final PID p = (PID) kvp.getOwner();
 				final int pid = p.getPid();
-				final AbstractPesHandler pesH = p.getPesHandler();
+				final GeneralPesHandler pesH = p.getPesHandler();
 				if(!pesH.isInitialized()){ // prevent double click
-					final HashMap<Integer, AbstractPesHandler> h = new HashMap<Integer, AbstractPesHandler>();
+					final HashMap<Integer, GeneralPesHandler> h = new HashMap<Integer, GeneralPesHandler>();
 					h.put(pid, pesH);
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -490,7 +490,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final Object owner =  kvp.getOwner();
 				if(owner instanceof PID){ // if PID has a owner, it is a PES that has not been parsed yet.
 					final PID p = (PID) owner;
-					final AbstractPesHandler pesH = p.getPesHandler();
+					final GeneralPesHandler pesH = p.getPesHandler();
 					if(!pesH.isInitialized()){
 						subMenu.addActionListener(this);
 						popup.add(subMenu);
