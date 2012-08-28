@@ -57,7 +57,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.EnhancedAC3Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.SubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.TeletextDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.VBIDataDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
@@ -201,11 +201,11 @@ public class TransportStream implements TreeNode{
 
 	/**
 	 * 
-	 * Read the file, and parse only the packets for which a AbstractPesHandler is present in toParsePids. Used for analyzing PESdata, like a video, teletext or subtitle stream
+	 * Read the file, and parse only the packets for which a GeneralPesHandler is present in toParsePids. Used for analyzing PESdata, like a video, teletext or subtitle stream
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
 	 * @throws IOException
 	 */
-	public void parseStream(final Map<Integer,AbstractPesHandler> toParsePids) throws IOException {
+	public void parseStream(final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
@@ -229,7 +229,7 @@ public class TransportStream implements TreeNode{
 				TSPacket packet = new TSPacket(buf, count);
 				if(!packet.isTransportErrorIndicator()){
 					final int pid = packet.getPID();
-					final AbstractPesHandler handler = toParsePids.get(pid);
+					final GeneralPesHandler handler = toParsePids.get(pid);
 					if(handler!=null){
 						handler.processTSPacket(packet);
 					}
@@ -396,12 +396,12 @@ public class TransportStream implements TreeNode{
 				final Iterator<Component> l = section.getComponentenList().iterator();
 				while(l.hasNext()){
 					final Component c = l.next();
-					AbstractPesHandler abstractPesHandler = null;
+					GeneralPesHandler abstractPesHandler = null;
 					final int comp_pid = c.getElementaryPID();
 					final int streamType = c.getStreamtype();
 					StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
 					StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
-					if(pids[comp_pid]!=null){
+					if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
 						if((streamType==1)||(streamType==2)){
 							abstractPesHandler = new Video138182Handler();
 						}else if((streamType==3)||(streamType==4)){
@@ -419,6 +419,8 @@ public class TransportStream implements TreeNode{
 							abstractPesHandler = new Audio138183Handler(ancillaryData);
 						}else if(streamType==0x1B){
 							abstractPesHandler = new Video14496Handler();
+						}else{
+							abstractPesHandler = new GeneralPesHandler();
 						}
 					}
 

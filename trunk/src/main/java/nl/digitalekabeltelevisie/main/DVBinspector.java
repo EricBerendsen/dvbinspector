@@ -57,7 +57,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.gui.AboutAction;
 import nl.digitalekabeltelevisie.gui.BarChart;
 import nl.digitalekabeltelevisie.gui.BitRateChart;
@@ -123,7 +123,7 @@ public class DVBinspector implements ChangeListener{
 				if(args.length>=2){
 
 					PID[] pids = ts.getPids();
-			        Map<Integer, AbstractPesHandler> pesHandlerMap = new HashMap<Integer, AbstractPesHandler>();
+			        Map<Integer, GeneralPesHandler> pesHandlerMap = new HashMap<Integer, GeneralPesHandler>();
 					for (int i = 1; i < args.length; i++) {
 						int pid=Integer.parseInt(args[i]);
 						PID p= pids[pid];
