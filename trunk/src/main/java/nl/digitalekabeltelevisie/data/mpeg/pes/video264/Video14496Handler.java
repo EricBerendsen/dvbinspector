@@ -29,18 +29,17 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 
 
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
  * @author Eric Berendsen
  *
  */
-public class Video14496Handler extends AbstractPesHandler implements TreeNode {
+public class Video14496Handler extends GeneralPesHandler{
 
 	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler#processPesDataBytes(int, byte[], int, int)
+	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
 	public void processPesDataBytes(final PesPacketData pesData){

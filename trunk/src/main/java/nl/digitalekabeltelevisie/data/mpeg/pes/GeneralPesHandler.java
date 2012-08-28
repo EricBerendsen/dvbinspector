@@ -36,6 +36,7 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
@@ -49,7 +50,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  *
  */
-public abstract class AbstractPesHandler{
+public class GeneralPesHandler  implements TreeNode{
 
 
 	private PesPacketData pesData= null;
@@ -74,7 +75,12 @@ public abstract class AbstractPesHandler{
 	protected final List<PesPacketData>	pesPackets	= new ArrayList<PesPacketData>();
 	private PID pid;
 
-	public abstract void processPesDataBytes(PesPacketData pesData);
+
+	public void processPesDataBytes(final PesPacketData pesData){
+		pesPackets.add(pesData);
+
+	}
+
 
 	public void processTSPacket(final TSPacket packet)
 	{
@@ -162,7 +168,7 @@ public abstract class AbstractPesHandler{
 				// see if it has a PESHandler (i.e. not scrambled) and if it is already parsed
 				PID pid = getTransportStream().getPids()[videoPID];
 				if(pid!=null){ // in partial stream the video PID may be missing 
-					AbstractPesHandler pesHandler = pid.getPesHandler();
+					GeneralPesHandler pesHandler = pid.getPesHandler();
 					if((pesHandler!=null)&& 
 						pesHandler.isInitialized() && 
 						(pesHandler instanceof Video138182Handler)){
