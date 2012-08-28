@@ -33,7 +33,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
  * Represent a PES packet, which can correspond to a MPEG frame, (or a complete group of frames) or Audio packet, or DVB subtitle, or teletextext..
@@ -62,12 +62,12 @@ public class PesPacketData  implements TreeNode{
 
 
 	protected long packet_no=0;
-	protected AbstractPesHandler pesHandler;
-	public AbstractPesHandler getPesHandler() {
+	protected GeneralPesHandler pesHandler;
+	public GeneralPesHandler getPesHandler() {
 		return pesHandler;
 	}
 
-	public void setPesHandler(AbstractPesHandler pesHandler) {
+	public void setPesHandler(GeneralPesHandler pesHandler) {
 		this.pesHandler = pesHandler;
 	}
 
@@ -97,7 +97,7 @@ public class PesPacketData  implements TreeNode{
 	public static int ISO_IEC14496_1_FlexMux_stream = 0xFB;
 	public static int program_stream_directory = 0xFF;
 
-	public PesPacketData(final int pesStreamID, final int pesLength,AbstractPesHandler pesHandler) {
+	public PesPacketData(final int pesStreamID, final int pesLength,GeneralPesHandler pesHandler) {
 		this.stream_id = pesStreamID;
 		this.noBytes = pesLength;
 		this.pesHandler = pesHandler;
