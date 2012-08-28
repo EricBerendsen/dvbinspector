@@ -32,16 +32,15 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds.UECP;
 
 /**
  * @author Eric Berendsen
  *
  */
-public class Audio138183Handler extends AbstractPesHandler implements TreeNode {
+public class Audio138183Handler extends GeneralPesHandler{
 
 	private byte[] rdsData=new byte[0];
 
@@ -56,7 +55,7 @@ public class Audio138183Handler extends AbstractPesHandler implements TreeNode {
 	private final int ancillaryDataIdentifier; // used to identify RDS data
 
 	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler#processPesDataBytes(int, byte[], int, int)
+	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
 	public void processPesDataBytes(final PesPacketData pesData) {

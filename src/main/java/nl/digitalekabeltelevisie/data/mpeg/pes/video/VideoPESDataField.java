@@ -214,7 +214,8 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 
 		if(isIFrame()){
 			MpvDecoder mpvDecoder = new MpvDecoder();
-			mpvDecoder.decodeArray(data, false, false, false, 0);
+			long l = mpvDecoder.decodeArray(data, false, false, false, 0);
+			System.out.println("L="+l);
 		    
 			return mpvDecoder.getImage();
 		}else{

@@ -34,9 +34,8 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
  * @author Eric Berendsen
@@ -44,7 +43,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
  * based on EN 300 706
  *
  */
-public class EBUTeletextHandler extends AbstractPesHandler implements TreeNode {
+public class EBUTeletextHandler extends GeneralPesHandler{
 
 
 	private TxtService txtService = null;
@@ -94,7 +93,7 @@ public class EBUTeletextHandler extends AbstractPesHandler implements TreeNode {
 	}
 
 	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler#porcessPesDataBytes(int, byte[], int, int)
+	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#porcessPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
 	public void processPesDataBytes(final PesPacketData pesData) {

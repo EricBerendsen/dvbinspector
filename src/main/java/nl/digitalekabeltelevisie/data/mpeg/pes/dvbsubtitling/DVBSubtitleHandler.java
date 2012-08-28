@@ -29,15 +29,14 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
  * @author Eric Berendsen
  *
  */
-public class DVBSubtitleHandler extends AbstractPesHandler implements TreeNode {
+public class DVBSubtitleHandler extends GeneralPesHandler{
 	
 	private Titles titles = null; 
 

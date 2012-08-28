@@ -50,7 +50,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AbstractPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
 public class DisplaySet implements TreeNode, ImageSource {
@@ -60,11 +60,11 @@ public class DisplaySet implements TreeNode, ImageSource {
 	// all sets up to and including this one from start of epoch ("mode change" or "acquisition point")
 	// so all we need to draw image
 	private ArrayList<DisplaySet> epoch = null;
-	private AbstractPesHandler pesHandler =null;
+	private GeneralPesHandler pesHandler =null;
 	
 	private long pts = 0;
 
-	public DisplaySet(AbstractPesHandler pesHandler, long pts) {
+	public DisplaySet(GeneralPesHandler pesHandler, long pts) {
 		this.pesHandler = pesHandler;
 		this.pts = pts;
 	}
@@ -271,11 +271,11 @@ public class DisplaySet implements TreeNode, ImageSource {
 		this.epoch = epoch;
 	}
 
-	public AbstractPesHandler getPesHandler() {
+	public GeneralPesHandler getPesHandler() {
 		return pesHandler;
 	}
 
-	public void setPesHandler(AbstractPesHandler pesHandler) {
+	public void setPesHandler(GeneralPesHandler pesHandler) {
 		this.pesHandler = pesHandler;
 	}
 
