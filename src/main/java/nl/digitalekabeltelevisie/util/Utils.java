@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.util;
@@ -41,7 +41,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +62,7 @@ import au.com.bytecode.opencsv.CSVReader;
 public final class Utils {
 
 	/**
-	 * 
+	 *
 	 */
 	private Utils() {
 		// private to avoid instantion
@@ -89,6 +88,7 @@ public final class Utils {
 	public static final int MASK_14BITS=0x3FFF;
 	public static final int MASK_15BITS=0x7FFF;
 	public static final int MASK_16BITS=0xFFFF;
+	public static final int MASK_18BITS=0x3FFFF;
 	public static final int MASK_20BITS=0xFFFFF;
 	public static final int MASK_22BITS=0x3FFFFF;
 	public static final int MASK_24BITS=0xFFFFFF;
@@ -399,7 +399,7 @@ public final class Utils {
 		return b+256;
 	}
 
-	
+
 	public static byte getSignedByte(final int b){
 		if(b<=127){
 			return (byte)b;
@@ -468,9 +468,9 @@ public final class Utils {
 
 
 	/**
-	 * 
+	 *
 	 * Parse an array of bytes into a java String, according to ETSI EN 300 468 V1.11.1 Annex A (normative): Coding of text characters
-	 * 
+	 *
 	 * @param b array of source bytes
 	 * @param off offset where relevant data starts in array b
 	 * @param len number of bytes to be parsed
@@ -515,19 +515,19 @@ public final class Utils {
 				charset = Charset.forName("ISO-8859-1");
 			}
 		}
-		
+
 		// filter Single byte control codes
 
-		byte[] filteredBytes = new byte[length];  // length is enough, might need less
+		final byte[] filteredBytes = new byte[length];  // length is enough, might need less
 		int filteredLength=0;
-		
+
 		for (int i = offset; i < (offset+length); i++) {
 			if(b[i]>-97){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f)){
 				filteredBytes[filteredLength++]=b[i];
 			}
-			
+
 		}
-		
+
 		if(charset==null){
 			return Iso6937ToUnicode.convert(filteredBytes, 0, filteredLength); //default for DVB
 		}else{
@@ -841,19 +841,19 @@ public final class Utils {
 			final Collection<U> itemList, final int modus) {
 		if(countListModus(modus)){
 			int count = 0;
-			for (final Iterator<U> iter = itemList.iterator(); iter.hasNext();) {
-				DefaultMutableTreeNode node = ((TreeNode) iter.next()).getJTreeNode(modus);
-				Object userObject = node.getUserObject();
+			for (final U u : itemList) {
+				final DefaultMutableTreeNode node = ((TreeNode) u).getJTreeNode(modus);
+				final Object userObject = node.getUserObject();
 				if (userObject instanceof KVP) {
-					KVP kvp = (KVP)userObject;
+					final KVP kvp = (KVP)userObject;
 					kvp.appendLabel(" ["+Integer.toString(count)+"]");
 					count++;
 				}
 				parent.add(node);
 			}
 		}else{
-			for (final Iterator<U> iter = itemList.iterator(); iter.hasNext();) {
-				parent.add(((TreeNode) iter.next()).getJTreeNode(modus));
+			for (final U u : itemList) {
+				parent.add(((TreeNode) u).getJTreeNode(modus));
 			}
 		}
 	}
@@ -919,7 +919,7 @@ public final class Utils {
 	/**
 	 * replace all 'html'characters in the string with their html-entity
 	 * Output is now safe for use in HTML fragments
-	 * 
+	 *
 	 * @param s
 	 * @return
 	 */
@@ -937,107 +937,299 @@ public final class Utils {
 			case '>': sb.append("&gt;"); break;
 			case '&': sb.append("&amp;"); break;
 			case '"': sb.append("&quot;"); break;
-			case '€': sb.append("&euro;"); break;
-			case '™': sb.append("&trade;"); break;
-			
+			case '€':
+				sb.append("&euro;");
+				break;
+			case '™':
+				sb.append("&trade;");
+				break;
+
 			// extra chars based on http://www.w3schools.com/tags/ref_entities.asp
-			
-			case '¡': sb.append("&iexcl;");break; // 	inverted exclamation mark
-			case '¢': sb.append("&cent;");break; // 	cent
-			case '£': sb.append("&pound;");break; // 	pound
-			case '¤': sb.append("&curren;");break; // 	currency
-			case '¥': sb.append("&yen;");break; // 	yen
-			case '¦': sb.append("&brvbar;");break; // 	broken vertical bar
-			case '§': sb.append("&sect;");break; // 	section
-			case '¨': sb.append("&uml;");break; // 	spacing diaeresis
-			case '©': sb.append("&copy;");break; // 	copyright
-			case 'ª': sb.append("&ordf;");break; // 	feminine ordinal indicator
-			case '«': sb.append("&laquo;");break; // 	angle quotation mark (left)
-			case '¬': sb.append("&not;");break; // 	negation
+
+			case '¡':
+				sb.append("&iexcl;");
+				break; // 	inverted exclamation mark
+			case '¢':
+				sb.append("&cent;");
+				break; // 	cent
+			case '£':
+				sb.append("&pound;");
+				break; // 	pound
+			case '¤':
+				sb.append("&curren;");
+				break; // 	currency
+			case '¥':
+				sb.append("&yen;");
+				break; // 	yen
+			case '¦':
+				sb.append("&brvbar;");
+				break; // 	broken vertical bar
+			case '§':
+				sb.append("&sect;");
+				break; // 	section
+			case '¨':
+				sb.append("&uml;");
+				break; // 	spacing diaeresis
+			case '©':
+				sb.append("&copy;");
+				break; // 	copyright
+			case 'ª':
+				sb.append("&ordf;");
+				break; // 	feminine ordinal indicator
+			case '«':
+				sb.append("&laquo;");
+				break; // 	angle quotation mark (left)
+			case '¬':
+				sb.append("&not;");
+				break; // 	negation
 			case '\u00AD': sb.append("&shy;");break; // 	soft hyphen
-			case '®': sb.append("&reg;");break; // 	registered trademark
-			case '¯': sb.append("&macr;");break; // 	spacing macron
-			case '°': sb.append("&deg;");break; // 	degree
-			case '±': sb.append("&plusmn;");break; // 	plus-or-minus 
-			case '²': sb.append("&sup2;");break; // 	superscript 2
-			case '³': sb.append("&sup3;");break; // 	superscript 3
-			case '´': sb.append("&acute;");break; // 	spacing acute
-			case 'µ': sb.append("&micro;");break; // 	micro
-			case '¶': sb.append("&para;");break; // 	paragraph
-			case '·': sb.append("&middot;");break; // 	middle dot
-			case '¸': sb.append("&cedil;");break; // 	spacing cedilla
-			case '¹': sb.append("&sup1;");break; // 	superscript 1
-			case 'º': sb.append("&ordm;");break; // 	masculine ordinal indicator
-			case '»': sb.append("&raquo;");break; // 	angle quotation mark (right)
-			case '¼': sb.append("&frac14;");break; // 	fraction 1/4
-			case '½': sb.append("&frac12;");break; // 	fraction 1/2
-			case '¾': sb.append("&frac34;");break; // 	fraction 3/4
-			case '¿': sb.append("&iquest;");break; // 	inverted question mark
-			case '×': sb.append("&times;");break; // 	multiplication
-			case '÷': sb.append("&divide;");break; // 	division
-			
-			case 'À': sb.append("&Agrave;");break; // 	capital a, grave accent
-			case 'Á': sb.append("&Aacute;");break; // 	capital a, acute accent
-			case 'Â': sb.append("&Acirc;");break; // 	capital a, circumflex accent
-			case 'Ã': sb.append("&Atilde;");break; // 	capital a, tilde
-			case 'Ä': sb.append("&Auml;");break; // 	capital a, umlaut mark
-			case 'Å': sb.append("&Aring;");break; // 	capital a, ring
-			case 'Æ': sb.append("&AElig;");break; // 	capital ae
-			case 'Ç': sb.append("&Ccedil;");break; // 	capital c, cedilla
-			case 'È': sb.append("&Egrave;");break; // 	capital e, grave accent
-			case 'É': sb.append("&Eacute;");break; // 	capital e, acute accent
-			case 'Ê': sb.append("&Ecirc;");break; // 	capital e, circumflex accent
-			case 'Ë': sb.append("&Euml;");break; // 	capital e, umlaut mark
-			case 'Ì': sb.append("&Igrave;");break; // 	capital i, grave accent
-			case 'Í': sb.append("&Iacute;");break; // 	capital i, acute accent
-			case 'Î': sb.append("&Icirc;");break; // 	capital i, circumflex accent
-			case 'Ï': sb.append("&Iuml;");break; // 	capital i, umlaut mark
-			case 'Ð': sb.append("&ETH;");break; // 	capital eth, Icelandic
-			case 'Ñ': sb.append("&Ntilde;");break; // 	capital n, tilde
-			case 'Ò': sb.append("&Ograve;");break; // 	capital o, grave accent
-			case 'Ó': sb.append("&Oacute;");break; // 	capital o, acute accent
-			case 'Ô': sb.append("&Ocirc;");break; // 	capital o, circumflex accent
-			case 'Õ': sb.append("&Otilde;");break; // 	capital o, tilde
-			case 'Ö': sb.append("&Ouml;");break; // 	capital o, umlaut mark
-			case 'Ø': sb.append("&Oslash;");break; // 	capital o, slash
-			case 'Ù': sb.append("&Ugrave;");break; // 	capital u, grave accent
-			case 'Ú': sb.append("&Uacute;");break; // 	capital u, acute accent
-			case 'Û': sb.append("&Ucirc;");break; // 	capital u, circumflex accent
-			case 'Ü': sb.append("&Uuml;");break; // 	capital u, umlaut mark
-			case 'Ý': sb.append("&Yacute;");break; // 	capital y, acute accent
-			case 'Þ': sb.append("&THORN;");break; // 	capital THORN, Icelandic
-			case 'ß': sb.append("&szlig;");break; // 	small sharp s, German
-			case 'à': sb.append("&agrave;");break; // 	small a, grave accent
-			case 'á': sb.append("&aacute;");break; // 	small a, acute accent
-			case 'â': sb.append("&acirc;");break; // 	small a, circumflex accent
-			case 'ã': sb.append("&atilde;");break; // 	small a, tilde
-			case 'ä': sb.append("&auml;");break; // 	small a, umlaut mark
-			case 'å': sb.append("&aring;");break; // 	small a, ring
-			case 'æ': sb.append("&aelig;");break; // 	small ae
-			case 'ç': sb.append("&ccedil;");break; // 	small c, cedilla
-			case 'è': sb.append("&egrave;");break; // 	small e, grave accent
-			case 'é': sb.append("&eacute;");break; // 	small e, acute accent
-			case 'ê': sb.append("&ecirc;");break; // 	small e, circumflex accent
-			case 'ë': sb.append("&euml;");break; // 	small e, umlaut mark
-			case 'ì': sb.append("&igrave;");break; // 	small i, grave accent
-			case 'í': sb.append("&iacute;");break; // 	small i, acute accent
-			case 'î': sb.append("&icirc;");break; // 	small i, circumflex accent
-			case 'ï': sb.append("&iuml;");break; // 	small i, umlaut mark
-			case 'ð': sb.append("&eth;");break; // 	small eth, Icelandic
-			case 'ñ': sb.append("&ntilde;");break; // 	small n, tilde
-			case 'ò': sb.append("&ograve;");break; // 	small o, grave accent
-			case 'ó': sb.append("&oacute;");break; // 	small o, acute accent
-			case 'ô': sb.append("&ocirc;");break; // 	small o, circumflex accent
-			case 'õ': sb.append("&otilde;");break; // 	small o, tilde
-			case 'ö': sb.append("&ouml;");break; // 	small o, umlaut mark
-			case 'ø': sb.append("&oslash;");break; // 	small o, slash
-			case 'ù': sb.append("&ugrave;");break; // 	small u, grave accent
-			case 'ú': sb.append("&uacute;");break; // 	small u, acute accent
-			case 'û': sb.append("&ucirc;");break; // 	small u, circumflex accent
-			case 'ü': sb.append("&uuml;");break; // 	small u, umlaut mark
-			case 'ý': sb.append("&yacute;");break; // 	small y, acute accent
-			case 'þ': sb.append("&thorn;");break; // 	small thorn, Icelandic
-			case 'ÿ': sb.append("&yuml;");break; // 	small y, umlaut mark
+			case '®':
+				sb.append("&reg;");
+				break; // 	registered trademark
+			case '¯':
+				sb.append("&macr;");
+				break; // 	spacing macron
+			case '°':
+				sb.append("&deg;");
+				break; // 	degree
+			case '±':
+				sb.append("&plusmn;");
+				break; // 	plus-or-minus
+			case '²':
+				sb.append("&sup2;");
+				break; // 	superscript 2
+			case '³':
+				sb.append("&sup3;");
+				break; // 	superscript 3
+			case '´':
+				sb.append("&acute;");
+				break; // 	spacing acute
+			case 'µ':
+				sb.append("&micro;");
+				break; // 	micro
+			case '¶':
+				sb.append("&para;");
+				break; // 	paragraph
+			case '·':
+				sb.append("&middot;");
+				break; // 	middle dot
+			case '¸':
+				sb.append("&cedil;");
+				break; // 	spacing cedilla
+			case '¹':
+				sb.append("&sup1;");
+				break; // 	superscript 1
+			case 'º':
+				sb.append("&ordm;");
+				break; // 	masculine ordinal indicator
+			case '»':
+				sb.append("&raquo;");
+				break; // 	angle quotation mark (right)
+			case '¼':
+				sb.append("&frac14;");
+				break; // 	fraction 1/4
+			case '½':
+				sb.append("&frac12;");
+				break; // 	fraction 1/2
+			case '¾':
+				sb.append("&frac34;");
+				break; // 	fraction 3/4
+			case '¿':
+				sb.append("&iquest;");
+				break; // 	inverted question mark
+			case '×':
+				sb.append("&times;");
+				break; // 	multiplication
+			case '÷':
+				sb.append("&divide;");
+				break; // 	division
+
+			case 'À':
+				sb.append("&Agrave;");
+				break; // 	capital a, grave accent
+			case 'Á':
+				sb.append("&Aacute;");
+				break; // 	capital a, acute accent
+			case 'Â':
+				sb.append("&Acirc;");
+				break; // 	capital a, circumflex accent
+			case 'Ã':
+				sb.append("&Atilde;");
+				break; // 	capital a, tilde
+			case 'Ä':
+				sb.append("&Auml;");
+				break; // 	capital a, umlaut mark
+			case 'Å':
+				sb.append("&Aring;");
+				break; // 	capital a, ring
+			case 'Æ':
+				sb.append("&AElig;");
+				break; // 	capital ae
+			case 'Ç':
+				sb.append("&Ccedil;");
+				break; // 	capital c, cedilla
+			case 'È':
+				sb.append("&Egrave;");
+				break; // 	capital e, grave accent
+			case 'É':
+				sb.append("&Eacute;");
+				break; // 	capital e, acute accent
+			case 'Ê':
+				sb.append("&Ecirc;");
+				break; // 	capital e, circumflex accent
+			case 'Ë':
+				sb.append("&Euml;");
+				break; // 	capital e, umlaut mark
+			case 'Ì':
+				sb.append("&Igrave;");
+				break; // 	capital i, grave accent
+			case 'Í':
+				sb.append("&Iacute;");
+				break; // 	capital i, acute accent
+			case 'Î':
+				sb.append("&Icirc;");
+				break; // 	capital i, circumflex accent
+			case 'Ï':
+				sb.append("&Iuml;");
+				break; // 	capital i, umlaut mark
+			case 'Ð':
+				sb.append("&ETH;");
+				break; // 	capital eth, Icelandic
+			case 'Ñ':
+				sb.append("&Ntilde;");
+				break; // 	capital n, tilde
+			case 'Ò':
+				sb.append("&Ograve;");
+				break; // 	capital o, grave accent
+			case 'Ó':
+				sb.append("&Oacute;");
+				break; // 	capital o, acute accent
+			case 'Ô':
+				sb.append("&Ocirc;");
+				break; // 	capital o, circumflex accent
+			case 'Õ':
+				sb.append("&Otilde;");
+				break; // 	capital o, tilde
+			case 'Ö':
+				sb.append("&Ouml;");
+				break; // 	capital o, umlaut mark
+			case 'Ø':
+				sb.append("&Oslash;");
+				break; // 	capital o, slash
+			case 'Ù':
+				sb.append("&Ugrave;");
+				break; // 	capital u, grave accent
+			case 'Ú':
+				sb.append("&Uacute;");
+				break; // 	capital u, acute accent
+			case 'Û':
+				sb.append("&Ucirc;");
+				break; // 	capital u, circumflex accent
+			case 'Ü':
+				sb.append("&Uuml;");
+				break; // 	capital u, umlaut mark
+			case 'Ý':
+				sb.append("&Yacute;");
+				break; // 	capital y, acute accent
+			case 'Þ':
+				sb.append("&THORN;");
+				break; // 	capital THORN, Icelandic
+			case 'ß':
+				sb.append("&szlig;");
+				break; // 	small sharp s, German
+			case 'à':
+				sb.append("&agrave;");
+				break; // 	small a, grave accent
+			case 'á':
+				sb.append("&aacute;");
+				break; // 	small a, acute accent
+			case 'â':
+				sb.append("&acirc;");
+				break; // 	small a, circumflex accent
+			case 'ã':
+				sb.append("&atilde;");
+				break; // 	small a, tilde
+			case 'ä':
+				sb.append("&auml;");
+				break; // 	small a, umlaut mark
+			case 'å':
+				sb.append("&aring;");
+				break; // 	small a, ring
+			case 'æ':
+				sb.append("&aelig;");
+				break; // 	small ae
+			case 'ç':
+				sb.append("&ccedil;");
+				break; // 	small c, cedilla
+			case 'è':
+				sb.append("&egrave;");
+				break; // 	small e, grave accent
+			case 'é':
+				sb.append("&eacute;");
+				break; // 	small e, acute accent
+			case 'ê':
+				sb.append("&ecirc;");
+				break; // 	small e, circumflex accent
+			case 'ë':
+				sb.append("&euml;");
+				break; // 	small e, umlaut mark
+			case 'ì':
+				sb.append("&igrave;");
+				break; // 	small i, grave accent
+			case 'í':
+				sb.append("&iacute;");
+				break; // 	small i, acute accent
+			case 'î':
+				sb.append("&icirc;");
+				break; // 	small i, circumflex accent
+			case 'ï':
+				sb.append("&iuml;");
+				break; // 	small i, umlaut mark
+			case 'ð':
+				sb.append("&eth;");
+				break; // 	small eth, Icelandic
+			case 'ñ':
+				sb.append("&ntilde;");
+				break; // 	small n, tilde
+			case 'ò':
+				sb.append("&ograve;");
+				break; // 	small o, grave accent
+			case 'ó':
+				sb.append("&oacute;");
+				break; // 	small o, acute accent
+			case 'ô':
+				sb.append("&ocirc;");
+				break; // 	small o, circumflex accent
+			case 'õ':
+				sb.append("&otilde;");
+				break; // 	small o, tilde
+			case 'ö':
+				sb.append("&ouml;");
+				break; // 	small o, umlaut mark
+			case 'ø':
+				sb.append("&oslash;");
+				break; // 	small o, slash
+			case 'ù':
+				sb.append("&ugrave;");
+				break; // 	small u, grave accent
+			case 'ú':
+				sb.append("&uacute;");
+				break; // 	small u, acute accent
+			case 'û':
+				sb.append("&ucirc;");
+				break; // 	small u, circumflex accent
+			case 'ü':
+				sb.append("&uuml;");
+				break; // 	small u, umlaut mark
+			case 'ý':
+				sb.append("&yacute;");
+				break; // 	small y, acute accent
+			case 'þ':
+				sb.append("&thorn;");
+				break; // 	small thorn, Icelandic
+			case 'ÿ':
+				sb.append("&yuml;");
+				break; // 	small y, umlaut mark
 			default:  sb.append(c); break;
 			}
 		}
@@ -1085,9 +1277,9 @@ public final class Utils {
 	/**
 	 * @param program_clock_reference
 	 * @return
-	 * 
+	 *
 	 * based on DVBsnoop helper.c, which is based on "dvbtextsubs  Dave Chapman"
-	 * 
+	 *
 	 */
 	public static String printPCRTime(final long program_clock_reference) {
 
@@ -1109,9 +1301,9 @@ public final class Utils {
 	/**
 	 * @param ts
 	 * @return
-	 * 
+	 *
 	 * based on DVBsnoop helper.c, which is based on "dvbtextsubs  Dave Chapman"
-	 * 
+	 *
 	 */
 	public static String printTimebase90kHz(final long ts) {
 
@@ -1276,9 +1468,12 @@ public final class Utils {
 		switch (s) {
 		case 0: return "forbidden";
 		case 1: return "1,0 (Square Sample)";
-		case 2 : return "3÷4";
-		case 3 : return "9÷16";
-		case 4 : return "1÷2,21";
+		case 2:
+			return "3÷4";
+		case 3:
+			return "9÷16";
+		case 4:
+			return "1÷2,21";
 
 		default:
 			return "reserved";
@@ -1323,9 +1518,9 @@ public final class Utils {
 
 
 
-	public static int findMPEG2VideoPid(PMTsection pmt) {
+	public static int findMPEG2VideoPid(final PMTsection pmt) {
 		int videoPID=0;
-		for(Component component :pmt.getComponentenList()){
+		for(final Component component :pmt.getComponentenList()){
 			if(component.getStreamtype()==0x02){ // TODO should we also use 0x01 (ISO/IEC 11172 Video)?
 				videoPID= component.getElementaryPID();
 				break;
