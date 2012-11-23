@@ -1,29 +1,29 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
@@ -39,13 +39,31 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
+/**
+ *
+ * Based on 5.2.4 Event Information Table (EIT) of ETSI EN 300 468 V1.11.1 (2010-04)
+ *
+ * @author Eric
+ *
+ */
 public class EIT extends AbstractPSITabel{
 
 	private final Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
 
+	/**
+	 * Helper to implement a HTMLSource for the program information for a single service (channel)
+	 * in a single tableID (now/next actual stream, now/next other stream, schedule current stream,
+	 * schedule other stream).
+	 *
+	 * @author Eric
+	 *
+	 */
+
+	 // TODO as this is pure presentation logic, move to gui package ??
+
 	public class ServiceListing implements HTMLSource {
 		private final int tableID;
-		private int serviceNo;
+		private final int serviceNo;
 
 		public ServiceListing(final int tableID, final int serviceNo){
 			this.tableID = tableID;
@@ -67,7 +85,6 @@ public class EIT extends AbstractPSITabel{
 		}
 	}
 
-	// HashMap<Integer, EITsection []> networks = new HashMap<Integer, NITsection []>();
 
 	public EIT(final PSI parent){
 		super(parent);
@@ -111,8 +128,6 @@ public class EIT extends AbstractPSITabel{
 		for(final Integer tableID : tableSet ){
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id",tableID, TableSection.getTableType(tableID)));
 			final HashMap<Integer, EITsection []> table= eit.get(tableID);
-
-			//addListJTree(t,ouiList,modus,"Systems Software Update");
 
 			final TreeSet<Integer> serviceSet = new TreeSet<Integer>(table.keySet());
 			for(final Integer serviceNo : serviceSet){
