@@ -1,29 +1,29 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
@@ -41,6 +41,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -48,6 +49,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class NIT extends AbstractPSITabel{
 
 	private Map<Integer, NITsection []> networks = new HashMap<Integer, NITsection []>();
+
 
 	public NIT(final PSI parent){
 		super(parent);
@@ -84,8 +86,7 @@ public class NIT extends AbstractPSITabel{
 			final Integer networkNo=i.next();
 			final NITsection [] sections = networks.get(networkNo);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("network_id",networkNo, getNetworkName(networkNo)));
-			for (int j = 0; j < sections.length; j++) {
-				final NITsection tsection = sections[j];
+			for (final NITsection tsection : sections) {
 				if(tsection!= null){
 					if(!Utils.simpleModus(modus)){
 						addSectionVersionsToJTree(n, tsection, modus);
@@ -104,9 +105,9 @@ public class NIT extends AbstractPSITabel{
 		String r = null;
 		final NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
-			for (int j = 0; j < sections.length; j++) {
-				if(sections[j]!= null){
-					final Iterator<Descriptor> descs=sections[j].getNetworkDescriptorList().iterator();
+			for (final NITsection section : sections) {
+				if(section!= null){
+					final Iterator<Descriptor> descs=section.getNetworkDescriptorList().iterator();
 					while(descs.hasNext()){
 						final Descriptor d=descs.next();
 						if(d instanceof NetworkNameDescriptor) {
@@ -126,17 +127,17 @@ public class NIT extends AbstractPSITabel{
 		int r = -1;
 		final NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
-			for (int j = 0; j < sections.length; j++) {
-				if(sections[j]!= null){
-					for(final NITsection.TransportStream stream :sections[j].getTransportStreamList() ){
+			for (final NITsection section : sections) {
+				if(section!= null){
+					for(final NITsection.TransportStream stream :section.getTransportStreamList() ){
 						if(stream.getTransportStreamID()==streamID) {
-							for (final Descriptor d : stream.getDescriptorList()) {
-								if(d instanceof LogicalChannelDescriptor) {
-									for ( final LogicalChannelDescriptor.LogicalChannel ch : ((LogicalChannelDescriptor)d).getChannelList()){
-										if(ch.getServiceID()==serviceID){
-											r = ch.getLogicalChannelNumber();
-											return r;
-										}
+							final List<LogicalChannelDescriptor> logicalChannelDescriptorList = Descriptor.findGenericDescriptorsInList(stream.getDescriptorList(),LogicalChannelDescriptor.class);
+							if((logicalChannelDescriptorList!=null)&&(logicalChannelDescriptorList.size()>0)) {
+								final LogicalChannelDescriptor d = logicalChannelDescriptorList.get(0); // there should be only one..
+								for ( final LogicalChannelDescriptor.LogicalChannel ch : d.getChannelList()){
+									if(ch.getServiceID()==serviceID){
+										r = ch.getLogicalChannelNumber();
+										return r;
 									}
 								}
 							}
@@ -148,6 +149,37 @@ public class NIT extends AbstractPSITabel{
 		return r;
 	}
 
+	public int getHDSimulcastLCN(final int networkNo, final int streamID,
+			final int serviceID) {
+		int r = -1;
+		final NITsection[] sections = networks.get(networkNo);
+		if (sections != null) {
+			for (final NITsection section : sections) {
+				if (section != null) {
+					for (final NITsection.TransportStream stream : section
+							.getTransportStreamList()) {
+						if (stream.getTransportStreamID() == streamID) {
+							final List<HDSimulcastLogicalChannelDescriptor> hdSimulcastDescriptorList = Descriptor
+									.findGenericDescriptorsInList(
+											stream.getDescriptorList(),
+											HDSimulcastLogicalChannelDescriptor.class);
+							if ((hdSimulcastDescriptorList != null)
+									&& (hdSimulcastDescriptorList.size() > 0)) {
+								final HDSimulcastLogicalChannelDescriptor d = hdSimulcastDescriptorList.get(0); // there should be only one..
+								for (final HDSimulcastLogicalChannelDescriptor.LogicalChannel ch : d.getChannelList()) {
+									if (ch.getServiceID() == serviceID) {
+										r = ch.getLogicalChannelNumber();
+										return r;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return r;
+	}
 
 	public boolean exists(final int netWorkID, final int section){
 		return ((networks.get(netWorkID)!=null) &&
@@ -171,8 +203,7 @@ public class NIT extends AbstractPSITabel{
 		while(i.hasNext()){
 			final Integer networkNo=i.next();
 			final NITsection [] sections = networks.get(networkNo);
-			for (int j = 0; j < sections.length; j++) {
-				final NITsection tsection = sections[j];
+			for (final NITsection tsection : sections) {
 				if((tsection!=null)&&(tsection.getTableId()==0x40)){
 					return networkNo;
 				}
@@ -185,8 +216,7 @@ public class NIT extends AbstractPSITabel{
 		final ArrayList<Descriptor> res = new ArrayList<Descriptor>();
 		final NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
-			for (int j = 0; j < sections.length; j++) {
-				final NITsection tsection = sections[j];
+			for (final NITsection tsection : sections) {
 				if(tsection!=null){
 					res.addAll(tsection.getNetworkDescriptorList());
 				}
@@ -204,8 +234,7 @@ public class NIT extends AbstractPSITabel{
 	public TransportStream getTransportStream(final int networkNo,final int streamID) {
 		final NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
-			for (int j = 0; j < sections.length; j++) {
-				final NITsection tsection = sections[j];
+			for (final NITsection tsection : sections) {
 				final TransportStream ts= tsection.getTransportStream(streamID);
 				if(ts!=null){
 					return ts;
