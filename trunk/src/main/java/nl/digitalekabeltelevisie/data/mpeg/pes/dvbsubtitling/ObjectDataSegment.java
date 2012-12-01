@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
@@ -57,16 +57,16 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 	private static Logger	logger	= Logger.getLogger(ObjectDataSegment.class.getName());
 
-	
+
 	// for coding of pixels
-	private List<PixelDataSubBlock> topFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
+	private final List<PixelDataSubBlock> topFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
 	private List<PixelDataSubBlock> bottomFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
-	
+
 	// For coded as a string of characters
 	private int number_of_codes;
 	private String character_code_string;
 
-	
+
 	private static byte [] default_2_to_4_bit_map_table = {0x0,0x7,0x8,0xf};
 	private static byte [] default_2_to_8_bit_map_table = {0x00,0x77,-0x78,-0x01};
 	private static byte [] default_4_to_8_bit_map_table = {0x00,0x11,0x22,0x33,
@@ -95,8 +95,8 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 		protected byte[] pixels;
 		protected int no_pixels;
-		
-		
+
+
 		private byte [] table_2_to_4_bit_map_table = null;
 		private byte [] table_2_to_8_bit_map_table = null;
 		private byte [] table_4_to_8_bit_map_table = null;
@@ -136,7 +136,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			return s;
 		}
 
-		
+
 		public void addPixel(final byte p){
 			if(pixels==null){
 				pixels = new byte[720];
@@ -192,7 +192,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			return table_2_to_4_bit_map_table;
 		}
 
-		public void setTable_2_to_4_bit_map_table(byte[] table_2_to_4_bit_map_table) {
+		public void setTable_2_to_4_bit_map_table(final byte[] table_2_to_4_bit_map_table) {
 			this.table_2_to_4_bit_map_table = table_2_to_4_bit_map_table;
 		}
 
@@ -200,7 +200,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			return table_2_to_8_bit_map_table;
 		}
 
-		public void setTable_2_to_8_bit_map_table(byte[] table_2_to_8_bit_map_table) {
+		public void setTable_2_to_8_bit_map_table(final byte[] table_2_to_8_bit_map_table) {
 			this.table_2_to_8_bit_map_table = table_2_to_8_bit_map_table;
 		}
 
@@ -208,7 +208,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			return table_4_to_8_bit_map_table;
 		}
 
-		public void setTable_4_to_8_bit_map_table(byte[] table_4_to_8_bit_map_table) {
+		public void setTable_4_to_8_bit_map_table(final byte[] table_4_to_8_bit_map_table) {
 			this.table_4_to_8_bit_map_table = table_4_to_8_bit_map_table;
 		}
 	}
@@ -232,20 +232,20 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 		}else if(getObjectCodingMethod()==1){ // coded as a string of characters
 			number_of_codes = getInt(data,offset+9, 1, MASK_8BITS);
-			int[] text = new int[number_of_codes];
+			final int[] text = new int[number_of_codes];
 			int txtLen=0;
 			for(int i = 0; i < number_of_codes; i ++){
-				int character_code = (int)getLong(data,offset+10+i*2, 2, MASK_16BITS);
+				final int character_code = (int)getLong(data,offset+10+i*2, 2, MASK_16BITS);
 				if(character_code>=32){ // skip unprintable chars (ugly!, why needed?)
 					text[txtLen++]=character_code;
 				}
 			}
-			// Specifies a character through its index number in the character table identified in the subtitle_descriptor 
+			// Specifies a character through its index number in the character table identified in the subtitle_descriptor
 			// (7.2.5 Object data segment, ETSI EN 300 743 V1.3.1 (2006-11)
 			// subtitling descriptor specifies only a language, not a character table
 			// ISO language may also contain something else than language...
 			// The private agreements required to enable these features are beyond the scope of ETSI EN 300 743 V1.3.1 (2006-11) (p.12)
-			
+
 			// also, first character seems to be 0x05, is this the DVB Selection of character table as in Annex A.2 of EN 300 468?
 			character_code_string = new String(text,0,txtLen);
 		}
@@ -301,7 +301,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @param b
 	 */
 	private static void two_to_4_bit_map_table(final BitSource bs, final PixelDataSubBlock b) {
-		byte [] table = new byte[4];
+		final byte [] table = new byte[4];
 		for (int i = 0; i < 4; i++) {
 			table[i]=(byte)bs.readBits(4);
 		}
@@ -313,7 +313,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @param b
 	 */
 	private static void two_to_8_bit_map_table(final BitSource bs, final PixelDataSubBlock b) {
-		byte [] table = new byte[4];
+		final byte [] table = new byte[4];
 		for (int i = 0; i < 4; i++) {
 			table[i]=bs.readSignedByte(8);
 		}
@@ -325,7 +325,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @param b
 	 */
 	private static void four_to_8_bit_map_table(final BitSource bs, final PixelDataSubBlock b) {
-		byte [] table = new byte[16];
+		final byte [] table = new byte[16];
 		for (int i = 0; i < 4; i++) {
 			table[i]=bs.readSignedByte(8);
 		}
@@ -477,12 +477,14 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			s.add(new DefaultMutableTreeNode(new KVP("top_field_data_block_length", getTopFieldDataBlockLength(), null)));
 			s.add(new DefaultMutableTreeNode(new KVP("bottom_field_data_block_length", getBottomFieldDataBlockLength(), null)));
 			addListJTree(s, topFieldDataBlocks,modus,"top field pixel-data_sub-block");
-			addListJTree(s, bottomFieldDataBlocks,modus,"bottom field pixel-data_sub-block");
+			if(getBottomFieldDataBlockLength()!=0){
+				addListJTree(s, bottomFieldDataBlocks,modus,"bottom field pixel-data_sub-block");
+			}
 
 		}else if(getObjectCodingMethod()==1){
 			s.add(new DefaultMutableTreeNode(new KVP("number_of_codes", number_of_codes, null)));
 			s.add(new DefaultMutableTreeNode(new KVP("character_codes", character_code_string, null)));
-			
+
 		}
 
 
@@ -589,18 +591,18 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
 	public BufferedImage getImage() {
-		
+
 		// check for objectCodingMethod characters (like in 07-20_CINE SKY (por)_Um Espírito Atrás de Mim_01.ts, PID 1036, segment 19
-		
+
 		if(getObjectCodingMethod()==0){
 			BufferedImage bi=null;
 			final WritableRaster wr = getRaster(2);
 			if(wr==null){
 				return null;
 			}
-	
+
 			final IndexColorModel cm =  CLUTDefinitionSegment.getDefault_CLUT_8bitColorModel();
-	
+
 			bi = new BufferedImage(cm, wr, false, null);
 			return bi;
 		}else{
@@ -631,10 +633,10 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 	/**
 	 * improved version of getRaster(), taking into account bit depth of region containing this ObjectDataSegment
-	 * @param regionDepth 1=2 bits, 2=4 bits, 3= 8 bits 
+	 * @param regionDepth 1=2 bits, 2=4 bits, 3= 8 bits
 	 * @return
 	 */
-	public WritableRaster getRaster(int regionDepth) {
+	public WritableRaster getRaster(final int regionDepth) {
 		if(getObjectCodingMethod()!=0){ // only for bitmaps
 			return null;
 		}
@@ -643,14 +645,14 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		int width=-1;
 		int height=-1;
 		//int dataType =-1;
-	
+
 		int topLines=0;
 		int bottomLines=0;
-	
+
 		// first count lines (heigth) and width.
 		int linewidth = 0;
 		for(final PixelDataSubBlock block: topFieldDataBlocks){
-			int dataType = block.getDataType();
+			final int dataType = block.getDataType();
 			if((dataType>=0x10)&&(dataType<=0x12)){
 				linewidth += block.getNo_pixels();
 			}else if(dataType==0xF0){ // end of object line code
@@ -661,10 +663,10 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 				linewidth = 0;
 			}
 		}
-	
-	
+
+
 		for(final PixelDataSubBlock block: bottomFieldDataBlocks){
-			int dataType = block.getDataType();
+			final int dataType = block.getDataType();
 			if((dataType>=0x10)&&(dataType<=0x12)){
 				linewidth += block.getNo_pixels();
 			}else if(dataType==0xF0){ // end of object line code
@@ -675,16 +677,16 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 				linewidth = 0;
 			}
 		}
-	
+
 		if((topLines!=bottomLines)&&(topLines!=(bottomLines+1))){
 			logger.log (Level.WARNING,"topLines "+topLines+" not matching bottomLines "+bottomLines);
 			return null;
 		}
-	
+
 		height = topLines + bottomLines;
-	
+
 		final byte[] dataBuffer = new byte[height * width];
-	
+
 		int line=0;
 		int linepos = 0;
 		// start with default tables
@@ -692,18 +694,18 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		byte [] two_to_8_bit_map_table = default_2_to_8_bit_map_table ;
 		byte [] four_to_8_bit_map_table = default_4_to_8_bit_map_table;
 
-		for(PixelDataSubBlock block: topFieldDataBlocks){
-			int dataType = block.getDataType();
+		for(final PixelDataSubBlock block: topFieldDataBlocks){
+			final int dataType = block.getDataType();
 			if((dataType>=0x10)&&(dataType<=0x12)){
 				if((dataType-15)>=regionDepth){ // ugly hack, means depth of block > requested depth, so no need to remap
 					System.arraycopy(block.getPixels(), 0, dataBuffer, 2*line*width+linepos, block.getNo_pixels());
 				}else{ // remap
-					byte[] remappedPix = mapTable(regionDepth,
+					final byte[] remappedPix = mapTable(regionDepth,
 							two_to_4_bit_map_table, two_to_8_bit_map_table,
 							four_to_8_bit_map_table, block, dataType);
 					System.arraycopy(remappedPix, 0, dataBuffer, 2*line*width+linepos, block.getNo_pixels());
 				}
-				
+
 				linepos += block.getNo_pixels();
 			}else if(dataType==0x20){
 				two_to_4_bit_map_table = block.getTable_2_to_4_bit_map_table();
@@ -716,26 +718,26 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 				linepos=0;
 			}
 		}
-			
+
 		line=0;
 		linepos = 0;
 		// start with default tables
 		two_to_4_bit_map_table = default_2_to_4_bit_map_table ;
 		two_to_8_bit_map_table = default_2_to_8_bit_map_table ;
 		four_to_8_bit_map_table = default_4_to_8_bit_map_table;
-		
-		for(PixelDataSubBlock block: bottomFieldDataBlocks){
-			int dataType = block.getDataType();
+
+		for(final PixelDataSubBlock block: bottomFieldDataBlocks){
+			final int dataType = block.getDataType();
 			if((dataType>=0x10)&&(dataType<=0x12)){
 				if((dataType-15)>=regionDepth){ // ugly hack, means depth of block > requested depth, so no need to remap
 					System.arraycopy(block.getPixels(), 0, dataBuffer, (1+2*line)*width+linepos, block.getNo_pixels());
 				}else{ // remap
-					byte[] remappedPix = mapTable(regionDepth,
+					final byte[] remappedPix = mapTable(regionDepth,
 							two_to_4_bit_map_table, two_to_8_bit_map_table,
 							four_to_8_bit_map_table, block, dataType);
 					System.arraycopy(remappedPix, 0, dataBuffer, (1+2*line)*width+linepos, block.getNo_pixels());
 				}
-				
+
 				linepos += block.getNo_pixels();
 			}else if(dataType==0x20){
 				two_to_4_bit_map_table = block.getTable_2_to_4_bit_map_table();
@@ -753,9 +755,9 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		return Raster.createInterleavedRaster(dBuffer,width,height,width,1,new int[]{0},null);
 	}
 
-	private byte[] mapTable(int regionDepth, byte[] two_to_4_bit_map_table,
-			byte[] two_to_8_bit_map_table, byte[] four_to_8_bit_map_table,
-			PixelDataSubBlock block, int dataType) {
+	private byte[] mapTable(final int regionDepth, final byte[] two_to_4_bit_map_table,
+			final byte[] two_to_8_bit_map_table, final byte[] four_to_8_bit_map_table,
+			final PixelDataSubBlock block, final int dataType) {
 		byte [] useMap;
 		if(dataType==0x10){ // two bits PixelDataSubBlock
 			if(regionDepth==2 ){ // four bits
@@ -766,8 +768,8 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		}else{ // 0x11, 4 bits PixelDataSubBlock
 			useMap = four_to_8_bit_map_table;
 		}
-		byte[] orgPix = block.getPixels();
-		byte[] remappedPix = new byte[block.getNo_pixels()];
+		final byte[] orgPix = block.getPixels();
+		final byte[] remappedPix = new byte[block.getNo_pixels()];
 		for (int i = 0; i < block.getNo_pixels(); i++) {
 			remappedPix[i]=useMap[orgPix[i]];
 		}
