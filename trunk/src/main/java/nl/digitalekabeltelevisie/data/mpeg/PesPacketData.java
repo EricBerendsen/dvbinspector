@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg;
@@ -36,20 +36,26 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
- * Represent a PES packet, which can correspond to a MPEG frame, (or a complete group of frames) or Audio packet, or DVB subtitle, or teletextext..
- * Subclasses are present for DVBsubtitles, MPEG2 video, MPEG2 audio, teletext.
- * 
+ * Represent a PES packet, which can correspond to a MPEG frame, (or a complete group of frames) or Audio packet, or DVB
+ * subtitle, or teletext. Subclasses are present for DVBsubtitles, MPEG2 video, MPEG2 audio, teletext.
+ *
  * based on ISO/IEC 13818-1 2.4.3.6 and 2.4.3.7
- * 
+ *
+ * <img src="doc-files/pespacket.png">
+ *
  * @author Eric Berendsen
  *
  */
 public class PesPacketData  implements TreeNode{
 
+	/**
+	 * Data including packet_start_code_prefix, stream id, PES packet length, pesHeader
+	 *
+	 */
 	protected byte [] data ;
 	protected int stream_id = 0;
 	/**
-	 * the number of bytes to be expected in this pes. 0 for unbounded
+	 * the number of bytes to be expected in this pes as defined by PES packet length. 0 for unbounded
 	 */
 	protected int noBytes=0;
 
@@ -60,24 +66,13 @@ public class PesPacketData  implements TreeNode{
 	protected long dts;
 	protected long escr;
 
-
 	protected long packet_no=0;
 	protected GeneralPesHandler pesHandler;
-	public GeneralPesHandler getPesHandler() {
-		return pesHandler;
-	}
-
-	public void setPesHandler(GeneralPesHandler pesHandler) {
-		this.pesHandler = pesHandler;
-	}
 
 	protected int pesDataStart;
 	protected int pesDataLen;
 
-
 	private int bytesRead = 0;
-
-	private final boolean complete = false;
 
 	public static int program_stream_map = 0xBC;
 	public static int private_stream_1 = 0xBD;
@@ -97,7 +92,15 @@ public class PesPacketData  implements TreeNode{
 	public static int ISO_IEC14496_1_FlexMux_stream = 0xFB;
 	public static int program_stream_directory = 0xFF;
 
-	public PesPacketData(final int pesStreamID, final int pesLength,GeneralPesHandler pesHandler) {
+	/**
+	 * Constructor used to start creating a new PesPacket. pesStreamID, pesLength and pesHandler have to be set, but the
+	 * data is to be added later by calling readBytes()
+	 *
+	 * @param pesStreamID
+	 * @param pesLength
+	 * @param pesHandler
+	 */
+	public PesPacketData(final int pesStreamID, final int pesLength,final GeneralPesHandler pesHandler) {
 		this.stream_id = pesStreamID;
 		this.noBytes = pesLength;
 		this.pesHandler = pesHandler;
@@ -108,8 +111,14 @@ public class PesPacketData  implements TreeNode{
 		}
 
 	}
-	
-	protected PesPacketData(final PesPacketData pesPacket){
+
+	/**
+	 * This constructor is only used to 'wrap' an existing PesPacketData into a specialized form, like
+	 * VideoPESDataField.
+	 *
+	 * @param pesPacket
+	 */
+	protected PesPacketData(final PesPacketData pesPacket) {
 		this.stream_id = pesPacket.getPesStreamID();
 
 		this.data = pesPacket.getData();
@@ -122,21 +131,29 @@ public class PesPacketData  implements TreeNode{
 
 	}
 
+	/**
+	 * Method to (partial) fill the data[] of this PesPacket. Data from single TSPacket is appended to the already
+	 * collected data
+	 *
+	 * @param payload data to be copied into PesPacketData
+	 * @param offset where in payload[] does the actual data start
+	 * @param available number of bytes available to be read
+	 */
 	public void readBytes(final byte [] payload, final int offset, final int available){
 		if(noBytes!=0){  //fixed length PES packet, we know how much to expect
 			if(bytesRead<(noBytes+6)){
-				final int read1=Math.min((noBytes-bytesRead)+6,payload.length); // we are going to read this number of bytes
+				final int read1 = Math.min((noBytes - bytesRead) + 6, available); // we are going to read this number of bytes
 				System.arraycopy(payload, offset, data, bytesRead, read1);
 				bytesRead+=read1;
 			}
 		}else{ // noBytes==0, unbounded video packet, length unknown
-			final int newcount = bytesRead + payload.length;
+			final int newcount = bytesRead + available;
 			if (newcount > data.length) {
 				final byte newbuf[] = new byte[Math.max(data.length << 1, newcount)];
 				System.arraycopy(data, 0, newbuf, 0, bytesRead);
 				data = newbuf;
 			}
-			System.arraycopy(payload, offset, data, bytesRead, payload.length);
+			System.arraycopy(payload, offset, data, bytesRead, available);
 			bytesRead = newcount;
 		}
 	}
@@ -148,49 +165,38 @@ public class PesPacketData  implements TreeNode{
 		return packet_no;
 	}
 
-	public void setPacket_no(final long packet_no) {
-		this.packet_no = packet_no;
-	}
 
 
 
-
+	/**
+	 * @return All Data of packet, including packet_start_code_prefix, stream id, PES packet length, pesHeader
+	 */
 	public byte[] getData() {
 		return data;
 	}
 
-	public void setData(final byte[] data) {
-		this.data = data;
-	}
 
+
+	/**
+	 * @return the number of bytes to be expected in this pes as defined by PES packet length. 0 for unbounded
+	 */
 	public int getNoBytes() {
 		return noBytes;
 	}
 
-	public void setNoBytes(final int noBytes) {
-		this.noBytes = noBytes;
-	}
 
-	public boolean isComplete() {
-		return complete;
-	}
 
 	/**
-	 * @return the pesStreamID
+	 * @return the stream_id
 	 */
 	public int getPesStreamID() {
 		return stream_id;
 	}
 
-	/**
-	 * @param pesStreamID the pesStreamID to set
-	 */
-	public void setPesStreamID(final int pesStreamID) {
-		this.stream_id = pesStreamID;
-	}
 
 	/**
-	 * iso 13818-1  2.4.3.6 PES packet
+	 * Called when all data for this PesPacket has been read by the readBytes() method. Determines values for PTS and
+	 * DTS (if any), and sets pesDataStart and pesDataLen. iso 13818-1 2.4.3.6 PES packet
 	 */
 	public void processPayload() {
 		if((stream_id!=program_stream_map)
@@ -224,8 +230,9 @@ public class PesPacketData  implements TreeNode{
 		}
 
 	}
+
 	/**
-	 * @return
+	 * @return length of Pes header
 	 */
 	public int getPes_header_data_length() {
 		return getInt(data, 8, 1, MASK_8BITS);
@@ -310,29 +317,37 @@ public class PesPacketData  implements TreeNode{
 	}
 
 	/**
-	 * @param data2
+	 * @param array
 	 * @param offset
-	 * @return
+	 * @return the value of the PTS/DTS as described in 2.4.3.7 of iso 13813, prefix and marker bits are ignored
 	 */
 	public long getTimeStamp(final byte[] array, final int offset) {
 
-		long ts = getLong(data, offset, 1, 0x0E)<<29; // bits 32..30
-		ts |= getLong(data, offset+1, 2, 0xFFFE)<<14; // bits 29..15
-		ts |= getLong(data, offset+3, 2, 0xFFFE)>>1; // bits 14..0
+		long ts = getLong(array, offset, 1, 0x0E) << 29; // bits 32..30
+		ts |= getLong(array, offset + 1, 2, 0xFFFE) << 14; // bits 29..15
+		ts |= getLong(array, offset + 3, 2, 0xFFFE) >> 1; // bits 14..0
 
 		return ts;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus){
+		return 	getJTreeNode(modus,"PES Packet");
+	}
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PES Packet"));
+	public DefaultMutableTreeNode getJTreeNode(final int modus, String title) {
+
+		String ptsString = "";
+		if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
+			ptsString = " [pts="+ printTimebase90kHz(pts)+"]";
+		}
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(title+ptsString));
 		t.add(new DefaultMutableTreeNode(new KVP("stream_id",stream_id,getStreamIDDescription(stream_id))));
 		t.add(new DefaultMutableTreeNode(new KVP("PES_packet_length",noBytes,null)));
 		if(noBytes==0){
 			t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("data",data,0,bytesRead,null)));
 		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("data",data,null))); 
+			t.add(new DefaultMutableTreeNode(new KVP("data",data,null)));
 		}
 
 		if((stream_id!=program_stream_map)
@@ -427,31 +442,19 @@ public class PesPacketData  implements TreeNode{
 	}
 
 	/**
-	 * @return the pesDataLen
+	 * @return the pesDataLen,the actual len of the payload (without prefix, stream_id, and header)
 	 */
 	public int getPesDataLen() {
 		return pesDataLen;
 	}
 
-	/**
-	 * @param pesDataLen the pesDataLen to set
-	 */
-	public void setPesDataLen(final int pesDataLen) {
-		this.pesDataLen = pesDataLen;
-	}
+
 
 	/**
-	 * @return the pesDataStart
+	 * @return the pesDataStart, the offset into data[], where the PES packet data bytes start (start of actual payload)
 	 */
 	public int getPesDataStart() {
 		return pesDataStart;
-	}
-
-	/**
-	 * @param pesDataStart the pesDataStart to set
-	 */
-	public void setPesDataStart(final int pesDataStart) {
-		this.pesDataStart = pesDataStart;
 	}
 
 	/**
@@ -461,13 +464,14 @@ public class PesPacketData  implements TreeNode{
 		return pts;
 	}
 
-	/**
-	 * @param pts the pts to set
-	 */
-	public void setPts(final long pts) {
-		this.pts = pts;
-	}
 
+
+	/**
+	 * @return the PesHandler that knows how to process the raw data in this type of PesPacket
+	 */
+	public GeneralPesHandler getPesHandler() {
+		return pesHandler;
+	}
 
 
 

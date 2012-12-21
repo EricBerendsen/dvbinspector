@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg;
@@ -56,12 +56,16 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.UNTsection;
 
 
+/**
+ *
+ * @author Eric
+ * 
+ */
 public class PsiSectionData {
 
 	private byte [] data ;
 	private int noBytes=0;
 	private long packet_no=0;
-	//private ArrayList<TSPacket> tsPacketList = new ArrayList<TSPacket>();
 	private final TransportStream transportStream;
 	private final PID parentPID;
 
@@ -219,7 +223,7 @@ public class PsiSectionData {
 
 
 	/**
-	 * 
+	 *
 	 *  is this PID a candidate to contain a UNT (Updata Notification Table)?
 	 *  the tabletype is already checked by caller (0x4b) TableType: SSU Update Notification Table
 	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: data_broadcast_id_descriptor: 0x66 (102)
@@ -255,7 +259,7 @@ public class PsiSectionData {
 	}
 
 	/**
-	 * 
+	 *
 	 *  is this PID a candidate to contain a AIT ( Application Information Table)
 	 *  the tabletype is already checked by caller  table_id: 0x74 (116) => MHP-application information section (AIT)
 	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: application_signalling_descriptor: 0x6F (111)
@@ -281,11 +285,11 @@ public class PsiSectionData {
 	}
 
 	/**
-	 * 
+	 *
 	 *  is this PID a candidate to contain a DSM-CC
 	 *  the tabletype is already checked by caller  table_id: > =0x38 && <=0x3F =>
 	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: Data_broadcast_id: 0x66 (102)
-	 * 
+	 *
 	 *  // TODO also check data_broadcast_id == 0x06 (data carousel) Not implemented yet
 	 *  now check for  0x07 (object carousel)
 	 *  following are also object carousels
