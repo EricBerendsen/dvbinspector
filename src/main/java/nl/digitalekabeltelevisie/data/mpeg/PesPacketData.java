@@ -337,8 +337,10 @@ public class PesPacketData  implements TreeNode{
 	public DefaultMutableTreeNode getJTreeNode(final int modus, String title) {
 
 		String ptsString = "";
-		if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
-			ptsString = " [pts="+ printTimebase90kHz(pts)+"]";
+		if(showPtsModus(modus)){
+			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
+				ptsString = " [pts="+ printTimebase90kHz(pts)+"]";
+			}
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(title+ptsString));
 		t.add(new DefaultMutableTreeNode(new KVP("stream_id",stream_id,getStreamIDDescription(stream_id))));
