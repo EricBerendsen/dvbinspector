@@ -1,34 +1,34 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.packet_length;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -58,6 +58,8 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.SubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.TeletextDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.VBIDataDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.AC3Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.EAC3Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
@@ -91,9 +93,9 @@ public class TransportStream implements TreeNode{
 	 */
 	private PID [] pids = new PID [8192];
 	/**
-	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and 
+	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and
 	 */
-	private short [] packet_pid;
+	private final short [] packet_pid;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -125,7 +127,7 @@ public class TransportStream implements TreeNode{
 	private Bouquet bouquet = null;
 
 	/**
-	 * 
+	 *
 	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
 	 * @param fileName name of the file to be read (null not permitted).
 	 */
@@ -134,7 +136,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	/**
-	 * 
+	 *
 	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
 	 * @param file the file to be read (null not permitted).
 	 */
@@ -200,7 +202,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	/**
-	 * 
+	 *
 	 * Read the file, and parse only the packets for which a GeneralPesHandler is present in toParsePids. Used for analyzing PESdata, like a video, teletext or subtitle stream
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
 	 * @throws IOException
@@ -320,9 +322,9 @@ public class TransportStream implements TreeNode{
 		if(!psiOnlyModus(modus)){
 			final DefaultMutableTreeNode pid = new DefaultMutableTreeNode(new KVP("PIDs"));
 			t.add(pid);
-			for (int i = 0; i < pids.length; i++) {
-				if((pids[i])!=null){
-					pid.add(pids[i].getJTreeNode(modus));
+			for (final PID pid2 : pids) {
+				if((pid2)!=null){
+					pid.add(pid2.getJTreeNode(modus));
 				}
 
 			}
@@ -395,19 +397,19 @@ public class TransportStream implements TreeNode{
 
 				final Iterator<Component> l = section.getComponentenList().iterator();
 				while(l.hasNext()){
-					final Component c = l.next();
+					final Component component = l.next();
 					GeneralPesHandler abstractPesHandler = null;
-					final int comp_pid = c.getElementaryPID();
-					final int streamType = c.getStreamtype();
-					StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
-					StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
+					final int comp_pid = component.getElementaryPID();
+					final int streamType = component.getStreamtype();
+					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
+					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
 					if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
 						if((streamType==1)||(streamType==2)){
 							abstractPesHandler = new Video138182Handler();
 						}else if((streamType==3)||(streamType==4)){
 							// find Ancillary Data info so we can parse RDS
 							int ancillaryData = 0;
-							final Iterator<Descriptor> k = c.getComponentDescriptorList().iterator();
+							final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
 							while (k.hasNext()) {
 								final Descriptor d = k.next();
 								if(d instanceof AncillaryDataDescriptor) {
@@ -424,7 +426,7 @@ public class TransportStream implements TreeNode{
 						}
 					}
 
-					final Iterator<Descriptor> k = c.getComponentDescriptorList().iterator();
+					final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
 					while (k.hasNext()) {
 						final Descriptor d = k.next();
 						if(d instanceof SubtitlingDescriptor) {
@@ -442,9 +444,11 @@ public class TransportStream implements TreeNode{
 						}else if(d instanceof AC3Descriptor){
 							compt_type.append(" Dolby Audio (AC3)");
 							short_compt_type.append("Dolby Audio (AC3)");
+							abstractPesHandler = new AC3Handler();
 						}else if(d instanceof EnhancedAC3Descriptor){
 							compt_type.append(" Enhanced Dolby Audio (AC3)");
 							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
+							 abstractPesHandler = new EAC3Handler(); // TODO separate EAC3Handler??
 						}if(d instanceof CADescriptor) {
 							final CADescriptor cad = (CADescriptor) d;
 							final int capid=cad.getCaPID();
@@ -698,11 +702,11 @@ public class TransportStream implements TreeNode{
 		this.defaultPrivateDataSpecifier = defaultPrivateDataSpecifier;
 	}
 
-	public PMTsection getPMTforPID(int thisPID) {
-		PMTs pmts = getPsi().getPmts();
-		for (PMTsection[] pmTsections : pmts) {
-			PMTsection pmt = pmTsections[0];
-			for(Component component :pmt.getComponentenList()){
+	public PMTsection getPMTforPID(final int thisPID) {
+		final PMTs pmts = getPsi().getPmts();
+		for (final PMTsection[] pmTsections : pmts) {
+			final PMTsection pmt = pmTsections[0];
+			for(final Component component :pmt.getComponentenList()){
 				if(component.getElementaryPID()==thisPID){
 					return pmt;
 				}
