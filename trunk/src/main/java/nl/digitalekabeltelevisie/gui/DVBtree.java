@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.gui;
@@ -77,13 +77,15 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
 /**
- * DVBTree is the container for the JTree. Also sets up menu items 
+ * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
+ * For now image and text are implemented as a label. Disadvantage is that both can not be copied.
+ * Also sets up menu items for the JTree.
  * @author Eric
  *
  */
 public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 9200238343077897328L;
 	private static final Logger logger = Logger.getLogger(DVBtree.class.getName());
@@ -101,6 +103,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public static final int PSI_ONLY_MODUS=0x2;
 	public static final int PACKET_MODUS=0x4;
 	public static final int COUNT_LIST_ITEMS_MODUS=0x8;
+	public static final int SHOW_PTS_MODUS=0x10;
 
 	private int mod=0;
 	private TransportStream ts;
@@ -178,8 +181,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 		final Dimension minimumSize = new Dimension(300, 600);
 		treeView.setMinimumSize(minimumSize);
-		treeView.setPreferredSize(new Dimension(800, 600));
-		splitPane.setDividerLocation(600);
+		treeView.setPreferredSize(new Dimension(1000, 600));
+		splitPane.setDividerLocation(900);
 
 		// add(treeView);
 		add(splitPane);
