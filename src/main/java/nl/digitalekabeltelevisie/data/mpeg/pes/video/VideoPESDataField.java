@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
  * @author Eric Berendsen
- * 
+ *
  */
 
 public class VideoPESDataField extends PesPacketData implements TreeNode, ImageSource {
@@ -91,7 +91,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
@@ -106,7 +106,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			type.append(")");
 		}
 		//DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("PES Packet"+type));
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+		final DefaultMutableTreeNode s = super.getJTreeNode(modus,"MPEG2 Video PES Packet");
 		s.setUserObject(new KVP("Video PES Packet"+type,this));
 		//s.add(new DefaultMutableTreeNode(new KVP("data",data,offset,data.length-offset,null)));
 		addListJTree(s,sections,modus,"Sections");
@@ -214,14 +214,13 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 
 		if(isIFrame()){
 			MpvDecoder mpvDecoder = new MpvDecoder();
-			long l = mpvDecoder.decodeArray(data, false, false, false, 0);
-			System.out.println("L="+l);
-		    
+			mpvDecoder.decodeArray(data, false, false, false, 0);
+
 			return mpvDecoder.getImage();
 		}else{
 			return null;
 		}
-		
+
 	}
 
 
@@ -230,16 +229,16 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 		if(isIFrame()){
 			MpvDecoder mpvDecoder = new MpvDecoder();
 			mpvDecoder.decodeArray(data, false, false, false, 0);
-		    
+
 			return mpvDecoder.getImage(w,h);
 		}else{
 			return null;
 		}
-		
+
 	}
 
 	public boolean isIFrame() {
-		
+
 		final List<VideoMPEG2Section> picts = findSectionInList(sections, 0);
 		if((picts!=null)&&(picts.size()>0)){
 			for(final VideoMPEG2Section section: picts) {
