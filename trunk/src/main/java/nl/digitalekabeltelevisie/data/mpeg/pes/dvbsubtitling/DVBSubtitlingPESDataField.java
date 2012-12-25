@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
@@ -54,16 +54,16 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
  * @author Eric Berendsen
- * 
+ *
  * PES_data_field() as defined in EN 300 743 V1.3.1
  * Digital Video Broadcasting (DVB); Subtitling systems
- * 
+ *
  */
 
 public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode, ImageSource {
 
 	/**
-	 * 
+	 *
 	 */
 	private static Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
 
@@ -99,7 +99,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 
 	/**
-	 * 
+	 *
 	 */
 	private final List<Segment> segmentList = new ArrayList<Segment>();
 
@@ -118,8 +118,8 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 		data_identifier = getInt(data, offset, 1, MASK_8BITS);
 		if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
 			subtitle_stream_id = getInt(data, offset + 1, 1, MASK_8BITS);
-	
-	
+
+
 			int t = 2;
 			while (data[offset + t] == 0x0f) { // sync byte
 				Segment segment;
@@ -147,12 +147,12 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 					segment = new DisplayDefinitionSegment(data, offset + t);
 					displayDefinitionSegment = (DisplayDefinitionSegment)segment;
 					break;
-	
+
 				default:
 					segment = new Segment(data, offset + t);
 					break;
 				}
-	
+
 				segmentList.add(segment);
 				t += 6 + getInt(data, offset + t + 4, 2, MASK_16BITS);
 			}
@@ -161,13 +161,13 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+		final DefaultMutableTreeNode s = super.getJTreeNode(modus,"DVBSubtitlingSegments");
 		s.setUserObject(new KVP("DVBSubtitlingSegments",this));
 
 		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier, getDataIDString(data_identifier))));
@@ -181,13 +181,13 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 	/**
 	 * Renders an image of the subtitles in this PESPacket.
-	 * <p> 
+	 * <p>
 	 * Known issues/todo's;
-	 * <ol> 
+	 * <ol>
 	 * <li>a display set can be spread across multiple PES</li>
 	 * <li>Page ID is ignored</li>
 	 * <li>only handles page_state== page refresh or new page, not incremental update </li>
-	 * <li>nice to have; emulate decoder pixel depths of 2, 4 and 8 bits.</li> 
+	 * <li>nice to have; emulate decoder pixel depths of 2, 4 and 8 bits.</li>
 	 * </ol>
 	 * This is different from the getImage in DisplaySet as this draws directly on the background, not on regions.
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
@@ -217,7 +217,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 						if(regionCompositionSegment!=null){
 							int clutId = regionCompositionSegment.getCLUTId();
 							CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
-	
+
 							//fill the region
 								if((regionCompositionSegment.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
 									int index = 0;
@@ -233,7 +233,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 										index = regionCompositionSegment.getRegion8BitPixelCode();
 										break;
 									}
-		
+
 									IndexColorModel colorModel = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
 									int rgb = colorModel.getRGB(index);
 									Color bgColor = new Color(rgb,true);
@@ -247,10 +247,10 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 								if(clutDefinitionSegment!=null){
 									// This is the colorModel for this region composition segment
 									final IndexColorModel cm = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
-	
+
 									int object_id = regionObject.getObject_id();
 									ObjectDataSegment objectDataSegment = objects.get(object_id);
-									
+
 									if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
 										final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
 										final BufferedImage i = new BufferedImage(cm, raster, false, null);
@@ -272,8 +272,8 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 					}
 				}
 			}
-	
-	
+
+
 			return img;
 		}else{
 			return null;

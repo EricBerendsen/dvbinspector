@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
@@ -41,12 +41,12 @@ import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
 /**
  * @author Eric Berendsen
- * 
+ *
  * PES_data_field() as defined in 4.3 Syntax for PES data field, ETSI EN 300 472 V1.3.1 (2003-05)
  * Digital Video Broadcasting (DVB); Specification for conveying ITU-R System B Teletext in DVB bitstreams
- * 
+ *
  * and (extension)
- * 
+ *
  * ETSI EN 301 775 V1.2.1  Digital Video Broadcasting (DVB);
  * Specification for the carriage of Vertical Blanking
  * Information (VBI) data in DVB bitstreams
@@ -139,7 +139,7 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		//DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES_data_field"));
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
+		final DefaultMutableTreeNode s=super.getJTreeNode(modus, "EBU PES Packet");
 		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier,getDataIDString(data_identifier))));
 		s.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
 
