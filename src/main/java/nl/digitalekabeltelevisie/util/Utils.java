@@ -1252,6 +1252,11 @@ public final class Utils {
 	public static boolean countListModus(final int m){
 		return ((m&DVBtree.COUNT_LIST_ITEMS_MODUS)!=0);
 	}
+
+	public static boolean showPtsModus(final int m){
+		return ((m&DVBtree.SHOW_PTS_MODUS)!=0);
+	}
+
 	public static String stripLeadingZeros(final String s) {
 		final int len = s.length()-1; // leave at least one zero if that is the only char
 		int st = 0;
