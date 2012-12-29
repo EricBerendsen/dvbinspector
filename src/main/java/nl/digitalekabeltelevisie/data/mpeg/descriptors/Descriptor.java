@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
@@ -963,6 +963,14 @@ public class Descriptor implements TreeNode {
 			return "HE-AAC v2 audio for the hard of hearing";
 		case 0x46:
 			return "HE-AAC v2 receiver-mixed supplementary audio as per annex E of TS 101 154 [10]";
+		case 0x47:
+			return "HE-AAC receiver mix audio description for the visually impaired";
+		case 0x48:
+			return "HE-AAC broadcaster mix audio description for the visually impaired";
+		case 0x49:
+			return "HE-AAC v2 receiver mix audio description for the visually impaired";
+		case 0x4A:
+			return "HE-AAC v2 broadcaster mix audio description for the visually impaired";
 		case 0xFF:
 			return "reserved for future use";
 
@@ -970,7 +978,7 @@ public class Descriptor implements TreeNode {
 			if ((0x06 <= component_type) && (component_type <= 0x3F)) {
 				return "reserved for future use";
 			}
-			if ((0x47 <= component_type) && (component_type <= 0xAF)) {
+			if ((0x4B <= component_type) && (component_type <= 0xAF)) {
 				return "reserved for future use";
 			}
 			if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
