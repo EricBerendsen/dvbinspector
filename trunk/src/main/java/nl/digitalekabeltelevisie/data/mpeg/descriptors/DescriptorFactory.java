@@ -274,7 +274,9 @@ public final class DescriptorFactory {
 		case 0x2A:
 			d = new AVCTimingAndHRDDescriptor(data, t + offset, tableSection);
 			break;
-
+		case 0x2B:
+			d = new AACMpeg2Descriptor(data, t + offset, tableSection);
+			break;
 		default:
 			d = new Descriptor(data, t + offset, tableSection);
 			logger.info("Not implemented descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
