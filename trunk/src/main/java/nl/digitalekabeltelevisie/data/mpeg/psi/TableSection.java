@@ -1,34 +1,34 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.packet_length;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 
 import java.util.Formatter;
 
@@ -84,7 +84,7 @@ public class TableSection implements TreeNode{
 	private long occurrence_count=-1;
 	private long packet_no=-1;
 
-
+	static Formatter formatter = new Formatter();
 
 	public TableSection(final PsiSectionData raw_data, final PID parent){
 		super();
@@ -363,7 +363,6 @@ public class TableSection implements TreeNode{
 		final long bitrate=getParentPID().getParentTransportStream().getBitRate();
 		if(bitrate>0){
 			if(count>=2){
-				final Formatter formatter = new Formatter();
 				final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
 				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 			}
