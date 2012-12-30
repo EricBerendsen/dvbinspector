@@ -40,42 +40,14 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
  */
 public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 
-	private   int crc1;
-
-	private final  int strmtyp;
-
-	private   int frmsizecod;
-
-	private final  int acmod;
-	private int cmixlev;
-	private int surmixlev;
-	private int langcode;
-	private int langcod;
-	private int langcod2e;
-	private int langcod2;
-	private int timecod1e;
-	private int timecod1;
-	private int timecod2e;
-	private int timecod2;
+	private int strmtyp;
 
 	private int lfemixlevcode;
 	private int lfemixlevcod;
 
-	// Alternate bit stream syntax
-	private int xbsi1e;
-	private int xbsi2e;
-	private int dsurexmod;
-	private int adconvtyp;
-	private int xbsi2;
-	private int encinfo;
+	private int substreamid;
 
-	private int addbsie;
-	private int addbsil;
-	//private byte[] addbsi;
-
-	private final int substreamid;
-
-	private final int frmsiz;
+	private int frmsiz;
 	private int fscod2;
 	private int numblkscod;
 	private int chanmape;
@@ -84,126 +56,39 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 	private int mixmdate;
 
 	private int pgmscle;
-
 	private int pgmscl;
-
 	private int pgmscl2e;
-
 	private int pgmscl2;
 
 	private int extpgmscle;
-
 	private int extpgmscl;
 
 	private int mixdef;
-
 	private int premixcmpsel;
-
 	private int drcsrc;
-
 	private int premixcmpscl;
 
 	private int mixdata;
-
 	private int mixdeflen;
 
-	private int mixdata2e;
-
-	private int extpgmlscle;
-
-	private int extpgmlscl;
-
-	private int extpgmcscle;
-
-	private int extpgmcscl;
-
-	private int extpgmrscle;
-
-	private int extpgmrscl;
-
-	private int extpgmlsscle;
-
-	private int extpgmlsscl;
-
-	private int extpgmrsscl;
-
-	private int extpgmrsscle;
-
-	private int extpgmlfescle;
-
-	private int extpgmlfescl;
-
-	private int dmixscle;
-
-	private int dmixscl;
-
-	private int addche;
-
-	private int extpgmaux1scle;
-
-	private int extpgmaux1scl;
-
-	private int extpgmaux2scle;
-
-	private int extpgmaux2scl;
-
-	private int mixdata3e;
-
-	private int spchdat;
-
-	private int addspchdate;
-
-	private int spchdat1;
-
-	private int spchan1att;
-
-	private int addspchdat1e;
-
-	private int addspdat1e;
-
-	private int spchdat2;
-
-	private int spchan2att;
-
-	private int mixdatafill;
-
 	private int paninfoe;
-
 	private int panmean;
-
 	private int paninfo;
-
 	private int paninfo2e;
-
 	private int panmean2;
-
 	private int paninfo2;
 
 	private int frmmixcfginfoe;
-
 	private int[] blkmixcfginfo;
-
 	private int[] blkmixcfginfoe;
 
 	private int infomdate;
 
-//	// based on  ProjectX AudioFormatAC3.java
-//	static int[] ac3_bitrate_index =  {
-//			32000, 40000, 48000, 56000, 64000, 80000, 96000,
-//			112000, 128000, 160000, 192000, 224000, 256000,
-//			320000, 384000, 448000, 512000, 576000, 640000,
-//			0,0,0,0,0,0,0,0,0,0,0,0,0
-//		};
-//
-//	// this is different from the version in ProjectX in 2 ways;
-//	// 1) it has size in words (2 bytes) instead of bytes (more confirming to the spec)
-//	// 2) double number of entries, for 44,1 kHz this makes difference
-//
-//	private static int[][] ac3_size_table = {
-//		{64,64,80,80,96,96,112,112,128,128,160,160,192,192,224,224,256,256,320,320,384,384,448,448,512,512,640,640,768,768,896,896,1024,1024,1152,1152,1280,1280}, //48 kHz
-//		{69,70,87,88,104,105,121,122,139,140,174,175,208,209,243,244,278,279,348,349,417,418,487,488,557,558,696,697,836,835,975,976,1114,1115,1253,1254,1393,1394}, // 44,1 kHz
-//		{96,96,120,120,144,144,168,168,192,192,240,240,288,288,336,336,384,384,480,480,576,576,672,672,768,768,960,960,1152,1152,1344,1344,1560,1560,1728,1728,1920,1920} //32 kHz
-//	};
+	private int adconvtyp2;
+	private int sourcefscod;
+	private int blkid;
+	private int convsync;
+
 
 	public EAC3SyncFrame(final byte[] data, final int offset) {
 		super(data,offset);
@@ -390,6 +275,48 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 				bsmod = bs.readBits(3);
 				copyrightb = bs.readBits(1);
 				origbs = bs.readBits(1);
+				if(acmod == 0x2){ /* if in 2/0 mode */
+					dsurmod = bs.readBits(2);
+					dheadphonmod = bs.readBits(2);
+				}
+				if(acmod >= 0x6){ /* if both surround channels exist */
+					dsurexmod = bs.readBits(2);
+				}
+				audprodie = bs.readBits(1);
+				if(audprodie!=0){
+					mixlevel = bs.readBits(5);
+					roomtyp = bs.readBits(2);
+					adconvtyp = bs.readBits(1);
+				}
+				if(acmod == 0x0){ /* if 1+1 mode (dual mono, so some items need a second value) */
+					audprodi2e = bs.readBits(1);
+					if(audprodi2e!=0){
+						mixlevel2 = bs.readBits(5);
+						roomtyp2 = bs.readBits(2);
+						adconvtyp2 = bs.readBits(1);
+					}
+				}
+				if(fscod < 0x3){ /* if not half sample rate */
+					sourcefscod = bs.readBits(1);
+				}
+			}
+			if( (strmtyp == 0x0) && (numblkscod != 0x3) ) {
+				convsync = bs.readBits(1);
+			}
+			if(strmtyp == 0x2){ /* if bit stream converted from AC-3 */
+				if(numblkscod == 0x3) /* 6 blocks per frame */ {
+					blkid = 1;
+				}else {
+					blkid = bs.readBits(1);
+				}
+				if(blkid!=0) {
+					frmsizecod = bs.readBits(6);
+				}
+			}
+			addbsie = bs.readBits(1);
+			if(addbsie!=0){
+				addbsil = bs.readBits(6);
+				//addbsi = bs.readBits((addbsil+1)*8);
 			}
 		}
 	}
@@ -524,15 +451,57 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 
 
 			}// END if(strmtyp == 0x0) /* if independent stream */
-			//infomdate = bs.readBits(1);
 			s.add(new DefaultMutableTreeNode(new KVP("infomdate",infomdate,"Informational metadata "+doesExistString(infomdate))));
 			if(infomdate!=0){ /* informational metadata */
 				s.add(new DefaultMutableTreeNode(new KVP("bsmod",bsmod,"Bit stream mode: "+getBsModString(bsmod, acmod))));
 				s.add(new DefaultMutableTreeNode(new KVP("copyrightb",copyrightb,"Copyright bit: "+(copyrightb==1?"information in the bit stream is indicated as protected by copyright":"information is not indicated as protected"))));
 				s.add(new DefaultMutableTreeNode(new KVP("origbs",origbs,origbs==1?"original bit stream":"copy of another bit stream")));
-//				bsmod = bs.readBits(3);
-//				copyrightb = bs.readBits(1);
-//				origbs = bs.readBits(1);
+				if(acmod == 0x2){ /* if in 2/0 mode */
+
+					s.add(new DefaultMutableTreeNode(new KVP("dsurmod",dsurmod,"Dolby Surround mode: "+getDsurmodString(dsurmod))));
+					s.add(new DefaultMutableTreeNode(new KVP("dheadphonmod",dheadphonmod,"Dolby Headphone mode: "+getDheadphonmodString(dheadphonmod))));
+				}
+				if(acmod >= 0x6){ /* if both surround channels exist */
+					s.add(new DefaultMutableTreeNode(new KVP("dsurexmod",dsurexmod,"Dolby Surround EX mode: "+getDsurexmodString(dsurexmod))));
+				}
+				s.add(new DefaultMutableTreeNode(new KVP("audprodie",audprodie,"Audio production information "+doesExistString(audprodie))));
+
+				if(audprodie!=0){
+					s.add(new DefaultMutableTreeNode(new KVP("mixlevel",mixlevel,"Mixing level: "+(80+mixlevel)+" dB")));
+					s.add(new DefaultMutableTreeNode(new KVP("roomtyp","Room type: "+roomtyp,getRoomTypeString(roomtyp))));
+					s.add(new DefaultMutableTreeNode(new KVP("adconvtyp",adconvtyp,"A/D converter type: "+(adconvtyp==1?"HDCD":"standard"))));
+				}
+				if(acmod == 0x0){ /* if 1+1 mode (dual mono, so some items need a second value) */
+					s.add(new DefaultMutableTreeNode(new KVP("mixdata",mixdata,null)));
+					audprodi2e = bs.readBits(1);
+					if(audprodi2e!=0){
+						s.add(new DefaultMutableTreeNode(new KVP("mixlevel2",mixlevel2,"peak mixing level during the final audio mixing session: "+(80+mixlevel2)+" dB")));
+						s.add(new DefaultMutableTreeNode(new KVP("roomtyp2",roomtyp2,getRoomTypeString(roomtyp))));
+						s.add(new DefaultMutableTreeNode(new KVP("adconvtyp2",adconvtyp2,"A/D converter type: "+(adconvtyp2==1?"HDCD":"standard"))));
+					}
+				}
+				if(fscod < 0x3){ /* if not half sample rate */
+					s.add(new DefaultMutableTreeNode(new KVP("sourcefscod",sourcefscod,"Source sample rate code"+(sourcefscod==1?" the source material was sampled at twice the rate indicated by fscod":" the source material was NOT sampled at twice the rate indicated by fscod"))));
+				}
+				if( (strmtyp == 0x0) && (numblkscod != 0x3) ) {
+					s.add(new DefaultMutableTreeNode(new KVP("convsync",convsync,"Converter synchronization flag. This bit is used for synchronization by a device that converts an Enhanced AC-3 bit stream to a bit stream compliant with a legacy AC-3 decoder")));
+				}
+				if(strmtyp == 0x2){ /* if bit stream converted from AC-3 */
+					if(numblkscod == 0x3) /* 6 blocks per frame */ {
+						s.add(new DefaultMutableTreeNode(new KVP("blkid",blkid,"Block identification: the first block in this Enhanced AC-3 frame was the first block in the original standard AC-3 frame: implicit because numblkscod == 0x3 (6 blocks per frame)")));
+					}else {
+						s.add(new DefaultMutableTreeNode(new KVP("blkid",blkid,"Block identification: "+(blkid==1?"the first block in this Enhanced AC-3 frame was the first block in the original standard AC-3 frame":"the first block in this Enhanced AC-3 frame was NOT the first block in the original standard AC-3 frame"))));
+					}
+					if(blkid!=0) {
+						s.add(new DefaultMutableTreeNode(new KVP("frmsizecod",frmsizecod,"Frame size code: "+getFrmsizecodString(fscod, frmsizecod))));
+					}
+				}
+				addbsie = bs.readBits(1);
+				s.add(new DefaultMutableTreeNode(new KVP("addbsie",addbsie,addbsie==1?"Additional bit stream information exists":"Additional bit stream information does not exist")));
+				if(addbsie!=0){
+					s.add(new DefaultMutableTreeNode(new KVP("addbsil",addbsil,"Additional bit stream information length")));
+				}
+
 			}
 		}
 
@@ -567,347 +536,6 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 		return "does not exist";
 	}
 
-
-	private String getDsurexmodString(final int dsurexmod) {
-		final String [] desc = {"Not indicated",
-				"Not Dolby Surround EX encoded",
-				"Dolby Surround EX encoded",
-				"Reserved"
-				};
-		return desc[dsurexmod];
-	}
-
-	private String getDheadphonmodString(final int dheadphonmod) {
-		final String [] desc = {"Not indicated",
-				"Not Dolby Headphone encoded",
-				"Dolby Headphone encoded",
-				"Reserved"
-				};
-		return desc[dheadphonmod];
-	}
-
-
-	private String getSurmixlevString(final int surmixlev) {
-		final String [] desc = {"Reserved",
-				"Reserved",
-				"Reserved",
-				"0,841 (-1,5 dB)",
-				"0,707 (-3,0 dB)",
-				"0,595 (-4,5 dB)",
-				"0,500 (-6,0 dB)",
-				"0,000 (-inf dB)"};
-		return desc[surmixlev];
-	}
-
-
-	private String getCmixlevString(final int cmixlev) {
-		final String [] desc = {"1,414 (+3,0 dB)",
-				"1,189 (+1,5 dB)",
-				"1,000 (0,0 dB)",
-				"0,841 (-1,5 dB)",
-				"0,707 (-3,0 dB)",
-				"0,595 (-4,5 dB)",
-				"0,500 (-6,0 dB)",
-				"0,000 (-inf dB)"};
-		return desc[cmixlev];
-	}
-
-
-	public int getOffset() {
-		return offset;
-	}
-
-
-	public int getSyncword() {
-		return syncword;
-	}
-
-
-	public int getCrc1() {
-		return crc1;
-	}
-
-
-	public int getFscod() {
-		return fscod;
-	}
-
-
-	public int getFrmsizecod() {
-		return frmsizecod;
-	}
-
-
-	public int getBsid() {
-		return bsid;
-	}
-
-
-	public int getAcmod() {
-		return acmod;
-	}
-
-
-	public int getCmixlev() {
-		return cmixlev;
-	}
-
-
-	public int getSurmixlev() {
-		return surmixlev;
-	}
-
-
-	public int getLfeon() {
-		return lfeon;
-	}
-
-
-	public int getDialnorm() {
-		return dialnorm;
-	}
-
-
-	public int getLangcode() {
-		return langcode;
-	}
-
-
-	public int getLangcod() {
-		return langcod;
-	}
-
-
-	public int getAudprodie() {
-		return audprodie;
-	}
-
-
-	public int getMixlevel() {
-		return mixlevel;
-	}
-
-
-	public int getRoomtyp() {
-		return roomtyp;
-	}
-
-
-	public int getDialnorm2() {
-		return dialnorm2;
-	}
-
-
-	public int getLangcod2e() {
-		return langcod2e;
-	}
-
-
-	public int getLangcod2() {
-		return langcod2;
-	}
-
-
-	public int getAudprodi2e() {
-		return audprodi2e;
-	}
-
-
-	public int getMixlevel2() {
-		return mixlevel2;
-	}
-
-
-	public int getRoomtyp2() {
-		return roomtyp2;
-	}
-
-
-	public int getCopyrightb() {
-		return copyrightb;
-	}
-
-
-	public int getTimecod1e() {
-		return timecod1e;
-	}
-
-
-	public int getTimecod1() {
-		return timecod1;
-	}
-
-
-	public int getTimecod2e() {
-		return timecod2e;
-	}
-
-
-	public int getTimecod2() {
-		return timecod2;
-	}
-
-
-	public int getXbsi1e() {
-		return xbsi1e;
-	}
-
-
-	public int getDmixmod() {
-		return dmixmod;
-	}
-
-
-	public int getXbsi2e() {
-		return xbsi2e;
-	}
-
-
-	public int getDsurexmod() {
-		return dsurexmod;
-	}
-
-
-	public int getDheadphonmod() {
-		return dheadphonmod;
-	}
-
-
-	public int getAdconvtyp() {
-		return adconvtyp;
-	}
-
-
-	public int getXbsi2() {
-		return xbsi2;
-	}
-
-
-	public int getEncinfo() {
-		return encinfo;
-	}
-
-
-	public int getAddbsie() {
-		return addbsie;
-	}
-
-
-	public int getAddbsil() {
-		return addbsil;
-	}
-
-
-
-
-
-//	public static String getFrmsizecodString(final int fscod, final int frmsizecod){
-//		if(fscod>=0 && fscod<3 && frmsizecod>=0 && frmsizecod <=37){
-//			return "Nominal bit rate: "+ac3_bitrate_index[frmsizecod>>>1]+", words/syncframe: "+ac3_size_table[fscod][frmsizecod];
-//		}else{
-//			return "illegal values for fscod: "+fscod+" or frmsizecod: "+frmsizecod;
-//		}
-//
-//	}
-//
-
-	public static String getBsModString(final int bsmod, final int acmod){
-		switch (bsmod) {
-		case 0:
-			return "Main audio service: complete main (CM)";
-		case 1:
-			return "Main audio service: music and effects (ME)";
-		case 2:
-			return "Associated service: visually impaired (VI)";
-		case 3:
-			return "Associated service: hearing impaired (HI)";
-		case 4:
-			return "Associated service: dialogue (D)";
-		case 5:
-			return "Associated service: commentary (C)";
-		case 6:
-			return "Associated service: emergency (E)";
-		case 7:
-			if(acmod==1){
-				return "Associated service: dialogue (D)";
-			}else if((acmod>=2) && (acmod<=7)){
-				return "Main audio service: karaoke";
-			}else{
-				return "Illegal value for acmod: "+acmod;
-			}
-
-		default:
-			return "Illegal Value for bsmod: "+bsmod;
-		}
-	}
-
-
-	public static String getCentreMixLevelString(final int cmixlev){
-		switch (cmixlev) {
-		case 0:
-			return "0,707 (-3,0 dB)";
-		case 1:
-			return "0,595 (-4,5 dB)";
-		case 2:
-			return "0,500 (-6,0 dB)";
-		case 3:
-			return "reserved";
-		default:
-			return "Illegal value";
-		}
-	}
-
-
-	public static String getSurroundMixLevelString(final int surmixlev){
-		switch (surmixlev) {
-		case 0:
-			return "0,707 (-3,0 dB)";
-		case 1:
-			return "0,500 (-6 dB)";
-		case 2:
-			return "0";
-		case 3:
-			return "reserved";
-		default:
-			return "Illegal value";
-		}
-	}
-
-
-	public static String getRoomTypeString(final int roomtyp){
-
-		switch (roomtyp) {
-
-		case 0:
-			return "Not indicated";
-		case 1:
-			return "Large room, X curve monitor";
-		case 2:
-			return "Small room, flat monitor";
-		case 3:
-			return "reserved";
-
-		default:
-			return "Illegal value";
-		}
-	}
-
-
-	public static String getSampleRateCodeString(final int fscod) {
-		switch (fscod) {
-		case 0:
-			return "48 kHz";
-		case 1:
-			return "44,1 kHz";
-		case 2:
-			return "32 kHz";
-		case 3:
-			return "fscod2";
-
-		default:
-			return "illegal value";
-		}
-	}
 
 	public static String getStreamTypeString(final int strmtyp) {
 		switch (strmtyp) {
@@ -971,6 +599,222 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 		default:
 			return 0;
 		}
+	}
+
+
+
+	public int getStrmtyp() {
+		return strmtyp;
+	}
+
+
+
+	public int getLfemixlevcode() {
+		return lfemixlevcode;
+	}
+
+
+
+	public int getLfemixlevcod() {
+		return lfemixlevcod;
+	}
+
+
+
+	public int getSubstreamid() {
+		return substreamid;
+	}
+
+
+
+	public int getFrmsiz() {
+		return frmsiz;
+	}
+
+
+
+	public int getFscod2() {
+		return fscod2;
+	}
+
+
+
+	public int getNumblkscod() {
+		return numblkscod;
+	}
+
+
+
+	public int getChanmape() {
+		return chanmape;
+	}
+
+
+
+	public int getChanmap() {
+		return chanmap;
+	}
+
+
+
+	public int getMixmdate() {
+		return mixmdate;
+	}
+
+
+
+	public int getPgmscle() {
+		return pgmscle;
+	}
+
+
+
+	public int getPgmscl() {
+		return pgmscl;
+	}
+
+
+
+	public int getPgmscl2e() {
+		return pgmscl2e;
+	}
+
+
+
+	public int getPgmscl2() {
+		return pgmscl2;
+	}
+
+
+
+	public int getExtpgmscle() {
+		return extpgmscle;
+	}
+
+
+
+	public int getExtpgmscl() {
+		return extpgmscl;
+	}
+
+
+
+	public int getMixdef() {
+		return mixdef;
+	}
+
+
+
+	public int getPremixcmpsel() {
+		return premixcmpsel;
+	}
+
+
+
+	public int getDrcsrc() {
+		return drcsrc;
+	}
+
+
+
+	public int getPremixcmpscl() {
+		return premixcmpscl;
+	}
+
+
+
+	public int getMixdata() {
+		return mixdata;
+	}
+
+
+
+	public int getMixdeflen() {
+		return mixdeflen;
+	}
+
+
+
+	public int getPaninfoe() {
+		return paninfoe;
+	}
+
+
+
+	public int getPanmean() {
+		return panmean;
+	}
+
+
+
+	public int getPaninfo() {
+		return paninfo;
+	}
+
+
+
+	public int getPaninfo2e() {
+		return paninfo2e;
+	}
+
+
+
+	public int getPanmean2() {
+		return panmean2;
+	}
+
+
+
+	public int getPaninfo2() {
+		return paninfo2;
+	}
+
+
+
+	public int getFrmmixcfginfoe() {
+		return frmmixcfginfoe;
+	}
+
+
+
+	public int[] getBlkmixcfginfo() {
+		return blkmixcfginfo;
+	}
+
+
+
+	public int[] getBlkmixcfginfoe() {
+		return blkmixcfginfoe;
+	}
+
+
+
+	public int getInfomdate() {
+		return infomdate;
+	}
+
+
+
+	public int getAdconvtyp2() {
+		return adconvtyp2;
+	}
+
+
+
+	public int getSourcefscod() {
+		return sourcefscod;
+	}
+
+
+
+	public int getBlkid() {
+		return blkid;
+	}
+
+
+
+	public int getConvsync() {
+		return convsync;
 	}
 
 }
