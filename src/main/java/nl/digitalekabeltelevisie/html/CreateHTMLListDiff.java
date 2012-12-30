@@ -42,8 +42,26 @@ public class CreateHTMLListDiff implements Runnable{
 	public void run() {
 
 
-		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 06-06 23-19-18.ts");
-		oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-15 19-10-43.ts");
+
+		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-19 08-51-59.ts");
+		oldTransportStream  = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-12 08-02-42.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-21 15-52-01.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-14 06-47-48.ts");
+		//newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-29 15-01-50.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-25 11-33-33.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-25 11-33-33.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-21 22-47-10.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-02 14-31-15.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-03 14-16-44.ts");
+
+		// oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 07-02 20-42-06.ts");
+		// newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-03 14-16-44.ts");
+		// oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 07-02 20-42-06.ts");
+		// newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-03 14-16-44.ts");
+		//		oldTransportStream = new TransportStream("d:\\ts\\upc20120805\\UPC 164000 08-05 17-15-22partial.ts");
+		//		oldTransportStream = new TransportStream("d:\\ts\\upc20120805\\UPC 164000 08-05 17-15-22partial.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 06-17 11-09-46.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-15 19-10-43.ts");
 		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-03 08-49-10.ts");
 		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-03 11-06-14.ts");
 		try {
@@ -54,7 +72,7 @@ public class CreateHTMLListDiff implements Runnable{
 			e.printStackTrace();
 		}
 
-		newTransportStream.namePIDs();
+		//newTransportStream.namePIDs();
 		System.out.println(newTransportStream);
 		writeHTML(newTransportStream,oldTransportStream);
 
@@ -132,7 +150,12 @@ public class CreateHTMLListDiff implements Runnable{
 					final Service oldService=oldSDT.getService(sid);
 
 					final int lcn = newStream.getPsi().getNit().getLCN(1000, transportStreamID, sid);
-					final String lcnString = (lcn>0)?Integer.toString(lcn):"-";
+					//final int lcn = newStream.getPsi().getNit().getLCN(43136, transportStreamID, sid);
+					String lcnString = (lcn > 0) ? Integer.toString(lcn) : "-";
+
+					final int hdLCN = newStream.getPsi().getNit().getHDSimulcastLCN(1000, transportStreamID, sid);
+					final String hdlcnString = (hdLCN > 0) ? (" / " + Integer.toString(hdLCN)) : "";
+					lcnString += hdlcnString;
 
 					final String newName= sdt.getServiceName(sid);
 					final String safeName= Utils.escapeHTML(newName);
@@ -148,7 +171,7 @@ public class CreateHTMLListDiff implements Runnable{
 					out.write("<td style=\"text-align: left;" +style+"\">\n"+transportStreamID+"</td>");
 
 					style="";
-					if((oldService!=null)&&(!newName.equals(oldSDT.getServiceName(sid)))){
+					if ((oldService != null) && (newName != null) && (!newName.equals(oldSDT.getServiceName(sid)))) {
 						style=bgColorCSS;
 					}
 
@@ -159,10 +182,16 @@ public class CreateHTMLListDiff implements Runnable{
 					}
 					out.write("<td style=\"text-align: left;" +style+"\">"+Descriptor.getServiceTypeString(sdt.getServiceType(sid))+" ("+sdt.getServiceType(sid)+") </td>\n");
 					style="";
-					if((oldService!=null)&&(lcn!=oldStream.getPsi().getNit().getLCN(1000, oldSDT.getTransportStreamID(sid), sid))){
+					final int oldLCN = oldStream.getPsi().getNit().getLCN(1000, oldSDT.getTransportStreamID(sid), sid);
+					String old = "";
+					if ((oldService != null)
+ && (lcn != oldLCN)) {
 						style="style=\""+bgColorCSS+"\"";
+						old = " [" + oldLCN + "] ";
+
 					}
-					out.write("<td style=\"text-align: left;\">"+sid+" </td><td " +style+">"+lcnString+"</td></tr>\n");
+					out.write("<td style=\"text-align: left;\">" + sid + " </td><td " + style + ">" + lcnString + old
+							+ "</td></tr>\n");
 
 				}
 
