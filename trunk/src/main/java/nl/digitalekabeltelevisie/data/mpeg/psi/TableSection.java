@@ -84,8 +84,6 @@ public class TableSection implements TreeNode{
 	private long occurrence_count=-1;
 	private long packet_no=-1;
 
-	static Formatter formatter = new Formatter();
-
 	public TableSection(final PsiSectionData raw_data, final PID parent){
 		super();
 		this.raw_data = raw_data;
@@ -364,7 +362,10 @@ public class TableSection implements TreeNode{
 		if(bitrate>0){
 			if(count>=2){
 				final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
-				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+				Formatter formatter = new Formatter();
+				String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+				formatter.close();
+				return r;
 			}
 		}
 		return null;
