@@ -203,6 +203,10 @@ public class Descriptor implements TreeNode {
 		case 0x2C:
 			return "FlexMuxTiming_descriptor";
 
+			/* ISO/IEC 13818-1:2007/FPDAM5 - Transport of JPEG 2000 part 1 video */
+		case 0x32:
+			return "J2K video descriptor";
+
 			// DVB
 
 		case 0x40:

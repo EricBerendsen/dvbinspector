@@ -94,7 +94,7 @@ public final class Utils {
 	public static final int MASK_24BITS=0xFFFFFF;
 	public static final int MASK_31BITS=0x7FFFFFFF;
 
-	public static final long MASK_32BITS=0xFFFFFFFFl;
+	public static final int MASK_32BITS=0xFFFFFFFF;
 
 	private static Map<Integer, String>oui = new HashMap<Integer, String>();
 	private static RangeHashMap<Integer,String> bat = new RangeHashMap<Integer,String>();
@@ -438,6 +438,38 @@ public final class Utils {
 		return (r&mask);
 	}
 
+	/**
+	 * Get single bit from a byte
+	 * Numbering starts from high order bit, starts at 1.
+	 *
+	 * @param b single byte
+	 * @param i position of bit in byte, start from 1 up to 8
+	 * @return 0 or 1 bit value
+	 */
+	public static int getBit(final byte b, final int i) {
+		return (( b & (0x80 >> (i-1))));
+	}
+
+	/**
+	 * Get sequence of bits from a byte
+	 * @param b
+	 * @param i position of the starting bit
+	 * @param len number of bits to get starting from i
+	 * @return sequence of bits as int
+	 * @example To get bit 3 and 4 call as getBits(b, 3, 2)
+	 *
+	 */
+	public static int getBits(final byte b, final int i, final int len) {
+		int mask = 0x00;
+
+		for(int pos = i; pos < i+len; ++pos)
+		{
+			mask |= 0x80 >> (pos-1);
+		}
+
+		return (b & mask) >> (9 - i - len);
+	}
+
 	public static String getBCD(final byte[] b, final int nibble_no, final int len) {
 		final StringBuilder buf =  new StringBuilder();
 		for (int i = 0; i < len; i++) {
@@ -598,7 +630,7 @@ public final class Utils {
 	}
 
 	public static String getStreamTypeString(final int tag){
-		if((0x20<=tag)&&(tag<=0x7e)){
+		if((0x22<=tag)&&(tag<=0x7e)){
 			return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
 
@@ -632,6 +664,7 @@ public final class Utils {
 		// 29n9184t.doc Text of ISO/IEC 13818-1:2007/FPDAM 3.2 - Transport of Scalable Video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
 		// Amendment 3: Transport of Scalable Video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
 		// ISO/IEC 13818-1:2007/FPDAM 3.2
+		// Amendment 5: Transport of JPEG 2000 Part 1 (ITU-T Rec T.800 | ISO/IEC 15444-1) video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
 
 		case 0x15: return"Metadata carried in PES packets";
 		case 0x16: return"Metadata carried in metadata_sections";
@@ -645,6 +678,8 @@ public final class Utils {
 		case 0x1E: return"Auxiliary video stream as defined in ISO/IEC 23002-3";
 		case 0x1F: return"SVC video sub-bitstream of a video stream as defined in the Annex G of ITU-T Rec. H.264 | ISO/IEC 14496-10 Video";
 		case 0x7f: return"IPMP stream";
+		case 0x20: return"MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10";
+		case 0x21: return"J2K Video stream conforming to one or more profiles as defined in ITU-T Rec T.800 | ISO/IEC 15444-1";
 
 		default:
 			return "illegal/unknown value";
