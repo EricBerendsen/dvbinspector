@@ -203,6 +203,18 @@ public class Descriptor implements TreeNode {
 		case 0x2C:
 			return "FlexMuxTiming_descriptor";
 
+			/* ISO/IEC 13818-1:2007/FPDAM5 */
+		case 0x2D:
+			return "MPEG-4_text_descriptor";
+		case 0x2E:
+			return "MPEG-4_audio_extension_descriptor";
+		case 0x2F:
+			return "Auxiliary_video_stream_descriptor";
+		case 0x30:
+			return "SVC extension descriptor";
+		case 0x31:
+			return "MVC extension descriptor";
+
 			/* ISO/IEC 13818-1:2007/FPDAM5 - Transport of JPEG 2000 part 1 video */
 		case 0x32:
 			return "J2K video descriptor";
@@ -386,7 +398,7 @@ public class Descriptor implements TreeNode {
 				return "Defined in ISO/IEC 13818-6";
 			}
 
-			if ((36 <= tag) && (tag <= 63)) {
+			if (tag <= 63) {
 				return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
 			}
 
