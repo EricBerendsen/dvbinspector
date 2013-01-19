@@ -448,7 +448,7 @@ public class TransportStream implements TreeNode{
 						}else if(d instanceof EnhancedAC3Descriptor){
 							compt_type.append(" Enhanced Dolby Audio (AC3)");
 							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
-							 abstractPesHandler = new EAC3Handler(); // TODO separate EAC3Handler??
+							abstractPesHandler = new EAC3Handler();
 						}if(d instanceof CADescriptor) {
 							final CADescriptor cad = (CADescriptor) d;
 							final int capid=cad.getCaPID();
