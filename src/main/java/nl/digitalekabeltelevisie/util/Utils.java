@@ -462,7 +462,7 @@ public final class Utils {
 	public static int getBits(final byte b, final int i, final int len) {
 		int mask = 0x00;
 
-		for(int pos = i; pos < i+len; ++pos)
+		for(int pos = i; pos < (i+len); ++pos)
 		{
 			mask |= 0x80 >> (pos-1);
 		}
@@ -677,9 +677,10 @@ public final class Utils {
 		case 0x1D: return"ISO/IEC 14496-17 Text";
 		case 0x1E: return"Auxiliary video stream as defined in ISO/IEC 23002-3";
 		case 0x1F: return"SVC video sub-bitstream of a video stream as defined in the Annex G of ITU-T Rec. H.264 | ISO/IEC 14496-10 Video";
-		case 0x7f: return"IPMP stream";
+
 		case 0x20: return"MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10";
 		case 0x21: return"J2K Video stream conforming to one or more profiles as defined in ITU-T Rec T.800 | ISO/IEC 15444-1";
+		case 0x7f: return"IPMP stream";
 
 		default:
 			return "illegal/unknown value";
@@ -759,7 +760,7 @@ public final class Utils {
 
 	public static String getStreamTypeShortString(final int tag){
 
-		if((0x20<=tag)&&(tag<=0x7e)){
+		if((0x22<=tag)&&(tag<=0x7e)){
 			return "ISO/IEC 13818-1 Reserved";
 		}
 
@@ -805,6 +806,9 @@ public final class Utils {
 		case 0x1D: return"ISO/IEC 14496-17 Text";
 		case 0x1E: return"ISO/IEC 23002-3 Aux. video stream ";
 		case 0x1F: return"ISO/IEC 14496-10 Video sub-bitstream";
+		/* ISO/IEC 13818-1:2007/FPDAM5 */
+		case 0x20: return"MVC video sub-bitstream";
+		case 0x21: return"J2K Video stream";
 		case 0x7f: return"IPMP stream";
 
 		default:
@@ -1561,7 +1565,8 @@ public final class Utils {
 	public static int findMPEG2VideoPid(final PMTsection pmt) {
 		int videoPID=0;
 		for(final Component component :pmt.getComponentenList()){
-			if(component.getStreamtype()==0x02){ // TODO should we also use 0x01 (ISO/IEC 11172 Video)?
+			if(component.getStreamtype()==0x02){ //
+
 				videoPID= component.getElementaryPID();
 				break;
 			}

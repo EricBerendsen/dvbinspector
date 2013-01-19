@@ -408,6 +408,7 @@ public class PesPacketData  implements TreeNode{
 	}
 
 	public static String getStreamIDDescription(final int streamId){
+
 		if((0xC0<=streamId)&&(streamId<0xE0)){
 			return "ISO/IEC 13818-3 or ISO/IEC 11172-3 or ISO/IEC 13818-7 or ISO/IEC 14496-3 audio stream number "+ Integer.toHexString(streamId & 0x1F);
 		}
@@ -415,9 +416,6 @@ public class PesPacketData  implements TreeNode{
 			return "ITU-T Rec. H.262 | ISO/IEC 13818-2 or ISO/IEC 11172-2 or ISO/IEC 14496-2 video stream number "+ Integer.toHexString(streamId & 0x0F);
 		}
 
-		if((0xFC<=streamId)&&(streamId<0xFF)){
-			return "reserved data stream";
-		}
 		switch (streamId) {
 		case 0xBC :return "program_stream_map";
 		case 0xBD :return "private_stream_1";
@@ -435,6 +433,11 @@ public class PesPacketData  implements TreeNode{
 		case 0xF9 :return "ancillary_stream";
 		case 0xFA :return "ISO/IEC14496-1_SL-packetized_stream";
 		case 0xFB :return "ISO/IEC14496-1_FlexMux_stream";
+		/* ISO/IEC 13818-1:2007/FPDAM5 */
+		case 0xFC :return "metadata stream";
+		case 0xFD :return "extended_stream_id";
+		case 0xFE :return "reserved data stream";
+
 		case 0xFF :return "program_stream_directory";
 		default:
 			return "??";
