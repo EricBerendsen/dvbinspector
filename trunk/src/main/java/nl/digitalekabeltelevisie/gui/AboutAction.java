@@ -66,7 +66,7 @@ public class AboutAction extends AbstractAction {
 		final ImageIcon icon = new ImageIcon(image);
 
 		JOptionPane.showMessageDialog(f, "DVB Inspector Version: "+version+"\n\n"+
-				"This code is Copyright 2009,2010,2011,2012 by Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n"+
+				"This code is Copyright 2009,2010,2011,2012,2013 by Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n"+
 				"http://www.digitalekabeltelevisie.nl/dvb_inspector\n\n"+
 				"DVB Inspector is free software: you can redistribute it and/or modify \n"+
 				"it under the terms of the GNU General Public License as published by\n"+
