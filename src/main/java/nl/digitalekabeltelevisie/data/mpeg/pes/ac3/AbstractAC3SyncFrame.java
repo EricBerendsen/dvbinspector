@@ -346,6 +346,13 @@ public class AbstractAC3SyncFrame {
 		return ac3_size_table;
 	}
 
+	public static String doesExistString(int p) {
+		if(p==1){
+			return "does exist";
+		}
+		return "does not exist";
+	}
+
 	public int getSyncword() {
 		return syncword;
 	}

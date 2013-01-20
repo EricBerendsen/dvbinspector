@@ -205,7 +205,7 @@ public class AC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 				s.add(new DefaultMutableTreeNode(new KVP("timecod2",timecod2,null)));
 			}
 		}else{  // Alternate bit stream syntax
-			s.add(new DefaultMutableTreeNode(new KVP("xbsi1e",xbsi1e,"Extra bitstream information #1 exists")));
+			s.add(new DefaultMutableTreeNode(new KVP("xbsi1e",xbsi1e,"Extra bitstream information #1 "+doesExistString(xbsi1e))));
 			if(xbsi1e==1){
 				s.add(new DefaultMutableTreeNode(new KVP("dmixmod",dmixmod,"Preferred stereo downmix mode: "+getDmixmodString(dmixmod))));
 				s.add(new DefaultMutableTreeNode(new KVP("ltrtcmixlev",ltrtcmixlev,"Lt/Rt center mix level: "+getCmixlevString(ltrtcmixlev))));
@@ -213,7 +213,7 @@ public class AC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 				s.add(new DefaultMutableTreeNode(new KVP("lorocmixlev",lorocmixlev,"Lo/Ro center mix level: "+getCmixlevString(lorocmixlev))));
 				s.add(new DefaultMutableTreeNode(new KVP("lorosurmixlev",lorosurmixlev,"Lo/Ro surround mix level: "+getSurmixlevString(lorosurmixlev))));
 			}
-			s.add(new DefaultMutableTreeNode(new KVP("xbsi2e",xbsi2e,"Extra bit stream information #2 exists")));
+			s.add(new DefaultMutableTreeNode(new KVP("xbsi2e",xbsi2e,"Extra bit stream information #2 "+doesExistString(xbsi2e))));
 			if(xbsi2e==1){
 				s.add(new DefaultMutableTreeNode(new KVP("dsurexmod",dsurexmod,"Dolby Surround EX mode: "+getDsurexmodString(dsurexmod))));
 				s.add(new DefaultMutableTreeNode(new KVP("dheadphonmod",dheadphonmod,"Dolby Headphone mode: "+getDheadphonmodString(dheadphonmod))));

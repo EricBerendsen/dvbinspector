@@ -529,14 +529,6 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 	}
 
 
-	public static String doesExistString(int p) {
-		if(p==1){
-			return "does exist";
-		}
-		return "does not exist";
-	}
-
-
 	public static String getStreamTypeString(final int strmtyp) {
 		switch (strmtyp) {
 		case 0:
