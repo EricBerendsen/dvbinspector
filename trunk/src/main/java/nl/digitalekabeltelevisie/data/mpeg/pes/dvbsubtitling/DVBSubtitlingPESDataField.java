@@ -167,8 +167,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,"DVBSubtitlingSegments");
-		s.setUserObject(new KVP("DVBSubtitlingSegments",this));
+		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("DVBSubtitlingSegments",this));
 
 		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier, getDataIDString(data_identifier))));
 		if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
