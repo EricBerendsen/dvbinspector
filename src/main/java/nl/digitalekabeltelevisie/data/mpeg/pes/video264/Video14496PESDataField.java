@@ -34,6 +34,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
@@ -87,7 +88,7 @@ public class Video14496PESDataField extends PesPacketData implements TreeNode {
 
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode s = super.getJTreeNode(modus,"Video 14496 PES Packet");
+			final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video 14496 PES Packet"));
 			addListJTree(s,nalUnits,modus,"NAL Units");
 			return s;
 

@@ -35,6 +35,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.gui.ImageSource;
@@ -104,7 +105,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			}
 			type.append(")");
 		}
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,"MPEG2 Video PES Packet"+type);
+		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video PES Packet"+type,this));
 		addListJTree(s,sections,modus,"Sections");
 		return s;
 	}

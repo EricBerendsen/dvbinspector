@@ -139,7 +139,7 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		//DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES_data_field"));
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus, "EBU PES Packet");
+		final DefaultMutableTreeNode s=super.getJTreeNode(modus, new KVP("EBU PES Packet"));
 		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier,getDataIDString(data_identifier))));
 		s.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
 

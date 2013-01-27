@@ -330,19 +330,31 @@ public class PesPacketData  implements TreeNode{
 		return ts;
 	}
 
+	/**
+	 *
+	 * Keep this to satisfy interface TreeNode. Children should call getJTreeNode(final int modus, KVP titleKVP) explicitly
+	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
+	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		return 	getJTreeNode(modus,"PES Packet");
+		return 	getJTreeNode(modus,new KVP("PES Packet"));
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus, String title) {
+	/**
+	 *
+	 * @param modus
+	 * @param titleKVP
+	 * @return
+	 */
+	public DefaultMutableTreeNode getJTreeNode(final int modus, KVP titleKVP) {
 
 		String ptsString = "";
 		if(showPtsModus(modus)){
 			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
 				ptsString = " [pts="+ printTimebase90kHz(pts)+"]";
 			}
+			titleKVP.appendLabel(ptsString);
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(title+ptsString));
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(titleKVP);
 		t.add(new DefaultMutableTreeNode(new KVP("stream_id",stream_id,getStreamIDDescription(stream_id))));
 		t.add(new DefaultMutableTreeNode(new KVP("PES_packet_length",noBytes,null)));
 		if(noBytes==0){
