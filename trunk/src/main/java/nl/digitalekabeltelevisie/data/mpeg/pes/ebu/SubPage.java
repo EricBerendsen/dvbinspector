@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
@@ -58,7 +58,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 	/**
-	 * 
+	 *
 	 */
 	private final Page			pageHandler;
 	private final int					subPageNo;
@@ -106,7 +106,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 * 
+	 *
 	 */
 
 	private static final Logger logger = Logger.getLogger(SubPage.class.getName());
@@ -114,7 +114,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	private static BufferedImage g3CharsImage;
 
 	/**
-	 * 
+	 *
 	 */
 
 	static {
@@ -140,7 +140,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public SubPage(final Page page, final int s) {
 		pageHandler = page;
@@ -937,7 +937,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void fillLevel1() {
 		byte[] rowData = null;
@@ -1567,12 +1567,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void processX26Enhancements() {
 		final List<TxtTriplet> tripletList = new ArrayList<TxtTriplet>();
-		for (int i = 0; i < packetx_26.length; i++) {
-			final TxtDataField x26 = packetx_26[i];
+		for (final TxtDataField x26 : packetx_26) {
 			if((x26!=null)&&(x26.getTxtTripletList()!=null)){
 				tripletList.addAll(x26.getTxtTripletList());
 			}
@@ -1621,40 +1620,37 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						originModifierColOffset = data;
 					}else if ((mode >= 0x11)&&(mode <= 0x13)){ // Object Invocation
 						final int objectSource = (address&0x18)>>3;
-					final int calledObjectType = (mode&0x3);
-					final int subPageS1 =data&0xF;
-					if((objectSource==3)||(objectSource==2)){ // GPOP or POP
-						final SubPage mot = getMOTPage();
-						if(mot!=null){
-							final int pageNo=pageHandler.getPageNo();
-							// only needed for POP
-							final int association = mot.getObjectPageAssociation(pageNo);
-							if(association==0){
-								return;
+						final int calledObjectType = (mode&0x3);
+						final int subPageS1 =data&0xF;
+						if((objectSource==3)||(objectSource==2)){ // GPOP or POP
+							final SubPage mot = getMOTPage();
+							if(mot!=null){
+								final int pageNo=pageHandler.getPageNo();
+								// only needed for POP
+								final int association = mot.getObjectPageAssociation(pageNo);
+								if(association==0){
+									return;
+								}
+								final List<ObjectLink> objectLinks= mot.getObjectLinksLevel25();
+								ObjectLink objectLink = null;
+								if(objectSource==3){
+									objectLink = objectLinks.get(0); // GPOP == ,
+								}else{ //POP
+									objectLink = objectLinks.get(association);
+								}
+
+								final int objectPageNo = objectLink.getPageNo();
+								final int magazine = objectLink.getMagazine();
+								final Page objectDefPage = pageHandler.getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
+								final SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
+								final int ptrLocation = address &0x3;
+								final int tripletOffset = (data & 0x60)>>5;
+								final int ptrPosition = (data&0x10)>>4;
+								findProcessObjectDefinition(objectDefSubPage, calledObjectType, ptrLocation, tripletOffset, ptrPosition,actRow,actCol,originModifierRowOffset,originModifierColOffset);
+								originModifierRowOffset = 0;
+								originModifierColOffset = 0;
 							}
-							final List<ObjectLink> objectLinks= mot.getObjectLinksLevel25();
-							ObjectLink objectLink = null;
-							if(objectSource==3){
-								objectLink = objectLinks.get(0); // GPOP == ,
-							}else{ //POP
-								objectLink = objectLinks.get(association);
-							}
-
-							final int objectPageNo = objectLink.getPageNo();
-							final int magazine = objectLink.getMagazine();
-							final Page objectDefPage = pageHandler.getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
-							final SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
-							final int ptrLocation = address &0x3;
-							final int tripletOffset = (data & 0x60)>>5;
-					final int ptrPosition = (data&0x10)>>4;
-
-
-		findProcessObjectDefinition(objectDefSubPage, calledObjectType, ptrLocation, tripletOffset, ptrPosition,actRow,actCol,originModifierRowOffset,originModifierColOffset);
-		originModifierRowOffset = 0;
-		originModifierColOffset = 0;
-
 						}
-					}
 					}else if ((mode >= 0x15)&&(mode <= 0x17)){ // Object Definition
 						// EMPTY function, only error checking
 						if((mode&0x3)!=objectType){
@@ -1663,7 +1659,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 					}else if (mode == 0x1F) { //Termination Marker
 						break;
 					}else{
-						logger.log(Level.INFO,"not implemented triplet:"+triplet);
+						logger.log(Level.FINE,"not implemented triplet:"+triplet);
 					}
 				}else{	// (address < 40) AKA Column Address Triplets
 					if(objectType==ADAPTIVE_OBJECT_TYPE){
@@ -1765,7 +1761,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 							bgColor[actRow][actCol]=bgCol;
 						}
 					}else{
-						logger.log(Level.INFO,"not implemented triplet:"+triplet);
+						logger.log(Level.FINE,"not implemented triplet:"+triplet);
 					}
 				}
 			}
