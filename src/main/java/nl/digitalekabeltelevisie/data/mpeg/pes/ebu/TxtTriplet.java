@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
@@ -35,21 +35,15 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 /**
  * @author Eric Berendsen
  *
+ * Based on ETSI EN 300 706 V1.2.1 (Enhanced Teletext specification) 12.3 Non-spacing attributes and additional characters
+ * and ETSI EN 300 231 V1.3.1  (Specification of the domestic video Programme Delivery Control system (PDC))  7.3.2.3 Coding of preselection data in extension packets X/26
+ *
  */
 public class TxtTriplet extends
 Triplet implements TreeNode {
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 
-
-	/* From CharSet.java , part of ProjectX
-	 * 
-	 * 
-	 */
-
-
+	// From CharSet.java , part of ProjectX
 	//DM10082004 081.7 int08 changed
 	//A=65 .. Z=90
 	private final static short diacritical_uppercase_char_map[][] = {
@@ -296,7 +290,7 @@ Triplet implements TreeNode {
 
 
 	/**
-	 * 
+	 *
 	 */
 	public TxtTriplet(final byte[] data, final int offset) {
 		super(data,offset);
@@ -320,6 +314,7 @@ Triplet implements TreeNode {
 		final int mode = (val&0x007c0)>>6;
 		final int data = (val&0x3f800)>>11;
 
+		// Should be StringBuilder, so sue me...
 		String str = "";
 
 		if(address < 40){
@@ -333,6 +328,11 @@ Triplet implements TreeNode {
 				final int clut = (data & 0x18)>>3;
 				final int clutEntry = (data & 0x7);
 				str += "clut "+clut+", entry "+clutEntry;
+			}
+			if(mode == 6){ // PDC - Cursor Column & Announced Starting & Finishing Time Minutes
+				final int minutesUnits = (data & 0x0F);
+				final int minutesTens = (data & 0x70)>>4;
+				str += "minutes "+minutesTens+minutesUnits; // add (append) as string, not numbers
 			}
 			if(mode == 12){ //Display attributes
 				final int doubleWidth = (data & 0x40)>>6;
@@ -362,22 +362,23 @@ Triplet implements TreeNode {
 				// Address triplet with Mode Description = 10 000 and Data = 0101010. See clause 12.2.4.
 				str += ""+(char)G0_sets[0][data]+"";
 			}
-		}else{
+		}else{ // address >= 40
 			if(mode==0x04){// set active position
-				int row;
-				if(address==40){
-					row=24;
-				}else{
-					row = address-40;
-				}
-				str += "Row "+ row+", column "+ ((data<40)? data:"undefined");
+				str += "Row "+ getRow(address)+", column "+ ((data<40)? data:"undefined");
 			}
 			// PDC related
 			if(mode==0x08){// PDC - Country of Origin and Programme Source
-				str += "Country of Origin "+ (address&0x3F)+", Programme Source "+ (data&0x03F); //ETSI EN 300 231 V1.3.1 says in §7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
+				str += "Country of Origin "+ (address&0x0F)+", Programme Source "+ (data&0x03F); //ETSI EN 300 231 V1.3.1 says in §7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
 			}
 			if(mode==0x09){// PDC - Month & Day
 				str += "Month "+ (address&0xF)+", Day "+ ((data&0x30)>>4)+""+(data&0x0F);
+			}
+			if(mode==0x0A){// PDC - Cursor Row & Announced Starting Time Hours
+
+				str += "Row "+ getRow(address)+", hours "+ getHoursString(data)+", Controlled Access Flag "+ ((data&0x40)>0?"controlled access":"free access");
+			}
+			if(mode==0x0B){// PDC - Cursor Row & Announce Finishing Time Hours
+				str += "Row "+ getRow(address)+", hours "+ getHoursString(data)+", duration "+((data&0x40)>0?"programme duration":"finishing time");
 			}
 			if(mode==0x10){// Origin Modifier
 				str += "row offset  "+ (address-40)+", column offset "+ (data&0x0F);
@@ -429,6 +430,32 @@ Triplet implements TreeNode {
 		t.add(new DefaultMutableTreeNode(new KVP("address/data word A",address,(address<=39)?"Column Address Group":"Row Address Group "+(address==40?24:address-40))));
 		t.add(new DefaultMutableTreeNode(new KVP("data/data word B",data,null)));
 		return t;
+	}
+
+	/**
+	 * @param data
+	 * @return
+	 */
+	private String getHoursString(final int data) {
+		StringBuilder hoursString = new StringBuilder();
+		int hoursUnits= data & 0x0F;
+		int hoursTens= ((data&0x30)>>4);
+		hoursString.append(hoursTens).append(hoursUnits);
+		return hoursString.toString();
+	}
+
+	/**
+	 * @param address
+	 * @return
+	 */
+	protected int getRow(final int address) {
+		int row;
+		if(address==40){
+			row=24;
+		}else{
+			row = address-40;
+		}
+		return row;
 	}
 
 	public static String getModeString(final int mode, final int address){
