@@ -607,6 +607,13 @@ public final class Utils {
 		return getUTCCalender(UTC_time).getTime();
 	}
 
+	public static long getDurationMillis(String eventDuration){
+		int hours = Integer.parseInt(eventDuration.substring(0, 2));
+		int minutes = Integer.parseInt(eventDuration.substring(2, 4));
+		int seconds = Integer.parseInt(eventDuration.substring(4, 6));
+		return 1000*(((( hours*60) +minutes)* 60) + seconds);
+	}
+
 	public static Calendar getUTCCalender(final byte[] UTC_time) {
 		final long mjd = getLong(UTC_time, 0, 2, 0xFFFF);
 		final String hours = getBCD(UTC_time, 4, 2);
