@@ -1580,5 +1580,39 @@ public final class Utils {
 		}
 		return videoPID;
 	}
+
+
+
+	/**
+	 * @param date
+	 * @return
+	 */
+	public static Date roundHourUp(Date date) {
+		Calendar c2 = new GregorianCalendar();
+		c2.setTime(date);
+		if((c2.get(Calendar.SECOND)!=0) || (c2.get(Calendar.MINUTE)!=0)){ //  no need to round if xx:00:00
+			c2.set(Calendar.SECOND, 0);
+			c2.set(Calendar.MINUTE, 0);
+			c2.add(Calendar.HOUR, 1);
+		}
+	
+	
+		return c2.getTime();
+	}
+
+
+
+	/**
+	 * @param date
+	 * @return
+	 */
+	public static Date roundHourDown(Date date) {
+		final Calendar c = new GregorianCalendar();
+		c.setTime(date);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MINUTE, 0);
+	
+		return c.getTime();
+	}
 }
 
