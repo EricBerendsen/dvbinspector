@@ -32,17 +32,17 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -52,7 +52,8 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.gui.ImageSource;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.Interval;
+
 
 /**
  *
@@ -64,72 +65,46 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class EIT extends AbstractPSITabel{
 
 	private final Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
-	private final int							charWidth	= 15;
-	private final int							charHeight	= 19;
 
-	private final long MILLI_SECS_PER_PIXEL = 15*1000;
 
 	public class EITableImage implements ImageSource{
-		private static final int SERVICE_NAME_WIDTH = 150;
-		private int tableID;
 
-		public EITableImage(final int tableID){
-			this.tableID = tableID;
+		private final long MILLI_SECS_PER_PIXEL = 30*1000;
+		private static final int SERVICE_NAME_WIDTH = 150;
+		private Map<Integer, EITsection[]> table;
+		final SortedSet<Integer> serviceOrder;
+
+		/**
+		 * Services are ordered by their SericeID.
+		 * @param table
+		 */
+		public EITableImage(Map<Integer, EITsection[]> table){
+			this.table = table;
+			serviceOrder = new TreeSet<Integer>(table.keySet());
 		}
 
+		/**
+		 * @param serviceOrder determines order in which EPG services are displayed
+		 * @param table
+		 */
+		public EITableImage(SortedSet<Integer> serviceOrder, Map<Integer, EITsection[]> table){
+			this.table = table;
+			this.serviceOrder = serviceOrder;
+		}
 		@Override
 		public BufferedImage getImage() {
-			HashMap<Integer, EITsection[]> table = eit.get(tableID);
-			Date startDate = null;
-			Date endDate = null;
 
-			final TreeSet<Integer> serviceSet = new TreeSet<Integer>(table.keySet());
-			for(final Integer serviceNo : serviceSet){
-				for(final EITsection section :table.get(serviceNo)){
-					if(section!= null){
-						List<Event> eventList = section.getEventList();
-						for(Event event:eventList){
-							Date eventStart = Utils.getUTCDate( event.getStartTime());
-							if((startDate==null)||(startDate.after(eventStart))){
-								startDate = eventStart;
-							}
-							Date eventEnd = new Date(eventStart.getTime()+ Utils.getDurationMillis(event.getDuration()));
-							if((endDate==null)||(endDate.before(eventEnd))){
-								endDate = eventEnd;
-							}
-						}
-					}
-				}
-			}
+			// determines selection and order of services to be rendered
 
-			System.out.println("Startdate :"+startDate);
-			System.out.println("endDate :"+endDate);
-			// ROUND UP/DOWN TO NEAREST HOUR
+			Interval interval = getSpanningInterval(serviceOrder, table);
 
-			Calendar c = new GregorianCalendar();
-			c.setTime(startDate);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MINUTE, 0);
+			// Round up/down to nearest hour
 
-			startDate = c.getTime();
-
-			c.setTime(endDate);
-			if((c.get(Calendar.SECOND)!=0) || (c.get(Calendar.MINUTE)!=0)){ //  no need to round if xx:00:00
-				c.set(Calendar.SECOND, 0);
-				c.set(Calendar.MINUTE, 0);
-				c.add(Calendar.HOUR, 1);
-			}
-
-			endDate = c.getTime();
-
-			System.out.println("Rounded Startdate :"+startDate);
-			System.out.println("Rounded endDate :"+endDate);
-
-			int rows = table.keySet().size();
-
+			Date startDate = roundHourDown(interval.getStart());
+			Date endDate = roundHourUp(interval.getEnd());
 
 			int legendHeight = 40;
-			int height = (rows*20)+1 + legendHeight;
+			int height = (serviceOrder.size()*20)+1 + legendHeight;
 			int width = 1+SERVICE_NAME_WIDTH + (int)((endDate.getTime() - startDate.getTime())/MILLI_SECS_PER_PIXEL);
 			final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 			final Graphics2D gd = img.createGraphics();
@@ -137,34 +112,95 @@ public class EIT extends AbstractPSITabel{
 			gd.fillRect(0, 0, width, height);
 			gd.setColor(Color.WHITE);
 
-			gd.setColor(Color.BLACK);
-			gd.fillRect(0, 0, width, legendHeight);
-
-
-			final BufferedImage charImg = new BufferedImage(charWidth, charHeight, BufferedImage.TYPE_INT_ARGB);
-			final Graphics2D charGD = charImg.createGraphics();
 			final Font font = new Font("SansSerif", Font.PLAIN, 14);
 			final Font nameFont = new Font("SansSerif", Font.BOLD, 14);
-			//charGD.setFont(font);
 			gd.setFont(font);
 
-			gd.setColor(Color.WHITE);
 			BasicStroke basicStroke = new BasicStroke( 3.0f);
 			gd.setStroke(basicStroke);
 
-			SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-			SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-			Date hourMark = new Date(startDate.getTime());
-			while(hourMark.before(endDate)){
-				int labelX = SERVICE_NAME_WIDTH+(int)((hourMark.getTime()-startDate.getTime())/MILLI_SECS_PER_PIXEL);
-				gd.drawLine(labelX, 0, labelX, legendHeight);
-				String timeString =   tf.format(hourMark);
-				String dateString =   df.format(hourMark);
-				gd.drawChars(dateString.toCharArray(), 0, dateString.length(), labelX+5, 17);
-				gd.drawChars(timeString.toCharArray(), 0, timeString.length(), labelX+5, 37);
-				hourMark = new Date(hourMark.getTime() + (1000L*60*60)); //advance 1 hour
-			}
+			drawLegend(gd, startDate, endDate,MILLI_SECS_PER_PIXEL,SERVICE_NAME_WIDTH, 0, width,legendHeight);
+			drawActualTime(gd, startDate, MILLI_SECS_PER_PIXEL, SERVICE_NAME_WIDTH, 0,width,legendHeight);
 
+			BasicStroke basicStroke1 = new BasicStroke( 1.0f);
+			gd.setStroke(basicStroke1);
+
+			int offset = legendHeight;
+			int char_descend = 16;
+
+			// draw labels
+			drawLabels(gd, serviceOrder, nameFont, 0, offset, char_descend);
+
+			// draw grid
+			offset=legendHeight;
+
+			gd.setFont(font);
+			for(final Integer serviceNo : serviceOrder){
+				EITsection[] eiTsections = table.get(serviceNo);
+				drawServiceEvents(gd, startDate, MILLI_SECS_PER_PIXEL, SERVICE_NAME_WIDTH, offset, char_descend,eiTsections);
+				offset+=20;
+			}
+			return img;
+		}
+
+
+		private void drawServiceEvents(final Graphics2D gd, Date startDate, long mSecsPixel, int x, int y,
+				int char_descend,EITsection[] eiTsections) {
+			for(final EITsection section :eiTsections){
+				if(section!= null){
+					List<Event> eventList = section.getEventList();
+					for(Event event:eventList){
+						drawEvent(gd, startDate, mSecsPixel, event, x, y, char_descend);
+					}
+				}
+			}
+		}
+
+
+		private void drawEvent(final Graphics2D gd, Date startDate, long mSecsPixel, Event event, int x, int y, int char_descend) {
+			Date eventStart = getUTCDate( event.getStartTime());
+
+			int w = (int)(getDurationMillis(event.getDuration())/mSecsPixel);
+			int eventX = x+(int)((eventStart.getTime()-startDate.getTime())/mSecsPixel);
+			String eventName= event.getEventName();
+			gd.setClip(null);
+
+			// FIll gray
+			gd.setColor(Color.GRAY);
+			gd.fillRect(eventX, y, w, 20);
+
+			// black border
+			gd.setColor(Color.BLACK);
+			gd.drawRect(eventX, y, w, 20);
+			// title
+
+			Shape clip = new Rectangle(eventX+5, y, w-10, 20);
+			gd.setClip(clip);
+			gd.setColor(Color.WHITE);
+			gd.drawString(eventName, eventX+5,y+char_descend);
+		}
+
+
+		private void drawLabels(final Graphics2D gd, final SortedSet<Integer> serviceSet, final Font nameFont,
+				int x,  int y, int char_descend) {
+			int labelY = y;
+			gd.setFont(nameFont);
+			gd.setColor(Color.WHITE);
+			for(final Integer serviceNo : serviceSet){
+				String serviceName = getParentPSI().getSdt().getServiceName(serviceNo);
+				if(serviceName==null){
+					serviceName = "Service "+serviceNo;
+				}
+				Shape clipn = new Rectangle(x, labelY, SERVICE_NAME_WIDTH-5, 20);
+				gd.setClip(clipn);
+				gd.drawString(serviceName, x+5, labelY+char_descend);
+
+				labelY+=20;
+			}
+		}
+
+
+		private void drawActualTime(final Graphics2D gd, Date startDate,long msecsPixel, int x, int y, int width, int legendHeight) {
 			// do we have a current time in the TDT?
 			if(getParentPSI().getTdt()!=null){
 				final List<TDTsection> tdtSectionList  = getParentPSI().getTdt().getTdtSectionList();
@@ -172,79 +208,34 @@ public class EIT extends AbstractPSITabel{
 					final TDTsection first = tdtSectionList.get(0);
 					final Date startTime = getUTCCalender(first.getUTC_time()).getTime();
 					gd.setColor(Color.RED);
-					int labelX = SERVICE_NAME_WIDTH+(int)((startTime.getTime()-startDate.getTime())/MILLI_SECS_PER_PIXEL);
-					gd.drawLine(labelX, 0, labelX, legendHeight);
-
-					gd.setColor(Color.WHITE);
+					int labelX = x+(int)((startTime.getTime()-startDate.getTime())/msecsPixel);
+					gd.drawLine(labelX, 0, labelX, legendHeight-1);
 				}
 			}
-
-
-			BasicStroke basicStroke1 = new BasicStroke( 1.0f);
-			gd.setStroke(basicStroke1);
-
-			Image targetChar = null;
-			int offset = legendHeight;
-
-			int char_descend = 16;
-
-			for(final Integer serviceNo : serviceSet){
-				String serviceName = getParentPSI().getSdt().getServiceName(serviceNo);
-				if(serviceName==null){
-					serviceName = "Service "+serviceNo;
-				}
-				gd.setFont(nameFont);
-				Shape clipn = new Rectangle(0, offset, SERVICE_NAME_WIDTH-5, 20);
-				gd.setClip(clipn);
-				gd.drawChars(serviceName.toCharArray() , 0, serviceName.length(),5,offset+char_descend);
-
-				gd.setFont(font);
-
-				for(final EITsection section :table.get(serviceNo)){
-					if(section!= null){
-						List<Event> eventList = section.getEventList();
-						for(Event event:eventList){
-							Date eventStart = Utils.getUTCDate( event.getStartTime());
-							Date eventEnd = new Date(eventStart.getTime()+ Utils.getDurationMillis(event.getDuration()));
-
-							int w = (int)(Utils.getDurationMillis(event.getDuration())/MILLI_SECS_PER_PIXEL);
-							int x = SERVICE_NAME_WIDTH+(int)((eventStart.getTime()-startDate.getTime())/MILLI_SECS_PER_PIXEL);
-							String eventName= event.getEventName();
-//							Shape clip = new Rectangle(x, offset, w, 20);
-							gd.setClip(null);
-
-							// FIll blue
-							gd.setColor(Color.GRAY);
-							gd.fillRect(x, offset, w, 20);
-
-							// black border
-							gd.setColor(Color.BLACK);
-
-							gd.drawRect(x, offset, w, 20);
-							// title
-
-							Shape clip = new Rectangle(x+5, offset, w-10, 20);
-							gd.setClip(clip);
-							gd.setColor(Color.WHITE);
-							gd.drawChars(eventName.toCharArray() , 0, eventName.length(), x+5,offset+char_descend);
-
-							gd.setClip(null);
-
-						}
-					}
-				}
-
-
-
-				//gd.drawBytes(serviceName.getBytes() , 0, serviceName.length(), 0,offset);
-				offset+=20;
-
-
-			}
-
-
-			return img;
 		}
+
+
+		private void drawLegend(final Graphics2D gd, Date startDate, Date endDate, long msecsPixel, int x, int y, int w, int legendHeight) {
+			gd.setColor(Color.BLACK);
+			gd.fillRect(x, y, w, legendHeight);
+
+			gd.setColor(Color.WHITE);
+
+			SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
+			SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+			Date hourMark = new Date(startDate.getTime());
+			while(hourMark.before(endDate)){
+				int labelX = x+(int)((hourMark.getTime()-startDate.getTime())/msecsPixel);
+				gd.drawLine(labelX, 0, labelX, legendHeight-1);
+				String timeString =   tf.format(hourMark);
+				String dateString =   df.format(hourMark);
+
+				gd.drawString(dateString, labelX+5, 17);
+				gd.drawString(timeString, labelX+5, 37);
+				hourMark = new Date(hourMark.getTime() + (1000L*60*60)); //advance 1 hour
+			}
+		}
+
 	}
 
 	/**
@@ -318,13 +309,15 @@ public class EIT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("EIT"));
+		KVP eitKVP = new KVP("EIT");
+		eitKVP.setImageSource(new EITableImage(getCombinedSchedule()));
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(eitKVP);
 		final TreeSet<Integer> tableSet = new TreeSet<Integer>(eit.keySet());
 
 
 		for(final Integer tableID : tableSet ){
 			final KVP tableKVP = new KVP("table_id",tableID, TableSection.getTableType(tableID));
-			tableKVP.setImageSource(new EITableImage(tableID));
+			tableKVP.setImageSource(new EITableImage(eit.get(tableID)));
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(tableKVP);
 			final HashMap<Integer, EITsection []> table= eit.get(tableID);
 
@@ -336,7 +329,7 @@ public class EIT extends AbstractPSITabel{
 				final DefaultMutableTreeNode o = new DefaultMutableTreeNode(kvp);
 				for(final EITsection section :table.get(serviceNo)){
 					if(section!= null){
-						if(!Utils.simpleModus(modus)){
+						if(!simpleModus(modus)){
 							addSectionVersionsToJTree(o, section, modus);
 						}else{
 							addListJTree(o,section.getEventList(),modus,"events");
@@ -361,5 +354,77 @@ public class EIT extends AbstractPSITabel{
 		return eit;
 	}
 
+	/**
+	 * Returns the start time of the first, and the end time of the last event of the services in this EIT table.
+	 * Only the services contained in serviceSet are used in the calculation
+	 *
+	 * @param serviceSet service ID of services to be included in calculation
+	 * @param eitTable map of service IDs to EITSection[] Can contain sections from different Table IDs, like 0x50 and 0x51, etc... (for very long EPGs)
+	 * @return Interval that covers all events in eitTable
+	 */
+	public static Interval getSpanningInterval(final Set<Integer> serviceSet, Map<Integer, EITsection[]> eitTable) {
+		Date startDate1 = null;
+		Date endDate1 = null;
+		// services to be displayed, in order
+
+		for(final Integer serviceNo : serviceSet){
+			for(final EITsection section :eitTable.get(serviceNo)){
+				if(section!= null){
+					List<Event> eventList = section.getEventList();
+					for(Event event:eventList){
+						Date eventStart = getUTCDate( event.getStartTime());
+						if((startDate1==null)||(startDate1.after(eventStart))){
+							startDate1 = eventStart;
+						}
+						Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
+						if((endDate1==null)||(endDate1.before(eventEnd))){
+							endDate1 = eventEnd;
+						}
+					}
+				}
+			}
+		}
+		Interval interval = new Interval(startDate1,endDate1);
+		return interval;
+	}
+
+	public HashMap<Integer, EITsection[]> getCombinedSchedule(){
+
+		HashMap<Integer, EITsection[]> res = new HashMap<Integer, EITsection[]>();
+		// actual TS
+		for (int tableID = 0x50; tableID < 0x60; tableID++) {
+			addSections(res, tableID);
+		}
+		// other TS
+		for (int tableID = 0x60; tableID < 0x70; tableID++) {
+			addSections(res, tableID);
+		}
+		return res;
+	}
+
+	/**
+	 * @param res
+	 * @param tableID
+	 */
+	private void addSections(HashMap<Integer, EITsection[]> res, int tableID) {
+		HashMap<Integer, EITsection []> table= eit.get(tableID);
+		if(table!=null){
+			HashSet<Integer> serviceSet = new HashSet<Integer>(table.keySet());
+			for(final Integer serviceNo : serviceSet){
+				EITsection[] eitArray = table.get(serviceNo); // array to be added to already found EITSections
+				if((eitArray!=null)&&(eitArray.length>0)){
+					EITsection[] resArray = res.get(serviceNo); //already found EITSections
+					if(resArray==null){ // nothing yet, so put in new found
+						res.put(serviceNo, eitArray);
+					}else{
+						EITsection[] combinedArray = new EITsection[resArray.length + eitArray.length];
+						System.arraycopy(resArray, 0, combinedArray, 0, resArray.length);
+						System.arraycopy(eitArray, 0, combinedArray, resArray.length, eitArray.length);
+						res.put(serviceNo, combinedArray);
+					}
+				}
+			}
+		}
+	}
 
 }
