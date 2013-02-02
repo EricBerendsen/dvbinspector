@@ -62,6 +62,7 @@ import nl.digitalekabeltelevisie.gui.AboutAction;
 import nl.digitalekabeltelevisie.gui.BarChart;
 import nl.digitalekabeltelevisie.gui.BitRateChart;
 import nl.digitalekabeltelevisie.gui.DVBtree;
+import nl.digitalekabeltelevisie.gui.EITView;
 import nl.digitalekabeltelevisie.gui.FileOpenAction;
 import nl.digitalekabeltelevisie.gui.GridView;
 import nl.digitalekabeltelevisie.gui.PIDDialog;
@@ -89,6 +90,7 @@ public class DVBinspector implements ChangeListener{
 	private BitRateChart bitRateView;
 	private BarChart barChart;
 	private GridView gridView;
+	private EITView eitView;
 	private final JFileChooser fc = new JFileChooser();
 	private JTabbedPane tabbedPane;
 	private JMenu viewTreeMenu;
@@ -206,6 +208,11 @@ public class DVBinspector implements ChangeListener{
 		gridView = new GridView(tStream,viewContest);
 		tabbedPane.addTab("Grid View", gridView);
 		views.add(gridView);
+
+		eitView = new EITView(tStream,viewContest);
+		tabbedPane.addTab("EIT View", eitView);
+		views.add(eitView);
+
 		tabbedPane.validate();
 
 		tabbedPane.addChangeListener(this);
@@ -377,6 +384,7 @@ public class DVBinspector implements ChangeListener{
 			bitRateView.setTransportStream(transportStream, vContext);
 			barChart.setTransportStream(transportStream, vContext);
 			gridView.setTransportStream(transportStream, vContext);
+			//ignore eitView on this, because it always uses only one PID.
 		}
 	}
 
