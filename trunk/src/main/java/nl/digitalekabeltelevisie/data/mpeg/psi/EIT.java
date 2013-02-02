@@ -28,21 +28,12 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.image.BufferedImage;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -50,8 +41,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
+import nl.digitalekabeltelevisie.gui.EITableImage;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.gui.ImageSource;
 import nl.digitalekabeltelevisie.util.Interval;
 
 
@@ -66,177 +57,6 @@ public class EIT extends AbstractPSITabel{
 
 	private final Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
 
-
-	public class EITableImage implements ImageSource{
-
-		private final long MILLI_SECS_PER_PIXEL = 30*1000;
-		private static final int SERVICE_NAME_WIDTH = 150;
-		private Map<Integer, EITsection[]> table;
-		final SortedSet<Integer> serviceOrder;
-
-		/**
-		 * Services are ordered by their SericeID.
-		 * @param table
-		 */
-		public EITableImage(Map<Integer, EITsection[]> table){
-			this.table = table;
-			serviceOrder = new TreeSet<Integer>(table.keySet());
-		}
-
-		/**
-		 * @param serviceOrder determines order in which EPG services are displayed
-		 * @param table
-		 */
-		public EITableImage(SortedSet<Integer> serviceOrder, Map<Integer, EITsection[]> table){
-			this.table = table;
-			this.serviceOrder = serviceOrder;
-		}
-		@Override
-		public BufferedImage getImage() {
-
-			// determines selection and order of services to be rendered
-
-			Interval interval = getSpanningInterval(serviceOrder, table);
-
-			// Round up/down to nearest hour
-
-			Date startDate = roundHourDown(interval.getStart());
-			Date endDate = roundHourUp(interval.getEnd());
-
-			int legendHeight = 40;
-			int height = (serviceOrder.size()*20)+1 + legendHeight;
-			int width = 1+SERVICE_NAME_WIDTH + (int)((endDate.getTime() - startDate.getTime())/MILLI_SECS_PER_PIXEL);
-			final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			final Graphics2D gd = img.createGraphics();
-			gd.setColor(Color.BLUE);
-			gd.fillRect(0, 0, width, height);
-			gd.setColor(Color.WHITE);
-
-			final Font font = new Font("SansSerif", Font.PLAIN, 14);
-			final Font nameFont = new Font("SansSerif", Font.BOLD, 14);
-			gd.setFont(font);
-
-			BasicStroke basicStroke = new BasicStroke( 3.0f);
-			gd.setStroke(basicStroke);
-
-			drawLegend(gd, startDate, endDate,MILLI_SECS_PER_PIXEL,SERVICE_NAME_WIDTH, 0, width,legendHeight);
-			drawActualTime(gd, startDate, MILLI_SECS_PER_PIXEL, SERVICE_NAME_WIDTH, 0,width,legendHeight);
-
-			BasicStroke basicStroke1 = new BasicStroke( 1.0f);
-			gd.setStroke(basicStroke1);
-
-			int offset = legendHeight;
-			int char_descend = 16;
-
-			// draw labels
-			drawLabels(gd, serviceOrder, nameFont, 0, offset, char_descend);
-
-			// draw grid
-			offset=legendHeight;
-
-			gd.setFont(font);
-			for(final Integer serviceNo : serviceOrder){
-				EITsection[] eiTsections = table.get(serviceNo);
-				drawServiceEvents(gd, startDate, MILLI_SECS_PER_PIXEL, SERVICE_NAME_WIDTH, offset, char_descend,eiTsections);
-				offset+=20;
-			}
-			return img;
-		}
-
-
-		private void drawServiceEvents(final Graphics2D gd, Date startDate, long mSecsPixel, int x, int y,
-				int char_descend,EITsection[] eiTsections) {
-			for(final EITsection section :eiTsections){
-				if(section!= null){
-					List<Event> eventList = section.getEventList();
-					for(Event event:eventList){
-						drawEvent(gd, startDate, mSecsPixel, event, x, y, char_descend);
-					}
-				}
-			}
-		}
-
-
-		private void drawEvent(final Graphics2D gd, Date startDate, long mSecsPixel, Event event, int x, int y, int char_descend) {
-			Date eventStart = getUTCDate( event.getStartTime());
-
-			int w = (int)(getDurationMillis(event.getDuration())/mSecsPixel);
-			int eventX = x+(int)((eventStart.getTime()-startDate.getTime())/mSecsPixel);
-			String eventName= event.getEventName();
-			gd.setClip(null);
-
-			// FIll gray
-			gd.setColor(Color.GRAY);
-			gd.fillRect(eventX, y, w, 20);
-
-			// black border
-			gd.setColor(Color.BLACK);
-			gd.drawRect(eventX, y, w, 20);
-			// title
-
-			Shape clip = new Rectangle(eventX+5, y, w-10, 20);
-			gd.setClip(clip);
-			gd.setColor(Color.WHITE);
-			gd.drawString(eventName, eventX+5,y+char_descend);
-		}
-
-
-		private void drawLabels(final Graphics2D gd, final SortedSet<Integer> serviceSet, final Font nameFont,
-				int x,  int y, int char_descend) {
-			int labelY = y;
-			gd.setFont(nameFont);
-			gd.setColor(Color.WHITE);
-			for(final Integer serviceNo : serviceSet){
-				String serviceName = getParentPSI().getSdt().getServiceName(serviceNo);
-				if(serviceName==null){
-					serviceName = "Service "+serviceNo;
-				}
-				Shape clipn = new Rectangle(x, labelY, SERVICE_NAME_WIDTH-5, 20);
-				gd.setClip(clipn);
-				gd.drawString(serviceName, x+5, labelY+char_descend);
-
-				labelY+=20;
-			}
-		}
-
-
-		private void drawActualTime(final Graphics2D gd, Date startDate,long msecsPixel, int x, int y, int width, int legendHeight) {
-			// do we have a current time in the TDT?
-			if(getParentPSI().getTdt()!=null){
-				final List<TDTsection> tdtSectionList  = getParentPSI().getTdt().getTdtSectionList();
-				if(tdtSectionList.size()>=1){
-					final TDTsection first = tdtSectionList.get(0);
-					final Date startTime = getUTCCalender(first.getUTC_time()).getTime();
-					gd.setColor(Color.RED);
-					int labelX = x+(int)((startTime.getTime()-startDate.getTime())/msecsPixel);
-					gd.drawLine(labelX, 0, labelX, legendHeight-1);
-				}
-			}
-		}
-
-
-		private void drawLegend(final Graphics2D gd, Date startDate, Date endDate, long msecsPixel, int x, int y, int w, int legendHeight) {
-			gd.setColor(Color.BLACK);
-			gd.fillRect(x, y, w, legendHeight);
-
-			gd.setColor(Color.WHITE);
-
-			SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-			SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-			Date hourMark = new Date(startDate.getTime());
-			while(hourMark.before(endDate)){
-				int labelX = x+(int)((hourMark.getTime()-startDate.getTime())/msecsPixel);
-				gd.drawLine(labelX, 0, labelX, legendHeight-1);
-				String timeString =   tf.format(hourMark);
-				String dateString =   df.format(hourMark);
-
-				gd.drawString(dateString, labelX+5, 17);
-				gd.drawString(timeString, labelX+5, 37);
-				hourMark = new Date(hourMark.getTime() + (1000L*60*60)); //advance 1 hour
-			}
-		}
-
-	}
 
 	/**
 	 * Helper to implement a HTMLSource for the program information for a single service (channel)
@@ -309,15 +129,18 @@ public class EIT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		KVP eitKVP = new KVP("EIT");
-		eitKVP.setImageSource(new EITableImage(getCombinedSchedule()));
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(eitKVP);
 		final TreeSet<Integer> tableSet = new TreeSet<Integer>(eit.keySet());
 
+		KVP eitKVP = new KVP("EIT");
+		if(!tableSet.isEmpty()){
+			// TODO still breaks when all EITSections are empty (no events defined), because we can not get start and end date...
+			eitKVP.setImageSource(new EITableImage(this, getCombinedSchedule()));
+		}
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(eitKVP);
 
 		for(final Integer tableID : tableSet ){
 			final KVP tableKVP = new KVP("table_id",tableID, TableSection.getTableType(tableID));
-			tableKVP.setImageSource(new EITableImage(eit.get(tableID)));
+			tableKVP.setImageSource(new EITableImage(this, eit.get(tableID)));
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(tableKVP);
 			final HashMap<Integer, EITsection []> table= eit.get(tableID);
 
@@ -363,9 +186,9 @@ public class EIT extends AbstractPSITabel{
 	 * @return Interval that covers all events in eitTable
 	 */
 	public static Interval getSpanningInterval(final Set<Integer> serviceSet, Map<Integer, EITsection[]> eitTable) {
-		Date startDate1 = null;
-		Date endDate1 = null;
-		// services to be displayed, in order
+		Date startDate = null;
+		Date endDate = null;
+		// services to be displayed
 
 		for(final Integer serviceNo : serviceSet){
 			for(final EITsection section :eitTable.get(serviceNo)){
@@ -373,19 +196,22 @@ public class EIT extends AbstractPSITabel{
 					List<Event> eventList = section.getEventList();
 					for(Event event:eventList){
 						Date eventStart = getUTCDate( event.getStartTime());
-						if((startDate1==null)||(startDate1.after(eventStart))){
-							startDate1 = eventStart;
+						if((startDate==null)||(startDate.after(eventStart))){
+							startDate = eventStart;
 						}
 						Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
-						if((endDate1==null)||(endDate1.before(eventEnd))){
-							endDate1 = eventEnd;
+						if((endDate==null)||(endDate.before(eventEnd))){
+							endDate = eventEnd;
 						}
 					}
 				}
 			}
 		}
-		Interval interval = new Interval(startDate1,endDate1);
-		return interval;
+		if((startDate!=null)&&(endDate!=null)){
+			return new Interval(startDate,endDate);
+		}else{
+			return null;
+		}
 	}
 
 	public HashMap<Integer, EITsection[]> getCombinedSchedule(){
@@ -399,6 +225,16 @@ public class EIT extends AbstractPSITabel{
 		for (int tableID = 0x60; tableID < 0x70; tableID++) {
 			addSections(res, tableID);
 		}
+		return res;
+	}
+
+	public HashMap<Integer, EITsection[]> getCombinedPresentFollowing(){
+
+		HashMap<Integer, EITsection[]> res = new HashMap<Integer, EITsection[]>();
+		// actual TS
+		addSections(res, 0x4E);
+		// other TS
+		addSections(res, 0x4F);
 		return res;
 	}
 
