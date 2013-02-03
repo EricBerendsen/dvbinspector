@@ -6,7 +6,12 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,6 +21,10 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import javax.swing.JPanel;
+
+import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor.ContentItem;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -30,7 +39,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.util.Interval;
 import nl.digitalekabeltelevisie.util.Utils;
 
-public class EITableImage implements ImageSource{
+public class EITableImage extends JPanel implements ComponentListener,ImageSource{
 
 	public static final int LINE_HEIGHT = 20;
 	/**
@@ -46,10 +55,15 @@ public class EITableImage implements ImageSource{
 	private Map<Integer, EITsection[]> servicesTable;
 	private SortedSet<Integer> serviceOrder;
 	private Interval interval;
+	private boolean selectedSchedule = true;
 
 	SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
+	private int translatedX;
+	private int translatedY;
+	private int viewWidth;
+	private int viewHeight;
 
 	public EITableImage(){
 	}
@@ -86,6 +100,36 @@ public class EITableImage implements ImageSource{
 		this.serviceOrder = serviceOrder;
 		this.interval = EIT.getSpanningInterval(serviceOrder, table);
 	}
+
+	public EITableImage(final TransportStream stream, final ViewContext viewContext) {
+		super();
+		this.addComponentListener(this);
+		setmSecP(15*1000L); // default
+
+		setTransportStream(stream, viewContext);
+		setToolTipText("");
+		revalidate();
+
+	}
+
+	public void setTransportStream(final TransportStream stream, final ViewContext viewContext) {
+
+		if(stream!=null){
+			eit = stream.getPsi().getEit();
+			if(selectedSchedule ){
+				servicesTable = eit.getCombinedSchedule();
+			}else{
+				servicesTable = eit.getCombinedPresentFollowing();
+			}
+
+			this.serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+			this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+
+			setSize(getDimension());
+			repaint();
+		}
+	}
+
 	@Override
 	public BufferedImage getImage() {
 
@@ -286,86 +330,90 @@ public class EITableImage implements ImageSource{
 		this.mSecP = mSecP;
 	}
 
-	String getToolTipText(int x, int y){
-		StringBuilder r = new StringBuilder();
-		if(y>LEGEND_HEIGHT){
-			int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
-			int serviceId = (Integer) serviceOrder.toArray()[row];
-			String name = eit.getParentPSI().getSdt().getServiceName(serviceId);
-			if(name==null){
-				name = "Service "+serviceId;
-			}
+	@Override
+	public String getToolTipText(final MouseEvent e){
+		StringBuilder r1=new StringBuilder();
+		if(interval!=null){
+			final int x=e.getX();
+			final int y=e.getY();
+			if((x>(translatedX+SERVICE_NAME_WIDTH))&&
+					(y>(translatedY+LEGEND_HEIGHT))){
 
-			r.append("<html><b>").append(name).append("</b><br>");
-			if(x>SERVICE_NAME_WIDTH){
+				int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
+				int serviceId = (Integer) serviceOrder.toArray()[row];
+				String name = eit.getParentPSI().getSdt().getServiceName(serviceId);
+				if(name==null){
+					name = "Service "+serviceId;
+				}
+
+				r1.append("<html><b>").append(name).append("</b><br>");
+
 				Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(mSecP *(x-SERVICE_NAME_WIDTH)));
 
 				Event event = findEvent(serviceId, thisDate);
 				if(event!=null){
-					//r.append("<br><br><b>").append(event.getEventName()).append("</b>");
-					r.append("Start:&nbsp;").append(Utils.getUTCFormattedString(event.getStartTime())).append("&nbsp;Duration: ");
-					r.append(event.getDuration().substring(0, 2)).append(":");
-					r.append(event.getDuration().substring(2, 4)).append(":");
-					r.append(event.getDuration().substring(4)).append("<br>");
-					final List<Descriptor> descList = event.getDescriptorList();
-					//List<Descriptor> shortDesc = Descriptor.findDescriptorsInList(descList, 0x4D);
-					final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
-					if(shortDesc.size()>0){
-						r.append("<br><b><span style=\"background-color: white\">");
-						final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
-						r.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
-						String shortText = shortEventDescriptor.getText().toString();
-						if((shortText!=null)&&!shortText.isEmpty()){
-							r.append(breakLinesEscapeHtml(shortText)).append("<br>");
-						}
-					}
-					//List<Descriptor> extendedDesc = Descriptor.findDescriptorsInList(descList, 0x4E);
-					final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
-					StringBuilder t = new StringBuilder();
-					for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
-						t.append(extEvent.getText().toString());
-					}
-					String extended = t.toString();
-					if(!extended.isEmpty()){
-						r.append("<br>").append(breakLinesEscapeHtml(extended)).append("<br>");
-					}
-					final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
-					if(!contentDescList.isEmpty()){
-						ContentDescriptor contentDesc = contentDescList.get(0);
-						List<ContentItem> contentList = contentDesc.getContentList();
-						for(ContentItem c:contentList){
-							r.append("<br>Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
-							r.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
-						}
-
-					}
-					final List<ParentalRatingDescriptor> ratingDescList = Descriptor.findGenericDescriptorsInList(descList, ParentalRatingDescriptor.class);
-					if(!ratingDescList.isEmpty()){
-						ParentalRatingDescriptor ratingDesc = ratingDescList.get(0);
-						List<Rating> ratingList = ratingDesc.getRatingList();
-						for(Rating c:ratingList){
-							r.append("<br>Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
-						}
-
-					}
-
-
-
+					addEventDetails(r1, event);
 				}else{ // NO event found, just display time
 					String timeString =   tf.format(thisDate);
 					String dateString =   df.format(thisDate);
-					r.append(dateString).append(" ").append(timeString);
-
+					r1.append(dateString).append(" ").append(timeString);
 				}
-
+				r1.append("</html>");
 			}
-			r.append("</html>");
+		}
+		return r1.toString();
+	}
+
+	/**
+	 * @param r1
+	 * @param event
+	 */
+	private void addEventDetails(StringBuilder r1, Event event) {
+		r1.append("Start:&nbsp;").append(Utils.getUTCFormattedString(event.getStartTime())).append("&nbsp;Duration: ");
+		r1.append(event.getDuration().substring(0, 2)).append(":");
+		r1.append(event.getDuration().substring(2, 4)).append(":");
+		r1.append(event.getDuration().substring(4)).append("<br>");
+		final List<Descriptor> descList = event.getDescriptorList();
+		final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
+		if(shortDesc.size()>0){
+			r1.append("<br><b><span style=\"background-color: white\">");
+			final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
+			r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
+			String shortText = shortEventDescriptor.getText().toString();
+			if((shortText!=null)&&!shortText.isEmpty()){
+				r1.append(breakLinesEscapeHtml(shortText)).append("<br>");
+			}
+		}
+		final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
+		StringBuilder t = new StringBuilder();
+		for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
+			t.append(extEvent.getText().toString());
+		}
+		String extended = t.toString();
+		if(!extended.isEmpty()){
+			r1.append("<br>").append(breakLinesEscapeHtml(extended)).append("<br>");
+		}
+		final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
+		if(!contentDescList.isEmpty()){
+			ContentDescriptor contentDesc = contentDescList.get(0);
+			List<ContentItem> contentList = contentDesc.getContentList();
+			for(ContentItem c:contentList){
+				r1.append("<br>Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
+				r1.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
+			}
 
 		}
-
-		return r.toString();
-
+		final List<ParentalRatingDescriptor> ratingDescList = Descriptor.findGenericDescriptorsInList(descList, ParentalRatingDescriptor.class);
+		if(!ratingDescList.isEmpty()){
+			ParentalRatingDescriptor ratingDesc = ratingDescList.get(0);
+			List<Rating> ratingList = ratingDesc.getRatingList();
+			for(Rating c:ratingList){
+				r1.append("<br>Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
+			}
+		}
 	}
+
+
 
 	private String breakLinesEscapeHtml(String t) {
 		 StringTokenizer st = new StringTokenizer(t);
@@ -416,6 +464,134 @@ public class EITableImage implements ImageSource{
 
 	public void setEit(EIT eit) {
 		this.eit = eit;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
+	 */
+	public void componentHidden(final ComponentEvent e) {
+		// empty block
+
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
+	 */
+	public void componentMoved(final ComponentEvent e) {
+		repaint();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
+	 */
+	public void componentResized(final ComponentEvent e) {
+		repaint();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
+	 */
+	public void componentShown(final ComponentEvent e) {
+		repaint();
+	}
+
+	@Override
+	public void paintComponent(final Graphics g) {
+		setBackground(Color.BLUE);
+		super.paintComponent(g);    // paints background
+
+		Graphics2D gd = (Graphics2D)g;
+		gd.setColor(Color.BLACK);
+
+		Rectangle rect = getVisibleRect();
+		translatedX = rect.x;
+		translatedY = rect.y;
+		viewWidth = rect.width;
+		viewHeight = rect.height;
+
+		System.out.println("transx: "+translatedX+", translatedY:"+translatedY+", rect "+rect);
+
+		if(interval!=null){ // there are services in the EIT
+			Date startDate = roundHourDown(interval.getStart());
+			Date endDate = roundHourUp(interval.getEnd());
+
+			gd.setColor(Color.WHITE);
+
+			final Font font = new Font("SansSerif", Font.PLAIN, 14);
+			final Font nameFont = new Font("SansSerif", Font.BOLD, 14);
+			gd.setFont(font);
+
+			BasicStroke basicStroke = new BasicStroke( 3.0f);
+			gd.setStroke(basicStroke);
+
+
+			BasicStroke basicStroke1 = new BasicStroke( 1.0f);
+			gd.setStroke(basicStroke1);
+
+			int offset = LEGEND_HEIGHT;
+			int char_descend = 16;
+			drawLegend(gd, startDate, endDate,SERVICE_NAME_WIDTH,translatedY, LEGEND_HEIGHT);
+			drawActualTime(gd, startDate, SERVICE_NAME_WIDTH, translatedY,LEGEND_HEIGHT);
+
+			// draw labels
+			drawLabels(gd, getServiceOrder(), nameFont, translatedX, offset, char_descend);
+
+			gd.setColor(Color.BLUE);
+			gd.fillRect(translatedX, translatedY, SERVICE_NAME_WIDTH, LEGEND_HEIGHT);
+
+			// draw grid
+			offset=LEGEND_HEIGHT;
+			Graphics2D gd2 = (Graphics2D)gd.create();
+
+			gd2.setFont(font);
+			gd2.clipRect(translatedX+SERVICE_NAME_WIDTH, translatedY+LEGEND_HEIGHT, viewWidth-SERVICE_NAME_WIDTH, viewHeight- LEGEND_HEIGHT);
+
+			SortedSet<Integer> order = getServiceOrder();
+			for(final Integer serviceNo : order){
+				EITsection[] eiTsections = servicesTable.get(serviceNo);
+				drawServiceEvents(gd2, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
+				offset+=LINE_HEIGHT;
+			}
+
+			gd2.dispose();
+
+		}else{
+			gd.setColor(Color.WHITE);
+			final Font nameFont = new Font("SansSerif", Font.BOLD, 14);
+			gd.setFont(nameFont);
+			gd.drawString("No EIT present (or empty)", 20, 20);
+		}
+
+	}
+
+
+	public void selectPresentFollowing() {
+		servicesTable = eit.getCombinedPresentFollowing();
+		serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+		interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+		setSize(getDimension());
+		selectedSchedule = false;
+		repaint();
+	}
+
+	public void selectSchedule() {
+		servicesTable = eit.getCombinedSchedule();
+		serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+		interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+		setSize(getDimension());
+		selectedSchedule = true;
+		repaint();
+	}
+
+	public void setZoom(long l) {
+		setmSecP(l);
+		setSize(getDimension());
+		repaint();
+	}
+
+	@Override
+	public Dimension getPreferredSize() {
+		return getDimension();
 	}
 
 }

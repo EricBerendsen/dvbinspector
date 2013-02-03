@@ -146,13 +146,13 @@ public class ContentDescriptor extends Descriptor {
 		case 0xA: return "Leisure hobbies:";
 		case 0xB: return "Special characteristics:";
 		case 0xF: return "user defined";
-		default: return "reserved for future use";
+		default: return "reserved for future use:";
 		}
 	}
 
 	public static String getContentNibbleLevel2String(final int nibble1,final int nibble2) {
 		switch (nibble1) {
-		case 0x0: return "undefined content";
+		case 0x0: return "";
 		case 0x1: //return "Movie/Drama:";
 			switch (nibble2) {
 			case 0x0: return "movie/drama (general)";
@@ -287,7 +287,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0xF: return "user defined";
+		case 0xF: return "";
 		default: return "reserved for future use";
 		}
 	}
