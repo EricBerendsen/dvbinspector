@@ -52,7 +52,7 @@ public class EITView extends JPanel implements TransportStreamView{
 	 *
 	 */
 	private JScrollPane scrollGrid;
-	private EITPanel eitPanel;
+	private EITableImage eitPanel;
 	private JPanel buttonPanel;
 
 	/**
@@ -68,7 +68,7 @@ public class EITView extends JPanel implements TransportStreamView{
 		addZoomRadioButtons();
 		add(buttonPanel,BorderLayout.PAGE_START);
 
-		eitPanel = new EITPanel(transportStream,viewContext);
+		eitPanel = new EITableImage(transportStream,viewContext);
 		scrollGrid = new JScrollPane(eitPanel);
 		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
