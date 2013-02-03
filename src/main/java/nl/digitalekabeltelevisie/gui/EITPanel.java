@@ -41,6 +41,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.swing.JPanel;
@@ -58,7 +59,7 @@ public class EITPanel extends JPanel implements ComponentListener
 {
 
 	private static final int LINE_HEIGTH = 20;
-	private long mSecsPixel = 15*1000L;
+
 	private static int legendHeight = 40;
 
 	private int SERVICE_NAME_WIDTH = 150;
@@ -68,11 +69,12 @@ public class EITPanel extends JPanel implements ComponentListener
 
 	private EIT eit;
 	EITableImage tableImage;
-	private TreeSet<Integer> serviceOrder;
+	//private TreeSet<Integer> serviceOrder;
 	private int translatedX;
 	private int translatedY;
 	private int viewWidth;
 	private int viewHeight;
+	private boolean selectedSchedule = true;
 
 	/**
 	 *
@@ -80,6 +82,8 @@ public class EITPanel extends JPanel implements ComponentListener
 	public EITPanel(final TransportStream stream, final ViewContext viewContext) {
 		super();
 		this.addComponentListener(this);
+		tableImage = new EITableImage();
+		tableImage.setmSecP(15*1000L); // default
 
 		setTransportStream(stream, viewContext);
 	}
@@ -89,9 +93,18 @@ public class EITPanel extends JPanel implements ComponentListener
 
 		if(stream!=null){
 			eit = stream.getPsi().getEit();
-			combinedSchedule = eit.getCombinedSchedule();
-			serviceOrder = new TreeSet<Integer>(combinedSchedule.keySet());
-			tableImage = new EITableImage(eit, combinedSchedule, 15*1000L);
+			if(selectedSchedule ){
+				combinedSchedule = eit.getCombinedSchedule();
+			}else{
+				combinedSchedule = eit.getCombinedPresentFollowing();
+			}
+
+			tableImage.setEit(eit);
+			tableImage.setServicesTableAndOrder(combinedSchedule, new TreeSet<Integer>(combinedSchedule.keySet()));
+			//tableImage.setmSecP(15*1000L);
+			setSize(tableImage.getDimension());
+			repaint();
+
 		}
 
 		//setPreferredSize(getPreferredSize());
@@ -156,7 +169,8 @@ public class EITPanel extends JPanel implements ComponentListener
 			gd2.setFont(font);
 			gd2.clipRect(translatedX+SERVICE_NAME_WIDTH, translatedY+legendHeight, viewWidth-SERVICE_NAME_WIDTH, viewHeight- legendHeight);
 
-			for(final Integer serviceNo : serviceOrder){
+			SortedSet<Integer> order = tableImage.getServiceOrder();
+			for(final Integer serviceNo : order){
 				EITsection[] eiTsections = combinedSchedule.get(serviceNo);
 				tableImage.drawServiceEvents(gd2, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
 				offset+=LINE_HEIGTH;
@@ -244,9 +258,10 @@ public class EITPanel extends JPanel implements ComponentListener
 
 	public void selectPresentFollowing() {
 		combinedSchedule = eit.getCombinedPresentFollowing();
-		serviceOrder = new TreeSet<Integer>(combinedSchedule.keySet());
+		TreeSet<Integer> serviceOrder = new TreeSet<Integer>(combinedSchedule.keySet());
 		tableImage.setServicesTableAndOrder(combinedSchedule,serviceOrder);
 		setSize(tableImage.getDimension());
+		selectedSchedule = false;
 
 		repaint();
 
@@ -255,9 +270,10 @@ public class EITPanel extends JPanel implements ComponentListener
 
 	public void selectSchedule() {
 		combinedSchedule = eit.getCombinedSchedule();
-		serviceOrder = new TreeSet<Integer>(combinedSchedule.keySet());
+		TreeSet<Integer> serviceOrder = new TreeSet<Integer>(combinedSchedule.keySet());
 		tableImage.setServicesTableAndOrder(combinedSchedule,serviceOrder);
 		setSize(tableImage.getDimension());
+		selectedSchedule = true;
 		repaint();
 
 

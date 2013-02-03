@@ -13,10 +13,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor.ContentItem;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtendedEventDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor.Rating;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ShortEventDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
@@ -31,18 +36,23 @@ public class EITableImage implements ImageSource{
 	/**
 	 *
 	 */
-	private final EIT eit;
-	private long mSecP = 30*1000;
 	private static long DEFAULT_MILLI_SECS_PER_PIXEL = 30*1000;
 	private static final int SERVICE_NAME_WIDTH = 150;
+	public static int LEGEND_HEIGHT = 40;
+
+
+	private EIT eit;
+	private long mSecP = DEFAULT_MILLI_SECS_PER_PIXEL;
 	private Map<Integer, EITsection[]> servicesTable;
 	private SortedSet<Integer> serviceOrder;
 	private Interval interval;
-	int legendHeight = 40;
 
 	SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
 	SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
+
+	public EITableImage(){
+	}
 
 	/**
 	 * Services are ordered by their SericeID.
@@ -91,7 +101,7 @@ public class EITableImage implements ImageSource{
 		Date endDate = roundHourUp(interval.getEnd());
 
 
-		int height = (serviceOrder.size()*LINE_HEIGHT)+1 + legendHeight;
+		int height = (serviceOrder.size()*LINE_HEIGHT)+1 + LEGEND_HEIGHT;
 		int legendWidth = (int)((endDate.getTime() - startDate.getTime())/mSecP);
 		int width = 1+SERVICE_NAME_WIDTH + legendWidth;
 		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -107,20 +117,20 @@ public class EITableImage implements ImageSource{
 		BasicStroke basicStroke = new BasicStroke( 3.0f);
 		gd.setStroke(basicStroke);
 
-		drawLegend(gd, startDate, endDate,SERVICE_NAME_WIDTH,0, legendHeight);
-		drawActualTime(gd, startDate, SERVICE_NAME_WIDTH, 0, legendHeight);
+		drawLegend(gd, startDate, endDate,SERVICE_NAME_WIDTH,0, LEGEND_HEIGHT);
+		drawActualTime(gd, startDate, SERVICE_NAME_WIDTH, 0, LEGEND_HEIGHT);
 
 		BasicStroke basicStroke1 = new BasicStroke( 1.0f);
 		gd.setStroke(basicStroke1);
 
-		int offset = legendHeight;
+		int offset = LEGEND_HEIGHT;
 		int char_descend = 16;
 
 		// draw labels
 		drawLabels(gd, serviceOrder, nameFont, 0, offset, char_descend);
 
 		// draw grid
-		offset=legendHeight;
+		offset=LEGEND_HEIGHT;
 
 		gd.setFont(font);
 		for(final Integer serviceNo : serviceOrder){
@@ -278,24 +288,25 @@ public class EITableImage implements ImageSource{
 
 	String getToolTipText(int x, int y){
 		StringBuilder r = new StringBuilder();
-		if(y>legendHeight){
-			int row = (y-legendHeight)/LINE_HEIGHT;
+		if(y>LEGEND_HEIGHT){
+			int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
 			int serviceId = (Integer) serviceOrder.toArray()[row];
 			String name = eit.getParentPSI().getSdt().getServiceName(serviceId);
 			if(name==null){
 				name = "Service "+serviceId;
 			}
 
-			r.append("<html><b>").append(name).append("</b>");
+			r.append("<html><b>").append(name).append("</b><br>");
 			if(x>SERVICE_NAME_WIDTH){
-				Date thisDate = new Date(interval.getStart().getTime()+(mSecP *(x-SERVICE_NAME_WIDTH)));
+				Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(mSecP *(x-SERVICE_NAME_WIDTH)));
 
 				Event event = findEvent(serviceId, thisDate);
 				if(event!=null){
 					//r.append("<br><br><b>").append(event.getEventName()).append("</b>");
-					r.append("&nbsp;").append(Utils.getUTCFormattedString(event.getStartTime())).append("&nbsp;");
-					r.append(event.getDuration()).append("&nbsp;");
-
+					r.append("Start:&nbsp;").append(Utils.getUTCFormattedString(event.getStartTime())).append("&nbsp;Duration: ");
+					r.append(event.getDuration().substring(0, 2)).append(":");
+					r.append(event.getDuration().substring(2, 4)).append(":");
+					r.append(event.getDuration().substring(4)).append("<br>");
 					final List<Descriptor> descList = event.getDescriptorList();
 					//List<Descriptor> shortDesc = Descriptor.findDescriptorsInList(descList, 0x4D);
 					final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
@@ -303,19 +314,47 @@ public class EITableImage implements ImageSource{
 						r.append("<br><b><span style=\"background-color: white\">");
 						final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
 						r.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
-						r.append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
+						String shortText = shortEventDescriptor.getText().toString();
+						if((shortText!=null)&&!shortText.isEmpty()){
+							r.append(breakLinesEscapeHtml(shortText)).append("<br>");
+						}
 					}
 					//List<Descriptor> extendedDesc = Descriptor.findDescriptorsInList(descList, 0x4E);
 					final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
+					StringBuilder t = new StringBuilder();
 					for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
-						r.append(Utils.escapeHTML(extEvent.getText().toString()));
+						t.append(extEvent.getText().toString());
 					}
+					String extended = t.toString();
+					if(!extended.isEmpty()){
+						r.append("<br>").append(breakLinesEscapeHtml(extended)).append("<br>");
+					}
+					final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
+					if(!contentDescList.isEmpty()){
+						ContentDescriptor contentDesc = contentDescList.get(0);
+						List<ContentItem> contentList = contentDesc.getContentList();
+						for(ContentItem c:contentList){
+							r.append("<br>Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
+							r.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
+						}
+
+					}
+					final List<ParentalRatingDescriptor> ratingDescList = Descriptor.findGenericDescriptorsInList(descList, ParentalRatingDescriptor.class);
+					if(!ratingDescList.isEmpty()){
+						ParentalRatingDescriptor ratingDesc = ratingDescList.get(0);
+						List<Rating> ratingList = ratingDesc.getRatingList();
+						for(Rating c:ratingList){
+							r.append("<br>Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
+						}
+
+					}
+
+
 
 				}else{ // NO event found, just display time
 					String timeString =   tf.format(thisDate);
 					String dateString =   df.format(thisDate);
-					r.append("<br>").append(dateString);
-					r.append("<br>").append(timeString);
+					r.append(dateString).append(" ").append(timeString);
 
 				}
 
@@ -326,6 +365,23 @@ public class EITableImage implements ImageSource{
 
 		return r.toString();
 
+	}
+
+	private String breakLinesEscapeHtml(String t) {
+		 StringTokenizer st = new StringTokenizer(t);
+		 int len = 0;
+		 StringBuilder res = new StringBuilder();
+	     while (st.hasMoreTokens()) {
+	         String s = st.nextToken();
+	         if((len+s.length())>80){
+	        	 res.append("<br>").append(Utils.escapeHTML(s));
+	        	 len=s.length();
+	         }else{
+	        	 res.append(' ').append(Utils.escapeHTML(s));
+	        	 len+=1+s.length();
+	         }
+	     }
+		return res.toString();
 	}
 
 	Event findEvent(int serviceID, Date date){
@@ -356,6 +412,10 @@ public class EITableImage implements ImageSource{
 		this.servicesTable = servicesTable;
 		this.serviceOrder = serviceOrder;
 		this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+	}
+
+	public void setEit(EIT eit) {
+		this.eit = eit;
 	}
 
 }
