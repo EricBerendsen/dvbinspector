@@ -553,6 +553,7 @@ public final class Utils {
 		final byte[] filteredBytes = new byte[length];  // length is enough, might need less
 		int filteredLength=0;
 
+		// TODO this is where we loose formatting, like newlines and character emphasis
 		for (int i = offset; i < (offset+length); i++) {
 			if(b[i]>-97){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f)){
 				filteredBytes[filteredLength++]=b[i];
@@ -1595,8 +1596,8 @@ public final class Utils {
 			c2.set(Calendar.MINUTE, 0);
 			c2.add(Calendar.HOUR, 1);
 		}
-	
-	
+
+
 		return c2.getTime();
 	}
 
@@ -1611,7 +1612,7 @@ public final class Utils {
 		c.setTime(date);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MINUTE, 0);
-	
+
 		return c.getTime();
 	}
 }
