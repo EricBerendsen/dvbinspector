@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes;
@@ -110,7 +110,6 @@ public class GeneralPesHandler  implements TreeNode{
 		}else if((packet.isAdaptationFieldControl()==1)||(packet.isAdaptationFieldControl()==3)){ // has payload?
 			if(packet.isPayloadUnitStartIndicator()){ // previous pesPAcket Finished, tell it to process its data
 				pesData.processPayload();
-				//processPesDataBytes(pesData.getPesStreamID(), pesData.getData(), pesData.getPesDataStart(), pesData.getPesDataLen(), pesData.getPts());
 				processPesDataBytes(pesData);
 				//start a new pesPacket
 				pesStreamID = getInt(data, 3, 1, MASK_8BITS);
@@ -145,21 +144,21 @@ public class GeneralPesHandler  implements TreeNode{
 
 	public void setPID(PID pid) {
 		this.pid = pid;
-		
+
 	}
-	
+
 	public PID getPID() {
 		return pid;
-		
+
 	}
 
 	public BufferedImage getBGImage(int height, int width, long pts) {
-		
+
 		BufferedImage bgImage = null;
 		// try to get video BG
 		// first get PMT to which this PES belongs
-		// this ASS U MEs this PES is used by only one service. 
-		// Also ignores Page ID. 
+		// this ASS U MEs this PES is used by only one service.
+		// Also ignores Page ID.
 		PMTsection pmt = getTransportStream().getPMTforPID(getPID().getPid());
 		// then get PID with ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream (0x02)
 		if(pmt!=null){
@@ -167,19 +166,19 @@ public class GeneralPesHandler  implements TreeNode{
 			if(videoPID>0){
 				// see if it has a PESHandler (i.e. not scrambled) and if it is already parsed
 				PID pid = getTransportStream().getPids()[videoPID];
-				if(pid!=null){ // in partial stream the video PID may be missing 
+				if(pid!=null){ // in partial stream the video PID may be missing
 					GeneralPesHandler pesHandler = pid.getPesHandler();
-					if((pesHandler!=null)&& 
-						pesHandler.isInitialized() && 
+					if((pesHandler!=null)&&
+						pesHandler.isInitialized() &&
 						(pesHandler instanceof Video138182Handler)){
 						Video138182Handler videoHandler = (Video138182Handler)pesHandler;
 						bgImage=videoHandler.getImage(height, width, pts);
-						
+
 					}
 				}
 			}
 		}
-		
+
 		if(bgImage==null){ // no life image, use default
 			bgImage = DVBSubtitlingPESDataField.bgImage576;
 			// display_definition_segment for other size

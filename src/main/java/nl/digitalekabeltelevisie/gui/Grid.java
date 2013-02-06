@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.gui;
@@ -51,7 +51,7 @@ public class Grid extends JPanel implements ComponentListener
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 7881015434582215246L;
 	private static final int blockW = 12;
@@ -69,7 +69,7 @@ public class Grid extends JPanel implements ComponentListener
 
 
 	/**
-	 * 
+	 *
 	 */
 	public Grid(final TransportStream stream, final ViewContext viewContext) {
 		super();
@@ -99,12 +99,9 @@ public class Grid extends JPanel implements ComponentListener
 
 		}
 
-		//setPreferredSize(getPreferredSize());
 		// exact text does not matter. getToolTipText overriden. This is only needed to activate tool tips
 		setToolTipText("Test");
 		revalidate();
-
-		//setMinimumSize(new Dimension(400,300));
 	}
 
 
@@ -112,7 +109,6 @@ public class Grid extends JPanel implements ComponentListener
 	public void paintComponent(final Graphics g) {
 		setBackground(Color.WHITE);
 		super.paintComponent(g);    // paints background
-		//g.drawLine(100, 100, 300, 300);
 		if(stream!=null){
 			for (int i = 0; i < lines; i++) {
 				for (int j = 0; j < blockPerLine; j++) {

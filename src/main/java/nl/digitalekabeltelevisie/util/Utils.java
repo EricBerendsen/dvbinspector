@@ -163,7 +163,6 @@ public final class Utils {
 
 	private static void readCSVIdString(final String fileName, final RangeHashMap<Integer,String> m) {
 		try {
-			//CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file),Charset.forName("UTF-16")));
 			final InputStream fileInputStream = classL.getResourceAsStream(fileName);
 			final CSVReader reader = new CSVReader(new InputStreamReader(fileInputStream,Charset.forName("UTF-16")));
 
@@ -187,7 +186,6 @@ public final class Utils {
 
 	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
 		try {
-			//CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file),Charset.forName("UTF-16")));
 			final InputStream fileInputStream = classL.getResourceAsStream(fileName);
 			final CSVReader reader = new CSVReader(new InputStreamReader(fileInputStream,Charset.forName("UTF-16")));
 			String [] nextLine;
@@ -1347,7 +1345,6 @@ public final class Utils {
 		u=p-(h*fa*60*60)-(m*fa*60)-(s*fa);
 
 		return h+":"+f2.format(m)+":"+f2.format(s)+"."+f6.format(u);
-		//out (v,"  [= PCR-Timestamp: %d:%02d:%02d.%06ld]", h,m,s,u);
 	}
 
 	/**
@@ -1370,7 +1367,6 @@ public final class Utils {
 		u=p-(h*10000L*60*60)-(m*10000L*60)-(s*10000L);
 
 		return h+":"+f2.format(m)+":"+f2.format(s)+"."+f4.format(u);
-		//out (v,"  [= PCR-Timestamp: %d:%02d:%02d.%06ld]", h,m,s,u);
 	}
 
 	public static int getHammingReverseByte(final byte b){

@@ -59,7 +59,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.UNTsection;
 /**
  *
  * @author Eric
- * 
+ *
  */
 public class PsiSectionData {
 
@@ -147,7 +147,6 @@ public class PsiSectionData {
 							transportStream.getPsi().getUnts().update(new UNTsection(this,parentPID));
 						}else if((tableId==0x74)&&isAITSection(pid)){
 							transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
-							//}else if((tableId>=0x37)&&(tableId<=0x3F)&&isDSMSection(pid)){
 						}else if((tableId>=0x37)&&(tableId<=0x3F)){
 							// also include all PES streams component (ISO/IEC 13818-6 type B) which
 							// do not have a data_broadcast_id_descriptor associated with it,

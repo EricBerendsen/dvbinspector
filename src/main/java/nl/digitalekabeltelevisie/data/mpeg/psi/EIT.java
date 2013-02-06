@@ -131,12 +131,7 @@ public class EIT extends AbstractPSITabel{
 
 		final TreeSet<Integer> tableSet = new TreeSet<Integer>(eit.keySet());
 
-		KVP eitKVP = new KVP("EIT");
-		if(!tableSet.isEmpty()){
-			// TODO still breaks when all EITSections are empty (no events defined), because we can not get start and end date...
-			eitKVP.setImageSource(new EITableImage(this, getCombinedSchedule()));
-		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(eitKVP);
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("EIT"));
 
 		for(final Integer tableID : tableSet ){
 			final KVP tableKVP = new KVP("table_id",tableID, TableSection.getTableType(tableID));
@@ -214,7 +209,7 @@ public class EIT extends AbstractPSITabel{
 		}
 	}
 
-	public HashMap<Integer, EITsection[]> getCombinedSchedule(){
+	public Map<Integer, EITsection[]> getCombinedSchedule(){
 
 		HashMap<Integer, EITsection[]> res = new HashMap<Integer, EITsection[]>();
 		// actual TS
@@ -228,7 +223,7 @@ public class EIT extends AbstractPSITabel{
 		return res;
 	}
 
-	public HashMap<Integer, EITsection[]> getCombinedPresentFollowing(){
+	public Map<Integer, EITsection[]> getCombinedPresentFollowing(){
 
 		HashMap<Integer, EITsection[]> res = new HashMap<Integer, EITsection[]>();
 		// actual TS
@@ -242,8 +237,8 @@ public class EIT extends AbstractPSITabel{
 	 * @param res
 	 * @param tableID
 	 */
-	private void addSections(HashMap<Integer, EITsection[]> res, int tableID) {
-		HashMap<Integer, EITsection []> table= eit.get(tableID);
+	private void addSections(Map<Integer, EITsection[]> res, int tableID) {
+		Map<Integer, EITsection []> table= eit.get(tableID);
 		if(table!=null){
 			HashSet<Integer> serviceSet = new HashSet<Integer>(table.keySet());
 			for(final Integer serviceNo : serviceSet){

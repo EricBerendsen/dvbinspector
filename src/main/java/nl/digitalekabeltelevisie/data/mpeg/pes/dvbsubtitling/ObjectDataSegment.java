@@ -75,12 +75,6 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 														  -0x34,-0x23,-0x12,-0x01
 														  };
 
-//	private static byte [] default_2_to_8_bit_map_table = {0x00,0x77,0x88,0xff};
-//	private static byte [] default_4_to_8_bit_map_table = {0x00,0x11,0x22,0x33,
-//														  0x44,0x55,0x66,0x77,
-//														  0x88,0x99,0xaa,0xbb,
-//														  0xcc,0xdd,0xee,0xff
-//														  };
 
 	/**
 	 *
@@ -125,11 +119,9 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_2_to_8_bit_map_table[i],null)));
 					}
 				}
-			}else if(dataType ==0x22 ){ // 4_to_8-bit_map-table data
-				if(table_4_to_8_bit_map_table!=null){
-					for (int i = 0; i < table_4_to_8_bit_map_table.length; i++) {
-						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_4_to_8_bit_map_table[i],null)));
-					}
+			}else if((dataType ==0x22)&& (table_4_to_8_bit_map_table!=null)){// 4_to_8-bit_map-table data
+				for (int i = 0; i < table_4_to_8_bit_map_table.length; i++) {
+					s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_4_to_8_bit_map_table[i],null)));
 				}
 			}
 
@@ -235,7 +227,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			final int[] text = new int[number_of_codes];
 			int txtLen=0;
 			for(int i = 0; i < number_of_codes; i ++){
-				final int character_code = (int)getLong(data,offset+10+i*2, 2, MASK_16BITS);
+				final int character_code = (int)getLong(data,offset+10+(i*2), 2, MASK_16BITS);
 				if(character_code>=32){ // skip unprintable chars (ugly!, why needed?)
 					text[txtLen++]=character_code;
 				}
@@ -644,7 +636,6 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		// right edge does not have to be straight. so we take the longest line.
 		int width=-1;
 		int height=-1;
-		//int dataType =-1;
 
 		int topLines=0;
 		int bottomLines=0;
@@ -698,12 +689,12 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			final int dataType = block.getDataType();
 			if((dataType>=0x10)&&(dataType<=0x12)){
 				if((dataType-15)>=regionDepth){ // ugly hack, means depth of block > requested depth, so no need to remap
-					System.arraycopy(block.getPixels(), 0, dataBuffer, 2*line*width+linepos, block.getNo_pixels());
+					System.arraycopy(block.getPixels(), 0, dataBuffer, (2*line*width)+linepos, block.getNo_pixels());
 				}else{ // remap
 					final byte[] remappedPix = mapTable(regionDepth,
 							two_to_4_bit_map_table, two_to_8_bit_map_table,
 							four_to_8_bit_map_table, block, dataType);
-					System.arraycopy(remappedPix, 0, dataBuffer, 2*line*width+linepos, block.getNo_pixels());
+					System.arraycopy(remappedPix, 0, dataBuffer, (2*line*width)+linepos, block.getNo_pixels());
 				}
 
 				linepos += block.getNo_pixels();
@@ -730,12 +721,12 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			final int dataType = block.getDataType();
 			if((dataType>=0x10)&&(dataType<=0x12)){
 				if((dataType-15)>=regionDepth){ // ugly hack, means depth of block > requested depth, so no need to remap
-					System.arraycopy(block.getPixels(), 0, dataBuffer, (1+2*line)*width+linepos, block.getNo_pixels());
+					System.arraycopy(block.getPixels(), 0, dataBuffer, ((1+(2*line))*width)+linepos, block.getNo_pixels());
 				}else{ // remap
 					final byte[] remappedPix = mapTable(regionDepth,
 							two_to_4_bit_map_table, two_to_8_bit_map_table,
 							four_to_8_bit_map_table, block, dataType);
-					System.arraycopy(remappedPix, 0, dataBuffer, (1+2*line)*width+linepos, block.getNo_pixels());
+					System.arraycopy(remappedPix, 0, dataBuffer, ((1+(2*line))*width)+linepos, block.getNo_pixels());
 				}
 
 				linepos += block.getNo_pixels();

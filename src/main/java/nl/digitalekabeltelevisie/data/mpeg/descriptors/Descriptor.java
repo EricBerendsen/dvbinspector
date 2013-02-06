@@ -54,7 +54,6 @@ public class Descriptor implements TreeNode {
 
 	protected TableSection	parentTableSection;
 
-	public static long		counter				= 0;
 
 	/**
 	 * @param b
@@ -62,12 +61,11 @@ public class Descriptor implements TreeNode {
 	 * @param parent
 	 */
 	public Descriptor(final byte[] b, final int offset, final TableSection parent) {
-		counter++;
 		privateData = b;
 		privateDataOffset = offset + 2;
 
-		setDescriptorTag(Utils.getUnsignedByte(b[offset]));
-		setDescriptorLength(Utils.getUnsignedByte(b[offset + 1]));
+		this.descriptorTag = Utils.getUnsignedByte(b[offset]);
+		this.descriptorLength = Utils.getUnsignedByte(b[offset + 1]);
 		parentTableSection = parent;
 	}
 
@@ -468,20 +466,7 @@ public class Descriptor implements TreeNode {
 		this.parentTableSection = parentTableSection;
 	}
 
-	//	public String getApplicationTypeString(int appType) {
-	//
-	//		switch (appType) {
-	//		case 0x00:
-	//			return "reserved_future_use";
-	//		case 0x01:
-	//			return "DVB-J application";
-	//		case 0x02:
-	//			return "DVB-HTML application";
-	//		default:
-	//			return "subject to registration with DVB";
-	//		}
-	//	}
-	//
+
 	public static String getFEC_innerString(final int fecInner) {
 		switch (fecInner) {
 		case 0:

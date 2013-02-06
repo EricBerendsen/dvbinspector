@@ -54,7 +54,6 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 	private final List<VideoMPEG2Section> sections= new ArrayList<VideoMPEG2Section>();
 
 	public VideoPESDataField(final PesPacketData pesPacket) {
-		//public VideoPESDataField(byte[] data, int offset, int len, long pts) {
 		super(pesPacket);
 
 		int i = pesDataStart;

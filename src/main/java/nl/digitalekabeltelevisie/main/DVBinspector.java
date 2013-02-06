@@ -150,15 +150,6 @@ public class DVBinspector implements ChangeListener{
 		defaultPrivateDataSpecifier = prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
 		modus = prefs.getInt(DVBinspector.DEFAULT_VIEW_MODUS,0);
 
-//		try {
-//			if(transportStream!=null){
-//				transportStream.parseStream();
-//			}
-//		} catch (final IOException e) {
-//			logger.log(Level.WARNING, "error parsing transportStream", e);
-//		}
-//
-
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
 		KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -186,7 +177,6 @@ public class DVBinspector implements ChangeListener{
 		//Create and set up the window.
 		frame = new JFrame("DVB Inspector");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		// ViewContext viewContext = new ViewContext();
 		pidDialog= new PIDDialog(frame,viewContest,this);
 		updatePIDLists(tStream,pidDialog);
 
@@ -219,7 +209,6 @@ public class DVBinspector implements ChangeListener{
 
 		frame.add(tabbedPane);
 		//Add content to the window.
-		//frame.add(treeView);
 
 		JMenuBar menuBar;
 		JMenu fileMenu;
@@ -362,7 +351,6 @@ public class DVBinspector implements ChangeListener{
 
 		if(tStream!=null){
 			final short[] used_pids=tStream.getUsedPids();
-			//ChartLabel[] labels= new ChartLabel[transportStream.getNoPIDS()];
 			for (int i = 0; i < used_pids.length; i++) {
 				used.add(new ChartLabel(used_pids[i]+" - "+transportStream.getShortLabel(used_pids[i]),used_pids[i], DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE[i%DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE.length]));
 			}

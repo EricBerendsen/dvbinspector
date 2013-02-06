@@ -153,7 +153,7 @@ public class ContentDescriptor extends Descriptor {
 	public static String getContentNibbleLevel2String(final int nibble1,final int nibble2) {
 		switch (nibble1) {
 		case 0x0: return "";
-		case 0x1: //return "Movie/Drama:";
+		case 0x1: // Movie/Drama:
 			switch (nibble2) {
 			case 0x0: return "movie/drama (general)";
 			case 0x1: return "detective/thriller";
@@ -167,7 +167,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x2: //return "News/Current affairs:";
+		case 0x2: // News/Current affairs:
 			switch (nibble2) {
 			case 0x0: return "news/current affairs (general)";
 			case 0x1: return "news/weather report";
@@ -177,7 +177,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x3: //return "Show/Game show:";
+		case 0x3: // Show/Game show:
 			switch (nibble2) {
 			case 0x0 : return "show/game show (general)";
 			case 0x1 : return "game show/quiz/contest";
@@ -186,7 +186,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x4: //return "Sports:";
+		case 0x4: // Sports:
 			switch (nibble2) {
 			case 0x0 : return "sports (general)";
 			case 0x1 : return "special events (Olympic Games, World Cup, etc.)";
@@ -203,7 +203,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x5: //return "Children's/Youth programmes:";
+		case 0x5: // Children's/Youth programmes:
 			switch (nibble2) {
 			case 0x0 : return "children's/youth programmes (general)";
 			case 0x1 : return "pre-school children's programmes";
@@ -214,7 +214,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x6: //return "Music/Ballet/Dance:";
+		case 0x6: // Music/Ballet/Dance:
 			switch (nibble2) {
 			case 0x0 : return "music/ballet/dance (general)";
 			case 0x1 : return "rock/pop";
@@ -226,7 +226,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x7: //return "Arts/Culture (without music)::";
+		case 0x7: // Arts/Culture (without music):
 			switch (nibble2) {
 			case 0x0 : return "arts/culture (without music, general)";
 			case 0x1 : return "performing arts";
@@ -243,7 +243,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x8: //return "Social/Political issues/Economics:";
+		case 0x8: // Social/Political issues/Economics:
 			switch (nibble2) {
 			case 0x0 : return "social/political issues/economics (general)";
 			case 0x1 : return "magazines/reports/documentary";
@@ -252,7 +252,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0x9: //return "Education/Science/Factual topics:";
+		case 0x9: // Education/Science/Factual topics:
 			switch (nibble2) {
 			case 0x0 : return "education/science/factual topics (general)";
 			case 0x1 : return "nature/animals/environment";
@@ -265,7 +265,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0xA: //return "Leisure hobbies:";
+		case 0xA: // Leisure hobbies:
 			switch (nibble2) {
 			case 0x0 : return "leisure hobbies (general)";
 			case 0x1 : return "tourism/travel";
@@ -278,7 +278,7 @@ public class ContentDescriptor extends Descriptor {
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}
-		case 0xB: //return "Special characteristics:";
+		case 0xB: // Special characteristics:
 			switch (nibble2) {
 			case 0x0 : return "original language";
 			case 0x1 : return "black and white";

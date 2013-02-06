@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
@@ -50,7 +50,6 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 
 		private int len = 0;
 
-		//BIOPName biopName = new BIOPName(data, r);
 
 		public Binding(final byte[] data, final int offset) {
 			biopName = new BIOPName(data, offset);
@@ -72,7 +71,6 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 			t.add(new DefaultMutableTreeNode(new KVP("bindingType",bindingType ,getBindingTypeString(bindingType))));
 			t.add(ior.getJTreeNode(modus));
 
-			//t.add(new DefaultMutableTreeNode(new KVP("context_data_length",context_data_length,null)));
 			return t;
 		}
 
@@ -167,7 +165,6 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 		r += 4;
 		bindings_count = Utils.getInt(data, r, 2, Utils.MASK_16BITS);
 		r += 2;
-		//for (int i = 0; i < bindings_count; i++) {
 		for (int i = 0; i <bindings_count; i++) {
 			final Binding binding = new Binding(data,r);
 			bindingList.add(binding);

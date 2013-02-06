@@ -74,23 +74,23 @@ public class PesPacketData  implements TreeNode{
 
 	private int bytesRead = 0;
 
-	public static int program_stream_map = 0xBC;
-	public static int private_stream_1 = 0xBD;
-	public static int padding_stream = 0xBE;
-	public static int private_stream_2 = 0xBF;
-	public static int ECM_stream = 0xF0;
-	public static int EMM_stream = 0xF1;
-	public static int DSMCC_stream = 0xF2;
-	public static int ISO_IEC_13522_stream = 0xF3;
-	public static int ITU_T_Rec_H_222_1typeA = 0xF4;
-	public static int ITU_T_Rec_H_222_1typeB = 0xF5;
-	public static int ITU_T_Rec_H_222_1typeC = 0xF6;
-	public static int ITU_T_Rec_H_222_1typeD = 0xF7;
-	public static int ITU_T_Rec_H_222_1typeE = 0xF8;
-	public static int ancillary_stream = 0xF9;
-	public static int ISO_IEC14496_1_SL_packetized_stream = 0xFA;
-	public static int ISO_IEC14496_1_FlexMux_stream = 0xFB;
-	public static int program_stream_directory = 0xFF;
+	public static final int program_stream_map = 0xBC;
+	public static final int private_stream_1 = 0xBD;
+	public static final int padding_stream = 0xBE;
+	public static final int private_stream_2 = 0xBF;
+	public static final int ECM_stream = 0xF0;
+	public static final int EMM_stream = 0xF1;
+	public static final int DSMCC_stream = 0xF2;
+	public static final int ISO_IEC_13522_stream = 0xF3;
+	public static final int ITU_T_Rec_H_222_1typeA = 0xF4;
+	public static final int ITU_T_Rec_H_222_1typeB = 0xF5;
+	public static final int ITU_T_Rec_H_222_1typeC = 0xF6;
+	public static final int ITU_T_Rec_H_222_1typeD = 0xF7;
+	public static final int ITU_T_Rec_H_222_1typeE = 0xF8;
+	public static final int ancillary_stream = 0xF9;
+	public static final int ISO_IEC14496_1_SL_packetized_stream = 0xFA;
+	public static final int ISO_IEC14496_1_FlexMux_stream = 0xFB;
+	public static final int program_stream_directory = 0xFF;
 
 	/**
 	 * Constructor used to start creating a new PesPacket. pesStreamID, pesLength and pesHandler have to be set, but the

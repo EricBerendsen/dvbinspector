@@ -59,7 +59,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 	private List<Segment>  segments = new ArrayList<Segment>();
 	// all sets up to and including this one from start of epoch ("mode change" or "acquisition point")
 	// so all we need to draw image
-	private ArrayList<DisplaySet> epoch = null;
+	private List<DisplaySet> epoch = null;
 	private GeneralPesHandler pesHandler =null;
 
 	private long pts = 0;
@@ -122,7 +122,6 @@ public class DisplaySet implements TreeNode, ImageSource {
 			PageCompositionSegment lastPCS = null;
 
 			// which segment are we processing
-			//int i=0;
 
 			List<RegionCompositionSegment> localRegions = new ArrayList<RegionCompositionSegment>();
 			for (final Segment segment : initDisplaySegments) {
@@ -185,8 +184,8 @@ public class DisplaySet implements TreeNode, ImageSource {
 				final DisplaySet displaySet = epoch.get(k++);
 				// used to remember which regions are in this set, because we need to update them with the objects later
 				localRegions = new ArrayList<RegionCompositionSegment>();
-				final List<Segment> segments = displaySet.getSegments();
-				for (final Segment segment : segments) {
+				final List<Segment> segmentList = displaySet.getSegments();
+				for (final Segment segment : segmentList) {
 					if(segment.getSegmentType()==0x10 ){// page composition segment,
 						final PageCompositionSegment pcSegment = (PageCompositionSegment)segment;
 						lastPCS = pcSegment;
@@ -285,11 +284,11 @@ public class DisplaySet implements TreeNode, ImageSource {
 		return segments.get(i);
 	}
 
-	public ArrayList<DisplaySet> getEpoch() {
+	public List<DisplaySet> getEpoch() {
 		return epoch;
 	}
 
-	public void setEpoch(final ArrayList<DisplaySet> epoch) {
+	public void setEpoch(final List<DisplaySet> epoch) {
 		this.epoch = epoch;
 	}
 

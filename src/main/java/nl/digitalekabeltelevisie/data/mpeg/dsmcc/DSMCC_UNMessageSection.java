@@ -1,31 +1,31 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
  *
 
  *
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
@@ -62,7 +62,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 	// DSI
 	private byte[] serverId;
-	//private int compatibilityDescriptorLength;
 	private CompatibilityDescriptor compatibilityDescriptor;
 	private int privateDataLength;
 	private byte[] privateDataByte;
@@ -112,7 +111,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 
 	/**
-	 * 
+	 *
 	 * Only used in case of objectCarousel DII
 	 * @author Eric
 	 *
@@ -206,16 +205,16 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 	// for DSI for SSU
 	public class GroupInfo implements TreeNode{
-		
-		// TODO should also contain 
+
+		// TODO should also contain
 		//		GroupInfoLength 	2
-		//		for (i=0; i < GroupInfoLength; i++) { 	
+		//		for (i=0; i < GroupInfoLength; i++) {
 		//			GroupInfoByte 	1
 		//		}
-		
+
 		// according to http://www.interactivetvweb.org/tutorials/dtv_intro/dsmcc/data_carousel
 		// Table 6: GroupInfoIndication structure of 8.1.1 DownloadServerInitiate message (DSI) of ETSI TS 102 006 V1.3.2 (2008-07)
-		// is not very clear, indentation is wrong 
+		// is not very clear, indentation is wrong
 
 		public GroupInfo(final byte[]data, final int offset){
 			groupId= Utils.getLong(data, offset, 4, Utils.MASK_32BITS);
@@ -341,7 +340,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 			compatibilityDescriptor = new CompatibilityDescriptor(raw_data.getData(), 40);
 			int offs=42 + compatibilityDescriptor.getCompatibilityDescriptorLength();
-			//compatibilityDescriptorLength = Utils.getInt(raw_data.getData(), 40, 2, Utils.MASK_16BITS);
 			privateDataLength = Utils.getInt(raw_data.getData(), offs, 2, Utils.MASK_16BITS);
 			offs +=2;
 			privateDataByte =Utils.copyOfRange(raw_data.getData(), offs, offs+privateDataLength);
@@ -369,7 +367,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 				offset += 2;
 				groupInfoByte = Utils.getBytes(privateDataByte, offset, groupInfoLength);
 				offset += groupInfoLength;
-				privateDataLen2 = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS); // this gives exception for nordig DVB-t 746000000.ts pid 8006. 
+				privateDataLen2 = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS); // this gives exception for nordig DVB-t 746000000.ts pid 8006.
 				offset += 2;
 				privateDataByte2 = Utils.getBytes(privateDataByte, offset, privateDataLen2);
 				offset += privateDataLen2;
@@ -390,8 +388,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 			numberOfModules = Utils.getInt(raw_data.getData(), p, 2, Utils.MASK_16BITS);
 			p+=2;
 
-			//			if(isObjectCarousel){
-			if(true){ // also SSU ??
+			if(true){ // isObjectCarousel, also SSU ??
 				for (int i = 0; i < numberOfModules; i++) {
 					final int moduleId= Utils.getInt(raw_data.getData(), p, 2, Utils.MASK_16BITS);
 					p+=2;
@@ -433,7 +430,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 		t.add(header.getJTreeNode(modus));
 		if(isDSI()){ // DSI
 			t.add(new DefaultMutableTreeNode(new KVP("serverId",serverId,null)));
-			//t.add(new DefaultMutableTreeNode(new KVP("compatibilityDescriptor length",compatibilityDescriptorLength,"should be 0")));
 			t.add(compatibilityDescriptor.getJTreeNode(modus));
 			t.add(new DefaultMutableTreeNode(new KVP("privateDataLength",privateDataLength,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("privateDataByte",privateDataByte,null)));
@@ -460,14 +456,10 @@ public class DSMCC_UNMessageSection extends TableSection {
 			t.add(new DefaultMutableTreeNode(new KVP("ackPeriod",ackPeriod,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("tCDownloadWindow",tCDownloadWindow,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("tCDownloadScenario",tCDownloadScenario,null)));
-			//			t.add(new DefaultMutableTreeNode(new KVP("compatibilityDescriptorLength",compatibilityDescriptorLength,null)));
-			//			if(compatibilityDescriptorLength!=0){
 			t.add(compatibilityDescriptor.getJTreeNode(modus));
-			//			}
 
 			t.add(new DefaultMutableTreeNode(new KVP("numberOfModules",numberOfModules,null)));
-			if(true){
-				//if(isObjectCarousel){
+			if(true){ // isObjectCarousel
 				addListJTree(t,modules,modus,"Modules");
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("privateDataLength",privateDataLength,null)));
@@ -519,12 +511,8 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 	private static String getMessageIDString(final int dsmccType,final int messageId) {
 		switch (dsmccType) {
-		//		case 0x01:
-		//			return "User-to-Network configuration message";
-		//		case 0x02:
-		//			return "User-to-Network session message";
 		case 0x03:
-			// "Download message";
+			// Download message
 			switch(messageId) {
 			case 0x1001:
 				return "DownloadInfoRequest";
@@ -540,14 +528,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 				return "DownloadServerInitiate";
 			default:
 				return null;
-
-
 			}
-			//		case 0x04:
-			//			return "SDB Channel Change Protocol message";
-			//		case 0x05:
-			//			return "User-to- Network pass-thru message";
-
 		default:
 			return null;
 

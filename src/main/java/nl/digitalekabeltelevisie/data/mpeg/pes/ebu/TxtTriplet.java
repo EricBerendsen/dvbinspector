@@ -46,7 +46,7 @@ Triplet implements TreeNode {
 	// From CharSet.java , part of ProjectX
 	//DM10082004 081.7 int08 changed
 	//A=65 .. Z=90
-	private final static short diacritical_uppercase_char_map[][] = {
+	private static final short diacritical_uppercase_char_map[][] = {
 		{ 0, 192, 193, 194, 195, 256, 258, 0, 196, 0, 197, 0, 0, 0, 260, 258 }, //A
 		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, //B
 		{ 0, 0, 262, 264, 0, 0, 268, 266, 0, 0, 0, 199, 0, 0, 0, 268 }, //C
@@ -77,7 +77,7 @@ Triplet implements TreeNode {
 
 	//DM10082004 081.7 int08 changed
 	//a=97 .. z=122
-	private final static short diacritical_lowercase_char_map[][] = {
+	private static final short diacritical_lowercase_char_map[][] = {
 		{ 0, 224, 225, 226, 227, 257, 259, 0, 228, 0, 229, 0, 0, 0, 261, 259 }, //a
 		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, //b
 		{ 0, 0, 263, 265, 0, 0, 269, 267, 0, 0, 0, 231, 0, 0, 0, 269 }, //c
@@ -125,7 +125,7 @@ Triplet implements TreeNode {
 		}
 	}
 
-	public final static short G0_sets[][] = {
+	public static final short G0_sets[][] = {
 		{
 			//0 = latin
 			0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
@@ -200,7 +200,7 @@ Triplet implements TreeNode {
 	};
 
 	//DM10082004 081.7 int08 changed
-	public final static short G2_sets[][] = {
+	public static final short G2_sets[][] = {
 		{
 			//0 = latin
 			0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
@@ -245,7 +245,7 @@ Triplet implements TreeNode {
 	};
 
 
-	public final static short national_subsets[][] = {
+	public static final short national_subsets[][] = {
 		// 0x23     0x24    0x40    0x5b    0x5c    0x5d    0x5e    0x5f   0x60    0x7b     0x7c   0x7d    0x7e
 		{ 0x00a3, 0x0024, 0x0040, 0x00ab, 0x00bd, 0x00bb, 0x005e, 0x0023, 0x002d, 0x00bc, 0x00a6, 0x00be, 0x00f7 }, // english ,000
 		{ 0x00e9, 0x00ef, 0x00e0, 0x00eb, 0x00ea, 0x00f9, 0x00ee, 0x0023, 0x00e8, 0x00e2, 0x00f4, 0x00fb, 0x00e7 }, // french  ,001
@@ -267,7 +267,7 @@ Triplet implements TreeNode {
 	//4 bits main tripl + 3 bits character_set
 	// not used(yet??)
 	@SuppressWarnings("unused")
-	private final static int national_subset_mapping[][] = {
+	private static final int national_subset_mapping[][] = {
 		{ 0, 1, 2, 3, 4, 5, 6, 7 },  //0, en,fr,se,cz,de,es,it,ro
 		{ 9, 1, 2, 3, 4, 5, 6, 7 },  //1, pl,fr,se,cz,de,es,it,ro
 		{ 0, 1, 2, 12, 4, 5, 6, 7 }, //2, en,fr,se,tr,de,es,it,ro
@@ -422,8 +422,6 @@ Triplet implements TreeNode {
 		if(str.length()>0){
 			str = " ("+str+")";
 		}
-
-		//DefaultMutableTreeNode t = super.getJTreeNode(modus);
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Triplet",val,getModeString(mode,address)+str));
 		t.add(new DefaultMutableTreeNode(new KVP("mode",mode,getModeString(mode,address))));

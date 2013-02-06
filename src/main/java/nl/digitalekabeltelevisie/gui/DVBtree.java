@@ -165,11 +165,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 		//Create the image viewing pane.
 		label = new JLabel();
-		//label.setFont(label.getFont().deriveFont(Font.ITALIC));
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		label.setVerticalAlignment(SwingConstants.TOP);
 
-		//initHelp();
 		final JScrollPane imgView = new JScrollPane(label);
 
 		//Add the scroll panes to a split pane.
@@ -184,7 +182,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		treeView.setPreferredSize(new Dimension(1000, 600));
 		splitPane.setDividerLocation(900);
 
-		// add(treeView);
 		add(splitPane);
 	}
 
@@ -233,9 +230,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		if (node == null){
 			label.setText(null);
 			label.setIcon(null);
-			//        	BasicSplitPaneUI ui = (BasicSplitPaneUI) splitPane.getUI();
-			//        	JButton oneClick = (JButton) ui.getDivider().getComponent(1);
-			//        	oneClick.doClick();
 			return;
 		}
 
@@ -321,7 +315,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					}
 					final DefaultMutableTreeNode node =((TreeNode)p.getPesHandler()).getJTreeNode(mod);
 					// thanks to Yong Zhang for the tip for refreshing the tree structure.
-					//node = new DefaultMutableTreeNode("children");
 					dmtn.add(node);
 					((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);
 					setCursor(Cursor.getDefaultCursor());

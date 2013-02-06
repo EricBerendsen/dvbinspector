@@ -32,7 +32,7 @@ import nl.digitalekabeltelevisie.util.BitSource;
 
 public class AbstractAC3SyncFrame {
 
-	static int[] ac3_bitrate_index = {
+	private static int[] ac3_bitrate_index = {
 				32000, 40000, 48000, 56000, 64000, 80000, 96000,
 				112000, 128000, 160000, 192000, 224000, 256000,
 				320000, 384000, 448000, 512000, 576000, 640000,
