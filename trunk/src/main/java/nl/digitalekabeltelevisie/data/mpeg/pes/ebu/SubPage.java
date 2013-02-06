@@ -69,11 +69,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	protected TxtDataField[]	packetx_27	= new TxtDataField[16];			// 9.4.1 Packet X/27, Designation code values 0000 to 1111 allow up to 16 packets with Y = 27 to be associated with a given page.
 	protected TxtDataField[]	packetx_28	= new TxtDataField[16];			// 9.4.1 Packet X/28, Designation code values 0000 to 1111 allow up to 16 packets with Y = 28 to be associated with a given page.
 
-	private final int							charWidth	= 15;
-	private final int							charHeight	= 19;
+	private static final int							charWidth	= 15;
+	private static final int							charHeight	= 19;
 
-	private final int							textColumns	= 40;
-	private final int							textRows	= 25;
+	private static final int							textColumns	= 40;
+	private static final int							textRows	= 25;
 
 	private final int							width		= textColumns * charWidth;
 	private final int							height		= textRows * charHeight;
@@ -119,8 +119,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 	static {
 		try {
-			//		    FileInputStream fileInputStream = new FileInputStream(new File("g3_charset.gif"));
-			//		    g3CharsImage = ImageIO.read( (fileInputStream));
 			final InputStream fileInputStream = classLoader.getResourceAsStream("g3_charset.gif");
 			g3CharsImage = ImageIO.read(fileInputStream);
 
@@ -215,8 +213,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		}
 		if (isObjectDefinitionpage()) {
 			addObjectDefinitionPageDetailsToJTree(modus, s);
-			//s.add(new DefaultMutableTreeNode(new KVP("Designation Code",getDesignationCode(),null)));
-
 		}
 		if(isBTTpage()){
 			addBTTPageDetailsToJTree(modus, s);
@@ -519,10 +515,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	private SubPage getBTTPage() {
 		if(getMagazine(1)!=null){
 			final Page p= getMagazine(1).getPage(0xF0);
-			if(p!=null){ // always hashMap, maybe no entries ?
-				if(!p.getSubPages().isEmpty()){
-					return p.getSubPages().values().iterator().next();
-				}
+			if((p!=null)&&!p.getSubPages().isEmpty()){
+				return p.getSubPages().values().iterator().next();
 			}
 		}
 		return null;
@@ -623,7 +617,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 			}
 		}
 
-		//TxtDataField txtDataField = linesList[19];
 		String level = "Level 2.5";
 		addObjectLinkLine1ToJTree(modus, mot, linesList[19], level);
 		addObjectLinkLine2ToJTree(modus, mot, linesList[20], level);
@@ -869,9 +862,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		final List<DRCSCharacter> globalDrcsChars = getDRCSChars(false); // global
 		final List<DRCSCharacter> localDrcsChars = getDRCSChars(true);
 
-		//boolean doubleHeightUsed = false;
 		for (int i = 24; i >=0 ; i--) {
-			//if (!doubleHeightUsed) {
 			for (int j = 0; j < 40; j++) {
 				boolean doubleWidthUsed = false;
 				// first draw the char on a tmp Image
@@ -890,16 +881,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				int w = charWidth;
 				if ((effect[i][j] & DOUBLE_HEIGHT) != 0) {
 					h = charHeight * 2;
-					//						if (!doubleHeightUsed) { // first on this line,clear next.
-					//							// the row below this row is displayed with the same local background colour and no foreground data.
-					//							// TODO, X26 packets or Objects can still write to not used parts of row below
-					//							// this should be part of the fillLine() process.
-					//							for (int t = 0; t < 40; t++) {
-					//								gd.setColor(new Color(getColorInt(bgColor[i][t]))); // use color from current line
-					//								gd.fillRect(t * charWidth, (i + 1) * charHeight, charWidth, charHeight); // draw on next (i+1)
-					//							}
-					//						}
-					//						doubleHeightUsed = true; // next line should not be drawn
 				} else if ((effect[i][j] & DOUBLE_WIDTH) != 0) {
 					w = charWidth * 2;
 					doubleWidthUsed = true; //  skip charafter a double width char
@@ -908,29 +889,14 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 					h = charHeight * 2;
 					w = charWidth * 2;
 					doubleWidthUsed = true; //  skip charafter a double width char
-					//						if (!doubleHeightUsed) { // first on this line,clear next.
-					//							// the row below this row is displayed with the same local background colour and no foreground data.
-					//							// TODO, X26 packets or Objects can still write to not used parts of row below
-					//							// this should be part of the fillLine() process.
-					//							for (int t = 0; t < 40; t++) {
-					//								gd.setColor(new Color(getColorInt(bgColor[i][t]))); // use color from current line
-					//								gd.fillRect(t * charWidth, (i + 1) * charHeight, charWidth, charHeight); // draw on next (i+1)
-					//							}
-					//						}
-					//						doubleHeightUsed = true; // next line should not be drawn
 				}
 
-				//gd.drawImage(charImg, j * charWidth, i * charHeight, w, h, null);
 				gd.drawImage(targetChar, j * charWidth, i * charHeight, w, h, null);
 				if (doubleWidthUsed) { // this char was double width (or size), so skip next pos
 					j++;
 					doubleWidthUsed = false; //reset
 				}
 			}
-			//			} else {
-			//				// reset doubleHeightUsed
-			//				doubleHeightUsed = false;
-			//			}
 		}
 
 		return img;
@@ -1203,11 +1169,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				1, // One bit per pixel
 				2,new int[]{fgC,bgC},0,false,-1,DataBuffer.TYPE_BYTE);
 		gd.drawImage(g3CharsImage, 0, 0, 12, 10, ((txt[i][j])-32)*12, 0, ((txt[i][j])-31)*12, 10, null);
-		//target = g3CharsImage.getSubimage((txt[i][j])-32, 0, 12, 10);
-		//target = new BufferedImage(blackAndWhite, drcsChars.get(txt[i][j]).getWritableRaster(), true, null);
-		//Raster r = g3CharsImage.getR
-		//WritableRaster wr= g3CharsImage.getData(new Rectangle(((txt[i][j])-32)*12, 0,12,10)).createCompatibleWritableRaster();
-		//WritableRaster wr=
 		final DataBuffer buf = b.getData().getDataBuffer();
 		final WritableRaster wr =  Raster.createPackedRaster(buf, 12, 10, 1, null);
 		target = new BufferedImage(blackAndWhite, wr, true, null);
@@ -1229,13 +1190,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				1, // One bit per pixel
 				2,new int[]{bgC,fgC},0,false,-1,DataBuffer.TYPE_BYTE);
 		if(txt[i][j]<48){ // global
-			//			if(txt[i][j]<globalDrcsChars.size()){
 			target = new BufferedImage(blackAndWhite, globalDrcsChars.get(txt[i][j]).getWritableRaster(), true, null);
-			//			}
 		}else{
-			//			if(txt[i][j]<localDdrcsChars.size()){
 			target = new BufferedImage(blackAndWhite, localDdrcsChars.get(txt[i][j]-64).getWritableRaster(), true, null);
-			//			}
 		}
 
 		return target;
@@ -1555,10 +1512,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 			}else{// then at magazine level line 29/0
 				final Magazine mag = pageHandler.getMagazine();
 				final TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
-				if(line!=null){
-					if((line.getPageFunction()==0)&&(line.isBlackBackGroundColorSubstitution())){
-						return line.getColor(line.getDefaultRowColour());
-					}
+				if((line!=null)&&(line.getPageFunction()==0)&&(line.isBlackBackGroundColorSubstitution())){
+					return line.getColor(line.getDefaultRowColour());
 				}
 			}
 		}
@@ -1607,7 +1562,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				final int mode = triplet.getMode();
 				final int data = triplet.getData();
 				if(address >= 40){
-					if (mode == 0x04) { //"Set Active Position";
+					if (mode == 0x04) { // Set Active Position
 						actRow = rowOffset + ((address == 40) ? 24 : address - 40);
 						actCol = colOffset + data;
 						if(objectType==ADAPTIVE_OBJECT_TYPE){ // reset colors for new posistion
@@ -1719,7 +1674,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						}
 					}else if (mode == 0x9) { //Character from the G0 Set at Levels 2.5 and 3.5
 						txt[actRow][actCol] = (char) TxtTriplet.G0_sets[0][data];
-						//effect[actRow][actCol]&=~DRCS_CHAR;
 						if(objectType==PASSIVE_OBJECT_TYPE){
 							fgColor[actRow][actCol]=fgCol;
 							bgColor[actRow][actCol]=bgCol;
@@ -1741,7 +1695,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						}
 					}else if (mode == 0xF) { //Character from the G2 Supplementary Set
 						txt[actRow][actCol] = (char) TxtTriplet.G2_sets[0][data];
-						//effect[actRow][actCol]&=~DRCS_CHAR;
 						if(objectType==PASSIVE_OBJECT_TYPE){
 							fgColor[actRow][actCol]=fgCol;
 							bgColor[actRow][actCol]=bgCol;
@@ -1825,7 +1778,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				final TxtDataField txtDataField=btt.getLine(i);
 				if(txtDataField!=null){
 					for (int j = 0; j < 5; j++) {
-						//int value = getHammingReverseByte(txtDataField.getRawByte(j));
 						final int magNo=getHammingReverseByte(txtDataField.getRawByte(j*8));
 						final int pagNo= (getHammingReverseByte(txtDataField.getRawByte((j*8)+1))*16) + getHammingReverseByte(txtDataField.getRawByte((j*8)+2));
 						final int t = getHammingReverseByte(txtDataField.getRawByte((j*8)+7));

@@ -133,7 +133,6 @@ public class AC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 		if(addbsie==1)
 		{
 			addbsil = bs.readBits(6);
-			//addbsi = bs.readBits((addbsil+1) * 8);
 		}
 
 	}
@@ -226,7 +225,6 @@ public class AC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 		if(addbsie==1)
 		{
 			s.add(new DefaultMutableTreeNode(new KVP("addbsil",addbsil,"Additional bit stream information length")));
-			// s.add(new DefaultMutableTreeNode(new KVP("addbsi",addbsi,null)));
 		}
 		return s;
 	}

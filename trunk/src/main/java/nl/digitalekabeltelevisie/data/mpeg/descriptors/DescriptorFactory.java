@@ -478,12 +478,10 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new UNTDescriptor(data, t + offset, tableSection);
-			// if(Utils.getUnsignedByte(data[t+offset])<128){
 			logger.info("Not implemented UNTDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
 					+ UNTDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
-			// }
 			break;
 		}
 		return d;
@@ -520,12 +518,10 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new AITDescriptor(data, t + offset, tableSection);
-			// if(Utils.getUnsignedByte(data[t+offset])<128){
 			logger.info("Not implemented AITDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
 					+ AITDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
-			// }
 			break;
 		}
 		return d;

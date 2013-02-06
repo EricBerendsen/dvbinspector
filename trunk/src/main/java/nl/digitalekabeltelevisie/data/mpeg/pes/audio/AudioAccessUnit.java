@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio;
@@ -37,10 +37,10 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen
- * 
+ *
  * this also can have ancillary data, including RDS via EUCP
  * see ts_101154v010901p.pdf Annex C.4.2.18 RDS data via UECP protocol
- * 
+ *
  *  partially based (framesize calculation) on http://www.javazoom.net/javalayer/
  */
 
@@ -112,11 +112,9 @@ public class AudioAccessUnit implements TreeNode {
 		{11025, 12000, 8000, 1}};	// SZD: MPEG25
 
 	public AudioAccessUnit(final byte[] data, final int offset, final long pts) {
-		//public AudioAccessUnit(byte[] data, int offset, int len, long pts) {
 		super();
 		this.data=data;
 		this.start=offset;
-		//this.len=len;
 
 		this.pts = pts;
 
@@ -147,7 +145,7 @@ public class AudioAccessUnit implements TreeNode {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {

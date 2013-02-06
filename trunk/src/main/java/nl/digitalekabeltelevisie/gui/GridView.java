@@ -59,7 +59,6 @@ public class GridView extends JPanel implements TransportStreamView{
 		scrollGrid = new JScrollPane(grid);
 		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		//scrollGrid.setPreferredSize(new Dimension(200,200));
 
 		add(scrollGrid);
 	}

@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.gui;
@@ -68,7 +68,7 @@ PropertyChangeListener, ListSelectionListener {
 
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -3439016568120119881L;
 	private final JList leftList;
@@ -140,7 +140,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class AddAllAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		 private static final long serialVersionUID = 3689777563900027556L;
 		 public AddAllAction(final String text) {
@@ -159,7 +159,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class AddAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 8979337275391648459L;
 		public AddAction(final String text) {
@@ -185,7 +185,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class SwitchAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 2303116336558669473L;
 		public SwitchAction(final String text) {
@@ -205,7 +205,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class RemoveAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 2805825694107261544L;
 		public RemoveAction(final String text) {
@@ -233,7 +233,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class RemoveAllAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 4811839547583190284L;
 		public RemoveAllAction(final String text) {
@@ -252,7 +252,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class UpAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 3534182235010446238L;
 		public UpAction(final String text) {
@@ -275,7 +275,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class TopAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 3209628912633150373L;
 		public TopAction(final String text) {
@@ -298,7 +298,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class ReverseAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -4739983729332909990L;
 		public ReverseAction(final String text) {
@@ -326,7 +326,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class DownAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -7274215756253610038L;
 		public DownAction(final String text) {
@@ -350,7 +350,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class BottomAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 1894143066033119542L;
 		public BottomAction(final String text) {
@@ -373,7 +373,7 @@ PropertyChangeListener, ListSelectionListener {
 	}
 	class ApplyAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 8414410738504899008L;
 		public ApplyAction(final String text) {
@@ -409,7 +409,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class OKAction extends ApplyAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -4143479183600719898L;
 		public OKAction(final String text) {
@@ -428,7 +428,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	class CancelAction extends AbstractAction {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -6217921517985338175L;
 		public CancelAction(final String text) {
@@ -482,7 +482,6 @@ PropertyChangeListener, ListSelectionListener {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 		setLayout(new FlowLayout());
 
-		//addAllButton = addAButton("add all >>",buttonPanel);
 		addAllAction =new AddAllAction("add all >>");
 		addAllButton = new JButton(addAllAction);
 		addAllButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -506,18 +505,13 @@ PropertyChangeListener, ListSelectionListener {
 		removeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(removeButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 10)));
-		//removeAllButton = addAButton("< remove all",buttonPanel);
 		removeAllAction =new RemoveAllAction("<< remove all");
 		removeAllButton = new JButton(removeAllAction);
 		removeAllButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(removeAllButton);
 
-		// leftList.setLayoutOrientation(JList.VERTICAL);
-		//leftList.setVisibleRowCount(-1);
-
 		leftList.addListSelectionListener(this);
 		rightList.addListSelectionListener(this);
-
 
 		topAction =new TopAction("Top");
 		topButton = new JButton(topAction);
@@ -610,8 +604,6 @@ PropertyChangeListener, ListSelectionListener {
 		stepsPanel.add(packetPanel);
 		stepsPanel.add(stepsChooserPanel);
 
-
-		//panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.add(Box.createRigidArea(new Dimension(10, 10)),BorderLayout.NORTH);
 		panel.add(stepsPanel,BorderLayout.NORTH);
 		panel.add(pidPanel,BorderLayout.CENTER);
@@ -622,7 +614,6 @@ PropertyChangeListener, ListSelectionListener {
 		setResizable(true);
 
 		//Handle window closing correctly.
-		//setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(final WindowEvent we) {

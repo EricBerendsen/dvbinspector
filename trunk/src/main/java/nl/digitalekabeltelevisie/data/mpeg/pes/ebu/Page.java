@@ -4,7 +4,6 @@ import static nl.digitalekabeltelevisie.util.Utils.toHexString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +22,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 public class Page implements TreeNode{
 
 	/**
-	 * 
+	 *
 	 */
 	private final Magazine	magazineHandler;
 	private final Map<Integer, SubPage>subPages = new HashMap<Integer, SubPage>();
@@ -82,8 +81,8 @@ public class Page implements TreeNode{
 		}else if(getSubPages().size()>0){ // normal list of subpages
 			s=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
 			final SortedSet<Integer> sortedSubPages = new TreeSet<Integer>(getSubPages().keySet());
-			for (final Iterator<Integer> iter = sortedSubPages.iterator(); iter.hasNext();) {
-				final int subPage= iter.next();
+			for (Integer integer : sortedSubPages) {
+				final int subPage= integer;
 				final SubPage p = getSubPages().get(subPage);
 				s.add(p.getJTreeNode(modus));
 			}
@@ -171,10 +170,8 @@ public class Page implements TreeNode{
 	 */
 	public SubPage getMOTPage() {
 		final Page p = magazineHandler.getPage(0xFE);
-		if(p!=null){ // always hashMap, maybe no entries ?
-			if(!p.getSubPages().isEmpty()){
-				return p.getSubPages().values().iterator().next();
-			}
+		if((p!=null)&&!p.getSubPages().isEmpty()){// always hashMap, maybe no entries ?
+			return p.getSubPages().values().iterator().next();
 		}
 		return null;
 	}
@@ -213,7 +210,7 @@ public class Page implements TreeNode{
 	public String toString(){
 		return "Mag:"+getMagazineNo()+", pageNo"+getPageNo();
 	}
-	
+
 	public Map<Integer, SubPage> getSubPages() {
 		return subPages;
 	}

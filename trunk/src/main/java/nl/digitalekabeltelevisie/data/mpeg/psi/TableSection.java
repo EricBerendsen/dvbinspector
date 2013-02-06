@@ -359,14 +359,12 @@ public class TableSection implements TreeNode{
 	 */
 	private String getRepetitionRate(final long count,final long last, final long  first) {
 		final long bitrate=getParentPID().getParentTransportStream().getBitRate();
-		if(bitrate>0){
-			if(count>=2){
-				final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
-				Formatter formatter = new Formatter();
-				String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
-				formatter.close();
-				return r;
-			}
+		if((bitrate>0)&&(count>=2)){
+			final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
+			Formatter formatter = new Formatter();
+			String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+			formatter.close();
+			return r;
 		}
 		return null;
 	}

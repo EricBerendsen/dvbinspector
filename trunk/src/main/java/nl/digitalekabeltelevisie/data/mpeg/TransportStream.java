@@ -70,6 +70,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.util.Utils;
+//import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+// import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 
 /**
  * TransportStream is responsible for parsing a file containing a transport stream, dividing it into 188 byte {@link TSPackets}, and handing them over to the correct PID.
@@ -536,7 +538,6 @@ public class TransportStream implements TreeNode{
 		if(teller!=0){
 			bitRate = totBitrate / teller;
 		}
-		//PMTs pmts = getPsi().getPmts();
 
 		// calculate bitrate based on TDT sections. Need at least 2
 		if(getPsi().getTdt()!=null){

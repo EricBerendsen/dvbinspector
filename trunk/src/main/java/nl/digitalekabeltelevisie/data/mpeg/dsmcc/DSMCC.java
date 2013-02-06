@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
@@ -41,12 +41,12 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 /**
  * Contains all DSM-CC information from single PID. Make a separation by TableID (all other sections contain just one table ID, this can have 0x38 - 0x3f)
- * 
+ *
  * single PID may be shared by multiple carousels
- * 
+ *
  * table_id: 0x3B (59) => DSM-CC - U-N messages (DSI or DII) (first implemented
  * table_id: 0x3C (60) => DSM-CC - Download Data Messages (DDB) (not implemented yet)
- * 
+ *
  * @author Eric Berendsen
  *
  */
@@ -107,7 +107,7 @@ public class DSMCC extends AbstractPSITabel{
 					updateSectionVersion(downloadMessage, last);
 				}
 			}
-		}else if(tableID==0x3d){ // "DSM-CC - stream descriptorlist";
+		}else if(tableID==0x3d){ // DSM-CC - stream descriptorlist;
 
 			// TODO make wrapper Stream DescriptorList , if we can find specs..
 			final int eventID = section.getTableIdExtension();
@@ -138,8 +138,7 @@ public class DSMCC extends AbstractPSITabel{
 			final Integer type=i.next();
 			final DSMCC_UNMessageSection [] sections = unMessages.get(type);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC UN-Message",type, null));
-			for (int j = 0; j < sections.length; j++) {
-				final DSMCC_UNMessageSection tsection = sections[j];
+			for (final DSMCC_UNMessageSection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
@@ -155,8 +154,7 @@ public class DSMCC extends AbstractPSITabel{
 			final Integer type=i.next();
 			final DSMCC_DownLoadDataMessageSection [] sections = downloadMessages.get(type);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC DownloadMessage ModuleID",type, null));
-			for (int j = 0; j < sections.length; j++) {
-				final DSMCC_DownLoadDataMessageSection tsection = sections[j];
+			for (final DSMCC_DownLoadDataMessageSection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
@@ -173,8 +171,7 @@ public class DSMCC extends AbstractPSITabel{
 			final Integer type=i.next();
 			final TableSection [] sections = eventStreams.get(type);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC Stream Descriptor List",type, null));
-			for (int j = 0; j < sections.length; j++) {
-				final TableSection tsection = sections[j];
+			for (final TableSection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

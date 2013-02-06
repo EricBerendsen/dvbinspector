@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig;
@@ -65,13 +65,12 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 
 
 		private int channel_list_id;
-		//private int channel_list_name_length;
 		private DVBString channel_list_name;
 		private final String country_code;
 		private int service_loop_length;
 		private List<LogicalChannel> logicalChannelList = new ArrayList<LogicalChannel>();
 
-		
+
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Channel List ("+channel_list_name+")"));
 			s.add(new DefaultMutableTreeNode(new KVP("channel_list_id",channel_list_id,null)));
@@ -79,13 +78,13 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 			s.add(new DefaultMutableTreeNode(new KVP("channel_list_name",channel_list_name,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("country_code",country_code,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("service_loop_length",service_loop_length,null)));
-			
+
 			addListJTree(s, logicalChannelList, modus, "Logical Channels");
 			return s;
 		}
 
 	}
-	
+
 	public class LogicalChannel implements TreeNode{
 		private int serviceID;
 		private int visibleServiceFlag;
@@ -142,7 +141,6 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 		int t=0;
 		while (t<descriptorLength) {
 			final int channel_list_id=getInt(b, offset+2+t,1,MASK_8BITS);
-			//final int channel_list_name_length = getInt(b,offset+t+3,1,MASK_8BITS);
 			DVBString channel_list_name = new DVBString(b,offset+t+3);
 			t+=2+channel_list_name.getLength();
 			String country_code = getISO8859_1String(b, offset+t+2, 3);

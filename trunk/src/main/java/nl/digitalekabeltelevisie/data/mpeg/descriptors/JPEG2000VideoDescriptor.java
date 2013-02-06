@@ -88,8 +88,8 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 		byteOffset += 1;
 
 		still_mode = Utils.getBit(aByte, 1);
-		setInterlaced_video(still_mode = Utils.getBit(aByte, 2));
-		setReserved(Utils.getBits(aByte, 3, 6));
+		interlaced_video = Utils.getBit(aByte, 2);
+		reserved = Utils.getBits(aByte, 3, 6);
 
 		if(byteOffset < descriptorLength)
 		{

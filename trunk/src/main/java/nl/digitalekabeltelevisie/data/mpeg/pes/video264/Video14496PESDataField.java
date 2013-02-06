@@ -50,10 +50,8 @@ public class Video14496PESDataField extends PesPacketData implements TreeNode {
 	private List<NALUnit> nalUnits = new ArrayList<NALUnit>();
 
 
-	//private final List<VideoMPEG2Section> sections= new ArrayList<VideoMPEG2Section>();
 
 	public Video14496PESDataField(final PesPacketData pesPacket) {
-		//public Video14496PESDataField(byte[] data, int offset, int len, long pts) {
 		super(pesPacket);
 
 		int i = pesDataStart;

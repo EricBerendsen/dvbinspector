@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
@@ -447,7 +447,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	 * Fix for incorrect constructor IndexColorModel(int bits, int size, byte[] cmap, int start, boolean hasalpha, int trans)
 	 * because it ignores hasalpha. Quick fix, convert to 4 byte[] .
 	 * int start, boolean hasalpha, int trans, int transferType are ignored.
-	 * 
+	 *
 	 * @param bits
 	 * @param size
 	 * @param cmap
@@ -462,7 +462,6 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		final byte[] g =new byte[cmap.length];
 		final byte[] b =new byte[cmap.length];
 		final byte[] a =new byte[cmap.length];
-		// 			return (a<<24 | r<<16 | g<<8 | b);
 
 		for (int i = 0; i < cmap.length; i++) {
 			r[i] = Utils.getInt2UnsignedByte((cmap[i]& 0xFF0000)>>16);

@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
@@ -43,7 +43,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	public static final String BLACK_HTML_LINE="<code><b><span style=\"background-color: black; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b></code>";
 
 	/**
-	 * 
+	 *
 	 */
 	public TxtDataField(final byte[] data,final int offset,final int len, final long pts) {
 		super(data,offset,len,pts);
@@ -55,7 +55,6 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		//DefaultMutableTreeNode s = super.getJTreeNode(modus);
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(EBUPESDataField.getDataUnitIdString(dataUnitId)));
 		super.addDetailsToJTree(s,modus);
 		addDetailsToJTree(s,modus);
@@ -102,7 +101,6 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 			final List<TxtTriplet> tripletList = getTxtTripletList();
 			addListJTree(s,tripletList,modus,"triplet_list");
-			//s.add(new DefaultMutableTreeNode(new KVP("Designation Code",getDesignationCode(),null)));
 
 		}
 		if((getPacketNo()==28)||  // page specific
@@ -449,8 +447,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 	private static String getTeletextPlain(final byte[] b){
 		final StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < b.length; i++) {
-			final byte ch = b[i];
+		for (final byte ch : b) {
 			if((ch>=32)&&(ch<127)){ // For text version of single line  national option charset subset is ignored because it can not be derived from only the line itself. Need pageheader for that.
 				buf.append((char)ch);
 			}else{  // empty space
@@ -466,15 +463,14 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 		String bg="black";
 		String fg="white";
 		final StringBuilder buf = new StringBuilder("<code><b><span style=\"background-color: black; color: white; \">");
-		for (int i = 0; i < b.length; i++) {
-			final byte ch = b[i];
+		for (final byte ch : b) {
 			if(ch==0x20){ //nbsp
 				buf.append("&nbsp;");
 			}else if(ch==0x3c){ //<<
 				buf.append("&lt;");
 			}else if(ch==0x26){ //&
 				buf.append("&amp;");
-			}else if((ch>32)&&(ch<127)){  // For HTML version of single line  national option charset subset is ignored because it can not be derived from only the line itself. Need pageheader for that. 
+			}else if((ch>32)&&(ch<127)){  // For HTML version of single line  national option charset subset is ignored because it can not be derived from only the line itself. Need pageheader for that.
 				buf.append((char)ch);
 			}else if((ch>=0)&&(ch<=7)){ //12.2 Spacing attributes
 				fg=getHTMLColorString(ch);
@@ -591,7 +587,6 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	}
 
 	public int getPageNumberTens(){
-		// return getHammingByte(data_block[7+offset]);
 		return getPageNumberTens(7);
 	}
 
@@ -600,7 +595,6 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	}
 
 	public int getPageNumber(){
-		//return getHammingByte(data_block[6+offset])+16*getHammingByte(data_block[7+offset]);
 		return getPageNumber(6);
 	}
 
@@ -609,7 +603,6 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	}
 
 	public int getSubPage(){
-		//return getHammingByte(data_block[8+offset]) +16*(getHammingByte(data_block[9+offset])&0x7) +256*getHammingByte(data_block[10+offset])+ 4096*(getHammingByte(data_block[11+offset])&0x3);
 		return getSubPage(8);
 	}
 
