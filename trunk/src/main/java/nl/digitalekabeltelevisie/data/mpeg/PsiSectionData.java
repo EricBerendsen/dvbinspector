@@ -59,7 +59,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.UNTsection;
 /**
  *
  * @author Eric
- *
+ * 
  */
 public class PsiSectionData {
 
@@ -82,7 +82,7 @@ public class PsiSectionData {
 	}
 
 	public int readBytes(final byte [] payload, final int offset, final int len){
-//		int available = len;
+		int available = len;
 
 		int need=0;
 		int read1=0; // bytes read to get pre-amble
@@ -90,9 +90,10 @@ public class PsiSectionData {
 
 		if(noBytes<3){
 			need = 3-noBytes; // how many more we need to get 3
-			read1=Math.min(need,len); // we are going to read this number of bytes
+			read1=Math.min(need,available); // we are going to read this number of bytes
 			System.arraycopy(payload, offset, data, noBytes, read1);
 			noBytes+=read1; // now we have read1 bytes more.
+			available -= read1;// now we have read1 bytes less available .
 			if(noBytes==3){
 				final int section_length= getInt(data, 1, 2, MASK_12BITS);
 				byte[] tmp = new byte[section_length+3];
@@ -109,9 +110,10 @@ public class PsiSectionData {
 				section_length=4093;
 			}
 			need = (section_length +3) - noBytes; //section_length + 3 pre-amble - what we already got
-			read2=Math.min(need,len); // we are going to read this number of bytes
+			read2=Math.min(need,available); // we are going to read this number of bytes
 			System.arraycopy(payload, offset+read1, data, noBytes, read2);
 			noBytes+=read2; // now we have read2 bytes more.
+			available -= read2;// now we have read2 bytes less available .
 			if(read2==need){
 				// complete SI section, handle it...
 				if(pid==0){
