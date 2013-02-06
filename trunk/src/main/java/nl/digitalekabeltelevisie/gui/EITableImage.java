@@ -366,7 +366,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @return
 	 */
 	public Dimension getDimension(){
-		if(interval!=null){
+		if((eit!=null)&&(interval!=null)){
 			// Round up/down to nearest hour
 			Date startDate = roundHourDown(interval.getStart());
 			Date endDate = roundHourUp(interval.getEnd());
@@ -398,32 +398,32 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	@Override
 	public String getToolTipText(final MouseEvent e){
 		StringBuilder r1=new StringBuilder();
-		if(interval!=null){
+		if((eit!=null)&&(interval!=null)){
 			final int x=e.getX();
 			final int y=e.getY();
 			if((x>(translatedX+SERVICE_NAME_WIDTH))&& // mouse not over labels or legend?
 					(y>(translatedY+LEGEND_HEIGHT))){
 
 				int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
-				int serviceId = (Integer) serviceOrder.toArray()[row];
-				String name = eit.getParentPSI().getSdt().getServiceName(serviceId);
-				if(name==null){
-					name = "Service "+serviceId;
+				if(row<serviceOrder.size()){
+					int serviceId = (Integer) serviceOrder.toArray()[row];
+					String name = eit.getParentPSI().getSdt().getServiceName(serviceId);
+					if(name==null){
+						name = "Service "+serviceId;
+					}
+					r1.append("<html><b>").append(name).append("</b><br>");
+
+					Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
+					Event event = findEvent(serviceId, thisDate);
+					if(event!=null){
+						addEventDetails(r1, event);
+					}else{ // NO event found, just display time
+						String timeString =   tf.format(thisDate);
+						String dateString =   df.format(thisDate);
+						r1.append(dateString).append(" ").append(timeString);
+					}
+					r1.append("</html>");
 				}
-
-				r1.append("<html><b>").append(name).append("</b><br>");
-
-				Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
-
-				Event event = findEvent(serviceId, thisDate);
-				if(event!=null){
-					addEventDetails(r1, event);
-				}else{ // NO event found, just display time
-					String timeString =   tf.format(thisDate);
-					String dateString =   df.format(thisDate);
-					r1.append(dateString).append(" ").append(timeString);
-				}
-				r1.append("</html>");
 			}
 		}
 		return r1.toString();
@@ -574,7 +574,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		viewWidth = rect.width;
 		viewHeight = rect.height;
 
-		if(interval!=null){ // there are services in the EIT
+		if((eit!=null)&&(interval!=null)){ // there are services in the EIT
 			Date startDate = roundHourDown(interval.getStart());
 			Date endDate = roundHourUp(interval.getEnd());
 
@@ -636,12 +636,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 *
 	 */
 	public void selectPresentFollowing() {
-		servicesTable = eit.getCombinedPresentFollowing();
-		serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
-		interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
-		setSize(getDimension());
 		selectedSchedule = false;
-		repaint();
+		if(eit!=null){
+			servicesTable = eit.getCombinedPresentFollowing();
+			serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+			setSize(getDimension());
+			repaint();
+		}
 	}
 
 	/**
@@ -652,12 +654,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 *
 	 */
 	public void selectSchedule() {
-		servicesTable = eit.getCombinedSchedule();
-		serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
-		interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
-		setSize(getDimension());
 		selectedSchedule = true;
-		repaint();
+		if(eit!=null){
+			servicesTable = eit.getCombinedSchedule();
+			serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+			setSize(getDimension());
+			repaint();
+		}
 	}
 
 	/**
