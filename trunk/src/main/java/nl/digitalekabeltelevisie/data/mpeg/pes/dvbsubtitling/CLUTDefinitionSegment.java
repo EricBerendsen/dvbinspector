@@ -90,7 +90,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	};
 
 
-	public class CLUTEntry implements TreeNode {
+	public static class CLUTEntry implements TreeNode {
 		private final int CLUT_entry_id;
 
 		private final int CLUT_flag_2_bit_entry;

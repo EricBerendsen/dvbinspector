@@ -204,7 +204,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 	}
 
 	// for DSI for SSU
-	public class GroupInfo implements TreeNode{
+	public static class GroupInfo implements TreeNode{
 
 		// TODO should also contain
 		//		GroupInfoLength 	2

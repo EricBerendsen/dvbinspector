@@ -40,7 +40,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class BIOPStreamEventMessage extends BIOPMessage {
 
-	public class Binding implements TreeNode{
+	public static class Binding implements TreeNode{
 
 		private final BIOPName biopName;
 		private final int bindingType;
@@ -105,7 +105,7 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 	}
 
-	public class EventName implements TreeNode{
+	public static class EventName implements TreeNode{
 
 		/**
 		 * @param eventName_length
@@ -129,7 +129,7 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 	}
 
-	public class EventId implements TreeNode{
+	public static class EventId implements TreeNode{
 
 		/**
 		 * @param eventName_length
@@ -149,7 +149,7 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 	}
 
 
-	public class ServiceContext implements TreeNode{
+	public static class ServiceContext implements TreeNode{
 
 		/**
 		 * @param context_id

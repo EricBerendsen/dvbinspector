@@ -40,7 +40,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class BIOPDirectoryMessage extends BIOPMessage {
 
-	public class Binding implements TreeNode{
+	public static class Binding implements TreeNode{
 
 		private final BIOPName biopName;
 		private final int bindingType;
@@ -106,7 +106,7 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 
 	}
 
-	public class ServiceContext implements TreeNode{
+	public static class ServiceContext implements TreeNode{
 
 		/**
 		 * @param context_id

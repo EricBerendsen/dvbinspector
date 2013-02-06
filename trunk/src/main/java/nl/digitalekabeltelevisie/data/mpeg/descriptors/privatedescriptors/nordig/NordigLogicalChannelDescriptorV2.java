@@ -46,7 +46,7 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 
 
 	private List<ChannelList> channelLists = new ArrayList<NordigLogicalChannelDescriptorV2.ChannelList>();
-	public class ChannelList implements TreeNode{
+	public static class ChannelList implements TreeNode{
 		/**
 		 * @param channel_list_id
 		 * @param channel_list_name

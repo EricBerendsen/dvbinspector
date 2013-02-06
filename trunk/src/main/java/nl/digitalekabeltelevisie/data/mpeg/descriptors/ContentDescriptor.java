@@ -42,7 +42,7 @@ public class ContentDescriptor extends Descriptor {
 	private List<ContentItem> contentList = new ArrayList<ContentItem>();
 
 
-	public class ContentItem implements TreeNode{
+	public static class ContentItem implements TreeNode{
 		/**
 		 *
 		 */

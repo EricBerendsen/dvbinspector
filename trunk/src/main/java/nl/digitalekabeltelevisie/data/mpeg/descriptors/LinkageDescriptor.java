@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
@@ -50,7 +50,7 @@ public class LinkageDescriptor extends Descriptor {
 	private List<Platform> platformList = new ArrayList<Platform>();
 	private List<NordigBootLoader> bootLoaderList = new ArrayList<NordigBootLoader>();
 
-	public class OUIEntry implements TreeNode{
+	public static class OUIEntry implements TreeNode{
 
 		private final int oui;
 		private final int selectorLength;
@@ -75,9 +75,9 @@ public class LinkageDescriptor extends Descriptor {
 	}
 
 
-	public class Platform implements TreeNode{
+	public static class Platform implements TreeNode{
 		/**
-		 * 
+		 *
 		 */
 		private final int platformId;
 		private List<PlatformName> platformNameList = new ArrayList<PlatformName>();
@@ -98,7 +98,7 @@ public class LinkageDescriptor extends Descriptor {
 		}
 	}
 
-	public class PlatformName implements TreeNode{
+	public static class PlatformName implements TreeNode{
 
 		private final String iso639LanguageCode;
 		private final DVBString platformName;
@@ -117,7 +117,7 @@ public class LinkageDescriptor extends Descriptor {
 		}
 	}
 
-	public class NordigBootLoader implements TreeNode{
+	public static class NordigBootLoader implements TreeNode{
 
 		/**
 		 * @param manufacturer_id
@@ -245,11 +245,11 @@ public class LinkageDescriptor extends Descriptor {
 				privateDataByte = Utils.copyOfRange(b, offset+10, offset+descriptorLength+2);
 			}
 
-		}else if(linkageType==0x81){ // 13.2.6 NorDig linkage for bootloader 
-			// TODO, this is a private usage, but not indicated by a private_data_specifier_descriptor: 0x5F 
+		}else if(linkageType==0x81){ // 13.2.6 NorDig linkage for bootloader
+			// TODO, this is a private usage, but not indicated by a private_data_specifier_descriptor: 0x5F
 			// just assume it is nordig?
-			int s = 9; // private data, if any, starts at position 9 
-			while(s+17 <= descriptorLength){ // bootloader = 19 bytes
+			int s = 9; // private data, if any, starts at position 9
+			while((s+17) <= descriptorLength){ // bootloader = 19 bytes
 				int manufacturer_id = getInt(b,offset+s,2,MASK_16BITS);
 				byte[] version_id = Utils.copyOfRange(b, offset+s+2, offset+s+10); // 64 bits, 8 bytes
 				long private_id = getLong(b, offset+s+10, 4, MASK_32BITS);

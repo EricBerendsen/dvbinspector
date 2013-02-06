@@ -43,7 +43,7 @@ public class ParentalRatingDescriptor extends Descriptor {
 	private List<Rating> ratingList = new ArrayList<Rating>();
 
 
-	public class Rating implements TreeNode{
+	public static class Rating implements TreeNode{
 		/**
 		 *
 		 */

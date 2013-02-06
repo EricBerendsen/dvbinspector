@@ -63,7 +63,7 @@ public class AITsection extends TableSection {
 	private int application_loop_length;
 	private List<Application>	applications;
 
-	public class Application implements TreeNode {
+	public static class Application implements TreeNode {
 		private long organisation_id;
 		private int application_id;
 

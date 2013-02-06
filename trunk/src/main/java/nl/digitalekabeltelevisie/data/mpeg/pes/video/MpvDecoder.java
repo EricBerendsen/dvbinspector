@@ -109,17 +109,17 @@ public class MpvDecoder extends Object {
 
 	private long StartPos = 0;
 
-	private static boolean FAST = false;
-	private static boolean DIRECTION = false;
-	private static boolean ERROR1 = false;
-	private static boolean ERROR2 = false;
-	private static boolean ERROR3 = false;
-	private static boolean ERROR4 = false;
-	private static boolean ERROR5 = false;
-	private static boolean ERROR6 = false;
-	private static boolean viewGOP = true;
+	private boolean FAST = false;
+	private boolean DIRECTION = false;
+	private boolean ERROR1 = false;
+	private boolean ERROR2 = false;
+	private boolean ERROR3 = false;
+	private boolean ERROR4 = false;
+	private boolean ERROR5 = false;
+	private boolean ERROR6 = false;
+	private boolean viewGOP = true;
 
-	private ArrayList PositionList = new ArrayList();
+	private List PositionList = new ArrayList();
 
 	private byte[] buf = new byte[0];
 

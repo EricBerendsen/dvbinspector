@@ -48,7 +48,7 @@ public class NITsection extends TableSection{
 	private int networkDescriptorsLength;
 	private int transportStreamLoopLength;
 
-	public class TransportStream implements TreeNode{
+	public static class TransportStream implements TreeNode{
 		private int transportStreamID;
 		private int originalNetworkID;
 		private int transportDescriptorsLength;

@@ -61,7 +61,7 @@ public class UNTsection extends TableSection {
 
 	private List<Descriptor>	common_descriptor_loop;
 
-	public class PlatformLoop implements TreeNode {
+	public static class PlatformLoop implements TreeNode {
 
 		private CompatibilityDescriptor	compatibilityDescriptor;
 		private int						platform_loop_length;
@@ -105,7 +105,7 @@ public class UNTsection extends TableSection {
 
 	}
 
-	public class TargetLoop implements TreeNode {
+	public static class TargetLoop implements TreeNode {
 
 		private int			target_descriptor_loop_length;
 		private int			operational_descriptor_loop_length;

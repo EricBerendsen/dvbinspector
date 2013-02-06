@@ -79,7 +79,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	/**
 	 *
 	 */
-	public class PixelDataSubBlock implements TreeNode{
+	public static class PixelDataSubBlock implements TreeNode{
 
 		protected byte[] data_block;
 

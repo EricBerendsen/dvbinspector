@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -44,7 +43,7 @@ public class ISO639LanguageDescriptor extends Descriptor {
 	private final List<Language> languageList = new ArrayList<Language>();
 
 
-	public class Language implements TreeNode{
+	public static class Language implements TreeNode{
 		/**
 		 *
 		 */
@@ -102,8 +101,8 @@ public class ISO639LanguageDescriptor extends Descriptor {
 	@Override
 	public String toString() {
 		final StringBuilder buf = new StringBuilder(super.toString());
-		for (final Iterator<Language> iter = languageList.iterator(); iter.hasNext();) {
-			buf.append(iter.next().toString());
+		for (Language language : languageList) {
+			buf.append(language.toString());
 		}
 
 
@@ -117,8 +116,9 @@ public class ISO639LanguageDescriptor extends Descriptor {
 		case 2: return "Hearing impaired";
 		case 3: return "Visual impaired commentary";
 		default:
-			if (audio >= 0x04 && audio <= 0x7F)
+			if ((audio >= 0x04) && (audio <= 0x7F)){
 				return "User Private";
+			}
 			return "Reserved";
 		}
 	}

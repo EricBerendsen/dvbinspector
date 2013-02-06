@@ -52,7 +52,7 @@ public class EITsection extends TableSection implements HTMLSource {
 	private int segmentLastSectionNumber;
 	private int lastTableID;
 
-	public class Event implements TreeNode{
+	public static class Event implements TreeNode{
 		private int eventID;
 		private byte[] startTime;
 		private String duration;
