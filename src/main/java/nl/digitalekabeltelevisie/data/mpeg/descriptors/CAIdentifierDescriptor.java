@@ -42,7 +42,7 @@ public class CAIdentifierDescriptor extends Descriptor {
 
 	private final List<CASystemId> CA_system_id = new ArrayList<CASystemId>();
 
-	public class CASystemId implements TreeNode{
+	public static class CASystemId implements TreeNode{
 		private final int ca_system_id;
 
 		public CASystemId(final int ca_system_id) {

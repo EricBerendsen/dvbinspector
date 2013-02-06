@@ -822,6 +822,8 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 		return true;
 	}
 
+
+
 	public int getColor(final int c){
 		final List<Triplet> tripletList= getTripletList();
 		final BitString bs = new BitString();

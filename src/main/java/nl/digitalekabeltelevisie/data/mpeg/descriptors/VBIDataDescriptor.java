@@ -47,13 +47,13 @@ public class VBIDataDescriptor extends Descriptor {
 
 	private List<DataService> serviceList = new ArrayList<DataService>();
 
-	public class DataService implements TreeNode{
+	public static class DataService implements TreeNode{
 		private final int dataServiceId;
 		private final int dataServiceDescriptorLength;
 		private List<VBILine> linesList;
 		private byte[] reserved;
 
-		public class VBILine implements TreeNode{
+		public static class VBILine implements TreeNode{
 
 			private final int reserved;
 			private final int fieldParity;

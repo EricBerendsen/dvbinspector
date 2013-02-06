@@ -46,7 +46,7 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 	private final List<Country> countryList = new ArrayList<Country>();
 
 
-	public class Country implements TreeNode{
+	public static class Country implements TreeNode{
 		/**
 		 * 
 		 */

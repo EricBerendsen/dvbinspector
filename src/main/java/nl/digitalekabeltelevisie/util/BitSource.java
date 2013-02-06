@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.util;
@@ -34,14 +34,14 @@ import java.util.Arrays;
  * wrapper around a byte[] to read bits at a time.
  * based on http://zxing.googlecode.com/svn/trunk/core/src/com/google/zxing/common/BitSource.java
  * see http://code.google.com/p/zxing/source/browse/trunk/core/src/com/google/zxing/common/BitSource.java
- * 
+ *
  * <p>This provides an easy abstraction to read bits at a time from a sequence of bytes, where the
  * number of bits read is not often a multiple of 8.</p>
  *
  * <p>This class is thread-safe but not reentrant. Unless the caller modifies the bytes array
  * it passed in, in which case all bets are off.</p>
- * 
- * 
+ *
+ *
  */
 public class BitSource {
 	private final byte[] bytes;
@@ -50,7 +50,7 @@ public class BitSource {
 
 	private int len = 0;
 
-	
+
 	public static final int[] powerOf2 = {1,2,4,8, 16,32,64,128,
 										 256,512,1024,2048, 4096,8192,16384,32768,
 										 65536,131072,262144,524288, 1048576,2097152,4194304,8388608,
@@ -122,7 +122,7 @@ public class BitSource {
 	/**
 	 * read entire bytes from source, starting at new byte, consuming them (no longer available)
 	 * if not at start of new byte (offset <>0) remainder bits are discarded without warning.
-	 * 
+	 *
 	 * @param bytes
 	 * @return
 	 */
@@ -206,7 +206,7 @@ public class BitSource {
 
 		return result;
 	}
-	
+
 	public int readSignedInt(int numBits) {
 		if (numBits < 2) {
 			throw new IllegalArgumentException("signed int should be at least 2 bits");
@@ -215,7 +215,7 @@ public class BitSource {
 			throw new IllegalArgumentException("signed int can have at most 31 bits");
 		}
 		int i = readBits(numBits);
-	
+
 		if(i>=powerOf2[numBits-1]){
 			i -= powerOf2[numBits];
 		}
@@ -230,8 +230,8 @@ public class BitSource {
 			throw new IllegalArgumentException("signed byte can have at most 8 bits");
 		}
 		int i = readSignedInt(numBits);
-		
-		
+
+
 		return (byte)i;
 	}
 
@@ -244,30 +244,29 @@ public class BitSource {
 	public int i(int v){
 		return readSignedInt(v);
 	}
-	
+
 	// fixed-pattern bit string using n bits written (from left to right) with the left bit first. The parsing process for
 	// this descriptor is specified by the return value of the function read_bits( n ).
 	public int f(int v){
 		return readBits(v);
 	}
-	
+
 
 	private int getCodeNum() {
-		int leadingZeroBits = -1; 
+		int leadingZeroBits = -1;
 		int b = 0;
 		while(b==0){
 			b = readBits(1);
-			leadingZeroBits++; 
+			leadingZeroBits++;
 		}
-		int codeNum = powerOf2[leadingZeroBits] - 1 + readBits(leadingZeroBits);
-		return codeNum;
+		return (powerOf2[leadingZeroBits] - 1) + readBits(leadingZeroBits);
+
 	}
 
 	// h264 9.1 Parsing process for Exp-Golomb codes
 	public int ue(){
-		int codeNum = getCodeNum();
-		return codeNum;
-		
+		return getCodeNum();
+
 	}
 
 	// h264 9.1.1 Mapping process for signed Exp-Golomb codes
@@ -275,11 +274,11 @@ public class BitSource {
 	public int se(){
 		int codeNum = getCodeNum();
 		int absVal = (codeNum+1)/2;
-		int sign = (codeNum%2==0)?-1:1;
+		int sign = ((codeNum%2)==0)?-1:1;
 		return absVal*sign;
-		
+
 	}
-	
+
 	public String toString(){
 		StringBuilder b = new StringBuilder("BitSource: ");
 		if(bytes!=null){
@@ -289,7 +288,7 @@ public class BitSource {
 		}
 		b.append(", byteOffset=").append(byteOffset);
 		b.append(", bitOffset=").append(bitOffset);
-		
+
 		return b.toString();
 	}
 }

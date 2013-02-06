@@ -85,10 +85,10 @@ public class MosaicDescriptor extends Descriptor {
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_cell"));
 			s.add(new DefaultMutableTreeNode(new KVP("logical_cell_id",logicalCellId,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_cell_presentation_info",logicalCellPresentationInfo,CodingOfLogicalCellPresentationInfo(logicalCellPresentationInfo))));
+			s.add(new DefaultMutableTreeNode(new KVP("logical_cell_presentation_info",logicalCellPresentationInfo,getCodingOfLogicalCellPresentationInfo(logicalCellPresentationInfo))));
 			s.add(new DefaultMutableTreeNode(new KVP("elementary_cell_field_length",elementaryCellFieldLength,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("elementary_cell_ids",elementaryCellIds,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_linkage_info",cellLinkageInfo,CodingOfCellLinkageInfo(cellLinkageInfo))));
+			s.add(new DefaultMutableTreeNode(new KVP("cell_linkage_info",cellLinkageInfo,getCodingOfCellLinkageInfo(cellLinkageInfo))));
 
 
 			if(cellLinkageInfo==0x01){
@@ -258,7 +258,7 @@ public class MosaicDescriptor extends Descriptor {
 		}
 	}
 
-	public static String CodingOfLogicalCellPresentationInfo(final int info) {
+	public static String getCodingOfLogicalCellPresentationInfo(final int info) {
 		switch (info) {
 		case 0x0: return "undefined";
 		case 0x1: return "video";
@@ -268,7 +268,7 @@ public class MosaicDescriptor extends Descriptor {
 		}
 	}
 
-	public static String CodingOfCellLinkageInfo(final int info) {
+	public static String getCodingOfCellLinkageInfo(final int info) {
 		switch (info) {
 		case 0x0: return "undefined";
 		case 0x1: return "bouquet related";

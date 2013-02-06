@@ -54,7 +54,7 @@ public class INTsection extends TableSection {
 	private int processing_order;
 	private int platform_descriptor_loop_length;
 
-	public class TargetLoop implements TreeNode{
+	public static class TargetLoop implements TreeNode{
 		private int target_descriptor_loop_length;
 		private int operational_descriptor_loop_length;
 
