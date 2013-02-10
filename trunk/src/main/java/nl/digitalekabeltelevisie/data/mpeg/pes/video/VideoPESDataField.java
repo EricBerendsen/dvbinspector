@@ -48,10 +48,12 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 public class VideoPESDataField extends PesPacketData implements TreeNode, ImageSource {
 
 
-
-
-
 	private final List<VideoMPEG2Section> sections= new ArrayList<VideoMPEG2Section>();
+
+	/**
+	 * Creates a new VideoPESDataField
+	 * @param pesPacket
+	 */
 
 	public VideoPESDataField(final PesPacketData pesPacket) {
 		super(pesPacket);
@@ -71,7 +73,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 					final int extensionStartCode = (getUnsignedByte(data[i+4])&0xF0)>>4;
 					if(extensionStartCode==1){ // Sequence extension
 						section = new SequenceExtension(data,i+3);
-					}else if(extensionStartCode==8){ // Sequence extension
+					}else if(extensionStartCode==8){ // Picture coding extension
 						section = new PictureCodingExtension(data,i+3);
 					}else{
 						section = new ExtensionHeader(data,i+3); // default Base Extension
@@ -184,7 +186,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 	}
 
 	/**
-	 * @param sectionList List of  sections to besearched
+	 * @param sectionList List of  sections to be searched
 	 * @param startCode code of target section
 	 * @return List of all sections matching startCode
 	 */
@@ -200,15 +202,27 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 	}
 
 
+	/**
+	 * Returns an unmodifiable list of the VideoMPEG2Sections in this PESPacket
+	 * @return the VideoMPEG2Sections
+	 */
 	public List<VideoMPEG2Section> getSections() {
 		return sections;
 	}
 
 
+	/**
+	 * If this VideoPESDataField contains a PictureHeader with picture_coding_type = "I"
+	 * tries to create an image from this I-Frame. If the VideoPESDataField does not contain all slices for the frame, the image will not be complete.
+	 *
+	 * The image has the exact dimensions of the source I-Frame, so aspect ratio may be incorrect.
+	 *
+	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
+	 */
 	@Override
 	public BufferedImage getImage() {
 
-		if(isIFrame()){
+		if(hasIFrame()){
 			MpvDecoder mpvDecoder = new MpvDecoder();
 			mpvDecoder.decodeArray(data, false, false, false, 0);
 
@@ -220,9 +234,19 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 	}
 
 
+	/**
+	 * If this VideoPESDataField contains a PictureHeader with picture_coding_type = "I"
+	 * tries to create an image from this I-Frame. If the VideoPESDataField does not contain all slices for the frame, the image will not be complete.
+	 *
+	 * This is used to give a real background for subtitles. Caller must set width and height, to make sure aspect ratio is as desired.
+	 *
+	 * @param w width
+	 * @param h height
+	 * @return
+	 */
 	public BufferedImage getImage(int w, int h) {
 
-		if(isIFrame()){
+		if(hasIFrame()){
 			MpvDecoder mpvDecoder = new MpvDecoder();
 			mpvDecoder.decodeArray(data, false, false, false, 0);
 
@@ -233,7 +257,16 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 
 	}
 
-	public boolean isIFrame() {
+	/**
+	 * Determine whether this if VideoPESDataField contains at least a PictureHeader with Picture_coding_type== "I".
+	 * Can have more, can also contain other types of PictureHeader.
+	 * <br>
+	 * <b>Does not imply this VideoPESDataField contains a complete I-Frame.</b>
+	 *
+	 *
+	 * @return true if VideoPESDataField contains PictureHeader with Picture_coding_type== "I", else false
+	 */
+	public boolean hasIFrame() {
 
 		final List<VideoMPEG2Section> picts = findSectionInList(sections, 0);
 		if((picts!=null)&&(picts.size()>0)){
