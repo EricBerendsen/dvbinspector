@@ -27,7 +27,15 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
@@ -46,31 +54,52 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
 
 /**
+ * Shows variation over time of the bandwidth each PID uses
+ *
  * @author Eric Berendsen
  *
  */
-public class BitRateChart extends ChartPanel implements TransportStreamView{
+public class BitRateChart extends JPanel implements TransportStreamView{
+
+	private JFreeChart freeChart;
+	private JPanel buttonPanel;
+
+	private ChartPanel chartPanel;
+	private boolean legendVisible = true;
 
 
 	/**
+	 * Creates a new BitRateChart
 	 *
+	 * @param transportStream stream to be displayed (can be <code>null</code>)
+	 * @param viewContext determines which PIDs to include, what interval to use, and how many steps in the graph
 	 */
-	private static final long serialVersionUID = 1159032380465429797L;
-	private JFreeChart freeChart;
-
-
-
 	public BitRateChart(final TransportStream transportStream, final ViewContext viewContext){
 
-		super(null);
+		super(new BorderLayout());
+		buttonPanel = new JPanel();
+		addLegendRadioButtons();
+		add(buttonPanel,BorderLayout.PAGE_START);
+
+		chartPanel = new ChartPanel(null);
 
 		if(transportStream!=null){
 			setTransportStream(transportStream,viewContext);
 		}
 
 
+		add(chartPanel,BorderLayout.CENTER);
+
 	}
 
+	/**
+	 * Update existing BitRateChart to display a new {@link TransportStream}
+	 *
+	 * @param transportStream stream to be displayed (can be <code>null</code>)
+	 * @param viewContext determines which PIDs to include, what interval to use, and how many steps in the graph
+	 *
+	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
+	 */
 	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
 		if(transportStream!=null){
 			final int steps=viewContext.getGraphSteps();
@@ -125,8 +154,9 @@ public class BitRateChart extends ChartPanel implements TransportStreamView{
 			renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
 			final CategoryPlot plot = new CategoryPlot(dataSet, categoryAxis, valueAxis,renderer);
 			plot.setOrientation(PlotOrientation.VERTICAL);
+			// always create with legend
 			freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT,plot, true);
-
+			freeChart.getLegend().setVisible(legendVisible);
 			plot.setBackgroundPaint(Color.white);
 			plot.setRangePannable(true);
 			plot.setDomainGridlinesVisible(false);
@@ -136,12 +166,50 @@ public class BitRateChart extends ChartPanel implements TransportStreamView{
 			final CategoryAxis domainAxis = plot.getDomainAxis();
 			domainAxis.setAxisLineVisible(true);
 
-			setChart(freeChart);
-			setDomainZoomable(true);
-			setRangeZoomable(true);
+			chartPanel.setChart(freeChart);
+			chartPanel.setDomainZoomable(true);
+			chartPanel.setRangeZoomable(true);
 		}else{ // transportstreaam == null
 			freeChart = null;
+			chartPanel.setChart(freeChart);
 		}
 	}
+
+	private void addLegendRadioButtons() {
+		JLabel typeLabel = new JLabel("Legend:");
+		buttonPanel.add(typeLabel);
+		JRadioButton onButton = new JRadioButton("On");
+		onButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(!legendVisible){
+					legendVisible = true;
+					if(freeChart!=null){
+						freeChart.getLegend().setVisible(legendVisible);
+					}
+				}
+			}
+		});
+		JRadioButton offButton = new JRadioButton("Off");
+		offButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(legendVisible){
+					legendVisible = false;
+					if(freeChart!=null){
+						freeChart.getLegend().setVisible(legendVisible);
+					}
+				}
+			}
+		});
+		onButton.setSelected(true);
+		ButtonGroup group = new ButtonGroup();
+		group.add(onButton);
+		group.add(offButton);
+
+		buttonPanel.add(onButton);
+		buttonPanel.add(offButton);
+	}
+
 
 }
