@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
+import static nl.digitalekabeltelevisie.util.Utils.indexOf;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -39,12 +41,16 @@ public class VideoMPEG2Section implements TreeNode{
 	 * startCode of this section as defined in ISO13818-2 6.2.1
 	 */
 	protected int startCode;
+	private int offset;
+	private byte[]data;
 	// helper to get bits instead of bytes
 	protected BitSource bs;
 
 	public VideoMPEG2Section(final byte[]data, final int offset) {
 		super();
 		bs = new BitSource(data, offset);
+		this.data = data;
+		this.offset = offset;
 		this.startCode = bs.readBits(8);
 	}
 
@@ -53,6 +59,8 @@ public class VideoMPEG2Section implements TreeNode{
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(VideoPESDataField.getSectionTypeString(startCode)));
+
+		t.add(new DefaultMutableTreeNode(new KVP("length",getLength(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("start_code",startCode,VideoPESDataField.getStartCodeString(startCode))));
 		return t;
 	}
@@ -65,4 +73,24 @@ public class VideoMPEG2Section implements TreeNode{
 		return startCode;
 	}
 
+	protected int getLength(){
+		int i = indexOf(data, new byte[]{0,0,1},offset); // look for start code
+		if(i>=0){ // next section in same byte[]
+			return (i-offset);
+		}
+		i = indexOf(data, new byte[]{0,0,0},offset); // look for stuffing
+		if(i>=0){ //
+			return (i-offset);
+		}
+		// fall back to length of array
+		return data.length - offset;
+	}
+
+	public String toString(){
+		if(startCode==0){
+			return VideoPESDataField.getSectionTypeString(startCode)+" ("+((PictureHeader)this).getPictureCodingTypeShortString()+")";
+		}else{
+			return VideoPESDataField.getSectionTypeString(startCode);
+		}
+	}
 }
