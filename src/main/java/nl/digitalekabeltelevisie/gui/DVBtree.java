@@ -78,8 +78,9 @@ import nl.digitalekabeltelevisie.main.DVBinspector;
 
 /**
  * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
- * For now image and text are implemented as a label. Disadvantage is that both can not be copied.
- * Also sets up menu items for the JTree.
+ * For now image and text are implemented as a label. Disadvantage is that both can not be copied by the user into the clipboard.
+ * Also sets up pop-up menu items for the JTree, and handles events from it.
+ *
  * @author Eric
  *
  */
@@ -109,6 +110,13 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private TransportStream ts;
 	private DefaultTreeModel model;
 
+	/**
+	 *
+	 * Creates a new DVBTree
+	 *
+	 * @param transportStream stream to be displayed (can be <code>null</code>)
+	 * @param modus determines options of JTree, (like simple view, number list items, etc.)
+	 */
 	public DVBtree(final TransportStream transportStream, final int modus) {
 		super(new GridLayout(1,0));
 		mod=modus;
@@ -177,14 +185,22 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerSize(12);
 
-		final Dimension minimumSize = new Dimension(300, 600);
+		final Dimension minimumSize = new Dimension(300, 670);
 		treeView.setMinimumSize(minimumSize);
-		treeView.setPreferredSize(new Dimension(1000, 600));
-		splitPane.setDividerLocation(900);
+		treeView.setPreferredSize(new Dimension(980, 670));
+		splitPane.setDividerLocation(500);
 
 		add(splitPane);
 	}
 
+	/**
+	 * Update existing DVBTree to display a new {@link TransportStream}
+	 *
+	 * @param transportStream stream to be displayed (can be <code>null</code>)
+	 * @param viewContext ignored, required by {@link TransportStreamView}
+
+	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
+	 */
 	public void setTransportStream(final TransportStream transportStream, final ViewContext v){
 		ts=transportStream;
 		if(ts!=null){
@@ -204,6 +220,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		return mod;
 	}
 
+	/**
+	 * Toggle one or more bits in the current modus
+	 * @param modus
+	 */
 	public void toggleMod(final int modus) {
 		this.mod = this.mod ^ modus;
 
@@ -213,7 +233,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		refreshView();
 	}
 
-	public void refreshView(){
+	private void refreshView(){
 		if(ts!=null){
 			model = new DefaultTreeModel(ts.getJTreeNode(this.mod));
 			tree.setModel(model);
@@ -238,7 +258,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		if (nodeInfo instanceof KVP) {
 			final KVP kvp = (KVP)nodeInfo;
 			if(kvp.getImageSource()!=null){
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				final Image img = kvp.getImageSource().getImage();
+				setCursor(Cursor.getDefaultCursor());
 				if(img != null){
 					label.setIcon(new ImageIcon(img));
 					label.setText(null);
