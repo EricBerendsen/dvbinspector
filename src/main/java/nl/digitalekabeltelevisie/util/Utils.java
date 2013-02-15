@@ -56,6 +56,8 @@ import nl.digitalekabeltelevisie.gui.DVBtree;
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
+ * Only static helper methods
+ *
  * @author Eric Berendsen
  *
  */
@@ -390,6 +392,11 @@ public final class Utils {
 		return buf.toString();
 	}
 
+	/**
+	 * interpret byte as unsigned byte, always returning a positive value
+	 * @param b byte
+	 * @return integer between 0 and 255 (inclusive)
+	 */
 	public static int getUnsignedByte(final byte b){
 		if(b>=0){
 			return b;
@@ -398,12 +405,12 @@ public final class Utils {
 	}
 
 
-	public static byte getSignedByte(final int b){
-		if(b<=127){
-			return (byte)b;
-		}
-		return (byte)(b-256);
-	}
+	/**
+	 * convert  nteger between 0 and 255 (inclusive) into byte (byte is interpreted as unsigned, even though that does not exist in java)
+	 *
+	 * @param b
+	 * @return
+	 */
 
 	public static byte getInt2UnsignedByte(final int b){
 		if(b<=127){
@@ -413,6 +420,15 @@ public final class Utils {
 	}
 
 
+	/**
+	 * Get an positive integer from array of bytes
+	 *
+	 * @param bytes
+	 * @param offset starting position
+	 * @param len number of bytes to interpret
+	 * @param mask bitmask to select which bits to use
+	 * @return
+	 */
 	public static int getInt(final byte[] bytes, final int offset, final int len, final int mask){
 		int r=0;
 		for (int i = 0; i < len; i++) {
@@ -949,6 +965,13 @@ public final class Utils {
 		return buf.toString();
 	}
 
+	/**
+	 * create a copy of a part of a byte[]
+	 * @param original
+	 * @param from
+	 * @param to
+	 * @return
+	 */
 	public static byte[] copyOfRange(final byte[] original, final int from, final int to) {
 		final int newLength = to - from;
 		if (newLength < 0) {
@@ -1313,6 +1336,11 @@ public final class Utils {
 		return s.substring(st);
 	}
 
+	/**
+	 * Format a byte[] a an formatted IP number for display (decimal, separated with dots)
+	 * @param ip byte[] of any length, so ready for IP6 (or 8 or ...) can not be <code>null</code>
+	 * @return
+	 */
 	public static String formatIPNumber(final byte[] ip){
 		final StringBuilder r = new StringBuilder();
 		if(ip.length>0){
@@ -1325,11 +1353,11 @@ public final class Utils {
 	}
 
 	/**
-	 * @param program_clock_reference
-	 * @return
-	 *
+	 * Convert PCR into human readable String (24 hour clock based)
 	 * based on DVBsnoop helper.c, which is based on "dvbtextsubs  Dave Chapman"
 	 *
+	 * @param program_clock_reference
+	 * @return
 	 */
 	public static String printPCRTime(final long program_clock_reference) {
 
@@ -1348,10 +1376,10 @@ public final class Utils {
 	}
 
 	/**
+	 * based on DVBsnoop helper.c, which is based on "dvbtextsubs  Dave Chapman"
+	 *
 	 * @param ts
 	 * @return
-	 *
-	 * based on DVBsnoop helper.c, which is based on "dvbtextsubs  Dave Chapman"
 	 *
 	 */
 	public static String printTimebase90kHz(final long ts) {
@@ -1401,6 +1429,9 @@ public final class Utils {
 	}
 
 
+	/**
+	 * Helper byte[] to reverse order of bits in a byte
+	 */
 	public static int invtab[] = {
 		0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
 		0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
@@ -1437,6 +1468,14 @@ public final class Utils {
 	};
 
 
+	/**
+	 * Find byte sequence target in source, starting search from fromIndex
+	 *
+	 * @param source array to be searched
+	 * @param target sequence to be found
+	 * @param fromIndex index to start search from
+	 * @return -1 if not found, else starting position
+	 */
 	public static int indexOf(final byte[] source,  final byte[]target, final int fromIndex){
 		if (fromIndex >= source.length) {
 			return  -1;
