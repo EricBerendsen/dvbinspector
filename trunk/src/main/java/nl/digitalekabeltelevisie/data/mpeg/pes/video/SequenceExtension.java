@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
@@ -77,7 +77,7 @@ public class SequenceExtension extends ExtensionHeader {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		t.setUserObject(new KVP("Sequence extension")); //  Ugly hack to overwrite the name given in the super-super class,
 		t.add(new DefaultMutableTreeNode(new KVP("profile_and_level_indication",profile_and_level_indication,getProfileLevelString(profile_and_level_indication))));
-		t.add(new DefaultMutableTreeNode(new KVP("progressive_sequence",progressive_sequence,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("progressive_sequence",progressive_sequence,progressive_sequence==1?"video sequence contains only progressive framepictures":"video sequence may contain both framepictures and field-pictures, and frame-picture may be progressive or interlaced frames")));
 		t.add(new DefaultMutableTreeNode(new KVP("chroma_format",chroma_format,getChromaFormatString(chroma_format))));
 		t.add(new DefaultMutableTreeNode(new KVP("horizontal_size_extension",horizontal_size_extension,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("vertical_size_extension",vertical_size_extension,null)));

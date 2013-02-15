@@ -94,9 +94,9 @@ public class SequenceHeader extends VideoMPEG2Section {
 		t.add(new DefaultMutableTreeNode(new KVP("aspect_ratio_information",aspect_ratio_information,Utils.getAspectRatioInformationString(aspect_ratio_information))));
 		t.add(new DefaultMutableTreeNode(new KVP("frame_rate_code",frame_rate_code,getFrameRateCodeString(frame_rate_code))));
 		t.add(new DefaultMutableTreeNode(new KVP("bit_rate_value",bit_rate_value,(bit_rate_value*400)+" bit/s")));
-		t.add(new DefaultMutableTreeNode(new KVP("marker_bit",marker_bit,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("marker_bit",marker_bit,"should be 1")));
 		t.add(new DefaultMutableTreeNode(new KVP("vbv_buffer_size_value",vbv_buffer_size_value,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constrained_parameters_flag",constrained_parameters_flag,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("constrained_parameters_flag",constrained_parameters_flag,"has no meaning in the ISO13818-2 specification and shall have the value 0")));
 		t.add(new DefaultMutableTreeNode(new KVP("load_intra_quantiser_matrix",load_intra_quantiser_matrix,null)));
 		if(load_intra_quantiser_matrix==1){
 			final DefaultMutableTreeNode intra_quantiser_matrixNode = new DefaultMutableTreeNode(new KVP("intra_quantiser_matrix"));

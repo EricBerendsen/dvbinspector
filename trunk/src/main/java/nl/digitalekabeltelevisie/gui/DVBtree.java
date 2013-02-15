@@ -267,10 +267,12 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					return;
 				}
 			}else  if(kvp.getHTMLSource()!=null){
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
 				if(html != null){
 					label.setIcon(null);
 					label.setText(html.toString());
+					setCursor(Cursor.getDefaultCursor());
 					return;
 				}
 			}

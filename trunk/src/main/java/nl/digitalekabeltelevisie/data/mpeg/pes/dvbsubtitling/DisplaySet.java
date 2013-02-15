@@ -169,7 +169,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 					}
 					//create new byte[] to fill
 					final byte[] dataArray = new byte[rcs.getRegionHeight() * rcs.getRegionWidth()];
-					Arrays.fill(dataArray, getSignedByte(index));
+					Arrays.fill(dataArray, getInt2UnsignedByte(index));
 					regionRaster[j] = Raster.createInterleavedRaster(new DataBufferByte(dataArray, rcs.getRegionWidth() * rcs.getRegionHeight()),rcs.getRegionWidth(),rcs.getRegionHeight(),rcs.getRegionWidth(),1,new int[]{0},null);
 				}
 			}
