@@ -348,6 +348,8 @@ public class Descriptor implements TreeNode {
 		case 0x7F:
 			return "extension descriptor";
 
+		case 0x81:
+			return "user defined: UPC logic_channel_descriptor/ATSC AC-3 audio descriptor";
 			/* http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf */
 		case 0x82:
 			return "user defined: Viasat private: Logic_channel_dscriptor";
