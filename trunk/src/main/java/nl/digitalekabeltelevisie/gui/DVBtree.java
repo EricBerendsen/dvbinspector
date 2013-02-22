@@ -27,8 +27,10 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -50,6 +52,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -94,6 +97,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 	private final JTree tree;
 	private final JLabel label;
+	private final JEditorPane editorPane;
 	private final JSplitPane splitPane;
 	private final JPopupMenu popup;
 	private final JMenuItem copyMenuItem;
@@ -176,7 +180,27 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		label.setVerticalAlignment(SwingConstants.TOP);
 
-		final JScrollPane imgView = new JScrollPane(label);
+		editorPane = new JEditorPane();
+		editorPane.getTransferHandler();
+		editorPane.setContentType("text/html");
+		editorPane.setText(null);
+		editorPane.setEditable(false);
+		editorPane.setBackground(Color.LIGHT_GRAY);
+		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+		editorPane.setTransferHandler(new MyTransferHandler());
+//		TransferHandler trans = editorPane.getTransferHandler();
+//		System.out.println("TransferHandler:"+trans);
+
+
+		JPanel panel = new JPanel();
+
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		panel.add(label);
+		panel.add(editorPane);
+
+
+		final JScrollPane imgView = new JScrollPane(panel);
 
 		//Add the scroll panes to a split pane.
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -264,6 +288,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				if(img != null){
 					label.setIcon(new ImageIcon(img));
 					label.setText(null);
+					editorPane.setText(null);
 					return;
 				}
 			}else  if(kvp.getHTMLSource()!=null){
@@ -271,7 +296,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
 				if(html != null){
 					label.setIcon(null);
-					label.setText(html.toString());
+					//label.setText(html.toString());
+					editorPane.setText(html.toString());
 					setCursor(Cursor.getDefaultCursor());
 					return;
 				}
@@ -280,6 +306,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		}
 		label.setIcon(null);
 		label.setText(null);
+		editorPane.setText(null);
 	}
 
 	/* (non-Javadoc)

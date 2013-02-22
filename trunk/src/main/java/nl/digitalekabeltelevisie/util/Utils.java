@@ -956,7 +956,7 @@ public final class Utils {
 		final int end = Math.min(block.length, offset+len);
 		for (int i = offset; i < end; i++) {
 			final byte b=block[i];
-			if((32<=getUnsignedByte(b))&&(getUnsignedByte(b)<=127)){
+			if((32<=getUnsignedByte(b))&&(getUnsignedByte(b)<127)){
 				buf.append((char)(b));
 			}else{
 				buf.append('.');
@@ -1571,14 +1571,14 @@ public final class Utils {
 	public static String getHTML(final byte [] byteValue, final int offset, final int len) {
 
 		final StringBuilder b= new StringBuilder();
-		b.append("<code>");
+		b.append("<pre>");
 		// header line
 		b.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0001 0203 0405 0607 0809 0A0B 0C0D 0E0F 0123456789ABCDEF<br>");
 		final int lines=1+((len-1)/16);
 		for (int l = 0; l < lines; l++) {
 			final int start=l*16;
-			b.append(Utils.toHexString(start,6));
-			b.append(' ');
+			b.append("").append(Utils.toHexString(start,6));
+			b.append("&nbsp;");
 			b.append("<span style=\"background-color: white\">");
 			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
 
@@ -1599,7 +1599,7 @@ public final class Utils {
 			b.append(Utils.escapeHTML(Utils.toSafeString(byteValue, offset+(l*16), lineLen))).append("</span><br>");
 		}
 
-		b.append("</code>");
+		b.append("</pre>");
 		return b.toString();
 	}
 
