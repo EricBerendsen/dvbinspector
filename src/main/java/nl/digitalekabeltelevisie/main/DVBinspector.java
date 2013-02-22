@@ -186,6 +186,9 @@ public class DVBinspector implements ChangeListener{
 		tabbedPane.addTab("Tree", treeView);
 		views.add(treeView);
 
+		eitView = new EITView(tStream,viewContest);
+		tabbedPane.addTab("EIT View", eitView);
+		views.add(eitView);
 
 		bitRateView = new BitRateChart(tStream,viewContest);
 		tabbedPane.addTab("BitRate View", bitRateView);
@@ -199,9 +202,7 @@ public class DVBinspector implements ChangeListener{
 		tabbedPane.addTab("Grid View", gridView);
 		views.add(gridView);
 
-		eitView = new EITView(tStream,viewContest);
-		tabbedPane.addTab("EIT View", eitView);
-		views.add(eitView);
+
 
 		tabbedPane.validate();
 
@@ -406,7 +407,7 @@ public class DVBinspector implements ChangeListener{
 	private void enableViewMenus() {
 		final int i = tabbedPane.getSelectedIndex();
 		viewTreeMenu.setEnabled((i==0)&&(transportStream!=null));
-		viewMenu.setEnabled((i!=0)&&(transportStream!=null));
+		viewMenu.setEnabled((i>1)&&(transportStream!=null));
 	}
 
 }
