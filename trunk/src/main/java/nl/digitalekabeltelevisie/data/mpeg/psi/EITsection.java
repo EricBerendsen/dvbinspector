@@ -251,7 +251,7 @@ public class EITsection extends TableSection implements HTMLSource {
 	public StringBuilder getHTMLLines(){
 		final StringBuilder b = new StringBuilder();
 		for(final Event event:eventList){
-			b.append("&nbsp;").append(Utils.getUTCFormattedString(event.getStartTime())).append("&nbsp;");
+			b.append(Utils.escapeHTML(Utils.getUTCFormattedString(event.getStartTime()))).append("&nbsp;");
 			b.append(event.getDuration()).append("&nbsp;");
 			final List<Descriptor> descList = event.getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
@@ -262,7 +262,7 @@ public class EITsection extends TableSection implements HTMLSource {
 				b.append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
 			}
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
-			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
+			for(final ExtendedEventDescriptor extEvent: extendedDesc){
 				b.append(Utils.escapeHTML(extEvent.getText().toString()));
 			}
 
