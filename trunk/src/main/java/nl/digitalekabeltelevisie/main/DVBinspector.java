@@ -26,8 +26,14 @@
  */
 package nl.digitalekabeltelevisie.main;
 
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,12 +80,32 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 
-public class DVBinspector implements ChangeListener{
+/**
+ * Main class for DVB Inspector, creates and holds all GUI elements.
+ *
+ * @author Eric
+ *
+ */
+public class DVBinspector implements ChangeListener, ActionListener{
 
 	private static Logger logger = Logger.getLogger(DVBinspector.class.getName());
 
+
+	/**
+	 * key for storage of last used DEFAULT_PRIVATE_DATA_SPECIFIER in Preferences
+	 */
 	public static final String DEFAULT_PRIVATE_DATA_SPECIFIER = "private_data_spcifier";
+
+	/**
+	 * key for storage of last used DEFAULT_VIEW_MODUS in Preferences
+	 */
 	public static final String DEFAULT_VIEW_MODUS = "view_modus";
+
+
+	public static final String WINDOW_WIDTH = "window_width";
+	public static final String WINDOW_HEIGHT = "window_height";
+	public static final String WINDOW_X = "window_x";
+	public static final String WINDOW_Y = "window_y";
 
 	private TransportStream transportStream;
 
@@ -105,12 +131,20 @@ public class DVBinspector implements ChangeListener{
 	private int modus;
 
 
+	/**
+	 * Default constructor for DVBinspector
+	 */
 	public DVBinspector() {
 		super();
 	}
 
 	/**
-	 * @param args
+	 * Starting point for DVB Inspector
+	 *
+	 * @param args String[] all optional, if used; arg[0] is absolute filename of transport stream to be loaded on startup.
+	 *  args[1...n] pids with PES data that should be parsed on startup (equivalent to "Parse PES data" menu in Tree View)
+	 *  These args are mainly intended for debugging, where you want to use the same stream and PES data over and over again.
+	 *
 	 */
 	public static void main(final String[] args) {
 		final DVBinspector inspector = new DVBinspector();
@@ -138,10 +172,7 @@ public class DVBinspector implements ChangeListener{
 			} catch (final IOException e) {
 				logger.log(Level.WARNING, "error parsing transportStream", e);
 			}
-
-
-}
-
+		}
 		inspector.run();
 	}
 
@@ -164,6 +195,9 @@ public class DVBinspector implements ChangeListener{
 	 * Create the GUI and show it.  For thread safety,
 	 * this method should be invoked from the
 	 * event dispatch thread.
+	 *
+	 * @param tStream Transport stream (can be <code>null</code>)
+	 * @param modus display Modus
 	 */
 	private void createAndShowGUI(final TransportStream tStream,final int modus) {
 		try
@@ -177,6 +211,16 @@ public class DVBinspector implements ChangeListener{
 		//Create and set up the window.
 		frame = new JFrame("DVB Inspector");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			/* (non-Javadoc)
+			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
+			 */
+			@Override
+			public void windowClosing(WindowEvent e) {
+				saveWindowState();
+				super.windowClosing(e);
+			}
+		});
 		pidDialog= new PIDDialog(frame,viewContest,this);
 		updatePIDLists(tStream,pidDialog);
 
@@ -216,6 +260,7 @@ public class DVBinspector implements ChangeListener{
 		JMenu helpMenu;
 		JMenu privateDataSubMenu;
 		JMenuItem openMenuItem;
+		JMenuItem exitMenuItem;
 		JMenuItem filterItem;
 
 		menuBar = new JMenuBar();
@@ -223,6 +268,7 @@ public class DVBinspector implements ChangeListener{
 		menuBar.add(fileMenu);
 		openMenuItem = new JMenuItem("Open",
 				KeyEvent.VK_O);
+		exitMenuItem = new JMenuItem("Exit");
 
 		viewTreeMenu =new JMenu("Tree View");
 		menuBar.add(viewTreeMenu);
@@ -286,6 +332,9 @@ public class DVBinspector implements ChangeListener{
 		openMenuItem.addActionListener(fileOpenAction);
 		fileMenu.add(openMenuItem);
 
+		exitMenuItem.addActionListener(this);
+		fileMenu.add(exitMenuItem);
+
 		filterItem = new JMenuItem("Filter");
 		viewMenu.add(filterItem);
 		final Action pidOpenAction = new PIDDialogOpenAction(pidDialog,frame,this);
@@ -299,14 +348,41 @@ public class DVBinspector implements ChangeListener{
 		final Image image = Utils.readIconImage("magnifying_glass.bmp");
 		frame.setIconImage(image);
 
+		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
+		int w  = prefs.getInt(DVBinspector.WINDOW_WIDTH, 980);
+		int h  = prefs.getInt(DVBinspector.WINDOW_HEIGHT, 700);
+		int x  = prefs.getInt(DVBinspector.WINDOW_X, 10);
+		int y  = prefs.getInt(DVBinspector.WINDOW_Y, 10);
+
+		// if last used on larger screen, it might open too large, or out of range
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int screenWidth = (int) screenSize.getWidth();
+		int screenHeight = (int) screenSize.getHeight();
+
+		// if it was moved out of view to the left, move back into view
+		x = Math.max(0, x);
+		y = Math.max(0, y);
+
+		x = Math.min(screenWidth-200, x); // at least 200 pix visible
+		y = Math.min(screenHeight-200, y); // at least 200 pix visible
+		w = Math.min(screenWidth, w);
+		h = Math.min(screenHeight, h);
+
 		//Display the window.
-		frame.pack();
+		frame.setBounds(x,y,w,h);
+
 		frame.setVisible(true);
 	}
 
+
 	/**
+	 * Add a menu item for a private data specifier to the "Private Data Specifier Default" menu
+	 *
 	 * @param privateDataSubMenu
 	 * @param group
+	 * @param spec
+	 * @param name
+	 * @param defaultSpecifier
 	 */
 	private void addPrivateDataSpecMenuItem(final JMenu privateDataSubMenu, final ButtonGroup group, final long spec, final String name, final long defaultSpecifier) {
 		final JMenuItem menuItem = new JRadioButtonMenuItem(Utils.toHexString(spec, 8)+" - "+name);
@@ -316,10 +392,18 @@ public class DVBinspector implements ChangeListener{
 		privateDataSubMenu.add(menuItem);
 	}
 
+	/**
+	 * getter for the Transport stream (can be <code>null</code>)
+	 * @return
+	 */
 	public TransportStream getTransportStream() {
 		return transportStream;
 	}
 
+	/**
+	 * setter for the Transport stream (can be <code>null</code>)
+	 * @param transportStream
+	 */
 	public void setTransportStream(final TransportStream transportStream) {
 		this.transportStream = transportStream;
 		if(transportStream!=null){
@@ -344,6 +428,11 @@ public class DVBinspector implements ChangeListener{
 
 
 
+	/**
+	 * Update the list of all pids when a new stream is loaded, used in the {@link PIDDialog}
+	 * @param tStream
+	 * @param pDialog
+	 */
 	private void updatePIDLists(final TransportStream tStream, final PIDDialog pDialog){
 
 		final ViewContext viewConfig = new ViewContext();
@@ -367,6 +456,11 @@ public class DVBinspector implements ChangeListener{
 	}
 
 
+
+	/**
+	 * Called by PIDDialog, when the list of PIDs to be shown has changed. Forwards new list to all views that need it.
+	 * @param vContext
+	 */
 	public void setPIDList(final ViewContext vContext){
 		viewContest = vContext;
 		if(transportStream!=null){
@@ -391,10 +485,10 @@ public class DVBinspector implements ChangeListener{
 		this.defaultPrivateDataSpecifier = defaultPrivateDataSpecifier;
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
-	 *
+	/**
 	 * Listen for changes caused by selecting another tab from tabbedPane. Then enable/disable appropriate menu's.
+	 *
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
 
 	public void stateChanged(final ChangeEvent e) {
@@ -402,7 +496,7 @@ public class DVBinspector implements ChangeListener{
 	}
 
 	/**
-	 *
+	 * enables menus based on which view is selected in the tabbedPane
 	 */
 	private void enableViewMenus() {
 		final int i = tabbedPane.getSelectedIndex();
@@ -410,4 +504,25 @@ public class DVBinspector implements ChangeListener{
 		viewMenu.setEnabled((i>1)&&(transportStream!=null));
 	}
 
+
+	/**
+	 * store current window position and size in preferences
+	 */
+	private void saveWindowState(){
+		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
+		prefs.putInt(WINDOW_WIDTH,frame.getWidth());
+		prefs.putInt(WINDOW_HEIGHT,frame.getHeight());
+		prefs.putInt(WINDOW_X,frame.getX());
+		prefs.putInt(WINDOW_Y,frame.getY());
+
+	}
+
+	/**
+	 * called when "exit" is selected in menu.
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		saveWindowState();
+		System.exit(0);
+	}
 }
