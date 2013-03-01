@@ -27,12 +27,12 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Event;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -40,8 +40,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -50,11 +52,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
-import javax.swing.ImageIcon;
+import javax.swing.AbstractAction;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -62,7 +64,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
-import javax.swing.SwingConstants;
+import javax.swing.KeyStroke;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -81,22 +83,66 @@ import nl.digitalekabeltelevisie.main.DVBinspector;
 
 /**
  * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
- * For now image and text are implemented as a label. Disadvantage is that both can not be copied by the user into the clipboard.
  * Also sets up pop-up menu items for the JTree, and handles events from it.
  *
  * @author Eric
  *
  */
 public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
+
+	public class CopyAction extends AbstractAction implements ClipboardOwner{
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("DVBtree Ctrl-C pressed"+e);
+
+			final TreePath path = tree.getSelectionPath();
+			if(path!=null){
+
+				DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
+				final KVP kvp = (KVP)dmtn.getUserObject();
+
+				final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
+				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents( stringSelection, this );
+
+			}
+
+		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
+		 */
+		@Override
+		public void lostOwnership(Clipboard clipboard, Transferable contents) {
+			// ignore
+		}
+
+	}
+	/**
+	 *
+	 */
+	private static final String EMPTY_PANEL = "empty";
+	/**
+	 *
+	 */
+	private static final String HTML_PANEL = "html";
+	/**
+	 *
+	 */
+	private static final String IMAGE_PANEL = "image";
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 9200238343077897328L;
 	private static final Logger logger = Logger.getLogger(DVBtree.class.getName());
-	private static final String SAVE_DIR = "save_directory";
+	public static final String SAVE_DIR = "save_directory";
 
 	private final JTree tree;
-	private final JLabel label;
+	private final JPanel detailPanel;
 	private final JEditorPane editorPane;
 	private final JSplitPane splitPane;
 	private final JPopupMenu popup;
@@ -113,6 +159,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private int mod=0;
 	private TransportStream ts;
 	private DefaultTreeModel model;
+	private ImagePanel imagePanel = new ImagePanel();
 
 	/**
 	 *
@@ -174,11 +221,12 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		//Create the scroll pane and add the tree to it.
 		final JScrollPane treeView = new JScrollPane(tree);
 
+		InputMap inputMap = tree.getInputMap();
+		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		inputMap.put(key, "copy");
+		tree.getActionMap().put("copy", new CopyAction());
 
-		//Create the image viewing pane.
-		label = new JLabel();
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-		label.setVerticalAlignment(SwingConstants.TOP);
+
 
 		editorPane = new JEditorPane();
 		editorPane.getTransferHandler();
@@ -188,24 +236,20 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		editorPane.setBackground(Color.LIGHT_GRAY);
 		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 		editorPane.setTransferHandler(new MyTransferHandler());
-//		TransferHandler trans = editorPane.getTransferHandler();
-//		System.out.println("TransferHandler:"+trans);
+
+		detailPanel = new JPanel(new CardLayout());
+		JPanel empty = new JPanel();
+		detailPanel.add(empty,EMPTY_PANEL);
+		detailPanel.add(imagePanel,IMAGE_PANEL);
+		detailPanel.add(editorPane,HTML_PANEL);
 
 
-		JPanel panel = new JPanel();
-
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-		panel.add(label);
-		panel.add(editorPane);
-
-
-		final JScrollPane imgView = new JScrollPane(panel);
+		final JScrollPane detailView = new JScrollPane(detailPanel);
 
 		//Add the scroll panes to a split pane.
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(treeView);
-		splitPane.setRightComponent(imgView);
+		splitPane.setRightComponent(detailView);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerSize(12);
 
@@ -271,9 +315,12 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	public void valueChanged(final TreeSelectionEvent e) {
 		final DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+		imagePanel.setImage(null);
+		editorPane.setText(null);
+		CardLayout cardLayout = (CardLayout)(detailPanel.getLayout());
+
 		if (node == null){
-			label.setText(null);
-			label.setIcon(null);
+			cardLayout.show(detailPanel, EMPTY_PANEL);
 			return;
 		}
 
@@ -283,30 +330,25 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			final KVP kvp = (KVP)nodeInfo;
 			if(kvp.getImageSource()!=null){
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				final Image img = kvp.getImageSource().getImage();
+				final BufferedImage img = kvp.getImageSource().getImage();
 				setCursor(Cursor.getDefaultCursor());
 				if(img != null){
-					label.setIcon(new ImageIcon(img));
-					label.setText(null);
-					editorPane.setText(null);
+					imagePanel.setImage(img);
+					cardLayout.show(detailPanel, IMAGE_PANEL);
 					return;
 				}
 			}else  if(kvp.getHTMLSource()!=null){
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
-				if(html != null){
-					label.setIcon(null);
-					//label.setText(html.toString());
-					editorPane.setText(html.toString());
-					setCursor(Cursor.getDefaultCursor());
-					return;
-				}
+				editorPane.setText(html.toString());
+				setCursor(Cursor.getDefaultCursor());
+				cardLayout.show(detailPanel, HTML_PANEL);
+				return;
 			}
 
 		}
-		label.setIcon(null);
-		label.setText(null);
-		editorPane.setText(null);
+		cardLayout.show(detailPanel, EMPTY_PANEL);
+
 	}
 
 	/* (non-Javadoc)
