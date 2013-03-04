@@ -62,6 +62,7 @@ public class VideoMPEG2Section implements TreeNode{
 
 		t.add(new DefaultMutableTreeNode(new KVP("length",getLength(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("start_code",startCode,VideoPESDataField.getStartCodeString(startCode))));
+		t.add(new DefaultMutableTreeNode(new KVP("data",data,offset,getLength(),null)));
 		return t;
 	}
 
