@@ -111,17 +111,11 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener{
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("ImagePanel Ctrl-C pressed"+e);
-
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			if(image!=null){
-
 				ImageTransferable it = new ImageTransferable(image);
-
 				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clipboard.setContents( it, it );
-
-
 			}
 			setCursor(Cursor.getDefaultCursor());
 		}
@@ -147,8 +141,6 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener{
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("ImagePanel Ctrl-S pressed"+e);
-
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 			File saveFile = new File("dvb_inspector_image_"+df.format(new Date()));
 			JFileChooser chooser = new JFileChooser();
