@@ -97,20 +97,15 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("DVBtree Ctrl-C pressed"+e);
-
 			final TreePath path = tree.getSelectionPath();
 			if(path!=null){
-
 				DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 				final KVP kvp = (KVP)dmtn.getUserObject();
 
 				final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
 				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clipboard.setContents( stringSelection, this );
-
 			}
-
 		}
 
 		/* (non-Javadoc)
@@ -123,22 +118,24 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 	}
 	/**
-	 *
+	 * key for cardlayout
 	 */
 	private static final String EMPTY_PANEL = "empty";
 	/**
-	 *
+	 * key for cardlayout
 	 */
 	private static final String HTML_PANEL = "html";
 	/**
-	 *
+	 * key for cardlayout
 	 */
 	private static final String IMAGE_PANEL = "image";
-	/**
-	 *
-	 */
+
 	private static final long serialVersionUID = 9200238343077897328L;
 	private static final Logger logger = Logger.getLogger(DVBtree.class.getName());
+
+	/**
+	 * key for preferences which dir was last used for save
+	 */
 	public static final String SAVE_DIR = "save_directory";
 
 	private final JTree tree;
@@ -284,12 +281,16 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	}
 
 
+	/**
+	 * @return the current view modus
+	 */
 	public int getMod() {
 		return mod;
 	}
 
 	/**
 	 * Toggle one or more bits in the current modus
+	 * store modus in preferences.
 	 * @param modus
 	 */
 	public void toggleMod(final int modus) {
