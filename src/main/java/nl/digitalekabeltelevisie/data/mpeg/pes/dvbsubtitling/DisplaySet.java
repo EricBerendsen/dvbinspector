@@ -93,8 +93,8 @@ public class DisplaySet implements TreeNode, ImageSource {
 	 *
 	 * On subtitles in mux_R5.ts like pid: 0xF0 (240) => France 2 HD ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data DVB subtitling
 	 * this breaks because region composition segment is 38 heigh,
-	 * and contains 3 regions, last one with vertical position 37. This should be one pix heigh to
-	 * fit, and it has only one line in top field pixel-data_sub-block. That means it is 2 lines heigh!
+	 * and contains 3 regions, last one with vertical position 37. This should be one pix height to
+	 * fit, and it has only one line in top field pixel-data_sub-block. That means it is 2 lines height!
 	 *
 	 * It can not be one line heigh, because ETSI EN 300 743 V1.3.1 (2006-11)  7.2.5 Object data segment says;
 	 *
@@ -242,35 +242,37 @@ public class DisplaySet implements TreeNode, ImageSource {
 				final int object_id = regionObject.getObject_id();
 				final ObjectDataSegment objectDataSegment = objects.get(object_id);
 
-				if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
-					final WritableRaster raster = objectDataSegment.getRaster(rcs.getRegionDepth());
-					regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
-				}else if(objectDataSegment.getObjectCodingMethod()==1){ // chars
-					final Font font = new Font("Arial", Font.BOLD,30);
-					// can not draw on raster directly, create img,draw on it and get its raster
+				if(objectDataSegment != null){
+					if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
+						final WritableRaster raster = objectDataSegment.getRaster(rcs.getRegionDepth());
+						regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
+					}else if(objectDataSegment.getObjectCodingMethod()==1){ // chars
+						final Font font = new Font("Arial", Font.BOLD,30);
+						// can not draw on raster directly, create img,draw on it and get its raster
 
-					// first determine needed dimensions of image, so create another tmp image to get size
-					final BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED);
-					Graphics2D g2d = tmp.createGraphics();
-					g2d.setFont(font);
-					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-					final FontRenderContext fontRenderContext  = g2d.getFontRenderContext();
-					final String txt = objectDataSegment.getCharacter_code_string();
-					final Rectangle2D rect = font.getStringBounds(txt, fontRenderContext);
+						// first determine needed dimensions of image, so create another tmp image to get size
+						final BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED);
+						Graphics2D g2d = tmp.createGraphics();
+						g2d.setFont(font);
+						g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+						final FontRenderContext fontRenderContext  = g2d.getFontRenderContext();
+						final String txt = objectDataSegment.getCharacter_code_string();
+						final Rectangle2D rect = font.getStringBounds(txt, fontRenderContext);
 
-					// now we can create the image to draw on
+						// now we can create the image to draw on
 
-					final IndexColorModel icm = CLUTDefinitionSegment.getDefaultColorModel(rcs.getRegionDepth());
-					final BufferedImage tmp2 = new BufferedImage((int)rect.getWidth(),(int)rect.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,icm);
-					g2d = tmp2.createGraphics();
-					g2d.setFont(font);
-					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-					g2d.setBackground(new Color(icm.getRGB(regionObject.getBackground_pixel_code())));
-					g2d.setColor(new Color(icm.getRGB(regionObject.getForeground_pixel_code())));
-					g2d.drawString(txt, 0, (int)-rect.getY());
-					final WritableRaster raster = tmp2.getRaster();
+						final IndexColorModel icm = CLUTDefinitionSegment.getDefaultColorModel(rcs.getRegionDepth());
+						final BufferedImage tmp2 = new BufferedImage((int)rect.getWidth(),(int)rect.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,icm);
+						g2d = tmp2.createGraphics();
+						g2d.setFont(font);
+						g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+						g2d.setBackground(new Color(icm.getRGB(regionObject.getBackground_pixel_code())));
+						g2d.setColor(new Color(icm.getRGB(regionObject.getForeground_pixel_code())));
+						g2d.drawString(txt, 0, (int)-rect.getY());
+						final WritableRaster raster = tmp2.getRaster();
 
-					regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
+						regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
+					}
 				}
 			}
 		}

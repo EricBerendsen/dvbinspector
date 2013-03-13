@@ -250,20 +250,22 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 									int object_id = regionObject.getObject_id();
 									ObjectDataSegment objectDataSegment = objects.get(object_id);
 
-									if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
-										final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
-										final BufferedImage i = new BufferedImage(cm, raster, false, null);
-										gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
-									}else if(objectDataSegment.getObjectCodingMethod()==1){
-										final BufferedImage i = new BufferedImage(regionCompositionSegment.getRegionWidth(),regionCompositionSegment.getRegionHeight(),BufferedImage.TYPE_BYTE_INDEXED,cm);
-										Graphics2D graphics = i.createGraphics();
-										// Font type/size is never defined in standard, this looks OK.
-										Font font = new Font("Arial", Font.BOLD,30);
-										graphics.setFont(font);
-										graphics.setColor(new Color(cm.getRGB(regionObject.getForeground_pixel_code())));
-										graphics.setBackground(new Color(cm.getRGB(regionObject.getBackground_pixel_code())));
-										graphics.drawString(objectDataSegment.getCharacter_code_string(), 0, 30);
-										gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+									if(objectDataSegment != null){
+										if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
+											final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
+											final BufferedImage i = new BufferedImage(cm, raster, false, null);
+											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+										}else if(objectDataSegment.getObjectCodingMethod()==1){
+											final BufferedImage i = new BufferedImage(regionCompositionSegment.getRegionWidth(),regionCompositionSegment.getRegionHeight(),BufferedImage.TYPE_BYTE_INDEXED,cm);
+											Graphics2D graphics = i.createGraphics();
+											// Font type/size is never defined in standard, this looks OK.
+											Font font = new Font("Arial", Font.BOLD,30);
+											graphics.setFont(font);
+											graphics.setColor(new Color(cm.getRGB(regionObject.getForeground_pixel_code())));
+											graphics.setBackground(new Color(cm.getRGB(regionObject.getBackground_pixel_code())));
+											graphics.drawString(objectDataSegment.getCharacter_code_string(), 0, 30);
+											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+										}
 									}
 								}
 							}
