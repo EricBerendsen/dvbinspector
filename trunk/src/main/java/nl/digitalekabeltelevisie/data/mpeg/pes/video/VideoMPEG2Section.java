@@ -35,6 +35,13 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
+/**
+ * A VideoMPEG2Section is a section as defined in 6.2 of ISO/IEC 13818-2,
+ * So either a slice, or sequence header, picture start, etc...
+ *
+ * @author Eric
+ *
+ */
 public class VideoMPEG2Section implements TreeNode{
 
 	/**

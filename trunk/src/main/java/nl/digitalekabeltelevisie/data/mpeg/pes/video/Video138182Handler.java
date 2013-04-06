@@ -92,6 +92,9 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 
 	/**
 	 * Meta Iterator to iterate over all VideoMPEG2Sections in this PES stream, regardless of grouping in PES Packets
+	 * TODO does not handle PES packets which contain no VideoMPEG2Section, like in iso/np.ts
+	 * In general this does not work for streams with no alignment, So every VideoMPEG2Section should be contained in a PES packet.
+	 * Most broadcast streams are aligned, some ISO test streams are not. So we can live with this for now.
 	 * @author Eric
 	 *
 	 */
@@ -103,22 +106,30 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 
 		public MPEG2SectionIterator() {
 			pesIterator = pesPackets.iterator();
-			if (pesIterator.hasNext()) {
-				VideoPESDataField pesPacket = (VideoPESDataField)pesIterator.next();
-				sectionIter= pesPacket.getSections().iterator();
-				if(sectionIter.hasNext()){
-					nextSection = sectionIter.next();
-				}
+			sectionIter = getNextSectionIter();
+			if(sectionIter!=null){
+				nextSection = sectionIter.next();
 			}
+		}
+
+		private Iterator<VideoMPEG2Section> getNextSectionIter(){
+
+			Iterator<VideoMPEG2Section> result = null;
+			do {
+				VideoPESDataField pesPacket = (VideoPESDataField)pesIterator.next();
+				result = pesPacket.getSections().iterator();
+
+			} while (((result==null)||!result.hasNext())&&(pesIterator.hasNext()));
+			return result;
+
 		}
 
 		public VideoMPEG2Section next() {
 			VideoMPEG2Section result = nextSection;
-			if(sectionIter.hasNext()){
+			if((sectionIter!=null)&&sectionIter.hasNext()){
 				nextSection = sectionIter.next();
 			}else if(pesIterator.hasNext()){
-				VideoPESDataField pesPacket = (VideoPESDataField)pesIterator.next();
-				sectionIter= pesPacket.getSections().iterator();
+				sectionIter= getNextSectionIter();
 				if(sectionIter.hasNext()){
 					nextSection = sectionIter.next();
 				}else{
@@ -181,6 +192,7 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 	}
 
 	public MPEG2SectionIterator getSectionIterator(){
+
 		return new MPEG2SectionIterator();
 	}
 
@@ -195,8 +207,6 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 		List<ChartLabel> labels = new ArrayList<ChartLabel>();
 		ChartLabel label = null;
 		List<Integer> frameSize  = new ArrayList<Integer>();
-
-			StringBuilder r = new StringBuilder();
 
 			int length = 0;
 			int count = 0;
@@ -221,11 +231,8 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 						section = iter.next();
 					}
 					// end slice data, is end of picture
-					//if(count<1500){ // 1 minute PAL... should be enough
-						labels.add(label);
-						frameSize.add(length);
-						r.append(label).append(" ").append(length).append("<br>");
-					//}
+					labels.add(label);
+					frameSize.add(length);
 					count++;
 					length = 0;
 					// start looking for next picture_start_code, ignore everything else
@@ -266,8 +273,8 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 			final ValueAxis valueAxis = new NumberAxis("frame size (bytes)");
 
 			final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis,renderer);
-
-			JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT,plot, false);
+			String title = getPID().getShortLabel()+" (Transmission Order)";
+			JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, false);
 
 			return chart.createBufferedImage((displayCount*18)+100, 640);
 
