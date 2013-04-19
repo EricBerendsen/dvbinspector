@@ -46,7 +46,7 @@ public class CreateHTMLListUPC implements Runnable{
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\upc\\upc_f284Mhz.ts");
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_25_18_30_02.DAT");
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_24_20_44_58.DAT");
-		transportStream = new TransportStream("D:\\ts\\UPC 164000 04-10 18-04-25.ts");
+		transportStream = new TransportStream("D:\\ts\\upcvorden20130403\\UPC 164000 04-03 20-19-36.ts");
 		//transportStream = new TransportStream("C:\\Documents and Settings\\Administrator\\My Documents\\My Videos\\UPC Riant vorden 164000 07-12 13-36-47.ts");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_07_03_09_33_12.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\818_2009_03_05_17_59_31.DAT");

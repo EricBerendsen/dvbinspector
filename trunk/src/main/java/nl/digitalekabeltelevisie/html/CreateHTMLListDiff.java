@@ -25,6 +25,7 @@ public class CreateHTMLListDiff implements Runnable{
 	private TransportStream newTransportStream;
 	private TransportStream oldTransportStream;
 	private static String bgColorCSS="background-color:yellow;";
+	private static String strikeCSS="text-decoration: line-through; background-color: orange;";
 
 
 	public CreateHTMLListDiff() {
@@ -43,8 +44,19 @@ public class CreateHTMLListDiff implements Runnable{
 
 
 
-		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-19 08-51-59.ts");
-		oldTransportStream  = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-12 08-02-42.ts");
+
+
+
+		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-17 19-42-48.ts");
+		oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-16 21-46-57.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-13 10-21-40.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-10 11-06-59.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-10 11-06-59.ts");
+
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-02 21-57-13.ts");
+
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 03-15 09-28-41.ts");
+		//oldTransportStream  = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-12 08-02-42.ts");
 		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-21 15-52-01.ts");
 		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-14 06-47-48.ts");
 		//newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-29 15-01-50.ts");
@@ -127,26 +139,40 @@ public class CreateHTMLListDiff implements Runnable{
 			final SDT oldSDT = oldStream.getPsi().getSdt();
 
 			final Map<Integer, SDTsection[]> streams = sdt.getTransportStreams();
+			final Map<Integer, SDTsection[]> oldStreams = oldSDT.getTransportStreams();
 			final TreeSet<Integer> s = new TreeSet<Integer>(streams.keySet());
 
 			for(final Integer transportStreamID: s){
 				//out.write("<tr><th colspan=\"4\">"+transportStreamID+"</th></tr>\n");
 				final SDTsection [] sections = streams.get(transportStreamID);
-				final ArrayList<Service> serviceList = new ArrayList<Service>();
+				final SDTsection [] oldSDTsections = oldStreams.get(transportStreamID);
+				final ArrayList<Service> sdtServiceList = getSortedSdtServices(sections);
+				final ArrayList<Service> oldSdtServiceList = getSortedSdtServices(oldSDTsections);
 
-				for (final SDTsection section: sections) {
-					if(section!= null){
-						serviceList.addAll(section.getServiceList());
-					}
-				}
 
-				Collections.sort(serviceList, new Comparator<Service>(){
-					public int compare(final Service s1, final Service s2){
-						return(s1.getServiceID()-s2.getServiceID());
-					}
-				});
-				for (final Service element: serviceList) {
+				int currentServiceIndex = 0;
+				int oldServiceIndex = 0;
+				//while ((currentService<sdtServiceList.size())&&(oldService<oldSdtServiceList.size()))
+				for (currentServiceIndex=0; currentServiceIndex < sdtServiceList.size(); currentServiceIndex++) {
+					Service element = sdtServiceList.get(currentServiceIndex);
 					final int sid=element.getServiceID();
+					while((oldServiceIndex<oldSdtServiceList.size())&&(oldSdtServiceList.get(oldServiceIndex).getServiceID()<sid)){
+						// oldService does not exist in new SDT in this stream, maybe somewhere else
+						Service oldService = oldSdtServiceList.get(oldServiceIndex);
+						// is this service somewhere else in the new SDT? If not, it was removed
+						if(sdt.getService(oldService.getServiceID())==null){ // it was removed, so print it with strike
+
+							writeService(oldStream, out, oldSDT, transportStreamID, oldService);
+
+
+						}
+						oldServiceIndex++;
+					}
+					// OLD SERVICE IN SAME STREAM AS new one
+					if((oldServiceIndex<oldSdtServiceList.size())&&(oldSdtServiceList.get(oldServiceIndex).getServiceID()==sid)){
+						oldServiceIndex++;
+					}
+
 					final Service oldService=oldSDT.getService(sid);
 
 					final int lcn = newStream.getPsi().getNit().getLCN(1000, transportStreamID, sid);
@@ -165,6 +191,7 @@ public class CreateHTMLListDiff implements Runnable{
 					}
 					out.write("<tr "+style+">");
 					style="";
+					// if service moved to other stream only highlight stream ID
 					if((oldService!=null)&&(transportStreamID!=oldSDT.getTransportStreamID(sid))){
 						style=bgColorCSS;
 					}
@@ -182,10 +209,10 @@ public class CreateHTMLListDiff implements Runnable{
 					}
 					out.write("<td style=\"text-align: left;" +style+"\">"+Descriptor.getServiceTypeString(sdt.getServiceType(sid))+" ("+sdt.getServiceType(sid)+") </td>\n");
 					style="";
+					// LCN changed ?
 					final int oldLCN = oldStream.getPsi().getNit().getLCN(1000, oldSDT.getTransportStreamID(sid), sid);
 					String old = "";
-					if ((oldService != null)
- && (lcn != oldLCN)) {
+					if ((oldService != null) && (lcn != oldLCN)&&(oldLCN!=-1)) {
 						style="style=\""+bgColorCSS+"\"";
 						old = " [" + oldLCN + "] ";
 
@@ -193,6 +220,19 @@ public class CreateHTMLListDiff implements Runnable{
 					out.write("<td style=\"text-align: left;\">" + sid + " </td><td " + style + ">" + lcnString + old
 							+ "</td></tr>\n");
 
+				}
+				// new Services processed, maybe some old ones with higher sid left
+				while(oldServiceIndex<oldSdtServiceList.size()){
+					// oldService does not exist in new SDT in this stream, maybe somewhere else
+					Service oldService = oldSdtServiceList.get(oldServiceIndex);
+					// is this service somewhere else in the new SDT? If not, it was removed
+					if(sdt.getService(oldService.getServiceID())==null){ // it was removed, so print it with strike
+
+						writeService(oldStream, out, oldSDT, transportStreamID, oldService);
+
+
+					}
+					oldServiceIndex++;
 				}
 
 
@@ -299,6 +339,57 @@ public class CreateHTMLListDiff implements Runnable{
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @param oldStream
+	 * @param out
+	 * @param oldSDT
+	 * @param transportStreamID
+	 * @param oldService
+	 * @throws IOException
+	 */
+	private void writeService(final TransportStream oldStream, final BufferedWriter out, final SDT oldSDT,
+			final Integer transportStreamID, Service oldService) throws IOException {
+		out.write("<tr style=\""+strikeCSS+"\">");
+
+		out.write("<td style=\"text-align: left;\">\n"+transportStreamID+"</td>");
+		final String safeName= Utils.escapeHTML(oldSDT.getServiceName(oldService.getServiceID()));
+
+
+		out.write("<td style=\"text-align: left;\">\n"+safeName+"</td>\n");
+		out.write("<td style=\"text-align: left;\">"+Descriptor.getServiceTypeString(oldSDT.getServiceType(oldService.getServiceID()))+" ("+oldSDT.getServiceType(oldService.getServiceID())+") </td>\n");
+
+		final int lcn = oldStream.getPsi().getNit().getLCN(1000, transportStreamID, oldService.getServiceID());
+		//final int lcn = newStream.getPsi().getNit().getLCN(43136, transportStreamID, sid);
+		String lcnString = (lcn > 0) ? Integer.toString(lcn) : "-";
+
+		final int hdLCN = oldStream.getPsi().getNit().getHDSimulcastLCN(1000, transportStreamID, oldService.getServiceID());
+		final String hdlcnString = (hdLCN > 0) ? (" / " + Integer.toString(hdLCN)) : "";
+		lcnString += hdlcnString;
+
+		out.write("<td style=\"text-align: left;\">" + oldService.getServiceID() + " </td><td>" + lcnString
+				+ "</td></tr>\n");
+	}
+
+	/**
+	 * @param sections
+	 * @return
+	 */
+	private ArrayList<Service> getSortedSdtServices(final SDTsection[] sections) {
+		final ArrayList<Service> serviceList = new ArrayList<Service>();
+
+		for (final SDTsection section: sections) {
+			if(section!= null){
+				serviceList.addAll(section.getServiceList());
+			}
+		}
+		Collections.sort(serviceList, new Comparator<Service>(){
+			public int compare(final Service s1, final Service s2){
+				return(s1.getServiceID()-s2.getServiceID());
+			}
+		});
+		return serviceList;
 	}
 
 
