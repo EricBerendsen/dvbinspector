@@ -92,9 +92,9 @@ public class DisplaySet implements TreeNode, ImageSource {
 	 * Known BUG (???), i think the error is in the TS of France DVB-T
 	 *
 	 * On subtitles in mux_R5.ts like pid: 0xF0 (240) => France 2 HD ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data DVB subtitling
-	 * this breaks because region composition segment is 38 heigh,
-	 * and contains 3 regions, last one with vertical position 37. This should be one pix height to
-	 * fit, and it has only one line in top field pixel-data_sub-block. That means it is 2 lines height!
+	 * this breaks because region composition segment is 38 high,
+	 * and contains 3 regions, last one with vertical position 37. This should be one pix high to
+	 * fit, and it has only one line in top field pixel-data_sub-block. That means it is 2 lines high!
 	 *
 	 * It can not be one line heigh, because ETSI EN 300 743 V1.3.1 (2006-11)  7.2.5 Object data segment says;
 	 *
