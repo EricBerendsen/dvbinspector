@@ -47,7 +47,7 @@ public class CreateHTMLListDiff implements Runnable{
 
 
 
-		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-17 19-42-48.ts");
+		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-27 11-15-48.ts");
 		oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-16 21-46-57.ts");
 		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-13 10-21-40.ts");
 		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-10 11-06-59.ts");
