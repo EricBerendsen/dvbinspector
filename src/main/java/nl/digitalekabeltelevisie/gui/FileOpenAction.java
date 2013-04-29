@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -38,6 +37,7 @@ import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.main.DVBinspector;
@@ -81,12 +81,18 @@ public class FileOpenAction extends AbstractAction {
 
 			try {
 				transportStream.parseStream();
-			} catch (final IOException ioe) {
-				logger.log(Level.WARNING, "error parsing transport stream",ioe);
+				contr.setTransportStream(transportStream);
+			} catch (final Throwable t) {
+				logger.log(Level.WARNING, "error parsing transport stream",t);
 				frame.setCursor(Cursor.getDefaultCursor());
+				String message = "Error parsing stream: "+((t.getMessage()!=null)?(t.getMessage()):t.getClass().getName());
+				JOptionPane.showMessageDialog(frame,
+						message,
+						"Error DVB Inspector",
+						JOptionPane.ERROR_MESSAGE);
 			}
 
-			contr.setTransportStream(transportStream);
+
 			frame.setCursor(Cursor.getDefaultCursor());
 		}
 	}
