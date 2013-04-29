@@ -85,9 +85,8 @@ public class FileOpenAction extends AbstractAction {
 			} catch (final Throwable t) {
 				logger.log(Level.WARNING, "error parsing transport stream",t);
 				frame.setCursor(Cursor.getDefaultCursor());
-				String message = "Error parsing stream: "+((t.getMessage()!=null)?(t.getMessage()):t.getClass().getName());
 				JOptionPane.showMessageDialog(frame,
-						message,
+						"Error parsing stream: "+t.toString(),
 						"Error DVB Inspector",
 						JOptionPane.ERROR_MESSAGE);
 			}
