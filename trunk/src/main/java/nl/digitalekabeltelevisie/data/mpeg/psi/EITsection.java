@@ -26,6 +26,8 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,9 +38,13 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor.ContentItem;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtendedEventDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor.Rating;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ShortEventDescriptor;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -52,7 +58,7 @@ public class EITsection extends TableSection implements HTMLSource {
 	private int segmentLastSectionNumber;
 	private int lastTableID;
 
-	public static class Event implements TreeNode{
+	public static class Event implements TreeNode, HTMLSource{
 		private int eventID;
 		private byte[] startTime;
 		private String duration;
@@ -108,7 +114,9 @@ public class EITsection extends TableSection implements HTMLSource {
 		}
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("event",eventID,Utils.getUTCFormattedString(startTime)+" "+getEventName()));
+			KVP kvp = new KVP("event",eventID,Utils.getUTCFormattedString(startTime)+" "+getEventName());
+			kvp.setHtmlSource(this);
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 			t.add(new DefaultMutableTreeNode(new KVP("event_id",eventID,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("start_time",startTime,Utils.getUTCFormattedString(startTime))));
@@ -160,6 +168,56 @@ public class EITsection extends TableSection implements HTMLSource {
 
 		public void setStartTime(final byte[] startTime) {
 			this.startTime = startTime;
+		}
+
+		/**
+		 * @param r1
+		 */
+		public String getHTML() {
+			StringBuilder r1 = new StringBuilder();
+			r1.append("Start:&nbsp;").append(Utils.getUTCFormattedString(getStartTime())).append("&nbsp;Duration: ");
+			r1.append(getDuration().substring(0, 2)).append(":");
+			r1.append(getDuration().substring(2, 4)).append(":");
+			r1.append(getDuration().substring(4)).append("<br>");
+			final List<Descriptor> descList = getDescriptorList();
+			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
+			if(shortDesc.size()>0){
+				r1.append("<br><b><span style=\"background-color: white\">");
+				final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
+				r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
+				String shortText = shortEventDescriptor.getText().toString();
+				if((shortText!=null)&&!shortText.isEmpty()){
+					r1.append(escapeHtmlBreakLines(shortText)).append("<br>");
+				}
+			}
+			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
+			StringBuilder t = new StringBuilder();
+			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
+				t.append(extEvent.getText().toString());
+			}
+			String extended = t.toString();
+			if(!extended.isEmpty()){
+				r1.append("<br>").append(escapeHtmlBreakLines(extended)).append("<br>");
+			}
+			final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
+			if(!contentDescList.isEmpty()){
+				ContentDescriptor contentDesc = contentDescList.get(0);
+				List<ContentItem> contentList = contentDesc.getContentList();
+				for(ContentItem c:contentList){
+					r1.append("<br>Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
+					r1.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
+				}
+
+			}
+			final List<ParentalRatingDescriptor> ratingDescList = Descriptor.findGenericDescriptorsInList(descList, ParentalRatingDescriptor.class);
+			if(!ratingDescList.isEmpty()){
+				ParentalRatingDescriptor ratingDesc = ratingDescList.get(0);
+				List<Rating> ratingList = ratingDesc.getRatingList();
+				for(Rating c:ratingList){
+					r1.append("<br>Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
+				}
+			}
+			return r1.toString();
 		}
 
 
