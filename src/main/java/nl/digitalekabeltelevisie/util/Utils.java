@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1649,6 +1650,34 @@ public final class Utils {
 		c.set(Calendar.MINUTE, 0);
 
 		return c.getTime();
+	}
+
+
+
+	/**
+  	 *replace all 'html'characters in the string with their html-entity
+	 * Output is now safe for use in HTML fragments.
+	 *
+	 * Same as escapeHTML, except for the purpose of displaying in a tooltiptext,
+	 * the text is broken down into lines of 80 chars or less, separated by &lt;br&gt;
+	 * @param t
+	 * @return
+	 */
+	public static String escapeHtmlBreakLines(String t) {
+		 StringTokenizer st = new StringTokenizer(t);
+		 int len = 0;
+		 StringBuilder res = new StringBuilder();
+	     while (st.hasMoreTokens()) {
+	         String s = st.nextToken();
+	         if((len+s.length())>80){
+	        	 res.append("<br>").append(escapeHTML(s));
+	        	 len=s.length();
+	         }else{
+	        	 res.append(' ').append(escapeHTML(s));
+	        	 len+=1+s.length();
+	         }
+	     }
+		return res.toString();
 	}
 }
 

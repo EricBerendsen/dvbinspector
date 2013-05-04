@@ -45,26 +45,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import javax.swing.JPanel;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor.ContentItem;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtendedEventDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor.Rating;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ShortEventDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.util.Interval;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Class to create a grid image of EIT information, like the EPG in decoders.
@@ -416,7 +407,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 					Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
 					Event event = findEvent(serviceId, thisDate);
 					if(event!=null){
-						addEventDetails(r1, event);
+						r1.append(event.getHTML());
 					}else{ // NO event found, just display time
 						String timeString =   tf.format(thisDate);
 						String dateString =   df.format(thisDate);
@@ -428,75 +419,6 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		}
 		return r1.toString();
 	}
-
-	/**
-	 * @param r1
-	 * @param event
-	 */
-	private void addEventDetails(StringBuilder r1, Event event) {
-		r1.append("Start:&nbsp;").append(Utils.getUTCFormattedString(event.getStartTime())).append("&nbsp;Duration: ");
-		r1.append(event.getDuration().substring(0, 2)).append(":");
-		r1.append(event.getDuration().substring(2, 4)).append(":");
-		r1.append(event.getDuration().substring(4)).append("<br>");
-		final List<Descriptor> descList = event.getDescriptorList();
-		final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
-		if(shortDesc.size()>0){
-			r1.append("<br><b><span style=\"background-color: white\">");
-			final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
-			r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
-			String shortText = shortEventDescriptor.getText().toString();
-			if((shortText!=null)&&!shortText.isEmpty()){
-				r1.append(breakLinesEscapeHtml(shortText)).append("<br>");
-			}
-		}
-		final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
-		StringBuilder t = new StringBuilder();
-		for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
-			t.append(extEvent.getText().toString());
-		}
-		String extended = t.toString();
-		if(!extended.isEmpty()){
-			r1.append("<br>").append(breakLinesEscapeHtml(extended)).append("<br>");
-		}
-		final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
-		if(!contentDescList.isEmpty()){
-			ContentDescriptor contentDesc = contentDescList.get(0);
-			List<ContentItem> contentList = contentDesc.getContentList();
-			for(ContentItem c:contentList){
-				r1.append("<br>Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
-				r1.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
-			}
-
-		}
-		final List<ParentalRatingDescriptor> ratingDescList = Descriptor.findGenericDescriptorsInList(descList, ParentalRatingDescriptor.class);
-		if(!ratingDescList.isEmpty()){
-			ParentalRatingDescriptor ratingDesc = ratingDescList.get(0);
-			List<Rating> ratingList = ratingDesc.getRatingList();
-			for(Rating c:ratingList){
-				r1.append("<br>Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
-			}
-		}
-	}
-
-
-
-	private String breakLinesEscapeHtml(String t) {
-		 StringTokenizer st = new StringTokenizer(t);
-		 int len = 0;
-		 StringBuilder res = new StringBuilder();
-	     while (st.hasMoreTokens()) {
-	         String s = st.nextToken();
-	         if((len+s.length())>80){
-	        	 res.append("<br>").append(Utils.escapeHTML(s));
-	        	 len=s.length();
-	         }else{
-	        	 res.append(' ').append(Utils.escapeHTML(s));
-	        	 len+=1+s.length();
-	         }
-	     }
-		return res.toString();
-	}
-
 
 	/**
 	 * Find event in servicesTable, based on serviceID, and date
