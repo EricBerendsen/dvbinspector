@@ -64,7 +64,10 @@ public class DVBString {
 
 	public String getEncodingString(){
 
-		//getUnsignedByte(data[offset+1])
+		// empty string has no encoding
+		if(getLength()==0){
+			return "-";
+		}
 
 		final int fb = getUnsignedByte(data[offset+1]);
 		if(0x20<=fb)
