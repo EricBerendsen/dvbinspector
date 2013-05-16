@@ -89,6 +89,10 @@ public final class DSMCCDescriptorFactory {
 			d = new SSUModuleTypeDescriptor(data, t + offset);
 			break;
 
+		case 0x70:
+			d = new LabelDescriptor(data, t + offset);
+			break;
+
 		case 0x71:
 			d = new CachingPriorityDescriptor(data, t + offset);
 			break;

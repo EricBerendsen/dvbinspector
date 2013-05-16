@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -35,45 +35,28 @@ import nl.digitalekabeltelevisie.controller.KVP;
 
 /**
  *
- * Based on B.2.2.4.2 Caching priority descriptor, ETSI TS 102 727 V1.1.1 (2010-01) or
- * ETSI TS 102 812 V1.3.1 Multimedia Home Platform (MHP) Specification 1.1.3 B.2.2.4.2 Caching priority descriptor
+ * Based on B.2.2.4.1 Caching priority descriptor, ETSI TS 102 727 V1.1.1 (2010-01) or
+ * ETSI TS 102 812 V1.3.1 Multimedia Home Platform (MHP) Specification 1.1.3 B.2.2.4.1 Label descriptor
  *
  * @author Eric
  *
  */
-public class CachingPriorityDescriptor extends DSMCCDescriptor {
+public class LabelDescriptor extends DSMCCDescriptor {
 
-	private final int priority_value;
-	private final int transparency_level;
+	private byte[] label_byte;
 
-	public CachingPriorityDescriptor(final byte[] b, final int offset) {
+	public LabelDescriptor(final byte[] b, final int offset) {
 		super(b, offset);
-		priority_value = getInt(b, offset + 2, 1,MASK_8BITS);
-		transparency_level = getInt(b, offset + 3, 1,MASK_8BITS);
-
+		label_byte = getBytes(b, offset + 2, descriptorLength);
 	}
 
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("priority_value", priority_value, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transparency_level", transparency_level, getTransParencyLevelString(transparency_level))));
+		t.add(new DefaultMutableTreeNode(new KVP("label_byte", label_byte, null)));
 		return t;
 	}
 
 
-
-	public static String getTransParencyLevelString(final int trans){
-		switch (trans) {
-		case 0: return "reserved";
-		case 1: return "Transparent caching";
-		case 2: return "Semi-transparent caching";
-		case 3: return "Static caching";
-
-
-		default:
-			return "reserved for future use";
-		}
-	}
 }
