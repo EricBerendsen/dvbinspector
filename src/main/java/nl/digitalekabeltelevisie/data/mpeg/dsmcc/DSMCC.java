@@ -184,7 +184,7 @@ public class DSMCC extends AbstractPSITabel{
 	}
 
 	public DSMCC_UNMessageSection getDSI(){
-		// DIS has table extension 0x0 or 0x1
+		// DSI has table extension 0x0 or 0x1
 		DSMCC_UNMessageSection [] res = unMessages.get(0);
 		if(res==null){
 			res=unMessages.get(1);
@@ -197,8 +197,12 @@ public class DSMCC extends AbstractPSITabel{
 	}
 
 	public DSMCC_UNMessageSection getDII(final int transactionID){
-		// DIS has table extension 0x0 or 0x1
-		final DSMCC_UNMessageSection [] res = unMessages.get(transactionID);
+		// DII transaction_id may toggle bit 0, so check for both
+		// See ETSI TR 101 202 V1.2.1 P.49
+		DSMCC_UNMessageSection [] res = unMessages.get(transactionID);
+		if(res==null){
+			res = unMessages.get(transactionID^0x1);
+		}
 		if(res!=null){
 			return res[0];
 		}else{
