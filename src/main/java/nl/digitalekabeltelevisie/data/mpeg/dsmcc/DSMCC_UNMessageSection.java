@@ -426,7 +426,7 @@ public class DSMCC_UNMessageSection extends TableSection {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.setUserObject(isDSI()?"DSI":"DII");
+		t.setUserObject(new KVP(isDSI()?"DSI":"DII"));
 		t.add(header.getJTreeNode(modus));
 		if(isDSI()){ // DSI
 			t.add(new DefaultMutableTreeNode(new KVP("serverId",serverId,null)));
