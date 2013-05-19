@@ -54,6 +54,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -208,6 +209,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			logger.warning("Couldn't use system look and feel.");
 		}
 
+		ToolTipManager.sharedInstance().setDismissDelay(30000);
 		//Create and set up the window.
 		frame = new JFrame("DVB Inspector");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
