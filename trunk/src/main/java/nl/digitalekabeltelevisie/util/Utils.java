@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.util;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -1569,7 +1570,14 @@ public final class Utils {
 	}
 
 
-	public static String getHTML(final byte [] byteValue, final int offset, final int len) {
+	/**
+	 * Generate a HTML hexView (both hex and character) of byteValue, with 16 bytes on each line
+	 * @param byteValue
+	 * @param offset
+	 * @param len
+	 * @return
+	 */
+	public static String getHTMLHexviewColored(final byte [] byteValue, final int offset, final int len, RangeHashMap<Integer, Color> coloring) {
 
 		final StringBuilder b= new StringBuilder();
 		b.append("<pre>");
@@ -1583,6 +1591,10 @@ public final class Utils {
 			b.append("<span style=\"background-color: white\">");
 			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
 
+			Color currentColor = coloring.find(l*16);
+			if(currentColor!=null){
+				b.append("<span style=\"color:").append(Utils.toHexString(currentColor)).append("\">");
+			}
 			// show byte as hex
 			for (int i = 0; i < 16; i++) {
 				if(i<lineLen){
@@ -1590,10 +1602,22 @@ public final class Utils {
 				}else{
 					b.append("&nbsp;&nbsp;");
 				}
+				Color nextColor=coloring.find((l*16)+i+1);
+				// disadvantage, at end of line maybe ampty span.
+				if((currentColor!=null)&&!currentColor.equals(nextColor)){ // color change
+					b.append("</span>"); //always close current
+				}
+				if((nextColor!=null)&&!nextColor.equals(currentColor)){
+					b.append("<span style=\"color:").append(Utils.toHexString(nextColor)).append("\">");
+				}
+				currentColor=nextColor;
 				// after every second byte insert space
 				if((i%2)!=0){
 					b.append("&nbsp;");
 				}
+			}
+			if(currentColor!=null){
+				b.append("</span>"); //close current at end of line
 			}
 
 			// string representation at end of line
@@ -1678,6 +1702,99 @@ public final class Utils {
 	         }
 	     }
 		return res.toString();
+	}
+
+	public static String getHexAndDecimalFormattedString(int intValue){
+		StringBuilder b = new StringBuilder();
+		b.append("0x").append(Integer.toHexString(intValue).toUpperCase()).append(" (").append(intValue)
+		.append(")");
+		return b.toString();
+	}
+
+	public static String getHexAndDecimalFormattedString(long longValue){
+		StringBuilder b = new StringBuilder();
+		b.append("0x").append(Long.toHexString(longValue).toUpperCase()).append(" (").append(longValue)
+		.append(")");
+		return b.toString();
+	}
+
+
+	/**
+	 * Get single bit as boolean from byte
+	 * numberings starts from high order bit, starts at 1.
+	 *
+	 * @param b singel byte
+	 * @param i position of bit in byte, start from 1 up to 8
+	 * @return boolen true if bit is set
+	 */
+	public static boolean getBitAsBoolean(final byte b, final int i) {
+		return (( b & (0x80 >> (i-1))) != 0);
+	}
+
+
+
+	/**
+	 * @param b
+	 * @return
+	 */
+	public static int getBooleanAsInt(boolean b) {
+		return b?1:0;
+	}
+
+
+
+	/**
+	 * Generate a HTML hexView (both hex and character) of byteValue, with 16 bytes on each line
+	 * @param byteValue
+	 * @param offset
+	 * @param len
+	 * @return
+	 */
+	public static String getHTMLHexview(final byte [] byteValue, final int offset, final int len) {
+
+		final StringBuilder b= new StringBuilder();
+		b.append("<pre>");
+		// header line
+		b.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0001 0203 0405 0607 0809 0A0B 0C0D 0E0F 0123456789ABCDEF<br>");
+		final int lines=1+((len-1)/16);
+		for (int l = 0; l < lines; l++) {
+			final int start=l*16;
+			b.append("").append(Utils.toHexString(start,6));
+			b.append("&nbsp;");
+			b.append("<span style=\"background-color: white\">");
+			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
+
+			// show byte as hex
+			for (int i = 0; i < 16; i++) {
+				if(i<lineLen){
+					b.append(Utils.toHexString(byteValue,  offset+(l*16)+i, 1));
+				}else{
+					b.append("&nbsp;&nbsp;");
+				}
+				// after every second byte insert space
+				if((i%2)!=0){
+					b.append("&nbsp;");
+				}
+			}
+
+			// string representation at end of line
+			b.append(Utils.escapeHTML(Utils.toSafeString(byteValue, offset+(l*16), lineLen))).append("</span><br>");
+		}
+
+		b.append("</pre>");
+		return b.toString();
+	}
+
+
+	public static String toHexString ( Color c ){
+
+	   String s = Integer.toHexString( c.getRGB() & 0xffffff );
+
+	   if ( s.length() < 6 ){
+		   s = "000000".substring( 0, 6 - s.length() ) + s;
+	   }
+	   return '#' + s;
+
 	}
 }
 

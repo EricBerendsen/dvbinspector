@@ -26,11 +26,12 @@
  */
 package nl.digitalekabeltelevisie.controller;
 
+import static nl.digitalekabeltelevisie.util.Utils.*;
+
 import javax.swing.JMenuItem;
 
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.gui.ImageSource;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Holder for names/values (and explanations) that takes care of formatting and presentation.
@@ -272,8 +273,7 @@ public class KVP{
 				} else if (numberFormat == NUMBER_DISPLAY_HEX) {
 					b.append("0x").append(Integer.toHexString(intValue).toUpperCase());
 				} else { // assume both to be safe
-					b.append("0x").append(Integer.toHexString(intValue).toUpperCase()).append(" (").append(intValue)
-					.append(")");
+					b.append(getHexAndDecimalFormattedString(intValue));
 				}
 			} else if (fieldType == FIELD_TYPE_LONG) {
 				if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
@@ -290,8 +290,8 @@ public class KVP{
 
 				} else {
 					final int showLen=Math.min(byteLen,BYTE_DATA_MAX_LEN);
-					b.append("0x").append(Utils.toHexString(byteValue, byteStart, showLen)).append(" \"").append(
-							Utils.toSafeString(byteValue, byteStart, showLen)).append("\"");
+					b.append("0x").append(toHexString(byteValue, byteStart, showLen)).append(" \"").append(
+							toSafeString(byteValue, byteStart, showLen)).append("\"");
 				}
 			} else if (fieldType == FIELD_TYPE_DVBSTRING) {// TODO make distinction between plain text, and HTML view,
 				// to support character emphasis on A.1 Control codes ETSI EN 300 468 V1.11.1 (2010-04)
@@ -394,7 +394,7 @@ public class KVP{
 		if(fieldType == FIELD_TYPE_BYTES){
 			return new HTMLSource() {
 				public String getHTML() {
-					return Utils.getHTML(byteValue, byteStart, byteLen);
+					return getHTMLHexview(byteValue, byteStart, byteLen);
 				}
 			};
 

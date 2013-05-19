@@ -89,7 +89,7 @@ public class GeneralPesHandler  implements TreeNode{
 		if((pesData==null)){ // nothing started
 			// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 			if(packet.isPayloadUnitStartIndicator() &&
-					((packet.isAdaptationFieldControl()==1)||(packet.isAdaptationFieldControl()==3))){ //start something
+					((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3))){ //start something
 				// at least one byte plus pointer available
 				if((data[0]!=0)||(data[1]!=0)){ //starting PSI section after ofset
 					// type = PSI;
@@ -107,7 +107,7 @@ public class GeneralPesHandler  implements TreeNode{
 				}
 			}
 			//	something started
-		}else if((packet.isAdaptationFieldControl()==1)||(packet.isAdaptationFieldControl()==3)){ // has payload?
+		}else if((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3)){ // has payload?
 			if(packet.isPayloadUnitStartIndicator()){ // previous pesPAcket Finished, tell it to process its data
 				pesData.processPayload();
 				processPesDataBytes(pesData);

@@ -69,6 +69,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -315,40 +316,45 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
 	 */
 	public void valueChanged(final TreeSelectionEvent e) {
-		final DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+		// node1 is either a DefaultMutableTreeNode (most normal items) or a MutableTreeNode (for LazyList)
+		final MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
 		imagePanel.setImage(null);
 		editorPane.setText(null);
 		CardLayout cardLayout = (CardLayout)(detailPanel.getLayout());
 
-		if (node == null){
+		if (node1 == null){
 			cardLayout.show(detailPanel, EMPTY_PANEL);
 			return;
 		}
+		// not always a DefaultMutableTreeNode
+		if(node1 instanceof DefaultMutableTreeNode){
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) node1;
 
-		final Object nodeInfo = node.getUserObject();
+			final Object nodeInfo = node.getUserObject();
 
-		if (nodeInfo instanceof KVP) {
-			final KVP kvp = (KVP)nodeInfo;
-			if(kvp.getImageSource()!=null){
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				final BufferedImage img = kvp.getImageSource().getImage();
-				setCursor(Cursor.getDefaultCursor());
-				if(img != null){
-					imagePanel.setImage(img);
-					cardLayout.show(detailPanel, IMAGE_PANEL);
+			if (nodeInfo instanceof KVP) {
+				final KVP kvp = (KVP)nodeInfo;
+				if(kvp.getImageSource()!=null){
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					final BufferedImage img = kvp.getImageSource().getImage();
+					setCursor(Cursor.getDefaultCursor());
+					if(img != null){
+						imagePanel.setImage(img);
+						cardLayout.show(detailPanel, IMAGE_PANEL);
+						return;
+					}
+				}else  if(kvp.getHTMLSource()!=null){
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
+					editorPane.setText(html.toString());
+					setCursor(Cursor.getDefaultCursor());
+					cardLayout.show(detailPanel, HTML_PANEL);
 					return;
 				}
-			}else  if(kvp.getHTMLSource()!=null){
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
-				editorPane.setText(html.toString());
-				setCursor(Cursor.getDefaultCursor());
-				cardLayout.show(detailPanel, HTML_PANEL);
-				return;
-			}
 
+			}
+			cardLayout.show(detailPanel, EMPTY_PANEL);
 		}
-		cardLayout.show(detailPanel, EMPTY_PANEL);
 
 	}
 
@@ -509,20 +515,24 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param dmtn
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+
 	private StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
 		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder();
-		final Enumeration<DefaultMutableTreeNode> children = dmtn.children();
+		@SuppressWarnings("rawtypes")
+		final Enumeration children = dmtn.children();
 		while(children.hasMoreElements()){
-			final DefaultMutableTreeNode child = children.nextElement();
-			final KVP chKVP = (KVP)child.getUserObject();
-			res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
-			if(!child.isLeaf()){
-				if(child!=dmtn.getLastChild()){
-					res.append(getEntireTree(child,preFix+"| ")); // more children follow, so start with "| "
-				}else{ // lastChild
-					res.append(getEntireTree(child,preFix+"  ")); // last , so prefix with "  "
+			Object next = children.nextElement();
+			if(next instanceof DefaultMutableTreeNode){
+				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
+				final KVP chKVP = (KVP)child.getUserObject();
+				res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
+				if(!child.isLeaf()){
+					if(child!=dmtn.getLastChild()){
+						res.append(getEntireTree(child,preFix+"| ")); // more children follow, so start with "| "
+					}else{ // lastChild
+						res.append(getEntireTree(child,preFix+"  ")); // last , so prefix with "  "
+					}
 				}
 			}
 		}
@@ -533,22 +543,27 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param dmtn
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+
 	private StringBuilder getViewTree(final DefaultMutableTreeNode dmtn,final String preFix,final TreePath path) {
 		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder();
-		final Enumeration<DefaultMutableTreeNode> children = dmtn.children();
+		@SuppressWarnings("rawtypes")
+		final Enumeration children = dmtn.children();
 		while(children.hasMoreElements()){
-			final DefaultMutableTreeNode child = children.nextElement();
-			final TreePath childPath = path.pathByAddingChild(child);
-			if(tree.isVisible(childPath)){
-				final KVP chKVP = (KVP)child.getUserObject();
-				res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
-				if(!child.isLeaf()){
-					if(child!=dmtn.getLastChild()){
-						res.append(getViewTree(child,preFix+"| ",childPath)); // more children follow, so start with "| "
-					}else{ // lastChild
-						res.append(getViewTree(child,preFix+"  ",childPath)); // last , so prefix with "  "
+
+			Object next = children.nextElement();
+			if(next instanceof DefaultMutableTreeNode){
+				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
+				final TreePath childPath = path.pathByAddingChild(child);
+				if(tree.isVisible(childPath)){
+					final KVP chKVP = (KVP)child.getUserObject();
+					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
+					if(!child.isLeaf()){
+						if(child!=dmtn.getLastChild()){
+							res.append(getViewTree(child,preFix+"| ",childPath)); // more children follow, so start with "| "
+						}else{ // lastChild
+							res.append(getViewTree(child,preFix+"  ",childPath)); // last , so prefix with "  "
+						}
 					}
 				}
 			}
@@ -573,23 +588,31 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		DefaultMutableTreeNode dmtn;
 
 		if(path!=null){
-			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
-			final KVP kvp=(KVP)dmtn.getUserObject();
-			JMenuItem subMenu = kvp.getSubMenu();
-			if(subMenu!=null){
-				final Object owner =  kvp.getOwner();
-				if(owner instanceof PID){ // if PID has a owner, it is a PES that has not been parsed yet.
-					final PID p = (PID) owner;
-					final GeneralPesHandler pesH = p.getPesHandler();
-					if(!pesH.isInitialized()){
+			MutableTreeNode node= (MutableTreeNode)path.getLastPathComponent();
+			if((node!=null)&&(node instanceof DefaultMutableTreeNode)){
+				dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
+				final KVP kvp=(KVP)dmtn.getUserObject();
+				JMenuItem subMenu = kvp.getSubMenu();
+				if(subMenu!=null){
+					final Object owner =  kvp.getOwner();
+					if(owner instanceof PID){ // if PID has a owner, it is a PES that maybe has not been parsed yet.
+						final PID p = (PID) owner;
+						final GeneralPesHandler pesH = p.getPesHandler();
+						if(!pesH.isInitialized()){
+							subMenu.addActionListener(this);
+							popup.add(subMenu);
+						}
+					}else{
+						subMenu.removeActionListener(this);
 						subMenu.addActionListener(this);
 						popup.add(subMenu);
 					}
-				}else{
-					subMenu.removeActionListener(this);
-					subMenu.addActionListener(this);
-					popup.add(subMenu);
 				}
+			}else{ //not a defaultMutableTreeNode, so it is a mutabletree node. Only used for TS packets lazy tree, so disable menu's
+				treeMenuItem.setEnabled(false);
+				copyMenuItem.setEnabled(false);
+				viewMenuItem.setEnabled(false);
+
 			}
 		}
 
