@@ -33,9 +33,10 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
+import java.io.RandomAccessFile;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -69,9 +70,10 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
+import nl.digitalekabeltelevisie.util.JTreeLazyList;
+import nl.digitalekabeltelevisie.util.PositionPushbackInputStream;
 import nl.digitalekabeltelevisie.util.Utils;
-//import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
-// import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+
 
 /**
  * TransportStream is responsible for parsing a file containing a transport stream, dividing it into 188 byte {@link TSPackets}, and handing them over to the correct PID.
@@ -95,9 +97,14 @@ public class TransportStream implements TreeNode{
 	 */
 	private PID [] pids = new PID [8192];
 	/**
-	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and
+	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and Grid View
 	 */
 	private final short [] packet_pid;
+
+	/**
+	 * for every TSPacket read, store it's offset in the file
+	 */
+	private final long [] packet_offset;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -147,6 +154,7 @@ public class TransportStream implements TreeNode{
 		final long len = file.length();
 		final int max_packets = (int)(len / packet_length);
 		packet_pid = new short [max_packets];
+		packet_offset = new long [max_packets];
 	}
 
 	/**
@@ -154,7 +162,7 @@ public class TransportStream implements TreeNode{
 	 * @throws IOException
 	 */
 	public void parseStream() throws IOException {
-		final PushbackInputStream fileStream = getInputStream();
+		final PositionPushbackInputStream fileStream = getInputStream();
 		final byte [] buf = new byte[packet_length];
 		long count=0;
 		no_packets = 0;
@@ -167,6 +175,7 @@ public class TransportStream implements TreeNode{
 
 		int bytes_read =0;
 		do {
+			int offset = (int) fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, MPEGConstants.packet_length);
 			final int next = fileStream.read();
 			if((bytes_read==MPEGConstants.packet_length)&&
@@ -177,13 +186,23 @@ public class TransportStream implements TreeNode{
 					fileStream.unread(next);
 				}
 
-				TSPacket packet = new TSPacket(buf, count);
+				TSPacket packet = new TSPacket(buf, count,this);
 				if(!packet.isTransportErrorIndicator()){
 					final short pid = packet.getPID();
 					if(pids[pid]==null) {
 						pids[pid] = new PID(pid,this);
 					}
-					packet_pid[no_packets++]=pid;
+					short pidFlags = pid;
+					if(packet.hasAdaptationField()){
+						pidFlags = (short) (pidFlags | 0x2000);
+					}
+					if(packet.isPayloadUnitStartIndicator()){
+						pidFlags = (short) (pidFlags | 0x4000);
+					}
+
+					packet_pid[no_packets]=pidFlags;
+					packet_offset[no_packets]=offset;
+					no_packets++;
 					pids[pid].update_packet(packet);
 					packet=null;
 				}else{
@@ -213,7 +232,7 @@ public class TransportStream implements TreeNode{
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
-		final PushbackInputStream fileStream = getInputStream();
+		final PositionPushbackInputStream fileStream = getInputStream();
 		final byte [] buf = new byte[MPEGConstants.packet_length];
 		long count=0;
 
@@ -230,7 +249,7 @@ public class TransportStream implements TreeNode{
 					fileStream.unread(next);
 				}
 
-				TSPacket packet = new TSPacket(buf, count);
+				TSPacket packet = new TSPacket(buf, count,this);
 				if(!packet.isTransportErrorIndicator()){
 					final int pid = packet.getPID();
 					final GeneralPesHandler handler = toParsePids.get(pid);
@@ -256,9 +275,9 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	private PushbackInputStream getInputStream() throws IOException{
+	private PositionPushbackInputStream getInputStream() throws IOException{
 		final InputStream is = new FileInputStream(file);
-		return new PushbackInputStream(new BufferedInputStream(is),200);
+		return new PositionPushbackInputStream(new BufferedInputStream(is),200);
 	}
 
 
@@ -331,6 +350,10 @@ public class TransportStream implements TreeNode{
 
 			}
 		}
+
+		JTreeLazyList list = new JTreeLazyList(this, 100, 0, getNo_packets());
+		t.add(list.getJTreeNode(modus, "Transport packets "));
+
 		return t;
 	}
 
@@ -607,12 +630,16 @@ public class TransportStream implements TreeNode{
 		return r;
 	}
 
-	public short[] getPacket_pid() {
-		return packet_pid;
-	}
+//	public short[] getPacket_pid() {
+//		return packet_pid;
+//	}
 
 	public short getPacket_pid(final int t) {
-		return packet_pid[t];
+		return (short) (0x1fff & packet_pid[t]);
+	}
+
+	public short getPacketPidFlags(final int t) {
+		return  packet_pid[t];
 	}
 
 	public String getLabel(final short pid){
@@ -714,6 +741,43 @@ public class TransportStream implements TreeNode{
 			}
 		}
 		return null;
+	}
+
+	public TSPacket getTSPacket(int packetNo){
+		TSPacket packet = null;
+		if(packet_offset!=null){
+			if(packet_offset.length>packetNo){
+				try {
+					RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+					randomAccessFile.seek(packet_offset[packetNo]);
+					byte [] buf = new byte[MPEGConstants.packet_length];
+					int l = randomAccessFile.read(buf);
+					if(l==MPEGConstants.packet_length){
+						packet = new TSPacket(buf, packetNo,this);
+
+					}else{
+						logger.warning("read less then MPEGConstants.packet_length ("+MPEGConstants.packet_length+") bytes, actual read: "+l);
+					}
+
+					randomAccessFile.close();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					logger.warning("FileNotFoundException");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}else{
+				logger.warning("packet_offset.length ("+packet_offset.length+") < packetNo ("+packetNo+")");
+
+			}
+
+		}else{
+			logger.warning("packet_offset[] is null");
+		}
+		return packet;
 	}
 
 

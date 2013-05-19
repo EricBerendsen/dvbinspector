@@ -27,9 +27,11 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -41,6 +43,7 @@ import javax.swing.JPanel;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 
@@ -50,12 +53,19 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 public class Grid extends JPanel implements ComponentListener
 {
 
+	final static float dash1[] = {3.0f};
+    final static BasicStroke dashed =
+        new BasicStroke(2.0f,
+                        BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_MITER,
+                        3.0f, dash1, 0.0f);
+
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 7881015434582215246L;
-	private static final int blockW = 12;
-	private static final int blockH = 12;
+	private static final int blockW = 20;
+	private static final int blockH = 20;
 
 	private int blockPerLine = 100;
 
@@ -66,6 +76,8 @@ public class Grid extends JPanel implements ComponentListener
 	private int startPacket;
 	private int endPacket;
 	private int noPackets;
+	private boolean showAdaptationField = false;
+	private boolean showPayloadStart = false;
 
 
 	/**
@@ -107,23 +119,55 @@ public class Grid extends JPanel implements ComponentListener
 
 	@Override
 	public void paintComponent(final Graphics g) {
+
+		int startline = g.getClipBounds().y/blockH;
+		int endLine = startline+1+(g.getClipBounds().height/blockH) ;
+
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(dashed);
 		setBackground(Color.WHITE);
 		super.paintComponent(g);    // paints background
 		if(stream!=null){
-			for (int i = 0; i < lines; i++) {
+			for (int i = startline; i <= endLine; i++) {
 				for (int j = 0; j < blockPerLine; j++) {
 					final int r = (i*blockPerLine)+j;
 					if(r<noPackets){
-						final short pid = stream.getPacket_pid(r+startPacket);
+						final short pidFlags = stream.getPacketPidFlags(r+startPacket);
+						final short pid = (short) (pidFlags & 0x1fff);
 						final Color c = (Color)colors.get(pid);
 						if(c!=null){
 							g.setColor(c);
 							g.fillRect(j*blockW, i*blockH, blockW, blockH);
+							final short adaptationFlag = (short) (pidFlags & 0x2000);
+							if(showAdaptationField&& (adaptationFlag!=0)){
+								Color contrast = getContrastingColor(c);
+								g.setColor(contrast);
+								g.fillRect((j*blockW)+2, (i*blockH)+2, blockW/2, blockH/2);
+							}
+							final short payloadStartFlag = (short) (pidFlags & 0x4000);
+							if(showPayloadStart && (payloadStartFlag!=0)){
+								Color contrast = getContrastingColor(c);
+								g.setColor(contrast);
+
+								g2.drawRect((j*blockW)+1, (i*blockH)+1, blockW-2, blockH-2);
+							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param c
+	 * @return
+	 */
+	private Color getContrastingColor(final Color c) {
+		Color contrast = Color.BLACK;
+		if((c.getGreen()+c.getRed()+c.getBlue())<384){
+			contrast = Color.WHITE;
+		}
+		return contrast;
 	}
 	/* (non-Javadoc)
 	 * @see javax.swing.Scrollable#getPreferredScrollableViewportSize()
@@ -145,7 +189,7 @@ public class Grid extends JPanel implements ComponentListener
 
 	@Override
 	public String getToolTipText(final MouseEvent e){
-		String r=null;
+		StringBuilder r=new StringBuilder();
 		if(stream!=null){
 			final int x=e.getX();
 			if((x/blockW)<blockPerLine){ // empty space to the right
@@ -155,12 +199,17 @@ public class Grid extends JPanel implements ComponentListener
 					final int realPacketNo = packetNo +startPacket;
 					final short pid = stream.getPacket_pid(realPacketNo);
 					if(colors.containsKey(pid)){ // don't care about actual color, just want to know is this pid shown
-						r = "Packet: "+realPacketNo+", PID: "+pid+" - "+stream.getShortLabel(pid)+", Time: "+stream.getPacketTime(realPacketNo);
+						TSPacket packet = stream.getTSPacket(realPacketNo);
+						r.append("<html>");
+						if(packet!=null){
+							r.append(packet.getHTML());
+						}
+						r.append("</html>");
 					}
 				}
 			}
 		}
-		return r;
+		return r.toString();
 	}
 
 
@@ -200,6 +249,24 @@ public class Grid extends JPanel implements ComponentListener
 	 */
 	public void componentShown(final ComponentEvent e) {
 		repaint();
+	}
+
+	/**
+	 * @param b
+	 */
+	public void setShowAdaptationField(boolean b) {
+		showAdaptationField = b;
+		repaint();
+
+	}
+
+	/**
+	 * @param b
+	 */
+	public void setShowPayloadStart(boolean b) {
+		showPayloadStart = b;
+		repaint();
+
 	}
 
 }

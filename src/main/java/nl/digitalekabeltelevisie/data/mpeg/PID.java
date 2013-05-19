@@ -119,7 +119,7 @@ public class PID implements TreeNode{
 			if((lastPacket==null)){ // nothing started
 				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 				if(packet.isPayloadUnitStartIndicator() &&
-						((packet.isAdaptationFieldControl()==1)||(packet.isAdaptationFieldControl()==3))){ //start something
+						((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3))){ //start something
 					// at least one byte plus pointer available
 					int start;
 					int available;
@@ -142,7 +142,7 @@ public class PID implements TreeNode{
 					}
 				}
 				//	something started
-			}else if((packet.isAdaptationFieldControl()==1)||(packet.isAdaptationFieldControl()==3)){ // has payload?
+			}else if((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3)){ // has payload?
 				// are we in a PSI PID??
 				if(type==PSI){
 					int start;
@@ -226,10 +226,10 @@ public class PID implements TreeNode{
 	}
 
 	private void processAdaptationField(final TSPacket packet) {
-		if((packet.isAdaptationFieldControl()==2)||(packet.isAdaptationFieldControl()==3)) { //Adaptation field present
-			final AdaptationField adaptationField = new AdaptationField(packet.getAdaptationField());
+		final AdaptationField adaptationField =packet.getAdaptationField();
+		if(adaptationField!=null) { //Adaptation field present
 			if(adaptationField.isPCR_flag()){
-				final PCR newPCR = adaptationField.getProgram_clock_reference_base();
+				final PCR newPCR = adaptationField.getProgram_clock_reference();
 				if((lastPCR != null)&&(lastPCR.getProgram_clock_reference_base()>newPCR.getProgram_clock_reference_base())){
 					// wrap around of PCR, because we use long we can just continue
 					newPCR.setProgram_clock_reference_base(newPCR.getProgram_clock_reference_base() + 0x200000000l);
@@ -249,9 +249,6 @@ public class PID implements TreeNode{
 					lastPCRpacketNo = -1;
 					pcr_count=1;
 				}
-				lastPCR = newPCR;
-				lastPCRpacketNo = packet.getPacketNo();
-				pcr_count++;
 			}
 			if(adaptationField.isDiscontinuity_indicator()){
 				logger.fine("Discontinuity_indicator() in PID "+packet.getPID()+"packetNo"+ packet.getPacketNo()+" at Time "+ getParentTransportStream().getPacketTime(packet.getPacketNo())) ;

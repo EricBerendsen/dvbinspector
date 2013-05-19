@@ -28,13 +28,22 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.packet_length;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.awt.Color;
 import java.util.Arrays;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.gui.HTMLSource;
+import nl.digitalekabeltelevisie.util.RangeHashMap;
 import nl.digitalekabeltelevisie.util.Utils;
 
+
 /**
- * 
+ *
  * Represents a single transport stream packet (188 bytes) as defined in 2.4.3.2 Transport Stream packet layer of ISO
  * 13813 , and contains all data in it.
  *
@@ -44,13 +53,22 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  *
  */
-public class TSPacket {
+public class TSPacket implements HTMLSource, TreeNode{
 	private final byte[] buffer ;
 	private long packetNo=-1;
+	private static Color HEADER_COLOR = new Color(0x0000ff);
+	private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
+	private TransportStream transportStream = null;
 
-	public TSPacket(final byte[] buf, final long no) {
+	/**
+	 * @param buf bytes forming tspacket, should be 188 long
+	 * @param no position number of this packet in the stream
+	 * @param ts TransportStream this packet belongs to, needed to find stuff like service name.
+	 */
+	public TSPacket(final byte[] buf, final long no, TransportStream ts) {
 		buffer=Arrays.copyOf(buf, buf.length); //buf should be copied, or else PID.getLast_packet() will always point to last packet parsed, regardless of the actual pid.
 		packetNo = no;
+		transportStream = ts;
 	}
 
 	public int getTransportScramblingControl(){
@@ -76,20 +94,32 @@ public class TSPacket {
 		return (buffer[1] & 0x80) != 0;
 	}
 
+	public int getTransportErrorIndicator() {
+		return (buffer[1] & 0x80)>>7;
+	}
+
 	public boolean isPayloadUnitStartIndicator() {
 		return (buffer[1] & 0x40) != 0;
+	}
+
+	public int getPayloadUnitStartIndicator() {
+		return (buffer[1] & 0x40)>>6 ;
 	}
 
 	public boolean isTransportPriority() {
 		return (buffer[1] & 0x20) != 0;
 	}
 
-	public int isAdaptationFieldControl(){
+	public int getTransportPriority() {
+		return (buffer[1] & 0x20)>>5;
+	}
+
+	public int getAdaptationFieldControl(){
 		return (buffer[3] & 0x30) >>4;
 	}
 
 	public String getAdaptationFieldControlString(){
-		switch (isAdaptationFieldControl()) {
+		switch (getAdaptationFieldControl()) {
 		case 0:
 			return "reserved for future use by ISO/IEC";
 		case 1:
@@ -99,13 +129,25 @@ public class TSPacket {
 		case 3:
 			return "adaptation_field followed by payload";
 		default:
-			throw new IllegalArgumentException("Invalid value in getAdaptationFieldControl:"+isAdaptationFieldControl());
+			throw new IllegalArgumentException("Invalid value in getAdaptationFieldControl:"+getAdaptationFieldControl());
 		}
 	}
 
-	public byte[] getAdaptationField(){
-		if((isAdaptationFieldControl()==2)||(isAdaptationFieldControl()==3)) { //Adaptation field presen
-			return Utils.copyOfRange(buffer,4, 4+Utils.getUnsignedByte(buffer[4])+1);
+	public boolean hasAdaptationField(){
+		return (getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3);
+
+	}
+
+	public byte[] getAdaptationFieldBytes(){
+		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+			return copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1);
+		}
+		return null;
+	}
+
+	public AdaptationField getAdaptationField(){
+		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+			return new AdaptationField(copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1));
 		}
 		return null;
 	}
@@ -114,21 +156,21 @@ public class TSPacket {
 	 * @return the payload of this TSPacket, direct after the adaptationField
 	 */
 	public byte[] getData(){
-		if((isAdaptationFieldControl()==1)) { //payload only
-			return Utils.copyOfRange(buffer,4, packet_length);
-		}else if((isAdaptationFieldControl()==3)) { //Adaptation followed by payload
-			return Utils.copyOfRange(buffer, 4+Utils.getUnsignedByte(buffer[4])+1,packet_length);
+		if((getAdaptationFieldControl()==1)) { //payload only
+			return copyOfRange(buffer,4, packet_length);
+		}else if((getAdaptationFieldControl()==3)) { //Adaptation followed by payload
+			return copyOfRange(buffer, 4+getUnsignedByte(buffer[4])+1,packet_length);
 		}
 		return null;
 	}
 
 	public short getPID()
 	{
-		return (short)Utils.getInt(buffer,1,2,Utils.MASK_13BITS) ;
+		return (short)getInt(buffer,1,2,MASK_13BITS) ;
 	}
 	@Override
 	public String toString() {
-		return "bytes="+ Utils.toHexString(buffer, 4) +" , PID="+Integer.toHexString(getPID())+" , continuity_counter="+getContinuityCounter()+", Adaptation_field_control="+getAdaptationFieldControlString()+", Transport Scrambling Control="+getTransportScramblingControlString() ;
+		return "bytes="+ toHexString(buffer, 4) +" , PID="+Integer.toHexString(getPID())+" , continuity_counter="+getContinuityCounter()+", Adaptation_field_control="+getAdaptationFieldControlString()+", Transport Scrambling Control="+getTransportScramblingControlString() ;
 	}
 
 	public int  getContinuityCounter() {
@@ -148,5 +190,101 @@ public class TSPacket {
 	 */
 	public void setPacketNo(final long packet_no) {
 		this.packetNo = packet_no;
+	}
+
+	/* (non-Javadoc)
+	 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
+	 */
+	@Override
+	public String getHTML() {
+		StringBuilder s = new StringBuilder();
+
+		s.append("Packet: ").append(packetNo);
+		if(transportStream!=null){
+			s.append("<br>Time: ").append(transportStream.getPacketTime(packetNo));
+			final short pid = transportStream.getPacket_pid((int)packetNo);
+			s.append("<br>").append(escapeHtmlBreakLines(transportStream.getShortLabel(pid))).append("<br>");
+		}
+
+
+		s.append("<br><span style=\"color:").append(Utils.toHexString(HEADER_COLOR)).append("\"><b>Header: </b><br>");
+		RangeHashMap<Integer, Color> coloring = new RangeHashMap<Integer, Color>();
+		coloring.put(0, 3, HEADER_COLOR);
+
+		s.append("<br>sync_byte: ").append(getHexAndDecimalFormattedString(getSyncByte()));
+		s.append("<br>transport_error_indicator: ").append(getTransportErrorIndicator());
+		s.append("<br>payload_unit_start_indicator: ").append(getPayloadUnitStartIndicator());
+		s.append("<br>transport_priority: ").append(getTransportPriority());
+
+		s.append("<br>PID: ").append(getHexAndDecimalFormattedString(getPID()));
+		s.append("<br>transport_scrambling_control: ").append(getTransportScramblingControl()).append(" (").append(getTransportScramblingControlString()).append(")");
+		s.append("<br>adaptation_field_control: ").append(getAdaptationFieldControl()).append(" (").append(getAdaptationFieldControlString()).append(")");
+		s.append("<br>continuity_counter: ").append(getHexAndDecimalFormattedString(getContinuityCounter())).append("</span>");
+
+		AdaptationField adaptationField = getAdaptationField();
+		if(adaptationField!=null){
+			s.append("<br><br><span style=\"color:").append(Utils.toHexString(ADAPTATION_FIELD_COLOR)).append("\"><b>AdaptationField:</b><br>").append(adaptationField.getHTML()).append("</span>");
+			coloring.put(4, 4+adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
+		}
+
+		s.append("<br><br><b>Data:</b><br>").append(getHTMLHexviewColored(buffer,0,buffer.length,coloring));
+
+		return s.toString();
+	}
+
+	/**
+	 * @return should always be 0x47
+	 */
+	private int getSyncByte() {
+		return getInt(buffer, 0,1,MASK_8BITS);
+	}
+
+	/* (non-Javadoc)
+	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
+	 */
+	@Override
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
+
+		StringBuilder l = new StringBuilder("TSPacket [").append(packetNo).append("]");
+		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+
+			l.append(" (adaptation field)");
+		}
+		if((getAdaptationFieldControl()==1)||(getAdaptationFieldControl()==3)) { //payload present
+
+			l.append(" (payload)");
+		}
+		if(isPayloadUnitStartIndicator()){
+			l.append(" (payload start)");
+		}
+
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(l.toString(), this));
+		t.add(new DefaultMutableTreeNode(new KVP("sync_byte",getSyncByte() ,"Should be 0x47")));
+		t.add(new DefaultMutableTreeNode(new KVP("transport_error_indicator",getTransportErrorIndicator() ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("payload_unit_start_indicator",getPayloadUnitStartIndicator() ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("transport_priority",getTransportPriority() ,null)));
+
+		t.add(new DefaultMutableTreeNode(new KVP("PID",getPID() ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",getTransportScramblingControl() ,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_control",getAdaptationFieldControl() ,getAdaptationFieldControlString())));
+
+		t.add(new DefaultMutableTreeNode(new KVP("continuity_counter",getContinuityCounter() ,null)));
+
+		AdaptationField adaptationField = getAdaptationField();
+		if(adaptationField!=null){
+			t.add(adaptationField.getJTreeNode(modus));
+		}
+
+		if((getAdaptationFieldControl() == 1) || (getAdaptationFieldControl() == 3)) {
+			int payloadStart = 4;
+			if(adaptationField!=null){
+				payloadStart = 5+adaptationField.getAdaptation_field_length();
+			}
+			t.add(new DefaultMutableTreeNode(new KVP("data_byte",buffer,payloadStart ,buffer.length-payloadStart, null)));
+		}
+
+
+
+		return t;
 	}
 }
