@@ -101,7 +101,7 @@ public class AdaptationField implements HTMLSource, nl.digitalekabeltelevisie.co
 			if(transport_private_data_flag){
 				transport_private_data_length = getInt(data,offset,1,MASK_8BITS);
 				offset+= 1;
-				private_data_byte = getBytes(data, offset, adaptation_field_extension_length);
+				private_data_byte = getBytes(data, offset, Math.min(transport_private_data_length, (adaptation_field_length+ 1) - offset));
 				offset+= transport_private_data_length ;
 			}
 			if(adaptation_field_extension_flag){
@@ -278,7 +278,7 @@ public class AdaptationField implements HTMLSource, nl.digitalekabeltelevisie.co
 		}
 		if(transport_private_data_flag){
 			s.append("<br>transport_private_data_length: ").append(getHexAndDecimalFormattedString(transport_private_data_length));
-			s.append("<br>private_data_byte: ").append("0x").append(toHexString(private_data_byte, 0)).append(" \"").append(
+			s.append("<br>private_data_byte: ").append("0x").append(toHexString(private_data_byte)).append(" \"").append(
 					toSafeString(private_data_byte)).append("\"");
 		}
 		if(adaptation_field_extension_flag){
