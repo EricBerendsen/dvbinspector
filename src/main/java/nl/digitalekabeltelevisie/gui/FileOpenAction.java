@@ -78,6 +78,7 @@ public class FileOpenAction extends AbstractAction {
 			prefs.put(DIR,f.getParent());
 			final TransportStream transportStream = new TransportStream(f);
 			transportStream.setDefaultPrivateDataSpecifier(contr.getDefaultPrivateDataSpecifier());
+			transportStream.setEnableTSPackets(contr.isEnableTSPackets());
 
 			try {
 				transportStream.parseStream();

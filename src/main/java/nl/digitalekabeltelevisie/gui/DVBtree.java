@@ -290,17 +290,18 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	}
 
 	/**
-	 * Toggle one or more bits in the current modus
-	 * store modus in preferences.
-	 * @param modus
+	 *  Toggle one or more bits in the current modus
+	 * @param modus mask of bit to be set
+	 * @return true if bit(s) was set as result of this operation
 	 */
-	public void toggleMod(final int modus) {
+	public boolean toggleMod(final int modus) {
 		this.mod = this.mod ^ modus;
 
 		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
 		prefs.putInt(DVBinspector.DEFAULT_VIEW_MODUS, mod);
 
 		refreshView();
+		return (this.mod&modus)!=0;
 	}
 
 	private void refreshView(){

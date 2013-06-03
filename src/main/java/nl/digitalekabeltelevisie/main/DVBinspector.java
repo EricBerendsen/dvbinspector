@@ -70,6 +70,7 @@ import nl.digitalekabeltelevisie.gui.BarChart;
 import nl.digitalekabeltelevisie.gui.BitRateChart;
 import nl.digitalekabeltelevisie.gui.DVBtree;
 import nl.digitalekabeltelevisie.gui.EITView;
+import nl.digitalekabeltelevisie.gui.EnableTSPacketsAction;
 import nl.digitalekabeltelevisie.gui.FileOpenAction;
 import nl.digitalekabeltelevisie.gui.GridView;
 import nl.digitalekabeltelevisie.gui.PIDDialog;
@@ -96,6 +97,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * key for storage of last used DEFAULT_PRIVATE_DATA_SPECIFIER in Preferences
 	 */
 	public static final String DEFAULT_PRIVATE_DATA_SPECIFIER = "private_data_spcifier";
+	public static final String ENABLE_TS_PACKETS = "enable_ts_packets";
 
 	/**
 	 * key for storage of last used DEFAULT_VIEW_MODUS in Preferences
@@ -122,14 +124,17 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private JTabbedPane tabbedPane;
 	private JMenu viewTreeMenu;
 	private JMenu viewMenu;
+	private JMenu settingsMenu;
 	private final JDialog aboutDialog = new JDialog();
 	private PIDDialog pidDialog = null;
 
 	private long defaultPrivateDataSpecifier = 0;
+	private boolean enableTSPackets = false;
 
 	private ViewContext viewContest = new ViewContext();
 
 	private int modus;
+
 
 
 	/**
@@ -152,6 +157,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		if(args.length>=1){
 			final String filename= args[0];
 			// TODO test if file exists
+			// TODO use enableTSPackets flag
 			final TransportStream ts = new TransportStream(filename);
 			inspector.transportStream = ts;
 
@@ -180,6 +186,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	public void run() {
 		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
 		defaultPrivateDataSpecifier = prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
+		enableTSPackets = prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false);
 		modus = prefs.getInt(DVBinspector.DEFAULT_VIEW_MODUS,0);
 
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
@@ -278,6 +285,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		viewMenu =new JMenu("View");
 		menuBar.add(viewMenu);
 
+		settingsMenu =new JMenu("Settings");
+		menuBar.add(settingsMenu);
+
 		helpMenu =new JMenu("Help");
 		menuBar.add(helpMenu);
 		JMenuItem aboutMenuItem;
@@ -328,7 +338,14 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x29, "Nordig",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x40, "CI Plus LLP",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x600, "UPC",defaultPrivateDataSpecifier);
-		viewTreeMenu.add(privateDataSubMenu);
+		settingsMenu.add(privateDataSubMenu);
+
+		final JCheckBoxMenuItem enableTSPacketsMenu = new JCheckBoxMenuItem("Enable TS Packets");
+		enableTSPacketsMenu.setSelected(enableTSPackets);
+		final Action enableTSPacketsAction= new EnableTSPacketsAction(this);
+		enableTSPacketsMenu.addActionListener(enableTSPacketsAction);
+		settingsMenu.add(enableTSPacketsMenu);
+
 
 		final Action fileOpenAction= new FileOpenAction(fc,frame,this);
 		openMenuItem.addActionListener(fileOpenAction);
@@ -527,4 +544,26 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		saveWindowState();
 		System.exit(0);
 	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public int getModus() {
+		return modus;
+	}
+
+	public void setModus(int modus) {
+		this.modus = modus;
+	}
+
+	public boolean isEnableTSPackets() {
+		return enableTSPackets;
+	}
+
+	public void setEnableTSPackets(boolean enableTSPackets) {
+		this.enableTSPackets = enableTSPackets;
+	}
+
+
 }

@@ -80,6 +80,16 @@ import nl.digitalekabeltelevisie.util.Utils;
  *
  */
 public class TransportStream implements TreeNode{
+
+
+	/**
+	 *
+	 */
+	public static final int TRANSPORT_ERROR_FLAG = 0x8000;
+	public static final int ADAPTATION_FIELD_FLAG = 0x2000;
+	public static final int PAYLOAD_UNIT_START_FLAG = 0x4000;
+
+
 	private static final Logger logger = Logger.getLogger(TransportStream.class.getName());
 
 	/**
@@ -87,6 +97,8 @@ public class TransportStream implements TreeNode{
 	 * @see DescriptorFactory
 	 */
 	private long defaultPrivateDataSpecifier = 0;
+
+	private boolean enableTSPackets = false;
 
 	/**
 	 * File containing data of this TransportStream
@@ -104,7 +116,7 @@ public class TransportStream implements TreeNode{
 	/**
 	 * for every TSPacket read, store it's offset in the file
 	 */
-	private final long [] packet_offset;
+	private long [] packet_offset =null;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -135,6 +147,10 @@ public class TransportStream implements TreeNode{
 	 */
 	private Bouquet bouquet = null;
 
+	private long len;
+
+	private int max_packets;
+
 	/**
 	 *
 	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
@@ -144,17 +160,22 @@ public class TransportStream implements TreeNode{
 		this(new File(fileName));
 	}
 
+
+
 	/**
 	 *
 	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
-	 * @param file the file to be read (null not permitted).
+	 * @param file the file to be read (null not permitted). Don't enable TSPackets by default.
 	 */
+
+
+
 	public TransportStream(final File file) {
 		this.file = file;
-		final long len = file.length();
-		final int max_packets = (int)(len / packet_length);
+		len = file.length();
+		max_packets = (int)(len / packet_length);
 		packet_pid = new short [max_packets];
-		packet_offset = new long [max_packets];
+
 	}
 
 	/**
@@ -172,10 +193,15 @@ public class TransportStream implements TreeNode{
 		error_packets = 0;
 		bitRate = -1;
 		bitRateTDT = -1;
+		if(enableTSPackets){
+			packet_offset = new long [max_packets];
+		}else{
+			packet_offset = null;
+		}
 
 		int bytes_read =0;
 		do {
-			int offset = (int) fileStream.getPosition();
+			long offset = fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, MPEGConstants.packet_length);
 			final int next = fileStream.read();
 			if((bytes_read==MPEGConstants.packet_length)&&
@@ -187,27 +213,32 @@ public class TransportStream implements TreeNode{
 				}
 
 				TSPacket packet = new TSPacket(buf, count,this);
+				final short pid = packet.getPID();
+				short pidFlags = pid;
+				if(packet.hasAdaptationField()){
+					pidFlags = (short) (pidFlags | ADAPTATION_FIELD_FLAG);
+				}
+				if(packet.isPayloadUnitStartIndicator()){
+					pidFlags = (short) (pidFlags | PAYLOAD_UNIT_START_FLAG);
+				}
+				if(packet.isTransportErrorIndicator()){
+					pidFlags = (short) (pidFlags | TRANSPORT_ERROR_FLAG);
+				}
+				packet_pid[no_packets]=pidFlags;
+				if(packet_offset!=null){
+					packet_offset[no_packets]=offset;
+				}
+				no_packets++;
 				if(!packet.isTransportErrorIndicator()){
-					final short pid = packet.getPID();
 					if(pids[pid]==null) {
 						pids[pid] = new PID(pid,this);
 					}
-					short pidFlags = pid;
-					if(packet.hasAdaptationField()){
-						pidFlags = (short) (pidFlags | 0x2000);
-					}
-					if(packet.isPayloadUnitStartIndicator()){
-						pidFlags = (short) (pidFlags | 0x4000);
-					}
-
-					packet_pid[no_packets]=pidFlags;
-					packet_offset[no_packets]=offset;
-					no_packets++;
 					pids[pid].update_packet(packet);
 					packet=null;
 				}else{
 					error_packets++;
 					logger.warning("TransportErrorIndicator set for packet "+ packet);
+					packet=null;
 				}
 				count++;
 			}else{ // something wrong, find next syncbyte. First push back the lot
@@ -226,6 +257,9 @@ public class TransportStream implements TreeNode{
 	 *
 	 * Read the file, and parse only the packets for which a GeneralPesHandler is present in toParsePids. Used for analyzing PESdata, like a video, teletext or subtitle stream
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
+	 *
+	 * TODO: optimize to read only the packets needed for these Pids, using seek(). We now have the file offset, use it!
+	 *
 	 * @throws IOException
 	 */
 	public void parseStream(final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
@@ -351,8 +385,10 @@ public class TransportStream implements TreeNode{
 			}
 		}
 
-		JTreeLazyList list = new JTreeLazyList(this, 100, 0, getNo_packets());
-		t.add(list.getJTreeNode(modus, "Transport packets "));
+		if(packet_offset!=null){
+			JTreeLazyList list = new JTreeLazyList(this, 100, 0, getNo_packets());
+			t.add(list.getJTreeNode(modus, "Transport packets "));
+		}
 
 		return t;
 	}
@@ -778,6 +814,16 @@ public class TransportStream implements TreeNode{
 			logger.warning("packet_offset[] is null");
 		}
 		return packet;
+	}
+
+
+	public boolean isEnableTSPackets() {
+		return enableTSPackets;
+	}
+
+
+	public void setEnableTSPackets(boolean enableTSPackets) {
+		this.enableTSPackets = enableTSPackets;
 	}
 
 

@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -78,6 +80,7 @@ public class Grid extends JPanel implements ComponentListener
 	private int noPackets;
 	private boolean showAdaptationField = false;
 	private boolean showPayloadStart = false;
+	private boolean showErrorIndicator = false;
 
 
 	/**
@@ -138,18 +141,29 @@ public class Grid extends JPanel implements ComponentListener
 						if(c!=null){
 							g.setColor(c);
 							g.fillRect(j*blockW, i*blockH, blockW, blockH);
-							final short adaptationFlag = (short) (pidFlags & 0x2000);
+							final short adaptationFlag = (short) (pidFlags & TransportStream.ADAPTATION_FIELD_FLAG);
 							if(showAdaptationField&& (adaptationFlag!=0)){
 								Color contrast = getContrastingColor(c);
 								g.setColor(contrast);
 								g.fillRect((j*blockW)+2, (i*blockH)+2, blockW/2, blockH/2);
 							}
-							final short payloadStartFlag = (short) (pidFlags & 0x4000);
+							final short payloadStartFlag = (short) (pidFlags & TransportStream.PAYLOAD_UNIT_START_FLAG);
 							if(showPayloadStart && (payloadStartFlag!=0)){
 								Color contrast = getContrastingColor(c);
 								g.setColor(contrast);
+								g2.setStroke(dashed);
 
 								g2.drawRect((j*blockW)+1, (i*blockH)+1, blockW-2, blockH-2);
+							}
+							final short errorFlag = (short) (pidFlags & TransportStream.TRANSPORT_ERROR_FLAG);
+							if(showErrorIndicator && (errorFlag!=0)){
+								Color contrast = getContrastingColor(c);
+								g.setColor(contrast);
+								g2.setStroke(new BasicStroke(2));
+
+								//g2.drawRect((j*blockW)+1, (i*blockH)+1, blockW-2, blockH-2);
+								g2.drawLine((j*blockW)+1, (i*blockH)+1, ((j+1)*blockW)-1, ((i+1)*blockH)-1);
+								g2.drawLine((j*blockW)+1, ((i+1)*blockH)-1, ((j+1)*blockW)-1, (i*blockH)+1);
 							}
 						}
 					}
@@ -203,6 +217,12 @@ public class Grid extends JPanel implements ComponentListener
 						r.append("<html>");
 						if(packet!=null){
 							r.append(packet.getHTML());
+						}else{ // no packets loaded, just show pid
+							r.append("Packet: ").append(packetNo);
+							r.append("<br>PID: ").append(pid);
+							r.append("<br>Time: ").append(stream.getPacketTime(packetNo));
+							r.append("<br>").append(escapeHtmlBreakLines(stream.getShortLabel(pid)));
+
 						}
 						r.append("</html>");
 					}
@@ -268,5 +288,16 @@ public class Grid extends JPanel implements ComponentListener
 		repaint();
 
 	}
+
+	/**
+	 * @param b
+	 */
+	public void setShowErrorIndicator(boolean b) {
+		showErrorIndicator = b;
+		repaint();
+
+	}
+
+
 
 }
