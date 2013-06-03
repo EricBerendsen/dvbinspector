@@ -312,19 +312,25 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 				if(CLUT_2bit==null){
 					CLUT_2bit=Arrays.copyOf(default_CLUT_2bit, default_CLUT_2bit.length);
 				}
-				CLUT_2bit[clutEntry.getCLUT_entry_id()]=clutEntry.getARGB();
+				if(clutEntry.getCLUT_entry_id()<CLUT_2bit.length){ // blame lovejoy
+					CLUT_2bit[clutEntry.getCLUT_entry_id()]=clutEntry.getARGB();
+				}
 			}
 			if(clutEntry.getCLUT_flag_4_bit_entry()==1){
 				if(CLUT_4bit==null){
 					CLUT_4bit=Arrays.copyOf(default_CLUT_4bit, default_CLUT_4bit.length);
 				}
-				CLUT_4bit[clutEntry.getCLUT_entry_id()]=clutEntry.getARGB();
+				if(clutEntry.getCLUT_entry_id()<CLUT_4bit.length){
+					CLUT_4bit[clutEntry.getCLUT_entry_id()]=clutEntry.getARGB();
+				}
 			}
 			if(clutEntry.getCLUT_flag_8_bit_entry()==1){
 				if(CLUT_8bit==null){
 					CLUT_8bit=Arrays.copyOf(default_CLUT_8bit, default_CLUT_8bit.length);
 				}
-				CLUT_8bit[clutEntry.getCLUT_entry_id()]=clutEntry.getARGB();
+				if(clutEntry.getCLUT_entry_id()<CLUT_8bit.length){
+					CLUT_8bit[clutEntry.getCLUT_entry_id()]=clutEntry.getARGB();
+				}
 			}
 		}
 	}
