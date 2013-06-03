@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,31 +34,34 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JOptionPane;
 
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
-public class SetPrivateDataSpecifierAction extends AbstractAction {
+public class EnableTSPacketsAction extends AbstractAction {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 7867550384009016903L;
 	private DVBinspector contr;
-	private long specifier=0;
-	private static final Logger	logger	= Logger.getLogger(SetPrivateDataSpecifierAction.class.getName());
 
-	public SetPrivateDataSpecifierAction(final DVBinspector controller, final long spec) {
+	private static final Logger	logger	= Logger.getLogger(EnableTSPacketsAction.class.getName());
+
+	public EnableTSPacketsAction(final DVBinspector controller) {
 		super();
 
 		contr=controller;
-		specifier=spec;
+
 	}
 	public void actionPerformed(final ActionEvent e) {
+		JCheckBoxMenuItem cb = (JCheckBoxMenuItem)e.getSource();
+		boolean enabled = cb.isSelected();
 		final Preferences prefs = Preferences.userNodeForPackage(contr.getClass());
-		prefs.putLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, specifier);
+		prefs.putBoolean(DVBinspector.ENABLE_TS_PACKETS, enabled);
 
-		contr.setDefaultPrivateDataSpecifier(specifier);
+		contr.setEnableTSPackets(enabled);
 
 		final TransportStream ts = contr.getTransportStream();
 		if(ts!=null){
@@ -76,7 +79,7 @@ public class SetPrivateDataSpecifierAction extends AbstractAction {
 				    options[1]); // default to no
 			if(n==0){
 				try {
-					ts.setDefaultPrivateDataSpecifier(specifier);
+					ts.setEnableTSPackets(enabled);
 					ts.parseStream();
 					contr.setTransportStream(ts);
 				} catch (final IOException e1) {

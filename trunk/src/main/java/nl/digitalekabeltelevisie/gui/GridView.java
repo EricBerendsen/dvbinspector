@@ -69,13 +69,15 @@ public class GridView extends JPanel implements TransportStreamView{
 
 		Image adImg = Utils.readIconImage("adaptation.bmp");
 		Image payloadImg = Utils.readIconImage("payloadstart.bmp");
+
+		Image errorImg = Utils.readIconImage("errorindicator.bmp");
 		final ImageIcon adaptationIcon = new ImageIcon(adImg);
 		final ImageIcon payloadIcon = new ImageIcon(payloadImg);
-//
+		final ImageIcon errorIcon = new ImageIcon(errorImg);
+
 		JLabel adaptationLabel = new JLabel(adaptationIcon);
 		buttonPanel.add(adaptationLabel);
 		JCheckBox adaptationFieldButton = new JCheckBox("Show Adaptation Field");
-		//adaptationFieldButton.setIcon(adaptationIcon);
 		adaptationFieldButton.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -101,17 +103,29 @@ public class GridView extends JPanel implements TransportStreamView{
 
 		buttonPanel.add(payLoadStartButton);
 
-		add(buttonPanel,BorderLayout.PAGE_START);
 
+		JLabel errorLabel = new JLabel(errorIcon);
+		buttonPanel.add(errorLabel);
+
+		JCheckBox errorButton = new JCheckBox("Show Error Indicator");
+		errorButton.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				grid.setShowErrorIndicator(e.getStateChange()==ItemEvent.SELECTED);
+
+			}
+		});
+
+		buttonPanel.add(errorButton);
+		add(buttonPanel,BorderLayout.PAGE_START);
 
 		grid = new Grid(transportStream,viewContext);
 		scrollGrid = new JScrollPane(grid);
 		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-//		add(scrollGrid);
 		add(scrollGrid,BorderLayout.CENTER);
-
 	}
 
 	/* (non-Javadoc)
@@ -122,10 +136,5 @@ public class GridView extends JPanel implements TransportStreamView{
 		grid.setTransportStream(transportStream,viewContext);
 		validate();
 		repaint();
-
 	}
-
-
-
-
 }
