@@ -498,6 +498,7 @@ public final class Utils {
 				t= (getUnsignedByte(b[byteNo]) & 0x0F);
 			}
 			if(t>9){
+				logger.warning("Error parsing BCD: "+toHexString(b)+" ,nibble_no: "+nibble_no+" ,len: "+len);
 				return "Error parsing BCD";
 			}
 			buf.append(Integer.toString(t));
