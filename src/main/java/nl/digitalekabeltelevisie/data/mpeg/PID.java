@@ -251,19 +251,13 @@ public class PID implements TreeNode{
 				}
 			}
 			if(adaptationField.isDiscontinuity_indicator()){
-				logger.fine("Discontinuity_indicator() in PID "+packet.getPID()+"packetNo"+ packet.getPacketNo()+" at Time "+ getParentTransportStream().getPacketTime(packet.getPacketNo())) ;
-			}
-			if(adaptationField.isTransport_private_data_flag()){
-				logger.fine("Transport_private_data_flag() in PID "+packet.getPID()) ;
+				logger.info("Discontinuity_indicator() in PID "+packet.getPID()+"packetNo"+ packet.getPacketNo()+" at Time "+ getParentTransportStream().getPacketTime(packet.getPacketNo())) ;
 			}
 			if(adaptationField.isSplicing_point_flag()){
-				logger.fine("Splicing_point_flag() in PID "+packet.getPID()) ;
+				logger.info("Splicing_point_flag() in PID "+packet.getPID()+", packetNo "+packet.getPacketNo()) ;
 			}
 			if(adaptationField.isAdaptation_field_extension_flag()){
-				logger.fine("isAdaptation_field_extension_flag() in PID "+packet.getPID()) ;
-			}
-			if(adaptationField.isRandom_access_indicator()){
-				logger.fine("isRandom_access_indicator() in PID "+packet.getPID()) ;
+				logger.info("isAdaptation_field_extension_flag() in PID "+packet.getPID()+", packetNo "+packet.getPacketNo()) ;
 			}
 		}
 	}
