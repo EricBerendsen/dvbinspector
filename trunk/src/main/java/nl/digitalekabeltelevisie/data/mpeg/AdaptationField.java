@@ -104,7 +104,7 @@ public class AdaptationField implements HTMLSource, nl.digitalekabeltelevisie.co
 				private_data_byte = getBytes(data, offset, Math.min(transport_private_data_length, (adaptation_field_length+ 1) - offset));
 				offset+= transport_private_data_length ;
 			}
-			if(adaptation_field_extension_flag){
+			if(adaptation_field_extension_flag&& (data.length>(offset+2))){ //extension is at least 2 bytes
 				adaptation_field_extension_length =  getInt(data,offset,1,MASK_8BITS);
 				offset+=1;
 				ltw_flag = getBitAsBoolean(data[offset],1);
