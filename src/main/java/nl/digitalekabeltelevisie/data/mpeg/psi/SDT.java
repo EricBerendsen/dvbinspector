@@ -54,9 +54,6 @@ public class SDT extends AbstractPSITabel{
 	public void update(final SDTsection section){
 
 		count++;
-		if(section.isCrc_error()){
-			return;
-		}
 
 		final int key = section.getTransportStreamID();
 		SDTsection [] sections= transportStreams.get(key);

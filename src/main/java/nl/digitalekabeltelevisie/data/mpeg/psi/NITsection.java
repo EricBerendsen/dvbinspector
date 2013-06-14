@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class NITsection extends TableSection{
+public class NITsection extends TableSectionExtendedSyntax{
 
 	private List<Descriptor> networkDescriptorList;
 	private List<TransportStream> transportStreamList;
@@ -122,15 +122,11 @@ public class NITsection extends TableSection{
 	public NITsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 
+		networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
+		transportStreamLoopLength= Utils.getInt(raw_data.getData(), 10+networkDescriptorsLength, 2, Utils.MASK_12BITS);
 
-
-		if(!isCrc_error()){
-			networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
-			transportStreamLoopLength= Utils.getInt(raw_data.getData(), 10+networkDescriptorsLength, 2, Utils.MASK_12BITS);
-
-			networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,networkDescriptorsLength,this);
-			transportStreamList = buildTransportStreamList(raw_data.getData(), 12+networkDescriptorsLength, transportStreamLoopLength);
-		}
+		networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,networkDescriptorsLength,this);
+		transportStreamList = buildTransportStreamList(raw_data.getData(), 12+networkDescriptorsLength, transportStreamLoopLength);
 	}
 
 

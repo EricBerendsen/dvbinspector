@@ -44,7 +44,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class INTsection extends TableSection {
+public class INTsection extends TableSectionExtendedSyntax {
 
 	private List<Descriptor> platformdescriptorList;
 	private List<TargetLoop> targetLoopList;
@@ -141,19 +141,16 @@ public class INTsection extends TableSection {
 	public INTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 
+		action_type = Utils.getInt(raw_data.getData(), 3, 1, Utils.MASK_8BITS); //tableIdExtension first byte
+		platform_id_hash = Utils.getInt(raw_data.getData(), 4, 1, Utils.MASK_8BITS); //tableIdExtension first byte
 
-		if(!isCrc_error()){
-			action_type = Utils.getInt(raw_data.getData(), 3, 1, Utils.MASK_8BITS); //tableIdExtension first byte
-			platform_id_hash = Utils.getInt(raw_data.getData(), 4, 1, Utils.MASK_8BITS); //tableIdExtension first byte
+		platformID = Utils.getInt(raw_data.getData(), 8, 3, Utils.MASK_24BITS);
+		processing_order = Utils.getInt(raw_data.getData(), 11, 1, Utils.MASK_8BITS);
 
-			platformID = Utils.getInt(raw_data.getData(), 8, 3, Utils.MASK_24BITS);
-			processing_order = Utils.getInt(raw_data.getData(), 11, 1, Utils.MASK_8BITS);
+		platform_descriptor_loop_length = Utils.getInt(raw_data.getData(), 12, 2, Utils.MASK_12BITS);
+		platformdescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),14,platform_descriptor_loop_length,this);
 
-			platform_descriptor_loop_length = Utils.getInt(raw_data.getData(), 12, 2, Utils.MASK_12BITS);
-			platformdescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),14,platform_descriptor_loop_length,this);
-
-			targetLoopList = buildTargetLoopList(raw_data.getData(), 14+platform_descriptor_loop_length , sectionLength - platform_descriptor_loop_length - 18);
-		}
+		targetLoopList = buildTargetLoopList(raw_data.getData(), 14+platform_descriptor_loop_length , sectionLength - platform_descriptor_loop_length - 18);
 	}
 
 

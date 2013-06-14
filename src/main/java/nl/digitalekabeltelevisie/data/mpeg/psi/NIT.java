@@ -58,9 +58,6 @@ public class NIT extends AbstractPSITabel{
 	public void update(final NITsection section){
 		count++;
 
-		if(section.isCrc_error()){
-			return;
-		}
 		final int key = section.getNetworkID();
 		NITsection [] sections= networks.get(key);
 

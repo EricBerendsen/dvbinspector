@@ -27,49 +27,36 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.util.Utils;
+
+/**
+ * Used to create a TableSection, when we know sectionSyntaxIndicator==1 should be true (i.e. we know it is the long
+ * form, i.e. because we know it is a NITSection)
+ *
+ * This forces it to have sectionSyntaxIndicator==1, else RuntimeException will be thrown
+ *
+ * @author Eric
+ *
+ */
+public class TableSectionExtendedSyntax extends TableSection {
 
 
-public class TDTsection extends TableSection {
+	/**
+	 * @param raw_data
+	 * @param parent
+	 */
+	public TableSectionExtendedSyntax(PsiSectionData raw_data, PID parent) {
+		super(raw_data, parent);
 
-	private byte[] UTC_time;
+		if(sectionSyntaxIndicator==0){ // not long format, but we are expecting it.. So error
+			// if sectionSyntaxIndicator==1 CRC checking was already done in super()
+			throw new RuntimeException("sectionSyntaxIndicator==0 for pid:"+parent.getPid());
 
-	public TDTsection(final PsiSectionData raw_data, final PID parent){
-		super(raw_data,parent);
-		UTC_time= Utils.copyOfRange(raw_data.getData(),3,8 );
+		}
+
 	}
 
 
-
-	@Override
-	public String toString(){
-		final StringBuilder b = new StringBuilder("TDTsection UTC_Time=");
-		b.append(Utils.toHexString(UTC_time)).append(", UTC_timeString=").append(getUTC_timeString()).append(", length=").append(getSectionLength());
-		return b.toString();
-	}
-
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
-		return t;
-	}
-
-
-	public byte[] getUTC_time() {
-		return UTC_time;
-	}
-
-
-
-	public String getUTC_timeString() {
-		return Utils.getUTCFormattedString(UTC_time);
-	}
 
 }

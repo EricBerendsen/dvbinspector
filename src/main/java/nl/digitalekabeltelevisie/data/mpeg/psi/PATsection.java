@@ -38,7 +38,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class PATsection extends TableSection {
+public class PATsection extends TableSectionExtendedSyntax {
 
 	private List<Program> programs;
 
@@ -78,10 +78,8 @@ public class PATsection extends TableSection {
 	public PATsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 
-		if(!isCrc_error()){
-			final int programsLength = sectionLength -9;
-			programs = buildProgramList(raw_data.getData(),8,programsLength);
-		}
+		final int programsLength = sectionLength -9;
+		programs = buildProgramList(raw_data.getData(),8,programsLength);
 	}
 
 	public List<Program> buildProgramList(final byte[] data, final int i, final int programInfoLength) {

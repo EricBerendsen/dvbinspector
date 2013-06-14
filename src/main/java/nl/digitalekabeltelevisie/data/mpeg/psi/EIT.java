@@ -100,10 +100,6 @@ public class EIT extends AbstractPSITabel{
 
 	public void update(final EITsection section){
 
-
-		if(section.isCrc_error()){
-			return;
-		}
 		count++;
 
 		final int tableId = section.getTableId();

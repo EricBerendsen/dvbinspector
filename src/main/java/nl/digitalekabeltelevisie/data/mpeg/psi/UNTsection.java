@@ -50,7 +50,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen Represents a section of the Updata Notification Table.
  * @see PsiSectionData#isUNTSection(int) based on TS 102 006, § 9.4
  */
-public class UNTsection extends TableSection {
+public class UNTsection extends TableSectionExtendedSyntax {
 
 	private List<PlatformLoop>	platformLoopList	= new ArrayList<PlatformLoop>();
 	private int					action_type;
@@ -163,26 +163,24 @@ public class UNTsection extends TableSection {
 
 	public UNTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data, parent);
-		if(!isCrc_error()){
-			action_type = Utils.getInt(raw_data.getData(), 3, 1, Utils.MASK_8BITS); // tableIdExtension first byte
-			oui_hash = Utils.getInt(raw_data.getData(), 4, 1, Utils.MASK_8BITS); // tableIdExtension first byte
+		action_type = Utils.getInt(raw_data.getData(), 3, 1, Utils.MASK_8BITS); // tableIdExtension first byte
+		oui_hash = Utils.getInt(raw_data.getData(), 4, 1, Utils.MASK_8BITS); // tableIdExtension first byte
 
-			oui = Utils.getInt(raw_data.getData(), 8, 3, Utils.MASK_24BITS);
-			processing_order = Utils.getInt(raw_data.getData(), 11, 1, Utils.MASK_8BITS);
+		oui = Utils.getInt(raw_data.getData(), 8, 3, Utils.MASK_24BITS);
+		processing_order = Utils.getInt(raw_data.getData(), 11, 1, Utils.MASK_8BITS);
 
-			common_descriptor_loop_length = Utils.getInt(raw_data.getData(), 12, 2, Utils.MASK_12BITS);
-			common_descriptor_loop = DescriptorFactory.buildDescriptorList(raw_data.getData(), 14,
-					common_descriptor_loop_length, this);
+		common_descriptor_loop_length = Utils.getInt(raw_data.getData(), 12, 2, Utils.MASK_12BITS);
+		common_descriptor_loop = DescriptorFactory.buildDescriptorList(raw_data.getData(), 14,
+				common_descriptor_loop_length, this);
 
-			int t = 0;
-			while (t < (sectionLength - 18 - common_descriptor_loop_length)) {
+		int t = 0;
+		while (t < (sectionLength - 18 - common_descriptor_loop_length)) {
 
-				final PlatformLoop pf = buildPlatformLoop(raw_data.getData(), 14 + t + common_descriptor_loop_length,
-						sectionLength - 18 - common_descriptor_loop_length - t);
-				platformLoopList.add(pf);
-				t += pf.getPlatform_loop_length() + pf.getCompatibilityDescriptor().getCompatibilityDescriptorLength() + 4;
+			final PlatformLoop pf = buildPlatformLoop(raw_data.getData(), 14 + t + common_descriptor_loop_length,
+					sectionLength - 18 - common_descriptor_loop_length - t);
+			platformLoopList.add(pf);
+			t += pf.getPlatform_loop_length() + pf.getCompatibilityDescriptor().getCompatibilityDescriptorLength() + 4;
 
-			}
 		}
 	}
 
