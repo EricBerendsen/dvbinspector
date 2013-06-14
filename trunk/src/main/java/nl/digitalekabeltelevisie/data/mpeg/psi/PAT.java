@@ -1,32 +1,31 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
-import java.util.Iterator;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -46,9 +45,6 @@ public class PAT extends AbstractPSITabel{
 	public void update(final PATsection section){
 
 		count++;
-		if(section.isCrc_error()){
-			return;
-		}
 
 		if(pat==null){
 			pat = new PATsection[section.getSectionLastNumber()+1];
@@ -69,12 +65,12 @@ public class PAT extends AbstractPSITabel{
 
 
 		if (pat != null) {
-			for (int j = 0; j < pat.length; j++) {
-				if(pat[j]!= null){
+			for (PATsection element : pat) {
+				if(element!= null){
 					if(!Utils.simpleModus(modus)){ // show all versions
-						addSectionVersionsToJTree(t, pat[j], modus);
+						addSectionVersionsToJTree(t, element, modus);
 					}else{ // keep it simple
-						t.add(pat[j].getJTreeNode(modus));
+						t.add(element.getJTreeNode(modus));
 					}
 				}
 			}
@@ -85,9 +81,9 @@ public class PAT extends AbstractPSITabel{
 	public int getTransportStreamId(){
 
 		if(pat!=null){
-			for (int j = 0; j < pat.length; j++) {
-				if(pat[j]!= null){
-					return pat[j].getTransportStreamId();
+			for (PATsection element : pat) {
+				if(element!= null){
+					return element.getTransportStreamId();
 				}
 			}
 		}
@@ -97,11 +93,11 @@ public class PAT extends AbstractPSITabel{
 	public boolean inPAT(final int pid){
 
 		if(pat!=null){
-			for (int j = 0; j < pat.length; j++) {
-				PATsection patSectionVersion = pat[j];
+			for (PATsection element : pat) {
+				PATsection patSectionVersion = element;
 				while(patSectionVersion!= null){
-					for (final Iterator<Program> iter = patSectionVersion.getPrograms().iterator(); iter.hasNext();) {
-						if(iter.next().getProgram_map_PID()==pid){
+					for (Program program : patSectionVersion.getPrograms()) {
+						if(program.getProgram_map_PID()==pid){
 							return true;
 						}
 					}

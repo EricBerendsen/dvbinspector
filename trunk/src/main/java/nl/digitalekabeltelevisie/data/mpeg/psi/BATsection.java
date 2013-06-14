@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
-public class BATsection extends TableSection {
+public class BATsection extends TableSectionExtendedSyntax {
 
 	private List<Descriptor>		networkDescriptorList;
 	private List<TransportStream>	transportStreamList;

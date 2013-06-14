@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  *
 
  */
@@ -54,9 +54,6 @@ public class INT extends AbstractPSITabel{
 	public void update(final INTsection section){
 		count++;
 
-		if(section.isCrc_error()){
-			return;
-		}
 		final int key = section.getPlatformID();
 		INTsection [] sections= networks.get(key);
 
@@ -85,8 +82,7 @@ public class INT extends AbstractPSITabel{
 			final Integer platformID=i.next();
 			final INTsection [] sections = networks.get(platformID);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("platform_id",platformID, Utils.getPlatformIDString(platformID)));
-			for (int j = 0; j < sections.length; j++) {
-				final INTsection tsection = sections[j];
+			for (final INTsection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

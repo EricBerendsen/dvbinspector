@@ -51,9 +51,6 @@ public class UNTs extends AbstractPSITabel{
 	public void update(final UNTsection section){
 		count++;
 
-		if(section.isCrc_error()){
-			return;
-		}
 		final int pid = section.getParentPID().getPid();
 		UNT  unt= unts.get(pid);
 

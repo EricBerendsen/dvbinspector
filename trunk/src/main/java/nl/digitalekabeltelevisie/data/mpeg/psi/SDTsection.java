@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class SDTsection extends TableSection {
+public class SDTsection extends TableSectionExtendedSyntax {
 
 	private List<Service> serviceList;
 	private int originalNetworkID;
@@ -162,10 +162,8 @@ public class SDTsection extends TableSection {
 	public SDTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 
-		if(!isCrc_error()){
-			originalNetworkID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
-			serviceList = buildServicesList(raw_data.getData(), 11, sectionLength -12);
-		}
+		originalNetworkID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
+		serviceList = buildServicesList(raw_data.getData(), 11, sectionLength -12);
 	}
 
 

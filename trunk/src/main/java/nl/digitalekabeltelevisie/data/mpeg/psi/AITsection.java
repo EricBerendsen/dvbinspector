@@ -51,7 +51,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen Represents a section of the Application Information Table.
  * @see PsiSectionData#isAITSection(int) based on ETSI ES 201 812 V1.1.1, ETSI TS 102 809 V1.1.1, ETSI TS 102 796 V1.1.1
  */
-public class AITsection extends TableSection {
+public class AITsection extends TableSectionExtendedSyntax {
 
 	private int test_application_flag;
 

@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class PMTsection extends TableSection {
+public class PMTsection extends TableSectionExtendedSyntax {
 
 
 	private int pcrPid = 0;
@@ -149,12 +149,10 @@ public class PMTsection extends TableSection {
 	public PMTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 
-		if(!isCrc_error()){
-			pcrPid = Utils.getInt(raw_data.getData(),8,2, 0x1FFF);
-			programInfoLength = Utils.getInt(raw_data.getData(),10,2, 0x0FFF);
-			descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),12,programInfoLength,this);
-			componentenList = buildComponentList(raw_data.getData(),12+programInfoLength, raw_data.getNoBytes()-16-programInfoLength);
-		}
+		pcrPid = Utils.getInt(raw_data.getData(),8,2, 0x1FFF);
+		programInfoLength = Utils.getInt(raw_data.getData(),10,2, 0x0FFF);
+		descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),12,programInfoLength,this);
+		componentenList = buildComponentList(raw_data.getData(),12+programInfoLength, raw_data.getNoBytes()-16-programInfoLength);
 	}
 
 

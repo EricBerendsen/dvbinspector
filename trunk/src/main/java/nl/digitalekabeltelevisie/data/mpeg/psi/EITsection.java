@@ -50,7 +50,7 @@ import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class EITsection extends TableSection implements HTMLSource {
+public class EITsection extends TableSectionExtendedSyntax implements HTMLSource {
 
 	private List<Event> eventList;
 	private int transportStreamID;
@@ -228,14 +228,13 @@ public class EITsection extends TableSection implements HTMLSource {
 
 	public EITsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
-		if(!isCrc_error()){
-			transportStreamID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
-			originalNetworkID = Utils.getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
-			segmentLastSectionNumber= Utils.getInt(raw_data.getData(), 12, 1, Utils.MASK_8BITS);
-			lastTableID= Utils.getInt(raw_data.getData(), 13, 1, Utils.MASK_8BITS);
 
-			eventList = buildEventList(raw_data.getData(), 14, sectionLength-14-4); //start and CRC(4)
-		}
+		transportStreamID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
+		originalNetworkID = Utils.getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
+		segmentLastSectionNumber= Utils.getInt(raw_data.getData(), 12, 1, Utils.MASK_8BITS);
+		lastTableID= Utils.getInt(raw_data.getData(), 13, 1, Utils.MASK_8BITS);
+
+		eventList = buildEventList(raw_data.getData(), 14, sectionLength-14-4); //start and CRC(4)
 	}
 
 
