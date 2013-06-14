@@ -62,20 +62,20 @@ public class TableSection implements TreeNode{
 
 	/*!< transport_stream_id for a
 	 PATsection section */
-	private int version; /*!< version_number */
+	protected int version; /*!< version_number */
 
-	private int currentNext; /*!< current_next_indicator */
+	protected int currentNext; /*!< current_next_indicator */
 
-	private int sectionNumber; /*!< section_number */
+	protected int sectionNumber; /*!< section_number */
 
-	private int sectionLastNumber; /*!< last_section_number */
+	protected int sectionLastNumber; /*!< last_section_number */
 
 	/* used if b_syntax_indicator is true */
-	private long crc; /*!< CRC_32 */
+	protected long crc; /*!< CRC_32 */
 
-	private boolean crc_error=false;
+	protected boolean crc_error=false;
 
-	private TableSection nextVersion = null;
+	protected TableSection nextVersion = null;
 
 	/* non DVB fields */
 
@@ -103,7 +103,7 @@ public class TableSection implements TreeNode{
 
 		if(sectionSyntaxIndicator==1){ //long format
 			tableIdExtension = getInt(bytes,3,2,MASK_16BITS);
-			version = getInt(bytes,5,1,0x1E)>>1;
+			version = getInt(bytes,5,1,0x3E)>>1;
 			currentNext = getInt(bytes,5,1,0x01);
 			sectionNumber = getInt(bytes,6,1,MASK_8BITS);
 			sectionLastNumber = getInt(bytes,7,1,MASK_8BITS);
@@ -324,7 +324,7 @@ public class TableSection implements TreeNode{
 		return t;
 	}
 
-	private void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
+	protected void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
 		if(!Utils.simpleModus(modus)){
 			if(Utils.packetModus(modus)){
 				t.add(new DefaultMutableTreeNode(new KVP("first_packet_no",first_packet_no ,parentPID.getParentTransportStream().getPacketTime(first_packet_no))));
