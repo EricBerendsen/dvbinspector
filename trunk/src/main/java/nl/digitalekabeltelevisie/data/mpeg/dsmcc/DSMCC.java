@@ -36,8 +36,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCC_UNMessageSection.ModuleInfo;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 
 /**
  * Contains all DSM-CC information from single PID. Make a separation by TableID (all other sections contain just one table ID, this can have 0x38 - 0x3f)
@@ -45,7 +47,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  * single PID may be shared by multiple carousels
  *
  * table_id: 0x3B (59) => DSM-CC - U-N messages (DSI or DII) (first implemented
- * table_id: 0x3C (60) => DSM-CC - Download Data Messages (DDB) (not implemented yet)
+ * table_id: 0x3C (60) => DSM-CC - Download Data Messages (DDB)
  *
  * @author Eric Berendsen
  *
@@ -64,13 +66,9 @@ public class DSMCC extends AbstractPSITabel{
 
 	}
 
-	public void update(final TableSection section){
+	public void update(final TableSectionExtendedSyntax section){
 		count++;
 		pid=section.getParentPID().getPid();
-
-		if(section.isCrc_error()){
-			return;
-		}
 
 		final int tableID  = section.getTableId();
 		if(tableID==0x3b){ // DSM-CC - U-N messages (DSI or DII)
@@ -109,7 +107,8 @@ public class DSMCC extends AbstractPSITabel{
 			}
 		}else if(tableID==0x3d){ // DSM-CC - stream descriptorlist;
 
-			// TODO make wrapper Stream DescriptorList , if we can find specs..
+			// TODO make wrapper Stream DescriptorList
+			// Specs in ISO/IEC 13818-6:1998(E) 8.3 Stream Event Descriptor
 			final int eventID = section.getTableIdExtension();
 			TableSection [] sections= eventStreams.get(eventID);
 
@@ -219,10 +218,11 @@ public class DSMCC extends AbstractPSITabel{
 		if(sections==null){
 			return null;
 		}
-		// how many bytes do we need
+		// how many bytes do we need,
+		// if one of the sections is null,not complete data, return..
 		int len =0;
 		for(final DSMCC_DownLoadDataMessageSection s:sections){
-			if(s!=null){
+			if((s!=null)){
 				len+= s.getPayLoadLength();
 			}else{
 				return null;
@@ -236,6 +236,55 @@ public class DSMCC extends AbstractPSITabel{
 			final int thisLen=s.getPayLoadLength();
 			System.arraycopy(s.getPayLoad(), 0, res, i, thisLen);
 			i+= thisLen;
+		}
+		return res;
+
+	}
+
+	public byte[] getDDMbytes(ModuleInfo moduleInfo){
+		int modId = moduleInfo.getModuleId();
+		int version = moduleInfo.getModuleVersion();
+		final DSMCC_DownLoadDataMessageSection [] sections =  downloadMessages.get(modId);
+		if(sections==null){
+			return null;
+		}
+		// how many bytes do we need, should be same as moduleInfo.getModuleSize()
+		// if one of the sections is null,not complete data, return..
+		// also check for correct version
+		int len =0;
+		for(DSMCC_DownLoadDataMessageSection s:sections){
+			if(s==null){
+				return null;
+			}else{
+				while((s!=null)&&(s.getModuleVersion()!=version)){ // start looking for right version
+					s = (DSMCC_DownLoadDataMessageSection)s.getNextVersion();
+				}
+				if((s!=null)&&(s.getModuleVersion()==version)){ // do we have right version?
+					len+= s.getPayLoadLength();
+				}else{
+					return null;
+				}
+			}
+		}
+		if(len!=moduleInfo.getModuleSize()){
+			return null;
+		}
+		// reserve space
+		final byte [] res = new byte[len];
+		// copy
+		int i = 0;
+		for(DSMCC_DownLoadDataMessageSection s:sections){
+			while((s!=null)&&(s.getModuleVersion()!=version)){ // start looking for right version
+				s = (DSMCC_DownLoadDataMessageSection)s.getNextVersion();
+			}
+
+			if(s!=null){
+				final int thisLen=s.getPayLoadLength();
+				System.arraycopy(s.getPayLoad(), 0, res, i, thisLen);
+				i+= thisLen;
+			}else{
+				return null;
+			}
 		}
 		return res;
 

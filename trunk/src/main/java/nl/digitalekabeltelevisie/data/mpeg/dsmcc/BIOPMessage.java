@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
@@ -54,8 +54,9 @@ public class BIOPMessage implements TreeNode {
 	protected byte[] objectKind_data;
 	protected int objectInfo_length;
 
-	protected int r; // used to count bytes in constructor
 
+
+	protected int byte_counter; // count bytes
 
 
 	public BIOPMessage(final byte[] data, final int off) {
@@ -71,14 +72,13 @@ public class BIOPMessage implements TreeNode {
 		message_size = Utils.getLong(data, offset+8, 4, Utils.MASK_32BITS);
 		objectKey_length = Utils.getInt(data, offset+12, 1, Utils.MASK_8BITS);
 		objectKey_data_byte = Utils.copyOfRange(data,offset+13,offset+13+objectKey_length);
-		r=offset+13+objectKey_length;
-		//objectKind_length = Utils.getLong(data,r, 4, Utils.MASK_32BITS); // should be 4
-		objectKind_length = 4;// Utils.getLong(data,r, 4, Utils.MASK_32BITS); // should be 4
-		r +=4;
-		objectKind_data = Utils.copyOfRange(data,r,r+(int)objectKind_length);
-		r += objectKind_length;
-		objectInfo_length =  Utils.getInt(data, r, 2, Utils.MASK_16BITS);
-		r +=2;
+		byte_counter=offset+13+objectKey_length;
+		objectKind_length = 4;// Utils.getLong(data,byte_counter, 4, Utils.MASK_32BITS); // should be 4
+		byte_counter +=4;
+		objectKind_data = Utils.copyOfRange(data,byte_counter,byte_counter+(int)objectKind_length);
+		byte_counter += objectKind_length;
+		objectInfo_length =  Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+		byte_counter +=2;
 
 	}
 
@@ -161,8 +161,5 @@ public class BIOPMessage implements TreeNode {
 		return objectInfo_length;
 	}
 
-	public int getR() {
-		return r;
-	}
 
 }

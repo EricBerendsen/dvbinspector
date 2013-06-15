@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +51,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.CarouselIdentifierDescrip
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.CompressedModuleDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.BIOPDirectoryMessage.Binding;
+import nl.digitalekabeltelevisie.data.mpeg.dsmcc.BIOPStreamEventMessage.EventName;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCC_UNMessageSection.ModuleInfo;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -101,13 +101,20 @@ public class ServiceDSMCC implements TreeNode {
 				b.append("Type: File<br>Size:");
 				final BIOPFileMessage fileMes= (BIOPFileMessage) biopMessage;
 				b.append(fileMes.getContent_length());
+
 			}else if(biopMessage instanceof BIOPDirectoryMessage){
 				b.append("Type: Directory<br>Descendants:<br>");
 				final BIOPDirectoryMessage dirMes= (BIOPDirectoryMessage) biopMessage;
 				for(final Binding binding:dirMes.getBindingList()){
 					b.append(binding.getBiopName().getName()).append(": (").append(BIOPDirectoryMessage.getBindingTypeString(binding.getBindingType())).append(")<br>");
 				}
-				//dirMes.g
+			}else if(biopMessage instanceof BIOPStreamEventMessage){
+				b.append("Type: StreamEvent<br>EventNames:<br>");
+				BIOPStreamEventMessage eventMsg = (BIOPStreamEventMessage)biopMessage;
+				for(EventName eventName:eventMsg.getEventNames()){
+					b.append(new String(eventName.getEventName_data_byte())).append("<br>");
+
+				}
 			}
 
 			return b.toString();
@@ -232,6 +239,9 @@ public class ServiceDSMCC implements TreeNode {
 
 				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
 
+			}else if(biopMessage instanceof BIOPStreamEventMessage){
+				final DSMFile dsmFile = new DSMFile(biopMessage,label);
+				kvp.setHtmlSource(dsmFile);
 			}
 			return treeNode;
 		}
@@ -276,63 +286,22 @@ public class ServiceDSMCC implements TreeNode {
 
 	}
 
-	public List<BIOPMessage> getBIOPMessages(final IOR ior){
-		List<BIOPMessage> biopMessages = new ArrayList<BIOPMessage>();
 
-		final List<TaggedProfile> profiles = ior.getProfiles();
-		if((profiles!=null)&&(profiles.size()>0)){
-			final TaggedProfile profile = ior.getProfiles().get(0); // should be only one for the serviceGateway
-			if(profile!=null){
-				final List<LiteComponent> components = profile.getLiteComponents(); // should be 2; BIOP::ObjectLocation and DSM::COnnBinder
-				if((components!=null)&&(components.size()>1)){
-					final LiteComponent objectLocation = components.get(0);
-					final LiteComponent connBinder = components.get(1);
-					if((objectLocation!=null)&&(objectLocation instanceof BIOPObjectLocation)&&
-							(connBinder!=null)&&(connBinder instanceof DSMConnBinder)){
-						final DSMConnBinder connBind =(DSMConnBinder)connBinder;
-						final BIOPObjectLocation biopObjectLocation = (BIOPObjectLocation) objectLocation;
-						final List<Tap> taps = connBind.getTaps();
-						if((taps!=null)&&(taps.size()>0)){
-							final Tap tap = connBind.getTaps().get(0);
-							if(tap!=null){
-								// now find the PID with association
-								final int association = tap.getAssociation_tag();
-								final DSMCC diiPid = dsmccs.get(association);
-								if(diiPid!=null){
-									// look for the DII with the right transaction ID
-									final long transaction = tap.getTransactionId();
-									final int tableExtension = (int) (transaction & Utils.MASK_16BITS);
-									final DSMCC_UNMessageSection dii = diiPid.getDII(tableExtension);
-									if(dii!=null){
-										final int moduleId = biopObjectLocation.getModuleId();
-										// TODO check real transaction ID ? now versions might be out of sync
-										biopMessages = getBIOPMessagesForModule(dii, moduleId);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return biopMessages;
-	}
 
 	public List<BIOPMessage> getBIOPMessagesForModule(
 			final DSMCC_UNMessageSection dii,
 			final int moduleId) {
 		List<BIOPMessage> biopMessages = null;
-		final ModuleInfo module = dii.getModule(moduleId);
-		if(module!=null){
-			final BIOPModuleInfo biopModInfo = module.getBiopModuleInfo();
+		final ModuleInfo moduleInfo = dii.getModule(moduleId);
+		if(moduleInfo!=null){
+			final BIOPModuleInfo biopModInfo = moduleInfo.getBiopModuleInfo();
 			if(biopModInfo!=null){ // find PID containing actual DDB with module data
 				final List<Tap> moduleTaps = biopModInfo.getTaps();
 				if((moduleTaps!=null)&&(moduleTaps.size()>0)){
 					final Tap moduleTap = moduleTaps.get(0);
 					final int moduleAssociationTag = moduleTap.getAssociation_tag();
 					final DSMCC ddbPid = dsmccs.get(moduleAssociationTag);
-					byte [] rawData= ddbPid.getDDMbytes(moduleId);
+					byte [] rawData= ddbPid.getDDMbytes(moduleInfo);
 					if(rawData!=null){
 						rawData = uncompressModuleData(biopModInfo,rawData);
 						biopMessages = BIOPMessageFactory.createBIOPMessages(rawData, 0);
@@ -475,7 +444,6 @@ public class ServiceDSMCC implements TreeNode {
 									if(dii!=null){
 										final int moduleId = biopObjectLocation.getModuleId();
 										final byte[] findObjectKey = biopObjectLocation.getObjectKey_data_byte();
-										// TODO check real transaction ID ? now versions might be out of sync
 										final List<BIOPMessage> biopMessages= getBIOPMessagesForModule(dii, moduleId);
 										if(biopMessages!=null){
 											for (final BIOPMessage biopMessage2: biopMessages) {

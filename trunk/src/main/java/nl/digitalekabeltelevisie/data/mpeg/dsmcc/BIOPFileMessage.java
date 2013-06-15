@@ -84,31 +84,31 @@ public class BIOPFileMessage extends BIOPMessage {
 	public BIOPFileMessage(final byte[] data, final int offset) {
 		super(data, offset);
 		if(objectInfo_length>=8){
-			dsmFileContentSize=Utils.copyOfRange(data,r,r+8);
+			dsmFileContentSize=Utils.copyOfRange(data,byte_counter,byte_counter+8);
 		}
 
 		if(objectInfo_length>8){
-			objectInfo_data_byte = Utils.copyOfRange(data,r+8,r+(objectInfo_length-8));
+			objectInfo_data_byte = Utils.copyOfRange(data,byte_counter+8,byte_counter+(objectInfo_length-8));
 		}
-		r += objectInfo_length;
+		byte_counter += objectInfo_length;
 
-		serviceContextList_count =  Utils.getInt(data, r, 1, Utils.MASK_8BITS);
-		r += 1;
+		serviceContextList_count =  Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
 		for (int i = 0; i < serviceContextList_count; i++) {
-			final long context_id = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-			r += 4;
-			final int  context_data_length = Utils.getInt(data, r, 2, Utils.MASK_16BITS);
-			r += 2;
-			final byte[] context_data_byte = Utils.copyOfRange(data,r,r+context_data_length);
-			r += context_data_length;
+			final long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+			byte_counter += 4;
+			final int  context_data_length = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+			byte_counter += 2;
+			final byte[] context_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+context_data_length);
+			byte_counter += context_data_length;
 			final ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
 			serviceContextList.add(serviceContext);
 		}
-		messageBody_length = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-		r += 4;
-		content_length = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-		r += 4;
-		contentStartOffset =r;
+		messageBody_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		byte_counter += 4;
+		content_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		byte_counter += 4;
+		contentStartOffset =byte_counter;
 
 
 	}

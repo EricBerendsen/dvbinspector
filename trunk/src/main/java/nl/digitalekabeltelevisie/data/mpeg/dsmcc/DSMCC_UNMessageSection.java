@@ -44,7 +44,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.DSMCCDescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.CompatibilityDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
@@ -52,7 +52,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * Based on TR 101 202 V1.2.1 Implementation guidelines for Data Broadcasting Annex A
  * represents either a DownloadServerInitiate (DSI) or a DownloadInfoIndication (DII) message
  */
-public class DSMCC_UNMessageSection extends TableSection {
+public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 
 	private boolean isObjectCarousel = true; // TODO later also support dataCarousel, for now assume everything is objectCarousel
 
@@ -320,12 +320,17 @@ public class DSMCC_UNMessageSection extends TableSection {
 			return messageLength;
 		}
 
+		public long getTransactionID() {
+			return transactionID;
+		}
+
 	}
 
 
 
 	public DSMCC_UNMessageSection(final PsiSectionData raw_data, final PID parent, final boolean isObjectCarousel2){
 		super(raw_data, parent);
+
 		this.isObjectCarousel = isObjectCarousel2;
 		final int protocolDiscriminator = Utils.getInt(raw_data.getData(), 8, 1, Utils.MASK_8BITS);
 		final int dsmccType = Utils.getInt(raw_data.getData(), 9, 1, Utils.MASK_8BITS);
@@ -407,10 +412,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 	}
 
-
-
-
-
 	@Override
 	public String toString() {
 		final StringBuilder b = new StringBuilder("DSMCCsection section=");
@@ -419,7 +420,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 
 		return b.toString();
 	}
-
 
 
 	@Override
@@ -470,14 +470,9 @@ public class DSMCC_UNMessageSection extends TableSection {
 	}
 
 
-
-
-
 	public boolean isDII() {
 		return header.getMessageId()== 0x1002;
 	}
-
-
 
 
 
@@ -544,14 +539,9 @@ public class DSMCC_UNMessageSection extends TableSection {
 	}
 
 
-
-
-
 	public DSMCCMessageHeader getHeader() {
 		return header;
 	}
-
-
 
 
 
@@ -560,18 +550,9 @@ public class DSMCC_UNMessageSection extends TableSection {
 	}
 
 
-
-
-
-
-
-
 	public int getPrivateDataLength() {
 		return privateDataLength;
 	}
-
-
-
 
 
 	public byte[] getPrivateDataByte() {
@@ -579,14 +560,9 @@ public class DSMCC_UNMessageSection extends TableSection {
 	}
 
 
-
-
-
 	public IOR getServiceGatewayIOR() {
 		return serviceGatewayIOR;
 	}
-
-
 
 
 
@@ -601,8 +577,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 	public int getServiceContextList_count() {
 		return serviceContextList_count;
 	}
-
-
 
 
 
@@ -625,8 +599,6 @@ public class DSMCC_UNMessageSection extends TableSection {
 	public int getBlockSize() {
 		return blockSize;
 	}
-
-
 
 
 
