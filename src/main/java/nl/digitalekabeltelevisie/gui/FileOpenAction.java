@@ -85,9 +85,23 @@ public class FileOpenAction extends AbstractAction {
 				contr.setTransportStream(transportStream);
 			} catch (final Throwable t) {
 				logger.log(Level.WARNING, "error parsing transport stream",t);
+
 				frame.setCursor(Cursor.getDefaultCursor());
+				final Package p = getClass().getPackage();
+				String version = p.getImplementationVersion();
+				if(version==null){
+					version="development version (unreleased)";
+				}
+
+
 				JOptionPane.showMessageDialog(frame,
-						"Error parsing stream: "+t.toString(),
+						"Ooops. \n\n" +
+						"While parsing your stream an error occured " +
+						"from which DVB Inspector can not recover.\n\n" +
+						"Error message: "+t.toString()+"\n\n"+
+						"You can help to improve DVB Inspector by making this stream available " +
+						"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
+						"Please include the version of DVB Inspector: "+version,
 						"Error DVB Inspector",
 						JOptionPane.ERROR_MESSAGE);
 			}
