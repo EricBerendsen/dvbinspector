@@ -127,6 +127,14 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 			return t;
 		}
 
+		public int getEventName_length() {
+			return eventName_length;
+		}
+
+		public byte[] getEventName_data_byte() {
+			return eventName_data_byte;
+		}
+
 	}
 
 	public static class EventId implements TreeNode{
@@ -202,74 +210,74 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 	public BIOPStreamEventMessage(final byte[] dataBytes, final int offset) {
 		super(dataBytes, offset);
-		final int objectInfoStart = r;
+		final int objectInfoStart = byte_counter;
 
 
-		aDescription_length =  Utils.getInt(dataBytes, r, 1, Utils.MASK_8BITS);
-		r += 1;
-		aDescription_bytes = Utils.copyOfRange(dataBytes,r,r+aDescription_length);
-		r += aDescription_length;
+		aDescription_length =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
+		aDescription_bytes = Utils.copyOfRange(dataBytes,byte_counter,byte_counter+aDescription_length);
+		byte_counter += aDescription_length;
 
-		duration_aSeconds = Utils.getLong(dataBytes, r, 4, Utils.MASK_32BITS);
-		r += 4;
-		duration_aMicroSeconds = Utils.getLong(dataBytes, r, 4, Utils.MASK_32BITS);
-		r += 4;
-		audio =  Utils.getInt(dataBytes, r, 1, Utils.MASK_8BITS);
-		r += 1;
-		video =  Utils.getInt(dataBytes, r, 1, Utils.MASK_8BITS);
-		r += 1;
-		data1 =  Utils.getInt(dataBytes, r, 1, Utils.MASK_8BITS);
-		r += 1;
+		duration_aSeconds = Utils.getLong(dataBytes, byte_counter, 4, Utils.MASK_32BITS);
+		byte_counter += 4;
+		duration_aMicroSeconds = Utils.getLong(dataBytes, byte_counter, 4, Utils.MASK_32BITS);
+		byte_counter += 4;
+		audio =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
+		video =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
+		data1 =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
 
-		eventNames_count = Utils.getInt(dataBytes, r, 2, Utils.MASK_16BITS);
-		r += 2;
+		eventNames_count = Utils.getInt(dataBytes, byte_counter, 2, Utils.MASK_16BITS);
+		byte_counter += 2;
 
 
 		for (int i = 0; i < eventNames_count; i++) {
-			final int  eventName_length = Utils.getInt(dataBytes, r, 1, Utils.MASK_8BITS);
-			r += 1;
-			final byte[] eventName_data_byte = Utils.copyOfRange(dataBytes,r,r+eventName_length);
-			r += eventName_length;
+			final int  eventName_length = Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+			byte_counter += 1;
+			final byte[] eventName_data_byte = Utils.copyOfRange(dataBytes,byte_counter,byte_counter+eventName_length);
+			byte_counter += eventName_length;
 			final EventName eventName = new EventName(eventName_length,eventName_data_byte);
 			eventNames.add(eventName);
 		}
 
-		objectInfo_data_byte = Utils.copyOfRange(dataBytes,r,objectInfoStart +objectInfo_length);
-		r = objectInfoStart +objectInfo_length;
+		objectInfo_data_byte = Utils.copyOfRange(dataBytes,byte_counter,objectInfoStart +objectInfo_length);
+		byte_counter = objectInfoStart +objectInfo_length;
 
 
-		serviceContextList_count =  Utils.getInt(data, r, 1, Utils.MASK_8BITS);
-		r += 1;
+		serviceContextList_count =  Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
 		for (int i = 0; i < serviceContextList_count; i++) {
-			final long context_id = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-			r += 4;
-			final int  context_data_length = Utils.getInt(data, r, 2, Utils.MASK_16BITS);
-			r += 2;
-			final byte[] context_data_byte = Utils.copyOfRange(data,r,r+context_data_length);
-			r += context_data_length;
+			final long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+			byte_counter += 4;
+			final int  context_data_length = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+			byte_counter += 2;
+			final byte[] context_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+context_data_length);
+			byte_counter += context_data_length;
 			final ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
 			serviceContextList.add(serviceContext);
 		}
-		messageBody_length = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-		r += 4;
+		messageBody_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		byte_counter += 4;
 
-		taps_count= Utils.getInt(data, r, 1, Utils.MASK_8BITS);
-		r += 1;
+		taps_count= Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
 
 
 		for (int i = 0; i < taps_count; i++) {
-			final Tap tap =new Tap(data,r);
+			final Tap tap =new Tap(data,byte_counter);
 			taps.add(tap);
-			r+= tap.getSelector_length()+7;
+			byte_counter+= tap.getSelector_length()+7;
 
 		}
 
-		eventIds_count = Utils.getInt(data, r, 1, Utils.MASK_8BITS);
-		r += 1;
+		eventIds_count = Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
 		for (int i = 0; i < taps_count; i++) {
-			final EventId eventId = new EventId(Utils.getInt(data, r, 2, Utils.MASK_16BITS));
+			final EventId eventId = new EventId(Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS));
 			eventIds.add(eventId);
-			r +=2;
+			byte_counter +=2;
 		}
 	}
 
@@ -343,5 +351,60 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 	public List<Binding> getBindingList() {
 		return bindingList;
+	}
+
+
+	public long getDuration_aSeconds() {
+		return duration_aSeconds;
+	}
+
+
+	public long getDuration_aMicroSeconds() {
+		return duration_aMicroSeconds;
+	}
+
+
+	public int getAudio() {
+		return audio;
+	}
+
+
+	public int getVideo() {
+		return video;
+	}
+
+
+	public int getData1() {
+		return data1;
+	}
+
+
+	public int getEventNames_count() {
+		return eventNames_count;
+	}
+
+
+	public List<EventName> getEventNames() {
+		return eventNames;
+	}
+
+
+	public int getTaps_count() {
+		return taps_count;
+	}
+
+
+	public List<Tap> getTaps() {
+		return taps;
+	}
+
+
+	public int getEventIds_count() {
+		return eventIds_count;
+	}
+
+
+	public List<EventId> getEventIds() {
+		return eventIds;
 	}
 }

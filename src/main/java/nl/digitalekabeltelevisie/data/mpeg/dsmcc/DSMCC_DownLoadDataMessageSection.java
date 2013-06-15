@@ -36,7 +36,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
@@ -44,7 +44,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * Based on TR 101 202 V1.2.1 Implementation guidelines for Data Broadcasting Annex A
  * See also {@link http://www.mhp-interactive.org/tutorials/dtv_intro/dsmcc} for a clear introduction
  */
-public class DSMCC_DownLoadDataMessageSection extends TableSection {
+public class DSMCC_DownLoadDataMessageSection extends TableSectionExtendedSyntax {
 
 
 	private final DSMCCMessageHeader header;
@@ -129,6 +129,7 @@ public class DSMCC_DownLoadDataMessageSection extends TableSection {
 
 	public DSMCC_DownLoadDataMessageSection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data, parent);
+
 		final int protocolDiscriminator = Utils.getInt(raw_data.getData(), 8, 1, Utils.MASK_8BITS);
 		final int dsmccType = Utils.getInt(raw_data.getData(), 9, 1, Utils.MASK_8BITS);
 		final int messageId = Utils.getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);

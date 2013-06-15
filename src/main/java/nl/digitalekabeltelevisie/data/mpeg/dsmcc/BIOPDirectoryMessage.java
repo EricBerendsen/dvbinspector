@@ -147,28 +147,28 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 
 	public BIOPDirectoryMessage(final byte[] data, final int offset) {
 		super(data, offset);
-		objectInfo_data_byte = Utils.copyOfRange(data,r,r+objectInfo_length);
-		r += objectInfo_length;
-		serviceContextList_count =  Utils.getInt(data, r, 1, Utils.MASK_8BITS);
-		r += 1;
+		objectInfo_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+objectInfo_length);
+		byte_counter += objectInfo_length;
+		serviceContextList_count =  Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		byte_counter += 1;
 		for (int i = 0; i < serviceContextList_count; i++) {
-			final long context_id = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-			r += 4;
-			final int  context_data_length = Utils.getInt(data, r, 2, Utils.MASK_16BITS);
-			r += 2;
-			final byte[] context_data_byte = Utils.copyOfRange(data,r,r+context_data_length);
-			r += context_data_length;
+			final long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+			byte_counter += 4;
+			final int  context_data_length = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+			byte_counter += 2;
+			final byte[] context_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+context_data_length);
+			byte_counter += context_data_length;
 			final ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
 			serviceContextList.add(serviceContext);
 		}
-		messageBody_length = Utils.getLong(data, r, 4, Utils.MASK_32BITS);
-		r += 4;
-		bindings_count = Utils.getInt(data, r, 2, Utils.MASK_16BITS);
-		r += 2;
+		messageBody_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		byte_counter += 4;
+		bindings_count = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+		byte_counter += 2;
 		for (int i = 0; i <bindings_count; i++) {
-			final Binding binding = new Binding(data,r);
+			final Binding binding = new Binding(data,byte_counter);
 			bindingList.add(binding);
-			r += binding.length();
+			byte_counter += binding.length();
 
 		}
 

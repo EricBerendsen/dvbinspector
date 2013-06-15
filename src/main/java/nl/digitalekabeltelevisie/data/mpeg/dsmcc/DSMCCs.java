@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  * based on ETSI ES 201 812 V1.1.1, ETSI TS 102 809 V1.1.1, ETSI TS 102 796 V1.1.1
  */
 
@@ -50,7 +50,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 
 public class DSMCCs extends AbstractPSITabel{
 
@@ -68,30 +68,24 @@ public class DSMCCs extends AbstractPSITabel{
 
 	/**
 	 * map ( serviceID  all the data for a carousel for a service
-	 * 
+	 *
 	 */
 
 	private Map<Integer, ServiceDSMCC> objectCarousels = new HashMap<Integer, ServiceDSMCC>();
 
 	/**
-	 * 
+	 *
 	 * put this section in every DSMCC (carousel) that uses it.
 	 * iterate over all PMTs to find them
 	 * @param section
 	 */
-	public void update(final TableSection section){
+	public void update(final TableSectionExtendedSyntax section){
 		count++;
 
-
-		if(section.isCrc_error()){
-			return;
-		}
 		final int pid = section.getParentPID().getPid();
-
 
 		//check if this PID is referenced in a PMT which contains a broadcastID descriptor for one of its componenets that has a caroussel.
 		// does not mean this PID has to be the component with the broadcastIDdescriptor
-
 
 		boolean isPartOfObjectCarousel = false;
 		boolean isSSU = false;
