@@ -56,7 +56,7 @@ public class DSMCC extends AbstractPSITabel{
 
 	private Map<Integer, DSMCC_UNMessageSection []> unMessages = new HashMap<Integer, DSMCC_UNMessageSection []>();
 	private Map<Integer, DSMCC_DownLoadDataMessageSection []> downloadMessages = new HashMap<Integer, DSMCC_DownLoadDataMessageSection []>();
-	private Map<Integer, TableSection[]> eventStreams = new HashMap<Integer, TableSection[]>();
+	private Map<Integer, DSMCC_StreamDescriptorList[]> eventStreams = new HashMap<Integer, DSMCC_StreamDescriptorList[]>();
 	private int pid = 0;
 	private boolean isObjectCarousel = true; // set to false for SSU
 
@@ -110,17 +110,18 @@ public class DSMCC extends AbstractPSITabel{
 			// TODO make wrapper Stream DescriptorList
 			// Specs in ISO/IEC 13818-6:1998(E) 8.3 Stream Event Descriptor
 			final int eventID = section.getTableIdExtension();
-			TableSection [] sections= eventStreams.get(eventID);
+			final DSMCC_StreamDescriptorList streamDescriptorListSection = new DSMCC_StreamDescriptorList(section.getRaw_data(), section.getParentPID());
+			DSMCC_StreamDescriptorList [] sections= eventStreams.get(eventID);
 
 			if(sections==null){
-				sections = new TableSection[section.getSectionLastNumber()+1];
+				sections = new DSMCC_StreamDescriptorList[section.getSectionLastNumber()+1];
 				eventStreams.put(eventID, sections);
 			}
 			if(sections[section.getSectionNumber()]==null){
-				sections[section.getSectionNumber()] = section;
+				sections[section.getSectionNumber()] = streamDescriptorListSection;
 			}else{
 				final TableSection last = sections[section.getSectionNumber()];
-				updateSectionVersion(section, last);
+				updateSectionVersion(streamDescriptorListSection, last);
 			}
 
 		}
@@ -168,9 +169,9 @@ public class DSMCC extends AbstractPSITabel{
 		i = s.iterator();
 		while(i.hasNext()){
 			final Integer type=i.next();
-			final TableSection [] sections = eventStreams.get(type);
+			final DSMCC_StreamDescriptorList [] sections = eventStreams.get(type);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC Stream Descriptor List",type, null));
-			for (final TableSection tsection : sections) {
+			for (final DSMCC_StreamDescriptorList tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

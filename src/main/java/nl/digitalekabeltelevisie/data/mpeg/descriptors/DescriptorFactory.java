@@ -268,6 +268,9 @@ public final class DescriptorFactory {
 		case 0x14:
 			d = new AssociationTagDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x1A:
+			d = new StreamEventDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x28:
 			d = new AVCVideoDescriptor(data, t + offset, tableSection);
 			break;
