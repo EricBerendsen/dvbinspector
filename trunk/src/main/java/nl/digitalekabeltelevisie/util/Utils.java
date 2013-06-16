@@ -99,6 +99,7 @@ public final class Utils {
 	public static final int MASK_31BITS=0x7FFFFFFF;
 
 	public static final int MASK_32BITS=0xFFFFFFFF;
+	public static final long MASK_33BITS=0x1FFFFFFFFl;
 
 	private static Map<Integer, String>oui = new HashMap<Integer, String>();
 	private static RangeHashMap<Integer,String> bat = new RangeHashMap<Integer,String>();
