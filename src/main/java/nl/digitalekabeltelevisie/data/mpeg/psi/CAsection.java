@@ -27,7 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -51,12 +50,6 @@ public class CAsection extends TableSectionExtendedSyntax {
 	public String toString() {
 		final StringBuilder b = new StringBuilder("CAsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber());
-		final Iterator<Descriptor> j = descriptorList.iterator();
-		while (j.hasNext()) {
-			final Descriptor d = j.next();
-			b.append(d).append(", ");
-
-		}
 		return b.toString();
 	}
 
