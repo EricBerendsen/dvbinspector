@@ -53,13 +53,14 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TOTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.data.mpeg.psi.UNTsection;
 
 
 /**
  *
  * @author Eric
- * 
+ *
  */
 public class PsiSectionData {
 
@@ -156,7 +157,7 @@ public class PsiSectionData {
 							// all handled in DSMCCs.
 
 
-							transportStream.getPsi().getDsms().update(new TableSection(this,parentPID));
+							transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
 						}
 					} catch (final RuntimeException re) {
 						logger.log(Level.WARNING, "RuntimeException in readBytes PSI data: pid="+pid, re);
@@ -168,10 +169,7 @@ public class PsiSectionData {
 
 				try {
 					final TableSection psi= new TableSection(this,parentPID);
-					if(!psi.isCrc_error()){
-
-						parentPID.getPsi().update(psi);
-					}
+					parentPID.getPsi().update(psi);
 
 				} catch (final RuntimeException re) {
 					logger.log(Level.WARNING, "RuntimeException in readBytes PIDs: pid="+pid, re);
