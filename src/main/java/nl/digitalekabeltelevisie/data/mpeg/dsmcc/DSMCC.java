@@ -107,8 +107,6 @@ public class DSMCC extends AbstractPSITabel{
 			}
 		}else if(tableID==0x3d){ // DSM-CC - stream descriptorlist;
 
-			// TODO make wrapper Stream DescriptorList
-			// Specs in ISO/IEC 13818-6:1998(E) 8.3 Stream Event Descriptor
 			final int eventID = section.getTableIdExtension();
 			final DSMCC_StreamDescriptorList streamDescriptorListSection = new DSMCC_StreamDescriptorList(section.getRaw_data(), section.getParentPID());
 			DSMCC_StreamDescriptorList [] sections= eventStreams.get(eventID);
