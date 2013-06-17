@@ -218,7 +218,7 @@ public class Grid extends JPanel implements ComponentListener
 						if(packet!=null){
 							r.append(packet.getHTML());
 						}else{ // no packets loaded, just show pid
-							r.append("Packet: ").append(packetNo);
+							r.append("Packet: ").append(realPacketNo);
 							r.append("<br>PID: ").append(pid);
 							r.append("<br>Time: ").append(stream.getPacketTime(packetNo));
 							r.append("<br>").append(escapeHtmlBreakLines(stream.getShortLabel(pid)));
