@@ -190,9 +190,11 @@ public class EIT extends AbstractPSITabel{
 						if((startDate==null)||(startDate.after(eventStart))){
 							startDate = eventStart;
 						}
-						Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
-						if((endDate==null)||(endDate.before(eventEnd))){
-							endDate = eventEnd;
+						if(eventStart!=null){
+							Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
+							if((endDate==null)||(endDate.before(eventEnd))){
+								endDate = eventEnd;
+							}
 						}
 					}
 				}
