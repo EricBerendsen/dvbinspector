@@ -623,7 +623,12 @@ public final class Utils {
 	}
 
 	public static Date getUTCDate(final byte[] UTC_time) {
-		return getUTCCalender(UTC_time).getTime();
+		Calendar t = getUTCCalender(UTC_time);
+		if(t!=null){
+			return t.getTime();
+		}else{
+			return null;
+		}
 	}
 
 	public static long getDurationMillis(String eventDuration){
@@ -648,7 +653,19 @@ public final class Utils {
 		y = y + k + 1900;
 		m = m - 1 - (k*12);
 
-		return new GregorianCalendar((int)y, (int)m-1, (int)d, Integer.parseInt(hours), Integer.parseInt(minutes), Integer.parseInt(secs));
+		try{
+			int h= Integer.parseInt(hours);
+			int mins = Integer.parseInt(minutes);
+			int s =Integer.parseInt(secs);
+			return new GregorianCalendar((int)y, (int)m-1, (int)d, h, mins, s);
+
+		}catch(NumberFormatException ne)
+		{
+			logger.log(Level.WARNING, "error parsing calendar:", ne);
+			return null;
+		}
+
+
 	}
 
 	public static long getUTCmillis(final byte[] UTC_time) {

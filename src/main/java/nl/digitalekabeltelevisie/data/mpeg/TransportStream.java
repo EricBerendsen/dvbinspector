@@ -797,7 +797,6 @@ public class TransportStream implements TreeNode{
 
 					randomAccessFile.close();
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					logger.warning("FileNotFoundException");
 				} catch (IOException e) {
@@ -810,8 +809,6 @@ public class TransportStream implements TreeNode{
 
 			}
 
-		}else{
-			logger.warning("packet_offset[] is null");
 		}
 		return packet;
 	}
