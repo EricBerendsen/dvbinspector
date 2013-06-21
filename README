@@ -2,7 +2,7 @@ readme
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-0.0.5-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.0.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 directory structure
 
@@ -13,12 +13,12 @@ directory structure
     COPYING, contains the GPL license
     dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default. For linux/unix you have to modify it yourself. Should not be very difficult.
     DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat script.
-    DVBinspector-0.0.5.jar. Self contained jar that contains all resources and libs. To execute just double click.
+    DVBinspector-1.0.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 
-DVBinspector-0.0.5.jar
+DVBinspector-1.0.0.jar
 
-Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-0.0.5.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-0.0.4.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-0.0.4.jar".
+Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.0.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.0.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.0.0.jar".
 DVB.bat
 
 This small windows batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path, and -Xmx sets the maximum memory heap size to 1 GB. This should be enough to read fairly large TS files (> 200 MB). You can modify this file for other environments like linux.
