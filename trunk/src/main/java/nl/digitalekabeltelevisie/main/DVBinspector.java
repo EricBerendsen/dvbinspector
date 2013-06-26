@@ -157,8 +157,13 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		if(args.length>=1){
 			final String filename= args[0];
 			// TODO test if file exists
-			// TODO use enableTSPackets flag
 			final TransportStream ts = new TransportStream(filename);
+
+			final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
+
+			ts.setDefaultPrivateDataSpecifier(prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0));
+			ts.setEnableTSPackets(prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false));
+
 			inspector.transportStream = ts;
 
 			try {
