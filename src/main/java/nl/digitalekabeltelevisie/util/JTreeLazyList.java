@@ -260,7 +260,6 @@ public class JTreeLazyList{
 			mutableTreeNode = new RangeNode(level, 0, noPackets-1,label);
 		}
 
-		// TODO Auto-generated method stub
 		return mutableTreeNode;
 	}
 
