@@ -54,8 +54,6 @@ public class AdaptationField implements HTMLSource, nl.digitalekabeltelevisie.co
 	private PCR original_program_clock_reference = null;
 	private int splice_countdown = 0;
 
-	// TODO (splicing_point_flag = = '1', transport_private_data_flag = = '1', adaptation_field_extension_flag = = '1'..
-
 	private int offset = 2;
 
 	private int transport_private_data_length = 0;
