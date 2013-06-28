@@ -159,7 +159,8 @@ public class TSPacket implements HTMLSource, TreeNode{
 		if((getAdaptationFieldControl()==1)) { //payload only
 			return copyOfRange(buffer,4, packet_length);
 		}else if((getAdaptationFieldControl()==3)) { //Adaptation followed by payload
-			return copyOfRange(buffer, 4+getUnsignedByte(buffer[4])+1,packet_length);
+			int start = Math.min(4+getUnsignedByte(buffer[4])+1, packet_length);
+			return copyOfRange(buffer, start,packet_length);
 		}
 		return null;
 	}
@@ -221,7 +222,12 @@ public class TSPacket implements HTMLSource, TreeNode{
 		s.append("<br>adaptation_field_control: ").append(getAdaptationFieldControl()).append(" (").append(getAdaptationFieldControlString()).append(")");
 		s.append("<br>continuity_counter: ").append(getHexAndDecimalFormattedString(getContinuityCounter())).append("</span>");
 
-		AdaptationField adaptationField = getAdaptationField();
+		AdaptationField adaptationField = null;
+		try{
+			adaptationField = getAdaptationField();
+		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
+			adaptationField = null;
+		}
 		if(adaptationField!=null){
 			s.append("<br><br><span style=\"color:").append(Utils.toHexString(ADAPTATION_FIELD_COLOR)).append("\"><b>AdaptationField:</b><br>").append(adaptationField.getHTML()).append("</span>");
 			coloring.put(4, 4+adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
@@ -270,7 +276,12 @@ public class TSPacket implements HTMLSource, TreeNode{
 
 		t.add(new DefaultMutableTreeNode(new KVP("continuity_counter",getContinuityCounter() ,null)));
 
-		AdaptationField adaptationField = getAdaptationField();
+		AdaptationField adaptationField = null;
+		try{
+			adaptationField = getAdaptationField();
+		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
+			adaptationField = null;
+		}
 		if(adaptationField!=null){
 			t.add(adaptationField.getJTreeNode(modus));
 		}
