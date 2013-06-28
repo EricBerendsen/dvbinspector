@@ -226,7 +226,12 @@ public class PID implements TreeNode{
 	}
 
 	private void processAdaptationField(final TSPacket packet) {
-		final AdaptationField adaptationField =packet.getAdaptationField();
+		AdaptationField adaptationField = null;
+		try{
+			adaptationField = packet.getAdaptationField();
+		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
+			adaptationField = null;
+		}
 		if(adaptationField!=null) { //Adaptation field present
 			if(adaptationField.isPCR_flag()){
 				final PCR newPCR = adaptationField.getProgram_clock_reference();
@@ -249,15 +254,6 @@ public class PID implements TreeNode{
 					lastPCRpacketNo = -1;
 					pcr_count=1;
 				}
-			}
-			if(adaptationField.isDiscontinuity_indicator()){
-				logger.info("Discontinuity_indicator() in PID "+packet.getPID()+"packetNo"+ packet.getPacketNo()+" at Time "+ getParentTransportStream().getPacketTime(packet.getPacketNo())) ;
-			}
-			if(adaptationField.isSplicing_point_flag()){
-				logger.info("Splicing_point_flag() in PID "+packet.getPID()+", packetNo "+packet.getPacketNo()) ;
-			}
-			if(adaptationField.isAdaptation_field_extension_flag()){
-				logger.info("isAdaptation_field_extension_flag() in PID "+packet.getPID()+", packetNo "+packet.getPacketNo()) ;
 			}
 		}
 	}
