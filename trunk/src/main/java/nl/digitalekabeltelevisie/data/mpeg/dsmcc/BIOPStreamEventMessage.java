@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -274,7 +274,7 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 		eventIds_count = Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
 		byte_counter += 1;
-		for (int i = 0; i < taps_count; i++) {
+		for (int i = 0; i < eventIds_count; i++) {
 			final EventId eventId = new EventId(Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS));
 			eventIds.add(eventId);
 			byte_counter +=2;
