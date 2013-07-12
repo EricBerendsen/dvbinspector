@@ -27,11 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.ExtensionHeader.*;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -49,6 +51,8 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 
 
 	private final List<VideoMPEG2Section> sections= new ArrayList<VideoMPEG2Section>();
+
+	private static final Logger logger = Logger.getLogger(VideoPESDataField.class.getName());
 
 	/**
 	 * Creates a new VideoPESDataField
@@ -70,13 +74,16 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 				}else if(getUnsignedByte(data[i+3])==0xB3){
 					section = new SequenceHeader(data,i+3);
 				}else if(getUnsignedByte(data[i+3])==0xB5){ // extension, use extension_start_code_identifier to make sub selection
-					final int extensionStartCode = (getUnsignedByte(data[i+4])&0xF0)>>4;
-					if(extensionStartCode==1){ // Sequence extension
+					final int extensionStartCodeIdentifier = (getUnsignedByte(data[i+4])&0xF0)>>4;
+					if(extensionStartCodeIdentifier==1){ // Sequence extension
 						section = new SequenceExtension(data,i+3);
-					}else if(extensionStartCode==8){ // Picture coding extension
+					}else if(extensionStartCodeIdentifier==8){ // Picture coding extension
 						section = new PictureCodingExtension(data,i+3);
+					}else if(extensionStartCodeIdentifier==2){ // Picture coding extension
+						section = new SequenceDisplayExtension(data,i+3);
 					}else{
 						section = new ExtensionHeader(data,i+3); // default Base Extension
+						logger.warning("Not implemented extendsion start code identifier:"+extensionStartCodeIdentifier+" ("+getExtensionStartCodeIdentifierString(extensionStartCodeIdentifier)+")");
 					}
 				}else if(getUnsignedByte(data[i+3])==0xB8){
 					section = new GroupOfPicturesHeader(data,i+3);
