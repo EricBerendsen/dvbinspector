@@ -26,7 +26,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -193,6 +193,19 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
 			StringBuilder t = new StringBuilder();
 			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
+				if(!extEvent.getItemList().isEmpty()){ // this extended Event has items
+					r1.append("<br><table>");
+					for(ExtendedEventDescriptor.Item item :extEvent.getItemList()){
+						r1.append("<tr><td>");
+						r1.append(Utils.escapeHTML(item.getItemDescription().toString()));
+						r1.append("</td><td>");
+						r1.append(Utils.escapeHTML(item.getItem().toString()));
+
+						r1.append("</td></tr>");
+
+					}
+					r1.append("</table>");
+				}
 				t.append(extEvent.getText().toString());
 			}
 			String extended = t.toString();
