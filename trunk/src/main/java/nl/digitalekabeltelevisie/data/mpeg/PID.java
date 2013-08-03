@@ -41,6 +41,8 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
+import nl.digitalekabeltelevisie.util.JTreeLazyList;
+import nl.digitalekabeltelevisie.util.PIDPacketGetter;
 
 /**
  * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets tables are built, PES packets are (initially) only counted.
@@ -124,6 +126,7 @@ public class PID implements TreeNode{
 					int start;
 					int available;
 					if((data[0]!=0)||((getPid() ==0)||(data[1]!=0))){ //starting PSI section after ofset
+						// this is just an educated guess, it might still be private data of unspecified format
 						type = PSI;
 
 						start = 1+getUnsignedByte(data[0]);
@@ -343,6 +346,12 @@ public class PID implements TreeNode{
 			t.add(psi.getJTreeNode(modus));
 		}else if((type==PES)&&(generalPesHandler!=null)&&(generalPesHandler.isInitialized())) {
 			t.add(((TreeNode)generalPesHandler).getJTreeNode(modus));
+		}
+		if(parentTransportStream.isEnableTSPackets()&&parentTransportStream.tsPacketsLoaded()){
+
+			JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,100));
+			t.add(list.getJTreeNode(modus, "Transport packets "));
+
 		}
 
 

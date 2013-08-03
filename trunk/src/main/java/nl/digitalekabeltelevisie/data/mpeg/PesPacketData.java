@@ -60,7 +60,7 @@ public class PesPacketData  implements TreeNode{
 	protected int noBytes=0;
 
 	private int pts_dts_flags;
-	private int pes_header_data_length;
+	protected int pes_header_data_length;
 
 	protected long pts;
 	protected long dts;
@@ -72,7 +72,7 @@ public class PesPacketData  implements TreeNode{
 	protected int pesDataStart;
 	protected int pesDataLen;
 
-	private int bytesRead = 0;
+	protected int bytesRead = 0;
 
 	public static final int program_stream_map = 0xBC;
 	public static final int private_stream_1 = 0xBD;
@@ -126,6 +126,7 @@ public class PesPacketData  implements TreeNode{
 		this.pesHandler = pesPacket.getPesHandler();
 		this.packet_no= pesPacket.getPacket_no();
 		this.pesDataStart = pesPacket.getPesDataStart();
+		this.pesDataLen = pesPacket.getPesDataLen();
 		this.bytesRead = pesPacket.bytesRead;
 		processPayload();
 
