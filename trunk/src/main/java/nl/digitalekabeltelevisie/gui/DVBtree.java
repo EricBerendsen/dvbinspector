@@ -355,6 +355,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 			}
 			cardLayout.show(detailPanel, EMPTY_PANEL);
+		}else{ // not DefaultMutableTreeNode
+			cardLayout.show(detailPanel, EMPTY_PANEL);
 		}
 
 	}
