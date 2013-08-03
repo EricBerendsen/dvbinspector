@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.packet_length;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.io.BufferedInputStream;
@@ -72,6 +72,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
 import nl.digitalekabeltelevisie.util.PositionPushbackInputStream;
+import nl.digitalekabeltelevisie.util.TSPacketGetter;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
@@ -386,7 +387,7 @@ public class TransportStream implements TreeNode{
 		}
 
 		if(packet_offset!=null){
-			JTreeLazyList list = new JTreeLazyList(this, 100, 0, getNo_packets());
+			JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,100));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 		}
 
@@ -823,5 +824,12 @@ public class TransportStream implements TreeNode{
 		this.enableTSPackets = enableTSPackets;
 	}
 
+	public boolean tsPacketsLoaded(){
+		return packet_offset!=null;
+	}
+
+	public PID getPID(int p){
+		return pids[p];
+	}
 
 }
