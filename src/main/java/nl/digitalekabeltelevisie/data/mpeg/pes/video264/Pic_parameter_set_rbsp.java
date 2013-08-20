@@ -60,7 +60,7 @@ public class Pic_parameter_set_rbsp extends RBSP {
 	private int transform_8x8_mode_flag;
 	private int pic_scaling_matrix_present_flag;
 
-	private int [] seq_scaling_list_present_flag=new int [8];
+	private int [] pic_scaling_list_present_flag=new int [8];
 	private int [][] delta_scale = new int [8][];
 	private int [] deltas_read = new int[8];  // helper, does not match data in PES  
 
@@ -115,8 +115,8 @@ public class Pic_parameter_set_rbsp extends RBSP {
 			pic_scaling_matrix_present_flag = bitSource.u(1);
 			if( pic_scaling_matrix_present_flag!=0 ){
 				for( int i = 0; i < 6 + 2* transform_8x8_mode_flag; i++ ) {
-					seq_scaling_list_present_flag[ i ] =bitSource.u(1);
-					if( seq_scaling_list_present_flag[ i ]!=0 ){
+					pic_scaling_list_present_flag[ i ] =bitSource.u(1);
+					if( pic_scaling_list_present_flag[ i ]!=0 ){
 						if( i < 6 ){
 							delta_scale[i] = new int[16];
 							deltas_read[i] = scaling_list( delta_scale[i], 16,bitSource);
@@ -157,8 +157,8 @@ public class Pic_parameter_set_rbsp extends RBSP {
 		t.add(new DefaultMutableTreeNode(new KVP("pic_scaling_matrix_present_flag",pic_scaling_matrix_present_flag,null)));
 		if( pic_scaling_matrix_present_flag!=0 ){
 			for( int i = 0; i < 6 + 2* transform_8x8_mode_flag; i++ ) {
-				t.add(new DefaultMutableTreeNode(new KVP("seq_scaling_list_present_flag["+i+"]",seq_scaling_list_present_flag[ i ],null)));
-				if( seq_scaling_list_present_flag[ i ]!=0 ){
+				t.add(new DefaultMutableTreeNode(new KVP("pic_scaling_list_present_flag["+i+"]",pic_scaling_list_present_flag[ i ],null)));
+				if( pic_scaling_list_present_flag[ i ]!=0 ){
 					if( i < 6 ){
 						t.add(getScalingListJTree( delta_scale[i], i, 16,deltas_read[i]));
 					}else{
@@ -241,8 +241,8 @@ public class Pic_parameter_set_rbsp extends RBSP {
 		return pic_scaling_matrix_present_flag;
 	}
 
-	public int[] getSeq_scaling_list_present_flag() {
-		return seq_scaling_list_present_flag;
+	public int[] getPic_scaling_list_present_flag() {
+		return pic_scaling_list_present_flag;
 	}
 
 	public int[][] getDelta_scale() {
