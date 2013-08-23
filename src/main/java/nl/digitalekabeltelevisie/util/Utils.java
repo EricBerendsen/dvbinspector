@@ -723,6 +723,8 @@ public final class Utils {
 
 		case 0x20: return"MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10";
 		case 0x21: return"J2K Video stream conforming to one or more profiles as defined in ITU-T Rec T.800 | ISO/IEC 15444-1";
+		case 0x22: return"Additional view Rec. ITU-T H.262 | ISO/IEC 13818-2 video stream for service-compatible stereoscopic 3D services";
+		case 0x23: return"Additional view Rec. ITU-T H.264 | ISO/IEC 14496-10 video stream conforming to one or more profiles defined in Annex A for service-compatible stereoscopic 3D services";
 		case 0x7f: return"IPMP stream";
 
 		default:
