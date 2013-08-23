@@ -217,6 +217,16 @@ public class Descriptor implements TreeNode {
 		case 0x32:
 			return "J2K video descriptor";
 
+			/* Rec. ITU-T H.222.0 (06/2012) */
+		case 51:
+			return "MVC operation point descriptor";
+		case 52:
+			return "MPEG2_stereoscopic_video_format_descriptor";
+		case 53:
+			return "Stereoscopic_program_info_descriptor";
+		case 54:
+			return "Stereoscopic_video_info_descriptor";
+
 			// DVB
 
 		case 0x40:
