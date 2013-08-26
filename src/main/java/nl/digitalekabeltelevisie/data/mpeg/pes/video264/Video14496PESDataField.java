@@ -31,6 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -45,6 +46,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
 public class Video14496PESDataField extends PesPacketData implements TreeNode {
 
+	private static final Logger	logger	= Logger.getLogger(Video14496PESDataField.class.getName());
 
 
 	private List<NALUnit> nalUnits = new ArrayList<NALUnit>();
@@ -75,9 +77,13 @@ public class Video14496PESDataField extends PesPacketData implements TreeNode {
 				}else{ // both not found, use pesLen
 					end = pesDataLen;
 				}
-				NALUnit nalUnit = new NALUnit(data,i, end-i);
+				try {
+					NALUnit nalUnit = new NALUnit(data,i, end-i);
+					nalUnits.add(nalUnit);
+				} catch (Exception e) {
+					logger.info("Create NALUnit failed: data.length="+data.length+" i="+i+", end="+end);
+				}
 				i=end;
-				nalUnits.add(nalUnit);
 
 			}
 		}
