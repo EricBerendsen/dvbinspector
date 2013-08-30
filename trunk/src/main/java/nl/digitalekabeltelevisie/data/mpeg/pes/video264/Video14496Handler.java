@@ -149,9 +149,7 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 		List<int[]> frameSize  = new ArrayList<int[]>();
 		List<ChartLabel> labels = new ArrayList<ChartLabel>();
 
-
 		int[] accessUnitData = new int[6]; // 0= P, 1 = B, 2 = I, 3 = SP, 4 = SI (all mod 5), 5 = Filler data
-		//StringBuilder line = new StringBuilder();
 		int count = 0;
 
 		NALUnitIterator nalIter = new NALUnitIterator();
@@ -165,28 +163,20 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 						( rbsp instanceof Sei_rbsp)){
 
 					if(notZero(accessUnitData)){
-						label =new ChartLabel(""+count, (short)count); // TODO real label
-
+						label =new ChartLabel(""+count, (short)count);
 						labels.add(label);
 						frameSize.add(accessUnitData);
 						count++;
-
 					}
 					accessUnitData = new int[6];
 				}else if( rbsp instanceof Slice_layer_without_partitioning_rbsp){
 					Slice_header header = ((Slice_layer_without_partitioning_rbsp)rbsp).getSlice_header();
 					int slice_type = header.getSlice_type();
-					//String type = Slice_header.getSlice_typeString(slice_type);
 					int size = unit.getNumBytesInRBSP();
-
-					//line.append(type).append(" (").append(size).append(") - ") ;
 					accessUnitData[slice_type%5] += size;
-
 				}else if( rbsp instanceof Filler_data_rbsp){
 					int size = unit.getNumBytesInRBSP();
-					// line.append("filler Data (").append(size).append(") - ") ;
 					accessUnitData[5] += size;
-
 				}
 			}
 			unit =  nalIter.next();
@@ -199,14 +189,10 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 			String type=getSlice_typeString(i);
 			Iterator<int[]> frameSizeIter = frameSize.iterator();
 			for(ChartLabel l:labels){
-
 				if(frameSizeIter.hasNext()){
 					int[] v = frameSizeIter.next();
-					//if(v[i]!=0){
-						dataset.setValue(v[i], type,l);
-					//}
+					dataset.setValue(v[i], type,l);
 				}
-
 			}
 		}
 
@@ -229,13 +215,11 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 		categoryAxis.setCategoryLabelPositions(CategoryLabelPositions.DOWN_90);
 		final ValueAxis valueAxis = new NumberAxis("frame size (bytes)");
 
-		//final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, new BarRenderer());
 		final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, renderer);
 		String title = getPID().getShortLabel()+" (Access Units, Transmission Order)";
 		JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, true	);
 
 		return chart.createBufferedImage(( frameSize.size()*18)+100, 640);
-
 	}
 
 
