@@ -146,4 +146,34 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor {
 
 		return t;
 	}
+
+
+	public String getOrbitalPosition() {
+		return orbitalPosition;
+	}
+
+
+	public int getWestEastFlag() {
+		return westEastFlag;
+	}
+
+
+	public int getPolarization() {
+		return polarization;
+	}
+
+
+	public int getRollOff() {
+		return rollOff;
+	}
+
+
+	public int getModulationSystem() {
+		return modulationSystem;
+	}
+
+
+	public int getModulationType() {
+		return modulationType;
+	}
 }
