@@ -1,33 +1,35 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
+
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -36,6 +38,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class ExtensionDescriptor extends Descriptor {
+
+	private static Logger logger = Logger.getLogger(ExtensionDescriptor.class.getName());
 
 
 	private final int descriptor_tag_extension;
@@ -64,6 +68,8 @@ public class ExtensionDescriptor extends Descriptor {
 			}
 			private_data_byte = Utils.copyOfRange(b, offset+t,offset+descriptorLength+2);
 
+		}else{
+			logger.info("Unimplemented Extended descriptor, descriptor_tag_extension="+descriptor_tag_extension+", tag description="+getDescriptorTagString(descriptor_tag_extension));
 		}
 	}
 
@@ -116,6 +122,14 @@ public class ExtensionDescriptor extends Descriptor {
 			return "target_region_name_descriptor";
 		case 0xb:
 			return "service_relocated_descriptor";
+		case 0xc:
+			return "XAIT_PID_descriptor";
+		case 0xd:
+			return "C2_delivery_system_descriptor";
+		case 0x10:
+			return "video_depth_range_descriptor";
+		case 0x11:
+			return "T2MI_descriptor";
 
 		default:
 			return "reserved for future use";
