@@ -52,7 +52,6 @@ public class INT extends AbstractPSITabel{
 	}
 
 	public void update(final INTsection section){
-		count++;
 
 		final int key = section.getPlatformID();
 		INTsection [] sections= networks.get(key);

@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,7 +49,6 @@ public class BAT extends AbstractPSITabel{
 	}
 
 	public void update(final BATsection section){
-		count++;
 
 		final int key = section.getBouqetID();
 		BATsection [] sections= networks.get(key);

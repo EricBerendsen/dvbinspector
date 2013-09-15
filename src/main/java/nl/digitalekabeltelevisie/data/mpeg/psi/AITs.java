@@ -55,7 +55,6 @@ public class AITs extends AbstractPSITabel{
 	private final Map<Integer, AIT> aits = new HashMap<Integer, AIT>();
 
 	public void update(final AITsection section){
-		count++;
 
 		final int pid = section.getParentPID().getPid();
 		AIT  ait= aits.get(pid);

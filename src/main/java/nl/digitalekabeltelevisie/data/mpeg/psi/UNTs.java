@@ -49,7 +49,6 @@ public class UNTs extends AbstractPSITabel{
 	private Map<Integer, UNT> unts = new HashMap<Integer, UNT>();
 
 	public void update(final UNTsection section){
-		count++;
 
 		final int pid = section.getParentPID().getPid();
 		UNT  unt= unts.get(pid);

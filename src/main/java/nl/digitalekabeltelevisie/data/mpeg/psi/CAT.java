@@ -58,7 +58,6 @@ public class CAT extends AbstractPSITabel {
 	 * @param section
 	 */
 	public void update(final CAsection section) {
-		count++;
 		if (cat == null) {
 			cat = new CAsection[section.getSectionLastNumber() + 1];
 		}

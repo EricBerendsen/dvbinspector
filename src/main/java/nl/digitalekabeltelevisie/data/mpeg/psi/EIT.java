@@ -100,8 +100,6 @@ public class EIT extends AbstractPSITabel{
 
 	public void update(final EITsection section){
 
-		count++;
-
 		final int tableId = section.getTableId();
 		HashMap<Integer, EITsection []>  table= eit.get(tableId);
 
