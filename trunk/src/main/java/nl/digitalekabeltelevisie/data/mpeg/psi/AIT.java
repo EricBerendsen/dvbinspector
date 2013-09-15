@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.getAppTypeIDString;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,7 +49,6 @@ public class AIT extends AbstractPSITabel{
 	}
 
 	public void update(final AITsection section){
-		count++;
 		pid=section.getParentPID().getPid();
 
 		final int key = section.getApplication_type();

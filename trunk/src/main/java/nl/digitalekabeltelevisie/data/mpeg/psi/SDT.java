@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,8 +52,6 @@ public class SDT extends AbstractPSITabel{
 	private Map<Integer, SDTsection []> transportStreams = new HashMap<Integer, SDTsection []>();
 
 	public void update(final SDTsection section){
-
-		count++;
 
 		final int key = section.getTransportStreamID();
 		SDTsection [] sections= transportStreams.get(key);

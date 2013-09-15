@@ -26,7 +26,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,7 +50,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	private Map<Integer, PMTsection []> pmts = new HashMap<Integer, PMTsection []>();
 
 	public void update(final PMTsection section){
-		count++;
 
 		final int programNumber = section.getProgramNumber();
 		PMTsection [] sections= pmts.get(programNumber);
