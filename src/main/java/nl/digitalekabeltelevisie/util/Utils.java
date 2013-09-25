@@ -1348,6 +1348,11 @@ public final class Utils {
 		return ((m&DVBtree.SHOW_PTS_MODUS)!=0);
 	}
 
+
+	public static boolean showVersionModus(final int m){
+		return ((m&DVBtree.SHOW_VERSION_MODUS)!=0);
+	}
+
 	public static String stripLeadingZeros(final String s) {
 		final int len = s.length()-1; // leave at least one zero if that is the only char
 		int st = 0;

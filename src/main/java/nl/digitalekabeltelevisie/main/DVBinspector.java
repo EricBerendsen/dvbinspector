@@ -333,6 +333,11 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		showPtsViewMenu.addActionListener(showPtsViewAction);
 		viewTreeMenu.add(showPtsViewMenu);
 
+		final JCheckBoxMenuItem showVersionNumberMenu = new JCheckBoxMenuItem("Show version_number on Table Sections");
+		showVersionNumberMenu.setSelected((modus&DVBtree.SHOW_VERSION_MODUS)!=0);
+		final Action showVersionNumberAction= new ToggleViewAction(this, DVBtree.SHOW_VERSION_MODUS);
+		showVersionNumberMenu.addActionListener(showVersionNumberAction);
+		viewTreeMenu.add(showVersionNumberMenu);
 
 		privateDataSubMenu = new JMenu("Private Data Specifier Default");
 		final ButtonGroup group = new ButtonGroup();
@@ -472,6 +477,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			viewConfig.setEndPacket(tStream.getNo_packets());
 			viewConfig.setMaxPacket(tStream.getNo_packets());
 		}
+
 		viewConfig.setShown(used);
 		viewConfig.setNotShown(notUsed);
 		viewConfig.setTransportStream(tStream);
