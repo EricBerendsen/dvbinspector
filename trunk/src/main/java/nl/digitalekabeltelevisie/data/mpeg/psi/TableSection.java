@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.packet_length;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Formatter;
@@ -319,9 +319,22 @@ public class TableSection implements TreeNode{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TableType: "+getTableType(getTableId())+" ("+getSectionNumber()+"/"+getSectionLastNumber()+")"));
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(getSectionKVP(modus));
 		addTableDetails(modus, t);
 		return t;
+	}
+
+	/**
+	 * @param modus
+	 * @return
+	 */
+	private KVP getSectionKVP(final int modus) {
+		KVP kvp = new KVP("TableType: "+getTableType(getTableId())+" ("+getSectionNumber()+"/"+getSectionLastNumber()+")");
+		if(Utils.showVersionModus(modus)&&(sectionSyntaxIndicator==1)){
+			kvp.appendLabel(" <version "+version+">");
+
+		}
+		return kvp;
 	}
 
 	protected void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
@@ -349,7 +362,9 @@ public class TableSection implements TreeNode{
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus,final HTMLSource htmlSource){
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TableType: "+getTableType(getTableId())+" ("+getSectionNumber()+"/"+getSectionLastNumber()+")",htmlSource));
+		KVP kvp = getSectionKVP(modus);
+		kvp.setHtmlSource(htmlSource);
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		addTableDetails(modus, t);
 		return t;
 	}
