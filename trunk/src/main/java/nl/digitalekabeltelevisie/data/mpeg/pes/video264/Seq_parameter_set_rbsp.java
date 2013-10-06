@@ -112,7 +112,7 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 			seq_scaling_matrix_present_flag =bitSource.u(1);
 			if( seq_scaling_matrix_present_flag==1 ){
-				for( int i = 0; i < 8; i++ ) { // TODO ? change to "for( i = 0; i < ( ( chroma_format_idc != 3 ) ? 8 : 12 ); i++ )"  as in Rec. ITU-T H.264 (03/2010) 7.3.2.1.1 Sequence parameter set data syntax
+				for( int i = 0; i < ( ( chroma_format_idc != 3 ) ? 8 : 12 ); i++ ) { // Rec. ITU-T H.264 (03/2010) 7.3.2.1.1 Sequence parameter set data syntax
 					seq_scaling_list_present_flag[ i ] =bitSource.u(1);
 					if( seq_scaling_list_present_flag[ i ]!=0 ){
 						if( i < 6 ){
@@ -192,7 +192,7 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			t.add(new DefaultMutableTreeNode(new KVP("seq_scaling_matrix_present_flag",seq_scaling_matrix_present_flag,null)));
 
 			if( seq_scaling_matrix_present_flag==1 ){
-				for( int i = 0; i < 8; i++ ) { // TODO ? change to "for( i = 0; i < ( ( chroma_format_idc != 3 ) ? 8 : 12 ); i++ )"  as in Rec. ITU-T H.264 (03/2010) 7.3.2.1.1 Sequence parameter set data syntax
+				for( int i = 0; i < ( ( chroma_format_idc != 3 ) ? 8 : 12 ); i++ ) { // Rec. ITU-T H.264 (03/2010) 7.3.2.1.1 Sequence parameter set data syntax
 					t.add(new DefaultMutableTreeNode(new KVP("seq_scaling_list_present_flag["+i+"]",seq_scaling_list_present_flag[ i ],null)));
 					if( seq_scaling_list_present_flag[ i ]!=0 ){
 						if( i < 6 ){
