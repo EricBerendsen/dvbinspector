@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.InterruptedIOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -38,6 +39,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.main.DVBinspector;
@@ -51,6 +53,76 @@ public class FileOpenAction extends AbstractAction {
 	private JFileChooser	fileChooser;
 	private JFrame			frame;
 	private DVBinspector	contr;
+
+
+	class TSLoader extends SwingWorker<TransportStream, Void>{
+
+		/**
+		 * @param file
+		 */
+		private TSLoader(File file) {
+			super();
+			this.file = file;
+		}
+
+		File file = null;
+
+	      @Override
+	       protected void done() {
+	           try {
+
+	        	   TransportStream ts = get();
+	        	   if(ts!=null){
+	        		   contr.setTransportStream(get());
+	        	   }
+	           } catch (Exception ignore) {
+	           }
+	       }
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected TransportStream doInBackground() throws Exception {
+			TransportStream transportStream = new TransportStream(file);
+			transportStream.setDefaultPrivateDataSpecifier(contr.getDefaultPrivateDataSpecifier());
+			transportStream.setEnableTSPackets(contr.isEnableTSPackets());
+
+			try {
+				transportStream.parseStream(contr.getFrame());
+			} catch (final InterruptedIOException ioe) {
+				transportStream = null;
+			} catch (final Throwable t) {
+				logger.log(Level.WARNING, "error parsing transport stream",t);
+
+				frame.setCursor(Cursor.getDefaultCursor());
+				final Package p = getClass().getPackage();
+				String version = p.getImplementationVersion();
+				if(version==null){
+					version="development version (unreleased)";
+				}
+				transportStream = null;
+
+
+				JOptionPane.showMessageDialog(frame,
+						"Ooops. \n\n" +
+						"While parsing your stream an error occured " +
+						"from which DVB Inspector can not recover.\n\n" +
+						"Error message: "+t.toString()+"\n\n"+
+						"You can help to improve DVB Inspector by making this stream available " +
+						"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
+						"Please include the version of DVB Inspector: "+version,
+						"Error DVB Inspector",
+						JOptionPane.ERROR_MESSAGE);
+			}
+
+
+			frame.setCursor(Cursor.getDefaultCursor());
+
+			return transportStream;
+		}
+
+	}
 
 	public FileOpenAction(final JFileChooser jf, final JFrame fr, final DVBinspector controller) {
 		super();
@@ -73,39 +145,11 @@ public class FileOpenAction extends AbstractAction {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			contr.setTransportStream(null); // clean up old before creating new, might save some memory
-			final File f = fileChooser.getSelectedFile();
-			prefs.put(DIR,f.getParent());
-			final TransportStream transportStream = new TransportStream(f);
-			transportStream.setDefaultPrivateDataSpecifier(contr.getDefaultPrivateDataSpecifier());
-			transportStream.setEnableTSPackets(contr.isEnableTSPackets());
+			File file = fileChooser.getSelectedFile();
+			prefs.put(DIR,file.getParent());
 
-			try {
-				transportStream.parseStream();
-				contr.setTransportStream(transportStream);
-			} catch (final Throwable t) {
-				logger.log(Level.WARNING, "error parsing transport stream",t);
-
-				frame.setCursor(Cursor.getDefaultCursor());
-				final Package p = getClass().getPackage();
-				String version = p.getImplementationVersion();
-				if(version==null){
-					version="development version (unreleased)";
-				}
-
-
-				JOptionPane.showMessageDialog(frame,
-						"Ooops. \n\n" +
-						"While parsing your stream an error occured " +
-						"from which DVB Inspector can not recover.\n\n" +
-						"Error message: "+t.toString()+"\n\n"+
-						"You can help to improve DVB Inspector by making this stream available " +
-						"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
-						"Please include the version of DVB Inspector: "+version,
-						"Error DVB Inspector",
-						JOptionPane.ERROR_MESSAGE);
-			}
-
+			TSLoader tsLoader = new TSLoader(file);
+			tsLoader.execute();
 
 			frame.setCursor(Cursor.getDefaultCursor());
 		}

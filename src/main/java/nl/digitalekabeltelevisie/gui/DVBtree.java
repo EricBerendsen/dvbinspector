@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -412,7 +412,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 					try {
-						ts.parseStream(h);
+						ts.parseStream(null,h);
 					} catch (final IOException e) {
 						logger.log(Level.WARNING,"could not read file"+ts.getFile().getName(),e);
 						setCursor(Cursor.getDefaultCursor());
