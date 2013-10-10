@@ -148,9 +148,9 @@ public class PesPacketData  implements TreeNode{
 				bytesRead+=read1;
 			}
 		}else{ // noBytes==0, unbounded video packet, length unknown
-			final int newcount = bytesRead + available;
+			int newcount = bytesRead + available;
 			if (newcount > data.length) {
-				final byte newbuf[] = new byte[Math.max(data.length << 1, newcount)];
+				final byte newbuf[] = new byte[Math.max(data.length * 2, newcount)];
 				System.arraycopy(data, 0, newbuf, 0, bytesRead);
 				data = newbuf;
 			}
@@ -223,7 +223,11 @@ public class PesPacketData  implements TreeNode{
 				offset+=5;
 			}
 			pesDataStart=9+pes_header_data_length;
-			pesDataLen=noBytes-pes_header_data_length-3;  // was -3
+			if(noBytes!=0){
+				pesDataLen=noBytes-pes_header_data_length-3;  // was -3 // TODO not correct when noBytes == 0 for Video PES
+			}else{
+				pesDataLen=bytesRead-pes_header_data_length-3;
+			}
 
 		}else{
 			pesDataStart=6;
