@@ -35,7 +35,6 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 public abstract class AbstractPSITabel implements TreeNode{
 
 	protected PSI parentPSI;
-	protected long count;
 
 	protected AbstractPSITabel(final PSI parentPSI) {
 		super();
@@ -48,14 +47,6 @@ public abstract class AbstractPSITabel implements TreeNode{
 
 	public void setParentPSI(final PSI parentPSI) {
 		this.parentPSI = parentPSI;
-	}
-
-	public long getCount() {
-		return count;
-	}
-
-	public void setCount(final long count) {
-		this.count = count;
 	}
 
 	/**

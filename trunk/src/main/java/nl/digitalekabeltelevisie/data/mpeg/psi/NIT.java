@@ -26,7 +26,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,8 +56,6 @@ public class NIT extends AbstractPSITabel{
 	}
 
 	public void update(final NITsection section){
-		count++;
-
 		final int key = section.getNetworkID();
 		NITsection [] sections= networks.get(key);
 
@@ -75,7 +73,7 @@ public class NIT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NIT"));
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("NIT"));
 		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
 
 		final Iterator<Integer> i = s.iterator();
