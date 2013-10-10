@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,9 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -37,14 +40,31 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class PAT extends AbstractPSITabel{
 
 	private PATsection []pat = null;
+	private List<PATsection []> patVersions = new ArrayList<PATsection[]>();
+	private PATsection [] actualPAT = null;
+	private PATsection [] newPAT = null;
+	private int actualVersionNo = -1;
+
 
 	public PAT(final PSI parent){
 		super(parent);
 	}
 
+	/**
+	 * Add (or update) the section to the PAT
+	 *
+	 * TODO, like all PSI tables this will go wrong when we start just before a version update, when only the last sections of the old version are received.
+	 * i.e. when we receive section 1, version 12, followed by section 0, version 13, section 1, version 13, etc, the PAT will consist of section 0, version 13 and section 1, version 12.
+	 * chance of this happening is small, so for now leave it.
+	 *
+	 * TODO this will not work correctly when number of sections in PAT changes.
+	 *
+	 * OTOH, a PAT only has multiple sections if > 1000 bytes, i.e. 250 services. Not very likely.
+	 *
+	 * @param section
+	 */
 	public void update(final PATsection section){
 
-		count++;
 
 		if(pat==null){
 			pat = new PATsection[section.getSectionLastNumber()+1];
@@ -56,7 +76,22 @@ public class PAT extends AbstractPSITabel{
 			final TableSection last = pat[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
-
+		if(section.getVersion()!=actualVersionNo){
+			if(newPAT==null){
+				newPAT = new PATsection[section.getSectionLastNumber()+1];
+			}
+			newPAT[section.getSectionNumber()] = section;
+			boolean allFilled = true;
+			for (PATsection element : newPAT) {
+				allFilled &= (element!=null);
+			}
+			if(allFilled){
+				actualPAT = newPAT;
+				patVersions.add(actualPAT);
+				actualVersionNo = section.getVersion();
+				newPAT = null;
+			}
+		}
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
@@ -90,6 +125,13 @@ public class PAT extends AbstractPSITabel{
 		return -1;
 	}
 
+	/**
+	 * Returns true if the pid is contained in the PAT
+	 * TODO this checks if the pid is contained in any version of the PAT, (maybe older) so it may not be
+	 * in the current PAT.
+	 * @param pid
+	 * @return
+	 */
 	public boolean inPAT(final int pid){
 
 		if(pat!=null){
@@ -110,6 +152,32 @@ public class PAT extends AbstractPSITabel{
 
 	public PATsection[] getPATsections() {
 		return pat;
+	}
+
+	/**
+	 * TODO work in progress
+	 * 
+	 * @param packetNo
+	 * @return the PAT valid at moment of packetNO, i.e. for which all sections have been received,
+	 * and which has not yet been replaced with a complete new PAT. If no complete PAT has been received yet at moment packetNo, the next complete PAT will be returned.
+	 */
+	public PAT getPat(long packetNo) {
+		if((pat==null)||(pat.length==0)){
+			return null;
+
+		}else if((pat[0]!=null)&&(packetNo<pat[0].getFirst_packet_no())){ // no complete PAT yet
+			return this;
+		}else if((pat[pat.length-1]!=null)&&(packetNo<pat[pat.length].getFirst_packet_no())){ // no complete PAT yet
+			return this;
+		}else{
+			PATsection l = pat[pat.length-1];
+
+			while((l.getLast_packet_no()<packetNo)&&(l.getNextVersion()!=null)){
+				l=(PATsection) l.getNextVersion();
+
+			}
+		return null;
+		}
 	}
 
 

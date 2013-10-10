@@ -67,7 +67,6 @@ public class DSMCC extends AbstractPSITabel{
 	}
 
 	public void update(final TableSectionExtendedSyntax section){
-		count++;
 		pid=section.getParentPID().getPid();
 
 		final int tableID  = section.getTableId();

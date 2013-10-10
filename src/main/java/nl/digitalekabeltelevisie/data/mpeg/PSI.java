@@ -47,9 +47,9 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.UNTs;
 
 /**
  * Container for all PSI related data
- * 
+ *
  * @author Eric Berendsen
- * 
+ *
  */
 public class PSI {
 
@@ -130,6 +130,18 @@ public class PSI {
 	}
 	public NetworkSync getNetworkSync() {
 		return networkSync;
+	}
+	/**
+	 * TODO, work in progress
+	 * @param packetNo
+	 * @return the PAT valid at moment of packetNO, i.e. for which all sections have been received,
+	 * and which has not yet been replaced with a complete new PAT. If no complete PAT has been received yet at moment packetNo, the next complete PAT will be returned.
+	 */
+	public PAT getPat(long packetNo) {
+		if(pat!=null){
+			return pat.getPat(packetNo);
+		}
+		return null;
 	}
 
 }

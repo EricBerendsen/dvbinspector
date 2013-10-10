@@ -55,7 +55,6 @@ public class GeneralPSITable extends AbstractPSITabel{
 	}
 
 	public void update(final TableSection section){
-		count++;
 
 		if(section.sectionSyntaxIndicator==0x01){
 
