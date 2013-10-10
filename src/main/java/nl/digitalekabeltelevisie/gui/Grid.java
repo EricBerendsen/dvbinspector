@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -35,6 +35,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
@@ -42,17 +43,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
-
 /**
+ * Grid to show individual TS-packets color coded. Mouse over will display PID.
+ *
+ * @author Eric
  *
  */
-public class Grid extends JPanel implements ComponentListener
+public class Grid extends JPanel implements ComponentListener, Scrollable
 {
 
 	final static float dash1[] = {3.0f};
@@ -114,7 +119,7 @@ public class Grid extends JPanel implements ComponentListener
 
 		}
 
-		// exact text does not matter. getToolTipText overriden. This is only needed to activate tool tips
+		// exact text does not matter. getToolTipText overridden. This is only needed to activate tool tips
 		setToolTipText("Test");
 		revalidate();
 	}
@@ -298,6 +303,58 @@ public class Grid extends JPanel implements ComponentListener
 
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getPreferredScrollableViewportSize()
+	 */
+	@Override
+	public Dimension getPreferredScrollableViewportSize() {
+		return getPreferredSize();
+	}
 
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableUnitIncrement(java.awt.Rectangle, int, int)
+	 */
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		if (orientation == SwingConstants.HORIZONTAL){
+			// actual value not relevant, no horizontal scrolling
+			return blockW;
+		}else{
+			// single line
+			return blockH;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableBlockIncrement(java.awt.Rectangle, int, int)
+	 */
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		if (orientation == SwingConstants.HORIZONTAL){
+			// actual value not relevant, no horizontal scrolling
+			return blockW;
+		}else{
+			// round down to integer number of blocks
+			final int h = (int)getVisibleRect().getHeight();
+			return h - (h % blockH);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableTracksViewportWidth()
+	 */
+	@Override
+	public boolean getScrollableTracksViewportWidth() {
+		// We will fit as many blocks on line as Width allows
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableTracksViewportHeight()
+	 */
+	@Override
+	public boolean getScrollableTracksViewportHeight() {
+		return false;
+	}
 
 }
