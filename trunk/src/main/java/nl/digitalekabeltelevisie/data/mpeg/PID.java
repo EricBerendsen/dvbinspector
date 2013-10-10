@@ -185,7 +185,6 @@ public class PID implements TreeNode{
 	}
 
 	public void update_packet(final TSPacket packet) {
-		packets++;
 		// handle 0x015 Mega-frame Initialization Packet (MIP)
 		if(pid==0x015){
 			// MIP has only TSPackets, no structure with PSISectionData
@@ -226,6 +225,7 @@ public class PID implements TreeNode{
 				gatherer.reset();
 			}
 		}
+		packets++;
 	}
 
 	private void processAdaptationField(final TSPacket packet) {
@@ -349,7 +349,7 @@ public class PID implements TreeNode{
 		}
 		if(parentTransportStream.isEnableTSPackets()&&parentTransportStream.tsPacketsLoaded()){
 
-			JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,100));
+			JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 
 		}

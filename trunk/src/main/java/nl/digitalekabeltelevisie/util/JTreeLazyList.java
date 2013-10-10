@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -33,20 +33,34 @@ import java.util.Vector;
 
 import javax.swing.tree.MutableTreeNode;
 
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-
 /**
+ * Class for holding a (long) list of MutableTreeNode's, and loading them only when needed (Lazy evaluation)
+ * Will group items by 100, and create a tree with as many levels as needed.
+ *
+ *
+ *Example: a list of 239 items will look like this;
+ * <pre>
+ * Items [0..238]
+ * +[0..99]
+ * +[100..199]
+ * +[200..238]
+ *   Item [200]
+ *   Item [201]
+ *   .
+ *   .
+ *   Item [238]
+ *
+ * </pre>
  * @author Eric
  *
  */
 public class JTreeLazyList{
 
 
-	private int stepSize = 100;
-	private TransportStream transportStream = null;
-	private int modus;
-	private int noPackets;
+	private static int stepSize = 100;
 	private MutableTreeNode mutableTreeNode = null;
+
+	LazyListItemGetter itemGetter =null;
 
 
 	public class RangeNode implements MutableTreeNode {
@@ -88,7 +102,7 @@ public class JTreeLazyList{
 		private RangeNode getChild(int level, int currentStart, int index){
 			int start = currentStart+(ipower(stepSize,level)*index);
 			int end = (currentStart+(ipower(stepSize,level)*(index+1)))-1;
-			end = Math.min(noPackets-1, end);
+			end = Math.min(itemGetter.getNoItems()-1, end);
 			return new RangeNode(level-1,start,end);
 		}
 
@@ -112,12 +126,12 @@ public class JTreeLazyList{
 				if(children!=null){
 					t = children[childIndex];
 					if(t==null){
-						t=transportStream.getTSPacket(childIndex+start).getJTreeNode(modus);
+						t= itemGetter.getTreeNode(childIndex+start);
 						children[childIndex]=t;
 					}
 				}else{
 					children = new MutableTreeNode[stepSize];
-					t=transportStream.getTSPacket(childIndex+start).getJTreeNode(modus);
+					t= itemGetter.getTreeNode(childIndex+start);
 					children[childIndex]=t;
 				}
 				return t;
@@ -129,7 +143,7 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public int getChildCount() {
-			if((start+ipower(stepSize, level+1))<=noPackets ){
+			if((start+ipower(stepSize, level+1))<=itemGetter.getNoItems() ){
 				return stepSize;
 			}else{
 				if(level==0){
@@ -246,18 +260,20 @@ public class JTreeLazyList{
 	/**
 	 *
 	 */
-	public JTreeLazyList(TransportStream ts,  int step, int modus, int noPackets) {
-		transportStream = ts;
-		this.stepSize = step;
-		this.modus = modus;
-		this.noPackets = noPackets;
+	public JTreeLazyList(LazyListItemGetter itemGetter) {
+		this.itemGetter = itemGetter;
 	}
 
 
+	/**
+	 * @param modus
+	 * @param label display name for the top-element of the tree
+	 * @return
+	 */
 	public MutableTreeNode getJTreeNode(int modus, String label) {
 		if(mutableTreeNode==null){
-			int level = determineLevel(noPackets);
-			mutableTreeNode = new RangeNode(level, 0, noPackets-1,label);
+			int level = determineLevel(itemGetter.getNoItems());
+			mutableTreeNode = new RangeNode(level, 0, itemGetter.getNoItems()-1,label);
 		}
 
 		return mutableTreeNode;

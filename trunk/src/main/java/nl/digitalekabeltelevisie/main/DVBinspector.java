@@ -179,7 +179,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			                pesHandlerMap.put(Integer.valueOf(p.getPid()), p.getPesHandler());
 			            }
 			        }
-			        ts.parseStream(pesHandlerMap);
+			        ts.parseStream(null,pesHandlerMap);
 				}
 			} catch (final IOException e) {
 				logger.log(Level.WARNING, "error parsing transportStream", e);
