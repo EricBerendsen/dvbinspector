@@ -48,6 +48,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.swing.JPanel;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -65,7 +67,7 @@ import nl.digitalekabeltelevisie.util.Interval;
  * @author Eric
  *
  */
-public class EITableImage extends JPanel implements ComponentListener,ImageSource{
+public class EITableImage extends JPanel implements ComponentListener,ImageSource, Scrollable{
 
 	private static final String FONT_NAME = "SansSerif";
 	private static final int LINE_HEIGHT = 20;
@@ -600,6 +602,67 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	@Override
 	public Dimension getPreferredSize() {
 		return getDimension();
+	}
+
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getPreferredScrollableViewportSize()
+	 */
+	@Override
+	public Dimension getPreferredScrollableViewportSize() {
+		return getPreferredSize();
+	}
+
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableUnitIncrement(java.awt.Rectangle, int, int)
+	 */
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		if (orientation == SwingConstants.HORIZONTAL){
+			// 1 hour
+			return (int) ((60 * 60 * 1000) / milliSecsPerPixel);
+		}else{
+			// single line
+			return LINE_HEIGHT;
+		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableBlockIncrement(java.awt.Rectangle, int, int)
+	 */
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		if (orientation == SwingConstants.HORIZONTAL){
+			//
+			final int w = (int)getVisibleRect().getWidth()-SERVICE_NAME_WIDTH;
+			// round down to integer number of hours, at least 1 hour
+			int pixelsHour = (int) ((60 * 60 * 1000) / milliSecsPerPixel);
+			return Math.max(pixelsHour, w-(w%pixelsHour));
+		}else{
+			final int h = (int)getVisibleRect().getHeight()-LEGEND_HEIGHT;
+			// round down to integer number of services
+			return h-(h%LINE_HEIGHT);
+		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableTracksViewportWidth()
+	 */
+	@Override
+	public boolean getScrollableTracksViewportWidth() {
+		return false;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see javax.swing.Scrollable#getScrollableTracksViewportHeight()
+	 */
+	@Override
+	public boolean getScrollableTracksViewportHeight() {
+		return false;
 	}
 
 }
