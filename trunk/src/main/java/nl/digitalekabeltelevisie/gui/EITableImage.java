@@ -653,7 +653,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	@Override
 	public boolean getScrollableTracksViewportWidth() {
-		return false;
+		return (eit==null)||(interval==null);
 	}
 
 
@@ -662,7 +662,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	@Override
 	public boolean getScrollableTracksViewportHeight() {
-		return false;
+		return (eit==null)||(interval==null);
 	}
 
 }
