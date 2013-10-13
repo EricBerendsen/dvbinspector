@@ -170,8 +170,9 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			this.startTime = startTime;
 		}
 
-		/**
-		 * @param r1
+
+		/* (non-Javadoc)
+		 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
 		 */
 		public String getHTML() {
 			StringBuilder r1 = new StringBuilder();
