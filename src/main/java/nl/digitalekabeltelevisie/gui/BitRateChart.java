@@ -28,9 +28,11 @@
 package nl.digitalekabeltelevisie.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -43,15 +45,13 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
-import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.StackedAreaRenderer;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StackedXYAreaRenderer2;
+import org.jfree.data.xy.CategoryTableXYDataset;
 
 /**
  * Shows variation over time of the bandwidth each PID uses
@@ -60,6 +60,42 @@ import org.jfree.data.general.DatasetUtilities;
  *
  */
 public class BitRateChart extends JPanel implements TransportStreamView{
+
+	/**
+	 * @author Eric
+	 *
+	 */
+	private final class PacketTimeNumberFormat extends NumberFormat {
+		/**
+		 *
+		 */
+		private final TransportStream transportStream;
+
+		/**
+		 * @param transportStream
+		 */
+		private PacketTimeNumberFormat(TransportStream transportStream) {
+			this.transportStream = transportStream;
+		}
+
+		@Override
+		public Number parse(String source, ParsePosition parsePosition) {
+			// Not implemented, only used for output.
+			return null;
+		}
+
+		@Override
+		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+			String s = transportStream.getShortPacketTime(number);
+			return toAppendTo.append(s);
+		}
+
+		@Override
+		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+			String s = transportStream.getShortPacketTime((long) number);
+			return toAppendTo.append(s);
+		}
+	}
 
 	private JFreeChart freeChart;
 	private JPanel buttonPanel;
@@ -87,9 +123,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			setTransportStream(transportStream,viewContext);
 		}
 
-
 		add(chartPanel,BorderLayout.CENTER);
-
 	}
 
 	/**
@@ -103,9 +137,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
 		if(transportStream!=null){
 			final int steps=viewContext.getGraphSteps();
-
 			final int noPIDs=viewContext.getShown().size();
-			final double[][] data = new double[noPIDs][steps];
 
 			final short[]used_pids=new short[noPIDs];
 			final ChartLabel[] labels= new ChartLabel[noPIDs];
@@ -119,52 +151,53 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			final int endPacket = viewContext.getEndPacket();
 			final int noPackets = endPacket - startPacket;
 
-			for(int t=0; t<steps;t++){
+			CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
 
-				final int startPacketStep= startPacket +(int)(((long)t*(long)noPackets)/steps);
-				final int endPacketStep = startPacket + (int) (((long)(t+1)*(long)noPackets)/steps);
-				stepLabels[t]=new ChartLabel(transportStream.getShortPacketTime(startPacketStep),(short)t);
-				final int [] pidcount = new int [8192];
-				for(int r = startPacketStep; r< endPacketStep;r++ ){
-					final int pid_current_packet=transportStream.getPacket_pid(r);
-					pidcount[pid_current_packet]++;
-				}
+			for (int i = 0; i < used_pids.length; i++) {
+				for(int t=0; t<steps;t++){
 
-				for (int i = 0; i < used_pids.length; i++) {
+					final int startPacketStep= startPacket +(int)(((long)t*(long)noPackets)/steps);
+					final int endPacketStep = startPacket + (int) (((long)(t+1)*(long)noPackets)/steps);
+					stepLabels[t]=new ChartLabel(transportStream.getShortPacketTime(startPacketStep),(short)t);
+					final int [] pidcount = new int [8192];
+					for(int r = startPacketStep; r< endPacketStep;r++ ){
+						final int pid_current_packet=transportStream.getPacket_pid(r);
+						pidcount[pid_current_packet]++;
+					}
+
 					if(transportStream.getBitRate()!=-1)
 					{
-						data[i][t]=((pidcount[used_pids[i]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep) ;
+						categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[i]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[i].getLabel());
 					}else{
-						data[i][t]=pidcount[used_pids[i]];
+						categoryTableXYDataset.add(startPacketStep,pidcount[used_pids[i]],labels[i].getLabel());
 					}
 				}
 			}
 
-			final CategoryDataset dataSet = DatasetUtilities.createCategoryDataset(labels,stepLabels, data);
-			//because we want custom colors, can not use ChartFactory.createStackedAreaChart, this is almost litteral copy
-			final CategoryAxis categoryAxis = new CategoryAxis("time");
-			categoryAxis.setCategoryMargin(0.0);
-			final ValueAxis valueAxis = new NumberAxis("bitrate");
-			final StackedAreaRenderer renderer = new StackedAreaRenderer();
+			//because we want custom colors, can not use ChartFactory.createStackedXYAreaChart(, this is almost litteral copy
+
+			NumberAxis xAxis = new NumberAxis("time");
+	        xAxis.setAutoRangeIncludesZero(false);
+	        xAxis.setLowerMargin(0.0);
+	        xAxis.setUpperMargin(0.0);
+	        xAxis.setNumberFormatOverride(new PacketTimeNumberFormat(transportStream));
+
+	        NumberAxis yAxis = new NumberAxis("bitrate");
+	        XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("PID: {0}, Time: {1}, bitrate: {2}", new PacketTimeNumberFormat(transportStream), NumberFormat.getNumberInstance());
+
+	        StackedXYAreaRenderer2 renderer = new StackedXYAreaRenderer2(
+	                toolTipGenerator, null);
 			for (int i = 0; i < noPIDs; i++) {
 				renderer.setSeriesPaint(i, viewContext.getShown().get(i).getColor());
 			}
 
-			//tooltips
-			renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
-			final CategoryPlot plot = new CategoryPlot(dataSet, categoryAxis, valueAxis,renderer);
-			plot.setOrientation(PlotOrientation.VERTICAL);
-			// always create with legend
-			freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT,plot, true);
-			freeChart.getLegend().setVisible(legendVisible);
-			plot.setBackgroundPaint(Color.white);
-			plot.setRangePannable(true);
-			plot.setDomainGridlinesVisible(false);
-			plot.setRangeGridlinesVisible(true);
-			plot.setRangeGridlinePaint(Color.lightGray);
+	        renderer.setOutline(false);
+	        XYPlot plot = new XYPlot(categoryTableXYDataset, xAxis, yAxis, renderer);
+	        plot.setOrientation(PlotOrientation.VERTICAL);
+	        plot.setRangeAxis(yAxis);  // forces recalculation of the axis range
 
-			final CategoryAxis domainAxis = plot.getDomainAxis();
-			domainAxis.setAxisLineVisible(true);
+	        freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT,
+	                plot, legendVisible);
 
 			chartPanel.setChart(freeChart);
 			chartPanel.setDomainZoomable(true);
