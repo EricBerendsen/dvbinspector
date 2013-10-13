@@ -934,6 +934,7 @@ public class TransportStream implements TreeNode{
 		if(getBitRate()!=-1){ //can't do anything without a bitrate
 			if(zeroTime==null){
 				final Calendar now=new GregorianCalendar();
+				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
 				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
@@ -955,6 +956,7 @@ public class TransportStream implements TreeNode{
 		if(getBitRate()!=-1){ //can't do anything without a bitrate
 			if(zeroTime==null){
 				final Calendar now=new GregorianCalendar();
+				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
 				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
