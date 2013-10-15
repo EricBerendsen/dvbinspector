@@ -39,6 +39,12 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
+/**
+ * Based on ETSI TS 102 809 V1.1.1 (2010-01) "Signalling and carriage of interactive applications and services in Hybrid broadcast/broadband environments"
+ * 5.3.5.1 Application signalling descriptor
+ * @author Eric
+ *
+ */
 public class ApplicationSignallingDescriptor extends Descriptor {
 
 	private List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
