@@ -51,6 +51,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.AC3Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.AncillaryDataDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ApplicationSignallingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.CADescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
@@ -741,6 +742,10 @@ public class TransportStream implements TreeNode{
 						}else if(d instanceof EnhancedAC3Descriptor){
 							compt_type.append(" Enhanced Dolby Audio (AC3)");
 							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
+							abstractPesHandler = new EAC3Handler();
+						}else if(d instanceof ApplicationSignallingDescriptor){
+							compt_type.append(" Application Information Table (AIT)");
+							short_compt_type.append(" Application Information Table (AIT)");
 							abstractPesHandler = new EAC3Handler();
 						}if(d instanceof CADescriptor) {
 							final CADescriptor cad = (CADescriptor) d;
