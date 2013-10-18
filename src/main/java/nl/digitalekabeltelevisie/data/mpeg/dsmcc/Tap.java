@@ -68,7 +68,7 @@ public class Tap implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("selector_length",selector_length ,null)));
 		if(use==0x0016){ // BIOP_DELIVERY_PARA_USE
 			t.add(new DefaultMutableTreeNode(new KVP("selector_type",selector_type ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("transactionId",transactionId ,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("transactionId",transactionId ,DSMCC_UNMessageSection.getTransactionIDString(transactionId))));
 			t.add(new DefaultMutableTreeNode(new KVP("timeout",timeout ,null)));
 		}
 		return t;

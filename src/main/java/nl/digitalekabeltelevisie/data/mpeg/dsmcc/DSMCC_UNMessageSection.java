@@ -30,7 +30,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -284,7 +284,7 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 			t.add(new DefaultMutableTreeNode(new KVP("protocolDiscriminator",protocolDiscriminator,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("dsmccType",dsmccType,getDSMCCTypeString(dsmccType))));
 			t.add(new DefaultMutableTreeNode(new KVP("messageId",messageId,getMessageIDString(dsmccType, messageId))));
-			t.add(new DefaultMutableTreeNode(new KVP("transactionID",transactionID,null))); // TODO split into originator, version, identification and update toggle flag
+			t.add(new DefaultMutableTreeNode(new KVP("transactionID",transactionID,getTransactionIDString(transactionID))));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("adaptationLength",adaptationLength,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("messageLength",messageLength,null)));
@@ -526,13 +526,24 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 			}
 		default:
 			return null;
-
 		}
 	}
 
 
-
-
+	/**
+	 *
+	 * Based on ETSI TR 101 202 V1.2.1 (2003-01), Table 4.20: Sub-fields of the transactionId
+	 * @param transactionID
+	 * @return
+	 */
+	public static String getTransactionIDString(long transactionID){
+		StringBuilder s = new StringBuilder();
+		s.append("Originator: ").		append((transactionID & 0xC0000000L)>>30); // bits 30 to 31 Bit 30 - zero, Bit 31 - non-zero
+		s.append(", Version: ").		append((transactionID & 0x3FFF0000L)>>16); // bits 16 to 29 This must be incremented/changed every time the control message is updated.
+		s.append(", Identification: ").	append((transactionID & 0x0000FFFEL)>>1); // bits 1 to 15 This must and can only be all zeros for the DownloadServerInitiate message. All other control messages must have one or more non-zero bit(s).
+		s.append(", Updated flag: ").	append( transactionID & 0x00000001L); // bit 0
+		return s.toString();
+	}
 
 	public boolean isObjectCarousel() {
 		return isObjectCarousel;
