@@ -69,7 +69,6 @@ public class ProgressMonitorLargeInputStream  extends FilterInputStream{
         this.size = size;
         if(size>Integer.MAX_VALUE){
         	divider = (size / Integer.MAX_VALUE) + 1;
-        	System.out.println("divider calculated: "+divider+", size: "+size);
         }
 
         monitor = new ProgressMonitor(parentComponent, message, null, 0, (int)(size / divider));
