@@ -46,12 +46,10 @@ public class PositionPushbackInputStream extends PushbackInputStream {
 	 */
 	public PositionPushbackInputStream(InputStream in) {
 		super(in);
-		// TODO Auto-generated constructor stub
 	}
 
 	public PositionPushbackInputStream(InputStream in, int size) {
 		super(in, size);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
