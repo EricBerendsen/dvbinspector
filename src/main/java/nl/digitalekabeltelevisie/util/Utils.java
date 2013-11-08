@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -50,6 +51,7 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
@@ -516,6 +518,86 @@ public final class Utils {
 
 
 
+	/**
+	 * Return a HTML fragment with concatenated text of DVBStrings. control code 0x8A is replaced with &lt;br&gt;,
+	 * 0x86 with &lt;em&gt;, 0x87 with &lt;/em&gt;
+	 *
+	 * Assumes all DVBStrings use same charset as defined in first element.
+	 *
+	 * @param dvbStrings
+	 * @param maxWidth (0 = unlimited)
+	 * @return
+	 */
+	public static String getEscapedHTML(List<DVBString> dvbStrings, int maxWidth){
+		StringBuilder sb = new StringBuilder();
+		byte[]rawData = new byte[dvbStrings.size()*255]; // max space needed as DVBString as maximum 255 chars
+		int rawDataLen = 0;
+		// TODO now uses only the first charset as encoding for all DVBStrings. Could be different.
+		Charset charset = dvbStrings.get(0).getCharSet();
+
+		//get the 'raw' data from all DVBStrings concatenated, so strip the first byte(s) with encoding
+		for (DVBString dvbString : dvbStrings) {
+			byte[] b = dvbString.getData();
+			int offset = 1 + dvbString.getOffset(); // offset starts at the len byte, actual data +1
+			int length = dvbString.getLength();
+
+			// dont't care about actual Charset chSet = getCharSet(b, offset, length);
+			// only need to skip the first byte(s)
+			int charSetLen = getCharSetLen(b, offset);
+
+			length -= charSetLen;
+			offset += charSetLen;
+
+			for (int i = offset; i < (offset+length); i++) {
+					rawData[rawDataLen++]=b[i];
+			}
+		}
+
+		int i=0;
+		int currentLineLength = 0;
+		while(i<rawDataLen){
+			byte[]filteredBytes=new byte[dvbStrings.size()*255]; // max space needed as DVBString as maximum 255 chars
+			int filteredLength=0;
+			// find 'regular' chars
+			while((i<rawDataLen)&&(rawData[i]>-97)){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f))
+				filteredBytes[filteredLength++]=rawData[i++];
+			}
+			// found all reg chars. process them
+			String decodedString = null;
+			if(charset==null){
+				decodedString = Iso6937ToUnicode.convert(filteredBytes, 0, filteredLength); //default for DVB
+			}else{
+				decodedString = new String(filteredBytes, 0, filteredLength,charset);
+			}
+			// now split  decodedString into words
+			 StringTokenizer st = new StringTokenizer(decodedString);
+
+			// append words to sb as long as lineLen < max
+			while (st.hasMoreTokens()) {
+			     String s = st.nextToken();
+			     if((maxWidth!=0)&& ((currentLineLength+s.length())>maxWidth)){
+			    	 sb.append("<br>").append(escapeHTML(s));
+			    	 currentLineLength=s.length();
+			     }else{
+			    	 sb.append(' ').append(escapeHTML(s));
+			    	 currentLineLength+=1+s.length();
+			     }
+			}
+			// now the special chars 0x80 - 0x97 (or EOF)
+			while((i<rawDataLen)&&(rawData[i]<=-97)){  // bytes are signed, what we really mean is if((b[i]>=0x80)&&(b[i]<=0x9f))
+				if(rawData[i]==-118){ // 0x8A, CR/LF
+					sb.append("<br>");
+					currentLineLength=0;
+				}else if(rawData[i]==-122){ // 0x86, character emphasis on
+					sb.append("<em>");
+				}else if(rawData[i]==-121){ // 0x87, character emphasis off
+					sb.append("</em>");
+				}
+				i++;
+			}
+		}
+		return sb.toString();
+	}
 
 	/**
 	 *
@@ -532,46 +614,16 @@ public final class Utils {
 		if(length<=0){
 			return "";
 		}
-		Charset charset = null;
-		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
-			final int selectorByte=b[offset];
-			try {
-				if((selectorByte>0)&&(selectorByte<=0x0b)){
-					charset = Charset.forName("ISO-8859-"+(selectorByte+4));
-					offset++;
-					length--;
-				}else if((selectorByte==0x10)){
-					if(b[offset+1]==0x0){
-						charset = Charset.forName("ISO-8859-"+b[offset+2]);
-						offset+=3;
-						length-=3;
-					}
-				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
-					charset = Charset.forName("UTF-8");
-					offset++;
-					length--;
-				}
-			} catch (final IllegalCharsetNameException e) {
-				logger.info("IllegalCharsetNameException in getString:"+e);
-				charset = Charset.forName("ISO-8859-1");
-			} catch (final UnsupportedCharsetException e) {
-				charset = Charset.forName("ISO-8859-1");
-				logger.info("UnsupportedCharsetException in getString:"+e+", String="+new String(b, offset, length, charset));
-			} catch (final IllegalArgumentException e) {
-				logger.info("IllegalArgumentException in getString:"+e);
-				charset = Charset.forName("ISO-8859-1");
-			}
-			if(charset==null){
-				charset = Charset.forName("ISO-8859-1");
-			}
-		}
+		Charset charset = getCharSet(b, offset, length);
+		int charSetLen = getCharSetLen(b, offset);
 
-		// filter Single byte control codes
+		length -= charSetLen;
+		offset += charSetLen;
 
 		final byte[] filteredBytes = new byte[length];  // length is enough, might need less
 		int filteredLength=0;
 
-		// TODO this is where we loose formatting, like newlines and character emphasis
+		// this is where we loose formatting, like newlines and character emphasis
 		for (int i = offset; i < (offset+length); i++) {
 			if(b[i]>-97){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f)){
 				filteredBytes[filteredLength++]=b[i];
@@ -585,6 +637,56 @@ public final class Utils {
 			return new String(filteredBytes, 0, filteredLength,charset);
 		}
 	}
+
+	public static Charset getCharSet(final byte b[], final int offset, final int length){
+		Charset charset = null;
+		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
+			final int selectorByte=b[offset];
+			try {
+				if((selectorByte>0)&&(selectorByte<=0x0b)){
+					charset = Charset.forName("ISO-8859-"+(selectorByte+4));
+				}else if((selectorByte==0x10)){
+					if(b[offset+1]==0x0){
+						charset = Charset.forName("ISO-8859-"+b[offset+2]);
+					} // else == reserved for future use, so not implemented
+				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
+					charset = Charset.forName("UTF-8");
+				}
+			} catch (final IllegalCharsetNameException e) {
+				logger.info("IllegalCharsetNameException in getCharSet:"+e);
+				charset = Charset.forName("ISO-8859-1");
+			} catch (final UnsupportedCharsetException e) {
+				charset = Charset.forName("ISO-8859-1");
+				logger.info("UnsupportedCharsetException in getCharSet:"+e+", String="+new String(b, offset, length, charset));
+			} catch (final IllegalArgumentException e) {
+				logger.info("IllegalArgumentException in getCharSet:"+e);
+				charset = Charset.forName("ISO-8859-1");
+			}
+			if(charset==null){
+				charset = Charset.forName("ISO-8859-1");
+			}
+		}
+		return charset;
+
+	}
+
+	private static int getCharSetLen(final byte b[], final int offset){
+		int charsetLen = 0;
+		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
+			final int selectorByte=b[offset];
+			if((selectorByte>0)&&(selectorByte<=0x0b)){
+				charsetLen = 1;
+			}else if((selectorByte==0x10)){
+				if(b[offset+1]==0x0){
+					charsetLen = 3;
+				}
+			}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
+				charsetLen = 1;
+			}
+		}
+		return charsetLen;
+	}
+
 
 	public static String getISO8859_1String(final byte b[], final int offset, final int length) {
 		if(length<=0){

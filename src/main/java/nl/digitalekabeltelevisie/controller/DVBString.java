@@ -28,6 +28,11 @@ package nl.digitalekabeltelevisie.controller;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+
+import nl.digitalekabeltelevisie.util.Utils;
+
 /**
  *
  * Representation of an DVB string, where 1th byte indicates length of string, and optional control codes to select a character table.
@@ -54,12 +59,31 @@ public class DVBString {
 	}
 
 
-	// TODO add toHTML() method, which keeps linefeeds
-	// should escapeHTML as well, because if we do it later it will break the linefeeds...
+	/**
+	 * @return HTML representation of this string, including linefeeds  (0x8A) and emphasis (0x86/0x87). Line length not limited
+	 *
+	 */
+	public String toEscapedHTML(){
+		return toEscapedHTML(0);
+	}
+
+	/**
+	 * @param maxWidth maximum width of HTML fragment in chars.
+	 * @return HTML representation of this string, including linefeeds  (0x8A) and emphasis (0x86/0x87). Line length max
+	 */
+	public String toEscapedHTML(int maxWidth){
+		ArrayList<DVBString> array = new ArrayList<DVBString>();
+		array.add(this);
+		return getEscapedHTML(array, maxWidth);
+	}
 
 	@Override
 	public String toString(){
 		return getString(data,this.getOffset()+1, this.getLength());
+	}
+
+	public Charset getCharSet(){
+		return Utils.getCharSet(data, this.getOffset()+1, this.getLength());
 	}
 
 	public String getEncodingString(){
@@ -133,6 +157,11 @@ public class DVBString {
 
 	public int getOffset() {
 		return offset;
+	}
+
+
+	public byte[] getData() {
+		return data;
 	}
 
 }
