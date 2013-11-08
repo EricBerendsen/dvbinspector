@@ -936,7 +936,7 @@ public class TransportStream implements TreeNode{
 	public String getPacketTime(final long packetNo){
 		String r = null;
 
-		if(getBitRate()!=-1){ //can't do anything without a bitrate
+		if(getBitRate()!=-1){ //can't calculate time without a bitrate
 			if(zeroTime==null){
 				final Calendar now=new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
@@ -951,6 +951,8 @@ public class TransportStream implements TreeNode{
 
 				r = now.get(Calendar.YEAR)+"/"+ (now.get(Calendar.MONTH)+1)+"/"+now.get(Calendar.DAY_OF_MONTH)+" "+now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
+		}else{ // no bitrate, return packet number
+			r = ""+packetNo+" (packetNo)";
 		}
 		return r;
 	}
@@ -958,7 +960,7 @@ public class TransportStream implements TreeNode{
 	public String getShortPacketTime(final long packetNo){
 		String r = null;
 
-		if(getBitRate()!=-1){ //can't do anything without a bitrate
+		if(getBitRate()!=-1){ //can't calculate time  without a bitrate
 			if(zeroTime==null){
 				final Calendar now=new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
@@ -973,6 +975,8 @@ public class TransportStream implements TreeNode{
 
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
+		}else{ // no bitrate
+			r = ""+packetNo+" (packetNo)";
 		}
 		return r;
 	}
@@ -1022,11 +1026,9 @@ public class TransportStream implements TreeNode{
 
 					randomAccessFile.close();
 				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-					logger.warning("FileNotFoundException");
+					logger.warning("FileNotFoundException:"+e);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warning("IOException:"+e);
 				}
 
 			}else{
