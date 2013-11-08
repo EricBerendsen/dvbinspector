@@ -51,6 +51,7 @@ import javax.swing.JPanel;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
@@ -264,6 +265,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	}
 
 
+
 	/**
 	 * Draws a column with service names at the left of the image
 	 * If no name found in SDT put "Service " + service ID.
@@ -399,12 +401,15 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 
 				int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
 				if(row<serviceOrder.size()){
+					r1.append("<html><b>");
 					int serviceId = (Integer) serviceOrder.toArray()[row];
-					String name = eit.getParentPSI().getSdt().getServiceName(serviceId);
+					DVBString name = eit.getParentPSI().getSdt().getServiceNameDVBString(serviceId);
 					if(name==null){
-						name = "Service "+serviceId;
+						r1.append("Service ").append(serviceId);
+					}else{
+						r1.append(name.toEscapedHTML());
 					}
-					r1.append("<html><b>").append(name).append("</b><br>");
+					r1.append("</b><br>");
 
 					Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
 					Event event = findEvent(serviceId, thisDate);

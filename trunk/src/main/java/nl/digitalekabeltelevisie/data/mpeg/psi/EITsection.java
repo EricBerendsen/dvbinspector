@@ -34,6 +34,7 @@ import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -192,7 +193,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 				}
 			}
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
-			StringBuilder t = new StringBuilder();
+			ArrayList<DVBString> extendedEventStrings = new ArrayList<DVBString>();
 			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
 				if(!extEvent.getItemList().isEmpty()){ // this extended Event has items
 					r1.append("<br><table>");
@@ -207,11 +208,10 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 					}
 					r1.append("</table>");
 				}
-				t.append(extEvent.getText().toString());
+				extendedEventStrings.add(extEvent.getText());
 			}
-			String extended = t.toString();
-			if(!extended.isEmpty()){
-				r1.append("<br>").append(escapeHtmlBreakLines(extended)).append("<br>");
+			if(!extendedEventStrings.isEmpty()){
+				r1.append("<br>").append(getEscapedHTML(extendedEventStrings,80)).append("<br>");
 			}
 			final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
 			if(!contentDescList.isEmpty()){

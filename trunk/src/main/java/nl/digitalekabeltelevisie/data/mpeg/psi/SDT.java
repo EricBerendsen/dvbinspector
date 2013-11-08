@@ -36,6 +36,7 @@ import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -94,7 +95,17 @@ public class SDT extends AbstractPSITabel{
 	}
 
 	public String getServiceName(final int serviceID){
-		String r = null;
+		DVBString dvbString = getServiceNameDVBString(serviceID);
+		if(dvbString!=null){
+			return dvbString.toString();
+		}else{
+			return null;
+		}
+	}
+
+
+	public DVBString getServiceNameDVBString(final int serviceID){
+		DVBString r = null;
 
 		final SDTsection.Service service=getService(serviceID);
 		if(service!=null) {
@@ -102,7 +113,7 @@ public class SDT extends AbstractPSITabel{
 			while(descs.hasNext()){
 				final Descriptor d=descs.next();
 				if(d instanceof ServiceDescriptor) {
-					r = ((ServiceDescriptor)d).getServiceName().toString();
+					r = ((ServiceDescriptor)d).getServiceName();
 					return r;
 				}
 			}
