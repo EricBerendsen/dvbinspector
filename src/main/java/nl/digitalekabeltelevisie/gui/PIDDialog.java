@@ -71,10 +71,10 @@ PropertyChangeListener, ListSelectionListener {
 	 *
 	 */
 	private static final long serialVersionUID = -3439016568120119881L;
-	private final JList leftList;
-	private final JList rightList;
-	private DefaultListModel leftListModel;
-	private DefaultListModel rightListModel;
+	private final JList<ChartLabel> leftList;
+	private final JList<ChartLabel> rightList;
+	private DefaultListModel<ChartLabel> leftListModel;
+	private DefaultListModel<ChartLabel> rightListModel;
 
 	private final DVBinspector controller;
 
@@ -114,7 +114,7 @@ PropertyChangeListener, ListSelectionListener {
 
 	private final PacketSelectionPanel packetSelectionStart;
 	private final PacketSelectionPanel packetSelectionEnd;
-	private final JComboBox stepsChooser;
+	private final JComboBox<Integer> stepsChooser;
 
 	private final JScrollPane leftListScroller;
 	private final JScrollPane rightlistScroller;
@@ -148,7 +148,7 @@ PropertyChangeListener, ListSelectionListener {
 
 		 }
 		 public void actionPerformed(final ActionEvent e) {
-			 final Enumeration<?> el = leftListModel.elements();
+			 final Enumeration<ChartLabel> el = leftListModel.elements();
 			 while(el.hasMoreElements()){
 				 rightListModel.addElement(el.nextElement());
 			 }
@@ -192,7 +192,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 		}
 		public void actionPerformed(final ActionEvent e) {
-			final DefaultListModel tmp = leftListModel;
+			final DefaultListModel<ChartLabel> tmp = leftListModel;
 			leftListModel = rightListModel;
 			leftList.setModel(rightListModel);
 			rightListModel = tmp;
@@ -241,7 +241,7 @@ PropertyChangeListener, ListSelectionListener {
 
 		}
 		public void actionPerformed(final ActionEvent e) {
-			final Enumeration<?> el = rightListModel.elements();
+			final Enumeration<ChartLabel> el = rightListModel.elements();
 			while(el.hasMoreElements()){
 				leftListModel.addElement(el.nextElement());
 			}
@@ -390,9 +390,9 @@ PropertyChangeListener, ListSelectionListener {
 
 			final List<ChartLabel> notShown = new ArrayList<ChartLabel>();
 
-			final Enumeration<?> el2 = leftListModel.elements();
+			final Enumeration<ChartLabel> el2 = leftListModel.elements();
 			while(el2.hasMoreElements()){
-				notShown.add((ChartLabel)el2.nextElement());
+				notShown.add(el2.nextElement());
 			}
 
 			orgView.setShown(shown);
@@ -458,21 +458,21 @@ PropertyChangeListener, ListSelectionListener {
 		final JPanel packetPanel = new JPanel();
 		pidPanel.setLayout(new BoxLayout(pidPanel,BoxLayout.X_AXIS));
 
-		leftListModel = new DefaultListModel();
+		leftListModel = new DefaultListModel<ChartLabel>();
 		for (final ChartLabel label : viewContext.getNotShown()) {
 			leftListModel.addElement(label);
 
 		}
-		leftList = new JList(leftListModel);
+		leftList = new JList<ChartLabel>(leftListModel);
 		leftList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		rightListModel = new DefaultListModel();
+		rightListModel = new DefaultListModel<ChartLabel>();
 
 		for (final ChartLabel label : viewContext.getShown()) {
 			rightListModel.addElement(label);
 
 		}
-		rightList = new JList(rightListModel);
+		rightList = new JList<ChartLabel>(rightListModel);
 
 
 		final JPanel buttonPanel = new JPanel();
@@ -590,8 +590,8 @@ PropertyChangeListener, ListSelectionListener {
 				BorderFactory.createEmptyBorder(5,5,5,5)));
 
 
-		final Object [] stepOptions = {1,2,5,10,20,50,100,200,500};
-		stepsChooser = new JComboBox(stepOptions);
+		final Integer [] stepOptions = {1,2,5,10,20,50,100,200,500};
+		stepsChooser = new JComboBox<Integer>(stepOptions);
 		stepsChooser.addActionListener(this);
 		stepsChooserPanel.add(stepsChooser);
 
@@ -668,7 +668,7 @@ PropertyChangeListener, ListSelectionListener {
 		packetSelectionEnd.setRangeValue(1, viewContex.getMaxPacket(), viewContex.getEndPacket(),viewContex.getTransportStream());
 
 		for(int i=0; i<stepsChooser.getItemCount();i++ ){
-			if(viewContex.getGraphSteps()==(Integer) stepsChooser.getItemAt(i)){
+			if(viewContex.getGraphSteps()==stepsChooser.getItemAt(i)){
 				stepsChooser.setSelectedIndex(i);
 			}
 		}
