@@ -77,7 +77,7 @@ public class CAT extends AbstractPSITabel {
 		if (cat != null) {
 			for (CAsection element : cat) {
 				if (element != null) {
-					t.add(element.getJTreeNode(modus));
+					addSectionVersionsToJTree(t, element, modus);
 				}
 			}
 		}
