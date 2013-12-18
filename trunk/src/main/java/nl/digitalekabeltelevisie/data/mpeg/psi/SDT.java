@@ -82,7 +82,7 @@ public class SDT extends AbstractPSITabel{
 			for (SDTsection section : sections) {
 				if(section!= null){
 					if(!Utils.simpleModus(modus)){
-						n.add(section.getJTreeNode(modus));
+						addSectionVersionsToJTree(n, section, modus);
 					}else{
 						addListJTree(n,section.getServiceList(),modus,"services");
 					}
