@@ -74,6 +74,10 @@ public class GeneralPesHandler  implements TreeNode{
 
 	protected final List<PesPacketData>	pesPackets	= new ArrayList<PesPacketData>();
 	private PID pid;
+	protected int DEFAULT_BUF_LEN = 10;
+	protected byte[] pesDataBuffer = new byte[DEFAULT_BUF_LEN];
+	protected int bufStart = 0;
+	protected int bufEnd = 0;
 
 
 	public void processPesDataBytes(final PesPacketData pesData){
@@ -189,6 +193,29 @@ public class GeneralPesHandler  implements TreeNode{
 			}
 		}
 		return bgImage;
+	}
+
+	/**
+	 * @param pesDataField
+	 */
+	protected void copyIntoBuf(final PesPacketData pesDataField) {
+		final int len = pesDataField.getPesDataLen();
+		// clean if needed, remove used bytes from start en append new space at end
+		if ((len + bufEnd) > pesDataBuffer.length) {
+			final byte[] newBuf = new byte[Math.max((len + bufEnd) - bufStart,DEFAULT_BUF_LEN)];
+			System.arraycopy(pesDataBuffer, bufStart, newBuf, 0, bufEnd - bufStart);
+			pesDataBuffer = newBuf;
+			bufEnd = bufEnd - bufStart;
+			bufStart = 0;
+		}
+
+		// now copy new data into buf
+		System.arraycopy(pesDataField.getData(),
+				pesDataField.getPesDataStart(),
+				pesDataBuffer,
+				bufEnd,
+				pesDataField.getPesDataLen());
+		bufEnd+= pesDataField.getPesDataLen();
 	}
 
 

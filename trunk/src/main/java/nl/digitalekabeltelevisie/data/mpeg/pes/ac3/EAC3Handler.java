@@ -51,10 +51,6 @@ public class EAC3Handler extends GeneralPesHandler{
 
 	private final List<EAC3SyncFrame> ac3Frames = new ArrayList<EAC3SyncFrame>();
 
-	private byte[] pesDataBuffer = new byte[10000];
-	private int bufStart = 0;
-	private int bufEnd = 0;
-
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
 	 */
@@ -64,23 +60,7 @@ public class EAC3Handler extends GeneralPesHandler{
 		pesPackets.add(ac3PesDataField);
 		// add data from packet to buffer
 
-		final int len = ac3PesDataField.getPesDataLen();
-		// clean if needed, remove used bytes from start en append new space at end
-		if ((len + bufEnd) > pesDataBuffer.length) {
-			final byte[] newBuf = new byte[20000];
-			System.arraycopy(pesDataBuffer, bufStart, newBuf, 0, bufEnd - bufStart);
-			pesDataBuffer = newBuf;
-			bufEnd = bufEnd - bufStart;
-			bufStart = 0;
-		}
-
-		// now copy new data into buf
-		System.arraycopy(ac3PesDataField.getData(),
-				ac3PesDataField.getPesDataStart(),
-				pesDataBuffer,
-				bufEnd,
-				ac3PesDataField.getPesDataLen());
-		bufEnd+= ac3PesDataField.getPesDataLen();
+		copyIntoBuf(ac3PesDataField);
 
 		int i = bufStart;
 		int end = bufStart;
