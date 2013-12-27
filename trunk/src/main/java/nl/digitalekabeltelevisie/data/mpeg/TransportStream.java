@@ -329,7 +329,7 @@ public class TransportStream implements TreeNode{
 			return new PositionPushbackInputStream(new BufferedInputStream(is),200);
 		}else{
 			return new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
-                    "Reading " + file.getName(),is, expectedSize)),200);
+                    "Reading file \"" + file.getPath() +"\"",is, expectedSize)),200);
 		}
 	}
 
