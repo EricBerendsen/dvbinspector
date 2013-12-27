@@ -350,12 +350,12 @@ public class LinkageDescriptor extends Descriptor {
 		case 0x0B : return "IP/MAC Notification Service";
 		case 0x0C : return "TS containing INT BAT or NIT";
 
-		case 0x81 : return "linkage to NorDig bootloader";
-		case 0x82 : return "Undocumented: linkage to Ziggo software update"; // or NorDig Simulcast replacement service.
+		case 0x81 : return "user defined: (linkage to NorDig bootloader)";
+		case 0x82 : return "user defined: (NorDig Simulcast replacement service/linkage to Ziggo software update)"; // or NorDig Simulcast replacement service.
 
-		case 0xA0 : return "link to OpenTV VOD service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-		case 0xA6 : return "link to OpenTV ITV service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-		case 0xA7 : return "link to WEB service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0xA0 : return "user defined: link to OpenTV VOD service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0xA6 : return "user defined: link to OpenTV ITV service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0xA7 : return "user defined: link to WEB service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
 		case 0xFF : return "reserved for future use";
 
