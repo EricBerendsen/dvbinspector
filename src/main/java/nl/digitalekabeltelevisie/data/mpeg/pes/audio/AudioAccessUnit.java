@@ -603,7 +603,7 @@ public class AudioAccessUnit implements TreeNode {
 	public int getFrameSize() {
 		// from jlayer Header.java
 		final int h_version=1; // only mpeg1 for now
-		int framesize =0;
+		int framesize =-1;
 		if (layer == 1)
 		{
 			framesize = (12 * bitrates[h_version][0][bit_rate_index]) /
@@ -613,7 +613,7 @@ public class AudioAccessUnit implements TreeNode {
 			}
 			framesize <<= 2;		// one slot is 4 bytes long
 		}
-		else
+		else if (layer > 1)
 		{
 			framesize = (144 * bitrates[h_version][layer - 1][bit_rate_index]) /
 					frequencies[h_version][sampling_frequency_index];
