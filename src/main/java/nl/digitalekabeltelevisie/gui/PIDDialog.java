@@ -583,6 +583,11 @@ PropertyChangeListener, ListSelectionListener {
 
 		packetSelectionStart = new PacketSelectionPanel("Start", 0, viewContext.getMaxPacket(), 0,viewContext.getTransportStream());
 		packetSelectionEnd = new PacketSelectionPanel("End",0, viewContext.getMaxPacket(), viewContext.getMaxPacket(),viewContext.getTransportStream());
+
+		packetPanel.setLayout(new BoxLayout(packetPanel, BoxLayout.Y_AXIS));
+		packetPanel.add(packetSelectionStart);
+		packetPanel.add(packetSelectionEnd);
+
 		final JPanel stepsChooserPanel = new JPanel();
 
 		stepsChooserPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -595,9 +600,7 @@ PropertyChangeListener, ListSelectionListener {
 		stepsChooser.addActionListener(this);
 		stepsChooserPanel.add(stepsChooser);
 
-		packetPanel.setLayout(new BoxLayout(packetPanel, BoxLayout.Y_AXIS));
-		packetPanel.add(packetSelectionStart);
-		packetPanel.add(packetSelectionEnd);
+
 
 		final JPanel stepsPanel = new JPanel();
 		stepsPanel.setLayout(new BoxLayout(stepsPanel, BoxLayout.X_AXIS));
