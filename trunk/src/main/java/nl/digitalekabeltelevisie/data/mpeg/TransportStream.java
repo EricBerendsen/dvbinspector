@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -264,6 +264,7 @@ public class TransportStream implements TreeNode{
 			}
 		} while (bytes_read==MPEGConstants.packet_length);
 		namePIDs();
+		calculateBitRate();
 	}
 
 	/**
@@ -643,7 +644,7 @@ public class TransportStream implements TreeNode{
 		return "?";
 	}
 
-	public void namePIDs() {
+	private void namePIDs() {
 
 		// first the easy ones, the fixed values
 		for (short i = 0; i <=0x1f; i++) {
@@ -810,6 +811,14 @@ public class TransportStream implements TreeNode{
 				}
 			}
 		}
+	}
+
+
+
+	/**
+	 *
+	 */
+	private void calculateBitRate() {
 
 		// now calculate bitrate of stream by averaging bitrates of PIDS with PCR
 
