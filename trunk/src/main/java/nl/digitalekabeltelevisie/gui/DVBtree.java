@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -80,6 +80,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
 /**
@@ -511,6 +512,19 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					logger.info("Open command cancelled by user." );
 				}
 			}
+			if (ae.getActionCommand().equals("play")){
+				final KVP kvp = (KVP)dmtn.getUserObject();
+				final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
+				audioHandler.play();
+
+			}
+			if (ae.getActionCommand().equals("stop")){
+				final KVP kvp = (KVP)dmtn.getUserObject();
+				final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
+				audioHandler.stop();
+
+			}
+
 
 		}
 	}

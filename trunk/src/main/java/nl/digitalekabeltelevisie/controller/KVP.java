@@ -380,6 +380,12 @@ public class KVP{
 		this.owner = owner;
 	}
 
+	/**
+	 * @param subMenu the subMenu to set
+	 */
+	public void setSubMenu(final JMenuItem subMenu) {
+		this.subMenu = subMenu;
+	}
 
 	/**
 	 * @return the owner

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -51,7 +51,19 @@ public class AudioAccessUnit implements TreeNode {
 	private final long pts;
 	private final int syncWord;
 	private final int id;
-	private final int	layer;
+
+	/**
+	 * This is the values as it is represented in the header of the access unit. It does NOT match the logical layer value!
+	 *
+	 * <pre>
+	 * 2 bits to indicate which layer is used, according to the following table.
+	 * "11" Layer I
+	 * "10" Layer II
+	 * "01" Layer III
+	 * "00" reserved
+	 * </pre>
+	 */
+	private final int layer;
 	private final int protection_bit;
 	private final int bit_rate_index;
 	private final int sampling_frequency_index;
@@ -62,7 +74,7 @@ public class AudioAccessUnit implements TreeNode {
 	private final int copyright;
 	private final int original_home;
 	private final int emphasis;
-	private int crc_check;
+	//private int crc_check;
 
 	private final byte [] data;
 	private final int start;
@@ -138,7 +150,7 @@ public class AudioAccessUnit implements TreeNode {
 		original_home = getInt(data, i+3, 1, 0X04)>>2;
 		emphasis = getInt(data, i+3, 1, 0X03);
 		if (protection_bit==0){
-			crc_check = getInt(data, i+4, 2, Utils.MASK_16BITS);
+			//crc_check = getInt(data, i+4, 2, Utils.MASK_16BITS);
 		}
 	}
 
@@ -167,7 +179,7 @@ public class AudioAccessUnit implements TreeNode {
 		s.add(new DefaultMutableTreeNode(new KVP("original/home",original_home, original_home==1?"original":"copy")));
 		s.add(new DefaultMutableTreeNode(new KVP("emphasis",emphasis, getEmphasisString(emphasis))));
 		if (protection_bit==0){
-			s.add(new DefaultMutableTreeNode(new KVP("crc_check",crc_check, null)));
+			s.add(new DefaultMutableTreeNode(new KVP("crc_check",getInt(data, start+4, 2, Utils.MASK_16BITS), null)));
 		}
 
 
@@ -247,6 +259,37 @@ public class AudioAccessUnit implements TreeNode {
 				return "16 kHz";
 			default:
 				return "reserved";
+			}
+		}
+	}
+
+	public int getSamplingFrequency(){
+		return getSamplingFrequency(id, sampling_frequency_index);
+	}
+
+	public static int getSamplingFrequency(final int id, final int sampling_frequency_index) {
+
+		if(id==1) {
+			switch (sampling_frequency_index) {
+			case 0x0:
+				return 44100;
+			case 0x1:
+				return 48000;
+			case 0x2:
+				return 32000;
+			default:
+				throw new IllegalArgumentException("id:"+id+",sampling_frequency_index:"+sampling_frequency_index);
+			}
+		}else{ // id==0,low bitrate
+			switch (sampling_frequency_index) {
+			case 0x0:
+				return 22050;
+			case 0x1:
+				return 24000;
+			case 0x2:
+				return 16000;
+			default:
+				throw new IllegalArgumentException("id:"+id+",sampling_frequency_index:"+sampling_frequency_index);
 			}
 		}
 	}
@@ -601,10 +644,15 @@ public class AudioAccessUnit implements TreeNode {
 	}
 
 	public int getFrameSize() {
-		// from jlayer Header.java
-		final int h_version=1; // only mpeg1 for now
+		// based on javazoom jlayer Header.java
+		// For MPEG2.5 this could be 2, but MPEG2.5 is not supported in DVB
+		// MPEG2 id ==0,  for extension to lower sampling frequencies.
+		final int h_version=id;
+		// The layer field in jlayer is corrected for the 'inverse' values from 11172-3
+		int javazoomLayer = 4 - layer;
+
 		int framesize =-1;
-		if (layer == 1)
+		if (javazoomLayer == 1)
 		{
 			framesize = (12 * bitrates[h_version][0][bit_rate_index]) /
 					frequencies[h_version][sampling_frequency_index];
@@ -613,9 +661,9 @@ public class AudioAccessUnit implements TreeNode {
 			}
 			framesize <<= 2;		// one slot is 4 bytes long
 		}
-		else if (layer > 1)
+		else if (javazoomLayer > 1)
 		{
-			framesize = (144 * bitrates[h_version][layer - 1][bit_rate_index]) /
+			framesize = (144 * bitrates[h_version][javazoomLayer - 1][bit_rate_index]) /
 					frequencies[h_version][sampling_frequency_index];
 			if ((h_version == MPEG2_LSF) || (h_version == MPEG25_LSF)){
 				framesize >>= 1;	// SZD
@@ -627,10 +675,6 @@ public class AudioAccessUnit implements TreeNode {
 		// EB total length
 		// framesize -= 4;             // subtract header size
 		return framesize;
-	}
-
-	public int getCrc_check() {
-		return crc_check;
 	}
 
 
@@ -653,5 +697,4 @@ public class AudioAccessUnit implements TreeNode {
 		return new AncillaryData(data, start, getFrameSize());
 
 	}
-
 }
