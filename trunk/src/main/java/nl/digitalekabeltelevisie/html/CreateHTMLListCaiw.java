@@ -46,7 +46,7 @@ public class CreateHTMLListCaiw implements Runnable{
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_25_18_30_02.DAT");
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_24_20_44_58.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_04_30_19_49_34.DAT");
-		transportStream = new TransportStream("d:\\ts\\dvb-c\\Caiway 554000 23-8-2013-6900.ts");
+		transportStream = new TransportStream("d:\\ts\\dvb-c\\Caiway 554000 29-12-2013-6900.ts");
 		//transportStream = new TransportStream("d:\\ts\\caiway\\2013-7-4-20-19-538000-6900-C.ts");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_07_03_09_33_12.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\818_2009_03_05_17_59_31.DAT");
@@ -59,7 +59,6 @@ public class CreateHTMLListCaiw implements Runnable{
 			e.printStackTrace();
 		}
 
-		transportStream.namePIDs();
 		System.out.println(transportStream);
 		writeHTML(transportStream);
 		System.out.println("Klaar!!");
@@ -70,7 +69,7 @@ public class CreateHTMLListCaiw implements Runnable{
 	private void writeHTML(final TransportStream tStream) {
 
 		try {
-			final FileWriter fstream = new FileWriter("d:\\eric\\caiw20130823.html");
+			final FileWriter fstream = new FileWriter("d:\\eric\\caiw20131229.html");
 			final BufferedWriter out = new BufferedWriter(fstream);
 
 			out.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head><script src=\"sorttable.js\"></script></head>\n");
@@ -194,8 +193,8 @@ public class CreateHTMLListCaiw implements Runnable{
 				}
 			}
 
-			out.write("	\n");
-			out.write("	</tbody></table>\n");
+			out.write("\n");
+			out.write("</tbody></table>\n");
 
 			out.write("");
 			out.write("</body></html>");

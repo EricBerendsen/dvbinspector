@@ -47,7 +47,7 @@ public class CreateHTMLListCasema implements Runnable{
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_24_20_44_58.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_04_30_19_49_34.DAT");
 		//transportStream = new TransportStream("E:\\dtv\\ziggo_west\\ZiggoMultikabel 514000 05-25 20-28-50.ts");
-		transportStream = new TransportStream("D:\\ts\\dvb-c\\Casema 372000 23-4-2013-6875.ts");
+		transportStream = new TransportStream("D:\\ts\\dvb-c\\Casema&Multikabel 372000 14-12-2013-6875.ts");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_07_03_09_33_12.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\818_2009_03_05_17_59_31.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\618_2009_03_09_19_59_44.DAT");
@@ -59,7 +59,6 @@ public class CreateHTMLListCasema implements Runnable{
 			e.printStackTrace();
 		}
 
-		transportStream.namePIDs();
 		System.out.println(transportStream);
 		writeHTML(transportStream);
 		System.out.println("Klaar!!");
@@ -70,7 +69,7 @@ public class CreateHTMLListCasema implements Runnable{
 	private void writeHTML(final TransportStream tStream) {
 
 		try {
-			final FileWriter fstream = new FileWriter("d:\\eric\\casema20130423.html");
+			final FileWriter fstream = new FileWriter("d:\\eric\\casema14-12-2013.html");
 			final BufferedWriter out = new BufferedWriter(fstream);
 
 			out.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head><script src=\"sorttable.js\"></script></head>\n");

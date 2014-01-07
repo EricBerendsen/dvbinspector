@@ -48,7 +48,6 @@ public class CreateHTMLListVeendamRekam implements Runnable{
 			e.printStackTrace();
 		}
 
-		transportStream.namePIDs();
 		System.out.println(transportStream);
 		writeHTML(transportStream);
 		System.out.println("Klaar!!");
