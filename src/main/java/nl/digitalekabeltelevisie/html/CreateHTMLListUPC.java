@@ -46,7 +46,7 @@ public class CreateHTMLListUPC implements Runnable{
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\upc\\upc_f284Mhz.ts");
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_25_18_30_02.DAT");
 		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_24_20_44_58.DAT");
-		transportStream = new TransportStream("D:\\ts\\upcvorden20130403\\UPC 164000 04-03 20-19-36.ts");
+		transportStream = new TransportStream("D:\\ts\\upcvorden20131226\\UPC 164000 12-26 10-21-53.ts");
 		//transportStream = new TransportStream("C:\\Documents and Settings\\Administrator\\My Documents\\My Videos\\UPC Riant vorden 164000 07-12 13-36-47.ts");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_07_03_09_33_12.DAT");
 		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\818_2009_03_05_17_59_31.DAT");
@@ -59,7 +59,6 @@ public class CreateHTMLListUPC implements Runnable{
 			e.printStackTrace();
 		}
 
-		transportStream.namePIDs();
 		System.out.println(transportStream);
 		writeHTML(transportStream);
 		System.out.println("Klaar!!");
@@ -70,7 +69,7 @@ public class CreateHTMLListUPC implements Runnable{
 	private void writeHTML(final TransportStream tStream) {
 
 		try {
-			final FileWriter fstream = new FileWriter("d:\\eric\\upcvorden201200410.html");
+			final FileWriter fstream = new FileWriter("d:\\eric\\upc2013126.html");
 			final BufferedWriter out = new BufferedWriter(fstream);
 
 			out.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head></head>\n");
@@ -219,8 +218,8 @@ public class CreateHTMLListUPC implements Runnable{
 				}
 			}
 
-			out.write("	\n");
-			out.write("	</tbody></table>\n");
+			out.write("\n");
+			out.write("</tbody></table>\n");
 
 			out.write("");
 			out.write("</body></html>");
