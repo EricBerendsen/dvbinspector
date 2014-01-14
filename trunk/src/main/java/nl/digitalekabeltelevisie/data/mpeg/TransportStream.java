@@ -405,7 +405,7 @@ public class TransportStream implements TreeNode{
 			}
 		}
 
-		if(packet_offset!=null){
+		if((packet_offset!=null)&&!psiOnlyModus(modus)){
 			JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 		}
