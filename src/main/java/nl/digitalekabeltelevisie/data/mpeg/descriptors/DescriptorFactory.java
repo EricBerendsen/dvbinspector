@@ -271,6 +271,9 @@ public final class DescriptorFactory {
 		case 0x1A:
 			d = new StreamEventDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x1C:
+			d = new Mpeg4AudioDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x28:
 			d = new AVCVideoDescriptor(data, t + offset, tableSection);
 			break;

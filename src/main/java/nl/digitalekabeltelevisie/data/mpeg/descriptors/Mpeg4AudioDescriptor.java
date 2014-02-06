@@ -34,26 +34,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
-public class AACDescriptor extends Descriptor {
+public class Mpeg4AudioDescriptor extends Descriptor {
 
 
-	private final int profile_and_level;
-	private final int aac_type_flag;
-	private int aac_type;
-	private byte[] additional_info;
+	private final int mpeg4_profile_and_level;
 
 
-	public AACDescriptor(final byte[] b, final int offset, final TableSection parent) {
+
+	public Mpeg4AudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
-		profile_and_level = getInt(b, offset+2, 1, MASK_8BITS);
-		aac_type_flag = getInt(b, offset+3, 1, 0x80)>>7;
-		int t=offset+4;
-		if(aac_type_flag==1){
-			aac_type = getInt(b, t++, 1, MASK_8BITS);
-		}
-		if(t<descriptorLength){
-			additional_info=getBytes(b, t, descriptorLength-t);
-		}
+		mpeg4_profile_and_level = getInt(b, offset+2, 1, MASK_8BITS);
 	}
 
 
@@ -61,15 +51,7 @@ public class AACDescriptor extends Descriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_and_level",profile_and_level,getProfileLevelString(profile_and_level))));
-		t.add(new DefaultMutableTreeNode(new KVP("aac_type_flag",aac_type_flag,null)));
-		if(aac_type_flag==1){
-			t.add(new DefaultMutableTreeNode(new KVP("aac_type",aac_type,getComponentType0x06String(aac_type))));
-		}
-		if(additional_info!=null){
-			t.add(new DefaultMutableTreeNode(new KVP("additional_info",additional_info,null)));
-		}
-
+		t.add(new DefaultMutableTreeNode(new KVP("MPEG-4_audio_profile_and_level",mpeg4_profile_and_level,getProfileLevelString(mpeg4_profile_and_level))));
 		return t;
 	}
 
