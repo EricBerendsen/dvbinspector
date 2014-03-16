@@ -42,9 +42,11 @@ public class CAT extends AbstractPSITabel {
 
 	public List<Descriptor> getDescriptorList() {
 		final ArrayList<Descriptor> l = new ArrayList<Descriptor>();
-		for (CAsection element : cat) {
-			if (element != null) {
-				l.addAll(element.getDescriptorList());
+		if(cat!=null){
+			for (CAsection element : cat) {
+				if (element != null) {
+					l.addAll(element.getDescriptorList());
+				}
 			}
 		}
 		return l;
