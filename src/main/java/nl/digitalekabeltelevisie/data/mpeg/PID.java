@@ -121,6 +121,8 @@ public class PID implements TreeNode{
 			if((lastPacket==null)){ // nothing started
 				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 				if(packet.isPayloadUnitStartIndicator() &&
+						(data!=null) &&
+						(data.length>1) &&
 						((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3))){ //start something
 					// at least one byte plus pointer available
 					int start;
@@ -139,7 +141,9 @@ public class PID implements TreeNode{
 						}
 
 						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
-					}else if((data[0]==0)&&(data[1]==0)&&(data[2]==1)){
+					}else if((data!=null) &&
+							(data.length>2) &&
+							(data[0]==0)&&(data[1]==0)&&(data[2]==1)){
 						type = PES;
 
 					}
@@ -188,8 +192,10 @@ public class PID implements TreeNode{
 		// handle 0x015 Mega-frame Initialization Packet (MIP)
 		if(pid==0x015){
 			// MIP has only TSPackets, no structure with PSISectionData
-			final MegaFrameInitializationPacket mip= new MegaFrameInitializationPacket(packet);
-			parentTransportStream.getPsi().getNetworkSync().update(mip);
+			if((packet.getData()!=null)&&(packet.getData().length>=14)){
+				final MegaFrameInitializationPacket mip= new MegaFrameInitializationPacket(packet);
+				parentTransportStream.getPsi().getNetworkSync().update(mip);
+			}
 		}else{
 
 			processAdaptationField(packet);
@@ -245,7 +251,9 @@ public class PID implements TreeNode{
 				}
 				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
 					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
-					bitRate = ((packetsDiff *packet_length * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
+					if((newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) !=0){
+						bitRate = ((packetsDiff *packet_length * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
+					}
 					lastPCR = newPCR;
 					lastPCRpacketNo = packet.getPacketNo();
 					pcr_count++;
