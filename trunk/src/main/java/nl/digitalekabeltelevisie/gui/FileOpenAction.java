@@ -76,6 +76,7 @@ public class FileOpenAction extends AbstractAction {
 	        		   contr.setTransportStream(get());
 	        	   }
 	           } catch (Exception ignore) {
+	        	   logger.log(Level.SEVERE, "Error loading stream", ignore);
 	           }
 	       }
 
