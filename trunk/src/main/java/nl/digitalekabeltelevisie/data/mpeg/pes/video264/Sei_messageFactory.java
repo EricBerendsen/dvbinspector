@@ -27,41 +27,37 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
  * @author Eric
  *
  */
-public class Sei_rbsp extends RBSP {
+public class Sei_messageFactory {
 
-	private List<Sei_message> sei_messages= new ArrayList<Sei_message>();
+	private static List<Sei_message> sei_messages;
 
-	protected Sei_rbsp(byte[] rbsp_bytes, int numBytesInRBSP) {
-		super(rbsp_bytes, numBytesInRBSP);
+	public static List<Sei_message> buildSei_messageList(BitSource bitSource){
 
+		sei_messages = new ArrayList<Sei_message>();
+		while((bitSource.available()>=8)&&( bitSource.nextBits(8)!= 0x80)){ // 0x80
+			// TODO implement fall back } catch (final RuntimeException iae) {
+			// in case there is an error in our code (constructor of a Sei_message), OR the stream is invalid.
+			// fall back to a standard Sei_message (this is highly unlikely to fail), so processing can continue
+			// requires a unread in BitSource
 
-		sei_messages = Sei_messageFactory.buildSei_messageList(bitSource);
-	}
+			if(bitSource.nextBits(8)== 0x4){
+				UserDataRegisteredItuT35Sei_message sei_message = new UserDataRegisteredItuT35Sei_message(bitSource);
+				sei_messages.add(sei_message);
+			}else{
+				Sei_message sei_message = new Sei_message(bitSource);
+				sei_messages.add(sei_message);
+			}
+		}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("sei_rbsp"));
-		addListJTree(s,sei_messages,modus,"sei_messages");
-		return s;
-	}
-
-	public List<Sei_message> getSei_messages() {
 		return sei_messages;
 	}
 
