@@ -1,28 +1,28 @@
 /**
- * 
+ *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- * 
+ *
  *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- * 
+ *
  *  This file is part of DVB Inspector.
- * 
+ *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- * 
+ *
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
@@ -34,40 +34,36 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Sei_message implements TreeNode{
-	
+
 	// based on 7.3.2.3.1 Supplemental enhancement information message syntax of Rec. ITU-T H.264 (03/2010) – Prepublished version
-	
+
 	int payloadType;
 	int last_payload_type_byte;
 	int payloadSize;
 	int last_payload_size_byte;
-	byte[] data;
+	byte[] payload;
 
 	public Sei_message(BitSource bitSource) {
-		
+
 		payloadType = 0;
 		while( bitSource.nextBits(8) == 0xFF ) {
-			/* int ff_byte = */ bitSource.f(8); 
+			/* int ff_byte = */ bitSource.f(8);
 			payloadType += 255;
 		}
 		last_payload_type_byte = bitSource.u(8);
 		payloadType += last_payload_type_byte;
-		
+
 		payloadSize = 0;
 		while( bitSource.nextBits( 8 ) == 0xFF) {
-			/* int ff_byte= */ bitSource.f(8); /* equal to 0xFF */ 
+			/* int ff_byte= */ bitSource.f(8); /* equal to 0xFF */
 			payloadSize += 255;
 		}
 		last_payload_size_byte= bitSource.u(8);
 		payloadSize += last_payload_size_byte;
-		//sei_payload( payloadType, payloadSize );
-		// A lot of the options (like Picture timing SEI message) depend on dependent on the content of the sequence parameter before.
-		// DVB Inspector architecture only allows for stand alone interpretation, there is no "context" awareness.
-		// So just show the raw data...
-		
-		data= bitSource.readBytes(payloadSize);
-		
-		
+
+		payload= bitSource.readBytes(payloadSize);
+
+
 	}
 
 	@Override
@@ -75,10 +71,10 @@ public class Sei_message implements TreeNode{
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("sei_message ("+getPayloadTypeString(payloadType)+")"));
 		s.add(new DefaultMutableTreeNode(new KVP("payloadType",payloadType,getPayloadTypeString(payloadType))));
 		s.add(new DefaultMutableTreeNode(new KVP("payloadSize",payloadSize,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("data",data,null)));
+		s.add(new DefaultMutableTreeNode(new KVP("sei_payload",payload,null)));
 		return s;
 	}
-	
+
 	public static String getPayloadTypeString(int payloadType){
 		switch (payloadType) {
 		case 0: return "buffering_period";
@@ -127,13 +123,13 @@ public class Sei_message implements TreeNode{
 		case 43: return "operation_points_not_present";
 		case 44: return "base_view_temporal_hrd";
 		case 45: return "frame_packing_arrangement";
-			
-			
+
+
 
 		default:
 			return "reserved_sei_message";
 		}
-		
+
 	}
 
 	public int getPayloadType() {
@@ -152,8 +148,5 @@ public class Sei_message implements TreeNode{
 		return last_payload_size_byte;
 	}
 
-	public byte[] getData() {
-		return data;
-	}
-	
+
 }

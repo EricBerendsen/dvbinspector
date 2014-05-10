@@ -112,6 +112,7 @@ public final class Utils {
 	private static RangeHashMap<Integer,String> cni = new RangeHashMap<Integer,String>();
 	private static RangeHashMap<Integer,String> app_type_id = new RangeHashMap<Integer,String>();
 	private static RangeHashMap<Long,String> mhp_organisation_id = new RangeHashMap<Long,String>();
+	private static RangeHashMap<Integer,String> itu35_country_code = new RangeHashMap<Integer,String>();
 
 	private static RangeHashMap<Long,String> private_data_spec_id = new RangeHashMap<Long,String>();
 
@@ -162,6 +163,7 @@ public final class Utils {
 		readCSVIdString("res/platform_id.csv",platform_id);
 		readCSVIdString("res/ni.csv",cni);
 		readCSVIdString("res/app_type_id.csv",app_type_id);
+		readCSVIdString("res/itu35country_codes.csv",itu35_country_code);
 		readCSVIdLongString("res/mhp_organisation_id.csv",mhp_organisation_id);
 		readCSVIdLongString("res/private_data_spec_id.csv", private_data_spec_id);
 
@@ -176,8 +178,8 @@ public final class Utils {
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
-				final int lower = Integer.decode(nextLine[0]);
-				final int upper = Integer.decode(nextLine[1]);
+				final int lower = decode(nextLine[0]);
+				final int upper = decode(nextLine[1]);
 
 				m.put(lower, upper, nextLine[2]);
 
@@ -189,7 +191,10 @@ public final class Utils {
 		}
 	}
 
-
+	private static int decode(String text) {
+        return (text.startsWith("0b")||text.startsWith("0B")) ? Integer.parseInt(text.substring(2), 2)
+                                     : Integer.decode(text);
+    }
 
 	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
 		try {
@@ -289,6 +294,14 @@ public final class Utils {
 
 	public static String getAppTypeIDString(final int i) {
 		String r = app_type_id.find(i);
+		if (r==null){
+			r="unknown";
+		}
+		return r;
+	}
+
+	public static String getItu35CountryCodeString(final int i) {
+		String r = itu35_country_code.find(i);
 		if (r==null){
 			r="unknown";
 		}

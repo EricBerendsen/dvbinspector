@@ -31,7 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.pes.AuxiliaryData;
 
 
 /**
@@ -44,13 +44,7 @@ public class UserData extends VideoMPEG2Section {
 	private final int offset;
 	private final int len;
 
-	private int active_format_flag;
-	private int active_format;
-	private boolean isAFD=false;
-	// TODO ??? support ATSC , containing afd and cc data ??
-	// see ATSC Digital Television Standard: Part 4 – MPEG-2 Video System Characteristics
-	// Document A/53 Part 4:2009, 7 August 2009 http://www.atsc.org/cms/standards/a53/a_53-Part-4-2009.pdf
-	// 6.2.3 ATSC Picture User Data Semantics
+	AuxiliaryData auxData = null;
 
 
 	/**
@@ -63,13 +57,8 @@ public class UserData extends VideoMPEG2Section {
 		this.offset = offset;
 		final int end = indexOf(data, new byte[]{0,0,1}, offset+1);
 		len = end - offset-1;
-		if(indexOf(data, new byte[]{0x44,0x54,0x47,0x31}, offset+1)==(offset+1)){ // DTG1
-			isAFD=true;
-			active_format_flag = getInt(data,offset+5,1,0x40)>>6;
-			if(active_format_flag==1){
-				active_format = getInt(data,offset+6,1,MASK_4BITS);
-			}
-		}
+
+		auxData = new AuxiliaryData(data, offset+1, len);
 	}
 
 	/* (non-Javadoc)
@@ -78,69 +67,8 @@ public class UserData extends VideoMPEG2Section {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("data",data,offset+1, len,isAFD?"Active Format Description":null)));
-		if(isAFD){
-			t.add(new DefaultMutableTreeNode(new KVP("active_format_flag",active_format_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("active_format",active_format,getActiveFormatString(active_format))));
-		}
+		t.add(auxData.getJTreeNode(modus));
 		return t;
-	}
-
-
-
-	public static String getActiveFormatString(final int active_format) {
-		switch (active_format) {
-		case 0x00:
-			return "reserved";
-		case 0x01:
-			return "reserved";
-		case 0x02:
-			return "box 16:9 (top)";
-		case 0x03:
-			return "box 14:9 (top)";
-		case 0x04:
-			return "box > 16:9 (centre)";
-		case 0x05:
-			return "reserved";
-		case 0x06:
-			return "reserved";
-		case 0x07:
-			return "reserved";
-		case 0x08:
-			return "Active format is the same as the coded frame";
-		case 0x09:
-			return "4:3 (centre)";
-		case 0x0A:
-			return "16:9 (centre)";
-		case 0x0B:
-			return "14:9 (centre)";
-		case 0x0C:
-			return "reserved";
-		case 0x0D:
-			return "4:3 (with shoot & protect 14:9 centre)";
-		case 0x0E:
-			return "16:9 (with shoot & protect 14:9 centre)";
-		case 0x0F:
-			return "16:9 (with shoot & protect 4:3 centre)";
-		default:
-			return "unknown/error";
-		}
-	}
-
-
-	/**
-	 * @return the active_format
-	 */
-	public int getActive_format() {
-		return active_format;
-	}
-
-
-	/**
-	 * @return the active_format_flag
-	 */
-	public int getActive_format_flag() {
-		return active_format_flag;
 	}
 
 
@@ -149,14 +77,6 @@ public class UserData extends VideoMPEG2Section {
 	 */
 	public byte[] getData() {
 		return data;
-	}
-
-
-	/**
-	 * @return the isAFD
-	 */
-	public boolean isAFD() {
-		return isAFD;
 	}
 
 
