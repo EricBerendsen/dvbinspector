@@ -48,7 +48,7 @@ public class BitSource {
 	private int byteOffset = 0;
 	private int bitOffset = 0;
 
-	private int len = 0;
+	private final int len;
 
 
 	public static final int[] powerOf2 = {1,2,4,8, 16,32,64,128,
