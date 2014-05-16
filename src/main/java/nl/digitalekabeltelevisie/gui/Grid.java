@@ -71,8 +71,8 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 *
 	 */
 	private static final long serialVersionUID = 7881015434582215246L;
-	private static final int blockW = 20;
-	private static final int blockH = 20;
+	private static int blockW = 20;
+	private static int blockH = 20;
 
 	private int blockPerLine = 100;
 
@@ -266,6 +266,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 				lines++;
 			}
 		}
+		revalidate();
 		repaint();
 	}
 
@@ -357,4 +358,9 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		return false;
 	}
 
+	public void setBlockSize(int s){
+		blockW = s;
+		blockH = s;
+		componentResized(null);
+	}
 }
