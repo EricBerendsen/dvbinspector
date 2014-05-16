@@ -29,14 +29,18 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
@@ -118,6 +122,11 @@ public class GridView extends JPanel implements TransportStreamView{
 		});
 
 		buttonPanel.add(errorButton);
+
+		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
+
+		addZoomRadioButtons();
+
 		add(buttonPanel,BorderLayout.PAGE_START);
 
 		grid = new Grid(transportStream,viewContext);
@@ -137,4 +146,29 @@ public class GridView extends JPanel implements TransportStreamView{
 		validate();
 		repaint();
 	}
+
+	private void addZoomRadioButtons() {
+		JLabel typeLabel = new JLabel("Zoom:");
+		buttonPanel.add(typeLabel);
+		int zoomLevels = 7;
+		JRadioButton[] zoonButtons = new JRadioButton[zoomLevels];
+		int size=1;
+		ButtonGroup group = new ButtonGroup();
+		for (int i = 0; i < zoonButtons.length; i++) {
+			final int s = size;
+			zoonButtons[i] = new JRadioButton(""+(i+1));
+			zoonButtons[i].addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					grid.setBlockSize(s);
+				}
+			});
+			size *=2;
+			group.add(zoonButtons[i]);
+			buttonPanel.add(zoonButtons[i]);
+		}
+
+		zoonButtons[Math.min(zoomLevels-1, 4)].setSelected(true);
+	}
+
 }
