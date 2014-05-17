@@ -71,10 +71,12 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 *
 	 */
 	private static final long serialVersionUID = 7881015434582215246L;
-	private static int blockW = 20;
-	private static int blockH = 20;
+	private int blockW = 20;
+	private int blockH = 20;
 
-	private int blockPerLine = 100;
+	private int gridLines = 0;
+
+	private int blocksPerRow = 100;
 
 	private int lines = 0;
 
@@ -107,8 +109,8 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 			endPacket = viewContext.getEndPacket();
 			noPackets = endPacket - startPacket;
 
-			lines = (noPackets/blockPerLine);
-			if((noPackets%blockPerLine)!=0){
+			lines = (noPackets/blocksPerRow);
+			if((noPackets%blocksPerRow)!=0){
 				lines++;
 			}
 
@@ -136,44 +138,106 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		setBackground(Color.WHITE);
 		super.paintComponent(g);    // paints background
 		if(stream!=null){
-			for (int i = startline; i <= endLine; i++) {
-				for (int j = 0; j < blockPerLine; j++) {
-					final int r = (i*blockPerLine)+j;
-					if(r<noPackets){
-						final short pidFlags = stream.getPacketPidFlags(r+startPacket);
+			for (int row = startline; row <= endLine; row++) {
+				for (int column = 0; column < blocksPerRow; column++) {
+					final int packetNo = (row*blocksPerRow)+column;
+					if(packetNo<noPackets){
+						final short pidFlags = stream.getPacketPidFlags(packetNo+startPacket);
 						final short pid = (short) (pidFlags & 0x1fff);
-						final Color c = (Color)colors.get(pid);
-						if(c!=null){
-							g.setColor(c);
-							g.fillRect(j*blockW, i*blockH, blockW, blockH);
-							final short adaptationFlag = (short) (pidFlags & TransportStream.ADAPTATION_FIELD_FLAG);
-							if(showAdaptationField&& (adaptationFlag!=0)){
-								Color contrast = getContrastingColor(c);
-								g.setColor(contrast);
-								g.fillRect((j*blockW)+2, (i*blockH)+2, blockW/2, blockH/2);
-							}
-							final short payloadStartFlag = (short) (pidFlags & TransportStream.PAYLOAD_UNIT_START_FLAG);
-							if(showPayloadStart && (payloadStartFlag!=0)){
-								Color contrast = getContrastingColor(c);
-								g.setColor(contrast);
-								g2.setStroke(dashed);
-
-								g2.drawRect((j*blockW)+1, (i*blockH)+1, blockW-2, blockH-2);
-							}
-							final short errorFlag = (short) (pidFlags & TransportStream.TRANSPORT_ERROR_FLAG);
-							if(showErrorIndicator && (errorFlag!=0)){
-								Color contrast = getContrastingColor(c);
-								g.setColor(contrast);
-								g2.setStroke(new BasicStroke(2));
-
-								//g2.drawRect((j*blockW)+1, (i*blockH)+1, blockW-2, blockH-2);
-								g2.drawLine((j*blockW)+1, (i*blockH)+1, ((j+1)*blockW)-1, ((i+1)*blockH)-1);
-								g2.drawLine((j*blockW)+1, ((i+1)*blockH)-1, ((j+1)*blockW)-1, (i*blockH)+1);
-							}
+						final Color packetPidColor = (Color)colors.get(pid);
+						if(packetPidColor!=null){
+							g.setColor(packetPidColor);
+							g.fillRect(column*blockW, row*blockH, blockW, blockH);
+							paintAdaptationFieldMarker(g, row, column, pidFlags, packetPidColor);
+							paintPayloadStartMarker(g, g2, row, column, pidFlags, packetPidColor);
+							paintErrorFlagMarker(g, g2, row, column, pidFlags, packetPidColor);
+							paintGridLines(g, g2, row, column, packetPidColor);
 						}
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * @param g
+	 * @param g2
+	 * @param row
+	 * @param column
+	 * @param packetPidColor
+	 */
+	private void paintGridLines(final Graphics g, Graphics2D g2, int row, int column, final Color packetPidColor) {
+		if(gridLines !=0){
+			if(((column%gridLines)==0)&&(column!=0)){
+				Color contrast = getContrastingColor(packetPidColor);
+				g.setColor(contrast);
+				g2.setStroke(new BasicStroke(2));
+				g2.drawLine((column*blockW), (row*blockH)+1, (column*blockW), ((row+1)*blockH)-1);
+			}
+			if(((row%gridLines)==0)&&(row!=0)){
+				Color contrast = getContrastingColor(packetPidColor);
+				g.setColor(contrast);
+				g2.setStroke(new BasicStroke(2));
+				g2.drawLine((column*blockW), (row*blockH), ((column+1)*blockW)-1, (row*blockH));
+			}
+		}
+	}
+
+	/**
+	 * @param g
+	 * @param g2
+	 * @param row
+	 * @param column
+	 * @param pidFlags
+	 * @param packetPidColor
+	 */
+	private void paintErrorFlagMarker(final Graphics g, Graphics2D g2, int row, int column, final short pidFlags,
+			final Color packetPidColor) {
+		final short errorFlag = (short) (pidFlags & TransportStream.TRANSPORT_ERROR_FLAG);
+		if(showErrorIndicator && (errorFlag!=0)){
+			Color contrast = getContrastingColor(packetPidColor);
+			g.setColor(contrast);
+			g2.setStroke(new BasicStroke(2));
+
+			g2.drawLine((column*blockW)+1, (row*blockH)+1, ((column+1)*blockW)-1, ((row+1)*blockH)-1);
+			g2.drawLine((column*blockW)+1, ((row+1)*blockH)-1, ((column+1)*blockW)-1, (row*blockH)+1);
+		}
+	}
+
+	/**
+	 * @param g
+	 * @param g2
+	 * @param row
+	 * @param column
+	 * @param pidFlags
+	 * @param packetPidColor
+	 */
+	private void paintPayloadStartMarker(final Graphics g, Graphics2D g2, int row, int column, final short pidFlags,
+			final Color packetPidColor) {
+		final short payloadStartFlag = (short) (pidFlags & TransportStream.PAYLOAD_UNIT_START_FLAG);
+		if(showPayloadStart && (payloadStartFlag!=0)){
+			Color contrast = getContrastingColor(packetPidColor);
+			g.setColor(contrast);
+			g2.setStroke(dashed);
+
+			g2.drawRect((column*blockW)+1, (row*blockH)+1, blockW-2, blockH-2);
+		}
+	}
+
+	/**
+	 * @param g
+	 * @param row
+	 * @param column
+	 * @param pidFlags
+	 * @param packetPidColor
+	 */
+	private void paintAdaptationFieldMarker(final Graphics g, int row, int column, final short pidFlags,
+			final Color packetPidColor) {
+		final short adaptationFlag = (short) (pidFlags & TransportStream.ADAPTATION_FIELD_FLAG);
+		if(showAdaptationField&& (adaptationFlag!=0)){
+			Color contrast = getContrastingColor(packetPidColor);
+			g.setColor(contrast);
+			g.fillRect((column*blockW)+2, (row*blockH)+2, blockW/2, blockH/2);
 		}
 	}
 
@@ -196,7 +260,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		int w =0;
 		int h = 0;
 		if(stream!=null){
-			w = blockPerLine * blockW;
+			w = blocksPerRow * blockW;
 			h = lines * blockH;
 		}
 		return new Dimension(w,h);
@@ -211,9 +275,9 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		StringBuilder r=new StringBuilder();
 		if(stream!=null){
 			final int x=e.getX();
-			if((x/blockW)<blockPerLine){ // empty space to the right
+			if((x/blockW)<blocksPerRow){ // empty space to the right
 				final int y=e.getY();
-				final int packetNo = ((y/blockH)*blockPerLine)+(x/blockW);
+				final int packetNo = ((y/blockH)*blocksPerRow)+(x/blockW);
 				if(packetNo<noPackets){
 					final int realPacketNo = packetNo +startPacket;
 					final short pid = stream.getPacket_pid(realPacketNo);
@@ -259,10 +323,10 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 */
 	public void componentResized(final ComponentEvent e) {
 		final int wid = (int)getVisibleRect().getWidth();
-		blockPerLine = wid/blockW;
+		blocksPerRow = wid/blockW;
 		if(stream!=null){
-			lines = (noPackets/blockPerLine);
-			if((noPackets%blockPerLine)!=0){
+			lines = (noPackets/blocksPerRow);
+			if((noPackets%blocksPerRow)!=0){
 				lines++;
 			}
 		}
@@ -362,5 +426,14 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		blockW = s;
 		blockH = s;
 		componentResized(null);
+	}
+
+	public int getGridLines() {
+		return gridLines;
+	}
+
+	public void setGridLines(int gridLines) {
+		this.gridLines = gridLines;
+		repaint();
 	}
 }

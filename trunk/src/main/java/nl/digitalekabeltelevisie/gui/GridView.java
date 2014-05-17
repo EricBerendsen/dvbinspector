@@ -70,7 +70,30 @@ public class GridView extends JPanel implements TransportStreamView{
 		super(new BorderLayout());
 		buttonPanel = new JPanel();
 
+		addPacketCheckBoxes();
 
+		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
+
+		addZoomRadioButtons();
+
+		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
+
+		addGridLinesRadioButtons();
+
+		add(buttonPanel,BorderLayout.PAGE_START);
+
+		grid = new Grid(transportStream,viewContext);
+		scrollGrid = new JScrollPane(grid);
+		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		add(scrollGrid,BorderLayout.CENTER);
+	}
+
+	/**
+	 *
+	 */
+	private void addPacketCheckBoxes() {
 		Image adImg = Utils.readIconImage("adaptation.bmp");
 		Image payloadImg = Utils.readIconImage("payloadstart.bmp");
 
@@ -97,7 +120,6 @@ public class GridView extends JPanel implements TransportStreamView{
 
 		JCheckBox payLoadStartButton = new JCheckBox("Show Payload Start");
 		payLoadStartButton.addItemListener(new ItemListener() {
-
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				grid.setShowPayloadStart(e.getStateChange()==ItemEvent.SELECTED);
@@ -107,13 +129,11 @@ public class GridView extends JPanel implements TransportStreamView{
 
 		buttonPanel.add(payLoadStartButton);
 
-
 		JLabel errorLabel = new JLabel(errorIcon);
 		buttonPanel.add(errorLabel);
 
 		JCheckBox errorButton = new JCheckBox("Show Error Indicator");
 		errorButton.addItemListener(new ItemListener() {
-
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				grid.setShowErrorIndicator(e.getStateChange()==ItemEvent.SELECTED);
@@ -122,19 +142,6 @@ public class GridView extends JPanel implements TransportStreamView{
 		});
 
 		buttonPanel.add(errorButton);
-
-		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
-
-		addZoomRadioButtons();
-
-		add(buttonPanel,BorderLayout.PAGE_START);
-
-		grid = new Grid(transportStream,viewContext);
-		scrollGrid = new JScrollPane(grid);
-		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-		add(scrollGrid,BorderLayout.CENTER);
 	}
 
 	/* (non-Javadoc)
@@ -151,24 +158,51 @@ public class GridView extends JPanel implements TransportStreamView{
 		JLabel typeLabel = new JLabel("Zoom:");
 		buttonPanel.add(typeLabel);
 		int zoomLevels = 7;
-		JRadioButton[] zoonButtons = new JRadioButton[zoomLevels];
+		JRadioButton[] zoomButtons = new JRadioButton[zoomLevels];
 		int size=1;
 		ButtonGroup group = new ButtonGroup();
-		for (int i = 0; i < zoonButtons.length; i++) {
+		for (int i = 0; i < zoomButtons.length; i++) {
 			final int s = size;
-			zoonButtons[i] = new JRadioButton(""+(i+1));
-			zoonButtons[i].addActionListener(new ActionListener() {
+			zoomButtons[i] = new JRadioButton(""+(i+1));
+			zoomButtons[i].addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					grid.setBlockSize(s);
 				}
 			});
 			size *=2;
-			group.add(zoonButtons[i]);
-			buttonPanel.add(zoonButtons[i]);
+			group.add(zoomButtons[i]);
+			buttonPanel.add(zoomButtons[i]);
 		}
 
-		zoonButtons[Math.min(zoomLevels-1, 4)].setSelected(true);
+		zoomButtons[Math.min(zoomLevels-1, 4)].setSelected(true);
+	}
+
+	private void addGridLinesRadioButtons(){
+		JLabel typeLabel = new JLabel("Grid Lines:");
+		buttonPanel.add(typeLabel);
+		ButtonGroup group = new ButtonGroup();
+
+		addGridRadioButton(group,"Off",0,true);
+		addGridRadioButton(group,"5",5,false);
+		addGridRadioButton(group,"10",10,false);
+		addGridRadioButton(group,"20",20,false);
+	}
+
+	/**
+	 * @param group
+	 */
+	private void addGridRadioButton(ButtonGroup group, String label, final int value, boolean selected) {
+		JRadioButton button = new JRadioButton(label);;
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				grid.setGridLines(value);
+			}
+		});
+		group.add(button);
+		buttonPanel.add(button);
+		button.setSelected(selected);
 	}
 
 }
