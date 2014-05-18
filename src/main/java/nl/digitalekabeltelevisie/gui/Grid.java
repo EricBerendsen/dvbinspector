@@ -152,6 +152,8 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 							paintPayloadStartMarker(g, g2, row, column, pidFlags, packetPidColor);
 							paintErrorFlagMarker(g, g2, row, column, pidFlags, packetPidColor);
 							paintGridLines(g, g2, row, column, packetPidColor);
+						}else{
+							paintGridLines(g, g2, row, column, Color.WHITE);
 						}
 					}
 				}
