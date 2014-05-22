@@ -40,10 +40,10 @@ public class CreateHTMLListGlashart implements Runnable{
 
 	public void run() {
 
-		transportStream = new TransportStream("D:\\ts\\glashart\\2012-4-3-11-28-304000-6875-C.ts");
 		try {
+		transportStream = new TransportStream("D:\\ts\\glashart\\2012-4-3-11-28-304000-6875-C.ts");
 			transportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}

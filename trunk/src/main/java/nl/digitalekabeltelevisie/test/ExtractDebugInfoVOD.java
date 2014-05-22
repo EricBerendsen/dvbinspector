@@ -1,7 +1,5 @@
 package nl.digitalekabeltelevisie.test;
 
-import java.io.IOException;
-
 import nl.digitalekabeltelevisie.data.mpeg.PCR;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -23,12 +21,13 @@ public class ExtractDebugInfoVOD {
 	 */
 	public static void main(final String[] args) {
 
-		final TransportStream transportStream = new TransportStream("d:\\ts\\Ziggo Oost 393000 08-31 11-17-00.ts");
-		transportStream.setEnableTSPackets(true);
+		TransportStream transportStream = null;;
 		try {
+			transportStream = new TransportStream("d:\\ts\\Ziggo Oost 393000 08-31 11-17-00.ts");
+			transportStream.setEnableTSPackets(true);
 		   // parse general (P)SI information
 		   transportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 		   e.printStackTrace();
 		}
 

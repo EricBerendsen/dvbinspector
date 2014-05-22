@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.packet_length;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.awt.Color;
@@ -58,6 +58,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	private long packetNo=-1;
 	private static Color HEADER_COLOR = new Color(0x0000ff);
 	private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
+	private static Color FEC_COLOR = new Color(0x800080);
 	private TransportStream transportStream = null;
 
 	/**
@@ -157,10 +158,10 @@ public class TSPacket implements HTMLSource, TreeNode{
 	 */
 	public byte[] getData(){
 		if((getAdaptationFieldControl()==1)) { //payload only
-			return copyOfRange(buffer,4, packet_length);
+			return copyOfRange(buffer,4, PAYLOAD_PACKET_LENGTH);
 		}else if((getAdaptationFieldControl()==3)) { //Adaptation followed by payload
-			int start = Math.min(4+getUnsignedByte(buffer[4])+1, packet_length);
-			return copyOfRange(buffer, start,packet_length);
+			int start = Math.min(4+getUnsignedByte(buffer[4])+1, PAYLOAD_PACKET_LENGTH);
+			return copyOfRange(buffer, start,PAYLOAD_PACKET_LENGTH);
 		}
 		return null;
 	}
@@ -232,6 +233,14 @@ public class TSPacket implements HTMLSource, TreeNode{
 			s.append("<br><br><span style=\"color:").append(Utils.toHexString(ADAPTATION_FIELD_COLOR)).append("\"><b>AdaptationField:</b><br>").append(adaptationField.getHTML()).append("</span>");
 			coloring.put(4, 4+adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
 		}
+		if(buffer.length>PAYLOAD_PACKET_LENGTH){
+			RangeHashMap<Integer, Color> localColoring = new RangeHashMap<Integer, Color>();
+			//for some reason using getHTMLHexview resets color, so we use getHTMLHexviewColored with only one color.
+			localColoring.put(0, buffer.length-PAYLOAD_PACKET_LENGTH, FEC_COLOR);
+			s.append("<br><br><span style=\"color:").append(Utils.toHexString(FEC_COLOR)).append("\"><b>FEC/timestamp:</b><br>").append(getHTMLHexviewColored(buffer,PAYLOAD_PACKET_LENGTH,buffer.length-PAYLOAD_PACKET_LENGTH,localColoring)).append("</span>");
+			coloring.put(PAYLOAD_PACKET_LENGTH, buffer.length, FEC_COLOR);
+		}
+
 
 		s.append("<br><br><b>Data:</b><br>").append(getHTMLHexviewColored(buffer,0,buffer.length,coloring));
 
@@ -291,7 +300,11 @@ public class TSPacket implements HTMLSource, TreeNode{
 			if(adaptationField!=null){
 				payloadStart = 5+adaptationField.getAdaptation_field_length();
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("data_byte",buffer,payloadStart ,buffer.length-payloadStart, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("data_byte",buffer,payloadStart ,PAYLOAD_PACKET_LENGTH - payloadStart, null)));
+			if(buffer.length>PAYLOAD_PACKET_LENGTH){
+				t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
+
+			}
 		}
 
 

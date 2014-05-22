@@ -27,7 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Formatter;
@@ -373,9 +372,10 @@ public class TableSection implements TreeNode{
 	 * @return
 	 */
 	private String getRepetitionRate(final long count,final long last, final long  first) {
-		final long bitrate=getParentPID().getParentTransportStream().getBitRate();
+		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
+		final long bitrate=parentTransportStream.getBitRate();
 		if((bitrate>0)&&(count>=2)){
-			final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
+			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
 			Formatter formatter = new Formatter();
 			String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 			formatter.close();

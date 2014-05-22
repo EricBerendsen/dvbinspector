@@ -40,10 +40,10 @@ public class CreateHTMLListVeendamRekam implements Runnable{
 
 	public void run() {
 
-		transportStream = new TransportStream("d:\\ts\\rekam\\2012-5-5-15-42-163000-6875-C.ts");
 		try {
+			transportStream = new TransportStream("d:\\ts\\rekam\\2012-5-5-15-42-163000-6875-C.ts");
 			transportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}

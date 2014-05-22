@@ -331,6 +331,9 @@ public final class DescriptorFactory {
 		case 0x4A:
 			d = new LinkageDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x4C:
+			d = new TimeShiftedServiceDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x4D:
 			d = new ShortEventDescriptor(data, t + offset, tableSection);
 			break;

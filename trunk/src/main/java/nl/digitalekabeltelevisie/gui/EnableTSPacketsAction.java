@@ -80,6 +80,8 @@ public class EnableTSPacketsAction extends AbstractAction {
 			if(n==0){
 				try {
 					ts.setEnableTSPackets(enabled);
+					// TODO use swingworker to enable progressIndicator (see FileOpenAction)
+
 					ts.parseStream();
 					contr.setTransportStream(ts);
 				} catch (final IOException e1) {

@@ -107,10 +107,10 @@ public class PID implements TreeNode{
 	public class GatherPIDData {
 
 
-		private PsiSectionData lastPacket;
+		private PsiSectionData lastPSISection;
 
 		public void reset(){
-			lastPacket = null;
+			lastPSISection = null;
 
 		}
 
@@ -118,7 +118,7 @@ public class PID implements TreeNode{
 		{
 			parentTransportStream = ts;
 			final byte []data = packet.getData();
-			if((lastPacket==null)){ // nothing started
+			if((lastPSISection==null)){ // nothing started
 				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 				if(packet.isPayloadUnitStartIndicator() &&
 						(data!=null) &&
@@ -134,8 +134,8 @@ public class PID implements TreeNode{
 						start = 1+getUnsignedByte(data[0]);
 						available = data.length -start;
 						while ((available>0) && (getUnsignedByte(data[start])!= 0xFF)){
-							lastPacket = new PsiSectionData(parentPID,packet.getPacketNo(),parentTransportStream);
-							final int bytes_read=lastPacket.readBytes(data, start, available);
+							lastPSISection = new PsiSectionData(parentPID,packet.getPacketNo(),parentTransportStream);
+							final int bytes_read=lastPSISection.readBytes(data, start, available);
 							start+=bytes_read;
 							available-=bytes_read;
 						}
@@ -159,14 +159,14 @@ public class PID implements TreeNode{
 						start = 0;
 					}
 					int available = data.length -start;
-					if(!lastPacket.isComplete()){
-						final int bytes_read=lastPacket.readBytes(data, start, available);
+					if(!lastPSISection.isComplete()){
+						final int bytes_read=lastPSISection.readBytes(data, start, available);
 						start+=bytes_read;
 						available-=bytes_read;
 					}
 					while ((available>0) && (getUnsignedByte(data[start])!= 0xFF)){
-						lastPacket = new PsiSectionData(parentPID,packet.getPacketNo(),parentTransportStream);
-						final int bytes_read=lastPacket.readBytes(data, start, available);
+						lastPSISection = new PsiSectionData(parentPID,packet.getPacketNo(),parentTransportStream);
+						final int bytes_read=lastPSISection.readBytes(data, start, available);
 						start+=bytes_read;
 						available-=bytes_read;
 					}
@@ -252,7 +252,7 @@ public class PID implements TreeNode{
 				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
 					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
 					if((newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) !=0){
-						bitRate = ((packetsDiff *packet_length * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
+						bitRate = ((packetsDiff * parentTransportStream.getPacketLenghth() * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
 					}
 					lastPCR = newPCR;
 					lastPCRpacketNo = packet.getPacketNo();
@@ -376,7 +376,7 @@ public class PID implements TreeNode{
 		if((bitrate>0)&&(count>=2)){
 			@SuppressWarnings("resource")
 			final Formatter formatter = new Formatter();
-			final float repRate=((float)(last-first)*packet_length*8)/((count-1)*bitrate);
+			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
 			return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 		}
 		return null;
