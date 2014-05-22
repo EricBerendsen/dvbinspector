@@ -364,21 +364,22 @@ public class Descriptor implements TreeNode {
 		case 0x82:
 			return "user defined: Viasat private: Logic_channel_dscriptor";
 		case 0x83:
-			return "user defined: EACEM Logic_channel_descriptor / NorDig private: Logic_channel_descriptor version 1";
+			return "user defined: EACEM Logic_channel_descriptor / NorDig private: Logic_channel_descriptor version 1 / DTG logical_channel_descriptor";
 		case 0x84:
-			return "user defined: EACEM Preferred_name_list_descriptor";
+			return "user defined: EACEM Preferred_name_list_descriptor / DTG preferred_name_list_descriptor";
 		case 0x85:
-			return "user defined: EACEM Preferred_name_identifier_descriptor";
+			return "user defined: EACEM Preferred_name_identifier_descriptor / DTG preferred_name_identifier_descriptor";
 		case 0x86:
-			return "user defined: EACEM stream_identifier_descriptor";
+			return "user defined: EACEM stream_identifier_descriptor / DTG service_attribute_descriptor";
 		case 0x87:
-			return "user defined: Ziggo/OpenTV Video On Demand delivery descriptor / NORDIG Logical_channel_descriptor version 2";
+			return "user defined: Ziggo/OpenTV Video On Demand delivery descriptor / NORDIG Logical_channel_descriptor version 2 / DTG short_service_name_descriptor";
 		case 0x88:
-			return "user defined: EACEM private: HD_simulcast_logical_channel_descriptor / YOUSEE Event tag descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-			// //http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+			return "user defined: EACEM private: HD_simulcast_logical_channel_descriptor / YOUSEE Event tag descriptor / DTG HD_simulcast_logical_channel_descriptor";
+			// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+
 
 		case 0x89:
-			return "user defined: OpenTV private descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+			return "user defined: OpenTV private descriptor / DTG guidance_descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0x90:
 			return "user defined: OpenTV module_track_descriptor";// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0x92:
@@ -1030,7 +1031,7 @@ public class Descriptor implements TreeNode {
 	 */
 	public static String getProfileLevelString(final int profile_and_level) {
 		switch (profile_and_level) {
-	
+
 		case 0x10:
 			return "Main profile, level 1";
 		case 0x11:
@@ -1133,13 +1134,13 @@ public class Descriptor implements TreeNode {
 			return "High efficiency AAC v2 profile, level 4";
 		case 0x63:
 			return "High efficiency AAC v2 profile, level 5";
-	
+
 		case 0xFF:
 			return "Audio profile and level not specified by the MPEG-4_audio_profile_and_level " +
 					"field in this descriptor";
 		default:
 			return "Reserved";
-	
+
 		}
 	}
 }

@@ -39,22 +39,11 @@ public class CreateHTMLListUPC implements Runnable{
 	}
 
 	public void run() {
-
-		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\multikabel\\2008-8-29-21-22-514000-6875-C.ts");
-		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\onsnet\\2008-11-19-13-20-303000-6956-C.ts");
-		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\casema\\2008-6-15-21-45-356000-6875-C.ts");
-		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\upc\\upc_f284Mhz.ts");
-		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_25_18_30_02.DAT");
-		// transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\417_2009_02_24_20_44_58.DAT");
-		transportStream = new TransportStream("D:\\ts\\upcvorden20131226\\UPC 164000 12-26 10-21-53.ts");
-		//transportStream = new TransportStream("C:\\Documents and Settings\\Administrator\\My Documents\\My Videos\\UPC Riant vorden 164000 07-12 13-36-47.ts");
-		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\369_2009_07_03_09_33_12.DAT");
-		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\818_2009_03_05_17_59_31.DAT");
-		//transportStream = new TransportStream("C:\\eric\\mpeg\\ts\\618_2009_03_09_19_59_44.DAT");
-		//TSReader tsReader = new TSReader(transportStream);
 		try {
+
+			transportStream = new TransportStream("D:\\ts\\upcvorden20131226\\UPC 164000 12-26 10-21-53.ts");
 			transportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}

@@ -1,6 +1,5 @@
 package nl.digitalekabeltelevisie.test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +32,12 @@ public class ExtractEIT {
 	 */
 	public static void main(final String[] args) {
 
-		final TransportStream transportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-21 15-52-01.ts");
+		TransportStream transportStream = null;;
 		try {
+			transportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-21 15-52-01.ts");
 		   // parse general (P)SI information
 		   transportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 		   e.printStackTrace();
 		}
 

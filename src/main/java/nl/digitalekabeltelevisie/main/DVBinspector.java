@@ -78,6 +78,7 @@ import nl.digitalekabeltelevisie.gui.PIDDialogOpenAction;
 import nl.digitalekabeltelevisie.gui.SetPrivateDataSpecifierAction;
 import nl.digitalekabeltelevisie.gui.ToggleViewAction;
 import nl.digitalekabeltelevisie.gui.TransportStreamView;
+import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.Utils;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
@@ -122,6 +123,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private EITView eitView;
 	private final JFileChooser fc = new JFileChooser();
 	private JTabbedPane tabbedPane;
+//	private JMenuItem exportMenuItem;
 	private JMenu viewTreeMenu;
 	private JMenu viewMenu;
 	private JMenu settingsMenu;
@@ -156,17 +158,16 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final DVBinspector inspector = new DVBinspector();
 		if(args.length>=1){
 			final String filename= args[0];
-			// TODO test if file exists
-			final TransportStream ts = new TransportStream(filename);
-
-			final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
-
-			ts.setDefaultPrivateDataSpecifier(prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0));
-			ts.setEnableTSPackets(prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false));
-
-			inspector.transportStream = ts;
-
 			try {
+				final TransportStream ts = new TransportStream(filename);
+
+				final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
+
+				ts.setDefaultPrivateDataSpecifier(prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0));
+				ts.setEnableTSPackets(prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false));
+
+				inspector.transportStream = ts;
+
 				inspector.transportStream.parseStream();
 				if(args.length>=2){
 
@@ -181,6 +182,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			        }
 			        ts.parseStream(null,pesHandlerMap);
 				}
+			} catch (final NotAnMPEGFileException e) {
+				logger.log(Level.WARNING, "error determining packetsize transportStream", e);
 			} catch (final IOException e) {
 				logger.log(Level.WARNING, "error parsing transportStream", e);
 			}
@@ -274,6 +277,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		JMenu helpMenu;
 		JMenu privateDataSubMenu;
 		JMenuItem openMenuItem;
+
 		JMenuItem exitMenuItem;
 		JMenuItem filterItem;
 
@@ -282,6 +286,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		menuBar.add(fileMenu);
 		openMenuItem = new JMenuItem("Open",
 				KeyEvent.VK_O);
+
+//		exportMenuItem = new JMenuItem("Export as HTML");
+//		exportMenuItem.setEnabled(false);
 		exitMenuItem = new JMenuItem("Exit");
 
 		viewTreeMenu =new JMenu("Tree View");
@@ -348,6 +355,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x29, "Nordig",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x40, "CI Plus LLP",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x600, "UPC",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x0000233A, "Independent Television Commission (DTG)",defaultPrivateDataSpecifier);
+
 		settingsMenu.add(privateDataSubMenu);
 
 		final JCheckBoxMenuItem enableTSPacketsMenu = new JCheckBoxMenuItem("Enable TS Packets");
@@ -361,7 +370,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		openMenuItem.addActionListener(fileOpenAction);
 		fileMenu.add(openMenuItem);
 
-		exitMenuItem.addActionListener(this);
+//		final Action exportAction= new ExportAction(frame,this);
+//		fileMenu.add(exportMenuItem);
+//		exportMenuItem.addActionListener(exportAction);
+
 		fileMenu.add(exitMenuItem);
 
 		filterItem = new JMenuItem("Filter");
@@ -532,6 +544,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final int i = tabbedPane.getSelectedIndex();
 		viewTreeMenu.setEnabled((i==0)&&(transportStream!=null));
 		viewMenu.setEnabled((i>1)&&(transportStream!=null));
+//		exportMenuItem.setEnabled(transportStream!=null);
 	}
 
 

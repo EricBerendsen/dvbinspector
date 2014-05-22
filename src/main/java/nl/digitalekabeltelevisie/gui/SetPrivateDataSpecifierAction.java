@@ -58,6 +58,9 @@ public class SetPrivateDataSpecifierAction extends AbstractAction {
 		final Preferences prefs = Preferences.userNodeForPackage(contr.getClass());
 		prefs.putLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, specifier);
 
+		System.out.println("actionPerformed(final ActionEvent e:"+e);
+		System.out.println("e.getSource():"+e.getSource());
+
 		contr.setDefaultPrivateDataSpecifier(specifier);
 
 		final TransportStream ts = contr.getTransportStream();
@@ -77,6 +80,8 @@ public class SetPrivateDataSpecifierAction extends AbstractAction {
 			if(n==0){
 				try {
 					ts.setDefaultPrivateDataSpecifier(specifier);
+					// TODO use swingworker to enable progressIndicator (see FileOpenAction)
+					//ts.parseStream((JRadioButtonMenuItem)e.getSource());
 					ts.parseStream();
 					contr.setTransportStream(ts);
 				} catch (final IOException e1) {

@@ -51,86 +51,21 @@ public class CreateHTMLListDiff implements Runnable{
 	public void run() {
 
 
-		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-08 05-42-11.ts");
-		oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-09 19-26-48.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-08 20-31-37.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-07 20-48-23.ts");
-		//newTransportStream = new TransportStream("d:\\ts\\dvb-c\\ziggo\\2014-4-7-1-47-369000-6875-C.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 03-19 21-23-28.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 03-12 19-10-06.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 03-05 20-23-31.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-26 19-06-49.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-23 20-23-36.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-19 05-51-49.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-16 20-30-39.ts");
-		//newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-12 05-42-23.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-12 05-42-23.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-04 12-28-18.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 02-04 12-28-18.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 01-10 12-02-58.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 01-06 11-47-30.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-18 17-32-00.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-18 12-42-04.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-17 09-02-20.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-11 17-45-16.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-20 09-24-01.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-13 07-35-37.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-30 07-16-47.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-21 16-54-35.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-09 08-47-06.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-04 11-15-18.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-02 08-15-22.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-01 10-42-17.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-30 07-21-16.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-25 08-05-48.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-11 08-29-21.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-10 11-27-43.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 08-09 11-01-22.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 08-02 08-19-13.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 07-31 16-29-16.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 07-24 08-54-40.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 06-12 12-17-48.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 06-08 09-43-28.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 06-01 08-19-38.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-16 21-46-57.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-13 10-21-40.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-10 11-06-59.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-10 11-06-59.ts");
-
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-02 21-57-13.ts");
-
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 03-15 09-28-41.ts");
-		//oldTransportStream  = new TransportStream("d:\\ts\\Ziggo Oost 369000 12-12 08-02-42.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-21 15-52-01.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 11-14 06-47-48.ts");
-		//newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-29 15-01-50.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-25 11-33-33.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-25 11-33-33.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-21 22-47-10.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 10-02 14-31-15.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-03 14-16-44.ts");
-
-		// oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 07-02 20-42-06.ts");
-		// newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-03 14-16-44.ts");
-		// oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 07-02 20-42-06.ts");
-		// newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 09-03 14-16-44.ts");
-		//		oldTransportStream = new TransportStream("d:\\ts\\upc20120805\\UPC 164000 08-05 17-15-22partial.ts");
-		//		oldTransportStream = new TransportStream("d:\\ts\\upc20120805\\UPC 164000 08-05 17-15-22partial.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 06-17 11-09-46.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-15 19-10-43.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-03 08-49-10.ts");
-		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-03 11-06-14.ts");
 		try {
+		newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-21 05-39-33.ts");
+		oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 05-08 05-42-11.ts");
+		//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 369000 04-09 19-26-48.ts");
 			newTransportStream.parseStream();
 			oldTransportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}
 
 
 		String tvhome_prefix_1="<!-- tpl:insert page=\"/newstemplate.htpl\" -->\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n<meta http-equiv=\"content-language\" content=\"nl\">\n<meta name=\"owner\" content=\"info@digitalekabeltelevisie.nl\">\n<meta name=\"author\" content=\"Eric Berendsen\">\n<!-- tpl:put name=\"description\" -->\n\n<script src=\"/theme/sorttable.js\" type=\"text/javascript\"></script>\n<meta name=\"description\"\ncontent=\"Overzicht gebruikte kanalen en frequenties bij Ziggo Oost (voormalig @home gebied).\">\n\n\n\n\n<!-- /tpl:put -->\n<!-- tpl:put name=\"keywords\" -->\n<meta name=\"keywords\"\ncontent=\"digitale televisie, DVB-C, NIT, SDT, MPEG, frequenties\">\n<!-- /tpl:put -->\n\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\">\n<link href=\"/theme/Master.css\" rel=\"stylesheet\" type=\"text/css\">\n<!-- tpl:put name=\"headarea\" -->\n<title>Zenderindeling Ziggo/@Home</title>\n<!-- /tpl:put -->\n</head>\n<body>\n<table class=\"lay\" align=\"center\" border=\"0\" cellpadding=\"0\"\ncellspacing=\"0\">\n<tbody>\n<tr>\n<td colspan=\"2\" class=\"kop\"\nonclick=\"location.href=\'http://www.digitalekabeltelevisie.nl/\';\"\nstyle=\"cursor: pointer;\"><h1 class=\"kop\">digitale\nkabeltelevisie</h1></td>\n</tr>\n<tr>\n<td class=\"links\">\n<!-- tpl:put name=\"linksboven\" --> <!-- /tpl:put --> <!--#exec cgi=\"/cgi-bin/menu.pl\" -->\n<!-- tpl:put name=\"linksmidden\" --> <!-- /tpl:put --> <!--#include virtual=\"/nieuws/laatste.shtml\" -->\n<!-- tpl:put name=\"linksbeneden\" --> <!-- /tpl:put -->\n\n</td>\n<td class=\"main\">\n<h1>\n<!-- tpl:put name=\"titel\" -->\nZenderindeling Ziggo/@Home\n<!-- /tpl:put -->\n</h1> <!-- tpl:put name=\"bodyarea\" -->\n\n"+
-		"\n<font color=\"red\"><h3>Ontbrekende netwerkcodes ??</h3>\n<p>Op deze pagina waren tot voor kort de frequenties van het hele voormalig @Home (Ziggo-Oost) netwerk te vinden. Nu staan er alleen het netwerk van Twente (9001) en een paar testnetwerken op. Dat is niet omdat ik er een paar vergeten ben, maar omdat het signaal in Enschede niet meer informatie bevat. Deze pagina wordt met een programma gegenereerd uit het Ziggo-signaal, en bevat alle NetwerkIds die in de Service Informatie zitten. Ziggo geeft sinds kort per regio alleen nog de informatie voor die regio door. Sterker nog, binnen een regio kan de informatie verschillen, dus het zou best kunnen dat de frequenties die voor Enschede geldig zijn in Hengelo anders zijn. </p><p>Wie op zoek is naar ontbrekende informatie (bijv. om een niet gecertificeerde decoder in te stellen) zou kunnen proberen het aan de <a href=\"https://www.ziggo.nl/#klantenservice/contactformulier\">Ziggo klantenservice</a> te vragen. Als Ziggo service serieus neemt zou dat geen probleem moeten zijn. </p></font>\n"
+		"\n<font color=\"red\"><h3>Ontbrekende netwerkcodes ??</h3>\n<p>Op deze pagina waren tot voor kort de frequenties van het hele voormalig @Home (Ziggo-Oost) netwerk te vinden. Nu staan er alleen het netwerk van Twente (9001) en een paar testnetwerken op. Dat is niet omdat ik er een paar vergeten ben, maar omdat het signaal in Enschede niet meer informatie bevat. Deze pagina wordt met een programma gegenereerd uit het Ziggo-signaal, en bevat alle NetwerkIds die in de Service Informatie zitten. Ziggo geeft sinds kort per regio alleen nog de informatie voor die regio door. Sterker nog, binnen een regio kan de informatie verschillen, dus het zou best kunnen dat de frequenties die voor Enschede geldig zijn in Hengelo anders zijn. </p><p>Wie op zoek is naar ontbrekende informatie (bijv. om een niet gecertificeerde decoder in te stellen) zou kunnen proberen het aan de <a href=\"https://www.ziggo.nl/#klantenservice/contactformulier\">Ziggo klantenservice</a> te vragen. Als Ziggo service serieus neemt zou dat geen probleem moeten zijn. </p>\n"+
+				"<p>Wie wil proberen om zelf deze informatie te verzamelen zou kan <a href=\"/nieuws/archives/2014/04/minder_informatie_op_pagi_1.shtml\">hier meer informatie</a> vinden hoe dat te doen. Let op, het is niet echt eenvoudig, en ik kan er <b>GEEN</b> ondersteuning bij geven.</p><p>Er zijn veel mensen die aanbieden om de informatie uit hun gebied door te geven om op deze site te plaatsen. Daar kan ik helaas door tijdgebrek niet aan beginnen. Misschien dat posten op een forum een alternatief kan zijn.</p></font>\n"
 		+"<p>\nDe indeling van kanalen zoals geldig in het voormalig @Home gebied (Enschede) van Ziggo op ";
 
 		String tvhome_prefix_2=". Wijzigingen/toevoegingen\nt.o.v. de vorige versie zijn in <span\nstyle=\"background-color: yellow;\">geel</span> aangegeven,\nverwijderde zenders zijn <span\nstyle=\"text-decoration: line-through; background-color: orange;\">oranje\nen doorgestreept</span>. (Soms geeft Ziggo zenders een ander\nservice ID, terwijl ze alleen maar naar een andere stream\nverplaatst zijn. Dan lijkt het in dit overzicht alsof de zender\nverwijderd EN tegelijk nieuw is.)\n</p>\n\n<p>Ziggo gebruikt nog twee gescheiden netwerken, \u00e9\u00e9n voor het\nvoormalige @Home-gebied, en \u00e9\u00e9n voor het gebied van\nCasema/Multikabel. Voor verschillende regios worden 32 streams op\nverschillende frequenties gebruikt. Eerst een lijst met de\nindeling in 32 streams (de nummering is die zoals door Ziggo\ngebruikt). Daarna een lijst met de frequenties van de streams voor\nde verschillende regio\'s.</p>\n<p>Bij type staat het soort zender aangegeven.</p>\n<ul>\n<li>\"digital television service (1)\" is een gewoon standaard\ndefinition (SD) TV kanaal.</li>\n<li>\"digital radio sound service (2)\" is een radiokanaal.</li>\n<li>\"user defined (128)\" is in de DVB specificatie\nvrijgelaten, en wordt gebruikt voor software updates voor de\ndecoders.</li>\n<li>\"reserved for future use (17)\" is HDTV in MPEG2\n(eigenlijk \"MPEG-2 HD digital television service\", in de zomer\nvan 2006 gebruikt voor het WK, en tot mei 2010 voor Discovery HD\nmet een datarate van 20 Mbps voor het beeld. Op dit moment niet\ngebruikt op het Ziggo Netwerk.</li>\n<li>\"advanced\ncodec HD digital television service (25)\" is HDTV in MPEG4 (H.264). Nu in\ngebruik voor Sport1 HD, National Geographic Channel HD en Film1\nHD. Deze hebben ongeveer een datarate van 14 Mbps voor het beeld.</li>\n</ul>\n\n<p>\nKlik <a href=\"tvhome";

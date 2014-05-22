@@ -39,10 +39,10 @@ public class CreateHTMLListDelta implements Runnable{
 
 	public void run() {
 
-		transportStream = new TransportStream("E:\\dtv\\delta\\2009-7-25-21-41-402000-6875-C.ts");
 		try {
+			transportStream = new TransportStream("E:\\dtv\\delta\\2009-7-25-21-41-402000-6875-C.ts");
 			transportStream.parseStream();
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 
 			e.printStackTrace();
 		}

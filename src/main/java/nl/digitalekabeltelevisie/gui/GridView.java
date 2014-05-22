@@ -184,6 +184,7 @@ public class GridView extends JPanel implements TransportStreamView{
 		ButtonGroup group = new ButtonGroup();
 
 		addGridRadioButton(group,"Off",0,true);
+		addGridRadioButton(group,"1",1,false);
 		addGridRadioButton(group,"5",5,false);
 		addGridRadioButton(group,"10",10,false);
 		addGridRadioButton(group,"20",20,false);

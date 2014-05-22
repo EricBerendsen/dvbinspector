@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.InterruptedIOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -42,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
 public class FileOpenAction extends AbstractAction {
@@ -85,42 +85,60 @@ public class FileOpenAction extends AbstractAction {
 		 */
 		@Override
 		protected TransportStream doInBackground() throws Exception {
-			TransportStream transportStream = new TransportStream(file);
-			transportStream.setDefaultPrivateDataSpecifier(contr.getDefaultPrivateDataSpecifier());
-			transportStream.setEnableTSPackets(contr.isEnableTSPackets());
-
+			TransportStream transportStream = null;
 			try {
-				transportStream.parseStream(contr.getFrame());
-			} catch (final InterruptedIOException ioe) {
-				transportStream = null;
-			} catch (final Throwable t) {
-				logger.log(Level.WARNING, "error parsing transport stream",t);
+				transportStream = new TransportStream(file);
+				transportStream.setDefaultPrivateDataSpecifier(contr.getDefaultPrivateDataSpecifier());
+				transportStream.setEnableTSPackets(contr.isEnableTSPackets());
 
-				frame.setCursor(Cursor.getDefaultCursor());
+				transportStream.parseStream(contr.getFrame());
+			} catch (final NotAnMPEGFileException e) {
+				logger.log(Level.WARNING, "could not determine packet size stream");
+
+				String msg =
+						"DVB Inspector could not determine packetsize for this file. \n" +
+						"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
+
+						"Are you sure this file contains a valid MPEG Transport Stream?\n\n ";
+				showMessage(msg);
+			} catch (final Throwable t) {
+				transportStream = null;
+				logger.log(Level.WARNING, "error parsing transport stream",t);
 				final Package p = getClass().getPackage();
 				String version = p.getImplementationVersion();
+
 				if(version==null){
 					version="development version (unreleased)";
 				}
-				transportStream = null;
 
-
-				JOptionPane.showMessageDialog(frame,
+				String msg =
 						"Ooops. \n\n" +
 						"While parsing your stream an error occured " +
 						"from which DVB Inspector can not recover.\n\n" +
 						"Error message: "+t.toString()+"\n\n"+
 						"You can help to improve DVB Inspector by making this stream available " +
 						"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
-						"Please include the version of DVB Inspector: "+version,
-						"Error DVB Inspector",
-						JOptionPane.ERROR_MESSAGE);
+						"Please include the version of DVB Inspector: "+version;
+
+				showMessage(msg);
 			}
 
 
 			frame.setCursor(Cursor.getDefaultCursor());
 
 			return transportStream;
+		}
+
+		/**
+		 * @param msg
+		 */
+		public void showMessage(String msg) {
+			frame.setCursor(Cursor.getDefaultCursor());
+
+			JOptionPane.showMessageDialog(frame,
+					msg,
+					"Error DVB Inspector",
+					JOptionPane.ERROR_MESSAGE);
 		}
 
 	}

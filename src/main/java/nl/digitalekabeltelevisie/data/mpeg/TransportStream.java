@@ -43,6 +43,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -72,6 +73,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
+import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
 import nl.digitalekabeltelevisie.util.PositionPushbackInputStream;
 import nl.digitalekabeltelevisie.util.ProgressMonitorLargeInputStream;
@@ -86,6 +88,10 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class TransportStream implements TreeNode{
 
 
+	/**
+	 *
+	 */
+	private static final int MAX_SEARCH_BYTES = 1000;
 	/**
 	 *
 	 */
@@ -146,25 +152,23 @@ public class TransportStream implements TreeNode{
 	 */
 	private Calendar zeroTime = null;
 
-	/**
-	 * Not used
-	 */
-	private Bouquet bouquet = null;
-
 	private long len;
 
 	private int max_packets;
+
+	private int packetLenghth = 188;
+
+	private int [] allowedPacketLengths = {188,192,204,208};
+
 
 	/**
 	 *
 	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
 	 * @param fileName name of the file to be read (null not permitted).
 	 */
-	public TransportStream(final String fileName) {
+	public TransportStream(final String fileName) throws NotAnMPEGFileException,IOException {
 		this(new File(fileName));
 	}
-
-
 
 	/**
 	 *
@@ -172,14 +176,67 @@ public class TransportStream implements TreeNode{
 	 * @param file the file to be read (null not permitted). Don't enable TSPackets by default.
 	 */
 
-
-
-	public TransportStream(final File file) {
+	public TransportStream(final File file) throws NotAnMPEGFileException,IOException{
 		this.file = file;
 		len = file.length();
-		max_packets = (int)(len / packet_length);
+		packetLenghth = determineActualPacketLength(file);
+		max_packets = (int)(len / packetLenghth);
 		packet_pid = new short [max_packets];
 
+	}
+
+	/**
+	 * tries to find the actual packetLength of packets in this file by finding a sequence of 5 sync bytes at the same distance, starting within the first 1000 bytes of the file
+	 * @param file
+	 * @return
+	 */
+	private int determineActualPacketLength(File file) throws NotAnMPEGFileException,IOException{
+		RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+		for(int possiblePacketLength:allowedPacketLengths){
+			logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
+
+			if(usesPacketLength(possiblePacketLength, randomAccessFile)){
+				randomAccessFile.close();
+				logger.log(Level.INFO, "Found packetLength {0}",possiblePacketLength);
+				return possiblePacketLength;
+			}
+		}
+
+		randomAccessFile.close();
+		throw new NotAnMPEGFileException();
+	}
+
+	/**
+	 * @param possiblePacketLength
+	 * @param randomAccessFile
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean usesPacketLength(int possiblePacketLength, RandomAccessFile randomAccessFile) throws IOException {
+		int startPos = 0;
+		do{
+			logger.log(Level.INFO, "starting at position {0}",startPos);
+			randomAccessFile.seek(startPos);
+			int b = randomAccessFile.read();
+			while ((b != sync_byte)&&(startPos<MAX_SEARCH_BYTES)){
+				b = randomAccessFile.read();
+				startPos++;
+			}
+			logger.log(Level.INFO, "found a sync byte at position {0}",startPos);
+			// found a sync byte, try to find next 4 sync bytes
+			boolean seqFound = true;
+			for (int i = 1; (i < 5) && seqFound; i++) {
+				randomAccessFile.seek(startPos + (i * possiblePacketLength));
+				logger.log(Level.INFO, "found {0} sequence syncs at pos {1}",new Object[]{i,startPos + (i * possiblePacketLength)});
+				seqFound &= (randomAccessFile.read() == sync_byte);
+			}
+			if(seqFound){
+				return true;
+			}else{
+				startPos++;
+			}
+		}while(startPos <MAX_SEARCH_BYTES);
+		return false;
 	}
 
 	/**
@@ -197,7 +254,7 @@ public class TransportStream implements TreeNode{
 	 */
 	public void parseStream(java.awt.Component component) throws IOException {
 		final PositionPushbackInputStream fileStream = getInputStream(component);
-		final byte [] buf = new byte[packet_length];
+		final byte [] buf = new byte[packetLenghth];
 		long count=0;
 		no_packets = 0;
 
@@ -215,9 +272,9 @@ public class TransportStream implements TreeNode{
 		int bytes_read =0;
 		do {
 			long offset = fileStream.getPosition();
-			bytes_read = fileStream.read(buf, 0, MPEGConstants.packet_length);
+			bytes_read = fileStream.read(buf, 0, packetLenghth);
 			final int next = fileStream.read();
-			if((bytes_read==MPEGConstants.packet_length)&&
+			if((bytes_read==packetLenghth)&&
 					(buf[0]==MPEGConstants.sync_byte) &&
 					((next==-1)||(next==MPEGConstants.sync_byte))) {
 				//always push back first byte of next packet
@@ -262,7 +319,7 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); //ignore result
 				}
 			}
-		} while (bytes_read==MPEGConstants.packet_length);
+		} while (bytes_read==packetLenghth);
 		namePIDs();
 		calculateBitRate();
 	}
@@ -281,15 +338,15 @@ public class TransportStream implements TreeNode{
 			return;
 		}
 		final PositionPushbackInputStream fileStream = getInputStream(component);
-		final byte [] buf = new byte[MPEGConstants.packet_length];
+		final byte [] buf = new byte[packetLenghth];
 		long count=0;
 
 
 		int bytes_read =0;
 		do {
-			bytes_read = fileStream.read(buf, 0, MPEGConstants.packet_length);
+			bytes_read = fileStream.read(buf, 0, packetLenghth);
 			final int next = fileStream.read();
-			if((bytes_read==MPEGConstants.packet_length)&&
+			if((bytes_read==packetLenghth)&&
 					(buf[0]==MPEGConstants.sync_byte) &&
 					((next==-1)||(next==MPEGConstants.sync_byte))) {
 				//always push back first byte of next packet
@@ -319,7 +376,7 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); //ignore result
 				}
 			}
-		} while (bytes_read==MPEGConstants.packet_length);
+		} while (bytes_read==packetLenghth);
 	}
 
 
@@ -383,6 +440,7 @@ public class TransportStream implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("size",file.length(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("modified",new Date(file.lastModified()).toString(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("TS packets",no_packets,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLenghth,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("Error packets",error_packets,null)));
 		if(bitRate!=-1){
 			t.add(new DefaultMutableTreeNode(new KVP("bitrate",bitRate,null)));
@@ -843,7 +901,7 @@ public class TransportStream implements TreeNode{
 				final long diffPacket = last.getPacket_no() - first.getPacket_no();
 				final long timeDiffMills =   getUTCmillis(last.getUTC_time())- getUTCmillis(first.getUTC_time());
 				if(timeDiffMills>0){ // shit happens... capture.guangdong  has 10 with same timestamp....
-					bitRateTDT = (diffPacket * packet_length * 8 * 1000)/timeDiffMills;
+					bitRateTDT = (diffPacket * packetLenghth * 8 * 1000)/timeDiffMills;
 				}
 
 			}
@@ -856,7 +914,7 @@ public class TransportStream implements TreeNode{
 			if(tdtSectionList.size()>=1){
 				final TDTsection first = tdtSectionList.get(0);
 				final Calendar firstTime = getUTCCalender(first.getUTC_time());
-				final long millsIntoStream= (first.getPacket_no() *packet_length * 8 * 1000)/getBitRate();
+				final long millsIntoStream= (first.getPacket_no() *packetLenghth * 8 * 1000)/getBitRate();
 				firstTime.add(Calendar.MILLISECOND, (int)-millsIntoStream);
 				zeroTime = firstTime;
 			}
@@ -865,14 +923,6 @@ public class TransportStream implements TreeNode{
 
 	public int getStreamID(){
 		return psi.getPat().getTransportStreamId();
-	}
-
-	public Bouquet getBouquet() {
-		return bouquet;
-	}
-
-	public void setBouquet(final Bouquet bouquet) {
-		this.bouquet = bouquet;
 	}
 
 	/**
@@ -950,13 +1000,13 @@ public class TransportStream implements TreeNode{
 				final Calendar now=new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
 
 				r = now.get(Calendar.YEAR)+"/"+ (now.get(Calendar.MONTH)+1)+"/"+now.get(Calendar.DAY_OF_MONTH)+" "+now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
@@ -974,13 +1024,13 @@ public class TransportStream implements TreeNode{
 				final Calendar now=new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packet_length * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
 
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
@@ -1024,13 +1074,13 @@ public class TransportStream implements TreeNode{
 				try {
 					RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
 					randomAccessFile.seek(packet_offset[packetNo]);
-					byte [] buf = new byte[MPEGConstants.packet_length];
+					byte [] buf = new byte[packetLenghth];
 					int l = randomAccessFile.read(buf);
-					if(l==MPEGConstants.packet_length){
+					if(l==packetLenghth){
 						packet = new TSPacket(buf, packetNo,this);
 
 					}else{
-						logger.warning("read less then MPEGConstants.packet_length ("+MPEGConstants.packet_length+") bytes, actual read: "+l);
+						logger.warning("read less then packetLenghth ("+packetLenghth+") bytes, actual read: "+l);
 					}
 
 					randomAccessFile.close();
@@ -1065,6 +1115,10 @@ public class TransportStream implements TreeNode{
 
 	public PID getPID(int p){
 		return pids[p];
+	}
+
+	public int getPacketLenghth() {
+		return packetLenghth;
 	}
 
 }
