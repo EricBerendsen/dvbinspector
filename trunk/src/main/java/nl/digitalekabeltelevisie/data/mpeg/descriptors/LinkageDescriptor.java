@@ -174,6 +174,12 @@ public class LinkageDescriptor extends Descriptor {
 	// linkage type 0x0c
 	private int bouquetID;
 
+	// linkage type 0x0D exent linkage
+	private int target_event_id;
+	private int target_listed;
+	private int event_simulcast;
+	private int reserved;
+
 	// TODO handle linkage_type ==0x05
 	// TODO handle linkage_type ==0x0D 300468
 
@@ -245,6 +251,13 @@ public class LinkageDescriptor extends Descriptor {
 				privateDataByte = Utils.copyOfRange(b, offset+10, offset+descriptorLength+2);
 			}
 
+		}else if(linkageType==0x0D){ // event linkage
+			target_event_id  = getInt(b,offset+9,2,MASK_16BITS);
+			target_listed = getInt(b,offset+11,1,0x80)>>7;
+			event_simulcast= getInt(b,offset+11,1,0x40)>>6;
+			reserved = getInt(b,offset+11,1,MASK_6BITS);
+			privateDataByte = Utils.copyOfRange(b, offset+12, offset+descriptorLength+2);
+
 		}else if(linkageType==0x81){ // 13.2.6 NorDig linkage for bootloader
 			// TODO, this is a private usage, but not indicated by a private_data_specifier_descriptor: 0x5F
 			// just assume it is nordig?
@@ -302,6 +315,12 @@ public class LinkageDescriptor extends Descriptor {
 			if(tableType==0x02){
 				t.add(new DefaultMutableTreeNode(new KVP("bouquet_id",bouquetID ,null)));
 			}
+		}else if(linkageType==0x0d){ // event linkage
+			t.add(new DefaultMutableTreeNode(new KVP("target_event_id",target_event_id ,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("target_listed",target_listed ,target_listed==1?"service shall be included in SDT":"service may not be included in SDT")));
+			t.add(new DefaultMutableTreeNode(new KVP("event_simulcast",event_simulcast ,event_simulcast==1?"target and source are being simulcast":"events are offset in time")));
+			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
+
 		}else if(linkageType==0x81){
 			addListJTree(t,bootLoaderList,modus,"Nordig BootLoader");
 		}
@@ -349,6 +368,8 @@ public class LinkageDescriptor extends Descriptor {
 		case 0x0A : return "TS containing SSU BAT or NIT";
 		case 0x0B : return "IP/MAC Notification Service";
 		case 0x0C : return "TS containing INT BAT or NIT";
+		case 0x0D : return "event linkage";
+		case 0x0E : return "extended event linkage";
 
 		case 0x81 : return "user defined: (linkage to NorDig bootloader)";
 		case 0x82 : return "user defined: (NorDig Simulcast replacement service/linkage to Ziggo software update)"; // or NorDig Simulcast replacement service.
