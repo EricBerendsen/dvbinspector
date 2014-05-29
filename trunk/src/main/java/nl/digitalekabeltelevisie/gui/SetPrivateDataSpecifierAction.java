@@ -57,10 +57,6 @@ public class SetPrivateDataSpecifierAction extends AbstractAction {
 	public void actionPerformed(final ActionEvent e) {
 		final Preferences prefs = Preferences.userNodeForPackage(contr.getClass());
 		prefs.putLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, specifier);
-
-		System.out.println("actionPerformed(final ActionEvent e:"+e);
-		System.out.println("e.getSource():"+e.getSource());
-
 		contr.setDefaultPrivateDataSpecifier(specifier);
 
 		final TransportStream ts = contr.getTransportStream();
