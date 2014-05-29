@@ -805,7 +805,6 @@ public class TransportStream implements TreeNode{
 						}else if(d instanceof ApplicationSignallingDescriptor){
 							compt_type.append(" Application Information Table (AIT)");
 							short_compt_type.append(" Application Information Table (AIT)");
-							abstractPesHandler = new EAC3Handler();
 						}if(d instanceof CADescriptor) {
 							final CADescriptor cad = (CADescriptor) d;
 							final int capid=cad.getCaPID();
