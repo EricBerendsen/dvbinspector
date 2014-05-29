@@ -132,6 +132,9 @@ public class ContentIdentifierDescriptor extends Descriptor {
 		case 0x02 : return "CRID references a series that this event belongs to.";
 		case 0x03 : return "CRID references a recommendation. This CRID can be a group or a single item of content.";
 
+		case 0x31 : return "User private; DTG programme CRID (equivalent to type 0x01); CRID references the item of content that this event is an instance of.";
+		case 0x32 : return "User private; DTG series CRID (a restriction of type 0x02 to be used only for series); CRID references a series that this event belongs to.";
+		case 0x33 : return "User private; DTG recommendation CRID (equivalent to type 0x03); CRID references a recommendation. This CRID can be a group or a single item of content.";
 		default:
 			if((0x04<=type)&&(type<=0x1F )){return "DVB reserved";}
 			if((0x20<=type)&&(type<=0x3F )){return "User private";}
