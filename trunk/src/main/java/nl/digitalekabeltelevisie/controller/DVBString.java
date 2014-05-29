@@ -138,6 +138,8 @@ public class DVBString {
 				return "Big5 subset of ISO/IEC 10646-1";
 			case 0x15:
 				return "UTF-8 encoding of ISO/IEC 10646-1";
+			case 0x1F:
+				return "Described by encoding_type_id;"+data[offset+2];
 			default:
 				return "reserved for future use";
 			}
