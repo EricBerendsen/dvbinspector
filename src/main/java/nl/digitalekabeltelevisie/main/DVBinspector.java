@@ -374,6 +374,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 //		fileMenu.add(exportMenuItem);
 //		exportMenuItem.addActionListener(exportAction);
 
+		exitMenuItem.addActionListener(this);
 		fileMenu.add(exitMenuItem);
 
 		filterItem = new JMenuItem("Filter");
