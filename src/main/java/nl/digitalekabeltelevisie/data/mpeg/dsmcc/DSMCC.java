@@ -27,10 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -60,6 +62,8 @@ public class DSMCC extends AbstractPSITabel{
 	private int pid = 0;
 	private boolean isObjectCarousel = true; // set to false for SSU
 
+	private static Logger logger = Logger.getLogger(DSMCC.class.getName());
+
 	public DSMCC(final PSI parent, final boolean isObjectCarousel){
 		super(parent);
 		this.isObjectCarousel = isObjectCarousel;
@@ -73,8 +77,8 @@ public class DSMCC extends AbstractPSITabel{
 		if(tableID==0x3b){ // DSM-CC - U-N messages (DSI or DII)
 			// TODO DSI or DII can be only one single section, so no need for []
 			final int tableIdExt = section.getTableIdExtension();
-			final DSMCC_UNMessageSection unMessage = new DSMCC_UNMessageSection(section.getRaw_data(), section.getParentPID(),isObjectCarousel);
 			DSMCC_UNMessageSection [] sections= unMessages.get(tableIdExt);
+			final DSMCC_UNMessageSection unMessage = new DSMCC_UNMessageSection(section.getRaw_data(), section.getParentPID(),isObjectCarousel);
 
 			if(sections==null){
 				sections = new DSMCC_UNMessageSection[section.getSectionLastNumber()+1];
@@ -96,13 +100,19 @@ public class DSMCC extends AbstractPSITabel{
 				sections = new DSMCC_DownLoadDataMessageSection[section.getSectionLastNumber()+1];
 				downloadMessages.put(moduleID, sections);
 			}
-			if(section.getSectionNumber()<=section.getSectionLastNumber()){ // this always be the case, but Ziggo managed to break this rule...
+			if(section.getSectionNumber()<=section.getSectionLastNumber()){ // this should always be the case, but Ziggo managed to break this rule...
+				if(section.getSectionLastNumber()>=sections.length){ //new version has getSectionLastNumber > previous version, resize
+					sections = Arrays.copyOf(sections, section.getSectionLastNumber()+1);
+					downloadMessages.put(moduleID, sections);
+				}
 				if(sections[section.getSectionNumber()]==null){
 					sections[section.getSectionNumber()] = downloadMessage;
 				}else{
 					final TableSection last = sections[section.getSectionNumber()];
 					updateSectionVersion(downloadMessage, last);
 				}
+			}else{
+				logger.info("section.getSectionNumber()>section.getSectionLastNumber()"+section);
 			}
 		}else if(tableID==0x3d){ // DSM-CC - stream descriptorlist;
 
