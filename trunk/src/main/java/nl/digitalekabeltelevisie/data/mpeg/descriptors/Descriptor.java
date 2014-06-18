@@ -38,6 +38,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.LookUpList;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
@@ -46,6 +47,34 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class Descriptor implements TreeNode {
 
+	private static LookUpList metadata_application_format_list = new LookUpList.Builder().
+				add(0x0000,0x000F,"Reserved").
+				add(0x0010,"ISO 15706 (ISAN) encoded in its binary form").
+				add(0x0011, "ISO 15706-2 (V-ISAN) encoded in its binary form").
+				add(0x0012,0x00FF,"Reserved").
+				add(0x0100,"metadata service contains TVA metadata as profiled according to DVB").
+				add(0x0101,"metadata contained conforms to DTG D-Book Record List.").
+				add(0x0102,0xFFFE,"User defined").
+				add(0xFFFF,"Defined by the metadata_application_format_identifier field").
+				build();
+	private static LookUpList mpeg_carriage_flags_list = new LookUpList.Builder().
+				add(0,"Carriage in the same transport stream where this metadata pointer descriptor is carried.").
+				add(1,"Carriage in a different transport stream from where this metadata pointer descriptor is carried.").
+				add(2,"Carriage in a program stream. This may or may not be the same program stream in which this metadata pointer descriptor is carried.").
+				add(3,"may be used if there is no relevant metadata carried on the DVB network. In this case the metadata locator record shall be present").
+				build();
+	private static LookUpList metadata_format_list = new LookUpList.Builder().
+				add(0,0x0f,"Reserved").
+				add(0x10,"ISO/IEC 15938-1 TeM").
+				add(0x11,"ISO/IEC 15938-1 BiM").
+				add(0x12,0x3e,"Reserved").
+				add(0x3f,"Defined by metadata application format").
+				add(0x40,0xef,"User Defined").
+				add(0xf0,"The encoding and encapsulation format as defined in clauses 9.3 and 9.4 of ETSI TS 102 323 V1.5.1").
+				add(0xf1,0xf7,"DVB Reserved").
+				add(0xf8,0xfe,"User Defined").
+				add(0xff,"Defined by metadata_format_identifier field").
+				build();
 	protected int			descriptorTag		= 0;
 	protected int			descriptorLength	= 0;
 
@@ -180,11 +209,11 @@ public class Descriptor implements TreeNode {
 
 			/* TV ANYTIME, TS 102 323 */
 		case 0x25:
-			return "TVA_metadata_pointer_descriptor";
+			return "metadata_pointer_descriptor";
 		case 0x26:
-			return "TVA_metadata_descriptor";
+			return "metadata_descriptor";
 		case 0x27:
-			return "TVA_metadata_STD_descriptor";
+			return "metadata_STD_descriptor";
 
 			/* H.222.0 AMD 3 */
 			/* http://neuron2.net/library/avc/T-REC-H%5B1%5D.222.0-200403-I!Amd3!PDF-E.pdf */
@@ -1142,5 +1171,17 @@ public class Descriptor implements TreeNode {
 			return "Reserved";
 
 		}
+	}
+
+	protected static String getMPEGCarriageFlagsString(int mPEG_carriage_flags) {
+		return mpeg_carriage_flags_list.get(mPEG_carriage_flags);
+	}
+
+	protected static String getMetaDataApplicationFormatString(int metadata_application_format) {
+		return metadata_application_format_list.get(metadata_application_format);
+	}
+
+	public static String getMetaDataFormatString(int metadata_format) {
+		return metadata_format_list.get(metadata_format);
 	}
 }

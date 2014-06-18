@@ -40,6 +40,10 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationLo
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationBoundaryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.SupplementaryAudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.T2DeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.TargetRegionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.TargetRegionNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.INTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACPlatformNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACPlatformProviderNameDescriptor;
@@ -49,6 +53,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoVodDeliveryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoVodURLDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus.CIProtectionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.GuidanceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.EACEMStreamIdentifierDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
@@ -171,7 +176,7 @@ public final class DescriptorFactory {
 				d = new ZiggoPackageDescriptor(data, t + offset, tableSection);
 				break;
 			}
-		} else if (private_data_specifier == 0x28) { // EACAM
+		} else if (private_data_specifier == 0x28) { // EACEM
 			switch (Utils.getUnsignedByte(data[t + offset])) {
 			case 0x83:
 				d = new LogicalChannelDescriptor(data, t + offset, tableSection);
@@ -198,6 +203,15 @@ public final class DescriptorFactory {
 			switch (Utils.getUnsignedByte(data[t + offset])) {
 			case 0xCE:
 				d = new CIProtectionDescriptor(data, t + offset, tableSection);
+				break;
+			}
+		} else if (private_data_specifier == 0x233a) { // DTG
+			switch (Utils.getUnsignedByte(data[t + offset])) {
+			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
+				d = new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, t + offset, tableSection);
+				break;
+			case 0x89:
+				d = new GuidanceDescriptor(data, t + offset, tableSection);
 				break;
 			}
 		}
@@ -273,6 +287,12 @@ public final class DescriptorFactory {
 			break;
 		case 0x1C:
 			d = new Mpeg4AudioDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x25:
+			d = new MetaDataPointerDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x26:
+			d = new MetaDataDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x28:
 			d = new AVCVideoDescriptor(data, t + offset, tableSection);
@@ -406,11 +426,17 @@ public final class DescriptorFactory {
 		case 0x6F:
 			d = new ApplicationSignallingDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x70:
+			d = new AdaptationFieldDataDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x71:
 			d = new ServiceIdentifierDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x73:
 			d = new DefaultAuthorityDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x74:
+			d = new RelatedContentDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x76:
 			d = new ContentIdentifierDescriptor(data, t + offset, tableSection);
@@ -427,8 +453,11 @@ public final class DescriptorFactory {
 		case 0x7C:
 			d = new AACDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x7E:
+			d = new FTAContentManagmentDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x7F:
-			d = new ExtensionDescriptor(data, t + offset, tableSection);
+			d = getExtendedDescriptor(data, offset, tableSection, t);
 			break;
 
 
@@ -441,6 +470,48 @@ public final class DescriptorFactory {
 					+ ",) data=" + d.getRawDataString());
 			break;
 		}
+		return d;
+	}
+
+	/**
+	 * @param data
+	 * @param offset
+	 * @param tableSection
+	 * @param t
+	 * @return
+	 */
+	public static ExtensionDescriptor getExtendedDescriptor(final byte[] data, final int offset,
+			final TableSection tableSection, final int t) {
+
+		ExtensionDescriptor d;
+		int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
+		switch(descriptor_tag_extension){
+
+		case 0x04:
+			d = new T2DeliverySystemDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x06:
+			d = new SupplementaryAudioDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x08:
+			d = new nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.MessageDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x09:
+			d = new TargetRegionDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x0A:
+			d = new TargetRegionNameDescriptor(data, t + offset, tableSection);
+			break;
+
+
+
+		default:
+			logger.warning("unimplemented ExtendsionDescriptor:" +
+					ExtensionDescriptor.getDescriptorTagString(descriptor_tag_extension) +
+					", TableSection:" + tableSection);
+			d = new ExtensionDescriptor(data, t + offset, tableSection);
+		}
+
 		return d;
 	}
 
