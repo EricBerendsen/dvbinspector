@@ -40,6 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.LinkageDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.RelatedContentDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.BATsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.CAsection;
@@ -49,6 +50,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PATsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.RCTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TOTsection;
@@ -148,6 +150,8 @@ public class PsiSectionData {
 							transportStream.getPsi().getUnts().update(new UNTsection(this,parentPID));
 						}else if((tableId==0x74)&&isAITSection(pid)){
 							transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
+						}else if((tableId==0x76)&&isRCTSection(pid)){
+							transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
 						}else if((tableId>=0x37)&&(tableId<=0x3F)){
 							// also include all PES streams component (ISO/IEC 13818-6 type B) which
 							// do not have a data_broadcast_id_descriptor associated with it,
@@ -262,7 +266,7 @@ public class PsiSectionData {
 	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: application_signalling_descriptor: 0x6F (111)
 
 	 * @param pid
-	 * @return true if this PID contains th eUNT
+	 * @return true if this PID contains a AIT
 	 */
 	public boolean isAITSection(final int pid){
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
@@ -272,6 +276,32 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<ApplicationSignallingDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), ApplicationSignallingDescriptor.class);
+					if((application_signalling_descriptors!=null)&&(application_signalling_descriptors.size()>0)){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 *
+	 *  is this PID a candidate to contain a RCT
+	 *  the tabletype is already checked by caller  table_id: 0x76 (118) => TVA-related content section (RCT)
+	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: Descriptor: related_content_descriptor [0]: 0x74 (116)
+
+	 * @param pid
+	 * @return true if this PID contains a RCT
+	 */
+	public boolean isRCTSection(final int pid){
+		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
+
+		for (final PMTsection[] pmt : pmtList.values()){
+			final PMTsection p=pmt[0]; // PMT always one section
+			for(final Component component : p.getComponentenList() ){
+				if(component.getElementaryPID()==pid){
+					final List<RelatedContentDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RelatedContentDescriptor.class);
 					if((application_signalling_descriptors!=null)&&(application_signalling_descriptors.size()>0)){
 						return true;
 					}

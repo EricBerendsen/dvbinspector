@@ -40,6 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NetworkSync;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PAT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
+import nl.digitalekabeltelevisie.data.mpeg.psi.RCTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TOT;
@@ -67,6 +68,7 @@ public class PSI {
 	private final INT int_table = new INT(this);
 	private final UNTs unt_table = new UNTs(this);
 	private final AITs ait_table = new AITs(this);
+	private final RCTs rct_table = new RCTs(this);
 	private final DSMCCs dsm_table = new DSMCCs(this);
 
 	public NIT getNit() {
@@ -88,6 +90,7 @@ public class PSI {
 		t.add(int_table.getJTreeNode(modus));
 		t.add(unt_table.getJTreeNode(modus));
 		t.add(ait_table.getJTreeNode(modus));
+		t.add(rct_table.getJTreeNode(modus));
 		t.add(dsm_table.getJTreeNode(modus));
 		return t;
 	}
@@ -142,6 +145,9 @@ public class PSI {
 			return pat.getPat(packetNo);
 		}
 		return null;
+	}
+	public RCTs getRcts() {
+		return rct_table;
 	}
 
 }
