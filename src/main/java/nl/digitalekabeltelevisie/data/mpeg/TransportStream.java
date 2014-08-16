@@ -57,6 +57,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.CADescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.EnhancedAC3Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.RelatedContentDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.SubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.TeletextDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.VBIDataDescriptor;
@@ -68,7 +69,6 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PAT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
@@ -572,7 +572,7 @@ public class TransportStream implements TreeNode{
 
 		// now all services, starting with PMTs themselves, then referenced ES
 		// get PMTs valid at moment "packetNo
-		PAT actualPat = getPsi().getPat(packetNo);
+		// PAT actualPat = getPsi().getPat(packetNo);
 		// .getPmts(packetNo).values().iterator();
 //		while (it.hasNext()) {
 //			final PMTsection[] pmt = it.next();
@@ -805,6 +805,9 @@ public class TransportStream implements TreeNode{
 						}else if(d instanceof ApplicationSignallingDescriptor){
 							compt_type.append(" Application Information Table (AIT)");
 							short_compt_type.append(" Application Information Table (AIT)");
+						}else if(d instanceof RelatedContentDescriptor){
+							compt_type.append(" Related Content Table (RCT)");
+							short_compt_type.append(" Related Content Table (RCT)");
 						}if(d instanceof CADescriptor) {
 							final CADescriptor cad = (CADescriptor) d;
 							final int capid=cad.getCaPID();
