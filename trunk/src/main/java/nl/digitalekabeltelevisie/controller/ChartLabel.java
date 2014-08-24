@@ -1,10 +1,10 @@
 /**
  *
- *  http://www.digitalekabeltelevisie.nl/dvb_inspector
+ * http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
- *  This file is part of DVB Inspector.
+ * This file is part of DVB Inspector.
  *
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,16 +32,16 @@ import java.awt.Paint;
 /**
  * @author Eric Berendsen
  *
- * Used as a label for the Charts as produced by jfreechart..
+ *         Used as a label for the Charts as produced by jfreechart..
  *
  */
 
 @SuppressWarnings("rawtypes")
 public class ChartLabel implements Comparable {
 
-	private String	label;
-	private short	pid;
-	private Paint	color;
+	private String label;
+	private short pid;
+	private Paint color;
 
 	public ChartLabel(final String label, final short pid, final Paint color) {
 		super();
@@ -51,7 +51,7 @@ public class ChartLabel implements Comparable {
 	}
 
 	public ChartLabel(final String label, final short pid) {
-		this(label,pid,null);
+		this(label, pid, null);
 	}
 
 	/*
@@ -61,13 +61,13 @@ public class ChartLabel implements Comparable {
 	 */
 	public int compareTo(final Object o) {
 		if (o == null) {
-			throw new NullPointerException();
+			throw new NullPointerException(); // NOPMD by Eric on 23-8-14 12:31
 		}
 		if (!(o instanceof ChartLabel)) {
 			throw new ClassCastException();
 		}
 
-		return  Short.valueOf(this.pid).compareTo(((ChartLabel) o).getPid());
+		return Short.valueOf(this.pid).compareTo(((ChartLabel) o).getPid());
 	}
 
 	@Override
@@ -91,14 +91,12 @@ public class ChartLabel implements Comparable {
 		this.pid = pid;
 	}
 
-
 	/**
 	 * @return the color
 	 */
 	public Paint getColor() {
 		return color;
 	}
-
 
 	/**
 	 * @param color the color to set
