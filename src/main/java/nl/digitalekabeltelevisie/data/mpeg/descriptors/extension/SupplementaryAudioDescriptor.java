@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.logging.Logger;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -40,14 +38,12 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class SupplementaryAudioDescriptor extends ExtensionDescriptor {
 
-	private static Logger logger = Logger.getLogger(SupplementaryAudioDescriptor.class.getName());
-
 	//Supplementary audio descriptor
-	private int mix_type;
-	private int editorial_classification;
-	private int language_code_present;
+	private final int mix_type;
+	private final int editorial_classification;
+	private final int language_code_present;
 	private String iso639LanguageCode;
-	private byte[] private_data_byte;
+	private final byte[] private_data_byte;
 
 
 

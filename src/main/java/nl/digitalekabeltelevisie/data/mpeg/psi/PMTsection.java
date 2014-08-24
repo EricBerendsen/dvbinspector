@@ -49,7 +49,7 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	private int programInfoLength = 0;
 
 	private List<Descriptor> descriptorList;
-	private List<Component> componentenList ;
+	private final List<Component> componentenList ;
 
 	public static class Component implements TreeNode{
 
@@ -128,7 +128,7 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	}
 
 
-	public List<Component> buildComponentList(final byte[] data, final int i, final int length) {
+	private final List<Component> buildComponentList(final byte[] data, final int i, final int length) {
 		final ArrayList<Component> r = new ArrayList<Component>();
 		int t =0;
 		while(t<length){

@@ -143,7 +143,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
 			return copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1);
 		}
-		return null;
+		return new byte[0];
 	}
 
 	public AdaptationField getAdaptationField(){
@@ -163,7 +163,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			int start = Math.min(4+getUnsignedByte(buffer[4])+1, PAYLOAD_PACKET_LENGTH);
 			return copyOfRange(buffer, start,PAYLOAD_PACKET_LENGTH);
 		}
-		return null;
+		return new byte[0];
 	}
 
 	public short getPID()

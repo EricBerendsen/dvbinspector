@@ -44,7 +44,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class LinkageDescriptor extends Descriptor {
 
-	private static Logger logger = Logger.getLogger(LinkageDescriptor.class.getName());
+	private static final Logger logger = Logger.getLogger(LinkageDescriptor.class.getName());
 
 	private List<OUIEntry> ouiList = new ArrayList<OUIEntry>();
 	private List<Platform> platformList = new ArrayList<Platform>();

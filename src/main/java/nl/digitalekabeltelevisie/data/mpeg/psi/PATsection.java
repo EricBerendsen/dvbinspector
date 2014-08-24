@@ -82,7 +82,7 @@ public class PATsection extends TableSectionExtendedSyntax {
 		programs = buildProgramList(raw_data.getData(),8,programsLength);
 	}
 
-	public List<Program> buildProgramList(final byte[] data, final int i, final int programInfoLength) {
+	private final List<Program> buildProgramList(final byte[] data, final int i, final int programInfoLength) {
 		final ArrayList<Program> r = new ArrayList<Program>();
 		int t =0;
 		while(t<programInfoLength){

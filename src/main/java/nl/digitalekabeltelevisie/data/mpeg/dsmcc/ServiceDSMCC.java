@@ -65,7 +65,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class ServiceDSMCC implements TreeNode {
 
-	private static Logger logger = Logger.getLogger(ServiceDSMCC.class.getName());
+	private static final Logger logger = Logger.getLogger(ServiceDSMCC.class.getName());
 
 	public class DSMFile implements HTMLSource{
 

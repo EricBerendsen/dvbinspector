@@ -44,7 +44,7 @@ public final class DSMCCDescriptorFactory {
 		// static only
 	}
 
-	private static Logger	logger	= Logger.getLogger(DSMCCDescriptorFactory.class.getName());
+	private static final Logger	logger	= Logger.getLogger(DSMCCDescriptorFactory.class.getName());
 
 
 	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {

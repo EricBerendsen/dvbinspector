@@ -29,16 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.logging.Logger;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ExtensionDescriptor extends Descriptor {
-
-	private static Logger logger = Logger.getLogger(ExtensionDescriptor.class.getName());
 
 	protected final int descriptor_tag_extension;
 	protected final byte[] selector_byte;

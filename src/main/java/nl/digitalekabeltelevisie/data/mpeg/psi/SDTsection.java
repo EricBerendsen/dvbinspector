@@ -197,7 +197,7 @@ public class SDTsection extends TableSectionExtendedSyntax {
 		return serviceList.size();
 	}
 
-	public List<Service> buildServicesList(final byte[] data, final int i, final int programInfoLength) {
+	private final List<Service> buildServicesList(final byte[] data, final int i, final int programInfoLength) {
 		final ArrayList<Service> r = new ArrayList<Service>();
 		int t =0;
 		while(t<programInfoLength){

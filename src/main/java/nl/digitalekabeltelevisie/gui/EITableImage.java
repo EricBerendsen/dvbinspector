@@ -84,8 +84,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	private Interval interval;
 	private boolean selectedSchedule = true;
 
-	private static SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-	private static SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+	private SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
+	private SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
 	private int translatedX;
 	private int translatedY;
@@ -360,7 +360,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 *
 	 * @return
 	 */
-	public Dimension getDimension(){
+	public final Dimension getDimension(){
 		if((eit!=null)&&(interval!=null)){
 			// Round up/down to nearest hour
 			Date startDate = roundHourDown(interval.getStart());

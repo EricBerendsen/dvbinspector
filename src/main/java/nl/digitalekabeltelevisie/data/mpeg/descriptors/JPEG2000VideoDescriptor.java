@@ -29,7 +29,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.getBytes;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -93,7 +93,7 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 
 		if(byteOffset < descriptorLength)
 		{
-			setPrivate_data_byte(getBytes(b, byteOffset, descriptorLength-byteOffset));
+			private_data_byte = getBytes(b, byteOffset, descriptorLength-byteOffset);
 		}
 	}
 

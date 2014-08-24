@@ -55,7 +55,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class ObjectDataSegment extends Segment implements TreeNode, ImageSource {
 
-	private static Logger	logger	= Logger.getLogger(ObjectDataSegment.class.getName());
+	private static final Logger	logger	= Logger.getLogger(ObjectDataSegment.class.getName());
 
 
 	// for coding of pixels
@@ -500,7 +500,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	/**
 	 * @return
 	 */
-	public int getObjectCodingMethod() {
+	public final int getObjectCodingMethod() {
 		return getInt(data_block, offset + 8, 1, 0x0C) >> 2;
 	}
 

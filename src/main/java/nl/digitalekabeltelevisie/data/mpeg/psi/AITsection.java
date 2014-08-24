@@ -196,7 +196,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 	}
 
-	public List<Application> buildApplicationList(final byte[] data, final int i, final int length) {
+	private final List<Application> buildApplicationList(final byte[] data, final int i, final int length) {
 		final ArrayList<Application> r = new ArrayList<Application>();
 		int t =0;
 		while(t<length){

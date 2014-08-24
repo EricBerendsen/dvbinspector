@@ -199,7 +199,7 @@ public class NITsection extends TableSectionExtendedSyntax{
 		this.transportStreamLoopLength = transportStreamLoopLength;
 	}
 
-	public List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
+	private final List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
 		final ArrayList<TransportStream> r = new ArrayList<TransportStream>();
 		int t =0;
 		while(t<programInfoLength){

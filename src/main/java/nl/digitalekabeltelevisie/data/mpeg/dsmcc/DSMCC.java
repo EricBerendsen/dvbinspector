@@ -62,7 +62,7 @@ public class DSMCC extends AbstractPSITabel{
 	private int pid = 0;
 	private boolean isObjectCarousel = true; // set to false for SSU
 
-	private static Logger logger = Logger.getLogger(DSMCC.class.getName());
+	private final static Logger logger = Logger.getLogger(DSMCC.class.getName());
 
 	public DSMCC(final PSI parent, final boolean isObjectCarousel){
 		super(parent);

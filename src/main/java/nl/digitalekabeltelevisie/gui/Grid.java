@@ -100,7 +100,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		setTransportStream(stream, viewContext);
 	}
 
-	public void setTransportStream(final TransportStream stream, final ViewContext viewContext) {
+	public final void setTransportStream(final TransportStream stream, final ViewContext viewContext) {
 		this.stream = stream;
 		this.colors=new HashMap<Short, Paint>();
 
