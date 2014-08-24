@@ -65,7 +65,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	/**
 	 *
 	 */
-	private static Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
+	private final static Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
 
 	private final int data_identifier;
 	private int subtitle_stream_id;

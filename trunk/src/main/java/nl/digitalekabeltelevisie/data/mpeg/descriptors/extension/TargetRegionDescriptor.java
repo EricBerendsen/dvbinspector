@@ -31,7 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -44,12 +43,19 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class TargetRegionDescriptor extends ExtensionDescriptor {
 
-	private static Logger logger = Logger.getLogger(TargetRegionDescriptor.class.getName());
-
 
 	// 0x09 target region descriptor
 
 	private class TargetRegion implements TreeNode{
+
+		private final int reserved;
+		private final int country_code_flag;
+		private final int region_dept;
+		private String country_code;
+		private final int primary_region_code;
+		private final int secondary_region_code;
+		private final int tertiary_region_code;
+
 		/**
 		 * @param reserved
 		 * @param country_code_flag
@@ -59,8 +65,8 @@ public class TargetRegionDescriptor extends ExtensionDescriptor {
 		 * @param secondary_region_code
 		 * @param tertiary_region_code
 		 */
-		private TargetRegion(int reserved, int country_code_flag, int region_dept, byte [] country_codeBytes,
-				int primary_region_code, int secondary_region_code, int tertiary_region_code) {
+		private TargetRegion(final int reserved, final int country_code_flag, final int region_dept, final byte [] country_codeBytes,
+				final int primary_region_code, final int secondary_region_code, final int tertiary_region_code) {
 			super();
 			this.reserved = reserved;
 			this.country_code_flag = country_code_flag;
@@ -72,18 +78,12 @@ public class TargetRegionDescriptor extends ExtensionDescriptor {
 			this.secondary_region_code = secondary_region_code;
 			this.tertiary_region_code = tertiary_region_code;
 		}
-		private int reserved;
-		private int country_code_flag;
-		private int region_dept;
-		private String country_code;
-		private int primary_region_code;
-		private int secondary_region_code;
-		private int tertiary_region_code;
+
 		/* (non-Javadoc)
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 			final DefaultMutableTreeNode t =  new DefaultMutableTreeNode(new KVP("TargetRegion"));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("country_code_flag",country_code_flag,null)));
@@ -105,8 +105,8 @@ public class TargetRegionDescriptor extends ExtensionDescriptor {
 
 	}
 
-	private String country_code;
-	List<TargetRegion> targetRegions = new ArrayList<TargetRegionDescriptor.TargetRegion>();
+	private final String country_code;
+	private final List<TargetRegion> targetRegions = new ArrayList<TargetRegionDescriptor.TargetRegion>();
 
 	// 0x0a target name descriptor
 
@@ -114,11 +114,11 @@ public class TargetRegionDescriptor extends ExtensionDescriptor {
 		super(b, offset,parent);
 		country_code = getISO8859_1String(selector_byte,0,3);
 
-		BitSource bs =new BitSource(selector_byte, 3);
+		final BitSource bs =new BitSource(selector_byte, 3);
 		while(bs.available()>0){
-			int reserved = bs.readBits(5);
-			int country_code_flag = bs.readBits(1);
-			int region_depth = bs.readBits(2);
+			final int reserved = bs.readBits(5);
+			final int country_code_flag = bs.readBits(1);
+			final int region_depth = bs.readBits(2);
 			int primary_region_code = 0;
 			int secondary_region_code = 0;
 			int tertiary_region_code = 0;
@@ -135,8 +135,7 @@ public class TargetRegionDescriptor extends ExtensionDescriptor {
 					}
 				}
 			}
-			TargetRegion targetRegion = new TargetRegion(reserved, country_code_flag, region_depth, countryCodeBytes, primary_region_code, secondary_region_code, tertiary_region_code);
-			targetRegions.add(targetRegion);
+			targetRegions.add(new TargetRegion(reserved, country_code_flag, region_depth, countryCodeBytes, primary_region_code, secondary_region_code, tertiary_region_code));
 		}
 
 	}

@@ -37,20 +37,20 @@ import nl.digitalekabeltelevisie.util.BitSource;
 public class Seq_parameter_set_rbsp extends RBSP {
 
 
-	private static Logger	logger	= Logger.getLogger(Seq_parameter_set_rbsp.class.getName());
+	private static final Logger	logger	= Logger.getLogger(Seq_parameter_set_rbsp.class.getName());
 
 	// based on 7.3.2.1.1 Sequence parameter set data syntax Rec. ITU-T H.264 (03/2010) – Prepublished version
-	private int profile_idc;
+	private final int profile_idc;
 
-	private int constraint_set0_flag;
-	private int constraint_set1_flag;
-	private int constraint_set2_flag;
-	private int constraint_set3_flag;
-	private int constraint_set4_flag;
-	private int constraint_set5_flag;
-	private int reserved_zero_2bits;  // http://www.cardinalpeak.com/blog/?p=878
-	private int level_idc;
-	private int seq_parameter_set_id;
+	private final int constraint_set0_flag;
+	private final int constraint_set1_flag;
+	private final int constraint_set2_flag;
+	private final int constraint_set3_flag;
+	private final int constraint_set4_flag;
+	private final int constraint_set5_flag;
+	private final int reserved_zero_2bits;  // http://www.cardinalpeak.com/blog/?p=878
+	private final int level_idc;
+	private final int seq_parameter_set_id;
 	private int chroma_format_idc;
 	private int separate_colour_plane_flag;
 
@@ -59,28 +59,28 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private int qpprime_y_zero_transform_bypass_flag;
 	private int seq_scaling_matrix_present_flag ;
 
-	private int [] seq_scaling_list_present_flag=new int [8];
-	private int [][] delta_scale = new int [8][];
-	private int [] deltas_read = new int[8];  // helper, does not match data in PES
+	private final int [] seq_scaling_list_present_flag=new int [8];
+	private final int [][] delta_scale = new int [8][];
+	private final int [] deltas_read = new int[8];  // helper, does not match data in PES
 
-	private int log2_max_frame_num_minus4;
-	private int pic_order_cnt_type;
+	private final int log2_max_frame_num_minus4;
+	private final int pic_order_cnt_type;
 	private int log2_max_pic_order_cnt_lsb_minus4;
 
-	private int max_num_ref_frames;
-	private int gaps_in_frame_num_value_allowed_flag;
-	private int pic_width_in_mbs_minus1;
-	private int pic_height_in_map_units_minus1;
-	private int frame_mbs_only_flag;
+	private final int max_num_ref_frames;
+	private final int gaps_in_frame_num_value_allowed_flag;
+	private final int pic_width_in_mbs_minus1;
+	private final int pic_height_in_map_units_minus1;
+	private final int frame_mbs_only_flag;
 	private int mb_adaptive_frame_field_flag;
 
-	private int direct_8x8_inference_flag;
-	private int frame_cropping_flag;
+	private final int direct_8x8_inference_flag;
+	private final int frame_cropping_flag;
 	private int frame_crop_left_offset;
 	private int frame_crop_right_offset;
 	private int frame_crop_top_offset;
 	private int frame_crop_bottom_offset;
-	private int vui_parameters_present_flag;
+	private final int vui_parameters_present_flag;
 
 	private VuiParameters vui_parameters;
 

@@ -91,7 +91,7 @@ import org.jfree.chart.plot.DefaultDrawingSupplier;
  */
 public class DVBinspector implements ChangeListener, ActionListener{
 
-	private static Logger logger = Logger.getLogger(DVBinspector.class.getName());
+	private static final Logger logger = Logger.getLogger(DVBinspector.class.getName());
 
 
 	/**

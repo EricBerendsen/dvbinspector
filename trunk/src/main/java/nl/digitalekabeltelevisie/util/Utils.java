@@ -337,12 +337,10 @@ public final class Utils {
 
 		if((p>=0x01)&&(p<=0xfe)){
 			return "subsequent actions (ascending)";
-		}
-
-		switch (p) {
-		case 0x00: return "first action";
-
-		default: return "reserved for future use";
+		}else if(p == 0x00){
+			return "first action";
+		}else{
+			return "reserved for future use";
 		}
 	}
 	/**

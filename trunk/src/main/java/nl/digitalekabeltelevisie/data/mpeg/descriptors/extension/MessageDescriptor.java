@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.logging.Logger;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -39,12 +37,11 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class MessageDescriptor extends ExtensionDescriptor {
 
-	private static Logger logger = Logger.getLogger(MessageDescriptor.class.getName());
 
 	//Supplementary audio descriptor
-	private int message_id;
-	private String iso639LanguageCode;
-	private String message;
+	private final int message_id;
+	private final String iso639LanguageCode;
+	private final String message;
 
 
 

@@ -54,10 +54,10 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class EITsection extends TableSectionExtendedSyntax implements HTMLSource {
 
 	private List<Event> eventList;
-	private int transportStreamID;
-	private int originalNetworkID;
-	private int segmentLastSectionNumber;
-	private int lastTableID;
+	private final int transportStreamID;
+	private final int originalNetworkID;
+	private final int segmentLastSectionNumber;
+	private final int lastTableID;
 
 	public static class Event implements TreeNode, HTMLSource{
 		private int eventID;
@@ -115,7 +115,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		}
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-			KVP kvp = new KVP("event",eventID,Utils.getUTCFormattedString(startTime)+" "+getEventName());
+			final KVP kvp = new KVP("event",eventID,Utils.getUTCFormattedString(startTime)+" "+getEventName());
 			kvp.setHtmlSource(this);
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
@@ -283,7 +283,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	}
 
 
-	public List<Event> buildEventList(final byte[] data, final int i, final int programInfoLength) {
+	private final List<Event> buildEventList(final byte[] data, final int i, final int programInfoLength) {
 		final List<Event> r = new ArrayList<Event>();
 		int t =0;
 		while(t<programInfoLength){

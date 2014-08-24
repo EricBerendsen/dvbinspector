@@ -199,7 +199,7 @@ public class PesPacketData  implements TreeNode{
 	 * Called when all data for this PesPacket has been read by the readBytes() method. Determines values for PTS and
 	 * DTS (if any), and sets pesDataStart and pesDataLen. iso 13818-1 2.4.3.6 PES packet
 	 */
-	public void processPayload() {
+	public final void processPayload() {
 		if((stream_id!=program_stream_map)
 				&& (stream_id != padding_stream)
 				&& (stream_id != private_stream_2)
@@ -239,7 +239,7 @@ public class PesPacketData  implements TreeNode{
 	/**
 	 * @return length of Pes header
 	 */
-	public int getPes_header_data_length() {
+	public final int getPes_header_data_length() {
 		return getInt(data, 8, 1, MASK_8BITS);
 	}
 	/**
@@ -281,7 +281,7 @@ public class PesPacketData  implements TreeNode{
 	/**
 	 * @return
 	 */
-	public int getPts_dts_flags() {
+	public final int getPts_dts_flags() {
 		return getInt(data, 7, 1, 0xC0)>>6;
 	}
 	/**
@@ -326,7 +326,7 @@ public class PesPacketData  implements TreeNode{
 	 * @param offset
 	 * @return the value of the PTS/DTS as described in 2.4.3.7 of iso 13813, prefix and marker bits are ignored
 	 */
-	public long getTimeStamp(final byte[] array, final int offset) {
+	public final long getTimeStamp(final byte[] array, final int offset) {
 
 		long ts = getLong(array, offset, 1, 0x0E) << 29; // bits 32..30
 		ts |= getLong(array, offset + 1, 2, 0xFFFE) << 14; // bits 29..15

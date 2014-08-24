@@ -362,7 +362,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	/**
 	 * @return
 	 */
-	public List<CLUTEntry> getCLUTEntries() {
+	public final List<CLUTEntry> getCLUTEntries() {
 		final ArrayList<CLUTEntry> clutEntries = new ArrayList<CLUTEntry>();
 		int t = 0;
 		while ((t + 2) < getSegmentLength()) {

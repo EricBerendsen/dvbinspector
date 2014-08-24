@@ -80,7 +80,7 @@ public final class DescriptorFactory {
 	}
 
 	// TODO check which descriptors are allowed in which PSI tables
-	private static Logger	logger	= Logger.getLogger(DescriptorFactory.class.getName());
+	private static final Logger	logger	= Logger.getLogger(DescriptorFactory.class.getName());
 
 
 	/**

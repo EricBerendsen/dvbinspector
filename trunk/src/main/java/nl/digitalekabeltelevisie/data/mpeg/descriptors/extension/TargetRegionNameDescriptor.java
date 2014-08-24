@@ -31,7 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -44,11 +43,17 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class TargetRegionNameDescriptor extends ExtensionDescriptor {
 
-	private static Logger logger = Logger.getLogger(TargetRegionNameDescriptor.class.getName());
-
 
 
 	private class TargetRegionName implements TreeNode{
+
+		private final int region_dept;
+		private final int region_name_length;
+		private final String region_name;
+		private final int primary_region_code;
+		private final int secondary_region_code;
+		private final int tertiary_region_code;
+
 		/**
 		 * @param reserved
 		 * @param country_code_flag
@@ -58,8 +63,8 @@ public class TargetRegionNameDescriptor extends ExtensionDescriptor {
 		 * @param secondary_region_code
 		 * @param tertiary_region_code
 		 */
-		private TargetRegionName(int region_dept, int region_name_length, byte [] region_name,
-				int primary_region_code, int secondary_region_code, int tertiary_region_code) {
+		private TargetRegionName(final int region_dept, final int region_name_length, final byte [] region_name,
+				final int primary_region_code, final int secondary_region_code, final int tertiary_region_code) {
 			super();
 			this.region_dept = region_dept;
 			this.region_name_length = region_name_length;
@@ -70,18 +75,12 @@ public class TargetRegionNameDescriptor extends ExtensionDescriptor {
 			this.tertiary_region_code = tertiary_region_code;
 		}
 
-		private int region_dept;
-		private int region_name_length;
-		private String region_name;
-		private int primary_region_code;
-		private int secondary_region_code;
-		private int tertiary_region_code;
 
 		/* (non-Javadoc)
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 			final DefaultMutableTreeNode t =  new DefaultMutableTreeNode(new KVP("TargetRegionName"));
 			t.add(new DefaultMutableTreeNode(new KVP("region_dept",region_dept,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("region_name_length",region_name_length,null)));
@@ -98,9 +97,9 @@ public class TargetRegionNameDescriptor extends ExtensionDescriptor {
 
 	}
 
-	private String country_code;
-	private String iso_639_language_code;
-	List<TargetRegionName> targetRegions = new ArrayList<TargetRegionNameDescriptor.TargetRegionName>();
+	private final String country_code;
+	private final String iso_639_language_code;
+	private final List<TargetRegionName> targetRegions = new ArrayList<TargetRegionNameDescriptor.TargetRegionName>();
 
 	// 0x0a target name descriptor
 
@@ -109,13 +108,13 @@ public class TargetRegionNameDescriptor extends ExtensionDescriptor {
 		country_code = getISO8859_1String(selector_byte,0,3);
 		iso_639_language_code = getISO8859_1String(selector_byte,3,3);
 
-		BitSource bs =new BitSource(selector_byte, 6);
+		final BitSource bs =new BitSource(selector_byte, 6);
 		while(bs.available()>0){
-			int region_depth = bs.readBits(2);
-			int region_name_length = bs.readBits(6);
-			byte [] region_name = bs.readBytes(region_name_length);
+			final int region_depth = bs.readBits(2);
+			final int region_name_length = bs.readBits(6);
+			final byte [] region_name = bs.readBytes(region_name_length);
 
-			int primary_region_code = bs.readBits(8);
+			final int primary_region_code = bs.readBits(8);
 
 			int secondary_region_code = 0;
 			int tertiary_region_code = 0;
@@ -125,8 +124,7 @@ public class TargetRegionNameDescriptor extends ExtensionDescriptor {
 					tertiary_region_code = bs.readBits(8);
 				}
 			}
-			TargetRegionName targetRegion = new TargetRegionName(region_depth, region_name_length, region_name, primary_region_code, secondary_region_code, tertiary_region_code);
-			targetRegions.add(targetRegion);
+			targetRegions.add(new TargetRegionName(region_depth, region_name_length, region_name, primary_region_code, secondary_region_code, tertiary_region_code));
 		}
 
 	}

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.logging.Logger;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -39,14 +37,11 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class T2DeliverySystemDescriptor extends ExtensionDescriptor {
 
-	private static Logger logger = Logger.getLogger(T2DeliverySystemDescriptor.class.getName());
-
-
 
 	// T2 delivery descriptor 0x04
 
-	private int plp_id;
-	private int t2_system_id;
+	private final int plp_id;
+	private final int t2_system_id;
 
 	public T2DeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);

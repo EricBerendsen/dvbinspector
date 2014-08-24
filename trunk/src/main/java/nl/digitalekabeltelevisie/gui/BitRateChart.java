@@ -134,7 +134,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 *
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
-	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
+	public final void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
 		if(transportStream!=null){
 			final int steps=viewContext.getGraphSteps();
 			final int noPIDs=viewContext.getShown().size();

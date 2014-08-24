@@ -71,7 +71,7 @@ public class DVBString {
 	 * @param maxWidth maximum width of HTML fragment in chars.
 	 * @return HTML representation of this string, including linefeeds  (0x8A) and emphasis (0x86/0x87). Line length max
 	 */
-	public String toEscapedHTML(int maxWidth){
+	public String toEscapedHTML(final int maxWidth){
 		ArrayList<DVBString> array = new ArrayList<DVBString>();
 		array.add(this);
 		return getEscapedHTML(array, maxWidth);
