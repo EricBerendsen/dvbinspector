@@ -29,6 +29,8 @@ package nl.digitalekabeltelevisie.util;
 
 import java.util.Arrays;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
+
 
 /**
  * wrapper around a byte[] to read bits at a time.
@@ -144,6 +146,25 @@ public class BitSource {
 
 		return result;
 	}
+
+	public DVBString readDVBString() {
+		DVBString result = null;
+
+		// First, skip remainder from current byte
+		if (bitOffset > 0) {
+			bitOffset = 0;
+			byteOffset++;
+		}
+
+		// Next read whole bytes
+		result = new DVBString(bytes, byteOffset);
+		int noBytes = result.getLength() + 1;
+		byteOffset+=noBytes;
+
+
+		return result;
+	}
+
 
 	/**
 	 * @return number of bits that can be read successfully
