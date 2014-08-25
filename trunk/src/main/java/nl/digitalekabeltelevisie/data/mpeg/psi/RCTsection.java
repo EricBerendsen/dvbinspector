@@ -172,7 +172,6 @@ public class RCTsection extends TableSectionExtendedSyntax {
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("link_info"));
-			t.add(new DefaultMutableTreeNode(new KVP("data", data, offset, len,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("link_info_length", len,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("link_type", link_type, link_type_list.get(link_type))));
 			t.add(new DefaultMutableTreeNode(new KVP("how_related_classification_scheme_id", how_related_classification_scheme_id, how_related_classification_scheme_id_list.get(how_related_classification_scheme_id))));
