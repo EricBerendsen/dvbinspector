@@ -30,153 +30,166 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.ApplicationNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.ApplicationNameDescriptor.ApplicationName;
-import nl.digitalekabeltelevisie.data.mpeg.psi.AITsection.Application;
+import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.LookUpList;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
- * @author Eric Berendsen
+ * @author Eric
+ *
+ * based on ETSI TS 102 323 V1.5.1 (2012-01) Digital Video Broadcasting (DVB);
+ * Carriage and signalling of TV-Anytime information
+ * in DVB transport streams
+ * 10.4 Related content table
  */
 public class RCTsection extends TableSectionExtendedSyntax {
 
+	private static LookUpList link_type_list = new LookUpList.Builder().
+			add(0x0,"Link information is a URI string only").
+			add(0x1,"Link information is a binary locator only").
+			add(0x2,"Link information is both a binary locator and a URI string").
+			add(0x3,"Link information is through means of a descriptor").
+			add(0x4 ,0xF,"DVB reserved").
+			build();
+
+	private static LookUpList how_related_classification_scheme_id_list = new LookUpList.Builder().
+			add(0x00,"urn:tva:metadata:HowRelatedCS:2004 [25], clause A.3.").
+			add(0x01,"urn:tva:metadata:HowRelatedCS:2005 [26], clause A.3.").
+			add(0x02,"urn:tva:metadata:HowRelatedCS:2007 [4], clause A.3.").
+			add(0x03,0x2F,"DVB reserved").
+			add(0x30,0x3F,"User Private").
+			build();
+
 	private int year_offset;
-
 	private int link_count;
-
 	private int descriptor_loop_length;
 	private List<Descriptor>descriptor_loop;
+	private List<LinkInfo>	links = new ArrayList<>();
 
-	private int application_loop_length;
-	private List<LinkInfo>	links;
+	public class LinkInfo implements TreeNode {
 
-	public static class LinkInfo implements TreeNode {
-		private long organisation_id;
-		private int application_id;
+		public class PromotionalText implements TreeNode {
 
-		private int application_control_code;
-		private int application_descriptors_loop_length;
+			private final String iso639LanguageCode;
+			private final DVBString promotional_text;
 
-		private List<Descriptor> applicationDescriptors;
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			// try to find application name
-			StringBuilder label = new StringBuilder("LinkInfo");
-
-			final List<ApplicationNameDescriptor> applicationNameDescriptors = Descriptor.findGenericDescriptorsInList(applicationDescriptors, ApplicationNameDescriptor.class); //0x01 = applicationNameDescriptor
-			if((applicationNameDescriptors!=null)&&(applicationNameDescriptors.size()>0)){
-				final ApplicationNameDescriptor appNameDesc = applicationNameDescriptors.get(0);
-				final List<ApplicationName> appNames = appNameDesc.getApplicationNames();
-				if((appNames!=null)&&(appNames.size()>0)){
-					final ApplicationName appName = appNames.get(0);
-					label.append(" (").append(appName.getApplication_name().toString()).append(")");
-				}
+			/**
+			 * @param iso639LanguageCode
+			 * @param promotional_text
+			 */
+			private PromotionalText(String iso639LanguageCode,
+					DVBString promotional_text) {
+				super();
+				this.iso639LanguageCode = iso639LanguageCode;
+				this.promotional_text = promotional_text;
 			}
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(label.toString()));
-			t.add(new DefaultMutableTreeNode(new KVP("organisation_id", organisation_id, getMHPOrganistionIdString(organisation_id))));
-//			t.add(new DefaultMutableTreeNode(new KVP("application_id", application_id, getApplicationIDString(application_id))));
-//			t.add(new DefaultMutableTreeNode(new KVP("application_control_code", application_control_code, getApplicationControlCodeString(application_control_code))));
-			t.add(new DefaultMutableTreeNode(new KVP("application_descriptors_loop_length", application_descriptors_loop_length, null)));
+			/* (non-Javadoc)
+			 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
+			 */
+			@Override
+			public DefaultMutableTreeNode getJTreeNode(int modus) {
+				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("promotional_text"));
+				t.add(new DefaultMutableTreeNode(new KVP("ISO 639-2_language_code", iso639LanguageCode,null)));
+				t.add(new DefaultMutableTreeNode(new KVP("promotional_text_encoding",promotional_text.getEncodingString(),null)));
+				t.add(new DefaultMutableTreeNode(new KVP("promotional_text_length",promotional_text.getLength(),null)));
+				t.add(new DefaultMutableTreeNode(new KVP("promotional_text",promotional_text,null)));
 
-			Utils.addListJTree(t,applicationDescriptors,modus,"application_descriptors");
+				return t;
+			}
+		}
+
+		private byte[] data;
+		private int offset;
+		private int len;
+
+		private final int link_type;
+		private final int how_related_classification_scheme_id;
+
+		private final int term_id;
+		private final int group_id;
+		private final int precedence;
+
+		private int media_uri_length;
+		private byte[] media_uri_byte;
+
+		private int number_items;
+		private List<PromotionalText> promotional_items = new ArrayList<>();
+
+		private int default_icon_flag;
+		private int icon_id;
+		private int descriptor_loop_length;
+		private List<Descriptor>descriptor_loop;
+
+		protected LinkInfo(byte[] data, int offset, int len){
+			this.data = data;
+			this.len = len;
+			this.offset = offset;
+			final BitSource bs =new BitSource(this.data,offset,len);
+			link_type = bs.readBits(4);
+			bs.readBits(2); // reserved_future_use
+			how_related_classification_scheme_id = bs.readBits(6);
+
+			term_id  = bs.readBits(12);
+			group_id  = bs.readBits(4);
+			precedence = bs.readBits(4);
+
+			if ((link_type == 0x00) || (link_type == 0x02)) {
+				media_uri_length  = bs.readBits( 8);
+				media_uri_byte = bs.readBytes(media_uri_length);
+			}
+			if((link_type == 0x01) ||(link_type == 0x02)) {
+				throw new RuntimeException("Unimplemented dvb_binary_locator()");
+			}
+			bs.readBits(2); // reserved_future_use
+			number_items = bs.readBits(6);
+			for(int k = 0; k< number_items; k++){
+				byte [] iso_639_2_language_code = bs.readBytes(3);
+				//int promotional_text_length = bs.readBits(8);
+				DVBString promotional_text_char = bs.readDVBString();
+				PromotionalText pt = new PromotionalText(new String(iso_639_2_language_code),promotional_text_char);
+				promotional_items.add(pt);
+			}
+			default_icon_flag  = bs.readBits(1);
+			icon_id  = bs.readBits(3);
+			descriptor_loop_length  = bs.readBits(12);
+			byte[] descriptorData = bs.readBytes(descriptor_loop_length);
+			descriptor_loop = DescriptorFactory.buildDescriptorList(descriptorData, 0, descriptor_loop_length, RCTsection.this);
+
+		}
+
+		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("link_info"));
+			t.add(new DefaultMutableTreeNode(new KVP("data", data, offset, len,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("link_info_length", len,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("link_type", link_type, link_type_list.get(link_type))));
+			t.add(new DefaultMutableTreeNode(new KVP("how_related_classification_scheme_id", how_related_classification_scheme_id, how_related_classification_scheme_id_list.get(how_related_classification_scheme_id))));
+			t.add(new DefaultMutableTreeNode(new KVP("term_id", term_id, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("group_id", group_id, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("precedence", precedence, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("media_uri_length", media_uri_length, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("media_uri_byte", media_uri_byte, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("number_items", number_items, null)));
+			Utils.addListJTree(t,promotional_items,modus,"Promotional text Items");
+			t.add(new DefaultMutableTreeNode(new KVP("default_icon_flag", default_icon_flag, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("icon_id", icon_id, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length", descriptor_loop_length, null)));
+			Utils.addListJTree(t,descriptor_loop,modus,"descriptor_loop");
 
 			return t;
 		}
-
-
-		/**
-		 * @return the application_control_code
-		 */
-		public int getApplication_control_code() {
-			return application_control_code;
-		}
-
-
-		/**
-		 * @param application_control_code the application_control_code to set
-		 */
-		public void setApplication_control_code(final int application_control_code) {
-			this.application_control_code = application_control_code;
-		}
-
-
-		/**
-		 * @return the application_descriptors_loop_lengt
-		 */
-		public int getApplication_descriptors_loop_length() {
-			return application_descriptors_loop_length;
-		}
-
-
-		/**
-		 * @param application_descriptors_loop_lengt the application_descriptors_loop_lengt to set
-		 */
-		public void setApplication_descriptors_loop_length(final int application_descriptors_loop_lengt) {
-			this.application_descriptors_loop_length = application_descriptors_loop_lengt;
-		}
-
-
-		/**
-		 * @return the application_id
-		 */
-		public int getApplication_id() {
-			return application_id;
-		}
-
-
-		/**
-		 * @param application_id the application_id to set
-		 */
-		public void setApplication_id(final int application_id) {
-			this.application_id = application_id;
-		}
-
-
-		/**
-		 * @return the applicationDescriptor
-		 */
-		public List<Descriptor> getApplicationDescriptors() {
-			return applicationDescriptors;
-		}
-
-
-		/**
-		 * @param applicationDescriptor the applicationDescriptor to set
-		 */
-		public void setApplicationDescriptors(final List<Descriptor> applicationDescriptor) {
-			this.applicationDescriptors = applicationDescriptor;
-		}
-
-
-		/**
-		 * @return the organisation_id
-		 */
-		public long getOrganisation_id() {
-			return organisation_id;
-		}
-
-
-		/**
-		 * @param organisation_id the organisation_id to set
-		 */
-		public void setOrganisation_id(final long organisation_id) {
-			this.organisation_id = organisation_id;
-		}
-
 	}
 
 	public RCTsection(final PsiSectionData raw_data, final PID parent){
@@ -189,42 +202,17 @@ public class RCTsection extends TableSectionExtendedSyntax {
 		int localOffset = 11;
 		for (int i = 0; i < link_count; i++) {
 			int link_info_length = Utils.getInt(b, localOffset, 2, Utils.MASK_12BITS);
+			LinkInfo linkInfo = new LinkInfo(b, localOffset+2, link_info_length);
+			links.add(linkInfo);
 			localOffset +=2+link_info_length;
 		}
 
 		descriptor_loop_length = Utils.getInt(b, localOffset, 2, Utils.MASK_12BITS);
 		localOffset += 2;
-//
+
 		descriptor_loop = DescriptorFactory.buildDescriptorList(b, localOffset,
 				descriptor_loop_length, this);
-//
-//		application_loop_length = Utils.getInt(raw_data.getData(), 10+common_descriptors_length, 2, Utils.MASK_12BITS);
-//
-//		applications = buildApplicationList(raw_data.getData(), 12+common_descriptors_length , application_loop_length);
-//
 	}
-
-	public List<Application> buildApplicationList(final byte[] data, final int i, final int length) {
-		final ArrayList<Application> r = new ArrayList<Application>();
-		int t =0;
-		while(t<length){
-			final Application a = new Application();
-			a.setOrganisation_id(Utils.getLong(data, i+t, 4, Utils.MASK_32BITS));
-			a.setApplication_id(Utils.getInt(data, i+t+4, 2, Utils.MASK_16BITS));
-			a.setApplication_control_code(Utils.getInt(data, i+t+6, 1, Utils.MASK_8BITS));
-			a.setApplication_descriptors_loop_length(Utils.getInt(data, i+t+7, 2, Utils.MASK_12BITS));
-			a.setApplicationDescriptors(DescriptorFactory.buildDescriptorList(data,i+t+9,a.getApplication_descriptors_loop_length(),this));
-
-			r.add(a);
-			t+=9+a.getApplication_descriptors_loop_length();
-
-		}
-
-		return r;
-	}
-
-
-
 
 	@Override
 	public String toString() {
@@ -235,22 +223,15 @@ public class RCTsection extends TableSectionExtendedSyntax {
 		return b.toString();
 	}
 
-
-
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		t.add(new DefaultMutableTreeNode(new KVP("year_offset", year_offset, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("link_count", link_count, null)));
+		Utils.addListJTree(t,links,modus,"link_infos");
 		t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length", descriptor_loop_length, null)));
 		Utils.addListJTree(t,descriptor_loop,modus,"descriptor_loop");
-//
-//		Utils.addListJTree(t,applications,modus,"applications");
 		return t;
 	}
-
-
-
 
 }
