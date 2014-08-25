@@ -116,7 +116,7 @@ public class TableSection implements TreeNode{
 			final long res = CRCcheck.crc32(bytes,sectionLength+3);
 			if(res!=0){
 				crc_error=true;
-				throw new RuntimeException("CRC Error in packet for pid:"+parent.getPid()+",CRC="+res);
+				throw new RuntimeException("CRC Error in packet for pid:"+parent.getPid()+",CRC="+res+", packetNo="+packet_no);
 			}
 		}
 	}
