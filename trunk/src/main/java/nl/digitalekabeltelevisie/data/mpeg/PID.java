@@ -121,7 +121,6 @@ public class PID implements TreeNode{
 			if((lastPSISection==null)){ // nothing started
 				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 				if(packet.isPayloadUnitStartIndicator() &&
-						(data!=null) &&
 						(data.length>1) &&
 						((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3))){ //start something
 					// at least one byte plus pointer available
@@ -141,8 +140,7 @@ public class PID implements TreeNode{
 						}
 
 						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
-					}else if((data!=null) &&
-							(data.length>2) &&
+					}else if((data.length>2) &&
 							(data[0]==0)&&(data[1]==0)&&(data[2]==1)){
 						type = PES;
 
