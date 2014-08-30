@@ -56,7 +56,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
  */
 public class AuxiliaryData implements TreeNode{
 
-	public class BarData implements TreeNode{
+	public static class BarData implements TreeNode{
 
 		int top_bar_flag;
 		int bottom_bar_flag;
@@ -134,9 +134,9 @@ public class AuxiliaryData implements TreeNode{
 
 	}
 
-	public class CCData implements TreeNode{
+	public static class CCData implements TreeNode{
 
-		public class Construct implements TreeNode{
+		public static class Construct implements TreeNode{
 
 			private int one_bit;// (set to '1")
 			private int reserved;

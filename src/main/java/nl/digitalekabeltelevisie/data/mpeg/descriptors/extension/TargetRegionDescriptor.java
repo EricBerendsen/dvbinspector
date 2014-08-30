@@ -46,7 +46,7 @@ public class TargetRegionDescriptor extends ExtensionDescriptor {
 
 	// 0x09 target region descriptor
 
-	private class TargetRegion implements TreeNode{
+	private static class TargetRegion implements TreeNode{
 
 		private final int reserved;
 		private final int country_code_flag;
