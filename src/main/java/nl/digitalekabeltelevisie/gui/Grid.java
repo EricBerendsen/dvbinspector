@@ -60,12 +60,12 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 public class Grid extends JPanel implements ComponentListener, Scrollable
 {
 
-	final static float dash1[] = {3.0f};
-    final static BasicStroke dashed =
+	private final static float DASH1[] = {3.0f};
+	private final static BasicStroke DASHED =
         new BasicStroke(2.0f,
                         BasicStroke.CAP_BUTT,
                         BasicStroke.JOIN_MITER,
-                        3.0f, dash1, 0.0f);
+                        3.0f, DASH1, 0.0f);
 
 	/**
 	 *
@@ -117,8 +117,6 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 			for(final ChartLabel l:viewContext.getShown()){
 				colors.put(l.getPid(), l.getColor());
 			}
-
-
 		}
 
 		// exact text does not matter. getToolTipText overridden. This is only needed to activate tool tips
@@ -130,33 +128,41 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	@Override
 	public void paintComponent(final Graphics g) {
 
-		int startline = g.getClipBounds().y/blockH;
-		int endLine = startline+1+(g.getClipBounds().height/blockH) ;
-
-		Graphics2D g2 = (Graphics2D) g;
-		g2.setStroke(dashed);
+		final Graphics2D graphics2d = (Graphics2D) g;
+		graphics2d.setStroke(DASHED);
 		setBackground(Color.WHITE);
-		super.paintComponent(g);    // paints background
+		super.paintComponent(graphics2d);    // paints background
 		if(stream!=null){
+			final int startline = graphics2d.getClipBounds().y/blockH;
+			final int endLine = startline+1+(graphics2d.getClipBounds().height/blockH) ;
 			for (int row = startline; row <= endLine; row++) {
 				for (int column = 0; column < blocksPerRow; column++) {
-					final int packetNo = (row*blocksPerRow)+column;
-					if(packetNo<noPackets){
-						final short pidFlags = stream.getPacketPidFlags(packetNo+startPacket);
-						final short pid = (short) (pidFlags & 0x1fff);
-						final Color packetPidColor = (Color)colors.get(pid);
-						if(packetPidColor!=null){
-							g.setColor(packetPidColor);
-							g.fillRect(column*blockW, row*blockH, blockW, blockH);
-							paintAdaptationFieldMarker(g, row, column, pidFlags, packetPidColor);
-							paintPayloadStartMarker(g, g2, row, column, pidFlags, packetPidColor);
-							paintErrorFlagMarker(g, g2, row, column, pidFlags, packetPidColor);
-							paintGridLines(g, g2, row, column, packetPidColor);
-						}else{
-							paintGridLines(g, g2, row, column, Color.WHITE);
-						}
-					}
+					paintPacket(graphics2d, row, column);
 				}
+			}
+		}
+	}
+
+	/**
+	 * @param graphics2d
+	 * @param row
+	 * @param column
+	 */
+	private void paintPacket(final Graphics2D graphics2d, final int row, final int column) {
+		final int packetNo = (row*blocksPerRow)+column;
+		if(packetNo<noPackets){
+			final short pidFlags = stream.getPacketPidFlags(packetNo+startPacket);
+			final short pid = (short) (pidFlags & 0x1fff);
+			final Color packetPidColor = (Color)colors.get(pid);
+			if(packetPidColor==null){
+				paintGridLines(graphics2d, row, column, Color.WHITE);
+			}else{
+				graphics2d.setColor(packetPidColor);
+				graphics2d.fillRect(column*blockW, row*blockH, blockW, blockH);
+				paintAdaptationFieldMarker(graphics2d, row, column, pidFlags, packetPidColor);
+				paintPayloadStartMarker(graphics2d, row, column, pidFlags, packetPidColor);
+				paintErrorFlagMarker(graphics2d, row, column, pidFlags, packetPidColor);
+				paintGridLines(graphics2d, row, column, packetPidColor);
 			}
 		}
 	}
@@ -168,17 +174,15 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @param column
 	 * @param packetPidColor
 	 */
-	private void paintGridLines(final Graphics g, Graphics2D g2, int row, int column, final Color packetPidColor) {
+	private void paintGridLines(final Graphics2D g2, final int row, final int column, final Color packetPidColor) {
 		if(gridLines !=0){
 			if(((column%gridLines)==0)&&(column!=0)){
-				Color contrast = getContrastingColor(packetPidColor);
-				g.setColor(contrast);
+				g2.setColor(getContrastingColor(packetPidColor));
 				g2.setStroke(new BasicStroke(2));
 				g2.drawLine((column*blockW), (row*blockH)+1, (column*blockW), ((row+1)*blockH)-1);
 			}
 			if(((row%gridLines)==0)&&(row!=0)){
-				Color contrast = getContrastingColor(packetPidColor);
-				g.setColor(contrast);
+				g2.setColor(getContrastingColor(packetPidColor));
 				g2.setStroke(new BasicStroke(2));
 				g2.drawLine((column*blockW), (row*blockH), ((column+1)*blockW)-1, (row*blockH));
 			}
@@ -193,12 +197,11 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @param pidFlags
 	 * @param packetPidColor
 	 */
-	private void paintErrorFlagMarker(final Graphics g, Graphics2D g2, int row, int column, final short pidFlags,
+	private void paintErrorFlagMarker(final Graphics2D g2, final int row, final int column, final short pidFlags,
 			final Color packetPidColor) {
 		final short errorFlag = (short) (pidFlags & TransportStream.TRANSPORT_ERROR_FLAG);
 		if(showErrorIndicator && (errorFlag!=0)){
-			Color contrast = getContrastingColor(packetPidColor);
-			g.setColor(contrast);
+			g2.setColor(getContrastingColor(packetPidColor));
 			g2.setStroke(new BasicStroke(2));
 
 			g2.drawLine((column*blockW)+1, (row*blockH)+1, ((column+1)*blockW)-1, ((row+1)*blockH)-1);
@@ -214,13 +217,12 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @param pidFlags
 	 * @param packetPidColor
 	 */
-	private void paintPayloadStartMarker(final Graphics g, Graphics2D g2, int row, int column, final short pidFlags,
+	private void paintPayloadStartMarker(final Graphics2D g2, final int row, final int column, final short pidFlags,
 			final Color packetPidColor) {
 		final short payloadStartFlag = (short) (pidFlags & TransportStream.PAYLOAD_UNIT_START_FLAG);
 		if(showPayloadStart && (payloadStartFlag!=0)){
-			Color contrast = getContrastingColor(packetPidColor);
-			g.setColor(contrast);
-			g2.setStroke(dashed);
+			g2.setColor(getContrastingColor(packetPidColor));
+			g2.setStroke(DASHED);
 
 			g2.drawRect((column*blockW)+1, (row*blockH)+1, blockW-2, blockH-2);
 		}
@@ -233,12 +235,11 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @param pidFlags
 	 * @param packetPidColor
 	 */
-	private void paintAdaptationFieldMarker(final Graphics g, int row, int column, final short pidFlags,
+	private void paintAdaptationFieldMarker(final Graphics2D g, final int row, final int column, final short pidFlags,
 			final Color packetPidColor) {
 		final short adaptationFlag = (short) (pidFlags & TransportStream.ADAPTATION_FIELD_FLAG);
 		if(showAdaptationField&& (adaptationFlag!=0)){
-			Color contrast = getContrastingColor(packetPidColor);
-			g.setColor(contrast);
+			g.setColor(getContrastingColor(packetPidColor));
 			g.fillRect((column*blockW)+2, (row*blockH)+2, blockW/2, blockH/2);
 		}
 	}
@@ -248,24 +249,23 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @return
 	 */
 	private Color getContrastingColor(final Color c) {
-		Color contrast = Color.BLACK;
 		if((c.getGreen()+c.getRed()+c.getBlue())<384){
-			contrast = Color.WHITE;
+			return Color.WHITE;
+		}else{
+			return Color.BLACK;
 		}
-		return contrast;
 	}
+
 	/* (non-Javadoc)
 	 * @see javax.swing.Scrollable#getPreferredScrollableViewportSize()
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		int w =0;
-		int h = 0;
-		if(stream!=null){
-			w = blocksPerRow * blockW;
-			h = lines * blockH;
+		if(stream==null){
+			return new Dimension(0,0);
+		}else{
+			return new Dimension(blocksPerRow * blockW,lines * blockH);
 		}
-		return new Dimension(w,h);
 	}
 
 	/* (non-Javadoc)
@@ -274,7 +274,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 
 	@Override
 	public String getToolTipText(final MouseEvent e){
-		StringBuilder r=new StringBuilder();
+		final StringBuilder r=new StringBuilder();
 		if(stream!=null){
 			final int x=e.getX();
 			if((x/blockW)<blocksPerRow){ // empty space to the right
@@ -284,16 +284,15 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 					final int realPacketNo = packetNo +startPacket;
 					final short pid = stream.getPacket_pid(realPacketNo);
 					if(colors.containsKey(pid)){ // don't care about actual color, just want to know is this pid shown
-						TSPacket packet = stream.getTSPacket(realPacketNo);
+						final TSPacket packet = stream.getTSPacket(realPacketNo);
 						r.append("<html>");
-						if(packet!=null){
-							r.append(packet.getHTML());
-						}else{ // no packets loaded, just show pid
+						if(packet==null){ // no packets loaded, just show pid
 							r.append("Packet: ").append(realPacketNo);
 							r.append("<br>PID: ").append(pid);
 							r.append("<br>Time: ").append(stream.getPacketTime(packetNo));
 							r.append("<br>").append(escapeHtmlBreakLines(stream.getShortLabel(pid)));
-
+						}else{
+							r.append(packet.getHTML());
 						}
 						r.append("</html>");
 					}
@@ -346,7 +345,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	/**
 	 * @param b
 	 */
-	public void setShowAdaptationField(boolean b) {
+	public void setShowAdaptationField(final boolean b) {
 		showAdaptationField = b;
 		repaint();
 
@@ -355,7 +354,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	/**
 	 * @param b
 	 */
-	public void setShowPayloadStart(boolean b) {
+	public void setShowPayloadStart(final boolean b) {
 		showPayloadStart = b;
 		repaint();
 
@@ -364,7 +363,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	/**
 	 * @param b
 	 */
-	public void setShowErrorIndicator(boolean b) {
+	public void setShowErrorIndicator(final boolean b) {
 		showErrorIndicator = b;
 		repaint();
 
@@ -382,7 +381,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @see javax.swing.Scrollable#getScrollableUnitIncrement(java.awt.Rectangle, int, int)
 	 */
 	@Override
-	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+	public int getScrollableUnitIncrement(final Rectangle visibleRect, final int orientation, final int direction) {
 		if (orientation == SwingConstants.HORIZONTAL){
 			// actual value not relevant, no horizontal scrolling
 			return blockW;
@@ -396,7 +395,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @see javax.swing.Scrollable#getScrollableBlockIncrement(java.awt.Rectangle, int, int)
 	 */
 	@Override
-	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+	public int getScrollableBlockIncrement(final Rectangle visibleRect, final int orientation, final int direction) {
 		if (orientation == SwingConstants.HORIZONTAL){
 			// actual value not relevant, no horizontal scrolling
 			return blockW;
@@ -424,7 +423,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		return false;
 	}
 
-	public void setBlockSize(int s){
+	public void setBlockSize(final int s){
 		blockW = s;
 		blockH = s;
 		componentResized(null);
@@ -434,7 +433,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		return gridLines;
 	}
 
-	public void setGridLines(int gridLines) {
+	public void setGridLines(final int gridLines) {
 		this.gridLines = gridLines;
 		repaint();
 	}
