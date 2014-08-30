@@ -65,7 +65,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @author Eric
 	 *
 	 */
-	private final class PacketTimeNumberFormat extends NumberFormat {
+	private static final class PacketTimeNumberFormat extends NumberFormat {
 		/**
 		 *
 		 */
@@ -74,33 +74,34 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		/**
 		 * @param transportStream
 		 */
-		private PacketTimeNumberFormat(TransportStream transportStream) {
+		private PacketTimeNumberFormat(final TransportStream transportStream) {
+			super();
 			this.transportStream = transportStream;
 		}
 
 		@Override
-		public Number parse(String source, ParsePosition parsePosition) {
+		public Number parse(final String source, final ParsePosition parsePosition) {
 			// Not implemented, only used for output.
 			return null;
 		}
 
 		@Override
-		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
-			String s = transportStream.getShortPacketTime(number);
+		public StringBuffer format(final long number, final StringBuffer toAppendTo, final FieldPosition pos) {
+			final String s = transportStream.getShortPacketTime(number);
 			return toAppendTo.append(s);
 		}
 
 		@Override
-		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
-			String s = transportStream.getShortPacketTime((long) number);
+		public StringBuffer format(final double number, final StringBuffer toAppendTo, final FieldPosition pos) {
+			final String s = transportStream.getShortPacketTime((long) number);
 			return toAppendTo.append(s);
 		}
 	}
 
 	private JFreeChart freeChart;
-	private JPanel buttonPanel;
+	private final JPanel buttonPanel;
 
-	private ChartPanel chartPanel;
+	private final ChartPanel chartPanel;
 	private boolean legendVisible = true;
 
 
@@ -119,10 +120,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 		chartPanel = new ChartPanel(null);
 
-		if(transportStream!=null){
-			setTransportStream(transportStream,viewContext);
-		}
-
+		setTransportStream(transportStream,viewContext);
 		add(chartPanel,BorderLayout.CENTER);
 	}
 
@@ -136,68 +134,12 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 */
 	public final void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
 		if(transportStream!=null){
-			final int steps=viewContext.getGraphSteps();
 			final int noPIDs=viewContext.getShown().size();
+			final CategoryTableXYDataset categoryTableXYDataset = createDataSet(transportStream, viewContext, noPIDs);
+			//because we want custom colors, can not use ChartFactory.createStackedXYAreaChart(, this is almost literal copy
 
-			final short[]used_pids=new short[noPIDs];
-			final ChartLabel[] labels= new ChartLabel[noPIDs];
-			for (int i = 0; i < noPIDs; i++) {
-				labels[i]=viewContext.getShown().get(i);
-				used_pids[i]=viewContext.getShown().get(i).getPid();
-			}
-			final ChartLabel[] stepLabels= new ChartLabel[steps];
-
-			final int startPacket = viewContext.getStartPacket();
-			final int endPacket = viewContext.getEndPacket();
-			final int noPackets = endPacket - startPacket;
-
-			CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
-
-			for (int i = 0; i < used_pids.length; i++) {
-				for(int t=0; t<steps;t++){
-
-					final int startPacketStep= startPacket +(int)(((long)t*(long)noPackets)/steps);
-					final int endPacketStep = startPacket + (int) (((long)(t+1)*(long)noPackets)/steps);
-					stepLabels[t]=new ChartLabel(transportStream.getShortPacketTime(startPacketStep),(short)t);
-					final int [] pidcount = new int [8192];
-					for(int r = startPacketStep; r< endPacketStep;r++ ){
-						final int pid_current_packet=transportStream.getPacket_pid(r);
-						pidcount[pid_current_packet]++;
-					}
-
-					if(transportStream.getBitRate()!=-1)
-					{
-						categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[i]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[i].getLabel());
-					}else{
-						categoryTableXYDataset.add(startPacketStep,pidcount[used_pids[i]],labels[i].getLabel());
-					}
-				}
-			}
-
-			//because we want custom colors, can not use ChartFactory.createStackedXYAreaChart(, this is almost litteral copy
-
-			NumberAxis xAxis = new NumberAxis("time");
-	        xAxis.setAutoRangeIncludesZero(false);
-	        xAxis.setLowerMargin(0.0);
-	        xAxis.setUpperMargin(0.0);
-	        xAxis.setNumberFormatOverride(new PacketTimeNumberFormat(transportStream));
-
-	        NumberAxis yAxis = new NumberAxis("bitrate");
-	        XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("PID: {0}, Time: {1}, bitrate: {2}", new PacketTimeNumberFormat(transportStream), NumberFormat.getNumberInstance());
-
-	        StackedXYAreaRenderer2 renderer = new StackedXYAreaRenderer2(
-	                toolTipGenerator, null);
-			for (int i = 0; i < noPIDs; i++) {
-				renderer.setSeriesPaint(i, viewContext.getShown().get(i).getColor());
-			}
-
-	        renderer.setOutline(false);
-	        XYPlot plot = new XYPlot(categoryTableXYDataset, xAxis, yAxis, renderer);
-	        plot.setOrientation(PlotOrientation.VERTICAL);
-	        plot.setRangeAxis(yAxis);  // forces recalculation of the axis range
-
-	        freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT,
-	                plot, legendVisible);
+			final XYPlot plot = createXYPlot(transportStream, viewContext, noPIDs, categoryTableXYDataset);
+	        freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, legendVisible);
 
 			chartPanel.setChart(freeChart);
 			chartPanel.setDomainZoomable(true);
@@ -208,13 +150,111 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		}
 	}
 
+	/**
+	 * @param transportStream
+	 * @param viewContext
+	 * @param noPIDs
+	 * @param categoryTableXYDataset
+	 * @return
+	 */
+	private XYPlot createXYPlot(final TransportStream transportStream,
+			final ViewContext viewContext, final int noPIDs,
+			final CategoryTableXYDataset categoryTableXYDataset) {
+		final NumberAxis xAxis = new NumberAxis("time");
+		xAxis.setAutoRangeIncludesZero(false);
+		xAxis.setLowerMargin(0.0);
+		xAxis.setUpperMargin(0.0);
+		xAxis.setNumberFormatOverride(new PacketTimeNumberFormat(transportStream));
+
+		final NumberAxis yAxis = new NumberAxis("bitrate");
+		final XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("PID: {0}, Time: {1}, bitrate: {2}", new PacketTimeNumberFormat(transportStream), NumberFormat.getNumberInstance());
+
+		final StackedXYAreaRenderer2 renderer = new StackedXYAreaRenderer2(
+		        toolTipGenerator, null);
+		for (int i = 0; i < noPIDs; i++) {
+			renderer.setSeriesPaint(i, viewContext.getShown().get(i).getColor());
+		}
+
+		renderer.setOutline(false);
+		final XYPlot plot = new XYPlot(categoryTableXYDataset, xAxis, yAxis, renderer);
+		plot.setOrientation(PlotOrientation.VERTICAL);
+		plot.setRangeAxis(yAxis);  // forces recalculation of the axis range
+		return plot;
+	}
+
+	/**
+	 * @param transportStream
+	 * @param viewContext
+	 * @param noPIDs
+	 * @return
+	 */
+	private CategoryTableXYDataset createDataSet(final TransportStream transportStream,
+			final ViewContext viewContext, final int noPIDs) {
+
+		final short[]used_pids=new short[noPIDs];
+		final ChartLabel[] labels= new ChartLabel[noPIDs];
+		for (int i = 0; i < noPIDs; i++) {
+			labels[i]=viewContext.getShown().get(i);
+			used_pids[i]=viewContext.getShown().get(i).getPid();
+		}
+		final int numberOfSteps=viewContext.getGraphSteps();
+		final ChartLabel[] stepLabels= new ChartLabel[numberOfSteps];
+
+		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
+
+		for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
+			for(int step=0; step<numberOfSteps;step++){
+
+				final int startPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step);
+				final int endPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step+1);
+				stepLabels[step]=new ChartLabel(transportStream.getShortPacketTime(startPacketStep), (short)step);
+				final int[] pidcount = countPidOccurrencesInStep(transportStream, startPacketStep, endPacketStep);
+
+				if(transportStream.getBitRate()!=-1)
+				{
+					categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[pidIndex]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[pidIndex].getLabel());
+				}else{
+					categoryTableXYDataset.add(startPacketStep,pidcount[used_pids[pidIndex]],labels[pidIndex].getLabel());
+				}
+			}
+		}
+		return categoryTableXYDataset;
+	}
+
+	/**
+	 * @param transportStream
+	 * @param startPacketStep
+	 * @param endPacketStep
+	 * @return
+	 */
+	private int[] countPidOccurrencesInStep(final TransportStream transportStream, final int startPacketStep,
+			final int endPacketStep) {
+		final int [] pidcount = new int [8192];
+		for(int r = startPacketStep; r< endPacketStep;r++ ){
+			final int pid_current_packet=transportStream.getPacket_pid(r);
+			pidcount[pid_current_packet]++;
+		}
+		return pidcount;
+	}
+
+	/**
+	 * @param viewContext
+	 * @param steps
+	 * @param step
+	 * @return
+	 */
+	private int getFirstPacketNoOfStep(final ViewContext viewContext,
+			final int steps, final int step) {
+		return viewContext.getStartPacket() +(int)(((long)step*(long)(viewContext.getEndPacket() - viewContext.getStartPacket()))/steps);
+	}
+
 	private void addLegendRadioButtons() {
-		JLabel typeLabel = new JLabel("Legend:");
+		final JLabel typeLabel = new JLabel("Legend:");
 		buttonPanel.add(typeLabel);
-		JRadioButton onButton = new JRadioButton("On");
+		final JRadioButton onButton = new JRadioButton("On");
 		onButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(final ActionEvent e) {
 				if(!legendVisible){
 					legendVisible = true;
 					if(freeChart!=null){
@@ -223,10 +263,10 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 				}
 			}
 		});
-		JRadioButton offButton = new JRadioButton("Off");
+		final JRadioButton offButton = new JRadioButton("Off");
 		offButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(final ActionEvent e) {
 				if(legendVisible){
 					legendVisible = false;
 					if(freeChart!=null){
@@ -236,7 +276,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			}
 		});
 		onButton.setSelected(true);
-		ButtonGroup group = new ButtonGroup();
+		final ButtonGroup group = new ButtonGroup();
 		group.add(onButton);
 		group.add(offButton);
 
