@@ -65,7 +65,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @author Eric
 	 *
 	 */
-	private static final class PacketTimeNumberFormat extends NumberFormat {
+	public static final class PacketTimeNumberFormat extends NumberFormat {
 		/**
 		 *
 		 */
@@ -74,7 +74,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		/**
 		 * @param transportStream
 		 */
-		private PacketTimeNumberFormat(final TransportStream transportStream) {
+		public PacketTimeNumberFormat(final TransportStream transportStream) {
 			super();
 			this.transportStream = transportStream;
 		}
@@ -133,7 +133,10 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
 	public final void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
-		if(transportStream!=null){
+		if(transportStream==null){
+			freeChart = null;
+			chartPanel.setChart(freeChart);
+		}else{
 			final int noPIDs=viewContext.getShown().size();
 			final CategoryTableXYDataset categoryTableXYDataset = createDataSet(transportStream, viewContext, noPIDs);
 			//because we want custom colors, can not use ChartFactory.createStackedXYAreaChart(, this is almost literal copy
@@ -144,9 +147,6 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			chartPanel.setChart(freeChart);
 			chartPanel.setDomainZoomable(true);
 			chartPanel.setRangeZoomable(true);
-		}else{ // transportstreaam == null
-			freeChart = null;
-			chartPanel.setChart(freeChart);
 		}
 	}
 
@@ -210,11 +210,10 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 				stepLabels[step]=new ChartLabel(transportStream.getShortPacketTime(startPacketStep), (short)step);
 				final int[] pidcount = countPidOccurrencesInStep(transportStream, startPacketStep, endPacketStep);
 
-				if(transportStream.getBitRate()!=-1)
-				{
-					categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[pidIndex]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[pidIndex].getLabel());
-				}else{
+				if(transportStream.getBitRate()==-1){
 					categoryTableXYDataset.add(startPacketStep,pidcount[used_pids[pidIndex]],labels[pidIndex].getLabel());
+				}else{
+					categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[pidIndex]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[pidIndex].getLabel());
 				}
 			}
 		}
