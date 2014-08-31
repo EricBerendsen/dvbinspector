@@ -74,19 +74,18 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		final Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
 			final Integer programNumber=i.next();
-			final TableSection [] sections = pmts.get(programNumber);
+			final PMTsection[] sections = pmts.get(programNumber);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("program",programNumber,getParentPSI().getSdt().getServiceName(programNumber)));
-			for (final TableSection tableSection : sections) {
-				if(tableSection!= null){
-					if(!Utils.simpleModus(modus)){ // show all details
-						addSectionVersionsToJTree(n, tableSection, modus);
-					}else{ // keep it simple
-						final PMTsection pmtSection = (PMTsection) tableSection;
+			for (final PMTsection pmtSection : sections) {
+				if(pmtSection!= null){
+					if(Utils.simpleModus(modus)){
+						// keep it simple
 						n.add(new DefaultMutableTreeNode(new KVP("PCR_PID",pmtSection.getPcrPid(),null)));
 						addListJTree(n,pmtSection.getDescriptorList(),modus,"program_info");
 						addListJTree(n,pmtSection.getComponentenList(),modus,"components");
+					}else{ // show all details
+						addSectionVersionsToJTree(n, pmtSection, modus);
 					}
-
 				}
 			}
 			t.add(n);
@@ -96,8 +95,8 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	}
 
 	public int getPmtPID(final int programNumber){
-		final TableSection [] sections = pmts.get(programNumber);
-		for (TableSection section : sections) {
+		final PMTsection [] sections = pmts.get(programNumber);
+		for (PMTsection section : sections) {
 			if(section!= null){
 				return section.getParentPID().getPid();
 			}
