@@ -116,7 +116,6 @@ public class PsiSectionData {
 			read2=Math.min(need,available); // we are going to read this number of bytes
 			System.arraycopy(payload, offset+read1, data, noBytes, read2);
 			noBytes+=read2; // now we have read2 bytes more.
-			available -= read2;// now we have read2 bytes less available .
 			if(read2==need){
 				// complete SI section, handle it...
 				if(pid==0){
@@ -169,7 +168,7 @@ public class PsiSectionData {
 				}
 
 				// now put it in general PID table
-				// when it is not valid an exception will be thrown, caught and ignored. The section will be dismissed
+				// when it is not valid an exception will be thrown, caught and ignored. The section will be discarded
 
 				try {
 					final TableSection psi= new TableSection(this,parentPID);
