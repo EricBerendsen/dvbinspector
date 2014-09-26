@@ -223,7 +223,7 @@ public class PID implements TreeNode{
 				}
 
 			}else 	{
-				logger.fine("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+				logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
 				last_continuity_counter=-1;
 				continuity_errors++;
 				gatherer.reset();
@@ -242,14 +242,13 @@ public class PID implements TreeNode{
 		if(adaptationField!=null) { //Adaptation field present
 			if(adaptationField.isPCR_flag()){
 				final PCR newPCR = adaptationField.getProgram_clock_reference();
-				if((lastPCR != null)&&(lastPCR.getProgram_clock_reference_base()>newPCR.getProgram_clock_reference_base())){
-					// wrap around of PCR, because we use long we can just continue
-					newPCR.setProgram_clock_reference_base(newPCR.getProgram_clock_reference_base() + 0x200000000l);
-
-				}
 				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
 					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
-					if((newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) !=0){
+
+					// This will ignore single PCR packets that have lower values than previous.
+					// when PCR wraps around we only use first part till wrap around for bitrate calculation
+					// (unless PCR reaches value of firstPCR again, this would mean stream of > 24 hours)
+					if((newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) >0){
 						bitRate = ((packetsDiff * parentTransportStream.getPacketLenghth() * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
 					}
 					lastPCR = newPCR;
@@ -275,7 +274,7 @@ public class PID implements TreeNode{
 	}
 	@Override
 	public String toString() {
-		return " "+packets;
+		return "PID:"+pid+", packets:"+packets;
 	}
 
 	public int getPid() {
