@@ -92,6 +92,10 @@ import nl.digitalekabeltelevisie.main.DVBinspector;
  */
 public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
 
+	private static final String COPY = "copy";
+	private static final String VIEW = "view";
+	private static final String TREE = "tree";
+
 	public class CopyAction extends AbstractAction implements ClipboardOwner{
 
 		/* (non-Javadoc)
@@ -188,17 +192,17 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		popup = new JPopupMenu();
 		copyMenuItem = new JMenuItem("Copy Item to clipboard");
 		copyMenuItem.addActionListener(this);
-		copyMenuItem.setActionCommand("copy");
+		copyMenuItem.setActionCommand(COPY);
 		popup.add(copyMenuItem);
 
 		treeMenuItem = new JMenuItem("Copy Entire Sub Tree to clipboard");
 		treeMenuItem.addActionListener(this);
-		treeMenuItem.setActionCommand("tree");
+		treeMenuItem.setActionCommand(TREE);
 		popup.add(treeMenuItem);
 
 		viewMenuItem = new JMenuItem("Copy Visible Sub Tree to clipboard");
 		viewMenuItem.addActionListener(this);
-		viewMenuItem.setActionCommand("view");
+		viewMenuItem.setActionCommand(VIEW);
 		popup.add(viewMenuItem);
 
 		tree.addMouseListener(
@@ -223,8 +227,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 		InputMap inputMap = tree.getInputMap();
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
-		inputMap.put(key, "copy");
-		tree.getActionMap().put("copy", new CopyAction());
+		inputMap.put(key, COPY);
+		tree.getActionMap().put(COPY, new CopyAction());
 
 
 
@@ -373,14 +377,14 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		if(path!=null){
 
 			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
-			if (ae.getActionCommand().equals("copy")) {
+			if (ae.getActionCommand().equals(COPY)) {
 				final KVP kvp = (KVP)dmtn.getUserObject();
 
 				final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
 				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clipboard.setContents( stringSelection, this );
 			}
-			if (ae.getActionCommand().equals("tree")){
+			if (ae.getActionCommand().equals(TREE)){
 				final KVP kvp = (KVP)dmtn.getUserObject();
 				final String lineSep = System.getProperty("line.separator");
 				final StringBuilder res = new StringBuilder(kvp.getPlainText());
@@ -391,7 +395,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clipboard.setContents( stringSelection, this );
 			}
-			if (ae.getActionCommand().equals("view")){
+			if (ae.getActionCommand().equals(VIEW)){
 				final KVP kvp = (KVP)dmtn.getUserObject();
 				final String lineSep = System.getProperty("line.separator");
 				final StringBuilder res = new StringBuilder(kvp.getPlainText());
@@ -534,7 +538,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @return
 	 */
 
-	private StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
+	private static StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
 		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder();
 		@SuppressWarnings("rawtypes")
