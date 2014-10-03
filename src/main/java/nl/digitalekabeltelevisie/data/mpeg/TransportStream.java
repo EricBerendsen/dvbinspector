@@ -1013,7 +1013,7 @@ public class TransportStream implements TreeNode{
 				r = now.get(Calendar.YEAR)+"/"+ (now.get(Calendar.MONTH)+1)+"/"+now.get(Calendar.DAY_OF_MONTH)+" "+now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
 		}else{ // no bitrate, return packet number
-			r = ""+packetNo+" (packetNo)";
+			r = Long.toString(packetNo)+" (packetNo)";
 		}
 		return r;
 	}
@@ -1037,7 +1037,7 @@ public class TransportStream implements TreeNode{
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
 		}else{ // no bitrate
-			r = ""+packetNo+" (packetNo)";
+			r = Long.toString(packetNo)+" (packetNo)";
 		}
 		return r;
 	}
@@ -1121,6 +1121,10 @@ public class TransportStream implements TreeNode{
 
 	public int getPacketLenghth() {
 		return packetLenghth;
+	}
+
+	public long getLen() {
+		return len;
 	}
 
 }
