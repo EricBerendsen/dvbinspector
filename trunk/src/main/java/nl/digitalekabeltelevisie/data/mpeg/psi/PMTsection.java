@@ -171,7 +171,7 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	@Override
 	public String toString(){
 		final StringBuilder b = new StringBuilder("PMTsection section=");
-		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", program_number=").append(getProgramNumber()).append(", ");
+		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", program_number=").append(getProgramNumber()).append(", ").append(", PMT_PID:").append(getParentPID().getPid());
 		return b.toString();
 	}
 
@@ -214,4 +214,6 @@ public class PMTsection extends TableSectionExtendedSyntax {
 		Utils.addListJTree(t,componentenList,modus,"components");
 		return t;
 	}
+
+
 }
