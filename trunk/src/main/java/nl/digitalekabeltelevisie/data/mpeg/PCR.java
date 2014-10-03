@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -67,7 +67,7 @@ public class PCR implements TreeNode{
 
 	@Override
 	public String toString(){
-		return "base:"+program_clock_reference_base+", extension:"+program_clock_reference_extension;
+		return "base:"+program_clock_reference_base+", extension:"+program_clock_reference_extension+", Time:"+printPCRTime(getProgram_clock_reference());
 	}
 
 	public long getProgram_clock_reference(){
