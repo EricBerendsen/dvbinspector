@@ -157,7 +157,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 			i = indexOfSyncWord(pesDataBuffer,  i);
 			if (i >= 0) { // found start,
 				if ((i+4) <= bufEnd){ // at least 4 bytes, try to create an AudioAccessUnit
-					AudioAccessUnit frame = new AudioAccessUnit(pesDataBuffer, i,audioPes.getPts());
+					AudioAccessUnit frame = new AudioAccessUnit(pesDataBuffer, i,audioPes.getPesHeader().getPts());
 					int unitLen = frame.getFrameSize();
 					if(unitLen<0) { // not a valid frame. start search again from next pos
 						i++;

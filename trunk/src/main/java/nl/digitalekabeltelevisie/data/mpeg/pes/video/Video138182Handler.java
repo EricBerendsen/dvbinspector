@@ -179,9 +179,9 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 		long diff = Long.MAX_VALUE;
 		for (PesPacketData pesPacket : pesPackets) { // iterate over all video frames, in case pts wraps around
 			VideoPESDataField video = (VideoPESDataField)pesPacket;
-			if(video.hasIFrame() && (Math.abs(video.getPts() - pts) <diff)){
+			if(video.hasIFrame() && (Math.abs(video.getPesHeader().getPts() - pts) <diff)){
 				resultPES = video;
-				diff = Math.abs(video.getPts() - pts);
+				diff = Math.abs(video.getPesHeader().getPts() - pts);
 			}
 		}
 		if(resultPES!=null){

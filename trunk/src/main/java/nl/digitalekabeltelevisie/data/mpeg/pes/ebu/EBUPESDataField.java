@@ -110,16 +110,16 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 			dataUnitLen = getInt(data, offset+t+1, 1, MASK_8BITS);
 			if((offset+t+2+0x2C)<data.length){  // element allways assumed to be 0x2c long.
 				if((dataUnitId==0x02)||(dataUnitId==0x03)||(dataUnitId==0xc0)||(dataUnitId==0xc1)){
-					final EBUDataField f = new TxtDataField(data,offset+t,dataUnitLen,pts);
+					final EBUDataField f = new TxtDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
 					fieldList.add(f);
 				}else if(dataUnitId==0xC4){
-					final EBUDataField f = new WSSDataField(data,offset+t,dataUnitLen,pts);
+					final EBUDataField f = new WSSDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
 					fieldList.add(f);
 				}else if(dataUnitId==0xC3){
-					final EBUDataField f = new VPSDataField(data,offset+t,dataUnitLen,pts);
+					final EBUDataField f = new VPSDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
 					fieldList.add(f);
 				}else{
-					final EBUDataField f = new EBUDataField(data,offset+t,dataUnitLen,pts);
+					final EBUDataField f = new EBUDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
 					fieldList.add(f);
 				}
 			}else{
@@ -136,7 +136,7 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=super.getJTreeNode(modus, new KVP("EBU PES Packet"));
 		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier,getDataIDString(data_identifier))));
-		s.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
+		//s.add(new DefaultMutableTreeNode(new KVP("pts",getPesHeader().getPts(), printTimebase90kHz(getPesHeader().getPts()))));
 
 		addListJTree(s,fieldList,modus,"fields");
 		return s;

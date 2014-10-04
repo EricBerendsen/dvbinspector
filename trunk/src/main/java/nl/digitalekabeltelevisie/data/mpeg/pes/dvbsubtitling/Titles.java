@@ -44,7 +44,7 @@ public class Titles implements TreeNode {
 				}
 			}else{ // not stuffing
 				if(current==null){
-					current = new DisplaySet(title.getPesHandler(),title.getPts());
+					current = new DisplaySet(title.getPesHandler(),title.getPesHeader().getPts());
 				}
 				for (Segment segment : segmentList) {
 					current.add(segment);

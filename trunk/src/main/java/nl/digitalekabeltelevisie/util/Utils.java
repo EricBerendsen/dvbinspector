@@ -40,6 +40,7 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -1936,6 +1937,26 @@ public final class Utils {
 	   }
 	   return '#' + s;
 
+	}
+
+	public static StringBuilder getChildrenAsHTML(final DefaultMutableTreeNode dmtn) {
+		final String lineSep = "<br>";
+		final StringBuilder res = new StringBuilder();
+		KVP kvp = (KVP)dmtn.getUserObject();
+		@SuppressWarnings("rawtypes")
+		final Enumeration children = dmtn.children();
+		while(children.hasMoreElements()){
+			Object next = children.nextElement();
+			if(next instanceof DefaultMutableTreeNode){
+				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
+				final KVP chKVP = (KVP)child.getUserObject();
+				res.append(chKVP.toString(KVP.STRING_DISPLAY_HTML_FRAGMENTS, KVP.NUMBER_DISPLAY_BOTH)).append(lineSep);
+				if(!child.isLeaf()){
+					res.append(getChildrenAsHTML(child));
+				}
+			}
+		}
+		return res;
 	}
 }
 
