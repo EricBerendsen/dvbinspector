@@ -34,6 +34,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 
 /**
  * Represent a PES packet, which can correspond to a MPEG frame, (or a complete group of frames) or Audio packet, or DVB
@@ -58,15 +59,10 @@ public class PesPacketData  implements TreeNode{
 	 * the number of bytes to be expected in this pes as defined by PES packet length. 0 for unbounded
 	 */
 	protected int noBytes=0;
+	private PesHeader pesHeader;
 
-	private int pts_dts_flags;
 	protected int pes_header_data_length;
 
-	protected long pts;
-	protected long dts;
-	protected long escr;
-
-	protected long packet_no=0;
 	protected GeneralPesHandler pesHandler;
 
 	protected int pesDataStart;
@@ -104,10 +100,10 @@ public class PesPacketData  implements TreeNode{
 		this.stream_id = pesStreamID;
 		this.noBytes = pesLength;
 		this.pesHandler = pesHandler;
-		if(pesLength!=0){
-			this.data= new byte[pesLength+6];
-		}else{
+		if(pesLength==0){
 			this.data= new byte[20000]; // start default for video, should be able to handle small frames.
+		}else{
+			this.data= new byte[pesLength+6];
 		}
 
 	}
@@ -124,12 +120,18 @@ public class PesPacketData  implements TreeNode{
 		this.data = pesPacket.getData();
 		this.noBytes = pesPacket.getNoBytes();
 		this.pesHandler = pesPacket.getPesHandler();
-		this.packet_no= pesPacket.getPacket_no();
 		this.pesDataStart = pesPacket.getPesDataStart();
 		this.pesDataLen = pesPacket.getPesDataLen();
 		this.bytesRead = pesPacket.bytesRead;
 		processPayload();
 
+	}
+
+	synchronized public PesHeader getPesHeader(){
+		if(pesHeader==null){
+			pesHeader = new PesHeader(data,0);
+		}
+		return pesHeader;
 	}
 
 	/**
@@ -148,7 +150,7 @@ public class PesPacketData  implements TreeNode{
 				bytesRead+=read1;
 			}
 		}else{ // noBytes==0, unbounded video packet, length unknown
-			int newcount = bytesRead + available;
+			final int newcount = bytesRead + available;
 			if (newcount > data.length) {
 				final byte newbuf[] = new byte[Math.max(data.length * 2, newcount)];
 				System.arraycopy(data, 0, newbuf, 0, bytesRead);
@@ -159,15 +161,6 @@ public class PesPacketData  implements TreeNode{
 		}
 	}
 
-	/**
-	 * @return the position of the first TSpacket of this PesPacket in the TransportStream
-	 */
-	public long getPacket_no() {
-		return packet_no;
-	}
-
-
-
 
 	/**
 	 * @return All Data of packet, including packet_start_code_prefix, stream id, PES packet length, pesHeader
@@ -177,14 +170,12 @@ public class PesPacketData  implements TreeNode{
 	}
 
 
-
 	/**
 	 * @return the number of bytes to be expected in this pes as defined by PES packet length. 0 for unbounded
 	 */
 	public int getNoBytes() {
 		return noBytes;
 	}
-
 
 
 	/**
@@ -210,30 +201,18 @@ public class PesPacketData  implements TreeNode{
 				&& (stream_id != ITU_T_Rec_H_222_1typeE))
 		{
 
-			pts_dts_flags  = getPts_dts_flags() ;
 			pes_header_data_length  = getPes_header_data_length();
 
-			int offset=9;
-			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)) {
-				pts = getTimeStamp(data,offset);
-				offset+=5;
-			}
-			if (pts_dts_flags ==3) {
-				dts = getTimeStamp(data,offset);
-				offset+=5;
-			}
 			pesDataStart=9+pes_header_data_length;
-			if(noBytes!=0){
-				pesDataLen=noBytes-pes_header_data_length-3;  // was -3 // TODO not correct when noBytes == 0 for Video PES
-			}else{
+			if(noBytes==0){
 				pesDataLen=bytesRead-pes_header_data_length-3;
+			}else{
+				pesDataLen=noBytes-pes_header_data_length-3;
 			}
-
 		}else{
 			pesDataStart=6;
 			pesDataLen=noBytes;
 		}
-
 	}
 
 	/**
@@ -241,98 +220,6 @@ public class PesPacketData  implements TreeNode{
 	 */
 	public final int getPes_header_data_length() {
 		return getInt(data, 8, 1, MASK_8BITS);
-	}
-	/**
-	 * @return
-	 */
-	public int getPes_extension_flag() {
-		return getInt(data, 7, 1, MASK_1BIT);
-	}
-	/**
-	 * @return
-	 */
-	public int getPes_crc_flag() {
-		return getInt(data, 7, 1, 0x02)>>1;
-	}
-	/**
-	 * @return
-	 */
-	public int getAdditional_copy_info_flag() {
-		return getInt(data, 7, 1, 0x04)>>2;
-	}
-	/**
-	 * @return
-	 */
-	public int getDsm_trick_mode_flag() {
-		return getInt(data, 7, 1, 0x08)>>3;
-	}
-	/**
-	 * @return
-	 */
-	public int getEs_rate_flag() {
-		return getInt(data, 7, 1, 0x10)>>4;
-	}
-	/**
-	 * @return
-	 */
-	public int getEscr_flag() {
-		return getInt(data, 7, 1, 0x20)>>5;
-	}
-	/**
-	 * @return
-	 */
-	public final int getPts_dts_flags() {
-		return getInt(data, 7, 1, 0xC0)>>6;
-	}
-	/**
-	 * @return
-	 */
-	public int getOriginal_or_copy() {
-		return getInt(data, 6, 1, MASK_1BIT);
-	}
-	/**
-	 * @return
-	 */
-	public int getCopyright() {
-		return getInt(data, 6, 1, 0x02) >>1;
-	}
-	/**
-	 * @return
-	 */
-	public int getData_alignment_indicator() {
-		return getInt(data, 6, 1, 0x04) >>2;
-	}
-	/**
-	 * @return
-	 */
-	public int getPes_priority() {
-		return getInt(data, 6, 1, 0x08) >>3;
-	}
-	/**
-	 * @return
-	 */
-	public int getPes_scrambling_control() {
-		return getInt(data, 6, 1, 0x30) >>4;
-	}
-	/**
-	 * @return
-	 */
-	public int getMarkerBits() {
-		return getInt(data, 6, 1, 0xC0) >>6;
-	}
-
-	/**
-	 * @param array
-	 * @param offset
-	 * @return the value of the PTS/DTS as described in 2.4.3.7 of iso 13813, prefix and marker bits are ignored
-	 */
-	public final long getTimeStamp(final byte[] array, final int offset) {
-
-		long ts = getLong(array, offset, 1, 0x0E) << 29; // bits 32..30
-		ts |= getLong(array, offset + 1, 2, 0xFFFE) << 14; // bits 29..15
-		ts |= getLong(array, offset + 3, 2, 0xFFFE) >> 1; // bits 14..0
-
-		return ts;
 	}
 
 	/**
@@ -350,18 +237,18 @@ public class PesPacketData  implements TreeNode{
 	 * @param titleKVP
 	 * @return
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus, KVP titleKVP) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus, final KVP titleKVP) {
 
-		String ptsString = "";
+		final PesHeader phv = getPesHeader();
 		if(showPtsModus(modus)){
+			final int pts_dts_flags = phv.getPts_dts_flags();
 			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
-				ptsString = " [pts="+ printTimebase90kHz(pts)+"]";
+				titleKVP.appendLabel(" [pts="+ printTimebase90kHz(phv.getPts())+"]");
 			}
-			titleKVP.appendLabel(ptsString);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(titleKVP);
-		t.add(new DefaultMutableTreeNode(new KVP("stream_id",stream_id,getStreamIDDescription(stream_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("PES_packet_length",noBytes,null)));
+
+		phv.addToJtree(t,modus);
 		if(noBytes==0){
 			t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("data",data,0,bytesRead,null)));
@@ -369,98 +256,7 @@ public class PesPacketData  implements TreeNode{
 			t.add(new DefaultMutableTreeNode(new KVP("data",data,null)));
 		}
 
-		if((stream_id!=program_stream_map)
-				&& (stream_id != padding_stream)
-				&& (stream_id != private_stream_2)
-				&& (stream_id != ECM_stream)
-				&& (stream_id != EMM_stream)
-				&& (stream_id != program_stream_directory)
-				&& (stream_id != DSMCC_stream)
-				&& (stream_id != ITU_T_Rec_H_222_1typeE)){
-
-			t.add(new DefaultMutableTreeNode(new KVP("markerBits",getMarkerBits(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_scrambling_control",getPes_scrambling_control(),getPes_scrambling_control()==0?"Not scrambled":"User-defined")));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_priority",getPes_priority(),getPes_priority()==1?"higher":"normal")));
-			t.add(new DefaultMutableTreeNode(new KVP("data_alignment_indicator",getData_alignment_indicator(),getData_alignment_indicator()==1?"PES packet header is immediately followed by the video start code or audio syncword indicated in the data_stream_alignment_descriptor":"alignment not defined")));
-			t.add(new DefaultMutableTreeNode(new KVP("copyright",getCopyright(),getCopyright()==1?"packet payload is protected by copyright":"not defined whether the material is protected by copyright")));
-			t.add(new DefaultMutableTreeNode(new KVP("original_or_copy",getOriginal_or_copy(),getOriginal_or_copy()==1?"contents of the associated PES packet payload is an original":"contents of the associated PES packet payload is a copy")));
-
-			t.add(new DefaultMutableTreeNode(new KVP("pts_dts_flags",getPts_dts_flags(),getPts_dts_flagsString())));
-			t.add(new DefaultMutableTreeNode(new KVP("escr_flag",getEscr_flag(),getEscr_flag()==1?"ESCR base and extension fields are present":"no ESCR fields are present")));
-			t.add(new DefaultMutableTreeNode(new KVP("es_rate_flag",getEs_rate_flag(),getEs_rate_flag()==1?"ES_rate field is present":"no ES_rate field is present")));
-			t.add(new DefaultMutableTreeNode(new KVP("dsm_trick_mode_flag",getDsm_trick_mode_flag() ,getDsm_trick_mode_flag()==1?"8-bit trick mode field is present":"8-bit trick mode field is not present")));
-			t.add(new DefaultMutableTreeNode(new KVP("additional_copy_info_flag",getAdditional_copy_info_flag(),getAdditional_copy_info_flag()==1?"additional_copy_info field is present":"additional_copy_info field is not present")));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_crc_flag",getPes_crc_flag(),getPes_crc_flag()==1?"CRC field is present":"CRC field is not present")));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_extension_flag",getPes_extension_flag() ,getPes_extension_flag()==1?"extension field is present":"extension field is not present")));
-			t.add(new DefaultMutableTreeNode(new KVP("pes_header_data_length",getPes_header_data_length(),null)));
-			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)) {
-				t.add(new DefaultMutableTreeNode(new KVP("pts",pts,printTimebase90kHz(pts))));
-			}
-			if (pts_dts_flags ==3) {
-				t.add(new DefaultMutableTreeNode(new KVP("dts",dts,printTimebase90kHz(dts))));
-			}
-			if(noBytes!=0){
-				t.add(new DefaultMutableTreeNode(new KVP("PES_packet_data_byte2",data,9+pes_header_data_length,noBytes-pes_header_data_length-3,null)));   // was noBytes-pes_header_data_length-3
-			}
-		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("PES_packet_data_byte3",data,6,noBytes,null)));
-		}
 		return t;
-	}
-
-	private String getPts_dts_flagsString() {
-		switch (getPts_dts_flags()) {
-		case 0:
-			return "no PTS or DTS fields shall be present in the PES packet header";
-		case 1:
-			return "forbidden value";
-		case 2:
-			return "PTS fields shall be present in the PES packet header";
-		case 3:
-			return "both the PTS fields and DTS fields shall be present in the PES packet header";
-
-		default:
-			return "illegal value (program error)";
-		}
-	}
-
-	public static String getStreamIDDescription(final int streamId){
-
-		if((0xC0<=streamId)&&(streamId<0xE0)){
-			return "ISO/IEC 13818-3 or ISO/IEC 11172-3 or ISO/IEC 13818-7 or ISO/IEC 14496-3 audio stream number "+ Integer.toHexString(streamId & 0x1F);
-		}
-		if((0xE0<=streamId)&&(streamId<0xF0)){
-			return "ITU-T Rec. H.262 | ISO/IEC 13818-2 or ISO/IEC 11172-2 or ISO/IEC 14496-2 video stream number "+ Integer.toHexString(streamId & 0x0F);
-		}
-
-		switch (streamId) {
-		case 0xBC :return "program_stream_map";
-		case 0xBD :return "private_stream_1";
-		case 0xBE :return "padding_stream";
-		case 0xBF :return "private_stream_2";
-		case 0xF0 :return "ECM_stream";
-		case 0xF1 :return "EMM_stream";
-		case 0xF2 :return "DSMCC_stream";
-		case 0xF3 :return "ISO/IEC_13522_stream";
-		case 0xF4 :return "ITU-T Rec. H.222.1 type A";
-		case 0xF5 :return "ITU-T Rec. H.222.1 type B";
-		case 0xF6 :return "ITU-T Rec. H.222.1 type C";
-		case 0xF7 :return "ITU-T Rec. H.222.1 type D";
-		case 0xF8 :return "ITU-T Rec. H.222.1 type E";
-		case 0xF9 :return "ancillary_stream";
-		case 0xFA :return "ISO/IEC14496-1_SL-packetized_stream";
-		case 0xFB :return "ISO/IEC14496-1_FlexMux_stream";
-		/* ISO/IEC 13818-1:2007/FPDAM5 */
-		case 0xFC :return "metadata stream";
-		case 0xFD :return "extended_stream_id";
-		case 0xFE :return "reserved data stream";
-
-		case 0xFF :return "program_stream_directory";
-		default:
-			return "??";
-		}
-
-
 	}
 
 	/**
@@ -471,22 +267,12 @@ public class PesPacketData  implements TreeNode{
 	}
 
 
-
 	/**
 	 * @return the pesDataStart, the offset into data[], where the PES packet data bytes start (start of actual payload)
 	 */
 	public int getPesDataStart() {
 		return pesDataStart;
 	}
-
-	/**
-	 * @return the pts
-	 */
-	public long getPts() {
-		return pts;
-	}
-
-
 
 	/**
 	 * @return the PesHandler that knows how to process the raw data in this type of PesPacket

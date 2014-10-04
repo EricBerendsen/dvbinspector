@@ -50,6 +50,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
@@ -192,8 +193,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
 	public BufferedImage getImage() {
+		PesHeader pesHeader = getPesHeader();
 		if((data_identifier==0x20)&& // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
-				(getPts_dts_flags()>=2)){ //Is this a packet that has PTS? If not, it is not meant for display.
+				(pesHeader.getPts_dts_flags()>=2)){ //Is this a packet that has PTS? If not, it is not meant for display.
 			int width=720;
 			int height=576;
 			if(displayDefinitionSegment!=null){
@@ -202,7 +204,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 				// TODO handle display_window_flag and display_window_horizontal_position_minimum, etc
 				// need some test data for it, is it ever used???
 			}
-			BufferedImage bgImage = pesHandler.getBGImage(height, width,pts);
+			BufferedImage bgImage = pesHandler.getBGImage(height, width,pesHeader.getPts());
 			final BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 			final Graphics2D gd = img.createGraphics();
 			gd.drawImage(bgImage, 0, 0,null);
