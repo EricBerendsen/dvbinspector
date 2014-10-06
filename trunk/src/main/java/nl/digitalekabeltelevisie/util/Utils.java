@@ -514,9 +514,8 @@ public final class Utils {
 			}
 			if(t>9){
 				logger.warning("Error parsing BCD: "+toHexString(b)+" ,nibble_no: "+nibble_no+" ,len: "+len);
-				return "Error parsing BCD";
 			}
-			buf.append(Integer.toString(t));
+			buf.append(Integer.toString(t,16));
 		}
 		return buf.toString();
 	}

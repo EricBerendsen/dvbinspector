@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
@@ -70,6 +72,7 @@ import nl.digitalekabeltelevisie.util.Interval;
  */
 public class EITableImage extends JPanel implements ComponentListener,ImageSource, Scrollable{
 
+	private static final Logger	logger	= Logger.getLogger(EITableImage.class.getName());
 	private static final String FONT_NAME = "SansSerif";
 	private static final int LINE_HEIGHT = 20;
 	private static final long DEFAULT_MILLI_SECS_PER_PIXEL = 30*1000;
@@ -242,26 +245,31 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	private void drawEvent(final Graphics2D gd, Date startDate, Event event, int x, int y, int char_descend) {
 		Date eventStart = getUTCDate( event.getStartTime());
 
+		try{
 		int w = (int)(getDurationMillis(event.getDuration())/milliSecsPerPixel);
-		int eventX = x+(int)((eventStart.getTime()-startDate.getTime())/milliSecsPerPixel);
-		String eventName= event.getEventName();
+			int eventX = x+(int)((eventStart.getTime()-startDate.getTime())/milliSecsPerPixel);
+			String eventName= event.getEventName();
 
-		// FIll gray
-		gd.setColor(Color.GRAY);
-		gd.fillRect(eventX, y, w, LINE_HEIGHT);
+			// FIll gray
+			gd.setColor(Color.GRAY);
+			gd.fillRect(eventX, y, w, LINE_HEIGHT);
 
-		// black border
-		gd.setColor(Color.BLACK);
-		gd.drawRect(eventX, y, w, LINE_HEIGHT);
-		// title
+			// black border
+			gd.setColor(Color.BLACK);
+			gd.drawRect(eventX, y, w, LINE_HEIGHT);
+			// title
 
 
-		Graphics2D gd2 = (Graphics2D)gd.create();
-		gd2.clipRect(eventX+5, y, w-10, LINE_HEIGHT);
+			Graphics2D gd2 = (Graphics2D)gd.create();
+			gd2.clipRect(eventX+5, y, w-10, LINE_HEIGHT);
 
-		gd2.setColor(Color.WHITE);
-		gd2.drawString(eventName, eventX+5,y+char_descend);
-		gd2.dispose();
+			gd2.setColor(Color.WHITE);
+			gd2.drawString(eventName, eventX+5,y+char_descend);
+			gd2.dispose();
+		}catch(NumberFormatException nfe){
+			logger.log(Level.WARNING, "drawEvent: Event.duration is not a valid BCD number;", nfe);
+
+		}
 	}
 
 

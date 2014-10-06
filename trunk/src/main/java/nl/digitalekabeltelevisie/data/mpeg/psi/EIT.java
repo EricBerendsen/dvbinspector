@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -56,6 +58,7 @@ import nl.digitalekabeltelevisie.util.Interval;
 public class EIT extends AbstractPSITabel{
 
 	private final Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
+	private static final Logger	logger	= Logger.getLogger(EIT.class.getName());
 
 
 	/**
@@ -189,9 +192,13 @@ public class EIT extends AbstractPSITabel{
 							startDate = eventStart;
 						}
 						if(eventStart!=null){
-							Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
-							if((endDate==null)||(endDate.before(eventEnd))){
-								endDate = eventEnd;
+							try{
+								Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
+								if((endDate==null)||(endDate.before(eventEnd))){
+									endDate = eventEnd;
+								}
+							}catch(NumberFormatException nfe){
+								logger.log(Level.WARNING, "getSpanningInterval: Event.duration is not a valid BCD number;", nfe);
 							}
 						}
 					}
