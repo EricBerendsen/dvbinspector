@@ -245,7 +245,7 @@ Triplet implements TreeNode {
 	};
 
 
-	public static final short national_subsets[][] = {
+	private static final short national_subsets[][] = {
 		// 0x23     0x24    0x40    0x5b    0x5c    0x5d    0x5e    0x5f   0x60    0x7b     0x7c   0x7d    0x7e
 		{ 0x00a3, 0x0024, 0x0040, 0x00ab, 0x00bd, 0x00bb, 0x005e, 0x0023, 0x002d, 0x00bc, 0x00a6, 0x00be, 0x00f7 }, // english ,000
 		{ 0x00e9, 0x00ef, 0x00e0, 0x00eb, 0x00ea, 0x00f9, 0x00ee, 0x0023, 0x00e8, 0x00e2, 0x00f4, 0x00fb, 0x00e7 }, // french  ,001
@@ -265,8 +265,6 @@ Triplet implements TreeNode {
 
 	//DM10082004 081.7 int08 changed
 	//4 bits main tripl + 3 bits character_set
-	// not used(yet??)
-	@SuppressWarnings("unused")
 	private static final int national_subset_mapping[][] = {
 		{ 0, 1, 2, 3, 4, 5, 6, 7 },  //0, en,fr,se,cz,de,es,it,ro
 		{ 9, 1, 2, 3, 4, 5, 6, 7 },  //1, pl,fr,se,cz,de,es,it,ro
@@ -563,6 +561,70 @@ Triplet implements TreeNode {
 	public String toString(){
 		return "TxtTriplet "+getModeString(getMode(), getAddress());
 
+	}
+	
+	/**
+	 * Get a national character for the character {@code ch}, according to the
+	 * national option selection bits sent in {@code nocs}.
+	 * @param ch The character to be converted to a national character, as it
+	 * appeared in the original teletext data.
+	 * @param nocs "Character Set Designation and National Option Selection",
+	 * coming from the page header or one of the page enhancement packets. Only
+	 * the last 7 bits are considered.
+	 * @return The national character, as mapped by {@code ch} and {@code nocs}.
+	 * If no mapping could be found, {@code ch} is returned.
+	 */
+	public static char getNationalOptionChar(final byte ch, final int nocs) {
+		char targetChar1;
+		int subset_idx = national_subset_mapping[(nocs & 0x78) >>> 3][nocs & 0x7];
+		switch (ch) // special national characters
+		{
+		case 0x23:
+			targetChar1 = (char) national_subsets[subset_idx][0];
+			break;
+		case 0x24:
+			targetChar1 = (char) national_subsets[subset_idx][1];
+			break;
+		case 0x40:
+			targetChar1 = (char) national_subsets[subset_idx][2];
+			break;
+		case 0x5b:
+			targetChar1 = (char) national_subsets[subset_idx][3];
+			break;
+		case 0x5c:
+			targetChar1 = (char) national_subsets[subset_idx][4];
+			break;
+		case 0x5d:
+			targetChar1 = (char) national_subsets[subset_idx][5];
+			break;
+		case 0x5e:
+			targetChar1 = (char) national_subsets[subset_idx][6];
+			break;
+		case 0x5f:
+			targetChar1 = (char) national_subsets[subset_idx][7];
+			break;
+		case 0x60:
+			targetChar1 = (char) national_subsets[subset_idx][8];
+			break;
+		case 0x7b:
+			targetChar1 = (char) national_subsets[subset_idx][9];
+			break;
+		case 0x7c:
+			targetChar1 = (char) national_subsets[subset_idx][10];
+			break;
+		case 0x7d:
+			targetChar1 = (char) national_subsets[subset_idx][11];
+			break;
+		case 0x7e:
+			targetChar1 = (char) national_subsets[subset_idx][12];
+			break;
+		case 0x7f:
+			targetChar1 = (char) 0x25A0;
+			break;
+		default:
+			targetChar1 = (char) ch;
+		}
+		return targetChar1;
 	}
 
 }

@@ -129,11 +129,26 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	}
 
 	public int getNationalOptionCharSubset() {
-		int r = 0; // default
-		if (linesList[0] != null) {
+		int r = 0; // sane default
+		
+		/* check for page enhancement data first. if X/28/0 is available, use
+		 * that, otherwise check for M/29/0 which contains the same data, but
+		 * magazine-wide. */
+		TxtDataField pageEnhancement = (packetx_28[0] != null)
+				? packetx_28[0]
+				: getMagazine().getPageEnhanceMentDataPackes(0);
+		if(pageEnhancement != null)
+		{
+			/* the national option selection data is contained in bits 14-8 of
+			 * triplet 1. */
+			r = ((pageEnhancement.getTripletList().get(0).getVal() & 0x3F80) >>> 7);
+		}
+		else if(linesList[0] != null) {
+			/* if we have no page enhancement data, revert to the data available
+			 * in the page's header. this only gives us the last 3 bits of the
+			 * selection bits. */
 			r = linesList[0].getNationalOptionCharacterSubset();
 		}
-
 		return r;
 	}
 
@@ -949,7 +964,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						final int nocs = getNationalOptionCharSubset();
 						// all chars 0x20..7F
 						if ((effectFlags & (MOSAIC_GRAPHICS)) == 0) { // not in block graphics
-							targetChar1 = getNationalOptionChar(ch, nocs);
+							targetChar1 = TxtTriplet.getNationalOptionChar(ch, nocs);
 						} else { // block graphices, not translated for special national characters
 							targetChar1 = (char) ch;
 							if ((ch & 0x20) != 0) {
@@ -1095,63 +1110,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				}
 			}
 		}
-	}
-
-	/**
-	 * @param ch
-	 * @param nocs
-	 * @return
-	 */
-	private static char getNationalOptionChar(final byte ch, final int nocs) {
-		char targetChar1;
-		switch (ch) // special national characters
-		{
-		case 0x23:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][0];
-			break;
-		case 0x24:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][1];
-			break;
-		case 0x40:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][2];
-			break;
-		case 0x5b:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][3];
-			break;
-		case 0x5c:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][4];
-			break;
-		case 0x5d:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][5];
-			break;
-		case 0x5e:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][6];
-			break;
-		case 0x5f:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][7];
-			break;
-		case 0x60:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][8];
-			break;
-		case 0x7b:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][9];
-			break;
-		case 0x7c:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][10];
-			break;
-		case 0x7d:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][11];
-			break;
-		case 0x7e:
-			targetChar1 = (char) TxtTriplet.national_subsets[nocs][12];
-			break;
-		case 0x7f:
-			targetChar1 = (char) 0x25A0;
-			break;
-		default:
-			targetChar1 = (char) ch;
-		}
-		return targetChar1;
 	}
 
 	/**
