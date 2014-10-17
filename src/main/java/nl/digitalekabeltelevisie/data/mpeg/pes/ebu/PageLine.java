@@ -36,55 +36,7 @@ public class PageLine extends TxtDataField implements TreeNode{
 				buf.append("&amp;");
 			}else if((ch>32)&&(ch<127)){  // national option charset subset
 				final int nocs= pageHandler.getNationalOptionCharSubset();
-				// all chars 0x20..7F
-				switch (ch)  // special national characters
-				{
-				case 0x23:
-					buf.append((char)TxtTriplet.national_subsets[nocs][0]);
-					break;
-				case 0x24:
-					buf.append((char)TxtTriplet.national_subsets[nocs][1]);
-					break;
-				case 0x40:
-					buf.append((char)TxtTriplet.national_subsets[nocs][2]);
-					break;
-				case 0x5b:
-					buf.append((char)TxtTriplet.national_subsets[nocs][3]);
-					break;
-				case 0x5c:
-					buf.append((char)TxtTriplet.national_subsets[nocs][4]);
-					break;
-				case 0x5d:
-					buf.append((char)TxtTriplet.national_subsets[nocs][5]);
-					break;
-				case 0x5e:
-					buf.append((char)TxtTriplet.national_subsets[nocs][6]);
-					break;
-				case 0x5f:
-					buf.append((char)TxtTriplet.national_subsets[nocs][7]);
-					break;
-				case 0x60:
-					buf.append((char)TxtTriplet.national_subsets[nocs][8]);
-					break;
-				case 0x7b:
-					buf.append((char)TxtTriplet.national_subsets[nocs][9]);
-					break;
-				case 0x7c:
-					buf.append((char)TxtTriplet.national_subsets[nocs][10]);
-					break;
-				case 0x7d:
-					buf.append((char)TxtTriplet.national_subsets[nocs][11]);
-					break;
-				case 0x7e:
-					buf.append((char)TxtTriplet.national_subsets[nocs][12]);
-					break;
-				case 0x7f:
-					buf.append(0x25a0);
-					break;
-				default:
-					buf.append((char)ch);
-				}
-
+				buf.append(TxtTriplet.getNationalOptionChar(ch, nocs));
 			}else if((ch>=0)&&(ch<=7)){ //12.2 Spacing attributes
 				fg=getHTMLColorString(ch);
 				buf.append("</span><span style=\"background-color: ").append(bg).append("; color: ").append(fg).append(";\">&nbsp;");
