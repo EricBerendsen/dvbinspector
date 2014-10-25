@@ -29,6 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -58,10 +59,7 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 	public BarChart(final TransportStream transportStream, final ViewContext viewContext) {
 
 		super(null);
-
-		if (transportStream != null) {
-			setTransportStream(transportStream, viewContext);
-		}
+		setTransportStream(transportStream, viewContext);
 	}
 
 	/* (non-Javadoc)
@@ -145,6 +143,8 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 			setChart(freeChart);
 		}else{ // transportstream == null
 			freeChart = null;
+			setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
+
 		}
 	}
 

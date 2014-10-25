@@ -63,6 +63,21 @@ public class TSPacket implements HTMLSource, TreeNode{
 	final private static Color PES_HEADER_COLOR = new Color(0x800000);
 	final private TransportStream transportStream;
 
+	private PesHeader pesHeader = null;
+
+	synchronized public PesHeader getPesHeader(){
+		if(pesHeader==null){
+			if(hasPayload()&&isPayloadUnitStartIndicator()){
+				int payloadStart = 4;
+				if(hasAdaptationField()){
+					payloadStart = 5+getAdaptationField().getAdaptation_field_length();
+				}
+				pesHeader = new PesHeader(buffer, payloadStart);
+			}
+		}
+		return pesHeader;
+	}
+
 	/**
 	 * @param buf bytes forming tspacket, should be 188 long
 	 * @param no position number of this packet in the stream
@@ -242,14 +257,18 @@ public class TSPacket implements HTMLSource, TreeNode{
 			if(adaptationField!=null){
 				payloadStart = 5+adaptationField.getAdaptation_field_length();
 			}
-			if(getPayloadUnitStartIndicator()==1){
-				final PesHeader pesHeaderView = new PesHeader(buffer, payloadStart);
+			if((getPayloadUnitStartIndicator()==1)&&(getTransportScramblingControl()==0)){
+				final PesHeader pesHeaderView = getPesHeader();
 				if(pesHeaderView.isValidPesHeader()){
 					final DefaultMutableTreeNode treeNode = pesHeaderView.getJTreeNode(0);
 					appendHeader(s, "Pes Header:", PES_HEADER_COLOR);
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					s.append("</span>");
-					coloring.put(payloadStart, payloadStart+8+pesHeaderView.getPes_header_data_length(), PES_HEADER_COLOR);
+					if(pesHeaderView.hasExtendedHeader()){
+						coloring.put(payloadStart, payloadStart+8+pesHeaderView.getPes_header_data_length(), PES_HEADER_COLOR);
+					}else{
+						coloring.put(payloadStart, payloadStart+5, PES_HEADER_COLOR);
+					}
 				}
 			}
 		}
@@ -337,8 +356,8 @@ public class TSPacket implements HTMLSource, TreeNode{
 				payloadStart = 5+adaptationField.getAdaptation_field_length();
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("data_byte",buffer,payloadStart ,PAYLOAD_PACKET_LENGTH - payloadStart, null)));
-			if(getPayloadUnitStartIndicator()==1){
-				final PesHeader pesHeaderView = new PesHeader(buffer, payloadStart);
+			if((getPayloadUnitStartIndicator()==1)&&(getTransportScramblingControl()==0)){
+				final PesHeader pesHeaderView = getPesHeader();
 				if(pesHeaderView.isValidPesHeader()){
 					t.add(pesHeaderView.getJTreeNode(modus));
 				}

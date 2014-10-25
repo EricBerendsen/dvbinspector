@@ -240,7 +240,7 @@ public class PesPacketData  implements TreeNode{
 	public DefaultMutableTreeNode getJTreeNode(final int modus, final KVP titleKVP) {
 
 		final PesHeader phv = getPesHeader();
-		if(showPtsModus(modus)){
+		if(showPtsModus(modus)&&phv.isValidPesHeader()&&phv.hasExtendedHeader()){
 			final int pts_dts_flags = phv.getPts_dts_flags();
 			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
 				titleKVP.appendLabel(" [pts="+ printTimebase90kHz(phv.getPts())+"]");

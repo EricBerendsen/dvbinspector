@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,6 +28,7 @@ package nl.digitalekabeltelevisie.main;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,6 +77,7 @@ import nl.digitalekabeltelevisie.gui.GridView;
 import nl.digitalekabeltelevisie.gui.PIDDialog;
 import nl.digitalekabeltelevisie.gui.PIDDialogOpenAction;
 import nl.digitalekabeltelevisie.gui.SetPrivateDataSpecifierAction;
+import nl.digitalekabeltelevisie.gui.TimeStampChart;
 import nl.digitalekabeltelevisie.gui.ToggleViewAction;
 import nl.digitalekabeltelevisie.gui.TransportStreamView;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
@@ -91,7 +93,7 @@ import org.jfree.chart.plot.DefaultDrawingSupplier;
  */
 public class DVBinspector implements ChangeListener, ActionListener{
 
-	private static final Logger logger = Logger.getLogger(DVBinspector.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DVBinspector.class.getName());
 
 
 	/**
@@ -117,23 +119,19 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 	private final List<TransportStreamView> views = new ArrayList<TransportStreamView>();
 	private DVBtree treeView;
+	private TimeStampChart timeStampChart;
 	private BitRateChart bitRateView;
 	private BarChart barChart;
 	private GridView gridView;
-	private EITView eitView;
-	private final JFileChooser fc = new JFileChooser();
 	private JTabbedPane tabbedPane;
-//	private JMenuItem exportMenuItem;
 	private JMenu viewTreeMenu;
 	private JMenu viewMenu;
-	private JMenu settingsMenu;
-	private final JDialog aboutDialog = new JDialog();
 	private PIDDialog pidDialog = null;
 
 	private long defaultPrivateDataSpecifier = 0;
 	private boolean enableTSPackets = false;
 
-	private ViewContext viewContest = new ViewContext();
+	private ViewContext viewContext = new ViewContext();
 
 	private int modus;
 
@@ -171,11 +169,11 @@ public class DVBinspector implements ChangeListener, ActionListener{
 				inspector.transportStream.parseStream();
 				if(args.length>=2){
 
-					PID[] pids = ts.getPids();
-			        Map<Integer, GeneralPesHandler> pesHandlerMap = new HashMap<Integer, GeneralPesHandler>();
+					final PID[] pids = ts.getPids();
+					final Map<Integer, GeneralPesHandler> pesHandlerMap = new HashMap<Integer, GeneralPesHandler>();
 					for (int i = 1; i < args.length; i++) {
-						int pid=Integer.parseInt(args[i]);
-						PID p= pids[pid];
+						final int pid=Integer.parseInt(args[i]);
+						final PID p= pids[pid];
 			            if (p != null) {
 			                pesHandlerMap.put(Integer.valueOf(p.getPid()), p.getPesHandler());
 			            }
@@ -183,9 +181,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			        ts.parseStream(null,pesHandlerMap);
 				}
 			} catch (final NotAnMPEGFileException e) {
-				logger.log(Level.WARNING, "error determining packetsize transportStream", e);
+				LOGGER.log(Level.WARNING, "error determining packetsize transportStream", e);
 			} catch (final IOException e) {
-				logger.log(Level.WARNING, "error parsing transportStream", e);
+				LOGGER.log(Level.WARNING, "error parsing transportStream", e);
 			}
 		}
 		inspector.run();
@@ -221,7 +219,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e)
 		{
-			logger.warning("Couldn't use system look and feel.");
+			LOGGER.warning("Couldn't use system look and feel.");
 		}
 
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
@@ -233,120 +231,101 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
 			 */
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosing(final WindowEvent e) {
 				saveWindowState();
 				super.windowClosing(e);
 			}
 		});
-		pidDialog= new PIDDialog(frame,viewContest,this);
+		pidDialog= new PIDDialog(frame,viewContext,this);
 		updatePIDLists(tStream,pidDialog);
 
 		tabbedPane = new JTabbedPane();
-
 		treeView = new DVBtree(tStream,modus);
 		tabbedPane.addTab("Tree", treeView);
 		views.add(treeView);
 
-		eitView = new EITView(tStream,viewContest);
+		final EITView eitView = new EITView(tStream,viewContext);
 		tabbedPane.addTab("EIT View", eitView);
 		views.add(eitView);
 
-		bitRateView = new BitRateChart(tStream,viewContest);
+		bitRateView = new BitRateChart(tStream,viewContext);
 		tabbedPane.addTab("BitRate View", bitRateView);
 		views.add(bitRateView);
 
-		barChart = new BarChart(tStream,viewContest);
+		barChart = new BarChart(tStream,viewContext);
 		tabbedPane.addTab("Bar View", barChart);
 		views.add(barChart);
 
-		gridView = new GridView(tStream,viewContest);
+		gridView = new GridView(tStream,viewContext);
 		tabbedPane.addTab("Grid View", gridView);
 		views.add(gridView);
 
-
+		timeStampChart = new TimeStampChart(tStream, viewContext);
+		tabbedPane.addTab("PCR/PTS/DTS View", timeStampChart);
+		views.add(timeStampChart);
 
 		tabbedPane.validate();
-
 		tabbedPane.addChangeListener(this);
-
 		frame.add(tabbedPane);
-		//Add content to the window.
 
-		JMenuBar menuBar;
-		JMenu fileMenu;
-		JMenu helpMenu;
-		JMenu privateDataSubMenu;
-		JMenuItem openMenuItem;
+		frame.setJMenuBar(createMenuBar(modus));
+		enableViewMenus();
 
-		JMenuItem exitMenuItem;
-		JMenuItem filterItem;
+		final Image image = Utils.readIconImage("magnifying_glass.bmp");
+		frame.setIconImage(image);
 
-		menuBar = new JMenuBar();
-		fileMenu =new JMenu("File");
-		menuBar.add(fileMenu);
-		openMenuItem = new JMenuItem("Open",
-				KeyEvent.VK_O);
+		frame.setBounds(calculateBounds(Preferences.userNodeForPackage(DVBinspector.class)));
 
-//		exportMenuItem = new JMenuItem("Export as HTML");
-//		exportMenuItem.setEnabled(false);
-		exitMenuItem = new JMenuItem("Exit");
+		frame.setVisible(true);
+	}
 
-		viewTreeMenu =new JMenu("Tree View");
+	/**
+	 * @param modus
+	 * @return
+	 */
+	private JMenuBar createMenuBar(final int modus) {
+		final JMenuBar menuBar = new JMenuBar();
+
+		menuBar.add(createFileMenu());
+
+		viewTreeMenu = createViewTreeMenu(modus);
 		menuBar.add(viewTreeMenu);
 
-		viewMenu =new JMenu("View");
+		viewMenu = createViewMenu();
 		menuBar.add(viewMenu);
 
-		settingsMenu =new JMenu("Settings");
-		menuBar.add(settingsMenu);
+		menuBar.add(createSettingsMenu());
+		menuBar.add(createHelpMenu());
+		return menuBar;
+	}
 
-		helpMenu =new JMenu("Help");
-		menuBar.add(helpMenu);
-		JMenuItem aboutMenuItem;
-		aboutMenuItem = new JMenuItem("About...");
+	/**
+	 * @param prefs
+	 * @return
+	 */
+	private Rectangle calculateBounds(final Preferences prefs) {
 
+		int x = Math.max(0, prefs.getInt(DVBinspector.WINDOW_X, 10));
+		int y = Math.max(0, prefs.getInt(DVBinspector.WINDOW_Y, 10));
 
-		final Action aboutAction= new AboutAction(aboutDialog, frame,this);
-		aboutMenuItem.addActionListener(aboutAction);
-		helpMenu.add(aboutMenuItem);
+		// if last used on larger screen, it might open too large, or out of range
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		final int screenWidth = (int) screenSize.getWidth();
+		final int screenHeight = (int) screenSize.getHeight();
 
-		final JCheckBoxMenuItem simpleViewMenu = new JCheckBoxMenuItem("Simple Tree View");
-		simpleViewMenu.setSelected((modus&DVBtree.SIMPLE_MODUS)!=0);
-		final Action simpleViewAction= new ToggleViewAction(this, DVBtree.SIMPLE_MODUS);
-		simpleViewMenu.addActionListener(simpleViewAction);
-		viewTreeMenu.add(simpleViewMenu);
+		x = Math.min(screenWidth-200, x); // at least 200 pix visible
+		y = Math.min(screenHeight-200, y); // at least 200 pix visible
+		final int w = Math.min(screenWidth, prefs.getInt(DVBinspector.WINDOW_WIDTH, 980));
+		final int h = Math.min(screenHeight, prefs.getInt(DVBinspector.WINDOW_HEIGHT, 700));
+		return new Rectangle(x,y,w,h);
+	}
 
-		final JCheckBoxMenuItem psiViewMenu = new JCheckBoxMenuItem("PSI Only");
-		psiViewMenu.setSelected((modus&DVBtree.PSI_ONLY_MODUS)!=0);
-		final Action psiOnlyViewAction= new ToggleViewAction(this, DVBtree.PSI_ONLY_MODUS);
-		psiViewMenu.addActionListener(psiOnlyViewAction);
-		viewTreeMenu.add(psiViewMenu);
-
-		final JCheckBoxMenuItem packetViewMenu = new JCheckBoxMenuItem("Packet Count");
-		packetViewMenu.setSelected((modus&DVBtree.PACKET_MODUS)!=0);
-		final Action packetViewAction= new ToggleViewAction(this, DVBtree.PACKET_MODUS);
-		packetViewMenu.addActionListener(packetViewAction);
-		viewTreeMenu.add(packetViewMenu);
-
-		final JCheckBoxMenuItem countListViewMenu = new JCheckBoxMenuItem("Number List Items");
-		countListViewMenu.setSelected((modus&DVBtree.COUNT_LIST_ITEMS_MODUS)!=0);
-		final Action countListViewAction= new ToggleViewAction(this, DVBtree.COUNT_LIST_ITEMS_MODUS);
-		countListViewMenu.addActionListener(countListViewAction);
-		viewTreeMenu.add(countListViewMenu);
-
-		final JCheckBoxMenuItem showPtsViewMenu = new JCheckBoxMenuItem("Show PTS on PES Packets");
-		showPtsViewMenu.setSelected((modus&DVBtree.SHOW_PTS_MODUS)!=0);
-		final Action showPtsViewAction= new ToggleViewAction(this, DVBtree.SHOW_PTS_MODUS);
-		showPtsViewMenu.addActionListener(showPtsViewAction);
-		viewTreeMenu.add(showPtsViewMenu);
-
-		final JCheckBoxMenuItem showVersionNumberMenu = new JCheckBoxMenuItem("Show version_number on Table Sections");
-		showVersionNumberMenu.setSelected((modus&DVBtree.SHOW_VERSION_MODUS)!=0);
-		final Action showVersionNumberAction= new ToggleViewAction(this, DVBtree.SHOW_VERSION_MODUS);
-		showVersionNumberMenu.addActionListener(showVersionNumberAction);
-		viewTreeMenu.add(showVersionNumberMenu);
-
-		privateDataSubMenu = new JMenu("Private Data Specifier Default");
+	/**
+	 * @return
+	 */
+	private JMenu createSettingsMenu() {
+		final JMenu settingsMenu =new JMenu("Settings");
+		final JMenu privateDataSubMenu = new JMenu("Private Data Specifier Default");
 		final ButtonGroup group = new ButtonGroup();
 
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x00, "none",defaultPrivateDataSpecifier);
@@ -364,9 +343,77 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final Action enableTSPacketsAction= new EnableTSPacketsAction(this);
 		enableTSPacketsMenu.addActionListener(enableTSPacketsAction);
 		settingsMenu.add(enableTSPacketsMenu);
+		return settingsMenu;
+	}
 
+	/**
+	 * @return
+	 */
+	private JMenu createViewMenu() {
+		final JMenu viewMenu =new JMenu("View");
+		final JMenuItem filterItem = new JMenuItem("Filter");
+		viewMenu.add(filterItem);
+		final Action pidOpenAction = new PIDDialogOpenAction(pidDialog,frame,this);
+		filterItem.addActionListener(pidOpenAction);
+		viewMenu.add(filterItem);
+		return viewMenu;
+	}
 
-		final Action fileOpenAction= new FileOpenAction(fc,frame,this);
+	/**
+	 * @return
+	 */
+	private JMenu createHelpMenu() {
+		final JMenu helpMenu =new JMenu("Help");
+		JMenuItem aboutMenuItem;
+		aboutMenuItem = new JMenuItem("About...");
+		final Action aboutAction= new AboutAction(new JDialog(), frame,this);
+		aboutMenuItem.addActionListener(aboutAction);
+		helpMenu.add(aboutMenuItem);
+		return helpMenu;
+	}
+
+	/**
+	 * @param modus
+	 */
+	private JMenu createViewTreeMenu(final int modus) {
+		final JMenu viewTreeMenu =new JMenu("Tree View");
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Simple Tree View", DVBtree.SIMPLE_MODUS));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "PSI Only",DVBtree.PSI_ONLY_MODUS));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Packet Count",DVBtree.PACKET_MODUS));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Number List Items",DVBtree.COUNT_LIST_ITEMS_MODUS));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show PTS on PES Packets",DVBtree.SHOW_PTS_MODUS));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show version_number on Table Sections",DVBtree.SHOW_VERSION_MODUS));
+
+		return viewTreeMenu;
+	}
+
+	/**
+	 * @param modus
+	 * @param label
+	 * @param modusBit
+	 * @return
+	 */
+	private JCheckBoxMenuItem createCheckBoxMenuItem(final int modus, final String label, final int modusBit) {
+		final JCheckBoxMenuItem viewMenu = new JCheckBoxMenuItem(label);
+		viewMenu.setSelected((modus&modusBit)!=0);
+		final Action viewAction= new ToggleViewAction(this, modusBit);
+		viewMenu.addActionListener(viewAction);
+		return viewMenu;
+	}
+
+	/**
+	 * @return
+	 */
+	private JMenu createFileMenu() {
+		final JMenu fileMenu =new JMenu("File");
+		final JMenuItem openMenuItem = new JMenuItem("Open",
+				KeyEvent.VK_O);
+
+//		exportMenuItem = new JMenuItem("Export as HTML");
+//		exportMenuItem.setEnabled(false);
+		final JMenuItem exitMenuItem = new JMenuItem("Exit");
+
+		final Action fileOpenAction= new FileOpenAction(new JFileChooser(),frame,this);
 		openMenuItem.addActionListener(fileOpenAction);
 		fileMenu.add(openMenuItem);
 
@@ -376,44 +423,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 		exitMenuItem.addActionListener(this);
 		fileMenu.add(exitMenuItem);
-
-		filterItem = new JMenuItem("Filter");
-		viewMenu.add(filterItem);
-		final Action pidOpenAction = new PIDDialogOpenAction(pidDialog,frame,this);
-		filterItem.addActionListener(pidOpenAction);
-		viewMenu.add(filterItem);
-
-		frame.setJMenuBar(menuBar);
-
-		enableViewMenus();
-
-		final Image image = Utils.readIconImage("magnifying_glass.bmp");
-		frame.setIconImage(image);
-
-		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
-		int w  = prefs.getInt(DVBinspector.WINDOW_WIDTH, 980);
-		int h  = prefs.getInt(DVBinspector.WINDOW_HEIGHT, 700);
-		int x  = prefs.getInt(DVBinspector.WINDOW_X, 10);
-		int y  = prefs.getInt(DVBinspector.WINDOW_Y, 10);
-
-		// if last used on larger screen, it might open too large, or out of range
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		int screenWidth = (int) screenSize.getWidth();
-		int screenHeight = (int) screenSize.getHeight();
-
-		// if it was moved out of view to the left, move back into view
-		x = Math.max(0, x);
-		y = Math.max(0, y);
-
-		x = Math.min(screenWidth-200, x); // at least 200 pix visible
-		y = Math.min(screenHeight-200, y); // at least 200 pix visible
-		w = Math.min(screenWidth, w);
-		h = Math.min(screenHeight, h);
-
-		//Display the window.
-		frame.setBounds(x,y,w,h);
-
-		frame.setVisible(true);
+		return fileMenu;
 	}
 
 
@@ -454,7 +464,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		}
 
 		for(final TransportStreamView v: views) {
-			v.setTransportStream(transportStream,viewContest);
+			v.setTransportStream(transportStream,viewContext);
 		}
 		enableViewMenus();
 
@@ -484,7 +494,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		if(tStream!=null){
 			final short[] used_pids=tStream.getUsedPids();
 			for (int i = 0; i < used_pids.length; i++) {
-				used.add(new ChartLabel(used_pids[i]+" - "+transportStream.getShortLabel(used_pids[i]),used_pids[i], DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE[i%DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE.length]));
+				final short actualPid = used_pids[i];
+				used.add(new ChartLabel(actualPid+" - "+transportStream.getShortLabel(actualPid),actualPid, DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE[i%DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE.length]));
 			}
 			viewConfig.setStartPacket(0);
 			viewConfig.setEndPacket(tStream.getNo_packets());
@@ -494,7 +505,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		viewConfig.setShown(used);
 		viewConfig.setNotShown(notUsed);
 		viewConfig.setTransportStream(tStream);
-		viewContest = viewConfig;
+		viewContext = viewConfig;
 		pDialog.setConfig(viewConfig);
 	}
 
@@ -505,11 +516,12 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param vContext
 	 */
 	public void setPIDList(final ViewContext vContext){
-		viewContest = vContext;
+		viewContext = vContext;
 		if(transportStream!=null){
 			bitRateView.setTransportStream(transportStream, vContext);
 			barChart.setTransportStream(transportStream, vContext);
 			gridView.setTransportStream(transportStream, vContext);
+			timeStampChart.setTransportStream(transportStream, vContext);
 			//ignore eitView on this, because it always uses only one PID.
 		}
 	}
@@ -565,7 +577,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * called when "exit" is selected in menu.
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 		saveWindowState();
 		System.exit(0);
 	}
@@ -578,7 +590,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		return modus;
 	}
 
-	public void setModus(int modus) {
+	public void setModus(final int modus) {
 		this.modus = modus;
 	}
 
@@ -586,7 +598,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		return enableTSPackets;
 	}
 
-	public void setEnableTSPackets(boolean enableTSPackets) {
+	public void setEnableTSPackets(final boolean enableTSPackets) {
 		this.enableTSPackets = enableTSPackets;
 	}
 
