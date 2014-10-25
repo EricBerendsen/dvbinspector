@@ -73,14 +73,7 @@ public class PesHeader implements HTMLSource, TreeNode{
 		final int stream_id = getStreamID();
 		t.add(new DefaultMutableTreeNode(new KVP("stream_id",getStreamID(),PesHeader.getStreamIDDescription(getStreamID()))));
 		t.add(new DefaultMutableTreeNode(new KVP("PES_packet_length",getPesPacketLength(),null)));
-		if((stream_id != PesPacketData.program_stream_map)
-				&& (stream_id != PesPacketData.padding_stream)
-				&& (stream_id != PesPacketData.private_stream_2)
-				&& (stream_id != PesPacketData.ECM_stream)
-				&& (stream_id != PesPacketData.EMM_stream)
-				&& (stream_id != PesPacketData.program_stream_directory)
-				&& (stream_id != PesPacketData.DSMCC_stream)
-				&& (stream_id != PesPacketData.ITU_T_Rec_H_222_1typeE)){
+		if(hasExtendedHeader(stream_id)){
 
 			t.add(new DefaultMutableTreeNode(new KVP("markerBits",getMarkerBits(),null)));
 			t.add(new DefaultMutableTreeNode(new KVP("pes_scrambling_control",getPes_scrambling_control(),getPes_scrambling_control()==0?"Not scrambled":"User-defined")));
@@ -109,6 +102,25 @@ public class PesHeader implements HTMLSource, TreeNode{
 		}
 	}
 
+	/**
+	 * @param stream_id
+	 * @return
+	 */
+	public boolean hasExtendedHeader(final int stream_id) {
+		return (stream_id != PesPacketData.program_stream_map)
+				&& (stream_id != PesPacketData.padding_stream)
+				&& (stream_id != PesPacketData.private_stream_2)
+				&& (stream_id != PesPacketData.ECM_stream)
+				&& (stream_id != PesPacketData.EMM_stream)
+				&& (stream_id != PesPacketData.program_stream_directory)
+				&& (stream_id != PesPacketData.DSMCC_stream)
+				&& (stream_id != PesPacketData.ITU_T_Rec_H_222_1typeE);
+	}
+
+
+	public boolean hasExtendedHeader(){
+		return hasExtendedHeader(getStreamID());
+	}
 	/**
 	 * @return
 	 */
@@ -251,21 +263,21 @@ public class PesHeader implements HTMLSource, TreeNode{
 			return "PTS fields shall be present in the PES packet header";
 		case 3:
 			return "both the PTS fields and DTS fields shall be present in the PES packet header";
-	
+
 		default:
 			return "illegal value (program error)";
 		}
 	}
 
 	public static String getStreamIDDescription(final int streamId){
-	
+
 		if((0xC0<=streamId)&&(streamId<0xE0)){
 			return "ISO/IEC 13818-3 or ISO/IEC 11172-3 or ISO/IEC 13818-7 or ISO/IEC 14496-3 audio stream number "+ Integer.toHexString(streamId & 0x1F);
 		}
 		if((0xE0<=streamId)&&(streamId<0xF0)){
 			return "ITU-T Rec. H.262 | ISO/IEC 13818-2 or ISO/IEC 11172-2 or ISO/IEC 14496-2 video stream number "+ Integer.toHexString(streamId & 0x0F);
 		}
-	
+
 		switch (streamId) {
 		case 0xBC :return "program_stream_map";
 		case 0xBD :return "private_stream_1";
@@ -287,13 +299,13 @@ public class PesHeader implements HTMLSource, TreeNode{
 		case 0xFC :return "metadata stream";
 		case 0xFD :return "extended_stream_id";
 		case 0xFE :return "reserved data stream";
-	
+
 		case 0xFF :return "program_stream_directory";
 		default:
 			return "??";
 		}
-	
-	
+
+
 	}
 
 

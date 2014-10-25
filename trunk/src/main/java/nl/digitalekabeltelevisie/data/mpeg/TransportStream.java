@@ -158,7 +158,7 @@ public class TransportStream implements TreeNode{
 
 	private int packetLenghth = 188;
 
-	private int [] allowedPacketLengths = {188,192,204,208};
+	private static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
 
 
 	/**
@@ -190,9 +190,9 @@ public class TransportStream implements TreeNode{
 	 * @param file
 	 * @return
 	 */
-	private int determineActualPacketLength(File file) throws NotAnMPEGFileException,IOException{
-		RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-		for(int possiblePacketLength:allowedPacketLengths){
+	private int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
+		final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+		for(int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
 			logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
 
 			if(usesPacketLength(possiblePacketLength, randomAccessFile)){
@@ -212,7 +212,7 @@ public class TransportStream implements TreeNode{
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean usesPacketLength(int possiblePacketLength, RandomAccessFile randomAccessFile) throws IOException {
+	private boolean usesPacketLength(final int possiblePacketLength, final RandomAccessFile randomAccessFile) throws IOException {
 		int startPos = 0;
 		do{
 			logger.log(Level.INFO, "starting at position {0}",startPos);
@@ -252,7 +252,7 @@ public class TransportStream implements TreeNode{
 	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
 	 * @throws IOException
 	 */
-	public void parseStream(java.awt.Component component) throws IOException {
+	public void parseStream(final java.awt.Component component) throws IOException {
 		final PositionPushbackInputStream fileStream = getInputStream(component);
 		final byte [] buf = new byte[packetLenghth];
 		long count=0;
@@ -271,7 +271,7 @@ public class TransportStream implements TreeNode{
 
 		int bytes_read =0;
 		do {
-			long offset = fileStream.getPosition();
+			final long offset = fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, packetLenghth);
 			final int next = fileStream.read();
 			if((bytes_read==packetLenghth)&&
@@ -333,7 +333,7 @@ public class TransportStream implements TreeNode{
 	 *
 	 * @throws IOException
 	 */
-	public void parseStream(java.awt.Component component, final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
+	public void parseStream(final java.awt.Component component, final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
@@ -382,7 +382,7 @@ public class TransportStream implements TreeNode{
 
 	private PositionPushbackInputStream getInputStream(java.awt.Component component) throws IOException{
 		final InputStream is = new FileInputStream(file);
-		long expectedSize=file.length();
+		final long expectedSize=file.length();
 		if(component==null){
 			return new PositionPushbackInputStream(new BufferedInputStream(is),200);
 		}else{
@@ -464,7 +464,7 @@ public class TransportStream implements TreeNode{
 		}
 
 		if((packet_offset!=null)&&!psiOnlyModus(modus)){
-			JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
+			final JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 		}
 
@@ -849,7 +849,7 @@ public class TransportStream implements TreeNode{
 						if(pids[PCR_pid].getShortLabel()==null){
 							pids[PCR_pid].setShortLabel(pcrShortLabel);
 						}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
-							pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
+							//pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
 						}else{
 							pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
 						}
@@ -966,7 +966,12 @@ public class TransportStream implements TreeNode{
 		return pids[pid].getLabel();
 	}
 	public String getShortLabel(final short pid){
-		return pids[pid].getShortLabel();
+		if(pids[pid]!=null){
+			return pids[pid].getShortLabel();
+		}else{
+			return null;
+		}
+
 	}
 
 	/**
@@ -1074,9 +1079,9 @@ public class TransportStream implements TreeNode{
 		if(packet_offset!=null){
 			if(packet_offset.length>packetNo){
 				try {
-					RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+					final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
 					randomAccessFile.seek(packet_offset[packetNo]);
-					byte [] buf = new byte[packetLenghth];
+					final byte [] buf = new byte[packetLenghth];
 					int l = randomAccessFile.read(buf);
 					if(l==packetLenghth){
 						packet = new TSPacket(buf, packetNo,this);
@@ -1101,6 +1106,51 @@ public class TransportStream implements TreeNode{
 		return packet;
 	}
 
+
+	public Iterator<TSPacket> getTSPacketsIterator(final int pid, final int flags){
+		return  getTSPacketsIterator(pid, flags, 0, getNo_packets());
+	}
+
+	public Iterator<TSPacket> getTSPacketsIterator(final int pid, final int flags, final int start, final int end){
+
+		Iterator<TSPacket> iter = new Iterator<TSPacket>(){
+
+			int pos = findNext(start-1);
+
+			private int findNext(final int pos){
+				int p = pos+1;
+				while((p<end)&&(!match(p))){
+					p++;
+				}
+				return p;
+
+			}
+
+			private boolean match(int p) {
+				return (packet_pid[p]&(0x1fff | flags))==( pid | flags) ;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return pos<end;
+			}
+
+			@Override
+			public TSPacket next() {
+				TSPacket packet = getTSPacket(pos);
+				pos = findNext(pos);
+				return packet;
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+
+		};
+		return iter;
+
+	}
 
 	public boolean isEnableTSPackets() {
 		return enableTSPackets;

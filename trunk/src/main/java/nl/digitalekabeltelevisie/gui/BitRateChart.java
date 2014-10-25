@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -42,6 +42,7 @@ import javax.swing.JRadioButton;
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -119,6 +120,11 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		add(buttonPanel,BorderLayout.PAGE_START);
 
 		chartPanel = new ChartPanel(null);
+		// see http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=28118
+		// Bug in ChartPanel.setMouseWheelEnabled in jfreechart 1.0.13
+		chartPanel.isMouseWheelEnabled();
+		chartPanel.setMouseWheelEnabled(true);
+
 
 		setTransportStream(transportStream,viewContext);
 		add(chartPanel,BorderLayout.CENTER);
@@ -135,7 +141,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	public final void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
 		if(transportStream==null){
 			freeChart = null;
-			chartPanel.setChart(freeChart);
+			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
 		}else{
 			final int noPIDs=viewContext.getShown().size();
 			final CategoryTableXYDataset categoryTableXYDataset = createDataSet(transportStream, viewContext, noPIDs);
@@ -145,6 +151,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	        freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, legendVisible);
 
 			chartPanel.setChart(freeChart);
+
 			chartPanel.setDomainZoomable(true);
 			chartPanel.setRangeZoomable(true);
 		}
