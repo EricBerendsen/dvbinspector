@@ -77,13 +77,15 @@ public class Video14496PESDataField extends PesPacketData implements TreeNode {
 				}else{ // both not found, use pesLen
 					end = pesDataLen;
 				}
-				try {
-					NALUnit nalUnit = new NALUnit(data,i, end-i);
-					nalUnits.add(nalUnit);
-				} catch (Exception e) {
-					logger.info("Create NALUnit failed: data.length="+data.length+" i="+i+", end="+end);
+				if(end>i){
+					try {
+						NALUnit nalUnit = new NALUnit(data,i, end-i);
+						nalUnits.add(nalUnit);
+					} catch (Exception e) {
+						logger.info("Create NALUnit failed: data.length="+data.length+" i="+i+", end="+end);
+					}
+					i=end;
 				}
-				i=end;
 
 			}
 		}
