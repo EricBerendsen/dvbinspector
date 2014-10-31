@@ -544,7 +544,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		s.append("<br>transport_private_data_flag: ").append(getBooleanAsInt(transport_private_data_flag));
 		s.append("<br>adaptation_field_extension_flag: ").append(getBooleanAsInt(adaptation_field_extension_flag));
 		if(PCR_flag){
-			s.append("<br>PCR: ").append(getHexAndDecimalFormattedString(program_clock_reference.getProgram_clock_reference())).append(" (").append(printPCRTime(program_clock_reference.getProgram_clock_reference())).append(")");
+			s.append("<br>PCR: [base] ").append(getHexAndDecimalFormattedString(program_clock_reference.getProgram_clock_reference_base())).append(" : [extension] ").append(getHexAndDecimalFormattedString(program_clock_reference.getProgram_clock_reference_extension())).append(" (").append(printPCRTime(program_clock_reference.getProgram_clock_reference())).append(")");
 		}
 		if(OPCR_flag){
 			s.append("<br>OPCR: ").append(getHexAndDecimalFormattedString(original_program_clock_reference.getProgram_clock_reference())).append(" (").append(printPCRTime(original_program_clock_reference.getProgram_clock_reference())).append(")");
