@@ -153,12 +153,12 @@ public class KVP{
 	public KVP(final String label, final String value, final String description) {
 		super();
 		this.label = label;
-		if(value!=null){
+		if(value==null){ // just a label
+			this.fieldType = FIELD_TYPE_LABEL;
+		}else{ 
 			this.value = value;
 			this.description = description;
 			this.fieldType = FIELD_TYPE_STRING;
-		}else{ // just a label
-			this.fieldType = FIELD_TYPE_LABEL;
 		}
 	}
 
@@ -264,55 +264,110 @@ public class KVP{
 		StringBuilder b = new StringBuilder(label);
 
 		if ((fieldType != FIELD_TYPE_LABEL)&&(fieldType != FIELD_TYPE_HTML)) {
-			b.append(": ");
-			if (fieldType == FIELD_TYPE_STRING) {
-				b.append(value);
-			} else if (fieldType == FIELD_TYPE_INT) {
-				if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
-					b.append(intValue);
-				} else if (numberFormat == NUMBER_DISPLAY_HEX) {
-					b.append("0x").append(Integer.toHexString(intValue).toUpperCase());
-				} else { // assume both to be safe
-					b.append(getHexAndDecimalFormattedString(intValue));
-				}
-			} else if (fieldType == FIELD_TYPE_LONG) {
-				if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
-					b.append(longValue);
-				} else if (numberFormat == NUMBER_DISPLAY_HEX) {
-					b.append("0x").append(Long.toHexString(longValue).toUpperCase());
-				} else { // assume both to be safe
-					b.append("0x").append(Long.toHexString(longValue).toUpperCase()).append(" (").append(longValue)
-					.append(")");
-				}
-			} else if (fieldType == FIELD_TYPE_BYTES) {
-				if (byteLen == 0) {
-					b.append('-');
-
-				} else {
-					final int showLen=Math.min(byteLen,BYTE_DATA_MAX_LEN);
-					b.append("0x").append(toHexString(byteValue, byteStart, showLen)).append(" \"").append(
-							toSafeString(byteValue, byteStart, showLen)).append("\"");
-				}
-			} else if (fieldType == FIELD_TYPE_DVBSTRING) {// TODO make distinction between plain text, and HTML view,
-				// to support character emphasis on A.1 Control codes ETSI EN 300 468 V1.11.1 (2010-04)
-
-				b.append(dvbStringValue.toString());
-			}
-			if (description != null) {
-				b.append(" => ").append(description);
-			}
+			appendValueAfterLabel(numberFormat, b);
 		}
 		if(fieldType==FIELD_TYPE_HTML){
-			if(stringFormat==STRING_DISPLAY_HTML_AWT){
-				b = new StringBuilder("<html>").append(value).append("</html>");
-			}else if(stringFormat==STRING_DISPLAY_HTML_FRAGMENTS){
-				b = new StringBuilder(value);
-			}
+			b = replacePlainLabelWithHTML(stringFormat);
 		}
 		if (stringFormat == STRING_DISPLAY_JAVASCRIPT) {
 			return  b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
 		} else {
 			return b.toString();
+		}
+	}
+
+	/**
+	 * @param stringFormat
+	 * @param b
+	 * @return
+	 */
+	private StringBuilder replacePlainLabelWithHTML(final byte stringFormat) {
+		if(stringFormat==STRING_DISPLAY_HTML_AWT){
+			return new StringBuilder("<html>").append(value).append("</html>");
+		}else if(stringFormat==STRING_DISPLAY_HTML_FRAGMENTS){
+			return new StringBuilder(value);
+		}
+		return null;
+	}
+
+	/**
+	 * @param numberFormat
+	 * @param b
+	 */
+	private void appendValueAfterLabel(final byte numberFormat, final StringBuilder b) {
+		b.append(": ");
+		if (fieldType == FIELD_TYPE_STRING) {
+			appendString(b);
+		} else if (fieldType == FIELD_TYPE_INT) {
+			appendInteger(numberFormat, b);
+		} else if (fieldType == FIELD_TYPE_LONG) {
+			appendLong(numberFormat, b);
+		} else if (fieldType == FIELD_TYPE_BYTES) {
+			appendHexBytes(b);
+		} else if (fieldType == FIELD_TYPE_DVBSTRING) {
+			appendDVBString(b);
+		}
+		if (description != null) {
+			b.append(" => ").append(description);
+		}
+	}
+
+	/**
+	 * @param b
+	 */
+	private void appendDVBString(final StringBuilder b) {
+		// TODO make distinction between plain text, and HTML view,
+		// to support character emphasis on A.1 Control codes ETSI EN 300 468 V1.11.1 (2010-04)
+		b.append(dvbStringValue.toString());
+	}
+
+	/**
+	 * @param b
+	 */
+	private void appendHexBytes(final StringBuilder b) {
+		if (byteLen == 0) {
+			b.append('-');
+
+		} else {
+			final int showLen=Math.min(byteLen,BYTE_DATA_MAX_LEN);
+			b.append("0x").append(toHexString(byteValue, byteStart, showLen)).append(" \"").append(
+					toSafeString(byteValue, byteStart, showLen)).append("\"");
+		}
+	}
+
+	/**
+	 * @param b
+	 */
+	private void appendString(final StringBuilder b) {
+		b.append(value);
+	}
+
+	/**
+	 * @param numberFormat
+	 * @param b
+	 */
+	private void appendLong(final byte numberFormat, final StringBuilder b) {
+		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
+			b.append(longValue);
+		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
+			b.append("0x").append(Long.toHexString(longValue).toUpperCase());
+		} else { // assume both to be safe
+			b.append("0x").append(Long.toHexString(longValue).toUpperCase()).append(" (").append(longValue)
+			.append(")");
+		}
+	}
+
+	/**
+	 * @param numberFormat
+	 * @param b
+	 */
+	private void appendInteger(final byte numberFormat, final StringBuilder b) {
+		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
+			b.append(intValue);
+		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
+			b.append("0x").append(Integer.toHexString(intValue).toUpperCase());
+		} else { // assume both to be safe
+			b.append(getHexAndDecimalFormattedString(intValue));
 		}
 	}
 
@@ -394,8 +449,6 @@ public class KVP{
 		return owner;
 	}
 
-
-
 	public HTMLSource getHTMLSource(){
 		if(fieldType == FIELD_TYPE_BYTES){
 			return new HTMLSource() {
@@ -403,7 +456,6 @@ public class KVP{
 					return getHTMLHexview(byteValue, byteStart, byteLen);
 				}
 			};
-
 		}else{
 			return htmlSource;
 		}
