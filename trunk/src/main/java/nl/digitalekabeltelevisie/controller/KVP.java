@@ -26,7 +26,10 @@
  */
 package nl.digitalekabeltelevisie.controller;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getHTMLHexview;
+import static nl.digitalekabeltelevisie.util.Utils.getHexAndDecimalFormattedString;
+import static nl.digitalekabeltelevisie.util.Utils.toHexString;
+import static nl.digitalekabeltelevisie.util.Utils.toSafeString;
 
 import javax.swing.JMenuItem;
 
@@ -155,7 +158,7 @@ public class KVP{
 		this.label = label;
 		if(value==null){ // just a label
 			this.fieldType = FIELD_TYPE_LABEL;
-		}else{ 
+		}else{
 			this.value = value;
 			this.description = description;
 			this.fieldType = FIELD_TYPE_STRING;
@@ -452,6 +455,7 @@ public class KVP{
 	public HTMLSource getHTMLSource(){
 		if(fieldType == FIELD_TYPE_BYTES){
 			return new HTMLSource() {
+				@Override
 				public String getHTML() {
 					return getHTMLHexview(byteValue, byteStart, byteLen);
 				}
