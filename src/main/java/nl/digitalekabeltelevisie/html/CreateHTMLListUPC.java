@@ -41,7 +41,7 @@ public class CreateHTMLListUPC implements Runnable{
 	public void run() {
 		try {
 
-			transportStream = new TransportStream("D:\\ts\\upcvorden20131226\\UPC 164000 12-26 10-21-53.ts");
+			transportStream = new TransportStream("D:\\ts\\upc vorden 20141226\\UPC 164000 12-26 11-24-24.ts");
 			transportStream.parseStream();
 		} catch (final Exception e) {
 
@@ -58,7 +58,7 @@ public class CreateHTMLListUPC implements Runnable{
 	private void writeHTML(final TransportStream tStream) {
 
 		try {
-			final FileWriter fstream = new FileWriter("d:\\eric\\upc2013126.html");
+			final FileWriter fstream = new FileWriter("d:\\eric\\upc20141226.html");
 			final BufferedWriter out = new BufferedWriter(fstream);
 
 			out.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head></head>\n");
