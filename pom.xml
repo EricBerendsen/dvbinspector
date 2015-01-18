@@ -6,7 +6,7 @@
 	<groupId>nl.digitalekabeltelevisie</groupId>
 	<artifactId>DVBinspector</artifactId>
 	<packaging>jar</packaging>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>1.4.0</version>
 	<name>DVBinspector</name>
 	
 <properties>
@@ -18,8 +18,6 @@
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
-		
-		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -94,6 +92,15 @@
 					</execution>
 				</executions>
 
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<skipTests>${skipTests}</skipTests>
+				</configuration>
 			</plugin>
 
 		</plugins>
