@@ -55,6 +55,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.RCTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.SITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TOTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -144,8 +145,8 @@ public class PsiSectionData {
 							transportStream.getPsi().getTot().update(new TOTsection(this,parentPID));
 						}else if((pid==0x11) &&((tableId==0x42)||(tableId==0x46))){
 							transportStream.getPsi().getSdt().update(new SDTsection(this,parentPID));
-							//						}else if(pid==0x15){ // network sync
-							//							transportStream.getPsi().getNetworkSync().update(new NetworkSyncSection(this,parentPID));
+						}else if((pid==0x1F) &&(tableId==0x7F)){
+							transportStream.getPsi().getSit().update(new SITsection(this,parentPID));
 						}else if((tableId==0x4c)&&isINTSection(pid)){ // check for linkage descriptors 0x0B located in the NIT  //ETSI EN 301 192 V1.4.2
 							transportStream.getPsi().getInt().update(new INTsection(this,parentPID));
 						}else if((tableId==0x4b)&&isUNTSection(pid)){

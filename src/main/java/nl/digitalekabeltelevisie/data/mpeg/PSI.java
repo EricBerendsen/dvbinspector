@@ -42,6 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PAT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.RCTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDT;
+import nl.digitalekabeltelevisie.data.mpeg.psi.SIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TOT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.UNTs;
@@ -64,6 +65,7 @@ public class PSI {
 	private final EIT eit = new EIT(this);
 	private final TDT tdt = new TDT(this);
 	private final TOT tot = new TOT(this);
+	private final SIT sit = new SIT(this);
 	private final NetworkSync networkSync = new NetworkSync(this);
 	private final INT int_table = new INT(this);
 	private final UNTs unt_table = new UNTs(this);
@@ -86,6 +88,7 @@ public class PSI {
 		t.add(eit.getJTreeNode(modus));
 		t.add(tdt.getJTreeNode(modus));
 		t.add(tot.getJTreeNode(modus));
+		t.add(sit.getJTreeNode(modus));
 		t.add(networkSync.getJTreeNode(modus));
 		t.add(int_table.getJTreeNode(modus));
 		t.add(unt_table.getJTreeNode(modus));
@@ -140,7 +143,7 @@ public class PSI {
 	 * @return the PAT valid at moment of packetNO, i.e. for which all sections have been received,
 	 * and which has not yet been replaced with a complete new PAT. If no complete PAT has been received yet at moment packetNo, the next complete PAT will be returned.
 	 */
-	public PAT getPat(long packetNo) {
+	public PAT getPat(final long packetNo) {
 		if(pat!=null){
 			return pat.getPat(packetNo);
 		}
@@ -148,6 +151,9 @@ public class PSI {
 	}
 	public RCTs getRcts() {
 		return rct_table;
+	}
+	public SIT getSit() {
+		return sit;
 	}
 
 }
