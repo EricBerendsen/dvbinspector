@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -402,6 +402,9 @@ public final class DescriptorFactory {
 		case 0x62:
 			d = new FrequencyListDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x63:
+			d = new PartialTransportStreamDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x64:
 			d = new DataBroadcastDescriptor(data, t + offset, tableSection);
 			break;
@@ -484,7 +487,7 @@ public final class DescriptorFactory {
 			final TableSection tableSection, final int t) {
 
 		ExtensionDescriptor d;
-		int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
+		final int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
 		switch(descriptor_tag_extension){
 
 		case 0x04:
