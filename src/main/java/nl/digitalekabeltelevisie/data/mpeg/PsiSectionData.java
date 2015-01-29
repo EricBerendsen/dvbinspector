@@ -121,55 +121,8 @@ public class PsiSectionData {
 			System.arraycopy(payload, offset+read1, data, noBytes, read2);
 			noBytes+=read2; // now we have read2 bytes more.
 			if(read2==need){
-				// complete SI section, handle it...
-				if(pid==0){
-					transportStream.getPsi().getPat().update(new PATsection(this,parentPID));
-				} else {
-					try {
-
-						final byte tableId = data[0];
-						if((tableId==0x02)&&
-								(transportStream.getPsi().getPat().inPAT(pid))){
-							transportStream.getPsi().getPmts().update(new PMTsection(this,parentPID));
-						}else if((tableId==0x01)&&(pid==0x01)){
-							transportStream.getPsi().getCat().update(new CAsection(this,parentPID));
-						}else if(pid==0x10){  // NIT
-							transportStream.getPsi().getNit().update(new NITsection(this,parentPID));
-						}else if((tableId==0x4A)&&(pid==0x11)){
-							transportStream.getPsi().getBat().update(new BATsection(this,parentPID));
-						}else if((0x4E<=tableId)&&(tableId<=0x6F)&&(pid==0x12)){
-							transportStream.getPsi().getEit().update(new EITsection(this,parentPID));
-						}else if((pid==0x14) &&(tableId==0x70)){
-							transportStream.getPsi().getTdt().update(new TDTsection(this,parentPID));
-						}else if((pid==0x14) &&(tableId==0x73)){
-							transportStream.getPsi().getTot().update(new TOTsection(this,parentPID));
-						}else if((pid==0x11) &&((tableId==0x42)||(tableId==0x46))){
-							transportStream.getPsi().getSdt().update(new SDTsection(this,parentPID));
-						}else if((pid==0x1F) &&(tableId==0x7F)){
-							transportStream.getPsi().getSit().update(new SITsection(this,parentPID));
-						}else if((tableId==0x4c)&&isINTSection(pid)){ // check for linkage descriptors 0x0B located in the NIT  //ETSI EN 301 192 V1.4.2
-							transportStream.getPsi().getInt().update(new INTsection(this,parentPID));
-						}else if((tableId==0x4b)&&isUNTSection(pid)){
-							transportStream.getPsi().getUnts().update(new UNTsection(this,parentPID));
-						}else if((tableId==0x74)&&isAITSection(pid)){
-							transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
-						}else if((tableId==0x76)&&isRCTSection(pid)){
-							transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
-						}else if((tableId>=0x37)&&(tableId<=0x3F)){
-							// also include all PES streams component (ISO/IEC 13818-6 type B) which
-							// do not have a data_broadcast_id_descriptor associated with it,
-							// but do have a Association_tag_descriptor (or a stream_identifier_descriptor)
-							// These might be referenced from DSI in other stream (or even from multiple)
-							// Also, include PMTs to store the stream_identifier_descriptor
-							// all handled in DSMCCs.
-
-
-							transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
-						}
-					} catch (final RuntimeException re) {
-						logger.log(Level.WARNING, "RuntimeException in readBytes PSI data: pid="+pid, re);
-					}
-				}
+				// complete SI section, handle it in PSI
+				updatePSI(pid);
 
 				// now put it in general PID table
 				// when it is not valid an exception will be thrown, caught and ignored. The section will be discarded
@@ -177,17 +130,66 @@ public class PsiSectionData {
 				try {
 					final TableSection psi= new TableSection(this,parentPID);
 					parentPID.getPsi().update(psi);
-
 				} catch (final RuntimeException re) {
 					logger.log(Level.WARNING, "RuntimeException in readBytes PIDs: pid="+pid, re);
 				}
-
 				complete=true;
-
-
 			}
 		}
 		return(read1+read2);
+	}
+
+	/**
+	 * @param pid
+	 */
+	private void updatePSI(final int pid) {
+		try {
+			if(pid==0){
+				transportStream.getPsi().getPat().update(new PATsection(this,parentPID));
+			} else {
+
+				final byte tableId = data[0];
+				if((tableId==0x02)&&
+						(transportStream.getPsi().getPat().inPAT(pid))){
+					transportStream.getPsi().getPmts().update(new PMTsection(this,parentPID));
+				}else if((tableId==0x01)&&(pid==0x01)){
+					transportStream.getPsi().getCat().update(new CAsection(this,parentPID));
+				}else if(pid==0x10){  // NIT
+					transportStream.getPsi().getNit().update(new NITsection(this,parentPID));
+				}else if((tableId==0x4A)&&(pid==0x11)){
+					transportStream.getPsi().getBat().update(new BATsection(this,parentPID));
+				}else if((0x4E<=tableId)&&(tableId<=0x6F)&&(pid==0x12)){
+					transportStream.getPsi().getEit().update(new EITsection(this,parentPID));
+				}else if((pid==0x14) &&(tableId==0x70)){
+					transportStream.getPsi().getTdt().update(new TDTsection(this,parentPID));
+				}else if((pid==0x14) &&(tableId==0x73)){
+					transportStream.getPsi().getTot().update(new TOTsection(this,parentPID));
+				}else if((pid==0x11) &&((tableId==0x42)||(tableId==0x46))){
+					transportStream.getPsi().getSdt().update(new SDTsection(this,parentPID));
+				}else if((pid==0x1F) &&(tableId==0x7F)){
+					transportStream.getPsi().getSit().update(new SITsection(this,parentPID));
+				}else if((tableId==0x4c)&&isINTSection(pid)){ // check for linkage descriptors 0x0B located in the NIT  //ETSI EN 301 192 V1.4.2
+					transportStream.getPsi().getInt().update(new INTsection(this,parentPID));
+				}else if((tableId==0x4b)&&isUNTSection(pid)){
+					transportStream.getPsi().getUnts().update(new UNTsection(this,parentPID));
+				}else if((tableId==0x74)&&isAITSection(pid)){
+					transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
+				}else if((tableId==0x76)&&isRCTSection(pid)){
+					transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
+				}else if((tableId>=0x37)&&(tableId<=0x3F)){
+					// also include all PES streams component (ISO/IEC 13818-6 type B) which
+					// do not have a data_broadcast_id_descriptor associated with it,
+					// but do have a Association_tag_descriptor (or a stream_identifier_descriptor)
+					// These might be referenced from DSI in other stream (or even from multiple)
+					// Also, include PMTs to store the stream_identifier_descriptor
+					// all handled in DSMCCs.
+
+					transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
+				}
+			}
+		} catch (final RuntimeException re) {
+			logger.log(Level.WARNING, "RuntimeException in updatePSI PSI data: pid="+pid, re);
+		}
 	}
 
 	/**
