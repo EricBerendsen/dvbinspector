@@ -27,8 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
+import static nl.digitalekabeltelevisie.util.Utils.df2pos;
+import static nl.digitalekabeltelevisie.util.Utils.df3pos;
+import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeShortString;
+import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeString;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCCalender;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCmillis;
+import static nl.digitalekabeltelevisie.util.Utils.psiOnlyModus;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -91,7 +97,8 @@ public class TransportStream implements TreeNode{
 	/**
 	 *
 	 */
-	private static final int MAX_SEARCH_BYTES = 1000;
+	private static final int MAX_SEARCH_BYTES =5000;
+	private static final int CONSECUTIVE_PACKETS =5;
 	/**
 	 *
 	 */
@@ -152,9 +159,9 @@ public class TransportStream implements TreeNode{
 	 */
 	private Calendar zeroTime = null;
 
-	private long len;
+	private final long len;
 
-	private int max_packets;
+	private final int max_packets;
 
 	private int packetLenghth = 188;
 
@@ -192,7 +199,7 @@ public class TransportStream implements TreeNode{
 	 */
 	private int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
 		final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-		for(int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
+		for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
 			logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
 
 			if(usesPacketLength(possiblePacketLength, randomAccessFile)){
@@ -225,7 +232,7 @@ public class TransportStream implements TreeNode{
 			logger.log(Level.INFO, "found a sync byte at position {0}",startPos);
 			// found a sync byte, try to find next 4 sync bytes
 			boolean seqFound = true;
-			for (int i = 1; (i < 5) && seqFound; i++) {
+			for (int i = 1; (i < CONSECUTIVE_PACKETS) && seqFound; i++) {
 				randomAccessFile.seek(startPos + (i * possiblePacketLength));
 				logger.log(Level.INFO, "found {0} sequence syncs at pos {1}",new Object[]{i,startPos + (i * possiblePacketLength)});
 				seqFound &= (randomAccessFile.read() == sync_byte);
@@ -380,14 +387,14 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	private PositionPushbackInputStream getInputStream(java.awt.Component component) throws IOException{
+	private PositionPushbackInputStream getInputStream(final java.awt.Component component) throws IOException{
 		final InputStream is = new FileInputStream(file);
 		final long expectedSize=file.length();
 		if(component==null){
 			return new PositionPushbackInputStream(new BufferedInputStream(is),200);
 		}else{
 			return new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
-                    "Reading file \"" + file.getPath() +"\"",is, expectedSize)),200);
+					"Reading file \"" + file.getPath() +"\"",is, expectedSize)),200);
 		}
 	}
 
@@ -495,45 +502,45 @@ public class TransportStream implements TreeNode{
 	 * @param pid
 	 * @return
 	 */
-	private String getFixedLabel(short pid){
+	private String getFixedLabel(final short pid){
 		switch (pid) {
-			case 0:
-				return "PAT";
-			case 1:
-				return "CAT";
-			case 2:
-				return "TSDT";
-			case 16:
-				return  "NIT";
-			case 17:
-				return "SDT/BAT";
-			case 18:
-				return "EIT";
-			case 19:
-				return "RST, ST";
-			case 20:
-				return "TOT/TDT";
-			case 21:
-				return "network synchronization";
-			case 22:
-				return "RNT (TS 102 323)";
-			case 0x1c:
-				return "inband signalling";
-			case 0x1d:
-				return "measurement";
-			case 0x1e:
-				return "DIT";
-			case 0x1f:
-				return "SIT";
+		case 0:
+			return "PAT";
+		case 1:
+			return "CAT";
+		case 2:
+			return "TSDT";
+		case 16:
+			return  "NIT";
+		case 17:
+			return "SDT/BAT";
+		case 18:
+			return "EIT";
+		case 19:
+			return "RST, ST";
+		case 20:
+			return "TOT/TDT";
+		case 21:
+			return "network synchronization";
+		case 22:
+			return "RNT (TS 102 323)";
+		case 0x1c:
+			return "inband signalling";
+		case 0x1d:
+			return "measurement";
+		case 0x1e:
+			return "DIT";
+		case 0x1f:
+			return "SIT";
 
-			default:
-				if(pid <= 0x1b){
-					return "reserved for future use";
-				}
-				break;
+		default:
+			if(pid <= 0x1b){
+				return "reserved for future use";
 			}
+			break;
+		}
 
-			return "??";
+		return "??";
 	}
 
 	/**
@@ -545,7 +552,7 @@ public class TransportStream implements TreeNode{
 	 * @param packetNo
 	 * @return
 	 */
-	public String getCurrentLabel(short pid, long packetNo){
+	public String getCurrentLabel(final short pid, final long packetNo){
 		if(pid <= 0x1b){
 			return getFixedLabel(pid);
 		}
@@ -574,131 +581,131 @@ public class TransportStream implements TreeNode{
 		// get PMTs valid at moment "packetNo
 		// PAT actualPat = getPsi().getPat(packetNo);
 		// .getPmts(packetNo).values().iterator();
-//		while (it.hasNext()) {
-//			final PMTsection[] pmt = it.next();
-//			PMTsection section = pmt[0];
-//			while(section!=null){
-//				final int service_id=section.getProgramNumber();
-//				String service_name = getPsi().getSdt().getServiceName(service_id);
-//				if(service_name==null){
-//					service_name="Service "+service_id;
-//				}
-//				final int pmt_pid=section.getParentPID().getPid();
-//				setLabel(pmt_pid,pids,"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
-//
-//				final Iterator<Descriptor> i = section.getDescriptorList().iterator();
-//				while (i.hasNext()) {
-//					final Descriptor d = i.next();
-//					if(d instanceof CADescriptor) {
-//						final CADescriptor cad = (CADescriptor) d;
-//						final int capid=cad.getCaPID();
-//						setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
-//					}
-//				}
-//
-//				final Iterator<Component> l = section.getComponentenList().iterator();
-//				while(l.hasNext()){
-//					final Component component = l.next();
-//					GeneralPesHandler abstractPesHandler = null;
-//					final int comp_pid = component.getElementaryPID();
-//					final int streamType = component.getStreamtype();
-//					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
-//					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
-//					if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
-//						if((streamType==1)||(streamType==2)){
-//							abstractPesHandler = new Video138182Handler();
-//						}else if((streamType==3)||(streamType==4)){
-//							// find Ancillary Data info so we can parse RDS
-//							int ancillaryData = 0;
-//							final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
-//							while (k.hasNext()) {
-//								final Descriptor d = k.next();
-//								if(d instanceof AncillaryDataDescriptor) {
-//									final AncillaryDataDescriptor ac= (AncillaryDataDescriptor)d;
-//									ancillaryData = ac.getAncillaryDataIdentifier();
-//								}
-//							}
-//
-//							abstractPesHandler = new Audio138183Handler(ancillaryData);
-//						}else if(streamType==0x1B){
-//							abstractPesHandler = new Video14496Handler();
-//						}else{
-//							abstractPesHandler = new GeneralPesHandler();
-//						}
-//					}
-//
-//					final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
-//					while (k.hasNext()) {
-//						final Descriptor d = k.next();
-//						if(d instanceof SubtitlingDescriptor) {
-//							compt_type.append(" DVB subtitling");
-//							short_compt_type.append("DVB subtitling");
-//							abstractPesHandler = new DVBSubtitleHandler();
-//						}else if(d instanceof TeletextDescriptor) {
-//							compt_type.append(" Teletext");
-//							short_compt_type.append("Teletext");
-//							abstractPesHandler = new EBUTeletextHandler();
-//						}else if(d instanceof VBIDataDescriptor) {
-//							compt_type.append(" VBI Data");
-//							short_compt_type.append("VBI Data");
-//							abstractPesHandler = new EBUTeletextHandler();
-//						}else if(d instanceof AC3Descriptor){
-//							compt_type.append(" Dolby Audio (AC3)");
-//							short_compt_type.append("Dolby Audio (AC3)");
-//							abstractPesHandler = new AC3Handler();
-//						}else if(d instanceof EnhancedAC3Descriptor){
-//							compt_type.append(" Enhanced Dolby Audio (AC3)");
-//							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
-//							abstractPesHandler = new EAC3Handler();
-//						}if(d instanceof CADescriptor) {
-//							final CADescriptor cad = (CADescriptor) d;
-//							final int capid=cad.getCaPID();
-//							setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
-//						}
-//					}
-//
-//					if(pids[comp_pid]!=null){
-//						if(pids[comp_pid].getLabel()==null){
-//							pids[comp_pid].setLabel(compt_type.toString());
-//						}else if(!pids[comp_pid].getLabel().contains(compt_type)){
-//							pids[comp_pid].setLabel(pids[comp_pid].getLabel()+ '/'+compt_type);
-//						}
-//						if(pids[comp_pid].getShortLabel()==null){
-//							pids[comp_pid].setShortLabel(short_compt_type.toString());
-//						}else if(!pids[comp_pid].getShortLabel().contains(short_compt_type)){
-//							pids[comp_pid].setShortLabel(pids[comp_pid].getShortLabel()+'/'+short_compt_type);
-//						}
-//						if(abstractPesHandler!=null){
-//							abstractPesHandler.setTransportStream(this);
-//							abstractPesHandler.setPID(pids[comp_pid]);
-//							pids[comp_pid].setPesHandler(abstractPesHandler);
-//						}
-//					}
-//				}
-//				final int PCR_pid = section.getPcrPid();
-//				final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
-//				final String pcrShortLabel = "PCR "+service_name;
-//				if(pids[PCR_pid]==null){
-//					logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
-//				}
-//				else if(pids[PCR_pid].getLabel()==null){
-//					pids[PCR_pid].setLabel(pcrLabel);
-//				}else if(!pids[PCR_pid].getLabel().contains(pcrLabel)){
-//					pids[PCR_pid].setLabel(pids[PCR_pid].getLabel()+", "+pcrLabel);
-//				}
-//				if(pids[PCR_pid]!=null){
-//					if(pids[PCR_pid].getShortLabel()==null){
-//						pids[PCR_pid].setShortLabel(pcrShortLabel);
-//					}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
-//						pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
-//					}else{
-//						pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
-//					}
-//				}
-//				section =(PMTsection)section.getNextVersion();
-//			}
-//
-//
+		//		while (it.hasNext()) {
+		//			final PMTsection[] pmt = it.next();
+		//			PMTsection section = pmt[0];
+		//			while(section!=null){
+		//				final int service_id=section.getProgramNumber();
+		//				String service_name = getPsi().getSdt().getServiceName(service_id);
+		//				if(service_name==null){
+		//					service_name="Service "+service_id;
+		//				}
+		//				final int pmt_pid=section.getParentPID().getPid();
+		//				setLabel(pmt_pid,pids,"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
+		//
+		//				final Iterator<Descriptor> i = section.getDescriptorList().iterator();
+		//				while (i.hasNext()) {
+		//					final Descriptor d = i.next();
+		//					if(d instanceof CADescriptor) {
+		//						final CADescriptor cad = (CADescriptor) d;
+		//						final int capid=cad.getCaPID();
+		//						setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
+		//					}
+		//				}
+		//
+		//				final Iterator<Component> l = section.getComponentenList().iterator();
+		//				while(l.hasNext()){
+		//					final Component component = l.next();
+		//					GeneralPesHandler abstractPesHandler = null;
+		//					final int comp_pid = component.getElementaryPID();
+		//					final int streamType = component.getStreamtype();
+		//					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
+		//					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
+		//					if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
+		//						if((streamType==1)||(streamType==2)){
+		//							abstractPesHandler = new Video138182Handler();
+		//						}else if((streamType==3)||(streamType==4)){
+		//							// find Ancillary Data info so we can parse RDS
+		//							int ancillaryData = 0;
+		//							final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
+		//							while (k.hasNext()) {
+		//								final Descriptor d = k.next();
+		//								if(d instanceof AncillaryDataDescriptor) {
+		//									final AncillaryDataDescriptor ac= (AncillaryDataDescriptor)d;
+		//									ancillaryData = ac.getAncillaryDataIdentifier();
+		//								}
+		//							}
+		//
+		//							abstractPesHandler = new Audio138183Handler(ancillaryData);
+		//						}else if(streamType==0x1B){
+		//							abstractPesHandler = new Video14496Handler();
+		//						}else{
+		//							abstractPesHandler = new GeneralPesHandler();
+		//						}
+		//					}
+		//
+		//					final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
+		//					while (k.hasNext()) {
+		//						final Descriptor d = k.next();
+		//						if(d instanceof SubtitlingDescriptor) {
+		//							compt_type.append(" DVB subtitling");
+		//							short_compt_type.append("DVB subtitling");
+		//							abstractPesHandler = new DVBSubtitleHandler();
+		//						}else if(d instanceof TeletextDescriptor) {
+		//							compt_type.append(" Teletext");
+		//							short_compt_type.append("Teletext");
+		//							abstractPesHandler = new EBUTeletextHandler();
+		//						}else if(d instanceof VBIDataDescriptor) {
+		//							compt_type.append(" VBI Data");
+		//							short_compt_type.append("VBI Data");
+		//							abstractPesHandler = new EBUTeletextHandler();
+		//						}else if(d instanceof AC3Descriptor){
+		//							compt_type.append(" Dolby Audio (AC3)");
+		//							short_compt_type.append("Dolby Audio (AC3)");
+		//							abstractPesHandler = new AC3Handler();
+		//						}else if(d instanceof EnhancedAC3Descriptor){
+		//							compt_type.append(" Enhanced Dolby Audio (AC3)");
+		//							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
+		//							abstractPesHandler = new EAC3Handler();
+		//						}if(d instanceof CADescriptor) {
+		//							final CADescriptor cad = (CADescriptor) d;
+		//							final int capid=cad.getCaPID();
+		//							setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
+		//						}
+		//					}
+		//
+		//					if(pids[comp_pid]!=null){
+		//						if(pids[comp_pid].getLabel()==null){
+		//							pids[comp_pid].setLabel(compt_type.toString());
+		//						}else if(!pids[comp_pid].getLabel().contains(compt_type)){
+		//							pids[comp_pid].setLabel(pids[comp_pid].getLabel()+ '/'+compt_type);
+		//						}
+		//						if(pids[comp_pid].getShortLabel()==null){
+		//							pids[comp_pid].setShortLabel(short_compt_type.toString());
+		//						}else if(!pids[comp_pid].getShortLabel().contains(short_compt_type)){
+		//							pids[comp_pid].setShortLabel(pids[comp_pid].getShortLabel()+'/'+short_compt_type);
+		//						}
+		//						if(abstractPesHandler!=null){
+		//							abstractPesHandler.setTransportStream(this);
+		//							abstractPesHandler.setPID(pids[comp_pid]);
+		//							pids[comp_pid].setPesHandler(abstractPesHandler);
+		//						}
+		//					}
+		//				}
+		//				final int PCR_pid = section.getPcrPid();
+		//				final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
+		//				final String pcrShortLabel = "PCR "+service_name;
+		//				if(pids[PCR_pid]==null){
+		//					logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
+		//				}
+		//				else if(pids[PCR_pid].getLabel()==null){
+		//					pids[PCR_pid].setLabel(pcrLabel);
+		//				}else if(!pids[PCR_pid].getLabel().contains(pcrLabel)){
+		//					pids[PCR_pid].setLabel(pids[PCR_pid].getLabel()+", "+pcrLabel);
+		//				}
+		//				if(pids[PCR_pid]!=null){
+		//					if(pids[PCR_pid].getShortLabel()==null){
+		//						pids[PCR_pid].setShortLabel(pcrShortLabel);
+		//					}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
+		//						pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
+		//					}else{
+		//						pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
+		//					}
+		//				}
+		//				section =(PMTsection)section.getNextVersion();
+		//			}
+		//
+		//
 		return "?";
 	}
 
@@ -1074,7 +1081,7 @@ public class TransportStream implements TreeNode{
 		return null;
 	}
 
-	public TSPacket getTSPacket(int packetNo){
+	public TSPacket getTSPacket(final int packetNo){
 		TSPacket packet = null;
 		if(packet_offset!=null){
 			if(packet_offset.length>packetNo){
@@ -1082,7 +1089,7 @@ public class TransportStream implements TreeNode{
 					final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
 					randomAccessFile.seek(packet_offset[packetNo]);
 					final byte [] buf = new byte[packetLenghth];
-					int l = randomAccessFile.read(buf);
+					final int l = randomAccessFile.read(buf);
 					if(l==packetLenghth){
 						packet = new TSPacket(buf, packetNo,this);
 
@@ -1091,9 +1098,9 @@ public class TransportStream implements TreeNode{
 					}
 
 					randomAccessFile.close();
-				} catch (FileNotFoundException e) {
+				} catch (final FileNotFoundException e) {
 					logger.warning("FileNotFoundException:"+e);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.warning("IOException:"+e);
 				}
 
@@ -1113,7 +1120,7 @@ public class TransportStream implements TreeNode{
 
 	public Iterator<TSPacket> getTSPacketsIterator(final int pid, final int flags, final int start, final int end){
 
-		Iterator<TSPacket> iter = new Iterator<TSPacket>(){
+		final Iterator<TSPacket> iter = new Iterator<TSPacket>(){
 
 			int pos = findNext(start-1);
 
@@ -1126,7 +1133,7 @@ public class TransportStream implements TreeNode{
 
 			}
 
-			private boolean match(int p) {
+			private boolean match(final int p) {
 				return (packet_pid[p]&(0x1fff | flags))==( pid | flags) ;
 			}
 
@@ -1137,7 +1144,7 @@ public class TransportStream implements TreeNode{
 
 			@Override
 			public TSPacket next() {
-				TSPacket packet = getTSPacket(pos);
+				final TSPacket packet = getTSPacket(pos);
 				pos = findNext(pos);
 				return packet;
 			}
@@ -1157,7 +1164,7 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	public void setEnableTSPackets(boolean enableTSPackets) {
+	public void setEnableTSPackets(final boolean enableTSPackets) {
 		this.enableTSPackets = enableTSPackets;
 	}
 
@@ -1165,7 +1172,7 @@ public class TransportStream implements TreeNode{
 		return packet_offset!=null;
 	}
 
-	public PID getPID(int p){
+	public PID getPID(final int p){
 		return pids[p];
 	}
 
