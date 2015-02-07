@@ -192,10 +192,10 @@ public final class Utils {
 		}
 	}
 
-	private static int decode(String text) {
-        return (text.startsWith("0b")||text.startsWith("0B")) ? Integer.parseInt(text.substring(2), 2)
-                                     : Integer.decode(text);
-    }
+	private static int decode(final String text) {
+		return (text.startsWith("0b")||text.startsWith("0B")) ? Integer.parseInt(text.substring(2), 2)
+				: Integer.decode(text);
+	}
 
 	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
 		try {
@@ -540,35 +540,66 @@ public final class Utils {
 	 * @param maxWidth (0 = unlimited)
 	 * @return
 	 */
-	public static String getEscapedHTML(List<DVBString> dvbStrings, int maxWidth){
-		StringBuilder sb = new StringBuilder();
-		byte[]rawData = new byte[dvbStrings.size()*255]; // max space needed as DVBString as maximum 255 chars
-		int rawDataLen = 0;
-		// TODO now uses only the first charset as encoding for all DVBStrings. Could be different.
-		Charset charset = dvbStrings.get(0).getCharSet();
+	public static String getEscapedHTML(final List<DVBString> dvbStrings, final int maxWidth){
+		final StringBuilder sb = new StringBuilder();
+		int stringIndex=0;
+		while(stringIndex<dvbStrings.size()){
+			final byte[]rawData = new byte[dvbStrings.size()*255]; // max space needed as DVBString as maximum 255 chars
+			int rawDataLen = 0;
+			final Charset charset = dvbStrings.get(stringIndex).getCharSet();
+			int sameCharSetIndex = stringIndex;
+			while((sameCharSetIndex < dvbStrings.size()) &&
+					isIdenticalCharSets(charset,dvbStrings.get(sameCharSetIndex).getCharSet())){
+				final DVBString dvbString = dvbStrings.get(sameCharSetIndex);
+				final byte[] b = dvbString.getData();
+				int offset = 1 + dvbString.getOffset(); // offset starts at the len byte, actual data +1
+				int length = dvbString.getLength();
+				final int charSetLen = getCharSetLen(b, offset);
 
-		//get the 'raw' data from all DVBStrings concatenated, so strip the first byte(s) with encoding
-		for (DVBString dvbString : dvbStrings) {
-			byte[] b = dvbString.getData();
-			int offset = 1 + dvbString.getOffset(); // offset starts at the len byte, actual data +1
-			int length = dvbString.getLength();
+				length -= charSetLen;
+				offset += charSetLen;
 
-			// dont't care about actual Charset chSet = getCharSet(b, offset, length);
-			// only need to skip the first byte(s)
-			int charSetLen = getCharSetLen(b, offset);
-
-			length -= charSetLen;
-			offset += charSetLen;
-
-			for (int i = offset; i < (offset+length); i++) {
+				for (int i = offset; i < (offset+length); i++) {
 					rawData[rawDataLen++]=b[i];
+				}
+				sameCharSetIndex++;
+			}
+			formatRawData(maxWidth, sb, rawData, rawDataLen, charset);
+			stringIndex += sameCharSetIndex;
+			sb.append("<br><br>");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * @param charset
+	 * @param charSet2
+	 * @return
+	 */
+	private static boolean isIdenticalCharSets(final Charset charSet1, final Charset charSet2) {
+		if((charSet1 == null)&&(charSet2 == null)){
+			return true;
+		}else{
+			if(charSet1!=null){
+				return charSet1.equals(charSet2);
 			}
 		}
+		return false;
+	}
 
+	/**
+	 * @param maxWidth
+	 * @param sb
+	 * @param rawData
+	 * @param rawDataLen
+	 * @param charset
+	 */
+	private static void formatRawData(final int maxWidth, final StringBuilder sb, final byte[] rawData, final int rawDataLen,
+			final Charset charset) {
 		int i=0;
 		int currentLineLength = 0;
 		while(i<rawDataLen){
-			byte[]filteredBytes=new byte[dvbStrings.size()*255]; // max space needed as DVBString as maximum 255 chars
+			final byte[]filteredBytes=new byte[rawDataLen];
 			int filteredLength=0;
 			// find 'regular' chars
 			while((i<rawDataLen)&&(rawData[i]>-97)){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f))
@@ -582,18 +613,18 @@ public final class Utils {
 				decodedString = new String(filteredBytes, 0, filteredLength,charset);
 			}
 			// now split  decodedString into words
-			 StringTokenizer st = new StringTokenizer(decodedString);
+			final StringTokenizer st = new StringTokenizer(decodedString);
 
 			// append words to sb as long as lineLen < max
 			while (st.hasMoreTokens()) {
-			     String s = st.nextToken();
-			     if((maxWidth!=0)&& ((currentLineLength+s.length())>maxWidth)){
-			    	 sb.append("<br>").append(escapeHTML(s));
-			    	 currentLineLength=s.length();
-			     }else{
-			    	 sb.append(' ').append(escapeHTML(s));
-			    	 currentLineLength+=1+s.length();
-			     }
+				final String s = st.nextToken();
+				if((maxWidth!=0)&& ((currentLineLength+s.length())>maxWidth)){
+					sb.append("<br>").append(escapeHTML(s));
+					currentLineLength=s.length();
+				}else{
+					sb.append(' ').append(escapeHTML(s));
+					currentLineLength+=1+s.length();
+				}
 			}
 			// now the special chars 0x80 - 0x97 (or EOF)
 			while((i<rawDataLen)&&(rawData[i]<=-97)){  // bytes are signed, what we really mean is if((b[i]>=0x80)&&(b[i]<=0x9f))
@@ -608,7 +639,6 @@ public final class Utils {
 				i++;
 			}
 		}
-		return sb.toString();
 	}
 
 	/**
@@ -626,8 +656,8 @@ public final class Utils {
 		if(length<=0){
 			return "";
 		}
-		Charset charset = getCharSet(b, offset, length);
-		int charSetLen = getCharSetLen(b, offset);
+		final Charset charset = getCharSet(b, offset, length);
+		final int charSetLen = getCharSetLen(b, offset);
 
 		length -= charSetLen;
 		offset += charSetLen;
@@ -679,7 +709,6 @@ public final class Utils {
 			}
 		}
 		return charset;
-
 	}
 
 	private static int getCharSetLen(final byte b[], final int offset){
@@ -739,7 +768,7 @@ public final class Utils {
 	}
 
 	public static Date getUTCDate(final byte[] UTC_time) {
-		Calendar t = getUTCCalender(UTC_time);
+		final Calendar t = getUTCCalender(UTC_time);
 		if(t!=null){
 			return t.getTime();
 		}else{
@@ -747,10 +776,10 @@ public final class Utils {
 		}
 	}
 
-	public static long getDurationMillis(String eventDuration){
-		int hours = Integer.parseInt(eventDuration.substring(0, 2));
-		int minutes = Integer.parseInt(eventDuration.substring(2, 4));
-		int seconds = Integer.parseInt(eventDuration.substring(4, 6));
+	public static long getDurationMillis(final String eventDuration){
+		final int hours = Integer.parseInt(eventDuration.substring(0, 2));
+		final int minutes = Integer.parseInt(eventDuration.substring(2, 4));
+		final int seconds = Integer.parseInt(eventDuration.substring(4, 6));
 		return 1000*(((( hours*60) +minutes)* 60) + seconds);
 	}
 
@@ -770,12 +799,12 @@ public final class Utils {
 		m = m - 1 - (k*12);
 
 		try{
-			int h= Integer.parseInt(hours);
-			int mins = Integer.parseInt(minutes);
-			int s =Integer.parseInt(secs);
+			final int h= Integer.parseInt(hours);
+			final int mins = Integer.parseInt(minutes);
+			final int s =Integer.parseInt(secs);
 			return new GregorianCalendar((int)y, (int)m-1, (int)d, h, mins, s);
 
-		}catch(NumberFormatException ne)
+		}catch(final NumberFormatException ne)
 		{
 			logger.log(Level.WARNING, "error parsing calendar:", ne);
 			return null;
@@ -1151,7 +1180,7 @@ public final class Utils {
 				sb.append("&trade;");
 				break;
 
-			// extra chars based on http://www.w3schools.com/tags/ref_entities.asp
+				// extra chars based on http://www.w3schools.com/tags/ref_entities.asp
 
 			case '¡':
 				sb.append("&iexcl;");
@@ -1719,7 +1748,7 @@ public final class Utils {
 	 * @param len
 	 * @return
 	 */
-	public static String getHTMLHexviewColored(final byte [] byteValue, final int offset, final int len, RangeHashMap<Integer, Color> coloring) {
+	public static String getHTMLHexviewColored(final byte [] byteValue, final int offset, final int len, final RangeHashMap<Integer, Color> coloring) {
 
 		final StringBuilder b= new StringBuilder();
 		b.append("<pre>");
@@ -1744,7 +1773,7 @@ public final class Utils {
 				}else{
 					b.append("&nbsp;&nbsp;");
 				}
-				Color nextColor=coloring.find((l*16)+i+1);
+				final Color nextColor=coloring.find((l*16)+i+1);
 				// disadvantage, at end of line maybe ampty span.
 				if((currentColor!=null)&&!currentColor.equals(nextColor)){ // color change
 					b.append("</span>"); //always close current
@@ -1790,8 +1819,8 @@ public final class Utils {
 	 * @param date
 	 * @return
 	 */
-	public static Date roundHourUp(Date date) {
-		Calendar c2 = new GregorianCalendar();
+	public static Date roundHourUp(final Date date) {
+		final Calendar c2 = new GregorianCalendar();
 		c2.setTime(date);
 		if((c2.get(Calendar.SECOND)!=0) || (c2.get(Calendar.MINUTE)!=0)){ //  no need to round if xx:00:00
 			c2.set(Calendar.SECOND, 0);
@@ -1809,7 +1838,7 @@ public final class Utils {
 	 * @param date
 	 * @return
 	 */
-	public static Date roundHourDown(Date date) {
+	public static Date roundHourDown(final Date date) {
 		final Calendar c = new GregorianCalendar();
 		c.setTime(date);
 		c.set(Calendar.SECOND, 0);
@@ -1821,7 +1850,7 @@ public final class Utils {
 
 
 	/**
-  	 *replace all 'html'characters in the string with their html-entity
+	 *replace all 'html'characters in the string with their html-entity
 	 * Output is now safe for use in HTML fragments.
 	 *
 	 * Same as escapeHTML, except for the purpose of displaying in a tooltiptext,
@@ -1829,32 +1858,32 @@ public final class Utils {
 	 * @param t
 	 * @return
 	 */
-	public static String escapeHtmlBreakLines(String t) {
-		 StringTokenizer st = new StringTokenizer(t);
-		 int len = 0;
-		 StringBuilder res = new StringBuilder();
-	     while (st.hasMoreTokens()) {
-	         String s = st.nextToken();
-	         if((len+s.length())>80){
-	        	 res.append("<br>").append(escapeHTML(s));
-	        	 len=s.length();
-	         }else{
-	        	 res.append(' ').append(escapeHTML(s));
-	        	 len+=1+s.length();
-	         }
-	     }
+	public static String escapeHtmlBreakLines(final String t) {
+		final StringTokenizer st = new StringTokenizer(t);
+		int len = 0;
+		final StringBuilder res = new StringBuilder();
+		while (st.hasMoreTokens()) {
+			final String s = st.nextToken();
+			if((len+s.length())>80){
+				res.append("<br>").append(escapeHTML(s));
+				len=s.length();
+			}else{
+				res.append(' ').append(escapeHTML(s));
+				len+=1+s.length();
+			}
+		}
 		return res.toString();
 	}
 
-	public static String getHexAndDecimalFormattedString(int intValue){
-		StringBuilder b = new StringBuilder();
+	public static String getHexAndDecimalFormattedString(final int intValue){
+		final StringBuilder b = new StringBuilder();
 		b.append("0x").append(Integer.toHexString(intValue).toUpperCase()).append(" (").append(intValue)
 		.append(")");
 		return b.toString();
 	}
 
-	public static String getHexAndDecimalFormattedString(long longValue){
-		StringBuilder b = new StringBuilder();
+	public static String getHexAndDecimalFormattedString(final long longValue){
+		final StringBuilder b = new StringBuilder();
 		b.append("0x").append(Long.toHexString(longValue).toUpperCase()).append(" (").append(longValue)
 		.append(")");
 		return b.toString();
@@ -1879,7 +1908,7 @@ public final class Utils {
 	 * @param b
 	 * @return
 	 */
-	public static int getBooleanAsInt(boolean b) {
+	public static int getBooleanAsInt(final boolean b) {
 		return b?1:0;
 	}
 
@@ -1928,25 +1957,25 @@ public final class Utils {
 	}
 
 
-	public static String toHexString ( Color c ){
+	public static String toHexString ( final Color c ){
 
-	   String s = Integer.toHexString( c.getRGB() & 0xffffff );
+		String s = Integer.toHexString( c.getRGB() & 0xffffff );
 
-	   if ( s.length() < 6 ){
-		   s = "000000".substring( 0, 6 - s.length() ) + s;
-	   }
-	   return '#' + s;
+		if ( s.length() < 6 ){
+			s = "000000".substring( 0, 6 - s.length() ) + s;
+		}
+		return '#' + s;
 
 	}
 
 	public static StringBuilder getChildrenAsHTML(final DefaultMutableTreeNode dmtn) {
 		final String lineSep = "<br>";
 		final StringBuilder res = new StringBuilder();
-		KVP kvp = (KVP)dmtn.getUserObject();
+		final KVP kvp = (KVP)dmtn.getUserObject();
 		@SuppressWarnings("rawtypes")
 		final Enumeration children = dmtn.children();
 		while(children.hasMoreElements()){
-			Object next = children.nextElement();
+			final Object next = children.nextElement();
 			if(next instanceof DefaultMutableTreeNode){
 				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
 				final KVP chKVP = (KVP)child.getUserObject();
