@@ -26,7 +26,8 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -176,28 +177,30 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
 		 */
 		public String getHTML() {
-			StringBuilder r1 = new StringBuilder();
+			final StringBuilder r1 = new StringBuilder();
 			r1.append("Start:&nbsp;").append(Utils.getUTCFormattedString(getStartTime())).append("&nbsp;Duration: ");
 			r1.append(getDuration().substring(0, 2)).append(":");
 			r1.append(getDuration().substring(2, 4)).append(":");
-			r1.append(getDuration().substring(4)).append("<br>");
+			r1.append(getDuration().substring(4)).append("<br><br>");
 			final List<Descriptor> descList = getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
-				r1.append("<br><b><span style=\"background-color: white\">");
-				final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
-				r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
-				String shortText = shortEventDescriptor.getText().toString();
-				if((shortText!=null)&&!shortText.isEmpty()){
-					r1.append(escapeHtmlBreakLines(shortText)).append("<br>");
+				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
+					r1.append("<b><span style=\"background-color: white\">");
+					r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
+					final String shortText = shortEventDescriptor.getText().toString();
+					if((shortText!=null)&&!shortText.isEmpty()){
+						r1.append(escapeHtmlBreakLines(shortText)).append("<br>");
+					}
+					r1.append("<br>");
 				}
 			}
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
-			ArrayList<DVBString> extendedEventStrings = new ArrayList<DVBString>();
+			final ArrayList<DVBString> extendedEventStrings = new ArrayList<DVBString>();
 			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
 				if(!extEvent.getItemList().isEmpty()){ // this extended Event has items
 					r1.append("<br><table>");
-					for(ExtendedEventDescriptor.Item item :extEvent.getItemList()){
+					for(final ExtendedEventDescriptor.Item item :extEvent.getItemList()){
 						r1.append("<tr><td>");
 						r1.append(Utils.escapeHTML(item.getItemDescription().toString()));
 						r1.append("</td><td>");
@@ -211,24 +214,25 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 				extendedEventStrings.add(extEvent.getText());
 			}
 			if(!extendedEventStrings.isEmpty()){
-				r1.append("<br>").append(getEscapedHTML(extendedEventStrings,80)).append("<br>");
+				r1.append("<br>").append(getEscapedHTML(extendedEventStrings,80));
 			}
 			final List<ContentDescriptor> contentDescList = Descriptor.findGenericDescriptorsInList(descList, ContentDescriptor.class);
 			if(!contentDescList.isEmpty()){
-				ContentDescriptor contentDesc = contentDescList.get(0);
-				List<ContentItem> contentList = contentDesc.getContentList();
-				for(ContentItem c:contentList){
-					r1.append("<br>Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
-					r1.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
+				for(final ContentDescriptor contentDesc : contentDescList){
+					final List<ContentItem> contentList = contentDesc.getContentList();
+					for(final ContentItem c:contentList){
+						r1.append("Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
+						r1.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
+					}
 				}
+				r1.append("<br>");
 
 			}
 			final List<ParentalRatingDescriptor> ratingDescList = Descriptor.findGenericDescriptorsInList(descList, ParentalRatingDescriptor.class);
-			if(!ratingDescList.isEmpty()){
-				ParentalRatingDescriptor ratingDesc = ratingDescList.get(0);
-				List<Rating> ratingList = ratingDesc.getRatingList();
-				for(Rating c:ratingList){
-					r1.append("<br>Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
+			for(final ParentalRatingDescriptor ratingDesc :ratingDescList){
+				final List<Rating> ratingList = ratingDesc.getRatingList();
+				for(final Rating c:ratingList){
+					r1.append("Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
 				}
 			}
 			return r1.toString();
@@ -327,10 +331,11 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			final List<Descriptor> descList = event.getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
-				b.append("<b><span style=\"background-color: white\">");
-				final ShortEventDescriptor shortEventDescriptor = shortDesc.get(0);
-				b.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b>&nbsp;");
-				b.append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
+				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
+					b.append("<b><span style=\"background-color: white\">");
+					b.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b>&nbsp;");
+					b.append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
+				}
 			}
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
 			for(final ExtendedEventDescriptor extEvent: extendedDesc){
