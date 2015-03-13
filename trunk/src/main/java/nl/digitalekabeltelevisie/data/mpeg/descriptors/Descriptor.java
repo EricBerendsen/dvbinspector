@@ -27,19 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.LookUpList;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 
 /**
  * @author Eric Berendsen
@@ -48,33 +43,33 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class Descriptor implements TreeNode {
 
 	private static LookUpList metadata_application_format_list = new LookUpList.Builder().
-				add(0x0000,0x000F,"Reserved").
-				add(0x0010,"ISO 15706 (ISAN) encoded in its binary form").
-				add(0x0011, "ISO 15706-2 (V-ISAN) encoded in its binary form").
-				add(0x0012,0x00FF,"Reserved").
-				add(0x0100,"metadata service contains TVA metadata as profiled according to DVB").
-				add(0x0101,"metadata contained conforms to DTG D-Book Record List.").
-				add(0x0102,0xFFFE,"User defined").
-				add(0xFFFF,"Defined by the metadata_application_format_identifier field").
-				build();
+			add(0x0000,0x000F,"Reserved").
+			add(0x0010,"ISO 15706 (ISAN) encoded in its binary form").
+			add(0x0011, "ISO 15706-2 (V-ISAN) encoded in its binary form").
+			add(0x0012,0x00FF,"Reserved").
+			add(0x0100,"metadata service contains TVA metadata as profiled according to DVB").
+			add(0x0101,"metadata contained conforms to DTG D-Book Record List.").
+			add(0x0102,0xFFFE,"User defined").
+			add(0xFFFF,"Defined by the metadata_application_format_identifier field").
+			build();
 	private static LookUpList mpeg_carriage_flags_list = new LookUpList.Builder().
-				add(0,"Carriage in the same transport stream where this metadata pointer descriptor is carried.").
-				add(1,"Carriage in a different transport stream from where this metadata pointer descriptor is carried.").
-				add(2,"Carriage in a program stream. This may or may not be the same program stream in which this metadata pointer descriptor is carried.").
-				add(3,"may be used if there is no relevant metadata carried on the DVB network. In this case the metadata locator record shall be present").
-				build();
+			add(0,"Carriage in the same transport stream where this metadata pointer descriptor is carried.").
+			add(1,"Carriage in a different transport stream from where this metadata pointer descriptor is carried.").
+			add(2,"Carriage in a program stream. This may or may not be the same program stream in which this metadata pointer descriptor is carried.").
+			add(3,"may be used if there is no relevant metadata carried on the DVB network. In this case the metadata locator record shall be present").
+			build();
 	private static LookUpList metadata_format_list = new LookUpList.Builder().
-				add(0,0x0f,"Reserved").
-				add(0x10,"ISO/IEC 15938-1 TeM").
-				add(0x11,"ISO/IEC 15938-1 BiM").
-				add(0x12,0x3e,"Reserved").
-				add(0x3f,"Defined by metadata application format").
-				add(0x40,0xef,"User Defined").
-				add(0xf0,"The encoding and encapsulation format as defined in clauses 9.3 and 9.4 of ETSI TS 102 323 V1.5.1").
-				add(0xf1,0xf7,"DVB Reserved").
-				add(0xf8,0xfe,"User Defined").
-				add(0xff,"Defined by metadata_format_identifier field").
-				build();
+			add(0,0x0f,"Reserved").
+			add(0x10,"ISO/IEC 15938-1 TeM").
+			add(0x11,"ISO/IEC 15938-1 BiM").
+			add(0x12,0x3e,"Reserved").
+			add(0x3f,"Defined by metadata application format").
+			add(0x40,0xef,"User Defined").
+			add(0xf0,"The encoding and encapsulation format as defined in clauses 9.3 and 9.4 of ETSI TS 102 323 V1.5.1").
+			add(0xf1,0xf7,"DVB Reserved").
+			add(0xf8,0xfe,"User Defined").
+			add(0xff,"Defined by metadata_format_identifier field").
+			build();
 	protected int			descriptorTag		= 0;
 	protected int			descriptorLength	= 0;
 
@@ -255,6 +250,14 @@ public class Descriptor implements TreeNode {
 			return "Stereoscopic_program_info_descriptor";
 		case 54:
 			return "Stereoscopic_video_info_descriptor";
+
+			/* Rec. ITU-T H.222.0 (10/2014) */
+		case 55:
+			return "Transport_profile_descriptor";
+		case 56:
+			return "HEVC video descriptor";
+		case 63:
+			return "Extension_descriptor";
 
 			// DVB
 
@@ -628,17 +631,25 @@ public class Descriptor implements TreeNode {
 		case 0x15:
 			return "reserved for future use";
 		case 0x16:
-			return "advanced codec SD digital television service";
+			return "H.264/AVC SD digital television service";
 		case 0x17:
-			return "advanced codec SD NVOD time-shifted service";
+			return "H.264/AVC SD NVOD time-shifted service";
 		case 0x18:
-			return "advanced codec SD NVOD reference service";
+			return "H.264/AVC SD NVOD reference service";
 		case 0x19:
-			return "advanced codec HD digital television service";
+			return "H.264/AVC HD digital television service";
 		case 0x1A:
-			return "advanced codec HD NVOD time-shifted service";
+			return "H.264/AVC HD NVOD time-shifted service";
 		case 0x1B:
-			return "advanced codec HD NVOD reference service";
+			return "H.264/AVC HD NVOD reference service";
+		case 0x1C:
+			return "H.264/AVC frame compatible plano-stereoscopic HD digital television service";
+		case 0x1D:
+			return "H.264/AVC frame compatible plano-stereoscopic HD NVOD time-shifted service";
+		case 0x1E:
+			return "H.264/AVC frame compatible plano-stereoscopic HD NVOD reference service";
+		case 0x1F:
+			return "HEVC digital television service";
 
 		case 0x84:
 			return "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
@@ -661,7 +672,7 @@ public class Descriptor implements TreeNode {
 			// ICD60).
 
 		default:
-			if ((0x1C <= serviceType) && (serviceType <= 0x7F)) {
+			if ((0x20 <= serviceType) && (serviceType <= 0x7F)) {
 				return "reserved for future use";
 			}
 
@@ -1166,22 +1177,22 @@ public class Descriptor implements TreeNode {
 
 		case 0xFF:
 			return "Audio profile and level not specified by the MPEG-4_audio_profile_and_level " +
-					"field in this descriptor";
+			"field in this descriptor";
 		default:
 			return "Reserved";
 
 		}
 	}
 
-	protected static String getMPEGCarriageFlagsString(int mPEG_carriage_flags) {
+	protected static String getMPEGCarriageFlagsString(final int mPEG_carriage_flags) {
 		return mpeg_carriage_flags_list.get(mPEG_carriage_flags);
 	}
 
-	protected static String getMetaDataApplicationFormatString(int metadata_application_format) {
+	protected static String getMetaDataApplicationFormatString(final int metadata_application_format) {
 		return metadata_application_format_list.get(metadata_application_format);
 	}
 
-	public static String getMetaDataFormatString(int metadata_format) {
+	public static String getMetaDataFormatString(final int metadata_format) {
 		return metadata_format_list.get(metadata_format);
 	}
 }
