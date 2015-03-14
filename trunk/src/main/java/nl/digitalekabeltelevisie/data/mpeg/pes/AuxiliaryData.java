@@ -27,7 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_14BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +79,7 @@ public class AuxiliaryData implements TreeNode{
 		int marker_bits_right;
 		int pixel_number_start_of_right_bar;
 
-		public BarData(byte[] data, int offset, int len){
+		public BarData(final byte[] data, final int offset, final int len){
 			top_bar_flag = getInt(data,offset,1,0x80)>>7;
 			bottom_bar_flag = getInt(data,offset,1,0x40)>>6;
 			left_bar_flag = getInt(data,offset,1,0x20)>>5;
@@ -106,7 +112,7 @@ public class AuxiliaryData implements TreeNode{
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("bar_data()"));
 			t.add(new DefaultMutableTreeNode(new KVP("top_bar_flag",top_bar_flag,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("bottom_bar_flag",bottom_bar_flag,null)));
@@ -149,12 +155,12 @@ public class AuxiliaryData implements TreeNode{
 			 * @param data
 			 * @param localOffset
 			 */
-			public Construct(byte[] data, int localOffset) {
+			public Construct(final byte[] data, final int localOffset) {
 				if(localOffset<data.length){
 					one_bit = getInt(data,localOffset,1,0x80)>>7;
-					reserved = getInt(data,localOffset,1,0x71)>>3;
-					cc_valid = getInt(data,localOffset,1,0x04)>>2;
-					cc_type = getInt(data,localOffset,1,0x03);
+				reserved = getInt(data,localOffset,1,0x71)>>3;
+				cc_valid = getInt(data,localOffset,1,0x04)>>2;
+				cc_type = getInt(data,localOffset,1,0x03);
 				}
 				if((localOffset+1)<data.length){
 					cc_data_1 = getInt(data,localOffset+1,1,MASK_8BITS);
@@ -168,7 +174,7 @@ public class AuxiliaryData implements TreeNode{
 			 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 			 */
 			@Override
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
+			public DefaultMutableTreeNode getJTreeNode(final int modus) {
 				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("construct"));
 				t.add(new DefaultMutableTreeNode(new KVP("one_bit",one_bit,"shall be '1' to maintain backwards compatibility with previous versions of CEA-708-C")));
 				t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
@@ -182,35 +188,35 @@ public class AuxiliaryData implements TreeNode{
 
 		}
 
-		private int reserved;
-		private int process_cc_data_flag;
-		private int zero_bit;
-		private int cc_count;
-		private int reserved2;
+		private final int reserved;
+		private final int process_cc_data_flag;
+		private final int zero_bit;
+		private final int cc_count;
+		private final int reserved2;
 		private final List<Construct> constructs = new ArrayList<Construct>();
-		private int marker_bits;
+		private final int marker_bits;
 
 
-		public CCData(byte[] data, int offset, int len){
+		public CCData(final byte[] data, final int offset, final int len){
 			reserved = getInt(data,offset,1,0x80)>>7;
-			process_cc_data_flag = getInt(data,offset,1,0x40)>>6;
-			zero_bit = getInt(data,offset,1,0x20)>>5;
-			cc_count = getInt(data,offset,1,0x1F);
-			reserved2= getInt(data,offset+1,1,MASK_8BITS);
-			int localOffset = offset+2;
-			for (int i = 0; i < cc_count; i++) {
-				Construct construct = new Construct(data, localOffset);
-				constructs.add(construct);
-				localOffset+=3;
-			}
-			marker_bits= getInt(data,localOffset,1,MASK_8BITS);
+				process_cc_data_flag = getInt(data,offset,1,0x40)>>6;
+				zero_bit = getInt(data,offset,1,0x20)>>5;
+				cc_count = getInt(data,offset,1,0x1F);
+				reserved2= getInt(data,offset+1,1,MASK_8BITS);
+				int localOffset = offset+2;
+				for (int i = 0; i < cc_count; i++) {
+					final Construct construct = new Construct(data, localOffset);
+					constructs.add(construct);
+					localOffset+=3;
+				}
+				marker_bits= getInt(data,localOffset,1,MASK_8BITS);
 		}
 
 		/* (non-Javadoc)
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public DefaultMutableTreeNode getJTreeNode(final int modus) {
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("cc_data()"));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("process_cc_data_flag",process_cc_data_flag,process_cc_data_flag==1?"cc_data shall be parsed and its meaning processed":"cc_data shall be discarded")));
@@ -246,7 +252,7 @@ public class AuxiliaryData implements TreeNode{
 	/**
 	 *
 	 */
-	public AuxiliaryData(byte[] data, int offset, int len) {
+	public AuxiliaryData(final byte[] data, final int offset, final int len) {
 		this.data = data;
 		this.offset = offset;
 		this.len = len;
@@ -254,11 +260,11 @@ public class AuxiliaryData implements TreeNode{
 		if(indexOf(data, new byte[]{0x44,0x54,0x47,0x31}, offset)==offset){ // DTG1
 			isAFD = true;
 			active_format_flag = getInt(data,offset+4,1,0x40)>>6;
-			reserved = getInt(data,offset+4,1,0x3F);
-			if(active_format_flag==1){
-				reserved2= getInt(data,offset+5,1,0xF0)>>4;
-				active_format = getInt(data,offset+5,1,MASK_4BITS);
-			}
+				reserved = getInt(data,offset+4,1,0x3F);
+				if(active_format_flag==1){
+					reserved2= getInt(data,offset+5,1,0xF0)>>4;
+					active_format = getInt(data,offset+5,1,MASK_4BITS);
+				}
 		}
 		if(indexOf(data, new byte[]{0x47,0x41,0x39,0x34}, offset)==offset){ // GA94
 			isDVB1data = true;
@@ -278,7 +284,7 @@ public class AuxiliaryData implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Auxilary data",data,offset, len,isAFD?"Active Format Description":null));
 		t.add(new DefaultMutableTreeNode(new KVP("user_identifier",user_identifier,null)));
 		if(isAFD){
@@ -355,6 +361,76 @@ public class AuxiliaryData implements TreeNode{
 		default:
 			return "unknown/error";
 		}
+	}
+
+
+	public byte[] getData() {
+		return data;
+	}
+
+
+	public int getOffset() {
+		return offset;
+	}
+
+
+	public int getLen() {
+		return len;
+	}
+
+
+	public byte[] getUser_identifier() {
+		return user_identifier;
+	}
+
+
+	public boolean isAFD() {
+		return isAFD;
+	}
+
+
+	public int getActive_format_flag() {
+		return active_format_flag;
+	}
+
+
+	public int getReserved() {
+		return reserved;
+	}
+
+
+	public int getReserved2() {
+		return reserved2;
+	}
+
+
+	public int getActive_format() {
+		return active_format;
+	}
+
+
+	public boolean isDVB1data() {
+		return isDVB1data;
+	}
+
+
+	public int getUser_data_type_code() {
+		return user_data_type_code;
+	}
+
+
+	public byte[] getUser_data_type_structure() {
+		return user_data_type_structure;
+	}
+
+
+	public BarData getBarData() {
+		return barData;
+	}
+
+
+	public CCData getCcData() {
+		return ccData;
 	}
 
 }
