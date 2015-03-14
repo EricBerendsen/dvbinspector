@@ -27,8 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.system_clock_frequency;
+import static nl.digitalekabeltelevisie.util.Utils.getUnsignedByte;
+import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
 import java.util.Formatter;
 import java.util.logging.Logger;
@@ -236,7 +237,7 @@ public class PID implements TreeNode{
 		AdaptationField adaptationField = null;
 		try{
 			adaptationField = packet.getAdaptationField();
-		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
+		}catch(final RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			adaptationField = null;
 		}
 		if(adaptationField!=null) { //Adaptation field present
@@ -354,7 +355,7 @@ public class PID implements TreeNode{
 		}
 		if(parentTransportStream.isEnableTSPackets()&&parentTransportStream.tsPacketsLoaded()){
 
-			JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
+			final JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 
 		}
@@ -455,6 +456,38 @@ public class PID implements TreeNode{
 
 	public boolean isScrambled() {
 		return scrambled;
+	}
+
+	public GeneralPesHandler getGeneralPesHandler() {
+		return generalPesHandler;
+	}
+
+	public long getContinuity_errors() {
+		return continuity_errors;
+	}
+
+	public PCR getLastPCR() {
+		return lastPCR;
+	}
+
+	public PCR getFirstPCR() {
+		return firstPCR;
+	}
+
+	public long getLastPCRpacketNo() {
+		return lastPCRpacketNo;
+	}
+
+	public long getFirstPCRpacketNo() {
+		return firstPCRpacketNo;
+	}
+
+	public long getPcr_count() {
+		return pcr_count;
+	}
+
+	public GatherPIDData getGatherer() {
+		return gatherer;
 	}
 
 }
