@@ -164,7 +164,8 @@ public final class Iso6937ToUnicode {
 			return 0x00A2; // 10/02 CENT SIGN
 		case 0xA3:
 			return 0x00A3; // 10/03 POUND SIGN
-			// 10/04 (This position shall not be used)
+		case 0xA4:
+			return 0x20AC; // 10/03 EURO SIGN €
 		case 0xA5:
 			return 0x00A5; // 10/05 YEN SIGN
 			// 10/06 (This position shall not be used)
