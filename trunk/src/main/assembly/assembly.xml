@@ -36,7 +36,7 @@
     </fileSet>
     <fileSet>
       <!-- TODO: use expresssions instead: ${project.build.sourceDirectory}, etc -->
-      <directory>${project.basedir}/src</directory>
+      <directory>${project.basedir}/src/main</directory>
       <useDefaultExcludes>true</useDefaultExcludes>
     </fileSet>
     
