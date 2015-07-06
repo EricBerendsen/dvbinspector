@@ -25,7 +25,7 @@
  *
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension;
+package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
@@ -36,12 +36,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
-public class TargetRegionNameDescriptor extends ExtensionDescriptor {
+public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 
 
 

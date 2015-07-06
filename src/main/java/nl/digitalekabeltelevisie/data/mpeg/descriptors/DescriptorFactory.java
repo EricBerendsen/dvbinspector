@@ -40,10 +40,13 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationLo
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationBoundaryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.SupplementaryAudioDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.T2DeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.TargetRegionDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.TargetRegionNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.DVBExtensionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SupplementaryAudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.MPEGExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.INTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACPlatformNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACPlatformProviderNameDescriptor;
@@ -306,6 +309,12 @@ public final class DescriptorFactory {
 		case 0x32:
 			d = new JPEG2000VideoDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x38:
+			d = new HEVCVideoDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x3F:
+			d = getMPEGExtendedDescriptor(data, offset, tableSection, t);
+			break;
 		default:
 			d = new Descriptor(data, t + offset, tableSection);
 			logger.info("Not implemented descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
@@ -314,6 +323,26 @@ public final class DescriptorFactory {
 					+ ",) data=" + d.getRawDataString());
 			break;
 		}
+		return d;
+	}
+	
+	private static MPEGExtensionDescriptor getMPEGExtendedDescriptor(final byte[] data, final int offset,
+			final TableSection tableSection, final int t) {
+
+		MPEGExtensionDescriptor d;
+		final int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
+		switch(descriptor_tag_extension){
+		
+		case 0x03:
+			d = new HEVCTimingAndHRDDescriptor(data, t + offset, tableSection);
+			break;
+		default:
+			d = new MPEGExtensionDescriptor(data, t + offset, tableSection);
+			logger.warning("unimplemented MPEGExtensionDescriptor:" +
+					d.getDescriptorTagString() +
+					", TableSection:" + tableSection);
+		}
+
 		return d;
 	}
 
@@ -460,7 +489,7 @@ public final class DescriptorFactory {
 			d = new FTAContentManagmentDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x7F:
-			d = getExtendedDescriptor(data, offset, tableSection, t);
+			d = getDVBExtendedDescriptor(data, offset, tableSection, t);
 			break;
 
 
@@ -483,10 +512,10 @@ public final class DescriptorFactory {
 	 * @param t
 	 * @return
 	 */
-	public static ExtensionDescriptor getExtendedDescriptor(final byte[] data, final int offset,
+	private static DVBExtensionDescriptor getDVBExtendedDescriptor(final byte[] data, final int offset,
 			final TableSection tableSection, final int t) {
 
-		ExtensionDescriptor d;
+		DVBExtensionDescriptor d;
 		final int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
 		switch(descriptor_tag_extension){
 
@@ -497,7 +526,7 @@ public final class DescriptorFactory {
 			d = new SupplementaryAudioDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x08:
-			d = new nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.MessageDescriptor(data, t + offset, tableSection);
+			d = new nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.MessageDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x09:
 			d = new TargetRegionDescriptor(data, t + offset, tableSection);
@@ -509,10 +538,10 @@ public final class DescriptorFactory {
 
 
 		default:
-			logger.warning("unimplemented ExtendsionDescriptor:" +
-					ExtensionDescriptor.getDescriptorTagString(descriptor_tag_extension) +
+			d = new DVBExtensionDescriptor(data, t + offset, tableSection);
+			logger.warning("unimplemented DVBExtensionDescriptor:" +
+					d.getDescriptorTagString() +
 					", TableSection:" + tableSection);
-			d = new ExtensionDescriptor(data, t + offset, tableSection);
 		}
 
 		return d;

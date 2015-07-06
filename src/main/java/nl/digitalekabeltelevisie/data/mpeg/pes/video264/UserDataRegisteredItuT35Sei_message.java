@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -50,7 +50,7 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 	/**
 	 * @param bitSource
 	 */
-	public UserDataRegisteredItuT35Sei_message(BitSource bitSource) {
+	public UserDataRegisteredItuT35Sei_message(final BitSource bitSource) {
 		super(bitSource);
 		int i=0;
 
@@ -73,7 +73,7 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
 		s.add(new DefaultMutableTreeNode(new KVP("UserDataRegisteredItuT35Sei_message")));
 		s.add(new DefaultMutableTreeNode(new KVP("itu_t_t35_country_code",itu_t_t35_country_code,Utils.getItu35CountryCodeString(itu_t_t35_country_code))));
@@ -87,6 +87,26 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 
 		}
 		return s;
+	}
+
+
+	public int getItu_t_t35_country_code() {
+		return itu_t_t35_country_code;
+	}
+
+
+	public int getItu_t_t35_country_code_extension_byte() {
+		return itu_t_t35_country_code_extension_byte;
+	}
+
+
+	public int getItu_t_t35_provider_code() {
+		return Itu_t_t35_provider_code;
+	}
+
+
+	public AuxiliaryData getAuxData() {
+		return auxData;
 	}
 
 }

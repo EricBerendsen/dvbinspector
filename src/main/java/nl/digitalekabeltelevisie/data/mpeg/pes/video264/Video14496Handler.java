@@ -29,27 +29,21 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.ChartLabel;
-import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.CategoryLabelPositions;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.*;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.StackedBarRenderer;
 import org.jfree.data.general.DefaultKeyedValues2DDataset;
@@ -58,85 +52,8 @@ import org.jfree.data.general.DefaultKeyedValues2DDataset;
  * @author Eric Berendsen
  *
  */
-public class Video14496Handler extends GeneralPesHandler implements ImageSource{
+public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUnit> implements ImageSource{
 
-
-	/**
-	 * Meta Iterator to iterate over all NALUnits in this PES stream, regardless of grouping in PES Packets
-	 *
-	 * In general this does not work for streams with no alignment, So every NALUnit should be contained in a PES packet.
-	 *
-	 * @author Eric
-	 *
-	 */
-	private class NALUnitIterator{
-
-		Iterator<PesPacketData> pesIterator = null;
-		NALUnit nextSection = null;
-		private Iterator<NALUnit> sectionIter;
-
-		public NALUnitIterator() {
-			pesIterator = pesPackets.iterator();
-			sectionIter = getNextSectionIter();
-			if(sectionIter!=null){
-				nextSection = sectionIter.next();
-			}
-		}
-
-		private Iterator<NALUnit> getNextSectionIter(){
-
-			Iterator<NALUnit> result = null;
-			do {
-				Video14496PESDataField pesPacket = (Video14496PESDataField )pesIterator.next();
-				result = pesPacket.getNalUnits().iterator();
-
-			} while (((result==null)||!result.hasNext())&&(pesIterator.hasNext()));
-			return result;
-
-		}
-
-		public NALUnit next() {
-			NALUnit result = nextSection;
-			if((sectionIter!=null)&&sectionIter.hasNext()){
-				nextSection = sectionIter.next();
-			}else if(pesIterator.hasNext()){
-				sectionIter= getNextSectionIter();
-				if(sectionIter.hasNext()){
-					nextSection = sectionIter.next();
-				}else{
-					nextSection = null;
-				}
-			}else{
-				nextSection = null;
-			}
-
-			return result;
-		}
-
-
-	}
-
-
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
-	 */
-	@Override
-	public void processPesDataBytes(final PesPacketData pesData){
-		pesPackets.add(new Video14496PESDataField(pesData));
-
-	}
-
-
-
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
-	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES Data",this));
-		addListJTree(s,pesPackets,modus,"PES Packets");
-
-		return s;
-	}
 
 
 	/* (non-Javadoc)
@@ -146,16 +63,16 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 	public BufferedImage getImage() {
 
 		ChartLabel label = null;
-		List<int[]> frameSize  = new ArrayList<int[]>();
-		List<ChartLabel> labels = new ArrayList<ChartLabel>();
+		final List<int[]> frameSize  = new ArrayList<int[]>();
+		final List<ChartLabel> labels = new ArrayList<ChartLabel>();
 
 		int[] accessUnitData = new int[6]; // 0= P, 1 = B, 2 = I, 3 = SP, 4 = SI (all mod 5), 5 = Filler data
 		int count = 0;
 
-		NALUnitIterator nalIter = new NALUnitIterator();
+		final NALUnitIterator nalIter = new NALUnitIterator();
 		NALUnit unit = nalIter.next();
 		while(unit!=null){
-			RBSP rbsp = unit.getRbsp();
+			final RBSP rbsp = unit.getRbsp();
 			if(rbsp!=null){
 				if(( rbsp instanceof Access_unit_delimiter_rbsp) ||
 						( rbsp instanceof Seq_parameter_set_rbsp) ||
@@ -170,33 +87,33 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 					}
 					accessUnitData = new int[6];
 				}else if( rbsp instanceof Slice_layer_without_partitioning_rbsp){
-					Slice_header header = ((Slice_layer_without_partitioning_rbsp)rbsp).getSlice_header();
-					int slice_type = header.getSlice_type();
-					int size = unit.getNumBytesInRBSP();
+					final Slice_header header = ((Slice_layer_without_partitioning_rbsp)rbsp).getSlice_header();
+					final int slice_type = header.getSlice_type();
+					final int size = unit.getNumBytesInRBSP();
 					accessUnitData[slice_type%5] += size;
 				}else if( rbsp instanceof Filler_data_rbsp){
-					int size = unit.getNumBytesInRBSP();
+					final int size = unit.getNumBytesInRBSP();
 					accessUnitData[5] += size;
 				}
 			}
 			unit =  nalIter.next();
 		}
 
-		DefaultKeyedValues2DDataset dataset = new DefaultKeyedValues2DDataset();
+		final DefaultKeyedValues2DDataset dataset = new DefaultKeyedValues2DDataset();
 
 
 		for (int i = 0; i < 6; i++) {
-			String type=getSlice_typeString(i);
-			Iterator<int[]> frameSizeIter = frameSize.iterator();
-			for(ChartLabel l:labels){
+			final String type=getSlice_typeString(i);
+			final Iterator<int[]> frameSizeIter = frameSize.iterator();
+			for(final ChartLabel l:labels){
 				if(frameSizeIter.hasNext()){
-					int[] v = frameSizeIter.next();
+					final int[] v = frameSizeIter.next();
 					dataset.setValue(v[i], type,l);
 				}
 			}
 		}
 
-		StackedBarRenderer renderer = new StackedBarRenderer();
+		final StackedBarRenderer renderer = new StackedBarRenderer();
 		renderer.setShadowVisible(false);
 		renderer.setDrawBarOutline(false);
 		renderer.setItemMargin(0.0);
@@ -216,10 +133,26 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 		final ValueAxis valueAxis = new NumberAxis("frame size (bytes)");
 
 		final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, renderer);
-		String title = getPID().getShortLabel()+" (Access Units, Transmission Order)";
-		JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, true	);
+		final String title = getPID().getShortLabel()+" (Access Units, Transmission Order)";
+		final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, true	);
 
 		return chart.createBufferedImage(( frameSize.size()*18)+100, 640);
+	}
+
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES Data",this));
+		addListJTree(s,pesPackets,modus,"PES Packets");
+
+		return s;
+	}
+
+
+	/**
+	 * @param pesData
+	 * @return
+	 */
+	protected Video14496PESDataField createH26xPESDataField(final PesPacketData pesData) {
+		return new Video14496PESDataField(pesData);
 	}
 
 
@@ -227,8 +160,8 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 	 * @param accessUnitData
 	 * @return
 	 */
-	private boolean notZero(int[] accessUnitData) {
-		for (int i : accessUnitData) {
+	private boolean notZero(final int[] accessUnitData) {
+		for (final int i : accessUnitData) {
 			if(i!=0){
 				return true;
 			}
@@ -238,7 +171,7 @@ public class Video14496Handler extends GeneralPesHandler implements ImageSource{
 	}
 
 
-	private static String getSlice_typeString(int slice_type){
+	private static String getSlice_typeString(final int slice_type){
 		switch (slice_type) {
 		case  0: return "P";
 		case  1 : return "B";
