@@ -818,7 +818,7 @@ public final class Utils {
 	}
 
 	public static String getStreamTypeString(final int tag){
-		if((0x22<=tag)&&(tag<=0x7e)){
+		if((0x27<=tag)&&(tag<=0x7e)){
 			return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
 
@@ -870,6 +870,9 @@ public final class Utils {
 		case 0x21: return"J2K Video stream conforming to one or more profiles as defined in ITU-T Rec T.800 | ISO/IEC 15444-1";
 		case 0x22: return"Additional view Rec. ITU-T H.262 | ISO/IEC 13818-2 video stream for service-compatible stereoscopic 3D services";
 		case 0x23: return"Additional view Rec. ITU-T H.264 | ISO/IEC 14496-10 video stream conforming to one or more profiles defined in Annex A for service-compatible stereoscopic 3D services";
+		case 0x24: return"ITU-T H.265 | ISO/IEC 23008-2 video stream or an HEVC temporal video sub-bitstream";
+		case 0x25: return"HEVC temporal video subset of an HEVC video stream conforming to one or more profiles defined in Annex A of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		case 0x26: return"MVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
 		case 0x7f: return"IPMP stream";
 
 		default:
@@ -950,7 +953,7 @@ public final class Utils {
 
 	public static String getStreamTypeShortString(final int tag){
 
-		if((0x22<=tag)&&(tag<=0x7e)){
+		if((0x27<=tag)&&(tag<=0x7e)){
 			return "ISO/IEC 13818-1 Reserved";
 		}
 
@@ -999,6 +1002,11 @@ public final class Utils {
 		/* ISO/IEC 13818-1:2007/FPDAM5 */
 		case 0x20: return"MVC video sub-bitstream";
 		case 0x21: return"J2K Video stream";
+		case 0x22: return"H.262 video stream for 3D services";
+		case 0x23: return"H.264 video stream for 3D services";
+		case 0x24: return"H.265 video stream or an HEVC temporal video sub-bitstream";
+		case 0x25: return"H.265 temporal video subset";
+		case 0x26: return"MVCD video sub-bitstream of an AVC video stream";
 		case 0x7f: return"IPMP stream";
 
 		default:
@@ -1971,7 +1979,6 @@ public final class Utils {
 	public static StringBuilder getChildrenAsHTML(final DefaultMutableTreeNode dmtn) {
 		final String lineSep = "<br>";
 		final StringBuilder res = new StringBuilder();
-		final KVP kvp = (KVP)dmtn.getUserObject();
 		@SuppressWarnings("rawtypes")
 		final Enumeration children = dmtn.children();
 		while(children.hasMoreElements()){
