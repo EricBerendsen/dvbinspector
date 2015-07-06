@@ -25,7 +25,7 @@
  *
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
+package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
@@ -42,12 +42,12 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xPESDataField;
  *
  */
 
-public class Video14496PESDataField extends H26xPESDataField<NALUnit> implements TreeNode {
+public class Video265PESDataField extends H26xPESDataField<H265NALUnit> implements TreeNode {
 
-	private static final Logger	logger	= Logger.getLogger(Video14496PESDataField.class.getName());
+	private static final Logger	logger	= Logger.getLogger(Video265PESDataField.class.getName());
 
 
-	public Video14496PESDataField(final PesPacketData pesPacket) {
+	public Video265PESDataField(final PesPacketData pesPacket) {
 		super(pesPacket);
 
 	}
@@ -67,8 +67,8 @@ public class Video14496PESDataField extends H26xPESDataField<NALUnit> implements
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.video264.H26xPESDataField#createInstance(byte[], int, int)
 	 */
 	@Override
-	protected NALUnit createNALUnitInstance(final byte[] data, final int i, final int j) {
-		return new NALUnit(data, i, j);
+	protected H265NALUnit createNALUnitInstance(final byte[] data, final int i, final int j) {
+		return new H265NALUnit(data, i, j);
 	}
 
 

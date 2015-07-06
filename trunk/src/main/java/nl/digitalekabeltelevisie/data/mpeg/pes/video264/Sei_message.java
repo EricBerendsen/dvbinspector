@@ -29,8 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Sei_message implements TreeNode{
@@ -43,7 +42,7 @@ public class Sei_message implements TreeNode{
 	int last_payload_size_byte;
 	byte[] payload;
 
-	public Sei_message(BitSource bitSource) {
+	public Sei_message(final BitSource bitSource) {
 
 		payloadType = 0;
 		while( bitSource.nextBits(8) == 0xFF ) {
@@ -67,7 +66,7 @@ public class Sei_message implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("sei_message ("+getPayloadTypeString(payloadType)+")"));
 		s.add(new DefaultMutableTreeNode(new KVP("payloadType",payloadType,getPayloadTypeString(payloadType))));
 		s.add(new DefaultMutableTreeNode(new KVP("payloadSize",payloadSize,null)));
@@ -75,7 +74,7 @@ public class Sei_message implements TreeNode{
 		return s;
 	}
 
-	public static String getPayloadTypeString(int payloadType){
+	public static String getPayloadTypeString(final int payloadType){
 		switch (payloadType) {
 		case 0: return "buffering_period";
 		case 1: return "pic_timing";
@@ -123,6 +122,15 @@ public class Sei_message implements TreeNode{
 		case 43: return "operation_points_not_present";
 		case 44: return "base_view_temporal_hrd";
 		case 45: return "frame_packing_arrangement";
+		case 46: return "multiview_view_position"; /* specified in Annex H Rec. ITU-T H.264 (02/2014)*/
+		case 47: return "display_orientation";
+		case 48: return "mvcd_scalable_nesting"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
+		case 49: return "mvcd_view_scalability_info"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
+		case 50: return "depth_representation_info"; /* specified in Annex I */
+		case 51: return "three_dimensional_reference_displays_info"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
+		case 52: return "depth_timing"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
+		case 53: return "depth_sampling_info"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
+		case 54: return "constrained_depth_parameter_set_identifier";
 
 
 

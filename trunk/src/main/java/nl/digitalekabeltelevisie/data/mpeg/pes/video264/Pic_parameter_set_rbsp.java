@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
 public class Pic_parameter_set_rbsp extends RBSP {
 

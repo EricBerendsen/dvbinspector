@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Seq_parameter_set_rbsp extends RBSP {
@@ -259,20 +260,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		default:
 			return "unknown";
 		}
-	}
-
-	public static String getChroma_format_idcString(int chroma_format_idc){
-		switch (chroma_format_idc) {
-		case 0: return "monochrome";
-		case 1: return "4:2:0";
-		case 2: return "4:2:2";
-		case 3: return "4:4:4";
-
-
-		default:
-			return "error";
-		}
-
 	}
 
 	public int getProfile_idc() {

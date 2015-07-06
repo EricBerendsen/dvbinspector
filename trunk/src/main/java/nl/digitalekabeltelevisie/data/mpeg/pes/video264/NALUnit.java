@@ -26,64 +26,45 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
-import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
 
-public class NALUnit implements TreeNode {
+public class NALUnit extends AbstractNALUnit implements TreeNode {
 
-	private static final Logger	logger	= Logger.getLogger(NALUnit.class.getName());
-	private final byte[] bytes;
-	private final int offset;
-	private final int numBytesInNALunit;
-	
 	private final int forbidden_zero_bit;
 	private final int nal_ref_idc;
 	private final int nal_unit_type;
-	protected BitSource bs;
-	
-	private final byte[]rbsp_byte;
-	private int numBytesInRBSP=0;
-	
-	private RBSP rbsp = null;
-
-
 	/**
 	 * @param bytes
 	 * @param offset
 	 * @param len
 	 */
-	public NALUnit(byte[] bytes, int offset, int len) {
-		super();
-		this.bytes = bytes;
-		this.offset = offset;
-		this.numBytesInNALunit = len;
-		rbsp_byte = new byte[len]; // max len, maybe a bit shorter
-		
-		
-		bs = new BitSource(bytes, offset);
+	public NALUnit(final byte[] bytes, final int offset, final int len) {
+		super(bytes, offset, len);
+
 		this.forbidden_zero_bit = bs.readBits(1);
-		
+
 		this.nal_ref_idc = bs.readBits(2);
 		this.nal_unit_type = bs.readBits(5);
-		
-		
-		numBytesInRBSP = 0;
-		for(int i = 1; i < numBytesInNALunit; i++ ) {
-			if( i + 2 < numBytesInNALunit && bs.nextBits(24) == 0x000003 ) {
-				rbsp_byte[ numBytesInRBSP++ ]=bs.readSignedByte(8); // All b(8)
-				rbsp_byte[ numBytesInRBSP++ ]=bs.readSignedByte(8);// All b(8)
-				i += 2;
-				/* emulation_prevention_three_byte =*/ bs.readSignedByte(8); // equal to 0x03 */ All f(8) ignore result
-			} else{
-				rbsp_byte[ numBytesInRBSP++ ]= bs.readSignedByte(8);
-			}
-		}
-		
+
+
+		readRBSPBytes();
+
+		createRBSP();
+
+
+
+	}
+
+
+	/**
+	 * 
+	 */
+	@Override
+	protected void createRBSP() {
 		if(nal_unit_type==1){
 			rbsp=new Slice_layer_without_partitioning_rbsp(rbsp_byte, numBytesInRBSP);
 		}else if(nal_unit_type==5){
@@ -101,13 +82,10 @@ public class NALUnit implements TreeNode {
 		}else{
 			logger.warning("not implemented nal_unit_type: "+nal_unit_type);
 		}
-		
-		
 	}
 
 
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NALUnit ("+getNALUnitTypeString(nal_unit_type)+")"));
 		t.add(new DefaultMutableTreeNode(new KVP("bytes",bytes,offset,numBytesInNALunit,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("numBytesInNALunit",numBytesInNALunit,null)));
@@ -122,8 +100,8 @@ public class NALUnit implements TreeNode {
 		return t;
 	}
 
-	
-	public static String getNALUnitTypeString(final int nal_unit_type) {
+
+	public String getNALUnitTypeString(final int nal_unit_type) {
 
 		switch (nal_unit_type) {
 		case 0: return "Unspecified";
@@ -139,49 +117,29 @@ public class NALUnit implements TreeNode {
 		case 10 : return "End of sequence";
 		case 11 : return "End of stream";
 		case 12 : return "Filler data";
+		case 13 : return "Sequence parameter set extension";
+		case 14 : return "Prefix NAL unit";
+		case 15 : return "Subset sequence parameter set";
+		case 16 : return "Depth parameter set";
+		case 19 : return "Coded slice of an auxiliary coded picture without partitioning";
+		case 20 : return "Coded slice extension";
+		case 21 : return "Coded slice extension for a depth view component or a 3D-AVC texture view component";
+
 		default:
 			return "reserved";
 		}
 	}
 
-
-	public byte[] getBytes() {
-		return bytes;
-	}
-
-
-	public int getNumBytesInNALunit() {
-		return numBytesInNALunit;
-	}
-
-
 	public int getForbidden_zero_bit() {
 		return forbidden_zero_bit;
 	}
-
 
 	public int getNal_ref_idc() {
 		return nal_ref_idc;
 	}
 
-
 	public int getNal_unit_type() {
 		return nal_unit_type;
-	}
-
-
-	public byte[] getRbsp_byte() {
-		return rbsp_byte;
-	}
-
-
-	public int getNumBytesInRBSP() {
-		return numBytesInRBSP;
-	}
-
-
-	public RBSP getRbsp() {
-		return rbsp;
 	}
 
 }

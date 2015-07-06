@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,7 +34,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
-public class ExtensionDescriptor extends Descriptor {
+public abstract class ExtensionDescriptor extends Descriptor {
 
 	protected final int descriptor_tag_extension;
 	protected final byte[] selector_byte;
@@ -49,60 +49,16 @@ public class ExtensionDescriptor extends Descriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("descriptor_tag_extension",descriptor_tag_extension,getDescriptorTagString(descriptor_tag_extension))));
+		t.add(new DefaultMutableTreeNode(new KVP("descriptor_tag_extension",descriptor_tag_extension,getDescriptorTagString())));
 		t.add(new DefaultMutableTreeNode(new KVP("selector_byte",selector_byte,null)));
 
 		return t;
 	}
 
 	public String getDescriptorname() {
-		return getDescriptorname(descriptorTag, parentTableSection)+" ("+getDescriptorTagString(descriptor_tag_extension)+")";
+		return getDescriptorname(descriptorTag, parentTableSection)+" ("+getDescriptorTagString()+")";
 	}
 
-
-	public static String getDescriptorTagString(final int descriptor_tag_extension) {
-		switch (descriptor_tag_extension) {
-
-		case 0x0:
-			return "image_icon_descriptor";
-		case 0x1:
-			return "cpcm_delivery_signalling_descriptor";
-		case 0x2:
-			return "CP_descriptor";
-		case 0x3:
-			return "CP_identifier_descriptor";
-		case 0x4:
-			return "T2_delivery_system_descriptor";
-		case 0x5:
-			return "SH_delivery_system_descriptor";
-		case 0x6:
-			return "supplementary_audio_descriptor";
-		case 0x7:
-			return "network_change_notify_descriptor";
-		case 0x8:
-			return "message_descriptor";
-		case 0x9:
-			return "target_region_descriptor";
-		case 0xa:
-			return "target_region_name_descriptor";
-		case 0xb:
-			return "service_relocated_descriptor";
-		case 0xc:
-			return "XAIT_PID_descriptor";
-		case 0xd:
-			return "C2_delivery_system_descriptor";
-		case 0x10:
-			return "video_depth_range_descriptor";
-		case 0x11:
-			return "T2MI_descriptor";
-		case 0x13:
-			return "URI_linkage_descriptor";
-		case 0x14:
-			return "BCI_ancillary_data_descriptor";
-
-		default:
-			return "reserved for future use";
-		}
-	}
+	public abstract String getDescriptorTagString();
 
 }

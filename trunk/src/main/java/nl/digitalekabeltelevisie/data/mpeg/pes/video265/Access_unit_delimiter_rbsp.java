@@ -25,7 +25,7 @@
  * 
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
+package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -33,41 +33,37 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
 public class Access_unit_delimiter_rbsp extends RBSP {
-	
-	private final int primary_pic_type;
 
-	protected Access_unit_delimiter_rbsp(byte[] rbsp_bytes, int numBytesInRBSP) {
+	private final int pic_type;
+	private final int available;
+
+	protected Access_unit_delimiter_rbsp(final byte[] rbsp_bytes, final int numBytesInRBSP) {
 		super(rbsp_bytes, numBytesInRBSP);
-		primary_pic_type = bitSource.u(3);
+		pic_type = bitSource.u(3);
+
+		available = bitSource.available();
+
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("access_unit_delimiter_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("primary_pic_type",primary_pic_type,getPrimaryPicTypeString(primary_pic_type))));
+		t.add(new DefaultMutableTreeNode(new KVP("pic_type",pic_type,getPrimaryPicTypeString(pic_type))));
+		t.add(new DefaultMutableTreeNode(new KVP("available bits left in bitSource (should be 0)",available,null)));
+
 		return t;
 	}
 
-	
-	public static String getPrimaryPicTypeString(final int primary_pic_type) {
 
-		StringBuilder r = new StringBuilder("slice_type values that may be present in the primary coded picture: ");
-		switch (primary_pic_type) {
+	public static String getPrimaryPicTypeString(final int pic_type) {
+
+		final StringBuilder r = new StringBuilder("slice_type values that may be present in the coded picture: ");
+		switch (pic_type) {
 		case 0 : r.append("I");
-			break;
-		case 1 : r.append( "I, P");
 		break;
-		case 2 : r.append( "I, P, B");
+		case 1 : r.append( "P, I");
 		break;
-		case 3 : r.append( "SI");
-		break;
-		case 4 : r.append( "SI, SP");
-		break;
-		case 5 : r.append( "I, SI");
-		break;
-		case 6 : r.append( "I, SI, P, SP");
-		break;
-		case 7 : r.append( "I, SI, P, SP, B");
+		case 2 : r.append( "B, P, I");
 		break;
 		default:
 			return "unknown";
@@ -75,8 +71,9 @@ public class Access_unit_delimiter_rbsp extends RBSP {
 		return r.toString();
 	}
 
-	public int getPrimary_pic_type() {
-		return primary_pic_type;
+	public int getPic_type() {
+		return pic_type;
 	}
+
 
 }

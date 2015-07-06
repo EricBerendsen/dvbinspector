@@ -25,28 +25,30 @@
  *
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension;
+package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
-public class T2DeliverySystemDescriptor extends ExtensionDescriptor {
+public class MessageDescriptor extends DVBExtensionDescriptor {
 
 
-	// T2 delivery descriptor 0x04
+	//Supplementary audio descriptor
+	private final int message_id;
+	private final String iso639LanguageCode;
+	private final String message;
 
-	private final int plp_id;
-	private final int t2_system_id;
 
-	public T2DeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
+
+	public MessageDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
-		plp_id = getInt(b, offset+3, 1, MASK_8BITS);
-		t2_system_id = getInt(b, offset+4, 2, MASK_16BITS);
+		message_id = getInt(b, offset+3, 1, MASK_8BITS);
+		iso639LanguageCode = getISO8859_1String(b, offset+4, 3);
+		message = getString(b, offset+7, descriptorLength -5);
 	}
 
 
@@ -54,13 +56,11 @@ public class T2DeliverySystemDescriptor extends ExtensionDescriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("plp_id",plp_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("T2_system_id",t2_system_id,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("message_id",message_id,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("iso639LanguageCode",iso639LanguageCode,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("message",message,null)));
 
 		return t;
 	}
-
-
-
 
 }
