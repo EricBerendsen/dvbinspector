@@ -54,9 +54,9 @@ public class BitSource {
 
 
 	public static final int[] powerOf2 = {1,2,4,8, 16,32,64,128,
-										 256,512,1024,2048, 4096,8192,16384,32768,
-										 65536,131072,262144,524288, 1048576,2097152,4194304,8388608,
-										 16777216,33554432,67108864,134217728, 268435456, 536870912,1073741824};
+		256,512,1024,2048, 4096,8192,16384,32768,
+		65536,131072,262144,524288, 1048576,2097152,4194304,8388608,
+		16777216,33554432,67108864,134217728, 268435456, 536870912,1073741824};
 
 	/**
 	 * @param bytes bytes from which this will read bits. Bits will be read starting from the offset byte first.
@@ -87,6 +87,52 @@ public class BitSource {
 		}
 
 		int result = 0;
+
+		// First, read remainder from current byte
+		if (bitOffset > 0) {
+			final int bitsLeft = 8 - bitOffset;
+			final int toRead = numBits < bitsLeft ? numBits : bitsLeft;
+			final int bitsToNotRead = bitsLeft - toRead;
+			final int mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
+			result = (bytes[byteOffset] & mask) >> bitsToNotRead;
+			numBits -= toRead;
+			bitOffset += toRead;
+			if (bitOffset == 8) {
+				bitOffset = 0;
+				byteOffset++;
+			}
+		}
+
+		// Next read whole bytes
+		while (numBits >= 8) {
+			result = (result << 8) | (bytes[byteOffset] & 0xFF);
+			byteOffset++;
+			numBits -= 8;
+		}
+
+		// Finally read a partial byte
+		if (numBits > 0) {
+			final int bitsToNotRead = 8 - numBits;
+			final int mask = (0xFF >> bitsToNotRead) << bitsToNotRead;
+			result = (result << numBits) | ((bytes[byteOffset] & mask) >> bitsToNotRead);
+			bitOffset += numBits;
+		}
+
+		return result;
+	}
+
+	/**
+	 * read bits from source, consuming them (no longer available)
+	 * @param bits number of bits to read
+	 * @return
+	 */
+	public long readBitsLong(final int bits) {
+		int numBits = bits;
+		if ((numBits < 0) || (numBits > 64)) {
+			throw new IllegalArgumentException();
+		}
+
+		long result = 0;
 
 		// First, read remainder from current byte
 		if (bitOffset > 0) {
@@ -158,7 +204,7 @@ public class BitSource {
 
 		// Next read whole bytes
 		result = new DVBString(bytes, byteOffset);
-		int noBytes = result.getLength() + 1;
+		final int noBytes = result.getLength() + 1;
 		byteOffset+=noBytes;
 
 
@@ -175,6 +221,14 @@ public class BitSource {
 
 	public int getNextFullByteOffset() {
 		return (bitOffset == 0)? byteOffset : (byteOffset +1);
+	}
+
+
+	// TODO
+	public String getBits(){
+		final StringBuilder b = new StringBuilder();
+
+		return b.toString();
 	}
 
 	/**
@@ -228,7 +282,7 @@ public class BitSource {
 		return result;
 	}
 
-	public int readSignedInt(int numBits) {
+	public int readSignedInt(final int numBits) {
 		if (numBits < 2) {
 			throw new IllegalArgumentException("signed int should be at least 2 bits");
 		}
@@ -243,32 +297,32 @@ public class BitSource {
 		return i;
 	}
 
-	public byte readSignedByte(int numBits) {
+	public byte readSignedByte(final int numBits) {
 		if (numBits < 2) {
 			throw new IllegalArgumentException("signed byte should be at least 2 bits");
 		}
 		if (numBits >8) {
 			throw new IllegalArgumentException("signed byte can have at most 8 bits");
 		}
-		int i = readSignedInt(numBits);
+		final int i = readSignedInt(numBits);
 
 
 		return (byte)i;
 	}
 
 	// unsigned integer using n bits
-	public int u(int v){
+	public int u(final int v){
 		return readBits(v);
 	}
 
 	// signed integer using n bits
-	public int i(int v){
+	public int i(final int v){
 		return readSignedInt(v);
 	}
 
 	// fixed-pattern bit string using n bits written (from left to right) with the left bit first. The parsing process for
 	// this descriptor is specified by the return value of the function read_bits( n ).
-	public int f(int v){
+	public int f(final int v){
 		return readBits(v);
 	}
 
@@ -293,15 +347,15 @@ public class BitSource {
 	// h264 9.1.1 Mapping process for signed Exp-Golomb codes
 
 	public int se(){
-		int codeNum = getCodeNum();
-		int absVal = (codeNum+1)/2;
-		int sign = ((codeNum%2)==0)?-1:1;
+		final int codeNum = getCodeNum();
+		final int absVal = (codeNum+1)/2;
+		final int sign = ((codeNum%2)==0)?-1:1;
 		return absVal*sign;
 
 	}
 
 	public String toString(){
-		StringBuilder b = new StringBuilder("BitSource: ");
+		final StringBuilder b = new StringBuilder("BitSource: ");
 		if(bytes!=null){
 			b.append("bytes.length=").append(bytes.length);
 		}else{
