@@ -29,26 +29,17 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.gui.ImageSource;
@@ -193,80 +184,69 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
 	public BufferedImage getImage() {
-		PesHeader pesHeader = getPesHeader();
+		final PesHeader pesHeader = getPesHeader();
 		if((data_identifier==0x20)&& // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
 				(pesHeader.getPts_dts_flags()>=2)){ //Is this a packet that has PTS? If not, it is not meant for display.
 			int width=720;
 			int height=576;
+			int x_offset = 0;
+			int y_offset = 0;
 			if(displayDefinitionSegment!=null){
 				width = displayDefinitionSegment.getDisplayWidth()+1;
 				height = displayDefinitionSegment.getDisplayHeight()+1;
-				// TODO handle display_window_flag and display_window_horizontal_position_minimum, etc
-				// need some test data for it, is it ever used???
+				if(displayDefinitionSegment.getDisplayWindowFlag()==1){
+					x_offset = displayDefinitionSegment.getDisplayWindowHorizontalPositionMinimum();
+					y_offset = displayDefinitionSegment.getDisplayWindowVerticalPositionMinimum();
+
+				}
 			}
-			BufferedImage bgImage = pesHandler.getBGImage(height, width,pesHeader.getPts());
+			final BufferedImage bgImage = pesHandler.getBGImage(height, width,pesHeader.getPts());
 			final BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 			final Graphics2D gd = img.createGraphics();
 			gd.drawImage(bgImage, 0, 0,null);
-			//		gd.setColor(new Color(0x00ff0000));
-			//		gd.fillRect(0, 0, width, height);
 			for (final Segment element: segmentList) {
 				if(element.getSegmentType()==0x10 ){// page composition segment)
 					final PageCompositionSegment pcSegment = (PageCompositionSegment)element;
 					for(final PageCompositionSegment.Region region :pcSegment.getRegions()){
 						final RegionCompositionSegment regionCompositionSegment = regionCompositionsSegments.get(region.getRegion_id());
 						if(regionCompositionSegment!=null){
-							int clutId = regionCompositionSegment.getCLUTId();
-							CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
+							final int clutId = regionCompositionSegment.getCLUTId();
+							final CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
 
 							//fill the region
-								if((regionCompositionSegment.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
-									int index = 0;
-									switch (regionCompositionSegment.getRegionDepth()) {
-									case 1: // 2 bit
-										index = regionCompositionSegment.getRegion2BitPixelCode();
-										break;
-									case 2: // 4 bit. TODO  if the region depth is 8 bit while the region_level_of_compatibility specifies that a 4-bit CLUT is within the minimum requirements.
-										// ETSI EN 300 743 V1.3.1 (2006-11) P 25 bottom.
-										index = regionCompositionSegment.getRegion4BitPixelCode();
-										break;
-									case 3:
-										index = regionCompositionSegment.getRegion8BitPixelCode();
-										break;
-									}
+							if((regionCompositionSegment.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
+								final int index = getPixelCode(regionCompositionSegment);
 
-									IndexColorModel colorModel = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
-									int rgb = colorModel.getRGB(index);
-									Color bgColor = new Color(rgb,true);
-									gd.setColor(bgColor);
-									Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), regionCompositionSegment.getRegionWidth(), regionCompositionSegment.getRegionHeight());
-									gd.fill(rect);
-								}
-								// next line only for debugging..
-								//gd.draw3DRect(region.getRegion_horizontal_address() , region.getRegion_vertical_address(), rc.getRegionWidth(), rc.getRegionHeight(), true);
+								final IndexColorModel colorModel = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
+								final int rgb = colorModel.getRGB(index);
+								final Color bgColor = new Color(rgb,true);
+								gd.setColor(bgColor);
+								final Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), regionCompositionSegment.getRegionWidth(), regionCompositionSegment.getRegionHeight());
+								gd.fill(rect);
+							}
 							for(final RegionCompositionSegment.RegionObject regionObject: regionCompositionSegment.getRegionObjects()){
 								if(clutDefinitionSegment!=null){
 									// This is the colorModel for this region composition segment
 									final IndexColorModel cm = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
 
-									int object_id = regionObject.getObject_id();
-									ObjectDataSegment objectDataSegment = objects.get(object_id);
+									final int object_id = regionObject.getObject_id();
+									final ObjectDataSegment objectDataSegment = objects.get(object_id);
 
 									if(objectDataSegment != null){
 										if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
 											final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
 											final BufferedImage i = new BufferedImage(cm, raster, false, null);
-											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position()+x_offset, region.getRegion_vertical_address()+regionObject.getObject_vertical_position()+y_offset, null);
 										}else if(objectDataSegment.getObjectCodingMethod()==1){
 											final BufferedImage i = new BufferedImage(regionCompositionSegment.getRegionWidth(),regionCompositionSegment.getRegionHeight(),BufferedImage.TYPE_BYTE_INDEXED,cm);
-											Graphics2D graphics = i.createGraphics();
+											final Graphics2D graphics = i.createGraphics();
 											// Font type/size is never defined in standard, this looks OK.
-											Font font = new Font("Arial", Font.BOLD,30);
+											final Font font = new Font("Arial", Font.BOLD,30);
 											graphics.setFont(font);
 											graphics.setColor(new Color(cm.getRGB(regionObject.getForeground_pixel_code())));
 											graphics.setBackground(new Color(cm.getRGB(regionObject.getBackground_pixel_code())));
 											graphics.drawString(objectDataSegment.getCharacter_code_string(), 0, 30);
-											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position(), region.getRegion_vertical_address()+regionObject.getObject_vertical_position(), null);
+											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position()+x_offset, region.getRegion_vertical_address()+regionObject.getObject_vertical_position()+y_offset, null);
 										}
 									}
 								}
@@ -281,6 +261,27 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 		}else{
 			return null;
 		}
+	}
+
+	/**
+	 * @param regionCompositionSegment
+	 * @return
+	 */
+	public int getPixelCode(final RegionCompositionSegment regionCompositionSegment) {
+		int index = 0;
+		switch (regionCompositionSegment.getRegionDepth()) {
+		case 1: // 2 bit
+			index = regionCompositionSegment.getRegion2BitPixelCode();
+			break;
+		case 2: // 4 bit. TODO  if the region depth is 8 bit while the region_level_of_compatibility specifies that a 4-bit CLUT is within the minimum requirements.
+			// ETSI EN 300 743 V1.3.1 (2006-11) P 25 bottom.
+			index = regionCompositionSegment.getRegion4BitPixelCode();
+			break;
+		case 3:
+			index = regionCompositionSegment.getRegion8BitPixelCode();
+			break;
+		}
+		return index;
 	}
 
 	/**
@@ -322,6 +323,8 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 			return "object data segment";
 		case 0x14:
 			return "display definition segment";
+		case 0x15:
+			return "disparity signalling segment";
 		case 0x80:
 			return "end of display set segment";
 		case 0xFF:

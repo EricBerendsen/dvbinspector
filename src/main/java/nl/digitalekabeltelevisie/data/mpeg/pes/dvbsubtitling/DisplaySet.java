@@ -29,27 +29,16 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.awt.image.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
@@ -206,9 +195,18 @@ public class DisplaySet implements TreeNode, ImageSource {
 
 			int width=720;
 			int height=576;
+			int x_offset = 0;
+			int y_offset = 0;
+
 			if(displayDefinitionSegment !=null){
 				width = displayDefinitionSegment.getDisplayWidth()+1;
 				height = displayDefinitionSegment.getDisplayHeight()+1;
+				if(displayDefinitionSegment.getDisplayWindowFlag()==1){
+					x_offset = displayDefinitionSegment.getDisplayWindowHorizontalPositionMinimum();
+					y_offset = displayDefinitionSegment.getDisplayWindowVerticalPositionMinimum();
+
+				}
+
 			}
 			final BufferedImage bgImage = pesHandler.getBGImage(height, width,pts);
 			res = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -223,7 +221,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 						final WritableRaster regionRaste = regionRaster[region.getRegion_id()];
 						final IndexColorModel iColorModel = cluts[regionCompositionSegment.getCLUTId()].getColorModel(regionCompositionSegment.getRegionDepth());
 						final BufferedImage img = new BufferedImage(iColorModel, regionRaste, false, null);
-						resGraphics.drawImage(img, region.getRegion_horizontal_address(), region.getRegion_vertical_address(),null); // no observer
+						resGraphics.drawImage(img, region.getRegion_horizontal_address()+x_offset, region.getRegion_vertical_address()+y_offset,null); // no observer
 					}
 				}
 			}
