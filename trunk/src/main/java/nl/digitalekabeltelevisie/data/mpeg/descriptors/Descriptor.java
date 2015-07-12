@@ -758,7 +758,7 @@ public class Descriptor implements TreeNode {
 
 	}
 
-	public static String getComponentDescriptorString(final int stream_content, final int component_type) {
+	public static String getComponentDescriptorString(final int stream_content,final int stream_content_ext, final int component_type) {
 		switch (stream_content) {
 		case 0x00:
 			return "reserved for future use";
@@ -784,6 +784,33 @@ public class Descriptor implements TreeNode {
 			} else {
 				return "reserved for future use";
 			}
+		case 0x08:
+			if (component_type == 0x00) {
+				return "reserved for future use";
+			} else if (component_type == 0x01) {
+				return "DVB SRM data";
+			}{
+				return "reserved for DVB CPCM modes";
+			}
+		case 0x09:
+			return getComponentType0x09String(stream_content_ext,component_type);
+		case 0x0b:
+			if(stream_content_ext==0xf){
+				if (component_type == 0x00) {
+					return "less than 16:9 aspect ratio";
+				} else if (component_type == 0x01) {
+					return "16:9 aspect ratio";
+				} else if (component_type == 0x02) {
+					return "greater than 16:9 aspect ratio";
+				} else if (component_type == 0x03) {
+					return "plano-stereoscopic top and\r\n" +
+							"bottom (TaB) frame-packing";
+				}else{
+					return "reserved for future use";
+				}
+			}else{
+				return "reserved for future use";
+			}
 		default:
 			if (stream_content < 0x0B) {
 				return "reserved for future use";
@@ -791,6 +818,65 @@ public class Descriptor implements TreeNode {
 				return "user defined";
 			}
 		}
+	}
+
+	/**
+	 * @param stream_content_ext
+	 * @param component_type
+	 * @return
+	 */
+	private static String getComponentType0x09String(final int stream_content_ext, final int component_type) {
+		switch(stream_content_ext){
+		case 0x00:
+			switch(component_type){
+			case 0x00:
+				return "HEVC Main Profile high definition video, 50 Hz";
+			case 0x01:
+				return "HEVC Main 10 Profile high definition video, 50 Hz";
+			case 0x02:
+				return "HEVC Main Profile high definition video, 60 Hz";
+			case 0x03:
+				return "HEVC Main 10 Profile high definition video, 60 Hz";
+			case 0x04:
+				return "HEVC ultra high definition video";
+			default:
+				return "reserved for future use";
+			}
+		case 0x01:
+			switch(component_type){
+			case 0x00:
+				return "AC-4 main audio, mono";
+			case 0x01:
+				return "AC-4 main audio, mono, dialogue enhancement enabled";
+			case 0x02:
+				return "AC-4 main audio, stereo";
+			case 0x03:
+				return "AC-4 main audio, stereo, dialogue enhancement enabled";
+			case 0x04:
+				return "AC-4 main audio, multichannel";
+			case 0x05:
+				return "AC-4 main audio, multichannel, dialogue enhancement enabled";
+			case 0x06:
+				return "AC-4 broadcast-mix audio description, mono, for the visually impaired";
+			case 0x07:
+				return "AC-4 broadcast-mix audio description, mono, for the visually impaired, dialogue enhancement enabled";
+			case 0x08:
+				return "AC-4 broadcast-mix audio description, stereo, for the visually impaired";
+			case 0x09:
+				return "AC-4 broadcast-mix audio description, stereo, for the visually impaired, dialogue enhancement enabled";
+			case 0x0a:
+				return "AC-4 broadcast-mix audio description, multichannel, for the visually impaired";
+			case 0x0b:
+				return "AC-4 broadcast-mix audio description, multichannel, for the visually impaired, dialogue enhancement enabled";
+			case 0x0c:
+				return "AC-4 receiver-mix audio description, mono, for the visually impaired";
+			case 0x0d:
+				return "AC-4 receiver-mix audio description, stereo, for the visually impaired";
+			default:
+				return "reserved for future use";
+			}
+		}
+		return "reserved for future use";
 	}
 
 	public static String getComponentType0x01String(final int component_type) {
@@ -864,6 +950,10 @@ public class Descriptor implements TreeNode {
 			return "MPEG-1 Layer 2 audio for the hard of hearing";
 		case 0x42:
 			return "receiver-mixed supplementary audio as per annex E of TS 101 154";
+		case 0x47:
+			return "MPEG-1 Layer 2 audio, receiver-mix audio description";
+		case 0x48:
+			return "MPEG-1 Layer 2 audio, broadcast-mix audio description";
 		case 0xFF:
 			return "reserved for future use";
 
@@ -902,6 +992,8 @@ public class Descriptor implements TreeNode {
 			return "DVB subtitles (normal) for display on 2.21:1 aspect ratio monitor";
 		case 0x14:
 			return "DVB subtitles (normal) for display on a high definition monitor";
+		case 0x15:
+			return "DVB subtitles (normal) with plano-stereoscopic disparity for display on a high definition monitor";
 		case 0x20:
 			return "DVB subtitles (for the hard of hearing) with no monitor aspect ratio criticality";
 		case 0x21:
@@ -912,10 +1004,16 @@ public class Descriptor implements TreeNode {
 			return "DVB subtitles (for the hard of hearing) for display on 2.21:1 aspect ratio monitor";
 		case 0x24:
 			return "DVB subtitles (for the hard of hearing) for display on a high definition monitor";
+		case 0x25:
+			return "DVB subtitles (for the hard of hearing) with planostereoscopic disparity for display on a high definition monitor";
 		case 0x30:
 			return "Open (in-vision) sign language interpretation for the deaf";
 		case 0x31:
 			return "Closed sign language interpretation for the deaf";
+		case 0x40:
+			return "video up-sampled from standard definition source material";
+		case 0x80:
+			return "dependent SAOC-DE data stream";
 		case 0xFF:
 			return "reserved for future use";
 
@@ -968,6 +1066,16 @@ public class Descriptor implements TreeNode {
 			return "H.264/AVC high definition video, 16:9 aspect ratio, 30 Hz";
 		case 0x10:
 			return "H.264/AVC high definition video, > 16:9 aspect ratio, 30 Hz";
+		case 0x80:
+			return "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 25 Hz, Side-by-Side";
+		case 0x81:
+			return "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 25 Hz, Top-and-Bottom";
+		case 0x82:
+			return "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 30 Hz, Side-by-Side";
+		case 0x83:
+			return "H.264/AVC stereoscopic frame compatible high definition video, 16:9 aspect ratio, 30 Hz, Top-and-Bottom";
+		case 0x84:
+			return "H.264/MVC dependent view, plano-stereoscopic service compatible video";
 		case 0xFF:
 			return "reserved for future use";
 
