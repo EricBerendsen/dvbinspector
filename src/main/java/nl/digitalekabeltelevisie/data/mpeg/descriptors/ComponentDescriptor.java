@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class ComponentDescriptor extends Descriptor {
 
-	private int reserved;
+	private int streamContentExt;
 
 	private int streamContent;
 
@@ -57,7 +57,7 @@ public class ComponentDescriptor extends Descriptor {
 
 	public ComponentDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
-		reserved = getInt(b, offset + 2, 2, 0xF0) >> 4;
+		streamContentExt = getInt(b, offset + 2, 2, 0xF0) >> 4;
 		streamContent = getInt(b, offset + 2, 1, MASK_4BITS);
 		componentType = getInt(b, offset + 3, 1, MASK_8BITS);
 		componentTag = getInt(b, offset + 4, 1, MASK_8BITS);
@@ -73,9 +73,9 @@ public class ComponentDescriptor extends Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
+		t.add(new DefaultMutableTreeNode(new KVP("stream_content_ext", streamContentExt, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("stream_content", streamContent, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("component_type", componentType, getComponentDescriptorString(streamContent,componentType))));
+		t.add(new DefaultMutableTreeNode(new KVP("component_type", componentType, getComponentDescriptorString(streamContent, streamContentExt, componentType))));
 		t.add(new DefaultMutableTreeNode(new KVP("component_tag", componentTag,	null)));
 		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code", iso639LanguageCode, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("text", text, null)));
@@ -91,11 +91,15 @@ public class ComponentDescriptor extends Descriptor {
 	}
 
 	public int getReserved() {
-		return reserved;
+		return streamContentExt;
 	}
 
 	public void setReserved(final int reserverd) {
-		this.reserved = reserverd;
+		this.streamContentExt = reserverd;
+	}
+
+	public int getStreamContentExt() {
+		return streamContentExt;
 	}
 
 }
