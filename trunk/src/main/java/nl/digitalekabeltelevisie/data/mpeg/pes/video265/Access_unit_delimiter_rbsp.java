@@ -49,8 +49,6 @@ public class Access_unit_delimiter_rbsp extends RBSP {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("access_unit_delimiter_rbsp"));
 		t.add(new DefaultMutableTreeNode(new KVP("pic_type",pic_type,getPrimaryPicTypeString(pic_type))));
-		t.add(new DefaultMutableTreeNode(new KVP("available bits left in bitSource (should be 0)",available,null)));
-
 		return t;
 	}
 
