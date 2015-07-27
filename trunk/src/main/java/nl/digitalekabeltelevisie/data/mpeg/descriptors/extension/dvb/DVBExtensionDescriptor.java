@@ -5,10 +5,10 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class DVBExtensionDescriptor extends ExtensionDescriptor {
 
-	public DVBExtensionDescriptor(byte[] b, int offset, TableSection parent) {
+	public DVBExtensionDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
 	}
-	
+
 	public static String getDescriptorTagString(final int descriptor_tag_extension) {
 		switch (descriptor_tag_extension) {
 
@@ -40,6 +40,10 @@ public class DVBExtensionDescriptor extends ExtensionDescriptor {
 			return "XAIT_PID_descriptor";
 		case 0xd:
 			return "C2_delivery_system_descriptor";
+		case 0xe:
+			return "DTS-HD_audio_stream_descriptor";
+		case 0xf:
+			return "DTS_Neural_descriptor";
 		case 0x10:
 			return "video_depth_range_descriptor";
 		case 0x11:
@@ -48,6 +52,10 @@ public class DVBExtensionDescriptor extends ExtensionDescriptor {
 			return "URI_linkage_descriptor";
 		case 0x14:
 			return "BCI_ancillary_data_descriptor";
+		case 0x15:
+			return "AC-4_descriptor";
+		case 0x16:
+			return "C2_bundle_delivery_system_descriptor";
 
 		default:
 			return "reserved for future use";
