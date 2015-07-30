@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -35,14 +35,10 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 public class Access_unit_delimiter_rbsp extends RBSP {
 
 	private final int pic_type;
-	private final int available;
 
 	protected Access_unit_delimiter_rbsp(final byte[] rbsp_bytes, final int numBytesInRBSP) {
 		super(rbsp_bytes, numBytesInRBSP);
 		pic_type = bitSource.u(3);
-
-		available = bitSource.available();
-
 	}
 
 	@Override
