@@ -33,6 +33,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 public class Video_parameter_set_rbsp extends RBSP {
 
@@ -172,6 +173,10 @@ public class Video_parameter_set_rbsp extends RBSP {
 				t.add(hrd_parameters[i].getJTreeNode(modus));
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("vps_extension_flag",vps_extension_flag,null)));
+			if(vps_extension_flag!=0){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("vps_extension_data_flag")));
+				return t;
+			}
 		}
 		return t;
 	}

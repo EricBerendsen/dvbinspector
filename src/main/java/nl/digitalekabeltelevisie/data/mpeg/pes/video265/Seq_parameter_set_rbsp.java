@@ -33,6 +33,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 public class Seq_parameter_set_rbsp extends RBSP {
 
@@ -106,8 +107,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private final int vui_parameters_present_flag;
 
 	private H265VuiParameters vui_parameters;
-
-	private final int available;
 
 	private final int sps_extension_present_flag;
 
@@ -217,8 +216,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			sps_extension_6bits = bitSource.u(6);
 		}
 
-		available = bitSource.available();
-
 	}
 
 	@Override
@@ -277,10 +274,10 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		if(scaling_list_enabled_flag==1) {
 			sps_scaling_list_data_present_flag = bitSource.u(1);
 			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_list_data_present_flag",sps_scaling_list_data_present_flag,null)));
-			//			if( sps_scaling_list_data_present_flag==1){
-			//				logger.warning("scaling_list_data( ) not implemented");
-			//				//scaling_list_data( )
-			//			}
+			if(sps_scaling_list_data_present_flag==1){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("scaling_list_data()")));
+				return t;
+			}
 		}
 
 
@@ -298,10 +295,18 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		}
 
 		t.add(new DefaultMutableTreeNode(new KVP("num_short_term_ref_pic_sets",num_short_term_ref_pic_sets,null)));
+		if(num_short_term_ref_pic_sets!=0){
+			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("st_ref_pic_set( i )")));
+			return t;
+		}
+		t.add(new DefaultMutableTreeNode(new KVP("long_term_ref_pics_present_flag",long_term_ref_pics_present_flag,null)));
 
-		t.add(new DefaultMutableTreeNode(new KVP("num_long_term_ref_pics_sps",num_long_term_ref_pics_sps,null)));
 		if( long_term_ref_pics_present_flag==1 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("long_term_ref_pics_present_flag",long_term_ref_pics_present_flag,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("num_long_term_ref_pics_sps",num_long_term_ref_pics_sps,null)));
+			if(num_long_term_ref_pics_sps!=0){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("num_long_term_ref_pics_sps!=0")));
+				return t;
+			}
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("sps_temporal_mvp_enabled_flag",sps_temporal_mvp_enabled_flag,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("strong_intra_smoothing_enabled_flag",strong_intra_smoothing_enabled_flag,null)));
@@ -317,8 +322,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			t.add(new DefaultMutableTreeNode(new KVP("sps_multilayer_extension_flag",sps_multilayer_extension_flag,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("sps_extension_6bits",sps_extension_6bits,null)));
 		}
-
-		t.add(new DefaultMutableTreeNode(new KVP("available bits left in bitSource (should be 0)",available,null)));
 
 		return t;
 	}
