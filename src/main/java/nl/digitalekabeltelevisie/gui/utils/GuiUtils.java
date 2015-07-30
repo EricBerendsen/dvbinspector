@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,13 +28,12 @@
 package nl.digitalekabeltelevisie.gui.utils;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
+
+import nl.digitalekabeltelevisie.controller.KVP;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.PlotRenderingInfo;
-import org.jfree.chart.plot.PlotState;
+import org.jfree.chart.plot.*;
 
 /**
  * @author Eric
@@ -59,21 +58,52 @@ public final class GuiUtils {
 	 * @return
 	 */
 	public static JFreeChart createTitleOnlyChart(final String title) {
-		Plot plot = new Plot() {
-	
+		final Plot plot = new Plot() {
+
 			@Override
 			public String getPlotType() {
 				// don't care about actual value
 				return "message";
 			}
-	
+
 			@Override
-			public void draw(Graphics2D g2, Rectangle2D area, Point2D anchor, PlotState parentState, PlotRenderingInfo info) {
+			public void draw(final Graphics2D g2, final Rectangle2D area, final Point2D anchor, final PlotState parentState, final PlotRenderingInfo info) {
 				// empty
 			}
 		};
-		JFreeChart mesg = new JFreeChart(title,plot);
+		final JFreeChart mesg = new JFreeChart(title,plot);
 		return mesg;
+	}
+
+	public static KVP getNotImplementedKVP(final String feature){
+		final StringBuilder message = new StringBuilder();
+		message.append(feature).append(" not implemented. ").append(getImproveMsg());
+		return new KVP("<span style=\"color: red;\">"+message.toString()+"</span>",message.toString());
+	}
+
+	/**
+	 * @return
+	 */
+	public static String getImproveMsg() {
+		final String version = getVersionString();
+
+		final String improveMsg = "You can help to improve DVB Inspector by making this stream available " +
+				"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
+				"Please include the version of DVB Inspector: "+version;
+		return improveMsg;
+	}
+
+	/**
+	 * @return
+	 */
+	public static String getVersionString() {
+		final Package p = GuiUtils.class.getPackage();
+		String version = p.getImplementationVersion();
+
+		if(version==null){
+			version="development version (unreleased)";
+		}
+		return version;
 	}
 
 }
