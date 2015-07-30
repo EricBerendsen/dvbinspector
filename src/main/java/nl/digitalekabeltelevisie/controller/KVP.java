@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,15 +26,11 @@
  */
 package nl.digitalekabeltelevisie.controller;
 
-import static nl.digitalekabeltelevisie.util.Utils.getHTMLHexview;
-import static nl.digitalekabeltelevisie.util.Utils.getHexAndDecimalFormattedString;
-import static nl.digitalekabeltelevisie.util.Utils.toHexString;
-import static nl.digitalekabeltelevisie.util.Utils.toSafeString;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.JMenuItem;
 
-import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.gui.ImageSource;
+import nl.digitalekabeltelevisie.gui.*;
 
 /**
  * Holder for names/values (and explanations) that takes care of formatting and presentation.
@@ -269,7 +265,7 @@ public class KVP{
 		if ((fieldType != FIELD_TYPE_LABEL)&&(fieldType != FIELD_TYPE_HTML)) {
 			appendValueAfterLabel(numberFormat, b);
 		}
-		if(fieldType==FIELD_TYPE_HTML){
+		if((fieldType==FIELD_TYPE_HTML)&&(STRING_DISPLAY_PLAIN!=stringFormat)){
 			b = replacePlainLabelWithHTML(stringFormat);
 		}
 		if (stringFormat == STRING_DISPLAY_JAVASCRIPT) {
