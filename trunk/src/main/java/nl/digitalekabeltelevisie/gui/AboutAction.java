@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,12 +30,9 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -44,7 +41,7 @@ public class AboutAction extends AbstractAction {
 	 *
 	 */
 	private static final long serialVersionUID = -6710642864878320650L;
-	private JFrame f;
+	private final JFrame f;
 
 	public AboutAction(final JDialog jf, final JFrame fr, final DVBinspector controller) {
 		super();
@@ -52,10 +49,6 @@ public class AboutAction extends AbstractAction {
 	}
 	public void actionPerformed(final ActionEvent e) {
 		final Package p = getClass().getPackage();
-		String version = p.getImplementationVersion();
-		if(version==null){
-			version="development version (unreleased)";
-		}
 		final String javaVersion=System.getProperty("java.version");
 		final String javaVendor=System.getProperty("java.vendor");
 		final String javaHome=System.getProperty("java.home");
@@ -65,8 +58,8 @@ public class AboutAction extends AbstractAction {
 		final Image image = Utils.readIconImage("magnifying_glass.bmp");
 		final ImageIcon icon = new ImageIcon(image);
 
-		JOptionPane.showMessageDialog(f, "DVB Inspector Version: "+version+"\n\n"+
-				"This code is Copyright 2009,2010,2011,2012,2013,2014 by Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n"+
+		JOptionPane.showMessageDialog(f, "DVB Inspector Version: "+GuiUtils.getVersionString()+"\n\n"+
+				"This code is Copyright 2009,2010,2011,2012,2013,2014,2015 by Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n"+
 				"http://www.digitalekabeltelevisie.nl/dvb_inspector\n\n"+
 				"DVB Inspector is free software: you can redistribute it and/or modify \n"+
 				"it under the terms of the GNU General Public License as published by\n"+

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,18 +30,14 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import java.util.prefs.Preferences;
 
-import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 
 public class FileOpenAction extends AbstractAction {
@@ -50,9 +46,9 @@ public class FileOpenAction extends AbstractAction {
 
 	private static final String DIR = "stream_directory";
 
-	private JFileChooser	fileChooser;
-	private JFrame			frame;
-	private DVBinspector	contr;
+	private final JFileChooser	fileChooser;
+	private final JFrame			frame;
+	private final DVBinspector	contr;
 
 
 	class TSLoader extends SwingWorker<TransportStream, Void>{
@@ -60,25 +56,25 @@ public class FileOpenAction extends AbstractAction {
 		/**
 		 * @param file
 		 */
-		private TSLoader(File file) {
+		private TSLoader(final File file) {
 			super();
 			this.file = file;
 		}
 
 		File file = null;
 
-	      @Override
-	       protected void done() {
-	           try {
+		@Override
+		protected void done() {
+			try {
 
-	        	   TransportStream ts = get();
-	        	   if(ts!=null){
-	        		   contr.setTransportStream(get());
-	        	   }
-	           } catch (Exception ignore) {
-	        	   logger.log(Level.SEVERE, "Error loading stream", ignore);
-	           }
-	       }
+				final TransportStream ts = get();
+				if(ts!=null){
+					contr.setTransportStream(get());
+				}
+			} catch (final Exception ignore) {
+				logger.log(Level.SEVERE, "Error loading stream", ignore);
+			}
+		}
 
 		/* (non-Javadoc)
 		 * @see javax.swing.SwingWorker#doInBackground()
@@ -95,30 +91,18 @@ public class FileOpenAction extends AbstractAction {
 			} catch (final NotAnMPEGFileException e) {
 				logger.log(Level.WARNING, "could not determine packet size stream");
 
-				String msg =
+				final String msg =
 						"DVB Inspector could not determine packetsize for this file. \n" +
-						"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
+								"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
 
 						"Are you sure this file contains a valid MPEG Transport Stream?\n\n ";
 				showMessage(msg);
 			} catch (final Throwable t) {
 				transportStream = null;
 				logger.log(Level.WARNING, "error parsing transport stream",t);
-				final Package p = getClass().getPackage();
-				String version = p.getImplementationVersion();
-
-				if(version==null){
-					version="development version (unreleased)";
-				}
-
-				String msg =
-						"Ooops. \n\n" +
-						"While parsing your stream an error occured " +
-						"from which DVB Inspector can not recover.\n\n" +
-						"Error message: "+t.toString()+"\n\n"+
-						"You can help to improve DVB Inspector by making this stream available " +
-						"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
-						"Please include the version of DVB Inspector: "+version;
+				final String improveMsg = GuiUtils.getImproveMsg();
+				final String msg =
+						"Ooops. \n\n" + "While parsing your stream an error occured " + "from which DVB Inspector can not recover.\n\n" + "Error message: " + t.toString() + "\n\n" + improveMsg;
 
 				showMessage(msg);
 			}
@@ -132,7 +116,7 @@ public class FileOpenAction extends AbstractAction {
 		/**
 		 * @param msg
 		 */
-		public void showMessage(String msg) {
+		public void showMessage(final String msg) {
 			frame.setCursor(Cursor.getDefaultCursor());
 
 			JOptionPane.showMessageDialog(frame,
@@ -164,10 +148,10 @@ public class FileOpenAction extends AbstractAction {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			File file = fileChooser.getSelectedFile();
+			final File file = fileChooser.getSelectedFile();
 			prefs.put(DIR,file.getParent());
 
-			TSLoader tsLoader = new TSLoader(file);
+			final TSLoader tsLoader = new TSLoader(file);
 			tsLoader.execute();
 
 			frame.setCursor(Cursor.getDefaultCursor());
