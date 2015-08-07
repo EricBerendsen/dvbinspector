@@ -1,30 +1,13 @@
 package nl.digitalekabeltelevisie.html;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.CableDeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SDT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection.Service;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TDT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TOT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TOTsection;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class CreateHTMLListDiff implements Runnable{
@@ -52,8 +35,14 @@ public class CreateHTMLListDiff implements Runnable{
 
 
 		try {
-			newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 01-11 22-17-22.ts");
-			oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 12-24 19-58-18.ts");
+
+			newTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 07-25 22-37-23.ts");
+			oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 06-01 20-19-40.ts");
+			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 05-16 16-03-45.ts");
+			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 04-01 19-32-31.ts");
+			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 03-29 21-12-11.ts");
+			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 01-28 20-18-55.ts");
+			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 12-24 19-58-18.ts");
 			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 11-29 19-16-42.ts");
 			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 11-16 10-41-50.ts");
 			//oldTransportStream = new TransportStream("d:\\ts\\Ziggo Oost 474000 11-07 22-47-32.ts");
@@ -73,12 +62,35 @@ public class CreateHTMLListDiff implements Runnable{
 		}
 
 
-		final String tvhome_prefix_1="<!-- tpl:insert page=\"/newstemplate.htpl\" -->\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n<meta http-equiv=\"content-language\" content=\"nl\">\n<meta name=\"owner\" content=\"info@digitalekabeltelevisie.nl\">\n<meta name=\"author\" content=\"Eric Berendsen\">\n<!-- tpl:put name=\"description\" -->\n\n<script src=\"/theme/sorttable.js\" type=\"text/javascript\"></script>\n<meta name=\"description\"\ncontent=\"Overzicht gebruikte kanalen en frequenties bij Ziggo Oost (voormalig @home gebied).\">\n\n\n\n\n<!-- /tpl:put -->\n<!-- tpl:put name=\"keywords\" -->\n<meta name=\"keywords\"\ncontent=\"digitale televisie, DVB-C, NIT, SDT, MPEG, frequenties\">\n<!-- /tpl:put -->\n\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\">\n<link href=\"/theme/Master.css\" rel=\"stylesheet\" type=\"text/css\">\n<!-- tpl:put name=\"headarea\" -->\n<title>Zenderindeling Ziggo/@Home</title>\n<!-- /tpl:put -->\n</head>\n<body>\n<table class=\"lay\" align=\"center\" border=\"0\" cellpadding=\"0\"\ncellspacing=\"0\">\n<tbody>\n<tr>\n<td colspan=\"2\" class=\"kop\"\nonclick=\"location.href=\'http://www.digitalekabeltelevisie.nl/\';\"\nstyle=\"cursor: pointer;\"><h1 class=\"kop\">digitale\nkabeltelevisie</h1></td>\n</tr>\n<tr>\n<td class=\"links\">\n<!-- tpl:put name=\"linksboven\" --> <!-- /tpl:put --> <!--#exec cgi=\"/cgi-bin/menu.pl\" -->\n<!-- tpl:put name=\"linksmidden\" --> <!-- /tpl:put --> <!--#include virtual=\"/nieuws/laatste.shtml\" -->\n<!-- tpl:put name=\"linksbeneden\" --> <!-- /tpl:put -->\n\n</td>\n<td class=\"main\">\n<h1>\n<!-- tpl:put name=\"titel\" -->\nZenderindeling Ziggo/@Home\n<!-- /tpl:put -->\n</h1> <!-- tpl:put name=\"bodyarea\" -->\n\n"+
-				"\n<font color=\"red\"><h3>Ontbrekende netwerkcodes ??</h3>\n<p>Op deze pagina waren tot voor kort de frequenties van het hele voormalig @Home (Ziggo-Oost) netwerk te vinden. Nu staan er alleen het netwerk van Twente (9001) en een paar testnetwerken op. Dat is niet omdat ik er een paar vergeten ben, maar omdat het signaal in Enschede niet meer informatie bevat. Deze pagina wordt met een programma gegenereerd uit het Ziggo-signaal, en bevat alle NetwerkIds die in de Service Informatie zitten. Ziggo geeft sinds kort per regio alleen nog de informatie voor die regio door. Sterker nog, binnen een regio kan de informatie verschillen, dus het zou best kunnen dat de frequenties die voor Enschede geldig zijn in Hengelo anders zijn. </p><p>Wie op zoek is naar ontbrekende informatie (bijv. om een niet gecertificeerde decoder in te stellen) zou kunnen proberen het aan de <a href=\"https://www.ziggo.nl/#klantenservice/contactformulier\">Ziggo klantenservice</a> te vragen. Als Ziggo service serieus neemt zou dat geen probleem moeten zijn. </p>\n"+
-				"<p>Wie wil proberen om zelf deze informatie te verzamelen zou kan <a href=\"/nieuws/archives/2014/04/minder_informatie_op_pagi_1.shtml\">hier meer informatie</a> vinden hoe dat te doen. Let op, het is niet echt eenvoudig, en ik kan er <b>GEEN</b> ondersteuning bij geven.</p><p>Er zijn veel mensen die aanbieden om de informatie uit hun gebied door te geven om op deze site te plaatsen. Daar kan ik helaas door tijdgebrek niet aan beginnen. Misschien dat posten op een forum een alternatief kan zijn.</p></font>\n"
-				+"<p>\nDe indeling van kanalen zoals geldig in het voormalig @Home gebied (Enschede) van Ziggo op ";
+		final String tvhome_prefix_1="<!-- tpl:insert page=\"/newstemplate.htpl\" -->\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n" +
+				"<html>\n<head>\n<meta http-equiv=\"content-language\" content=\"nl\">\n<meta name=\"owner\" content=\"info@digitalekabeltelevisie.nl\">\n" +
+				"<meta name=\"author\" content=\"Eric Berendsen\">\n<!-- tpl:put name=\"description\" -->\n\n<script src=\"/theme/sorttable.js\" type=\"text/javascript\">" +
+				"</script>\n<meta name=\"description\"\ncontent=\"Overzicht gebruikte kanalen en frequenties bij Ziggo Oost (voormalig @home gebied).\">\n\n\n\n\n" +
+				"<!-- /tpl:put -->\n<!-- tpl:put name=\"keywords\" -->\n<meta name=\"keywords\"\ncontent=\"digitale televisie, DVB-C, NIT, SDT, MPEG, frequenties\">\n" +
+				"<!-- /tpl:put -->\n\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\">\n" +
+				"<link href=\"/theme/Master.css\" rel=\"stylesheet\" type=\"text/css\">\n<!-- tpl:put name=\"headarea\" -->\n<title>Zenderindeling Ziggo/@Home</title>" +
+				"\n<!-- /tpl:put -->\n</head>\n<body>\n<table class=\"lay\" align=\"center\" border=\"0\" cellpadding=\"0\"\ncellspacing=\"0\">\n<tbody>\n" +
+				"<tr>\n<td colspan=\"2\" class=\"kop\"\nonclick=\"location.href=\'http://www.digitalekabeltelevisie.nl/\';\"\nstyle=\"cursor: pointer;\">" +
+				"<h1 class=\"kop\">digitale\nkabeltelevisie</h1></td>\n</tr>\n<tr>\n<td class=\"links\">\n" +
+				"<!-- tpl:put name=\"linksboven\" --> <!-- /tpl:put --> <!--#exec cgi=\"/cgi-bin/menu.pl\" -->\n" +
+				"<!-- tpl:put name=\"linksmidden\" --> <!-- /tpl:put --> <!--#include virtual=\"/nieuws/laatste.shtml\" -->\n<!-- tpl:put name=\"linksbeneden\" -->" +
+				" <!-- /tpl:put -->\n\n</td>\n<td class=\"main\">\n<h1>\n<!-- tpl:put name=\"titel\" -->\nZenderindeling Ziggo/@Home\n<!-- /tpl:put -->\n" +
+				"</h1> <!-- tpl:put name=\"bodyarea\" -->\n\n"+
+				"<p>\nDe indeling van kanalen zoals geldig in het voormalig @Home gebied (Enschede) van Ziggo op ";
 
-		final String tvhome_prefix_2=". Wijzigingen/toevoegingen\nt.o.v. de vorige versie zijn in <span\nstyle=\"background-color: yellow;\">geel</span> aangegeven,\nverwijderde zenders zijn <span\nstyle=\"text-decoration: line-through; background-color: orange;\">oranje\nen doorgestreept</span>. (Soms geeft Ziggo zenders een ander\nservice ID, terwijl ze alleen maar naar een andere stream\nverplaatst zijn. Dan lijkt het in dit overzicht alsof de zender\nverwijderd EN tegelijk nieuw is.)\n</p>\n\n<p>Ziggo gebruikt nog twee gescheiden netwerken, \u00e9\u00e9n voor het\nvoormalige @Home-gebied, en \u00e9\u00e9n voor het gebied van\nCasema/Multikabel. Voor verschillende regios worden 32 streams op\nverschillende frequenties gebruikt. Eerst een lijst met de\nindeling in 32 streams (de nummering is die zoals door Ziggo\ngebruikt). Daarna een lijst met de frequenties van de streams voor\nde verschillende regio\'s.</p>\n<p>Bij type staat het soort zender aangegeven.</p>\n<ul>\n<li>\"digital television service (1)\" is een gewoon standaard\ndefinition (SD) TV kanaal.</li>\n<li>\"digital radio sound service (2)\" is een radiokanaal.</li>\n<li>\"user defined (128)\" is in de DVB specificatie\nvrijgelaten, en wordt gebruikt voor software updates voor de\ndecoders.</li>\n<li>\"reserved for future use (17)\" is HDTV in MPEG2\n(eigenlijk \"MPEG-2 HD digital television service\", in de zomer\nvan 2006 gebruikt voor het WK, en tot mei 2010 voor Discovery HD\nmet een datarate van 20 Mbps voor het beeld. Op dit moment niet\ngebruikt op het Ziggo Netwerk.</li>\n<li>\"advanced\ncodec HD digital television service (25)\" is HDTV in MPEG4 (H.264). Nu in\ngebruik voor Sport1 HD, National Geographic Channel HD en Film1\nHD. Deze hebben ongeveer een datarate van 14 Mbps voor het beeld.</li>\n</ul>\n\n<p>\nKlik <a href=\"tvhome";
+		final String tvhome_prefix_2=". Wijzigingen/toevoegingen\nt.o.v. de vorige versie zijn in <span\nstyle=\"background-color: yellow;\">geel</span> aangegeven,\n" +
+				"verwijderde zenders zijn <span\nstyle=\"text-decoration: line-through; background-color: orange;\">oranje\nen doorgestreept</span>." +
+				" (Soms geeft Ziggo zenders een ander\nservice ID, terwijl ze alleen maar naar een andere stream\nverplaatst zijn. " +
+				"Dan lijkt het in dit overzicht alsof de zender\nverwijderd EN tegelijk nieuw is.)\n</p>\n\n<" +
+				"Eerst een lijst met de\nindeling in  streams (de nummering is die zoals door Ziggo\ngebruikt). " +
+				"Daarna een lijst met de frequenties van de streams voor de verschillende regio\'s.</p>\n<p>" +
+				"Bij type staat het soort zender aangegeven.</p>\n<ul>\n<li>\"digital television service (1)\" is een gewoon standaard\ndefinition (SD) TV kanaal.</li>" +
+				"\n<li>\"digital radio sound service (2)\" is een radiokanaal.</li>\n<li>\"user defined (128)\" is in de DVB specificatie\nvrijgelaten, " +
+				"en wordt gebruikt voor software updates voor de\ndecoders.</li>\n<li>\"reserved for future use " +
+				"(17)\" is HDTV in MPEG2\n(eigenlijk \"MPEG-2 HD digital television service\", in de zomer\nvan 2006 gebruikt voor het WK, en tot mei " +
+				"2010 voor Discovery HD\nmet een datarate van 20 Mbps voor het beeld. Op dit moment niet\ngebruikt op het Ziggo Netwerk.</li>\n<li>\"" +
+				"advanced\ncodec HD digital television service (25)\" is HDTV in MPEG4 (H.264). Nu in\ngebruik voor Sport1 HD, National Geographic Channel HD " +
+				"en Film1\nHD. Deze hebben ongeveer een datarate van 14 Mbps voor het beeld.</li>\n</ul>\n\n<p>\nKlik <a href=\"tvhome";
 
 		final String tvhome_prefix_3=".shtml\">hier voor de vorige\nindeling</a>.\n</p>\n<p>\n<script type=\"text/javascript\">\ndocument\n\t.write(\"\\t\\t\\tOnderstaande tabel kan je sorteren door te klikken op de naam van de kolom die je wilt sorteren.\");\n</script>\n</p> <!-- /tpl:put -->\n\n";
 
@@ -230,11 +242,11 @@ public class CreateHTMLListDiff implements Runnable{
 
 					final Service oldService=oldSDT.getService(sid);
 
-					final int lcn = newStream.getPsi().getNit().getLCN(1000, transportStreamID, sid);
+					final int lcn = newStream.getPsi().getNit().getLCN(1536, transportStreamID, sid);
 					//final int lcn = newStream.getPsi().getNit().getLCN(43136, transportStreamID, sid);
 					String lcnString = (lcn > 0) ? Integer.toString(lcn) : "-";
 
-					final int hdLCN = newStream.getPsi().getNit().getHDSimulcastLCN(1000, transportStreamID, sid);
+					final int hdLCN = newStream.getPsi().getNit().getHDSimulcastLCN(1536, transportStreamID, sid);
 					final String hdlcnString = (hdLCN > 0) ? (" / " + Integer.toString(hdLCN)) : "";
 					lcnString += hdlcnString;
 
@@ -299,7 +311,7 @@ public class CreateHTMLListDiff implements Runnable{
 			out.write("	</tbody></table>\n");
 			out.write("	<p><br></p><p>Onderstaande lijst bevat alle frequenties zoals ze gebruikt worden per regionaal netwerk.</p>\n");
 			out.write("	<p><br></p>\n");
-			out.write("	<table class=\"content\" border=\"1\" cellpadding=\"0\" cellspacing=\"0\"><thead><tr><th>Transportstream-ID</th><th>Frequentie</th><th>Modulatie</th></tr></thead><tbody>\n");
+			out.write("	<table class=\"content\" border=\"1\" cellpadding=\"0\" cellspacing=\"0\"><thead><tr><th>Transportstream-ID</th><th>Frequentie</th><th>Modulatie</th><th>Symbol Rate</th></tr></thead><tbody>\n");
 
 			final NIT nit = newStream.getPsi().getNit();
 			final NIT oldNIT = oldStream.getPsi().getNit();
@@ -312,7 +324,7 @@ public class CreateHTMLListDiff implements Runnable{
 			final Iterator<Integer> j = t.iterator();
 			while(j.hasNext()){
 				final int networkNo=j.next();
-				out.write("<tr><th colspan=\"3\">"+networkNo+" : "+nit.getNetworkName(networkNo)+"</th></tr>\n");
+				out.write("<tr><th colspan=\"4\">"+networkNo+" : "+nit.getNetworkName(networkNo)+"</th></tr>\n");
 				final ArrayList<nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream> newStreams = new ArrayList<nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream>();
 				final NITsection [] sections = networks.get(networkNo);
 				oldNetworks.get(networkNo);
@@ -335,6 +347,7 @@ public class CreateHTMLListDiff implements Runnable{
 					String freq="";
 					int mod=-1;
 					String modulation = "";
+					String symbolrate = "";
 
 					CableDeliverySystemDescriptor newDelivery = null;
 					while(descs.hasNext()){
@@ -344,6 +357,7 @@ public class CreateHTMLListDiff implements Runnable{
 							freq =  Descriptor.formatCableFrequencyList(((CableDeliverySystemDescriptor)d).getFrequency());
 							mod = ((CableDeliverySystemDescriptor)d).getModulation();
 							modulation = CableDeliverySystemDescriptor.getModulationString(mod);
+							symbolrate = Descriptor.formatSymbolRate(((CableDeliverySystemDescriptor)d).getSymbol_rate());
 						}
 					}
 					String style="";
@@ -378,7 +392,7 @@ public class CreateHTMLListDiff implements Runnable{
 					if((oldNITStream!=null)&&(oldDelivery!=null)&&(oldDelivery.getModulation()!=newDelivery.getModulation())){
 						style="style=\""+bgColorCSS+"\"";
 					}
-					out.write("<td " + style+">"+modulation+ "</td></tr>\n");
+					out.write("<td " + style+">"+modulation+ "</td><td>"+symbolrate+ "</td></tr>\n");
 
 				}
 
