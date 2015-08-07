@@ -2,7 +2,7 @@ readme
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.3.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.5.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 directory structure
 
@@ -16,10 +16,189 @@ directory structure
     DVBinspector-1.2.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 
-DVBinspector-1.3.0.jar
+DVBinspector-1.5.0.jar
 
-Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.3.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.3.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.3.0.jar".
+Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.5.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.5.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.5.0.jar".
 DVB.bat
 
 This small windows batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path, and -Xmx sets the maximum memory heap size to 1 GB. This should be enough to read fairly large TS files (> 200 MB). You can modify this file for other environments like linux.
-java -classpath .;.\lib\jfreechart-1.0.13.jar;.\lib\jcommon-1.0.16.jar;.\lib\opencsv-2.1.jar;.\lib\jlayer-1.0.1-1.jar;.\DVBInspector.jar -Xmx1000m -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector 
+java -classpath .;.\lib\jfreechart-1.0.13.jar;.\lib\jcommon-1.0.16.jar;.\lib\opencsv-2.1.jar;.\lib\jlayer-1.0.1-1.jar;.\DVBInspector.jar -Xmx1000m -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector
+
+Changelog
+
+List of the most important changes between releases
+
+Release 1.5.0
+Release date: 07/08/2015
+
+added: Support for h.265 (HEVC) parsing
+added: MPEG Extension descriptor
+added: HEVC video descriptor
+added: HEVC_timing_and_HRD_descriptor
+added: support for new stream types in PMT as defined in ITU-T H.222.0 (10/2014)
+added: SIT (Selection Information Table) and PartialTransportStreamDescriptor
+updated: component descriptor to use Final draft ETSI EN 300 468 V1.15.1
+fixed: rendering of DVB titles when display_window_flag is used
+fixed: some bugs
+Thanks to Daniel Kamil Kozar for adding MPEG Extension descriptor, HEVC video descriptor and HEVC_timing_and_HRD_descriptor
+
+
+Release 1.4.0
+Release date: 18/01/2015
+
+added: PCR/PTS/DTS Chart
+added: show PesHeader in TSPacket
+fixed: improved support for national characters in teletext
+fixed: fixed bitrate calculation, now handles (ignores) PCRs that have smaller value than previous
+fixed: some bugs
+Thanks to Daniel Kamil Kozar for the fix for improved support for national characters in teletext!
+Release 1.3.0
+Release date: 25/08/2014
+
+added: support for Related Content Tables (RCT)
+added: support for Coding of Data Fields in the Private Data Bytes of the Adaptation Field
+added: AdaptationFieldDataDescriptor, FTAConentManagmentDescriptor, MetaDataDescriptor, MetaDataPointerDescriptor, RelatedContentDescriptor, DTG-GuidanceDescriptor, DTG-LogicalChannelDescriptor, Mpeg4AudioDescriptor
+added: message, t2delivery, targetregion, targetregionname extension descriptors
+added: support for 188,192,204 and 208 bytes size TSPackets
+added: add gridlines to gridview, make gridview zoomable
+fixed: added encoding string for type 0x1f
+added: linkageType==0x0D (event linkage) to LinkageDescriptor
+fixed: some bugs
+
+
+Release 1.2.0
+Release date: 14/01/2014
+
+fixed: Audio access units were not handled right when not aligned with PESPackets
+added: Graph of MPEG 1/2 audio
+added: option to play MPEG 1/2 audio
+fixed: show multiple versions of CATSections/SDTSections in DVBTree
+fixed: Mouse over in EITView now has correct behavior for emphasis and lf/cr DBVStrings
+improved: Changed BitRateChart for better labels on time-axis, and improved mouse support
+changed: upgraded to java 1.7
+fixed: some bugs
+
+
+Release 1.1.0
+Release date: 11/10/2013
+
+added: Show contents of TS packets per PID
+added: Progress indicator when loading file
+added: graph to show frame type/order and size in H.264 Video
+added: SequenceDisplayExtension (MPEG2 Video)
+fixed: eventIds in BIOPStreamEventMessage
+improved: scrolling in EIT and Grid View
+added: option to show version number on Table Sections
+fixed: some bugs
+
+
+Release 1.0.0
+Release date: 21/06/2013
+
+added: Show contents of TS packets, both in Tree and Grid View
+improved: performance of Grid View
+fixed: version number in PSI tables is 5 bits, not 4
+Added: support for DSM-CC stream descriptor list
+fixed: usage of version info in DSM-CC Object carousel
+fixed: usage of transaction_id in DSM-CC Object carousel
+changed: method of checking CRC on PSI tables, should be more robust now
+changed: method how different versions of tables are stored, now all version are stored, even if version number wraps around
+added: MHP Label descriptor
+added: Multilingual Network Name descriptor
+added: Multilingual Service Name descriptor
+added: DSM-CC Stream descriptor
+
+
+Release 0.0.10
+Release date: 28/04/2013
+
+added: graph to show frame order (IBP) and size in MPEG2 Video
+added: toggle legend on Bitrate chart
+added: copy to clip board functionality on detail panel
+added: save as... for images in detail panel
+added: resize images in detail panel
+added: remember window size/position
+changed: order of tabs (EPG grid now second, so all 'filtered' views are at the end)
+fixed: getDisplayWindowFlag in DisplayDefinitionSegment.java
+added: frame_packing_SEI_not_present_flag to AVCVideoDescriptor.java
+fixed: handle missing object_data_segments in DisplaySet
+Thanks to Dave Evans for the fixes for getDisplayWindowFlag, frame_packing_SEI_not_present_flag and missing object_data_segments!
+Release 0.0.9
+Release date: 06/02/2013
+
+added: EIT grid view
+
+
+Release 0.0.8
+Release date: 27/01/2013
+
+fixed: MPEG2 Video preview did not work on PES packets, because of adding PTS labels.
+added: some detail to PDC TxtTriplets for teletext
+
+
+Release 0.0.7
+Release date: 20/01/2013
+
+added: descriptors: S2SatelliteDeliverySystemDescriptor, AACMpeg2Descriptor, JPEG2000VideoDescriptor
+added: AC3 (also alternative syntax) and E-AC3 support
+updated: General PES support, also show PES packets for which no dedicated support is available
+added: option show PTS on PES packets (easier to find certain packet)
+Thanks to Asif Raza for the contribution of the AACMpeg2Descriptor and JPEG2000VideoDescriptor.
+
+
+Release 0.0.6
+Release date: 23/08/2012
+
+added: preview for MPEG2 Video (based on MPVDecoder from ProjectX)
+updated DVB subtitles (now show complete Display Sets), and show Video background
+
+
+Release 0.0.5
+Release date: 06/08/2012
+
+added: Support for h.264
+added: descriptors: DefaultAuthorityDescriptor, ServiceIdentifierDescriptor, NordigLogicalChannelDescriptorV1 and NordigLogicalChannelDescriptorV2
+fixed: filtering of non printable characters (range 0x80 to 0x9F) in text items
+changed: source encoding to UTF-8
+added: option to number items in lists
+fixed: some bugs
+new: put sources on sourceforge
+
+
+Release 0.0.4
+Release date: 15/05/2012
+
+added: Support for DSM-CC Object carousels (HbbTV, MHP, MHEG5)
+added: Ancillary data for 138183-Audio (RDS over UECP)
+added: Mega-frame Initialization Packet (MIP) for DVB-T
+added: hex-viewer for raw data
+changed: improved usability, now remembers last used directory, default private_data_specifier and view-modus
+fixed: some bugs
+added: descriptors: TargetBackGroundDescriptor, VideoWindowDescriptor and ApplicationUsageDescriptor (AIT)
+
+
+Release 0.0.3
+Release date: 23/08/2011
+
+added: Support for AIT
+added: level 2.5 graphical view for teletext pages
+fixed: some bugs
+added: some descriptors
+changed: maven enabled (if you want to build it yourself)
+
+
+Release 0.0.2
+Release date: 26/02/2011
+
+changed: the way PES data is processed, less memory use and higher processing speed
+added: grid view for TS packets
+added: graphical view for teletext pages
+added: graphical view for DVB subtitles
+added: 'copy to clipboard' actions to tree view
+changed: when changing the order of PIDs in the bitrate view, they keep their original color
+
+
+Release 0.0.1
+Release date: 31/01/2011
+
+Initial release. 
