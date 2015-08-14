@@ -61,7 +61,7 @@ public class AdaptationFieldDataDescriptor extends Descriptor {
 	 * @param adaptationFieldDataIdentifier2
 	 * @return
 	 */
-	private String getAdaptationFieldDataIdentifierString(int adaptationFieldDataIdentifier) {
+	private static String getAdaptationFieldDataIdentifierString(int adaptationFieldDataIdentifier) {
 		StringBuilder sb = new StringBuilder();
 		if((adaptationFieldDataIdentifier & 0x01)!=0){
 			sb.append("announcement switching data field");
