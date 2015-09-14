@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,11 +30,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,19 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
-import javax.swing.Action;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JTabbedPane;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -66,20 +50,7 @@ import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.gui.AboutAction;
-import nl.digitalekabeltelevisie.gui.BarChart;
-import nl.digitalekabeltelevisie.gui.BitRateChart;
-import nl.digitalekabeltelevisie.gui.DVBtree;
-import nl.digitalekabeltelevisie.gui.EITView;
-import nl.digitalekabeltelevisie.gui.EnableTSPacketsAction;
-import nl.digitalekabeltelevisie.gui.FileOpenAction;
-import nl.digitalekabeltelevisie.gui.GridView;
-import nl.digitalekabeltelevisie.gui.PIDDialog;
-import nl.digitalekabeltelevisie.gui.PIDDialogOpenAction;
-import nl.digitalekabeltelevisie.gui.SetPrivateDataSpecifierAction;
-import nl.digitalekabeltelevisie.gui.TimeStampChart;
-import nl.digitalekabeltelevisie.gui.ToggleViewAction;
-import nl.digitalekabeltelevisie.gui.TransportStreamView;
+import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -325,7 +296,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	private JMenu createSettingsMenu() {
 		final JMenu settingsMenu =new JMenu("Settings");
+		settingsMenu.setMnemonic(KeyEvent.VK_S);
+
 		final JMenu privateDataSubMenu = new JMenu("Private Data Specifier Default");
+		privateDataSubMenu.setMnemonic(KeyEvent.VK_P);
 		final ButtonGroup group = new ButtonGroup();
 
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x00, "none",defaultPrivateDataSpecifier);
@@ -339,6 +313,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		settingsMenu.add(privateDataSubMenu);
 
 		final JCheckBoxMenuItem enableTSPacketsMenu = new JCheckBoxMenuItem("Enable TS Packets");
+		enableTSPacketsMenu.setMnemonic(KeyEvent.VK_E);
 		enableTSPacketsMenu.setSelected(enableTSPackets);
 		final Action enableTSPacketsAction= new EnableTSPacketsAction(this);
 		enableTSPacketsMenu.addActionListener(enableTSPacketsAction);
@@ -351,7 +326,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	private JMenu createViewMenu() {
 		final JMenu viewMenu =new JMenu("View");
+		viewMenu.setMnemonic(KeyEvent.VK_V);
+
 		final JMenuItem filterItem = new JMenuItem("Filter");
+		filterItem.setMnemonic(KeyEvent.VK_F);
 		viewMenu.add(filterItem);
 		final Action pidOpenAction = new PIDDialogOpenAction(pidDialog,frame,this);
 		filterItem.addActionListener(pidOpenAction);
@@ -364,8 +342,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	private JMenu createHelpMenu() {
 		final JMenu helpMenu =new JMenu("Help");
-		JMenuItem aboutMenuItem;
-		aboutMenuItem = new JMenuItem("About...");
+		helpMenu.setMnemonic(KeyEvent.VK_H);
+		JMenuItem aboutMenuItem = new JMenuItem("About...");
+		aboutMenuItem.setMnemonic(KeyEvent.VK_A);
 		final Action aboutAction= new AboutAction(new JDialog(), frame,this);
 		aboutMenuItem.addActionListener(aboutAction);
 		helpMenu.add(aboutMenuItem);
@@ -377,12 +356,24 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	private JMenu createViewTreeMenu(final int modus) {
 		final JMenu viewTreeMenu =new JMenu("Tree View");
-		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Simple Tree View", DVBtree.SIMPLE_MODUS));
-		viewTreeMenu.add(createCheckBoxMenuItem(modus, "PSI Only",DVBtree.PSI_ONLY_MODUS));
-		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Packet Count",DVBtree.PACKET_MODUS));
-		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Number List Items",DVBtree.COUNT_LIST_ITEMS_MODUS));
-		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show PTS on PES Packets",DVBtree.SHOW_PTS_MODUS));
-		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show version_number on Table Sections",DVBtree.SHOW_VERSION_MODUS));
+		viewTreeMenu.setMnemonic(KeyEvent.VK_T);
+
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Simple Tree View", DVBtree.SIMPLE_MODUS,KeyEvent.VK_S));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "PSI Only",DVBtree.PSI_ONLY_MODUS,KeyEvent.VK_P));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Packet Count",DVBtree.PACKET_MODUS,KeyEvent.VK_C));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Number List Items",DVBtree.COUNT_LIST_ITEMS_MODUS,KeyEvent.VK_N));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show PTS on PES Packets",DVBtree.SHOW_PTS_MODUS,KeyEvent.VK_T));
+		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show version_number on Table Sections",DVBtree.SHOW_VERSION_MODUS,KeyEvent.VK_V));
+		
+		JMenuItem findMenuItem = new JMenuItem("Find...");
+		findMenuItem.setMnemonic(KeyEvent.VK_F);
+		
+		findMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
+		
+		findMenuItem.addActionListener(new FindAction(frame, treeView)); 
+		
+		viewTreeMenu.addSeparator();
+		viewTreeMenu.add(findMenuItem);
 
 		return viewTreeMenu;
 	}
@@ -391,10 +382,12 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param modus
 	 * @param label
 	 * @param modusBit
+	 * @param vkS 
 	 * @return
 	 */
-	private JCheckBoxMenuItem createCheckBoxMenuItem(final int modus, final String label, final int modusBit) {
+	private JCheckBoxMenuItem createCheckBoxMenuItem(final int modus, final String label, final int modusBit, int vkS) {
 		final JCheckBoxMenuItem viewMenu = new JCheckBoxMenuItem(label);
+		viewMenu.setMnemonic(vkS);
 		viewMenu.setSelected((modus&modusBit)!=0);
 		final Action viewAction= new ToggleViewAction(this, modusBit);
 		viewMenu.addActionListener(viewAction);
@@ -406,12 +399,16 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	private JMenu createFileMenu() {
 		final JMenu fileMenu =new JMenu("File");
+		fileMenu.setMnemonic(KeyEvent.VK_F);
 		final JMenuItem openMenuItem = new JMenuItem("Open",
 				KeyEvent.VK_O);
+		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+
 
 //		exportMenuItem = new JMenuItem("Export as HTML");
 //		exportMenuItem.setEnabled(false);
-		final JMenuItem exitMenuItem = new JMenuItem("Exit");
+		final JMenuItem exitMenuItem = new JMenuItem("Exit",KeyEvent.VK_X);
+		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
 
 		final Action fileOpenAction= new FileOpenAction(new JFileChooser(),frame,this);
 		openMenuItem.addActionListener(fileOpenAction);

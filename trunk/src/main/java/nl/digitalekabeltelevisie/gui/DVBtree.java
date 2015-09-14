@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -82,6 +82,7 @@ import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.main.DVBinspector;
+import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
 
 /**
  * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
@@ -649,5 +650,38 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		// empty block, we don't care
 
 	}
+
+	public boolean findAndShow(String s,DefaultMutableTreeNodePreorderEnumaration enumeration) {
+		
+        DefaultMutableTreeNode node = searchNode(s.toLowerCase(),enumeration);
+        if (node != null) {
+          javax.swing.tree.TreeNode[] nodes = model.getPathToRoot(node);
+          TreePath path = new TreePath(nodes);
+          tree.scrollPathToVisible(path);
+          tree.setSelectionPath(path);
+          return true;
+        }
+        return false;
+	}
+	
+	public DefaultMutableTreeNodePreorderEnumaration getDefaultMutableTreeNodePreorderEnumaration(){
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
+		return new DefaultMutableTreeNodePreorderEnumaration(root);
+	}
+
+	private DefaultMutableTreeNode searchNode(String targetString, DefaultMutableTreeNodePreorderEnumaration enumeration) {
+		while (enumeration.hasMoreElements()) {
+			Object node = enumeration.nextElement();
+			if (node instanceof DefaultMutableTreeNode){
+				DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode)node;
+				String nodeString = defaultMutableTreeNode.getUserObject().toString();
+				if( nodeString.toLowerCase().contains(targetString)) {
+					return defaultMutableTreeNode;
+				}
+			}
+		}
+		return null;
+	}
+
 
 }
