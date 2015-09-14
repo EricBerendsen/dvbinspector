@@ -669,7 +669,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		return new DefaultMutableTreeNodePreorderEnumaration(root);
 	}
 
-	private DefaultMutableTreeNode searchNode(String targetString, DefaultMutableTreeNodePreorderEnumaration enumeration) {
+	private static DefaultMutableTreeNode searchNode(String targetString, DefaultMutableTreeNodePreorderEnumaration enumeration) {
 		while (enumeration.hasMoreElements()) {
 			Object node = enumeration.nextElement();
 			if (node instanceof DefaultMutableTreeNode){

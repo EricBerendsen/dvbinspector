@@ -28,16 +28,10 @@
 package nl.digitalekabeltelevisie.gui;
 
 import java.awt.event.ActionEvent;
-import java.beans.*;
 
 import javax.swing.*;
 
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
-
 public class FindAction extends AbstractAction {
-
-	private DefaultMutableTreeNodePreorderEnumaration enummeration;
-
 
 	public FindAction(JFrame frame, DVBtree treeView) {
 		super();
