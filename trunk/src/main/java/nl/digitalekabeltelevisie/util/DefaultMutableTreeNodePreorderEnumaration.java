@@ -6,7 +6,7 @@ import javax.swing.tree.*;
 
 public class DefaultMutableTreeNodePreorderEnumaration implements Enumeration<DefaultMutableTreeNode>{
 
-    private final Stack<Enumeration> stack = new Stack<Enumeration>();
+    private final Stack<Enumeration<DefaultMutableTreeNode>> stack = new Stack<Enumeration<DefaultMutableTreeNode>>();
 
     public DefaultMutableTreeNodePreorderEnumaration(DefaultMutableTreeNode rootNode) {
         super();

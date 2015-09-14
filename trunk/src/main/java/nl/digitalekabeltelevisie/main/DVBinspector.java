@@ -274,7 +274,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param prefs
 	 * @return
 	 */
-	private Rectangle calculateBounds(final Preferences prefs) {
+	private static Rectangle calculateBounds(final Preferences prefs) {
 
 		int x = Math.max(0, prefs.getInt(DVBinspector.WINDOW_X, 10));
 		int y = Math.max(0, prefs.getInt(DVBinspector.WINDOW_Y, 10));
