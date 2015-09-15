@@ -248,7 +248,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 * @param c
 	 * @return
 	 */
-	private Color getContrastingColor(final Color c) {
+	private static Color getContrastingColor(final Color c) {
 		if((c.getGreen()+c.getRed()+c.getBlue())<384){
 			return Color.WHITE;
 		}else{

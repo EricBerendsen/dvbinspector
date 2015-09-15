@@ -432,7 +432,7 @@ Triplet implements TreeNode {
 	 * @param data
 	 * @return
 	 */
-	private String getHoursString(final int data) {
+	private static String getHoursString(final int data) {
 		StringBuilder hoursString = new StringBuilder();
 		int hoursUnits= data & 0x0F;
 		int hoursTens= ((data&0x30)>>4);

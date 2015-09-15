@@ -164,7 +164,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param categoryTableXYDataset
 	 * @return
 	 */
-	private XYPlot createXYPlot(final TransportStream transportStream,
+	private static XYPlot createXYPlot(final TransportStream transportStream,
 			final ViewContext viewContext, final int noPIDs,
 			final CategoryTableXYDataset categoryTableXYDataset) {
 		final NumberAxis xAxis = new NumberAxis("time");
@@ -195,7 +195,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param noPIDs
 	 * @return
 	 */
-	private CategoryTableXYDataset createDataSet(final TransportStream transportStream,
+	private static CategoryTableXYDataset createDataSet(final TransportStream transportStream,
 			final ViewContext viewContext, final int noPIDs) {
 
 		final short[]used_pids=new short[noPIDs];
@@ -233,7 +233,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param endPacketStep
 	 * @return
 	 */
-	private int[] countPidOccurrencesInStep(final TransportStream transportStream, final int startPacketStep,
+	private static int[] countPidOccurrencesInStep(final TransportStream transportStream, final int startPacketStep,
 			final int endPacketStep) {
 		final int [] pidcount = new int [8192];
 		for(int r = startPacketStep; r< endPacketStep;r++ ){
@@ -249,7 +249,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param step
 	 * @return
 	 */
-	private int getFirstPacketNoOfStep(final ViewContext viewContext,
+	private static int getFirstPacketNoOfStep(final ViewContext viewContext,
 			final int steps, final int step) {
 		return viewContext.getStartPacket() +(int)(((long)step*(long)(viewContext.getEndPacket() - viewContext.getStartPacket()))/steps);
 	}

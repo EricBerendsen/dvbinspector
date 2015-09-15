@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.logging.Logger;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
@@ -43,9 +41,6 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xPESDataField;
  */
 
 public class Video265PESDataField extends H26xPESDataField<H265NALUnit> implements TreeNode {
-
-	private static final Logger	logger	= Logger.getLogger(Video265PESDataField.class.getName());
-
 
 	public Video265PESDataField(final PesPacketData pesPacket) {
 		super(pesPacket);

@@ -225,7 +225,7 @@ public class PesHeader implements HTMLSource, TreeNode{
 	 * @param offset
 	 * @return the value of the PTS/DTS as described in 2.4.3.7 of iso 13813, prefix and marker bits are ignored
 	 */
-	public final long getTimeStamp(final byte[] array, final int offset) {
+	public final static long getTimeStamp(final byte[] array, final int offset) {
 
 		long ts = getLong(array, offset, 1, 0x0E) << 29; // bits 32..30
 		ts |= getLong(array, offset + 1, 2, 0xFFFE) << 14; // bits 29..15

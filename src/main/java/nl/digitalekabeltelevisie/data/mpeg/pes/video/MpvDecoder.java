@@ -90,9 +90,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 
 
@@ -117,8 +115,6 @@ public class MpvDecoder extends Object {
 	private boolean ERROR5 = false;
 	private boolean ERROR6 = false;
 	private boolean viewGOP = true;
-
-	private final List PositionList = new ArrayList();
 
 	private byte[] buf = new byte[0];
 
@@ -2158,7 +2154,7 @@ public class MpvDecoder extends Object {
 	/* ISO/IEC 13818-2 section 7.6.3.1: Decoding the motion vectors */
 	/* Note: the arithmetic here is more elegant than that which is shown
 	in 7.6.3.1.  The end results (PMV[][][]) should, however, be the same.  */
-	private void decode_motion_vector(int pred, final int r_size, final int motion_code,
+	private static void decode_motion_vector(int pred, final int r_size, final int motion_code,
 			final int motion_residual, final int full_pel_vector)
 	{
 
@@ -2219,7 +2215,7 @@ public class MpvDecoder extends Object {
 	}
 
 	/**/
-	private void IDCT_referenceFAST(final short block[])
+	private static void IDCT_referenceFAST(final short block[])
 	{
 		int v;
 
@@ -2232,7 +2228,7 @@ public class MpvDecoder extends Object {
 		Arrays.fill(block,block[0]);
 	}
 
-	private void IDCT_reference1(final short block[])
+	private static void IDCT_reference1(final short block[])
 	{
 		int i, j, v;
 
@@ -2680,23 +2676,6 @@ public class MpvDecoder extends Object {
 		return vertical_size;
 	}
 
-
-	/**
-	 *
-	 */
-	public void resetProcessedPosition()
-	{
-		PositionList.clear();
-	}
-
-
-	/**
-	 *
-	 */
-	public List getPositions()
-	{
-		return PositionList;
-	}
 
 
 	/**

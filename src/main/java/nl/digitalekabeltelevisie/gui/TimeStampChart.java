@@ -249,7 +249,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 * @param programNumber
 	 * @return
 	 */
-	private String getServiceName(final TransportStream transportStream, int programNumber) {
+	private static String getServiceName(final TransportStream transportStream, int programNumber) {
 		String 	name = transportStream.getPsi().getSdt().getServiceName(programNumber);
 		if(name==null){
 			name= "Service "+ programNumber;

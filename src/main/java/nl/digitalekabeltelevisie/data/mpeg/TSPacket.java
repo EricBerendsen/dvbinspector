@@ -291,7 +291,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	 * @param headerString
 	 * @param color
 	 */
-	private void appendHeader(final StringBuilder s, final String headerString, final Color color) {
+	private static void appendHeader(final StringBuilder s, final String headerString, final Color color) {
 		s.append("<br><span style=\"color:").append(Utils.toHexString(color)).append("\"><b>");
 		s.append(headerString);
 		s.append("</b><br>");

@@ -376,7 +376,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 	 * @param sample
 	 * @return
 	 */
-	private int getY(int channel, int sample) {
+	private static int getY(int channel, int sample) {
 		int t =(int)(((long)sample * GRAPH_HEIGHT) / (2L * Short.MAX_VALUE));
 		return ((GRAPH_HEIGHT/2) + (channel * (GRAPH_HEIGHT+LEGEND_HEIGHT)))- t;
 	}

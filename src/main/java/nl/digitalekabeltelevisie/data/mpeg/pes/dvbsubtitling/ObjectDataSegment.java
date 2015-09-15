@@ -746,7 +746,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		return Raster.createInterleavedRaster(dBuffer,width,height,width,1,new int[]{0},null);
 	}
 
-	private byte[] mapTable(final int regionDepth, final byte[] two_to_4_bit_map_table,
+	private static byte[] mapTable(final int regionDepth, final byte[] two_to_4_bit_map_table,
 			final byte[] two_to_8_bit_map_table, final byte[] four_to_8_bit_map_table,
 			final PixelDataSubBlock block, final int dataType) {
 		byte [] useMap;

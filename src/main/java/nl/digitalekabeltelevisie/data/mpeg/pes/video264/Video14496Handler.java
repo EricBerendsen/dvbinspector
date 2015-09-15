@@ -160,7 +160,7 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 	 * @param accessUnitData
 	 * @return
 	 */
-	private boolean notZero(final int[] accessUnitData) {
+	private static boolean notZero(final int[] accessUnitData) {
 		for (final int i : accessUnitData) {
 			if(i!=0){
 				return true;
