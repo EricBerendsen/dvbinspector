@@ -81,7 +81,7 @@ public class AncillaryData implements TreeNode{
 		return s;
 	}
 
-	private String getSync(final int s){
+	private static String getSync(final int s){
 		switch (s) {
 		case 0xAD: return "announcement_switching_data_sync";
 		case 0xFD: return "UECP_data_sync";

@@ -107,7 +107,7 @@ public class ZiggoPackageDescriptor extends Descriptor {
 	 * @param packages
 	 * @return a comma separated list of names of packages
 	 */
-	private String getPackagesList(final byte[] packages){
+	private static String getPackagesList(final byte[] packages){
 		final StringBuilder t = new StringBuilder();
 		final BitString bs = new BitString(packages);
 		for (int i = 0; i < packageNames.length; i++) {

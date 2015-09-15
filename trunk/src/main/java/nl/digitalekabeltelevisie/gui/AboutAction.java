@@ -48,7 +48,6 @@ public class AboutAction extends AbstractAction {
 		f=fr;
 	}
 	public void actionPerformed(final ActionEvent e) {
-		final Package p = getClass().getPackage();
 		final String javaVersion=System.getProperty("java.version");
 		final String javaVendor=System.getProperty("java.vendor");
 		final String javaHome=System.getProperty("java.home");

@@ -91,7 +91,7 @@ public class CompatibilityDescriptor implements TreeNode {
 			return t;
 		}
 
-		private String getSpecifierTypeString(final int specifierType2) {
+		private static String getSpecifierTypeString(final int specifierType2) {
 			if(specifierType2==0){
 				return "ISO/IEC 13818-6 reserved";
 			}else if(specifierType2==1){

@@ -284,7 +284,7 @@ public class JTreeLazyList{
 	 * @param noPackets2
 	 * @return
 	 */
-	private int determineLevel(int noPackets2) {
+	private static int determineLevel(int noPackets2) {
 		int l=0;
 		while(ipower(stepSize,l+1)<noPackets2){
 			l++;

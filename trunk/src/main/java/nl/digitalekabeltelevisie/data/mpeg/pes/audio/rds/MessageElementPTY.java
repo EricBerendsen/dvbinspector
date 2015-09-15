@@ -61,7 +61,7 @@ public class MessageElementPTY extends MessageElement {
 
 
 
-	private String getPTY(final int tatp){
+	private static String getPTY(final int tatp){
 		switch (tatp) {
 		case 0:
 			return "No programma type or undefined";

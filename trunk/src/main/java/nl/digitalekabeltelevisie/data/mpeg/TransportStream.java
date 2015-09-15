@@ -184,7 +184,7 @@ public class TransportStream implements TreeNode{
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean usesPacketLength(final int possiblePacketLength, final RandomAccessFile randomAccessFile) throws IOException {
+	private static boolean usesPacketLength(final int possiblePacketLength, final RandomAccessFile randomAccessFile) throws IOException {
 		int startPos = 0;
 		do{
 			logger.log(Level.INFO, "starting at position {0}",startPos);
@@ -467,7 +467,7 @@ public class TransportStream implements TreeNode{
 	 * @param pid
 	 * @return
 	 */
-	private String getFixedLabel(final short pid){
+	private static String getFixedLabel(final short pid){
 		switch (pid) {
 		case 0:
 			return "PAT";

@@ -193,7 +193,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		 * @param r
 		 * @return
 		 */
-		private int boundRange(final int r) {
+		private static int boundRange(final int r) {
 			return r < 0 ? 0 : (r > 0xFF ? 0xFF : r);
 		}
 
