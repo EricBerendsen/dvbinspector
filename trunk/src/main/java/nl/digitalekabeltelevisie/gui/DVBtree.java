@@ -664,9 +664,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
         return false;
 	}
 	
-	public DefaultMutableTreeNodePreorderEnumaration getDefaultMutableTreeNodePreorderEnumaration(){
-		DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
-		return new DefaultMutableTreeNodePreorderEnumaration(root);
+	public DefaultMutableTreeNodePreorderEnumaration createNewDefaultMutableTreeNodePreorderEnumaration(){
+		return new DefaultMutableTreeNodePreorderEnumaration((DefaultMutableTreeNode)model.getRoot());
 	}
 
 	private static DefaultMutableTreeNode searchNode(String targetString, DefaultMutableTreeNodePreorderEnumaration enumeration) {

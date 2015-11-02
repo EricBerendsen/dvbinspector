@@ -31,23 +31,24 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
+import nl.digitalekabeltelevisie.main.DVBinspector;
+
 public class FindAction extends AbstractAction {
 
-	public FindAction(JFrame frame, DVBtree treeView) {
-		super();
-		this.frame = frame;
-		this.treeView = treeView;
+	public FindAction(DVBinspector controller) {
+		super("Find...");
+		this.controller = controller;
 	}
 
-	JFrame frame;
-	DVBtree treeView;
+
+	DVBinspector controller;
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		FindDialog dialog = new FindDialog(frame,treeView);
+		FindDialog dialog = new FindDialog(controller);
 		dialog.pack();
-		dialog.setLocationRelativeTo(frame);
+		dialog.setLocationRelativeTo(controller.getFrame());
 		dialog.setVisible(true);
 	}
 }

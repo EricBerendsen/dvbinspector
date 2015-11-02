@@ -50,7 +50,7 @@ public class EnableTSPacketsAction extends AbstractAction {
 	private static final Logger	logger	= Logger.getLogger(EnableTSPacketsAction.class.getName());
 
 	public EnableTSPacketsAction(final DVBinspector controller) {
-		super();
+		super("Enable TS Packets");
 
 		contr=controller;
 
@@ -84,6 +84,7 @@ public class EnableTSPacketsAction extends AbstractAction {
 
 					ts.parseStream();
 					contr.setTransportStream(ts);
+					contr.resetSearch();
 				} catch (final IOException e1) {
 					logger.log (Level.SEVERE,"Error (re)reading transport stream: ",e1);
 				}

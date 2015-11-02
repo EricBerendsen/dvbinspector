@@ -128,7 +128,7 @@ public class FileOpenAction extends AbstractAction {
 	}
 
 	public FileOpenAction(final JFileChooser jf, final JFrame fr, final DVBinspector controller) {
-		super();
+		super("Open");
 		fileChooser = jf;
 		frame = fr;
 		contr = controller;
