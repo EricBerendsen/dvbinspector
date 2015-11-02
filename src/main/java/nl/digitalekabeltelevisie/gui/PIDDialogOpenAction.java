@@ -43,7 +43,7 @@ public class PIDDialogOpenAction extends AbstractAction {
 	private final JFrame f;
 
 	public PIDDialogOpenAction(final PIDDialog pd, final JFrame fr, final DVBinspector controller) {
-		super();
+		super("Filter");
 		pIDDialog=pd;
 		f=fr;
 	}

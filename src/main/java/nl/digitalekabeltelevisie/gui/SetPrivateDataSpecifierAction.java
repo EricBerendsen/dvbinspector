@@ -80,6 +80,7 @@ public class SetPrivateDataSpecifierAction extends AbstractAction {
 					//ts.parseStream((JRadioButtonMenuItem)e.getSource());
 					ts.parseStream();
 					contr.setTransportStream(ts);
+					contr.resetSearch();
 				} catch (final IOException e1) {
 					logger.log (Level.SEVERE,"Error (re)reading transport stream: ",e1);
 				}

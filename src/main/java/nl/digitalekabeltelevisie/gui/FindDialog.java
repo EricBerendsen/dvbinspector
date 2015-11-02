@@ -27,22 +27,21 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.event.*;
 import java.beans.*;
 
 import javax.swing.*;
 
+import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
-
-import java.awt.*;
-import java.awt.event.*;
 
 class FindDialog extends JDialog
                    implements ActionListener,
                               PropertyChangeListener {
     private String searchText = null;
     private JTextField textField;
-    private DVBtree treeView;
     private JOptionPane optionPane;
+    DVBinspector controller;
 
     private String buttonString1 = "Search";
     private String buttonString2 = "Cancel";
@@ -50,11 +49,14 @@ class FindDialog extends JDialog
 
 
 
-    public FindDialog(Frame aFrame, DVBtree treeView) {
-        super(aFrame, true);
-        this.treeView= treeView;
+    public FindDialog(DVBinspector controller) {
+        super(controller.getFrame(), true);
+        this.controller = controller;
         
-		enummeration = treeView.getDefaultMutableTreeNodePreorderEnumaration();
+        
+		enummeration = controller.getTreeView().createNewDefaultMutableTreeNodePreorderEnumaration();
+		controller.setSearchEnumeration(enummeration);
+		controller.setSearchString(null);
 
         setTitle("Search");
 
@@ -91,45 +93,45 @@ class FindDialog extends JDialog
         optionPane.setValue(buttonString1);
     }
 
-    /** This method reacts to state changes in the option pane. */
-    public void propertyChange(PropertyChangeEvent e) {
-        String prop = e.getPropertyName();
+	/** This method reacts to state changes in the option pane. */
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
 
-        if (isVisible()
-         && (e.getSource() == optionPane)
-         && (JOptionPane.VALUE_PROPERTY.equals(prop) ||
-             JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
-            Object value = optionPane.getValue();
+		if (isVisible() && (e.getSource() == optionPane)
+				&& (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
+			Object value = optionPane.getValue();
 
-            if (value == JOptionPane.UNINITIALIZED_VALUE) {
-                //ignore reset
-                return;
-            }
+			if (value == JOptionPane.UNINITIALIZED_VALUE) {
+				//ignore reset
+				return;
+			}
 
-            optionPane.setValue(
-                    JOptionPane.UNINITIALIZED_VALUE);
+			optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
 
-            if (buttonString1.equals(value)) {
-                    searchText = textField.getText();
-                
-				boolean found = treeView.findAndShow(searchText,enummeration);
-				if(!found){
-					setTitle("No (more) instances of '"+searchText+ "' found");
+			if (buttonString1.equals(value)) {
+				searchText = textField.getText();
+				controller.setSearchString(searchText);
+
+				boolean found = controller.getTreeView().findAndShow(searchText, enummeration);
+				if (!found) {
+					setTitle("No (more) instances of '" + searchText + "' found");
+					controller.setSearchEnumeration(null);
+					controller.setSearchString(null);
 					textField.setEnabled(false);
 					optionPane.getRootPane().getDefaultButton().setEnabled(false);
-					
-				}else{
+
+				} else {
 					optionPane.getRootPane().getDefaultButton().setText("Next");
 					textField.setEnabled(false);
-					
+
 				}
 
-            } else { 
-                searchText = null;
-                clearAndHide();
-            }
-        }
-    }
+			} else {
+				searchText = null;
+				clearAndHide();
+			}
+		}
+	}
 
     /** This method clears the dialog and hides it. */
     public void clearAndHide() {

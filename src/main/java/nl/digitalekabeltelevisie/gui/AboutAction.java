@@ -44,7 +44,7 @@ public class AboutAction extends AbstractAction {
 	private final JFrame f;
 
 	public AboutAction(final JDialog jf, final JFrame fr, final DVBinspector controller) {
-		super();
+		super("About...");
 		f=fr;
 	}
 	public void actionPerformed(final ActionEvent e) {

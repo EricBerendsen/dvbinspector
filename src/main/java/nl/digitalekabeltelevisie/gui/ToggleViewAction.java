@@ -41,13 +41,14 @@ public class ToggleViewAction extends AbstractAction {
 	private final DVBinspector contr;
 	private int bit=0;
 
-	public ToggleViewAction(final DVBinspector controller, final int toggleBit) {
-		super();
+	public ToggleViewAction(final String label,final DVBinspector controller, final int toggleBit) {
+		super(label);
 
 		contr=controller;
 		bit=toggleBit;
 	}
 	public void actionPerformed(final ActionEvent e) {
+		contr.resetSearch();
 		contr.getTreeView().toggleMod(bit);
 	}
 }
