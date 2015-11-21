@@ -72,7 +72,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	protected void addDetailsToJTree(final DefaultMutableTreeNode s,final int modus) {
 		s.add(new DefaultMutableTreeNode(new KVP("framing_code",getInt(data_block, offset+3, 1, MASK_8BITS),null)));
 		s.add(new DefaultMutableTreeNode(new KVP("magazine_and_packet_address",getInt(data_block, 4+offset, 2,MASK_16BITS),"Magazine:"+getMagazineNo()+" Packet:"+getPacketNo())));
-		s.add(new DefaultMutableTreeNode(new KVP("raw data",data_block,offset,45,null)));
+		s.add(new DefaultMutableTreeNode(new KVP("raw data",data_block,offset,46,null)));
 		if(getPacketNo()==0){ // header
 			s.add(new DefaultMutableTreeNode(new KVP("page number",toHexString((getPageNumberTens()*16)+getPageNumberUnits(),2), null))); // Tens is really hexadecimal
 			s.add(new DefaultMutableTreeNode(new KVP("sub page",toHexString(getSubPage(),4), null)));
