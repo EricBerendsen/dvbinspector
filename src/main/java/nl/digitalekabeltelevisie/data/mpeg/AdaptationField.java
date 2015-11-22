@@ -535,6 +535,10 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		StringBuilder s = new StringBuilder();
 
 		s.append("<br>adaptation_field_length: ").append(getHexAndDecimalFormattedString(getAdaptation_field_length()));
+		if(getAdaptation_field_length()==0){
+			return s.toString();
+		}
+
 		s.append("<br>discontinuity_indicator: ").append(getBooleanAsInt(discontinuity_indicator));
 		s.append("<br>random_access_indicator: ").append(getBooleanAsInt(random_access_indicator));
 		s.append("<br>elementary_stream_priority_indicator: ").append(getBooleanAsInt(elementary_stream_priority_indicator));
@@ -586,8 +590,11 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Adaptation Field"));
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("adaptation_field"));
 		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_length",getAdaptation_field_length() ,null)));
+		if(getAdaptation_field_length()==0){
+			return t;
+		}
 		t.add(new DefaultMutableTreeNode(new KVP("discontinuity_indicator",getBooleanAsInt(discontinuity_indicator) ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("random_access_indicator",getBooleanAsInt(random_access_indicator) ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("elementary_stream_priority_indicator",getBooleanAsInt(elementary_stream_priority_indicator) ,null)));
@@ -597,8 +604,6 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("splicing_point_flag",getBooleanAsInt(splicing_point_flag) ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("transport_private_data_flag",getBooleanAsInt(transport_private_data_flag) ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_extension_flag",getBooleanAsInt(adaptation_field_extension_flag) ,null)));
-
-//		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_length",getAdaptation_field_length() ,null)));
 
 		if(PCR_flag){
 			t.add(program_clock_reference.getJTreeNode(modus, "PCR"));
