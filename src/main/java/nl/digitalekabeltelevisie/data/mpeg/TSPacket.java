@@ -27,7 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.*;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.PAYLOAD_PACKET_LENGTH;
+import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.getErrorKVP;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.awt.Color;
@@ -35,12 +36,10 @@ import java.util.Arrays;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.util.RangeHashMap;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 
 
 /**
@@ -55,12 +54,14 @@ import nl.digitalekabeltelevisie.util.Utils;
  *
  */
 public class TSPacket implements HTMLSource, TreeNode{
+	private static final String ERROR_PARSING_ADAPTATION_FIELD = "Error parsing AdaptationField";
 	final private byte[] buffer ;
 	private long packetNo=-1;
 	final private static Color HEADER_COLOR = new Color(0x0000ff);
 	final private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
 	final private static Color FEC_COLOR = new Color(0x800080);
 	final private static Color PES_HEADER_COLOR = new Color(0x800000);
+	private static final Color ERROR_COLOR = new Color(0xFF0000);
 	final private TransportStream transportStream;
 
 	private PesHeader pesHeader = null;
@@ -244,9 +245,11 @@ public class TSPacket implements HTMLSource, TreeNode{
 			adaptationField = getAdaptationField();
 		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			adaptationField = null;
+			appendHeader(s,ERROR_PARSING_ADAPTATION_FIELD,ERROR_COLOR);
+			s.append("<br></span>");
 		}
 		if(adaptationField!=null){
-			appendHeader(s, "AdaptationField:", ADAPTATION_FIELD_COLOR);
+			appendHeader(s, "adaptation_field:", ADAPTATION_FIELD_COLOR);
 			s.append(adaptationField.getHTML()).append("<br></span>");
 			coloring.put(4, 4+adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
 		}
@@ -317,7 +320,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final StringBuilder l = new StringBuilder("TSPacket [").append(packetNo).append("]");
+		final StringBuilder l = new StringBuilder("transport_packet [").append(packetNo).append("]");
 		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
 			l.append(" (adaptation field)");
 		}
@@ -345,6 +348,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			adaptationField = getAdaptationField();
 		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			adaptationField = null;
+			t.add(new DefaultMutableTreeNode(getErrorKVP(ERROR_PARSING_ADAPTATION_FIELD)));
 		}
 		if(adaptationField!=null){
 			t.add(adaptationField.getJTreeNode(modus));

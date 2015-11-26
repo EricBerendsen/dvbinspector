@@ -81,6 +81,10 @@ public final class GuiUtils {
 		return new KVP("<span style=\"color: red;\">"+message.toString()+"</span>",message.toString());
 	}
 
+	public static KVP getErrorKVP(final String message){
+		return new KVP("<span style=\"color: red;\">"+message.toString()+"</span>",message.toString());
+	}
+
 	/**
 	 * @return
 	 */
