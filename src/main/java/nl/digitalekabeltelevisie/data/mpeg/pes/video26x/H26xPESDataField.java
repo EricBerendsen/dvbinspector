@@ -83,7 +83,7 @@ public abstract class H26xPESDataField<E extends AbstractNALUnit> extends PesPac
 						final E nalUnit = createNALUnitInstance(data,i, end-i);
 						nalUnits.add(nalUnit);
 					} catch (final Exception e) {
-						logger.info("Create NALUnit failed: data.length="+data.length+" i="+i+", end="+end);
+						logger.info("Create NALUnit failed: data.length="+data.length+" i="+i+", end="+end+", exception="+e.getMessage());
 					}
 					i=end;
 				}
