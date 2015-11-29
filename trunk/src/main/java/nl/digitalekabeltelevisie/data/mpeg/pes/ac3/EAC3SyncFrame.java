@@ -31,6 +31,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 /**
  *
@@ -356,7 +357,8 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 		if(strmtyp == 0x1){ /* if dependent stream */
 			s.add(new DefaultMutableTreeNode(new KVP("chanmape",chanmape,"Custom channel map "+doesExistString(chanmape)+" (Only dependent substreams can have a custom channel map)")));
 			if(chanmape==1) {
-				s.add(new DefaultMutableTreeNode(new KVP("chanmap",chanmap,"Not implemented, please report!")));
+				s.add(new DefaultMutableTreeNode(new KVP("chanmap",chanmap,null)));
+				s.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("chanmap")));
 			}
 		}
 		s.add(new DefaultMutableTreeNode(new KVP("mixmdate",mixmdate,mixmdate==1?"mixing metadata exists":"mixing metadata does not exist")));
@@ -413,7 +415,7 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 				}else if(mixdef == 0x3) /* mixing option 4 */
 				{
 					s.add(new DefaultMutableTreeNode(new KVP("mixdeflen",mixdeflen,"Length of mixing parameter data field: "+(mixdeflen+2)+" bytes")));
-					s.add(new DefaultMutableTreeNode(new KVP("mixing option 4: Not implemented, please report!")));
+					s.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("mixing option 4")));
 				}
 				if(acmod < 0x2) /* if mono or dual mono source */
 				{
