@@ -91,6 +91,13 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 					final int slice_type = header.getSlice_type();
 					final int size = unit.getNumBytesInRBSP();
 					accessUnitData[slice_type%5] += size;
+				}else if( rbsp instanceof Slice_layer_extension_rbsp){
+					final Slice_header header = ((Slice_layer_extension_rbsp)rbsp).getSlice_header();
+					if(header!=null){
+						final int slice_type = header.getSlice_type();
+						final int size = unit.getNumBytesInRBSP();
+						accessUnitData[slice_type%5] += size;
+					}
 				}else if( rbsp instanceof Filler_data_rbsp){
 					final int size = unit.getNumBytesInRBSP();
 					accessUnitData[5] += size;
