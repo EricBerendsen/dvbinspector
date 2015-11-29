@@ -746,6 +746,8 @@ public class TransportStream implements TreeNode{
 							abstractPesHandler = new Audio138183Handler(ancillaryData);
 						}else if(streamType==0x1B){
 							abstractPesHandler = new Video14496Handler();
+						}else if(streamType==0x20){ //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
+							abstractPesHandler = new Video14496Handler();
 						}else if(streamType==0x24){
 							abstractPesHandler = new H265Handler();
 						}else{

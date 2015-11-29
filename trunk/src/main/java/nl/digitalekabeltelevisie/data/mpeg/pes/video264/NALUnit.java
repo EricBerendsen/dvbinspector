@@ -31,12 +31,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 public class NALUnit extends AbstractNALUnit implements TreeNode {
 
 	private final int forbidden_zero_bit;
 	private final int nal_ref_idc;
 	private final int nal_unit_type;
+	
+	private int svc_extension_flag;
+	private int avc_3d_extension_flag;
+	
+	NalUnitHeaderMvcExtension nalUnitHeaderMvcExtension;
 	/**
 	 * @param bytes
 	 * @param offset
@@ -50,7 +56,26 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 		this.nal_ref_idc = bs.readBits(2);
 		this.nal_unit_type = bs.readBits(5);
 
-
+		if( (nal_unit_type == 14) || (nal_unit_type == 20) || (nal_unit_type == 21) ) {
+			if(nal_unit_type != 21 ){
+				svc_extension_flag = bs.u(1);
+			}else{
+				avc_3d_extension_flag = bs.u(1);
+			}
+			if( svc_extension_flag==1 ) {
+				// nal_unit_header_svc_extension()
+				logger.warning("Not implemented nal_unit_header_svc_extension");
+				bs.readBits(24);
+			} else if( avc_3d_extension_flag==1 ) {
+				//al_unit_header_3davc_extension()
+				logger.warning("Not implemented al_unit_header_3davc_extension");
+				bs.readBits(16);
+			} else {
+				//nal_unit_header_mvc_extension( )
+				nalUnitHeaderMvcExtension = new NalUnitHeaderMvcExtension(bs);
+			}
+		}
+		
 		readRBSPBytes();
 
 		createRBSP();
@@ -79,8 +104,13 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 			rbsp=new Access_unit_delimiter_rbsp(rbsp_byte, numBytesInRBSP);
 		}else if(nal_unit_type==12){
 			rbsp=new Filler_data_rbsp(rbsp_byte, numBytesInRBSP);
+		}else if(nal_unit_type==15){
+			rbsp=new Subset_seq_parameter_set_rbsp(rbsp_byte, numBytesInRBSP);
+		}else if(nal_unit_type==20){
+			rbsp=new Slice_layer_extension_rbsp(rbsp_byte, numBytesInRBSP, svc_extension_flag, avc_3d_extension_flag);
 		}else{
-			logger.warning("not implemented nal_unit_type: "+nal_unit_type);
+			logger.warning("not implemented nal_unit_type: "+nal_unit_type+" ("+getNALUnitTypeString(nal_unit_type)+")");
+			
 		}
 	}
 
@@ -92,6 +122,22 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 		t.add(new DefaultMutableTreeNode(new KVP("forbidden_zero_bit",forbidden_zero_bit,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("nal_ref_idc",nal_ref_idc,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("nal_unit_type",nal_unit_type,getNALUnitTypeString(nal_unit_type))));
+
+		if( (nal_unit_type == 14) || (nal_unit_type == 20) || (nal_unit_type == 21) ) {
+			if(nal_unit_type != 21 ){
+				t.add(new DefaultMutableTreeNode(new KVP("svc_extension_flag",svc_extension_flag,null)));
+			}else{
+				t.add(new DefaultMutableTreeNode(new KVP("avc_3d_extension_flag",avc_3d_extension_flag,null)));
+			}
+			if( svc_extension_flag==1 ) {
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("nal_unit_header_svc_extension()")));
+			} else if( avc_3d_extension_flag==1 ) {
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("nal_unit_header_3davc_extension()")));
+			} else {
+				t.add(nalUnitHeaderMvcExtension.getJTreeNode(modus));
+			}
+		}
+
 		t.add(new DefaultMutableTreeNode(new KVP("rbsp_byte",rbsp_byte,0,numBytesInRBSP,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("NumBytesInRBSP",numBytesInRBSP,null)));
 		if(rbsp!=null){
@@ -125,6 +171,14 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 		case 20 : return "Coded slice extension";
 		case 21 : return "Coded slice extension for a depth view component or a 3D-AVC texture view component";
 
+		// RFC 6184 RTP Payload Format for H.264 Video
+		// https://tools.ietf.org/html/rfc6184#section-5.2
+		case 24 : return "Single-time aggregation packet without DON (STAP-A) RFC 6184";
+		case 25 : return "Single-time aggregation packet including DON (STAP-B) RFC 6184";
+		case 26 : return "Multi-time aggregation packet (MTAP16) RFC 6184";
+		case 27 : return "Multi-time aggregation packet (MTAP24) RFC 6184";
+		case 28 : return "Fragmentation unit (FU-A) RFC 6184";
+		case 29 : return "Fragmentation unit (FU-B) RFC 6184";
 		default:
 			return "reserved";
 		}

@@ -63,7 +63,7 @@ public abstract class RBSP implements TreeNode {
 	 * @param bitSource
 	 * @return the number of delta's read, and present in deltaScalingList
 	 */
-	protected int scaling_list(int[] deltaScalingList, int sizeOfScalingList, BitSource bitSource) {
+	public static int scaling_list(int[] deltaScalingList, int sizeOfScalingList, BitSource bitSource) {
 		int lastScale = 8;
 		int nextScale = 8;
 		int no_deltas=0;
@@ -81,7 +81,7 @@ public abstract class RBSP implements TreeNode {
 
 	// used in Pic_parameter_set_rbsp and Seq_parameter_set_rbsp
 
-	protected DefaultMutableTreeNode getScalingListJTree(int[] deltaScalingList, int i,
+	public static DefaultMutableTreeNode getScalingListJTree(int[] deltaScalingList, int i,
 			int sizeOfScalingList, int deltas_read) {
 
 				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("scaling_list["+i+"]"));
@@ -99,4 +99,32 @@ public abstract class RBSP implements TreeNode {
 
 				return t;
 			}
+
+	public static String getProfileIdcString(final int profile_idc) {
+	
+		switch (profile_idc) {
+		case 66: return "Baseline profile";
+		case 77: return "Main profile";
+		case 88: return "Extended profile";
+		case 100: return "High profile";
+		case 110: return "High 10 profile";
+		case 122: return "High 4:2:2 profile";
+		case 44: return "CAVLC 4:4:4 Intra profile";
+		case 144: return "High 4:4:4 Predictive profile";
+	
+		// these are used in Rec. ITU-T H.264 (03/2010) – Prepublished version, but not defined in Annex A
+		// definitions from https://ffmpeg.org/pipermail/ffmpeg-cvslog/2014-March/074446.html
+		case 83: return "Scalable Constrained High profile (SVC)";
+		case 86: return "Scalable High Intra profile (SVC)";
+		case 118: return "Stereo High profile (MVC)";
+		case 128: return "Multiview High profile (MVC)";
+		case 138: return "Multiview Depth High profile (MVCD)";
+		case 244: return "High444 Predictive profile";
+
+		// Rec. ITU-T H.264 (02/2014) J.10.1.1 Enhanced Multiview Depth High profile
+		case 139: return "Enhanced Multiview Depth High profile (MVCD)";
+		default:
+			return "unknown";
+		}
+	}
 }
