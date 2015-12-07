@@ -30,7 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Seq_parameter_set_rbsp;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -80,7 +80,7 @@ public class AVCVideoDescriptor extends Descriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,Seq_parameter_set_rbsp.getProfileIdcString(profile_idc))));
+		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,RBSP.getProfileIdcString(profile_idc))));
 		t.add(new DefaultMutableTreeNode(new KVP("constraint_set0_flag",constraint_set0_flag,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("constraint_set1_flag",constraint_set1_flag,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("constraint_set2_flag",constraint_set2_flag,null)));
