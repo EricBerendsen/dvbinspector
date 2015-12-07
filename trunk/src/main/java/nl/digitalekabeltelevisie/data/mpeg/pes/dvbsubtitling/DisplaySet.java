@@ -232,7 +232,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 		}
 	}
 
-	private void paintObjectsOnRegions(final Map<Integer, ObjectDataSegment> objects,
+	private static void paintObjectsOnRegions(final Map<Integer, ObjectDataSegment> objects,
 			final List<RegionCompositionSegment> localRegions,
 			final WritableRaster[] regionRaster) {
 		for (final RegionCompositionSegment rcs : localRegions) {

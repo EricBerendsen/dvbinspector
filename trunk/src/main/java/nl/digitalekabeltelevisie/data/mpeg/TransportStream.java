@@ -162,7 +162,7 @@ public class TransportStream implements TreeNode{
 	 * @param file
 	 * @return
 	 */
-	private int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
+	private static int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
 		final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
 		for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
 			logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
