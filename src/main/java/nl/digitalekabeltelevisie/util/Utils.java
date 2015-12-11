@@ -691,6 +691,8 @@ public final class Utils {
 					if(b[offset+1]==0x0){
 						charset = Charset.forName("ISO-8859-"+b[offset+2]);
 					} // else == reserved for future use, so not implemented
+				}else if((selectorByte==0x11 )){ // ISO/IEC 10646
+					charset = Charset.forName("UTF-16");
 				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
 					charset = Charset.forName("UTF-8");
 				}
@@ -721,6 +723,8 @@ public final class Utils {
 				if(b[offset+1]==0x0){
 					charsetLen = 3;
 				}
+			}else if((selectorByte==0x11 )){ // ISO/IEC 10646
+				charsetLen = 1;
 			}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
 				charsetLen = 1;
 			}else if((selectorByte==0x1F )){ // described by encoding_type_id
