@@ -422,6 +422,9 @@ public final class DescriptorFactory {
 		case 0x5B:
 			d = new MultilingualNetworkNameDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x5C:
+			d = new MultilingualBouquetNameDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x5D:
 			d = new MultilingualServiceNameDescriptor(data, t + offset, tableSection);
 			break;
