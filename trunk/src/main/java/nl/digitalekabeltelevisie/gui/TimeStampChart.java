@@ -53,7 +53,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PCR;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.utils.DVBInspectorDefaultDrawingSupplier;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -229,18 +229,23 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart("To enable this graph select \"Enable TS Packets\" in the settings menu"));
 		}else{
-			for (PMTsection[] pmTsections : transportStream.getPsi().getPmts()) {
-				PMTsection section = pmTsections[0]; //always one
-				//PCR_PID If no PCR is associated with a program definition for private
-				//streams, then this field shall take the value of 0x1FFF.
-				if(section.getPcrPid()!=8191){
-					pmts.add(section);
-					String name = getServiceName(transportStream, section.getProgramNumber());
-					serviceChooser.addItem(name+", PCR_PID : "+section.getPcrPid());
+			final PMTs streamPmts = transportStream.getPsi().getPmts();
+			if(streamPmts.getPmts().isEmpty()){
+				chartPanel.setChart(GuiUtils.createTitleOnlyChart("No PMTs found to display in this graph"));
+			}else{
+				for (PMTsection[] pmTsections : streamPmts) {
+					PMTsection section = pmTsections[0]; //always one
+					//PCR_PID If no PCR is associated with a program definition for private
+					//streams, then this field shall take the value of 0x1FFF.
+					if(section.getPcrPid()!=8191){
+						pmts.add(section);
+						String name = getServiceName(transportStream, section.getProgramNumber());
+						serviceChooser.addItem(name+", PCR_PID : "+section.getPcrPid());
+					}
 				}
+				serviceChooser.addActionListener(this);
+				updateChartPanel();
 			}
-			serviceChooser.addActionListener(this);
-			updateChartPanel();
 		}
 	}
 
