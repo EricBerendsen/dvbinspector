@@ -88,6 +88,12 @@ public class MultilingualNetworkNameDescriptor extends Descriptor {
 
 
 
+		public DVBString getNetwork_name() {
+			return network_name;
+		}
+
+
+
 
 
 	}
@@ -125,7 +131,7 @@ public class MultilingualNetworkNameDescriptor extends Descriptor {
 		return t;
 	}
 
-	public List<NetworkName> getSubtitleList() {
+	public List<NetworkName> getNetworkNameList() {
 		return networkNameList;
 	}
 }
