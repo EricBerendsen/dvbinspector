@@ -93,6 +93,18 @@ public class MultilingualServiceNameDescriptor extends Descriptor {
 
 
 
+		public DVBString getService_provider_name() {
+			return service_provider_name;
+		}
+
+
+
+		public DVBString getService_name() {
+			return service_name;
+		}
+
+
+
 
 
 	}
@@ -132,7 +144,7 @@ public class MultilingualServiceNameDescriptor extends Descriptor {
 		return t;
 	}
 
-	public List<ServiceName> getSubtitleList() {
+	public List<ServiceName> getServiceNameList() {
 		return serviceNameList;
 	}
 }
