@@ -116,9 +116,9 @@ public class Video14496HandlerTest {
 		testNALUnit(unit1, Seq_parameter_set_rbsp.class, 7);
 		final Seq_parameter_set_rbsp seq_parameter_set_rbsp = (Seq_parameter_set_rbsp) unit1.getRbsp();
 
-		assertEquals("Profile_idc",77,seq_parameter_set_rbsp.getProfile_idc());
-		assertEquals("Pic_width_in_mbs_minus1",119,seq_parameter_set_rbsp.getPic_width_in_mbs_minus1());
-		assertEquals("Pic_height_in_map_units_minus1",33,seq_parameter_set_rbsp.getPic_height_in_map_units_minus1());
+		assertEquals("Profile_idc",77,seq_parameter_set_rbsp.getSeqParameterSetData().getProfile_idc());
+		assertEquals("Pic_width_in_mbs_minus1",119,seq_parameter_set_rbsp.getSeqParameterSetData().getPic_width_in_mbs_minus1());
+		assertEquals("Pic_height_in_map_units_minus1",33,seq_parameter_set_rbsp.getSeqParameterSetData().getPic_height_in_map_units_minus1());
 
 		final NALUnit unit2 = nalUnitsIFrame.get(2);
 		testNALUnit(unit2, Pic_parameter_set_rbsp.class, 8);
