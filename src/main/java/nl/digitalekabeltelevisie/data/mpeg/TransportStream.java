@@ -28,6 +28,7 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.io.*;
@@ -57,6 +58,10 @@ import nl.digitalekabeltelevisie.util.*;
  *
  */
 public class TransportStream implements TreeNode{
+	
+	private enum ComponentType{
+		AC3, E_AC3, VBI, TELETEXT, DVB_SUBTITLING, AIT, RCT, ECM
+	}
 
 
 	/**
@@ -163,18 +168,17 @@ public class TransportStream implements TreeNode{
 	 * @return
 	 */
 	private static int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
-		final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-		for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
-			logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
-
-			if(usesPacketLength(possiblePacketLength, randomAccessFile)){
-				randomAccessFile.close();
-				logger.log(Level.INFO, "Found packetLength {0}",possiblePacketLength);
-				return possiblePacketLength;
+		try(final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
+			for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
+				logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
+	
+				if(usesPacketLength(possiblePacketLength, randomAccessFile)){
+					randomAccessFile.close();
+					logger.log(Level.INFO, "Found packetLength {0}",possiblePacketLength);
+					return possiblePacketLength;
+				}
 			}
 		}
-
-		randomAccessFile.close();
 		throw new NotAnMPEGFileException();
 	}
 
@@ -508,171 +512,6 @@ public class TransportStream implements TreeNode{
 		return "??";
 	}
 
-	/**
-	 * TODO work in  progress, not finished yet.
-	 *
-	 * Get the label for pid at position packetNo. Used for (long) VOD streams, where PMTs change a lot, and PIDs get re-assigned
-	 *
-	 * @param pid
-	 * @param packetNo
-	 * @return
-	 */
-	public String getCurrentLabel(final short pid, final long packetNo){
-		if(pid <= 0x1b){
-			return getFixedLabel(pid);
-		}
-		if(pid == 8191){
-			return "NULL Packets (Stuffing)";
-		}
-
-		// now see if the stream is referenced from the CAT
-		// ASSumes CAT does not change
-
-		if(pids[1]!=null){
-			final Iterator<Descriptor> catIter= getPsi().getCat().getDescriptorList().iterator();
-			while (catIter.hasNext()) {
-				final Descriptor d = catIter.next();
-				if(d instanceof CADescriptor) {
-					final CADescriptor cad = (CADescriptor) d;
-					final int capid=cad.getCaPID();
-					if(capid==pid){
-						return  "EMM for CA_ID:"+cad.getCaSystemID()+ " ("+Utils.getCASystemIDString(cad.getCaSystemID())+")";
-					}
-				}
-			}
-		}
-
-		// now all services, starting with PMTs themselves, then referenced ES
-		// get PMTs valid at moment "packetNo
-		// PAT actualPat = getPsi().getPat(packetNo);
-		// .getPmts(packetNo).values().iterator();
-		//		while (it.hasNext()) {
-		//			final PMTsection[] pmt = it.next();
-		//			PMTsection section = pmt[0];
-		//			while(section!=null){
-		//				final int service_id=section.getProgramNumber();
-		//				String service_name = getPsi().getSdt().getServiceName(service_id);
-		//				if(service_name==null){
-		//					service_name="Service "+service_id;
-		//				}
-		//				final int pmt_pid=section.getParentPID().getPid();
-		//				setLabel(pmt_pid,pids,"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
-		//
-		//				final Iterator<Descriptor> i = section.getDescriptorList().iterator();
-		//				while (i.hasNext()) {
-		//					final Descriptor d = i.next();
-		//					if(d instanceof CADescriptor) {
-		//						final CADescriptor cad = (CADescriptor) d;
-		//						final int capid=cad.getCaPID();
-		//						setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
-		//					}
-		//				}
-		//
-		//				final Iterator<Component> l = section.getComponentenList().iterator();
-		//				while(l.hasNext()){
-		//					final Component component = l.next();
-		//					GeneralPesHandler abstractPesHandler = null;
-		//					final int comp_pid = component.getElementaryPID();
-		//					final int streamType = component.getStreamtype();
-		//					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
-		//					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
-		//					if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
-		//						if((streamType==1)||(streamType==2)){
-		//							abstractPesHandler = new Video138182Handler();
-		//						}else if((streamType==3)||(streamType==4)){
-		//							// find Ancillary Data info so we can parse RDS
-		//							int ancillaryData = 0;
-		//							final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
-		//							while (k.hasNext()) {
-		//								final Descriptor d = k.next();
-		//								if(d instanceof AncillaryDataDescriptor) {
-		//									final AncillaryDataDescriptor ac= (AncillaryDataDescriptor)d;
-		//									ancillaryData = ac.getAncillaryDataIdentifier();
-		//								}
-		//							}
-		//
-		//							abstractPesHandler = new Audio138183Handler(ancillaryData);
-		//						}else if(streamType==0x1B){
-		//							abstractPesHandler = new Video14496Handler();
-		//						}else{
-		//							abstractPesHandler = new GeneralPesHandler();
-		//						}
-		//					}
-		//
-		//					final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
-		//					while (k.hasNext()) {
-		//						final Descriptor d = k.next();
-		//						if(d instanceof SubtitlingDescriptor) {
-		//							compt_type.append(" DVB subtitling");
-		//							short_compt_type.append("DVB subtitling");
-		//							abstractPesHandler = new DVBSubtitleHandler();
-		//						}else if(d instanceof TeletextDescriptor) {
-		//							compt_type.append(" Teletext");
-		//							short_compt_type.append("Teletext");
-		//							abstractPesHandler = new EBUTeletextHandler();
-		//						}else if(d instanceof VBIDataDescriptor) {
-		//							compt_type.append(" VBI Data");
-		//							short_compt_type.append("VBI Data");
-		//							abstractPesHandler = new EBUTeletextHandler();
-		//						}else if(d instanceof AC3Descriptor){
-		//							compt_type.append(" Dolby Audio (AC3)");
-		//							short_compt_type.append("Dolby Audio (AC3)");
-		//							abstractPesHandler = new AC3Handler();
-		//						}else if(d instanceof EnhancedAC3Descriptor){
-		//							compt_type.append(" Enhanced Dolby Audio (AC3)");
-		//							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
-		//							abstractPesHandler = new EAC3Handler();
-		//						}if(d instanceof CADescriptor) {
-		//							final CADescriptor cad = (CADescriptor) d;
-		//							final int capid=cad.getCaPID();
-		//							setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
-		//						}
-		//					}
-		//
-		//					if(pids[comp_pid]!=null){
-		//						if(pids[comp_pid].getLabel()==null){
-		//							pids[comp_pid].setLabel(compt_type.toString());
-		//						}else if(!pids[comp_pid].getLabel().contains(compt_type)){
-		//							pids[comp_pid].setLabel(pids[comp_pid].getLabel()+ '/'+compt_type);
-		//						}
-		//						if(pids[comp_pid].getShortLabel()==null){
-		//							pids[comp_pid].setShortLabel(short_compt_type.toString());
-		//						}else if(!pids[comp_pid].getShortLabel().contains(short_compt_type)){
-		//							pids[comp_pid].setShortLabel(pids[comp_pid].getShortLabel()+'/'+short_compt_type);
-		//						}
-		//						if(abstractPesHandler!=null){
-		//							abstractPesHandler.setTransportStream(this);
-		//							abstractPesHandler.setPID(pids[comp_pid]);
-		//							pids[comp_pid].setPesHandler(abstractPesHandler);
-		//						}
-		//					}
-		//				}
-		//				final int PCR_pid = section.getPcrPid();
-		//				final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
-		//				final String pcrShortLabel = "PCR "+service_name;
-		//				if(pids[PCR_pid]==null){
-		//					logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
-		//				}
-		//				else if(pids[PCR_pid].getLabel()==null){
-		//					pids[PCR_pid].setLabel(pcrLabel);
-		//				}else if(!pids[PCR_pid].getLabel().contains(pcrLabel)){
-		//					pids[PCR_pid].setLabel(pids[PCR_pid].getLabel()+", "+pcrLabel);
-		//				}
-		//				if(pids[PCR_pid]!=null){
-		//					if(pids[PCR_pid].getShortLabel()==null){
-		//						pids[PCR_pid].setShortLabel(pcrShortLabel);
-		//					}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
-		//						pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
-		//					}else{
-		//						pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
-		//					}
-		//				}
-		//				section =(PMTsection)section.getNextVersion();
-		//			}
-		//
-		//
-		return "?";
-	}
 
 	private void namePIDs() {
 
@@ -685,14 +524,8 @@ public class TransportStream implements TreeNode{
 
 		// now the streams referenced from the CAT
 		if(pids[1]!=null){
-			final Iterator<Descriptor> catIter= getPsi().getCat().getDescriptorList().iterator();
-			while (catIter.hasNext()) {
-				final Descriptor d = catIter.next();
-				if(d instanceof CADescriptor) {
-					final CADescriptor cad = (CADescriptor) d;
-					final int capid=cad.getCaPID();
-					setLabel(capid, pids, "EMM for CA_ID:"+cad.getCaSystemID()+ " ("+Utils.getCASystemIDString(cad.getCaSystemID())+")");
-				}
+			for(CADescriptor caDescriptor:findGenericDescriptorsInList(getPsi().getCat().getDescriptorList(), CADescriptor.class)){
+				setLabel(caDescriptor.getCaPID(), pids, "EMM for CA_ID:"+caDescriptor.getCaSystemID()+ " ("+Utils.getCASystemIDString(caDescriptor.getCaSystemID())+")");
 			}
 		}
 
@@ -710,102 +543,82 @@ public class TransportStream implements TreeNode{
 				final int pmt_pid=pmtSection.getParentPID().getPid();
 				setLabel(pmt_pid,pids,"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
 
-				final Iterator<Descriptor> i = pmtSection.getDescriptorList().iterator();
-				while (i.hasNext()) {
-					final Descriptor d = i.next();
-					if(d instanceof CADescriptor) {
-						final CADescriptor cad = (CADescriptor) d;
-						final int capid=cad.getCaPID();
-						setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
-					}
+				for(CADescriptor caDescriptor:findGenericDescriptorsInList(pmtSection.getDescriptorList(), CADescriptor.class)){
+					setLabel(caDescriptor.getCaPID(),pids,"ECM for CA_ID:"+caDescriptor.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
 				}
 
 				final Iterator<Component> l = pmtSection.getComponentenList().iterator();
 				while(l.hasNext()){
 					final Component component = l.next();
-					GeneralPesHandler abstractPesHandler = null;
-					final int comp_pid = component.getElementaryPID();
 					final int streamType = component.getStreamtype();
 					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
 					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
-					if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
-						if((streamType==1)||(streamType==2)){
-							abstractPesHandler = new Video138182Handler();
-						}else if((streamType==3)||(streamType==4)){
-							// find Ancillary Data info so we can parse RDS
-							int ancillaryData = 0;
-							final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
-							while (k.hasNext()) {
-								final Descriptor d = k.next();
-								if(d instanceof AncillaryDataDescriptor) {
-									final AncillaryDataDescriptor ac= (AncillaryDataDescriptor)d;
-									ancillaryData = ac.getAncillaryDataIdentifier();
-								}
-							}
+					GeneralPesHandler abstractPesHandler = determinePesHandlerByStreamType(component,streamType);
 
-							abstractPesHandler = new Audio138183Handler(ancillaryData);
-						}else if(streamType==0x1B){
-							abstractPesHandler = new Video14496Handler();
-						}else if(streamType==0x20){ //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
-							abstractPesHandler = new Video14496Handler();
-						}else if(streamType==0x24){
-							abstractPesHandler = new H265Handler();
-						}else{
-							abstractPesHandler = new GeneralPesHandler();
+					ComponentType componentType = determineComponentType(component.getComponentDescriptorList());
+					if(componentType!=null){
+						switch(componentType){
+						case DVB_SUBTITLING:
+								compt_type.append(" DVB subtitling");
+								short_compt_type.append("DVB subtitling");
+								abstractPesHandler = new DVBSubtitleHandler();
+								break;
+						case TELETEXT:
+								compt_type.append(" Teletext");
+								short_compt_type.append("Teletext");
+								abstractPesHandler = new EBUTeletextHandler();
+								break;
+						case VBI:
+								compt_type.append(" VBI Data");
+								short_compt_type.append("VBI Data");
+								abstractPesHandler = new EBUTeletextHandler();
+								break;
+						case AC3:
+								compt_type.append(" Dolby Audio (AC3)");
+								short_compt_type.append("Dolby Audio (AC3)");
+								abstractPesHandler = new AC3Handler();
+								break;
+						case E_AC3:
+								compt_type.append(" Enhanced Dolby Audio (AC3)");
+								short_compt_type.append(" Enhanced Dolby Audio (AC3)");
+								abstractPesHandler = new EAC3Handler();
+								break;
+						case AIT:
+								compt_type.append(" Application Information Table (AIT)");
+								short_compt_type.append(" Application Information Table (AIT)");
+								break;
+						case RCT:
+								compt_type.append(" Related Content Table (RCT)");
+								short_compt_type.append(" Related Content Table (RCT)");
+								break;
+						case ECM:
+								final List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
+									if(component.getComponentDescriptorList().size()>0){
+										final CADescriptor cad = caDescriptorList.get(0);
+										setLabel(cad.getCaPID(),pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
+									}
+								break;
+						default:
+								logger.warning("no componenttype found for pid "+component.getElementaryPID()+", part of service "+service_id);
 						}
 					}
 
-					final Iterator<Descriptor> k = component.getComponentDescriptorList().iterator();
-					while (k.hasNext()) {
-						final Descriptor d = k.next();
-						if(d instanceof SubtitlingDescriptor) {
-							compt_type.append(" DVB subtitling");
-							short_compt_type.append("DVB subtitling");
-							abstractPesHandler = new DVBSubtitleHandler();
-						}else if(d instanceof TeletextDescriptor) {
-							compt_type.append(" Teletext");
-							short_compt_type.append("Teletext");
-							abstractPesHandler = new EBUTeletextHandler();
-						}else if(d instanceof VBIDataDescriptor) {
-							compt_type.append(" VBI Data");
-							short_compt_type.append("VBI Data");
-							abstractPesHandler = new EBUTeletextHandler();
-						}else if(d instanceof AC3Descriptor){
-							compt_type.append(" Dolby Audio (AC3)");
-							short_compt_type.append("Dolby Audio (AC3)");
-							abstractPesHandler = new AC3Handler();
-						}else if(d instanceof EnhancedAC3Descriptor){
-							compt_type.append(" Enhanced Dolby Audio (AC3)");
-							short_compt_type.append(" Enhanced Dolby Audio (AC3)");
-							abstractPesHandler = new EAC3Handler();
-						}else if(d instanceof ApplicationSignallingDescriptor){
-							compt_type.append(" Application Information Table (AIT)");
-							short_compt_type.append(" Application Information Table (AIT)");
-						}else if(d instanceof RelatedContentDescriptor){
-							compt_type.append(" Related Content Table (RCT)");
-							short_compt_type.append(" Related Content Table (RCT)");
-						}if(d instanceof CADescriptor) {
-							final CADescriptor cad = (CADescriptor) d;
-							final int capid=cad.getCaPID();
-							setLabel(capid,pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
+					final PID pid = pids[component.getElementaryPID()];
+					if(pid!=null){
+						if(pid.getLabel()==null){
+							pid.setLabel(compt_type.toString());
+						}else if(!pid.getLabel().contains(compt_type)){
+							pid.setLabel(pid.getLabel()+ '/'+compt_type);
 						}
-					}
-
-					if(pids[comp_pid]!=null){
-						if(pids[comp_pid].getLabel()==null){
-							pids[comp_pid].setLabel(compt_type.toString());
-						}else if(!pids[comp_pid].getLabel().contains(compt_type)){
-							pids[comp_pid].setLabel(pids[comp_pid].getLabel()+ '/'+compt_type);
-						}
-						if(pids[comp_pid].getShortLabel()==null){
-							pids[comp_pid].setShortLabel(short_compt_type.toString());
-						}else if(!pids[comp_pid].getShortLabel().contains(short_compt_type)){
-							pids[comp_pid].setShortLabel(pids[comp_pid].getShortLabel()+'/'+short_compt_type);
+						if(pid.getShortLabel()==null){
+							pid.setShortLabel(short_compt_type.toString());
+						}else if(!pid.getShortLabel().contains(short_compt_type)){
+							pid.setShortLabel(pid.getShortLabel()+'/'+short_compt_type);
 						}
 						if(abstractPesHandler!=null){
 							abstractPesHandler.setTransportStream(this);
-							abstractPesHandler.setPID(pids[comp_pid]);
-							pids[comp_pid].setPesHandler(abstractPesHandler);
+							abstractPesHandler.setPID(pid);
+							pid.setPesHandler(abstractPesHandler);
 						}
 					}
 				}
@@ -847,6 +660,68 @@ public class TransportStream implements TreeNode{
 				}
 			}
 		}
+	}
+
+	private static ComponentType determineComponentType(List<Descriptor> componentDescriptorList) {
+		
+		for(Descriptor d:componentDescriptorList){
+			if(d instanceof SubtitlingDescriptor) {
+				return ComponentType.DVB_SUBTITLING;
+			}else if(d instanceof TeletextDescriptor) {
+				return ComponentType.TELETEXT;
+			}else if(d instanceof VBIDataDescriptor) {
+				return ComponentType.VBI;
+			}else if(d instanceof AC3Descriptor){
+				return ComponentType.AC3;
+			}else if(d instanceof RegistrationDescriptor){
+				byte[] formatIdentifier = ((RegistrationDescriptor)d).getFormatIdentifier();
+				if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.AC_3,0,RegistrationDescriptor.AC_3.length)){
+					return ComponentType.AC3;
+				}
+			}else if(d instanceof EnhancedAC3Descriptor){
+				return ComponentType.E_AC3;
+			}else if(d instanceof ApplicationSignallingDescriptor){
+				return ComponentType.AIT;
+			}else if(d instanceof RelatedContentDescriptor){
+				return ComponentType.RCT;
+			}if(d instanceof CADescriptor) {
+				return ComponentType.ECM;
+			}
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private GeneralPesHandler determinePesHandlerByStreamType(final Component component,
+			final int streamType) {
+		int comp_pid = component.getElementaryPID();
+		GeneralPesHandler abstractPesHandler = null;
+		if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
+			if((streamType==1)||(streamType==2)){
+				abstractPesHandler = new Video138182Handler();
+			}else if((streamType==3)||(streamType==4)){
+				abstractPesHandler = new Audio138183Handler(getAncillaryDataIdentifier(component));
+			}else if(streamType==0x1B){
+				abstractPesHandler = new Video14496Handler();
+			}else if(streamType==0x20){ //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
+				abstractPesHandler = new Video14496Handler();
+			}else if(streamType==0x24){
+				abstractPesHandler = new H265Handler();
+			}else{
+				abstractPesHandler = new GeneralPesHandler();
+			}
+		}
+		return abstractPesHandler;
+	}
+
+	private static int getAncillaryDataIdentifier(final Component component) {
+		int ancillaryData = 0;
+		final List<AncillaryDataDescriptor> ancillaryDataDescriptors = findGenericDescriptorsInList(component.getComponentDescriptorList(), AncillaryDataDescriptor.class);
+		if(ancillaryDataDescriptors.size()>0){
+			ancillaryData = ancillaryDataDescriptors.get(0).getAncillaryDataIdentifier();
+		}
+		return ancillaryData;
 	}
 
 
@@ -1054,30 +929,23 @@ public class TransportStream implements TreeNode{
 		TSPacket packet = null;
 		if(packet_offset!=null){
 			if(packet_offset.length>packetNo){
-				try {
-					final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+				try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
 					randomAccessFile.seek(packet_offset[packetNo]);
 					final byte [] buf = new byte[packetLenghth];
 					final int l = randomAccessFile.read(buf);
 					if(l==packetLenghth){
 						packet = new TSPacket(buf, packetNo,this);
-
 					}else{
 						logger.warning("read less then packetLenghth ("+packetLenghth+") bytes, actual read: "+l);
 					}
-
-					randomAccessFile.close();
 				} catch (final FileNotFoundException e) {
 					logger.warning("FileNotFoundException:"+e);
 				} catch (final IOException e) {
 					logger.warning("IOException:"+e);
 				}
-
 			}else{
 				logger.warning("packet_offset.length ("+packet_offset.length+") < packetNo ("+packetNo+")");
-
 			}
-
 		}
 		return packet;
 	}
