@@ -36,6 +36,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class RegistrationDescriptor extends Descriptor {
 
+	public static final byte[] SCTE_35 = {'C','U','E','I'};
+	public static final byte[] AC_3 = {'A','C','-','3'};
 
 	private final byte[]  formatIdentifier;
 	private final byte[]  additionalIdentificationInfo;
