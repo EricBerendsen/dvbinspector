@@ -241,6 +241,7 @@ public class TableSection implements TreeNode{
 		case 0x80: return "CA_message_section, ECM 1";
 		case 0x81: return "CA_message_section, ECM 2";
 
+		case 0xFC: return "splice_info_section";
 		case 0xFF: return "not used (illegal)";
 
 		default:
@@ -376,10 +377,10 @@ public class TableSection implements TreeNode{
 		final long bitrate=parentTransportStream.getBitRate();
 		if((bitrate>0)&&(count>=2)){
 			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
-			Formatter formatter = new Formatter();
-			String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
-			formatter.close();
-			return r;
+			try (Formatter formatter = new Formatter()){
+				String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+				return r;
+			}
 		}
 		return null;
 	}

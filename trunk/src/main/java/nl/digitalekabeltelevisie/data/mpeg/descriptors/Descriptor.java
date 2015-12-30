@@ -412,6 +412,8 @@ public class Descriptor implements TreeNode {
 
 		case 0x89:
 			return "user defined: OpenTV private descriptor / DTG guidance_descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0x8A:
+			return "user defined: SCTE-35 Cue Identifier Descriptor "; //http://www.scte.org/documents/pdf/Standards/ANSI_SCTE%2035%202014.pdf
 		case 0x90:
 			return "user defined: OpenTV module_track_descriptor";// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0x92:
