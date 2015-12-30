@@ -38,29 +38,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ApplicationSignallingDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.LinkageDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.RelatedContentDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.AITsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.BATsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.CAsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.INTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PATsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.data.mpeg.psi.RCTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SITsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TOTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
-import nl.digitalekabeltelevisie.data.mpeg.psi.UNTsection;
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 /**
@@ -77,6 +59,8 @@ public class PsiSectionData {
 	private final PID parentPID;
 
 	private boolean complete = false;
+	
+	
 
 	private static final Logger logger = Logger.getLogger(PsiSectionData.class.getName());
 
@@ -176,6 +160,8 @@ public class PsiSectionData {
 					transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
 				}else if((tableId==0x76)&&isRCTSection(pid)){
 					transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
+				}else if((tableId==-4)&&isSpliceInfoSection(pid)){ // 0xFC
+					transportStream.getPsi().getScte35_table().update(new SpliceInfoSection(this,parentPID));
 				}else if((tableId>=0x37)&&(tableId<=0x3F)){
 					// also include all PES streams component (ISO/IEC 13818-6 type B) which
 					// do not have a data_broadcast_id_descriptor associated with it,
@@ -190,6 +176,28 @@ public class PsiSectionData {
 		} catch (final RuntimeException re) {
 			logger.log(Level.WARNING, "RuntimeException in updatePSI PSI data: pid="+pid, re);
 		}
+	}
+
+	private boolean isSpliceInfoSection(int pid) {
+		
+		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
+
+		for (final PMTsection[] pmt : pmtList.values()){
+			final PMTsection p=pmt[0]; // PMT always one section
+			for(final Component component : p.getComponentenList() ){
+				if(component.getElementaryPID()==pid){
+					final List<RegistrationDescriptor> registration_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RegistrationDescriptor.class);
+					for(RegistrationDescriptor registrationDescriptor:registration_descriptors){
+						final byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
+						if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.SCTE_35,0,RegistrationDescriptor.SCTE_35.length)){
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+
 	}
 
 	/**
@@ -281,7 +289,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<ApplicationSignallingDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), ApplicationSignallingDescriptor.class);
-					if((application_signalling_descriptors!=null)&&(application_signalling_descriptors.size()>0)){
+					if(application_signalling_descriptors.size()>0){
 						return true;
 					}
 				}
@@ -307,7 +315,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<RelatedContentDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RelatedContentDescriptor.class);
-					if((application_signalling_descriptors!=null)&&(application_signalling_descriptors.size()>0)){
+					if(application_signalling_descriptors.size()>0){
 						return true;
 					}
 				}
@@ -342,7 +350,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<DataBroadcastIDDescriptor> data_broadcast_id_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), DataBroadcastIDDescriptor.class);
-					if((data_broadcast_id_descriptors!=null)&&(data_broadcast_id_descriptors.size()>0)){
+					if(data_broadcast_id_descriptors.size()>0){
 						// assume there is only one (should be!)
 						final DataBroadcastIDDescriptor dataBroadcastIDDescriptor = data_broadcast_id_descriptors.get(0);
 						// is the dataBroadcastId in this descriptor in the list of id that represent object carousels?

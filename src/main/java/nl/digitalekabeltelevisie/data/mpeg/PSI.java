@@ -31,21 +31,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
-import nl.digitalekabeltelevisie.data.mpeg.psi.AITs;
-import nl.digitalekabeltelevisie.data.mpeg.psi.BAT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.CAT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.INT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NetworkSync;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PAT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
-import nl.digitalekabeltelevisie.data.mpeg.psi.RCTs;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SDT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SIT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TDT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TOT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.UNTs;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 
 /**
  * Container for all PSI related data
@@ -72,6 +58,8 @@ public class PSI {
 	private final AITs ait_table = new AITs(this);
 	private final RCTs rct_table = new RCTs(this);
 	private final DSMCCs dsm_table = new DSMCCs(this);
+	private final SCTE35 scte35_table = new SCTE35(this);
+	
 
 	public NIT getNit() {
 		return nit;
@@ -95,6 +83,7 @@ public class PSI {
 		t.add(ait_table.getJTreeNode(modus));
 		t.add(rct_table.getJTreeNode(modus));
 		t.add(dsm_table.getJTreeNode(modus));
+		t.add(scte35_table.getJTreeNode(modus));
 		return t;
 	}
 	public PMTs getPmts() {
@@ -154,6 +143,24 @@ public class PSI {
 	}
 	public SIT getSit() {
 		return sit;
+	}
+	public INT getInt_table() {
+		return int_table;
+	}
+	public UNTs getUnt_table() {
+		return unt_table;
+	}
+	public AITs getAit_table() {
+		return ait_table;
+	}
+	public RCTs getRct_table() {
+		return rct_table;
+	}
+	public DSMCCs getDsm_table() {
+		return dsm_table;
+	}
+	public SCTE35 getScte35_table() {
+		return scte35_table;
 	}
 
 }

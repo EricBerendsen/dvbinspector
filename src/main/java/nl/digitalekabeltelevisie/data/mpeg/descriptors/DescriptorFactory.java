@@ -63,6 +63,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV2;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.MessageDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUEventNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSULocationDescriptor;
@@ -70,7 +71,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUSubgroupAssoci
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SchedulingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UNTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UpdateDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public final class DescriptorFactory {
@@ -111,6 +112,8 @@ public final class DescriptorFactory {
 						d = getUNTDescriptor(data, offset, tableSection, t);
 					} else if (tableSection.getTableId() == 0x74) {
 						d = getAITDescriptor(data, offset, tableSection, t);
+					} else if (tableSection.getTableId() == 0xFC) {
+						d = getSCTE35Descriptor(data, offset, tableSection, t);
 					} else {
 						d = getMPEGDescriptor(data, offset, tableSection, t);
 					}
@@ -640,6 +643,23 @@ public final class DescriptorFactory {
 		default:
 			d = new AITDescriptor(data, t + offset, tableSection);
 			logger.info("Not implemented AITDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
+					+ AITDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
+					+ ",) data=" + d.getRawDataString());
+			break;
+		}
+		return d;
+	}
+
+	private static Descriptor getSCTE35Descriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
+		Descriptor d;
+		switch (Utils.getUnsignedByte(data[t + offset])) {
+		case 0x00:
+			d = new AvailDescriptor(data, t + offset, tableSection);
+			break;
+		default:
+			d = new SCTE35Descriptor(data, t + offset, tableSection);
+			logger.info("Not implemented SCTE35Descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
 					+ AITDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
