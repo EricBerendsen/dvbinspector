@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Run: mvn eclipse:clean eclipse:eclipse mvn clean install mvn clean package -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.digitalekabeltelevisie</groupId>
+	<artifactId>DVBinspector</artifactId>
+	<packaging>jar</packaging>
+	<version>1.6.0</version>
+	<name>DVBinspector</name>
+	
+<properties>
+    <maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
+    <buildNumber>${maven.build.timestamp}</buildNumber>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ </properties>
+	
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+       				       <url>${project.url}</url>
+							<Implementation-Version>${project.version} (${buildNumber})</Implementation-Version>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${this.version}</Implementation-Version>
+						</manifestEntries>
+					</archive>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<finalName>${project.artifactId}-${project.version}</finalName>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>${project.groupId}.main.DVBinspector</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>${project.artifactId}-${project.version}</finalName>
+							<descriptors>
+								<descriptor>src/main/assembly/assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<skipTests>${skipTests}</skipTests>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+	<dependencies>
+
+		<dependency>
+			<groupId>jfree</groupId>
+			<artifactId>jcommon</artifactId>
+			<version>1.0.16</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>jlayer</artifactId>
+			<version>1.0.1-1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>junit</artifactId>
+					<groupId>junit</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+  			<groupId>junit</groupId>
+  			<artifactId>junit</artifactId>
+  			<version>4.11</version>
+  			<scope>test</scope>
+		</dependency> 
+		
+
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>maven2-repository.dev.java.net</id>
+			<name>Java.net Repository for Maven</name>
+			<url>http://download.java.net/maven/2/</url>
+			<layout>default</layout>
+		</repository>
+
+		<repository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+			<layout>default</layout>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
+
+
+	<url>http://www.digitalekabeltelevisie.nl/dvb_inspector/</url>
+	<organization>
+		<url>http://www.digitalekabeltelevisie.nl/</url>
+		<name>digitalekabeltelevisie.nl</name>
+	</organization>
+</project>
