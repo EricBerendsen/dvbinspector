@@ -35,6 +35,14 @@
       </includes>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>dvb.sh</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+    <fileSet>
       <!-- TODO: use expresssions instead: ${project.build.sourceDirectory}, etc -->
       <directory>${project.basedir}/src/main</directory>
       <useDefaultExcludes>true</useDefaultExcludes>
