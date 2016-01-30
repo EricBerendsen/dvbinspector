@@ -58,7 +58,7 @@ public class H265NALUnit extends AbstractNALUnit implements TreeNode {
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NALUnit ("+nal_unit_type.name()+" "+ nal_unit_type.getDescription())+")");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NALUnit ("+nal_unit_type.name()+" "+ nal_unit_type.getDescription()+")"));
 		t.add(new DefaultMutableTreeNode(new KVP("bytes",bytes,offset,numBytesInNALunit,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("numBytesInNALunit",numBytesInNALunit,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("forbidden_zero_bit",forbidden_zero_bit,null)));
