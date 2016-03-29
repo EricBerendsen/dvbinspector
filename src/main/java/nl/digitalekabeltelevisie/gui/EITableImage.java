@@ -41,11 +41,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -324,10 +320,13 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			final List<TDTsection> tdtSectionList  = this.eit.getParentPSI().getTdt().getTdtSectionList();
 			if(tdtSectionList.size()>=1){
 				final TDTsection first = tdtSectionList.get(0);
-				final Date startTime = getUTCCalender(first.getUTC_time()).getTime();
-				gd.setColor(Color.RED);
-				int labelX = x+(int)((startTime.getTime()-startDate.getTime())/milliSecsPerPixel);
-				gd.drawLine(labelX, y, labelX, (y+legendHeight)-1);
+				final Calendar utcCalender = getUTCCalender(first.getUTC_time());
+				if(utcCalender!=null){
+					final Date startTime = utcCalender.getTime();
+					gd.setColor(Color.RED);
+					int labelX = x+(int)((startTime.getTime()-startDate.getTime())/milliSecsPerPixel);
+					gd.drawLine(labelX, y, labelX, (y+legendHeight)-1);
+				}
 			}
 		}
 	}
