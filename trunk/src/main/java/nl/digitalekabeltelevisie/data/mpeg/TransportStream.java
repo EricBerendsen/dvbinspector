@@ -752,9 +752,14 @@ public class TransportStream implements TreeNode{
 				final TDTsection first = tdtSectionList.get(0);
 				final TDTsection last = tdtSectionList.get(tdtSectionList.size()-1);
 				final long diffPacket = last.getPacket_no() - first.getPacket_no();
-				final long timeDiffMills =   getUTCmillis(last.getUTC_time())- getUTCmillis(first.getUTC_time());
-				if(timeDiffMills>0){ // shit happens... capture.guangdong  has 10 with same timestamp....
-					bitRateTDT = (diffPacket * packetLenghth * 8 * 1000)/timeDiffMills;
+				final Calendar utcCalenderLast = getUTCCalender(last.getUTC_time());
+				final Calendar utcCalenderFirst = getUTCCalender(first.getUTC_time());
+				// getUTCCalender might fail if not correct BCD, then will return null.
+				if((utcCalenderLast!=null)&&(utcCalenderFirst!=null)){
+					final long timeDiffMills =   utcCalenderLast.getTimeInMillis()- utcCalenderFirst.getTimeInMillis();
+					if(timeDiffMills>0){ // shit happens... capture.guangdong  has 10 with same timestamp....
+						bitRateTDT = (diffPacket * packetLenghth * 8 * 1000)/timeDiffMills;
+					}
 				}
 
 			}
@@ -767,9 +772,11 @@ public class TransportStream implements TreeNode{
 			if(tdtSectionList.size()>=1){
 				final TDTsection first = tdtSectionList.get(0);
 				final Calendar firstTime = getUTCCalender(first.getUTC_time());
-				final long millsIntoStream= (first.getPacket_no() *packetLenghth * 8 * 1000)/getBitRate();
-				firstTime.add(Calendar.MILLISECOND, (int)-millsIntoStream);
-				zeroTime = firstTime;
+				if(firstTime!=null){
+					final long millsIntoStream= (first.getPacket_no() *packetLenghth * 8 * 1000)/getBitRate();
+					firstTime.add(Calendar.MILLISECOND, (int)-millsIntoStream);
+					zeroTime = firstTime;
+				}
 			}
 		}
 	}

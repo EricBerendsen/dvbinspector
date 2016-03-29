@@ -787,6 +787,11 @@ public final class Utils {
 		return 1000*(((( hours*60) +minutes)* 60) + seconds);
 	}
 
+	/**
+	 * create Calender from time as specified in ETSI EN 300 468 - ANNEX C 
+	 * @param UTC_time
+	 * @return  Calender from time as specified in ETSI EN 300 468 - ANNEX C, null if parsing failed (incorrect BCD)
+	 */
 	public static Calendar getUTCCalender(final byte[] UTC_time) {
 		final long mjd = getLong(UTC_time, 0, 2, 0xFFFF);
 		final String hours = getBCD(UTC_time, 4, 2);
@@ -817,9 +822,6 @@ public final class Utils {
 
 	}
 
-	public static long getUTCmillis(final byte[] UTC_time) {
-		return getUTCCalender(UTC_time).getTimeInMillis();
-	}
 
 	public static String getStreamTypeString(final int tag){
 		if((0x27<=tag)&&(tag<=0x7e)){
