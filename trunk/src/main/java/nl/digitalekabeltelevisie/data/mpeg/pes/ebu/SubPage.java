@@ -60,28 +60,32 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	/**
 	 *
 	 */
-	private final Page			pageHandler;
-	private final int					subPageNo;
-	protected PageLine[]		linesList	= new PageLine[26];				// visible lines within cntext of a page
+	private final Page pageHandler;
+	private final int subPageNo;
+	protected PageLine[] linesList = new PageLine[26]; // visible lines within cntext of a page
 
-	protected TxtDataField[]	packetx_26	= new TxtDataField[16];			// 9.4.1 Packet X/26, Designation code values 0000 to 1111 allow up to 16 packets with Y = 26 to be associated with a given page.
+	protected TxtDataField[] packetx_26 = new TxtDataField[16]; // 9.4.1 Packet X/26, Designation code values 0000 to 1111 allow up to 16 packets with Y = 26 to be associated with a given page.
 
-	protected TxtDataField[]	packetx_27	= new TxtDataField[16];			// 9.4.1 Packet X/27, Designation code values 0000 to 1111 allow up to 16 packets with Y = 27 to be associated with a given page.
-	protected TxtDataField[]	packetx_28	= new TxtDataField[16];			// 9.4.1 Packet X/28, Designation code values 0000 to 1111 allow up to 16 packets with Y = 28 to be associated with a given page.
+	protected TxtDataField[] packetx_27 = new TxtDataField[16]; // 9.4.1 Packet X/27, Designation code values 0000 to 1111 allow up to 16 packets with Y = 27 to be associated with a given page.
+	protected TxtDataField[] packetx_28 = new TxtDataField[16]; // 9.4.1 Packet X/28, Designation code values 0000 to 1111 allow up to 16 packets with Y = 28 to be associated with a given page.
 
-	private static final int							charWidth	= 15;
-	private static final int							charHeight	= 19;
+	private static final int charWidth = 15;
+	private static final int charHeight = 19;
 
-	private static final int							textColumns	= 40;
-	private static final int							textRows	= 25;
+	private static final int textColumns = 40;
+	private static final int textRows = 25;
 
-	private final int							width		= textColumns * charWidth;
-	private final int							height		= textRows * charHeight;
+	private final int width = textColumns * charWidth;
+	private final int height = textRows * charHeight;
 
-	public static final int 	NO_OBJECT_TYPE = 0;
-	public static final int 	ACTIVE_OBJECT_TYPE = 1;
-	public static final int 	ADAPTIVE_OBJECT_TYPE = 2;
-	public static final int 	PASSIVE_OBJECT_TYPE = 3;
+	public static final int NO_OBJECT_TYPE = 0;
+	public static final int ACTIVE_OBJECT_TYPE = 1;
+	public static final int ADAPTIVE_OBJECT_TYPE = 2;
+	public static final int PASSIVE_OBJECT_TYPE = 3;
+	
+	private static int invNationalOptionSet[] = {
+			0, 4, 2, 6, 1, 5, 3, 7 
+	};
 
 
 	private static final ClassLoader classLoader = SubPage.class.getClassLoader();
@@ -141,7 +145,23 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		{
 			/* the national option selection data is contained in bits 14-8 of
 			 * triplet 1. */
-			r = ((pageEnhancement.getTripletList().get(0).getVal() & 0x3F80) >>> 7);
+
+			final int tripletVal = pageEnhancement.getTripletList().get(0).getVal();
+
+			/* EB very dirty hack, the order of the last 3 bits is reversed from the order used in getNationalOptionCharacterSubset()
+			 * Table 32 in ETSI EN 300 706 V1.2.1 (2003-04) suggest the order from triplet 1 is correct. 
+			 * However we use look up tables from ProjectX, and these also have the 'wrong' order.  
+			 *  
+			 */
+
+			
+			// G0 character set part
+			final int g0CharacterSet = (tripletVal & 0x3c00) >>> 7;
+			
+			// National Option subset part, reverse bits with a lookup table
+			final int  nationalOptionSubset =invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
+			
+			r = g0CharacterSet | nationalOptionSubset;
 		}
 		else if(linesList[0] != null) {
 			/* if we have no page enhancement data, revert to the data available
