@@ -6,7 +6,7 @@
 	<groupId>nl.digitalekabeltelevisie</groupId>
 	<artifactId>DVBinspector</artifactId>
 	<packaging>jar</packaging>
-	<version>1.6.0</version>
+	<version>1.7.0-SNAPSHOT</version>
 	<name>DVBinspector</name>
 	
 <properties>
@@ -144,6 +144,11 @@
   			<scope>test</scope>
 		</dependency> 
 		
+		<dependency>
+		    <groupId>org.jcodec</groupId>
+		    <artifactId>jcodec</artifactId>
+		    <version>0.2-SNAPSHOT</version>
+		</dependency>		
 
 	</dependencies>
 
