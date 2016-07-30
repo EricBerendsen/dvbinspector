@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -84,6 +84,9 @@ public class TransportStream implements TreeNode{
 	 * @see DescriptorFactory
 	 */
 	private long defaultPrivateDataSpecifier = 0;
+
+	private int defaultG0CharacterSet = 0;
+
 
 	private boolean enableTSPackets = false;
 
@@ -1026,6 +1029,14 @@ public class TransportStream implements TreeNode{
 
 	public long getLen() {
 		return len;
+	}
+
+	public int getDefaultG0CharacterSet() {
+		return defaultG0CharacterSet;
+	}
+
+	public void setDefaultG0CharacterSet(int defaultG0CharacterSet) {
+		this.defaultG0CharacterSet = defaultG0CharacterSet;
 	}
 
 }

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -83,11 +83,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	public static final int ADAPTIVE_OBJECT_TYPE = 2;
 	public static final int PASSIVE_OBJECT_TYPE = 3;
 	
-	private static int invNationalOptionSet[] = {
-			0, 4, 2, 6, 1, 5, 3, 7 
-	};
-
-
 	private static final ClassLoader classLoader = SubPage.class.getClassLoader();
 	/**
 	 * contains java Unicode char for each visible character. Depending on effect[][] it might be a block graphics (that is not a unicode char)
@@ -159,15 +154,27 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 			final int g0CharacterSet = (tripletVal & 0x3c00) >>> 7;
 			
 			// National Option subset part, reverse bits with a lookup table
-			final int  nationalOptionSubset =invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
+			final int  nationalOptionSubset =Utils.invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
 			
 			r = g0CharacterSet | nationalOptionSubset;
 		}
 		else if(linesList[0] != null) {
+			/* 
+			 * ETSI EN 300 706 V1.2.1 (2003-04) 15.2 
+			 * Designation of default G0 and G2 sets and national option sub-sets
+			 * "in the absence of a packet X/28/0 Format 1, X/28/4, M/29/0 or M/29/4, the
+			 * default sets are established by a local Code of Practice"
+			 * 
+			 *  get user specified default G0 and G2 sets, to be used in the absence of a packet X/28/0 Format 1, X/28/4, M/29/0 or M/29/4
+			 *   
+			 */
+			
+			int defaultG0CharacterSet = pageHandler.getMagazine().getTxtService().getTransportStream().getDefaultG0CharacterSet();
 			/* if we have no page enhancement data, revert to the data available
 			 * in the page's header. this only gives us the last 3 bits of the
-			 * selection bits. */
-			r = linesList[0].getNationalOptionCharacterSubset();
+			 * selection bits. Add the user specified default G0 and G2 set to this 
+			 */
+			r = (defaultG0CharacterSet << 3)|linesList[0].getNationalOptionCharacterSubset();
 		}
 		return r;
 	}

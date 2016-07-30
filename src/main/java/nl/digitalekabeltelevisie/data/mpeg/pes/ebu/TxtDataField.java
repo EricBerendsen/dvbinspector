@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -87,7 +87,10 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 			if(isInhibitDisplay()){ buildStringList(flags,"Inhibit Display");	}
 			if(isMagazineSerial()){ buildStringList(flags,"Magazine Serial");	}
 			s.add(new DefaultMutableTreeNode(new KVP("flags",flags.toString(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("National Option Character Subset",getNationalOptionCharacterSubset(),null)));
+			// internal we use reverted order of NationalOptionCharacterSubset, bevause of ProjectX legacy.
+			// For display we want to conform to Table 32 of ETSI EN 300 706 V1.2.1 (2003-04) 
+			final int normalOrderNOS = Utils.invNationalOptionSet[getNationalOptionCharacterSubset()];
+			s.add(new DefaultMutableTreeNode(new KVP("National Option Character Subset",normalOrderNOS,"C12 C13 C14: "+Utils.toBinaryString(normalOrderNOS, 3))));
 
 		}else if((getPacketNo()>0)&&(getPacketNo()<=25)){ // Packets X/1 to X/25, direct display
 			s.add(new DefaultMutableTreeNode(new KVP("data bytes",getPageDataBytes(),null)));
@@ -178,82 +181,94 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 		final int pageFunction = tr1.getPageFunction();
 		final int pageCoding = (tr1.getVal() & 0x70) >> 4;
-		s.add(new DefaultMutableTreeNode(new KVP("first triplet", tr1.getVal(), null)));
+		//s.add(new DefaultMutableTreeNode(new KVP("first triplet", tr1.getVal(), null)));
 		s.add(new DefaultMutableTreeNode(new KVP("pageFunction", pageFunction, getPageFunctionString(pageFunction))));
 		s.add(new DefaultMutableTreeNode(new KVP("pageCoding", pageCoding, getPageCodingString(pageCoding))));
 
 		if (pageFunction == 0) { // 9.4.2.2 Coding for basic Level 1 Teletext pages
 			final int defaultCharset = (tr1.getVal() & 0x3F80) >> 7;
-		s
-		.add(new DefaultMutableTreeNode(new KVP(
-				"Default G0 and G2 Character Set Designation and National Option Selection",
-				defaultCharset, null)));
-		final Triplet tr2 = tripletList.get(1);
-		final int leftSidePanel = (tr2.getVal() & 0x08) >> 3;
-		final int rightSidePanel = (tr2.getVal() & 0x10) >> 4;
-		final int sidePanelStatusFlag = (tr2.getVal() & 0x20) >> 5;
-		final int numberOfColumnsInSidePanels = (tr2.getVal() & 0x3C0) >> 6;
-		s.add(new DefaultMutableTreeNode(
-				new KVP("Left Side Panel", leftSidePanel, leftSidePanel == 0 ? "No left side panel is to be displayed" : "Left side panel is to be displayed")));
-		s.add(new DefaultMutableTreeNode(new KVP("Right Side Panel", rightSidePanel, rightSidePanel == 0 ? "No right side panel is to be displayed": "Right side panel is to be displayed")));
-		s.add(new DefaultMutableTreeNode(new KVP("Side Panel Status Flag", sidePanelStatusFlag,	sidePanelStatusFlag == 0 ? "Side panel(s) required at Level 3.5 only" : "Side panel(s) required at Levels 2.5 & 3.5")));
-		s.add(new DefaultMutableTreeNode(new KVP("Number of Columns in Side Panels", numberOfColumnsInSidePanels,null)));
+			final int bits14_11 = (defaultCharset & 0b1111000)>>3;
+			final int bits10_8 = (defaultCharset & 0b111);
+			s.add(new DefaultMutableTreeNode(
+					new KVP("Default G0 and G2 Character Set Designation and National Option Selection", defaultCharset,
+							"bits 14 13 12 11: "+Utils.toBinaryString(bits14_11 , 4)+" bits 10 9 8: " +Utils.toBinaryString(bits10_8,3))));
+			final Triplet tr2 = tripletList.get(1);
+			final int secondCharset = (tr1.getVal()&0b11_1100_0000_0000_0000)>>14 | ((tr2.getVal() & 0b0111)<<4);
+			s.add(new DefaultMutableTreeNode(
+					new KVP("Second G0 Set Designation and National Option Selection",secondCharset,null)));;
+			final int leftSidePanel = (tr2.getVal() & 0x08) >> 3;
+			final int rightSidePanel = (tr2.getVal() & 0x10) >> 4;
+			final int sidePanelStatusFlag = (tr2.getVal() & 0x20) >> 5;
+			final int numberOfColumnsInSidePanels = (tr2.getVal() & 0x3C0) >> 6;
+			s.add(new DefaultMutableTreeNode(new KVP("Left Side Panel", leftSidePanel, leftSidePanel == 0
+					? "No left side panel is to be displayed" : "Left side panel is to be displayed")));
+			s.add(new DefaultMutableTreeNode(new KVP("Right Side Panel", rightSidePanel, rightSidePanel == 0
+					? "No right side panel is to be displayed" : "Right side panel is to be displayed")));
+			s.add(new DefaultMutableTreeNode(new KVP("Side Panel Status Flag", sidePanelStatusFlag,
+					sidePanelStatusFlag == 0 ? "Side panel(s) required at Level 3.5 only"
+							: "Side panel(s) required at Levels 2.5 & 3.5")));
+			s.add(new DefaultMutableTreeNode(
+					new KVP("Number of Columns in Side Panels", numberOfColumnsInSidePanels, null)));
 
-		// The bits for Colour Map Entry Coding for CLUTs 2 and 3 are transmitted LSB first (as standard for
-		// teletext)
-		// in the tripletList these bits are already reversed into MSB first (standard and convenient for java)
-		// For retrieving the colours we need to reverse back to LSB first, concatenate all together, and split.
-		// After splitting the
-		// separate colours reverse again to get java ints.
+			// The bits for Colour Map Entry Coding for CLUTs 2 and 3 are transmitted LSB first (as standard for
+			// teletext)
+			// in the tripletList these bits are already reversed into MSB first (standard and convenient for java)
+			// For retrieving the colours we need to reverse back to LSB first, concatenate all together, and split.
+			// After splitting the
+			// separate colours reverse again to get java ints.
 
-		final BitString bs = new BitString();
-		// bits 11-18 of triplet 2
-		bs.addIntBitsReverse(tr2.getVal() & (0x3FC00 >> 10), 8);
-		for (int i = 3; i <= 12; i++) {
-			bs.addIntBitsReverse(tripletList.get(i - 1).getVal(), 18);
-		}
-		// bits 1-4 of triplet 13
-		bs.addIntBitsReverse(tripletList.get(12).getVal() & 0xF, 4);
+			final BitString bs = new BitString();
+			// bits 11-18 of triplet 2
+			bs.addIntBitsReverse(tr2.getVal() & (0x3FC00 >> 10), 8);
+			for (int i = 3; i <= 12; i++) {
+				bs.addIntBitsReverse(tripletList.get(i - 1).getVal(), 18);
+			}
+			// bits 1-4 of triplet 13
+			bs.addIntBitsReverse(tripletList.get(12).getVal() & 0xF, 4);
 
-		final DefaultMutableTreeNode clut23 = new DefaultMutableTreeNode(new KVP(
-				"Colour Map Entry Coding for CLUTs 2 and 3"));
+			final DefaultMutableTreeNode clut23 = new DefaultMutableTreeNode(
+					new KVP("Colour Map Entry Coding for CLUTs 2 and 3"));
 
-		for (int i = 16; i <= 31; i++) {
-			final int r = bs.getIntBitsReverse(4); // 0..15
-			final int g = bs.getIntBitsReverse(4);
-			final int b = bs.getIntBitsReverse(4);
+			for (int i = 16; i <= 31; i++) {
+				final int r = bs.getIntBitsReverse(4); // 0..15
+				final int g = bs.getIntBitsReverse(4);
+				final int b = bs.getIntBitsReverse(4);
 
-			final int r_byte = (r * 255) / 15;
-			final int g_byte = (g * 255) / 15;
-			final int b_byte = (b * 255) / 15;
+				final int r_byte = (r * 255) / 15;
+				final int g_byte = (g * 255) / 15;
+				final int b_byte = (b * 255) / 15;
 
-			final String bgColor = "#" + Utils.toHexStringUnformatted(r_byte, 2)
-					+ Utils.toHexStringUnformatted(g_byte, 2) + Utils.toHexStringUnformatted(b_byte, 2);
-			final DefaultMutableTreeNode cmapEntry = new DefaultMutableTreeNode(new KVP("Colour Map entry " + i
-					+ " <code><span style=\"background-color: " + bgColor
-					+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>","Colour Map entry " + i));
-			cmapEntry.add(new DefaultMutableTreeNode(new KVP("R", r, null)));
-			cmapEntry.add(new DefaultMutableTreeNode(new KVP("G", g, null)));
-			cmapEntry.add(new DefaultMutableTreeNode(new KVP("B", b, null)));
-			clut23.add(cmapEntry);
-		}
-		s.add(clut23);
+				final String bgColor = "#" + Utils.toHexStringUnformatted(r_byte, 2)
+						+ Utils.toHexStringUnformatted(g_byte, 2) + Utils.toHexStringUnformatted(b_byte, 2);
+				final DefaultMutableTreeNode cmapEntry = new DefaultMutableTreeNode(new KVP(
+						"Colour Map entry " + i + " <code><span style=\"background-color: " + bgColor
+								+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>",
+						"Colour Map entry " + i));
+				cmapEntry.add(new DefaultMutableTreeNode(new KVP("R", r, null)));
+				cmapEntry.add(new DefaultMutableTreeNode(new KVP("G", g, null)));
+				cmapEntry.add(new DefaultMutableTreeNode(new KVP("B", b, null)));
+				clut23.add(cmapEntry);
+			}
+			s.add(clut23);
 
-		final Triplet tr13 = tripletList.get(12);
-		final int defaultScreenColour = (tr13.getVal() & 0x1F0) >> 4;
-		final int defaultRowColour = (tr13.getVal() & 0x3E00) >> 9;
-		final int blackBackgroundColourSubstitution = (tr13.getVal() & 0x4000) >> 14;
-		final int colourTableRemapping = (tr13.getVal() & 0x38000) >> 15;
+			final Triplet tr13 = tripletList.get(12);
+			final int defaultScreenColour = (tr13.getVal() & 0x1F0) >> 4;
+			final int defaultRowColour = (tr13.getVal() & 0x3E00) >> 9;
+			final int blackBackgroundColourSubstitution = (tr13.getVal() & 0x4000) >> 14;
+			final int colourTableRemapping = (tr13.getVal() & 0x38000) >> 15;
 
-		s.add(new DefaultMutableTreeNode(new KVP("Default Screen Colour", defaultScreenColour, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("Default Row Colour", defaultRowColour, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("Black Background Colour Substitution", blackBackgroundColourSubstitution, blackBackgroundColourSubstitution==1?"black background is replaced by the full row colour applying to that row":"No substitution of black background by the pertaining row colour")));
-		s.add(new DefaultMutableTreeNode(new KVP("Colour Table Re-mapping for use with Spacing Attributes", colourTableRemapping, null)));
+			s.add(new DefaultMutableTreeNode(new KVP("Default Screen Colour", defaultScreenColour, null)));
+			s.add(new DefaultMutableTreeNode(new KVP("Default Row Colour", defaultRowColour, null)));
+			s.add(new DefaultMutableTreeNode(
+					new KVP("Black Background Colour Substitution", blackBackgroundColourSubstitution,
+							blackBackgroundColourSubstitution == 1
+									? "black background is replaced by the full row colour applying to that row"
+									: "No substitution of black background by the pertaining row colour")));
+			s.add(new DefaultMutableTreeNode(
+					new KVP("Colour Table Re-mapping for use with Spacing Attributes", colourTableRemapping, null)));
 
 		}
 	}
-
-
 
 	/**
 	 * @return

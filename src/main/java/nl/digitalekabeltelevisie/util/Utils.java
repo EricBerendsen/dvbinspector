@@ -68,6 +68,23 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public final class Utils {
 
+	
+	/**
+	 * Helper int[] to reverse order of bits in a National Option Set 
+	 */
+
+	public static int invNationalOptionSet[] = {
+			0b000, 
+			0b100,
+			0b010, 
+			0b110,
+			0b001,
+			0b101,
+			0b011,
+			0b111 
+	};
+
+
 	/**
 	 *
 	 */
@@ -407,6 +424,13 @@ public final class Utils {
 			buf.append(hexChars[low]);
 		}
 		return buf.toString();
+	}
+
+	
+	public static String toBinaryString(final long l, final int pos){
+		String r ="00000000000000000000000000000000"+ Long.toBinaryString(l);
+		r="0b"+ r.substring(r.length()-pos);
+		return r;
 	}
 
 	/**

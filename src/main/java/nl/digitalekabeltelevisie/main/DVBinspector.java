@@ -71,6 +71,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * key for storage of last used DEFAULT_PRIVATE_DATA_SPECIFIER in Preferences
 	 */
 	public static final String DEFAULT_PRIVATE_DATA_SPECIFIER = "private_data_spcifier";
+	public static final String DEFAULT_G0_CHARACTER_SET = "defaultg0_character_set";
 	public static final String ENABLE_TS_PACKETS = "enable_ts_packets";
 
 	/**
@@ -100,6 +101,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private PIDDialog pidDialog = null;
 
 	private long defaultPrivateDataSpecifier = 0;
+	private int defaultG0CharacterSet = 0;
+
 	private boolean enableTSPackets = false;
 
 	private ViewContext viewContext = new ViewContext();
@@ -156,6 +159,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 				final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
 
 				ts.setDefaultPrivateDataSpecifier(prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0));
+				ts.setDefaultG0CharacterSet(prefs.getInt(DVBinspector.DEFAULT_G0_CHARACTER_SET, 0));
 				ts.setEnableTSPackets(prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false));
 
 				inspector.transportStream = ts;
@@ -186,6 +190,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	public void run() {
 		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
 		defaultPrivateDataSpecifier = prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
+		defaultG0CharacterSet = prefs.getInt(DVBinspector.DEFAULT_G0_CHARACTER_SET, 0);
 		enableTSPackets = prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false);
 		modus = prefs.getInt(DVBinspector.DEFAULT_VIEW_MODUS,0);
 
@@ -335,6 +340,26 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 		settingsMenu.add(privateDataSubMenu);
 		
+		
+		
+		final JMenu defaultG0andG2CharacterSetDesignationMenu = new JMenu("Teletext Default G0 and G2 Character Set Designation");
+		privateDataSubMenu.setMnemonic(KeyEvent.VK_G);
+		final ButtonGroup g0Group = new ButtonGroup();
+
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x00, "0 0 0 0 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x01, "0 0 0 1 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x02, "0 0 1 0 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x03, "0 0 1 1 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x04, "0 1 0 0 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x05, "0 1 0 1 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x06, "0 1 1 0 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x07, "0 1 1 1 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x08, "1 0 0 0 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x09, "1 0 0 1 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x0A, "1 0 1 0 x x x",defaultG0CharacterSet);
+
+		settingsMenu.add(defaultG0andG2CharacterSetDesignationMenu);
+
 		enableTSPacketsAction = new EnableTSPacketsAction(this);
 
 		final JCheckBoxMenuItem enableTSPacketsMenu = new JCheckBoxMenuItem(enableTSPacketsAction);
@@ -468,6 +493,15 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		privateDataSubMenu.add(menuItem);
 	}
 
+	
+	private void addG0CharacterSet(final JMenu privateDataSubMenu, final ButtonGroup group, final int spec, final String name, final long defaultSpecifier) {
+		final JMenuItem menuItem = new JRadioButtonMenuItem(name);
+		group.add(menuItem);
+		menuItem.addActionListener(new SetG0DefaultAction(this,spec));
+		menuItem.setSelected(spec==defaultG0CharacterSet);
+		privateDataSubMenu.add(menuItem);
+	}
+	
 	/**
 	 * getter for the Transport stream (can be <code>null</code>)
 	 * @return
@@ -663,5 +697,14 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		searchString = null;
 		findNextAction.setEnabled(false);
 	}
+
+	public int getDefaultG0CharacterSet() {
+		return defaultG0CharacterSet;
+	}
+
+	public void setDefaultG0CharacterSet(int defaultG0CharacterSet) {
+		this.defaultG0CharacterSet = defaultG0CharacterSet;
+	}
+
 
 }

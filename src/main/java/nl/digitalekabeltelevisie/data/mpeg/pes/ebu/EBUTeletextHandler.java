@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -104,7 +104,7 @@ public class EBUTeletextHandler extends GeneralPesHandler{
 		for(final EBUDataField ebuData: lines){
 			if(ebuData instanceof TxtDataField) {
 				if(txtService==null){
-					txtService = new TxtService();
+					txtService = new TxtService(getTransportStream());
 				}
 				txtService.addTxtDataField((TxtDataField)ebuData);
 			}else if(ebuData instanceof VPSDataField){

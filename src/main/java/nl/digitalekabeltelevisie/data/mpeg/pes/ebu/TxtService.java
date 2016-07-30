@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,11 +36,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 public class TxtService implements TreeNode{
+	
+	private TransportStream transportStream;
 
-	TxtService() {
+	TxtService(TransportStream transportStream) {
 		super();
+		this.transportStream = transportStream;
 	}
 
 	private final Magazine[] magazineList = new Magazine[8];
@@ -105,5 +109,9 @@ public class TxtService implements TreeNode{
 	public Magazine getMagazine(final int m) {
 
 		return magazineList[m];
+	}
+
+	public TransportStream getTransportStream() {
+		return transportStream;
 	}
 }
