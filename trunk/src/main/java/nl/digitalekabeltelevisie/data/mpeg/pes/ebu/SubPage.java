@@ -29,31 +29,19 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.gui.ImageSource;
-import nl.digitalekabeltelevisie.util.BitString;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 
 public class SubPage implements TreeNode, ImageSource, TextConstants{
 
@@ -951,21 +939,21 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		byte[] rowData = null;
 		// level 1.5 page
 		boolean doubleHeightUsed1 = false;
-		for (int i = 0; i < 25; i++) {
+		for (int row = 0; row < 25; row++) {
 			if(doubleHeightUsed1){
 				// last line contained some double heigth chars, this line should contain only level 1 spaces, with same bgcolor as last line
 				for(int k=0;k<40;k++){
-					txt[i][k]=' ';
-					bgColor[i][k]=bgColor[i-1][k];
+					txt[row][k]=' ';
+					bgColor[row][k]=bgColor[row-1][k];
 				}
 				doubleHeightUsed1 = false;
 			}else{
-				if(i==0){
+				if(row==0){
 					rowData = new byte[40];
 					Arrays.fill(rowData, (byte) 32);
 					System.arraycopy(linesList[0].getHeaderDataBytes(), 0, rowData, 8, 32);
-				}else if(linesList[i]!=null){
-					rowData = linesList[i].getPageDataBytes();
+				}else if(linesList[row]!=null){
+					rowData = linesList[row].getPageDataBytes();
 				}else{
 					rowData = new byte[40];
 					Arrays.fill(rowData, (byte) 32);
@@ -977,16 +965,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				char targetChar1;
 				char heldMosaicCharacter = ' ';
 
-				for (int j = 0; j < rowData.length; j++) {
+				for (int column = 0; column < rowData.length; column++) {
 
 					// initial set foreground,background color and effect flags to the 'old' values, before interpreting this char ch
 					// if they are updated most of the time they are "Set-After"
 					// if they are "Set-At" we will explicitly set the value for this
-					fgColor[i][j] = fg;
-					bgColor[i][j] = bg;
-					effect[i][j] = effectFlags;
+					fgColor[row][column] = fg;
+					bgColor[row][column] = bg;
+					effect[row][column] = effectFlags;
 
-					final byte ch = rowData[j];
+					final byte ch = rowData[column];
 					if (ch >= 32) { // national option charset subset
 						final int nocs = getNationalOptionCharSubset();
 						// all chars 0x20..7F
@@ -1083,21 +1071,21 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						} else {
 							targetChar1 = ' ';
 						}
-					} else if (ch == 0x19) { //Contiguous Mosaic Graphics ("Set-At") - Start-of-row default condition
-						effectFlags = effectFlags & ~(SEPARATED_MOSAIC_GRAPHICS);
-						effect[i][j] = effectFlags;
-						targetChar1 = ' ';
-					} else if (ch == 0x1a) { //Separated Mosaic Graphics ("Set-At")
-						effectFlags = effectFlags | SEPARATED_MOSAIC_GRAPHICS;
-						effect[i][j] = effectFlags;
+					} else if (ch == 0x18) { //Conceal ("Set-At")
+						effectFlags = effectFlags | CONCEAL;
+						effect[row][column] = effectFlags;
 						if (holdMosaicActive(effectFlags)) {
 							targetChar1 = heldMosaicCharacter;
 						} else {
 							targetChar1 = ' ';
 						}
-					} else if (ch == 0x1B) { //Conceal ("Set-At")
-						effectFlags = effectFlags | CONCEAL;
-						effect[i][j] = effectFlags;
+					} else if (ch == 0x19) { //Contiguous Mosaic Graphics ("Set-At") - Start-of-row default condition
+						effectFlags = effectFlags & ~(SEPARATED_MOSAIC_GRAPHICS);
+						effect[row][column] = effectFlags;
+						targetChar1 = ' ';
+					} else if (ch == 0x1a) { //Separated Mosaic Graphics ("Set-At")
+						effectFlags = effectFlags | SEPARATED_MOSAIC_GRAPHICS;
+						effect[row][column] = effectFlags;
 						if (holdMosaicActive(effectFlags)) {
 							targetChar1 = heldMosaicCharacter;
 						} else {
@@ -1105,7 +1093,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						}
 					} else if (ch == 0x1c) { //Black Background ("Set-At")
 						bg = 0;
-						bgColor[i][j] = bg;
+						bgColor[row][column] = bg;
 						if (holdMosaicActive(effectFlags)) {
 							targetChar1 = heldMosaicCharacter;
 						} else {
@@ -1113,7 +1101,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						}
 					} else if (ch == 0x1d) { //1New Background ("Set-At")
 						bg = fg;
-						bgColor[i][j] = bg;
+						bgColor[row][column] = bg;
 						if (holdMosaicActive(effectFlags)) {
 							targetChar1 = heldMosaicCharacter;
 						} else {
@@ -1121,7 +1109,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						}
 					} else if (ch == 0x1e) { //Hold Mosaics ("Set-At")
 						effectFlags = effectFlags | HOLD_MOSAIC;
-						effect[i][j] = effectFlags;
+						effect[row][column] = effectFlags;
 						targetChar1 = heldMosaicCharacter;
 					} else if (ch == 0x1f) { //Release Mosaics ("Set-After")
 						if (holdMosaicActive(effectFlags)) {
@@ -1131,9 +1119,10 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						}
 						effectFlags = effectFlags & ~(HOLD_MOSAIC);
 					} else { // not implemented, empty space
+						logger.warning("Teletext: found not implemented character:"+ch+" at magazine:"+pageHandler.getMagazineNo()+",page:"+pageHandler.getPageNo()+",subpage:"+subPageNo+",row:"+row+", column:"+column);
 						targetChar1 = ' ';
 					}
-					txt[i][j] = targetChar1;
+					txt[row][column] = targetChar1;
 				}
 			}
 		}
@@ -1435,7 +1424,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		charGD.fillRect(0, 0, charWidth, charHeight);
 		charGD.setColor(new Color(getColorInt(fgColor[i][j])));
 		final int ch = txt[i][j];
-		if (((effect[i][j] & MOSAIC_GRAPHICS) != 0) && ((ch < 0x40) || (ch >= 0x60))) {
+		final int characterEffect = effect[i][j];
+		if (isMosaicGraphicsMode(characterEffect) && 
+			isValidMosaicCharacter(ch)) {
 			final int blockH = charHeight / 3;
 			final int blockW = charWidth / 2;
 
@@ -1457,7 +1448,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 			if ((ch & 0x40) != 0) { // bottom right
 				charGD.fillRect(blockW, 2 * blockH, charWidth - blockW, charHeight - (2 * blockH));
 			}
-			if (((effect[i][j] & SEPARATED_MOSAIC_GRAPHICS) != 0)) {
+			if (((characterEffect & SEPARATED_MOSAIC_GRAPHICS) != 0)) {
 				charGD.setColor(new Color(getColorInt(bgColor[i][j])));
 				charGD.drawRect(0, 0, charWidth, charHeight);
 				charGD.drawLine(0, blockH, charWidth - 1, blockH);
@@ -1468,6 +1459,14 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		} else {
 			charGD.drawChars(txt[i], j, 1, 1, charHeight - descent);
 		}
+	}
+
+	private boolean isValidMosaicCharacter(final int ch) {
+		return (ch < 0x40) || ((ch >= 0x60)&&(ch <= 0x7f));
+	}
+
+	private boolean isMosaicGraphicsMode(final int ef) {
+		return (ef & MOSAIC_GRAPHICS) != 0;
 	}
 
 	/**
