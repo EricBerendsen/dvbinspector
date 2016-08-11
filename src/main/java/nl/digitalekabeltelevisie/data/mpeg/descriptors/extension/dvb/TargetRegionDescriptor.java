@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -130,7 +130,7 @@ public class TargetRegionDescriptor extends DVBExtensionDescriptor {
 				if(region_depth>=2){
 					secondary_region_code = bs.readBits(8);
 					if(region_depth==3){
-						tertiary_region_code = bs.readBits(8);
+						tertiary_region_code = bs.readBits(16);
 					}
 				}
 			}
