@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -146,12 +146,8 @@ public final class Utils {
 
 	static{
 
-		BufferedReader in;
-		try {
-			//in = new BufferedReader(new FileReader("res/oui_lines_final.txt"));//open a bufferedReader to file hellowrold.txt
-			final InputStream fileInputStream = classL.getResourceAsStream("res/oui_lines_final.txt");
-			in = new BufferedReader(new InputStreamReader(fileInputStream));
-
+		
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(classL.getResourceAsStream("res/oui_lines_final.txt")))){
 
 			String line;
 			while ((line = in.readLine()) != null) {
@@ -169,7 +165,6 @@ public final class Utils {
 					}
 				}
 			}
-			in.close();//safely close the BufferedReader after use
 		}catch(final IOException e){
 			logger.severe("There was a problem reading oui table:" + e);
 		}
@@ -189,9 +184,7 @@ public final class Utils {
 
 
 	private static void readCSVIdString(final String fileName, final RangeHashMap<Integer,String> m) {
-		try {
-			final InputStream fileInputStream = classL.getResourceAsStream(fileName);
-			final CSVReader reader = new CSVReader(new InputStreamReader(fileInputStream,Charset.forName("UTF-16")));
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-16")))){
 
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
@@ -202,7 +195,6 @@ public final class Utils {
 				m.put(lower, upper, nextLine[2]);
 
 			}
-			reader.close();
 
 		}catch(final IOException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
@@ -215,9 +207,7 @@ public final class Utils {
 	}
 
 	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
-		try {
-			final InputStream fileInputStream = classL.getResourceAsStream(fileName);
-			final CSVReader reader = new CSVReader(new InputStreamReader(fileInputStream,Charset.forName("UTF-16")));
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-16")))){
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
@@ -227,8 +217,6 @@ public final class Utils {
 				m.put(lower, upper, nextLine[2]);
 
 			}
-			reader.close();
-
 		}catch(final IOException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
 		}
