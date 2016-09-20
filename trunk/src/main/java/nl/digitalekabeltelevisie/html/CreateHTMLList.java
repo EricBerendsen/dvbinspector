@@ -67,11 +67,10 @@ public class CreateHTMLList implements Runnable{
 
 	}
 
-	private void writeHTML(final TransportStream tStream) {
+	private static void writeHTML(final TransportStream tStream) {
 
-		try {
-			final FileWriter fstream = new FileWriter("d:\\eric\\Ziggo Oost 369000 12-08 18-33-19.html");
-			final BufferedWriter out = new BufferedWriter(fstream);
+		try(final BufferedWriter out = new BufferedWriter(new FileWriter("d:\\eric\\Ziggo Oost 369000 12-08 18-33-19.html"))){
+			
 
 			out.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head><script src=\"sorttable.js\"></script></head>\n");
 			out.write("<body>\n");

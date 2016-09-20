@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,7 +28,6 @@
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -124,26 +123,13 @@ public class ServiceDSMCC implements TreeNode {
 			logger.info("saveFile called for file path:"+file.getAbsolutePath()+", name:"+file.getName());
 			if(biopMessage instanceof BIOPFileMessage){
 				logger.info("starting write file");
-				FileOutputStream out = null;
-
-				try {
-					out = new FileOutputStream(file);
+				try (FileOutputStream out = new FileOutputStream(file)){
 
 					final BIOPFileMessage biopFile = (BIOPFileMessage)biopMessage;
 					out.write(biopFile.getData(),biopFile.getContentStartOffset(),(int)biopFile.getContent_length());
 
-				} catch (final FileNotFoundException e) {
+				} catch (IOException e) {
 					logger.log(Level.WARNING,"could not write file",e);
-				} catch (final IOException e) {
-					logger.log(Level.WARNING,"could not write file",e);
-				} finally {
-					if (out != null) {
-						try {
-							out.close();
-						} catch (final IOException e) {
-							logger.log(Level.WARNING,"Error while closing outputstream.",e);
-						}
-					}
 				}
 			}else if(biopMessage instanceof BIOPDirectoryMessage){
 				//recursively save tree..
@@ -162,13 +148,9 @@ public class ServiceDSMCC implements TreeNode {
 						logger.log(Level.INFO,"now going down to save:"+descName);
 						saveFile(new File(file,descName),child);
 					}
-
 				}
-
-
 			}
 		}
-
 	}
 
 
