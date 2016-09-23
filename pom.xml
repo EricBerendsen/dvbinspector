@@ -6,7 +6,7 @@
 	<groupId>nl.digitalekabeltelevisie</groupId>
 	<artifactId>DVBinspector</artifactId>
 	<packaging>jar</packaging>
-	<version>1.7.0</version>
+	<version>1.8.0-SNAPSHOT</version>
 	<name>DVBinspector</name>
 	
 <properties>
