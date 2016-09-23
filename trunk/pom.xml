@@ -144,12 +144,6 @@
   			<scope>test</scope>
 		</dependency> 
 		
-		<dependency>
-		    <groupId>org.jcodec</groupId>
-		    <artifactId>jcodec</artifactId>
-		    <version>0.2-SNAPSHOT</version>
-		</dependency>		
-
 	</dependencies>
 
 	<repositories>
