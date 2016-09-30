@@ -63,6 +63,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	final private static Color PES_HEADER_COLOR = new Color(0x800000);
 	private static final Color ERROR_COLOR = new Color(0xFF0000);
 	final private TransportStream transportStream;
+	private long packetOffset = -1;
 
 	private PesHeader pesHeader = null;
 
@@ -220,6 +221,9 @@ public class TSPacket implements HTMLSource, TreeNode{
 		final StringBuilder s = new StringBuilder();
 
 		s.append("Packet: ").append(packetNo);
+		if(packetOffset!=-1){
+			s.append("<br>File Offset: ").append(packetOffset);
+		}
 		if(transportStream!=null){
 			s.append("<br>Time: ").append(transportStream.getPacketTime(packetNo));
 			final short pid = transportStream.getPacket_pid((int)packetNo);
@@ -371,6 +375,14 @@ public class TSPacket implements HTMLSource, TreeNode{
 			}
 		}
 		return t;
+	}
+
+	public long getPacketOffset() {
+		return packetOffset;
+	}
+
+	public void setPacketOffset(long packetOffset) {
+		this.packetOffset = packetOffset;
 	}
 
 }

@@ -91,7 +91,7 @@ public class Video14496HandlerTest {
 		final GeneralPesHandler pesHandler = npo1.getPesHandler();
 		assertEquals(Video14496Handler.class, pesHandler.getClass());
 
-		final H26xHandler video14496Handler = (H26xHandler) pesHandler;
+		final H26xHandler<?, ?> video14496Handler = (H26xHandler<?, ?>) pesHandler;
 
 		final List<PesPacketData> pesPackets = video14496Handler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);
@@ -105,7 +105,7 @@ public class Video14496HandlerTest {
 	/**
 	 * @param bFrame
 	 */
-	private void testFrame19(final PesPacketData iFrame) {
+	private static void testFrame19(final PesPacketData iFrame) {
 		assertNotNull("iFrame = null",iFrame);
 
 		final List<NALUnit> nalUnitsIFrame = getNALUnits(iFrame);
@@ -152,7 +152,7 @@ public class Video14496HandlerTest {
 	/**
 	 * @param bFrame
 	 */
-	private void testFrame2(final PesPacketData pFrame) {
+	private static void testFrame2(final PesPacketData pFrame) {
 		assertNotNull("bFrame = null",pFrame);
 
 		final List<NALUnit> nalUnitsBFrame = getNALUnits(pFrame);
@@ -175,7 +175,7 @@ public class Video14496HandlerTest {
 	/**
 	 * @param bFrame
 	 */
-	private void testFrame0(final PesPacketData bFrame) {
+	private static void testFrame0(final PesPacketData bFrame) {
 		assertNotNull("bFrame = null",bFrame);
 
 		final PesHeader pesHeader = bFrame.getPesHeader();
@@ -250,7 +250,7 @@ public class Video14496HandlerTest {
 	 * @param bFrame
 	 * @return
 	 */
-	private List<NALUnit> getNALUnits(final PesPacketData bFrame) {
+	private static List<NALUnit> getNALUnits(final PesPacketData bFrame) {
 		assertEquals(Video14496PESDataField.class, bFrame.getClass());
 		final Video14496PESDataField bFrame264 = (Video14496PESDataField) bFrame;
 
@@ -265,7 +265,7 @@ public class Video14496HandlerTest {
 	 * @param expectedClass
 	 * @param expectedType
 	 */
-	private void testNALUnit(final NALUnit unit, final Class<? extends RBSP> expectedClass,
+	private static void testNALUnit(final NALUnit unit, final Class<? extends RBSP> expectedClass,
 			final int expectedType) {
 		assertNotNull("unit = null",unit);
 		assertEquals("unit.getNal_unit_type",expectedType,unit.getNal_unit_type());

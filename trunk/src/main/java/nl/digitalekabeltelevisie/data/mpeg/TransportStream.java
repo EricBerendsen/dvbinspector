@@ -133,6 +133,11 @@ public class TransportStream implements TreeNode{
 	private Calendar zeroTime = null;
 
 	private final long len;
+	
+	/**
+	 * number of times sync was lost
+	 */
+	private int sync_errors = 0;
 
 	private final int max_packets;
 
@@ -249,6 +254,7 @@ public class TransportStream implements TreeNode{
 		}
 
 		int bytes_read =0;
+		int lastHandledSyncErrorPacket = -1;
 		do {
 			final long offset = fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, packetLenghth);
@@ -292,6 +298,11 @@ public class TransportStream implements TreeNode{
 				count++;
 			}else{ // something wrong, find next syncbyte. First push back the lot
 				if((next!=-1)) {
+					if(lastHandledSyncErrorPacket != no_packets){
+						sync_errors++;
+						logger.severe("Did not find sync byte, resyncing at offset:"+offset+", packet_no:"+no_packets);
+						lastHandledSyncErrorPacket = no_packets;
+					}
 					fileStream.unread(next);
 					fileStream.unread(buf, 0, bytes_read);
 					// now read 1 byte and restart all
@@ -421,6 +432,7 @@ public class TransportStream implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("TS packets",no_packets,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLenghth,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("Error packets",error_packets,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("Sync Errors",sync_errors,null)));
 		if(bitRate!=-1){
 			t.add(new DefaultMutableTreeNode(new KVP("bitrate",bitRate,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()*8)/bitRate,null)));
@@ -940,13 +952,15 @@ public class TransportStream implements TreeNode{
 		if(packet_offset!=null){
 			if(packet_offset.length>packetNo){
 				try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
-					randomAccessFile.seek(packet_offset[packetNo]);
+					final long offset = packet_offset[packetNo];
+					randomAccessFile.seek(offset);
 					final byte [] buf = new byte[packetLenghth];
-					final int l = randomAccessFile.read(buf);
-					if(l==packetLenghth){
+					final int bytesRead = randomAccessFile.read(buf);
+					if(bytesRead==packetLenghth){
 						packet = new TSPacket(buf, packetNo,this);
+						packet.setPacketOffset(offset);
 					}else{
-						logger.warning("read less then packetLenghth ("+packetLenghth+") bytes, actual read: "+l);
+						logger.warning("read less then packetLenghth ("+packetLenghth+") bytes, actual read: "+bytesRead);
 					}
 				} catch (final FileNotFoundException e) {
 					logger.warning("FileNotFoundException:"+e);
@@ -1039,4 +1053,21 @@ public class TransportStream implements TreeNode{
 		this.defaultG0CharacterSet = defaultG0CharacterSet;
 	}
 
+	public int getSync_errors() {
+		return sync_errors;
+	}
+
+	public void setSync_errors(int sync_errors) {
+		this.sync_errors = sync_errors;
+	}
+
+	public int getError_packets() {
+		return error_packets;
+	}
+
+	public void setError_packets(int error_packets) {
+		this.error_packets = error_packets;
+	}
+
+	
 }
