@@ -103,10 +103,7 @@ public class TransportStream implements TreeNode{
 	 */
 	private final short [] packet_pid;
 
-	/**
-	 * for every TSPacket read, store it's offset in the file
-	 */
-	private long [] packet_offset =null;
+	private OffsetHelper offsetHelper = null;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -141,7 +138,7 @@ public class TransportStream implements TreeNode{
 
 	private final int max_packets;
 
-	private int packetLenghth = 188;
+	private int packetLength = 188;
 
 	private static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
 
@@ -164,9 +161,10 @@ public class TransportStream implements TreeNode{
 	public TransportStream(final File file) throws NotAnMPEGFileException,IOException{
 		this.file = file;
 		len = file.length();
-		packetLenghth = determineActualPacketLength(file);
-		max_packets = (int)(len / packetLenghth);
+		packetLength = determineActualPacketLength(file);
+		max_packets = (int)(len / packetLength);
 		packet_pid = new short [max_packets];
+		offsetHelper = new OffsetHelper(max_packets,packetLength);
 
 	}
 
@@ -238,7 +236,7 @@ public class TransportStream implements TreeNode{
 	 */
 	public void parseStream(final java.awt.Component component) throws IOException {
 		final PositionPushbackInputStream fileStream = getInputStream(component);
-		final byte [] buf = new byte[packetLenghth];
+		final byte [] buf = new byte[packetLength];
 		long count=0;
 		no_packets = 0;
 
@@ -247,19 +245,15 @@ public class TransportStream implements TreeNode{
 		error_packets = 0;
 		bitRate = -1;
 		bitRateTDT = -1;
-		if(enableTSPackets){
-			packet_offset = new long [max_packets];
-		}else{
-			packet_offset = null;
-		}
+		offsetHelper.setEnabled(enableTSPackets);
 
 		int bytes_read =0;
 		int lastHandledSyncErrorPacket = -1;
 		do {
 			final long offset = fileStream.getPosition();
-			bytes_read = fileStream.read(buf, 0, packetLenghth);
+			bytes_read = fileStream.read(buf, 0, packetLength);
 			final int next = fileStream.read();
-			if((bytes_read==packetLenghth)&&
+			if((bytes_read==packetLength)&&
 					(buf[0]==MPEGConstants.sync_byte) &&
 					((next==-1)||(next==MPEGConstants.sync_byte))) {
 				//always push back first byte of next packet
@@ -280,8 +274,8 @@ public class TransportStream implements TreeNode{
 					pidFlags = (short) (pidFlags | TRANSPORT_ERROR_FLAG);
 				}
 				packet_pid[no_packets]=pidFlags;
-				if(packet_offset!=null){
-					packet_offset[no_packets]=offset;
+				if(offsetHelper.isEnabled()){
+					offsetHelper.addPacket(no_packets,offset);
 				}
 				no_packets++;
 				if(!packet.isTransportErrorIndicator()){
@@ -309,7 +303,7 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); //ignore result
 				}
 			}
-		} while (bytes_read==packetLenghth);
+		} while (bytes_read==packetLength);
 		namePIDs();
 		calculateBitRate();
 	}
@@ -328,15 +322,15 @@ public class TransportStream implements TreeNode{
 			return;
 		}
 		final PositionPushbackInputStream fileStream = getInputStream(component);
-		final byte [] buf = new byte[packetLenghth];
+		final byte [] buf = new byte[packetLength];
 		long count=0;
 
 
 		int bytes_read =0;
 		do {
-			bytes_read = fileStream.read(buf, 0, packetLenghth);
+			bytes_read = fileStream.read(buf, 0, packetLength);
 			final int next = fileStream.read();
-			if((bytes_read==packetLenghth)&&
+			if((bytes_read==packetLength)&&
 					(buf[0]==MPEGConstants.sync_byte) &&
 					((next==-1)||(next==MPEGConstants.sync_byte))) {
 				//always push back first byte of next packet
@@ -366,7 +360,7 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); //ignore result
 				}
 			}
-		} while (bytes_read==packetLenghth);
+		} while (bytes_read==packetLength);
 	}
 
 
@@ -430,7 +424,7 @@ public class TransportStream implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("size",file.length(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("modified",new Date(file.lastModified()).toString(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("TS packets",no_packets,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLenghth,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLength,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("Error packets",error_packets,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("Sync Errors",sync_errors,null)));
 		if(bitRate!=-1){
@@ -454,7 +448,7 @@ public class TransportStream implements TreeNode{
 			}
 		}
 
-		if((packet_offset!=null)&&!psiOnlyModus(modus)){
+		if(offsetHelper.isEnabled()&&!psiOnlyModus(modus)){
 			final JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 		}
@@ -704,7 +698,6 @@ public class TransportStream implements TreeNode{
 			}
 		}
 
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -773,7 +766,7 @@ public class TransportStream implements TreeNode{
 				if((utcCalenderLast!=null)&&(utcCalenderFirst!=null)){
 					final long timeDiffMills =   utcCalenderLast.getTimeInMillis()- utcCalenderFirst.getTimeInMillis();
 					if(timeDiffMills>0){ // shit happens... capture.guangdong  has 10 with same timestamp....
-						bitRateTDT = (diffPacket * packetLenghth * 8 * 1000)/timeDiffMills;
+						bitRateTDT = (diffPacket * packetLength * 8 * 1000)/timeDiffMills;
 					}
 				}
 
@@ -788,7 +781,7 @@ public class TransportStream implements TreeNode{
 				final TDTsection first = tdtSectionList.get(0);
 				final Calendar firstTime = getUTCCalender(first.getUTC_time());
 				if(firstTime!=null){
-					final long millsIntoStream= (first.getPacket_no() *packetLenghth * 8 * 1000)/getBitRate();
+					final long millsIntoStream= (first.getPacket_no() *packetLength * 8 * 1000)/getBitRate();
 					firstTime.add(Calendar.MILLISECOND, (int)-millsIntoStream);
 					zeroTime = firstTime;
 				}
@@ -880,13 +873,13 @@ public class TransportStream implements TreeNode{
 				final Calendar now=new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 
 				r = now.get(Calendar.YEAR)+"/"+ (now.get(Calendar.MONTH)+1)+"/"+now.get(Calendar.DAY_OF_MONTH)+" "+now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
@@ -904,13 +897,13 @@ public class TransportStream implements TreeNode{
 				final Calendar now=new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLenghth * 8 * 1000)/getBitRate()));
+				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
@@ -949,26 +942,24 @@ public class TransportStream implements TreeNode{
 
 	public TSPacket getTSPacket(final int packetNo){
 		TSPacket packet = null;
-		if(packet_offset!=null){
-			if(packet_offset.length>packetNo){
+		if(offsetHelper.isEnabled()){
+			if(offsetHelper.getMaxPacket()>packetNo){
 				try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
-					final long offset = packet_offset[packetNo];
+					final long offset = offsetHelper.getOffset(packetNo);
 					randomAccessFile.seek(offset);
-					final byte [] buf = new byte[packetLenghth];
+					final byte [] buf = new byte[packetLength];
 					final int bytesRead = randomAccessFile.read(buf);
-					if(bytesRead==packetLenghth){
+					if(bytesRead==packetLength){
 						packet = new TSPacket(buf, packetNo,this);
 						packet.setPacketOffset(offset);
 					}else{
-						logger.warning("read less then packetLenghth ("+packetLenghth+") bytes, actual read: "+bytesRead);
+						logger.warning("read less then packetLenghth ("+packetLength+") bytes, actual read: "+bytesRead);
 					}
-				} catch (final FileNotFoundException e) {
-					logger.warning("FileNotFoundException:"+e);
 				} catch (final IOException e) {
 					logger.warning("IOException:"+e);
 				}
 			}else{
-				logger.warning("packet_offset.length ("+packet_offset.length+") < packetNo ("+packetNo+")");
+				logger.warning("offsetHelper.getMaxPacket() ("+offsetHelper.getMaxPacket()+") < packetNo ("+packetNo+")");
 			}
 		}
 		return packet;
@@ -1030,7 +1021,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	public boolean tsPacketsLoaded(){
-		return packet_offset!=null;
+		return offsetHelper.isEnabled();
 	}
 
 	public PID getPID(final int p){
@@ -1038,7 +1029,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	public int getPacketLenghth() {
-		return packetLenghth;
+		return packetLength;
 	}
 
 	public long getLen() {
