@@ -298,4 +298,8 @@ public class DSMCC extends AbstractPSITabel{
 
 	}
 
+	public int getPid() {
+		return pid;
+	}
+
 }
