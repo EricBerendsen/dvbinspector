@@ -356,9 +356,10 @@ public class ServiceDSMCC implements TreeNode {
 		final Iterator<Integer> iter = s.iterator();
 		while (iter.hasNext()) {
 			final int associationTag =  iter.next();
-			final DefaultMutableTreeNode a=new DefaultMutableTreeNode(new KVP("Association: "+associationTag));
-			a.add(dsmccs.get(associationTag).getJTreeNode(modus));
-			t.add(a);
+			final DefaultMutableTreeNode association=new DefaultMutableTreeNode(new KVP("Association: "+associationTag));
+			final DSMCC dsmcc = dsmccs.get(associationTag);
+			association.add(new DefaultMutableTreeNode(new KVP("PID",dsmcc.getPid(),null)));
+			t.add(association);
 		}
 		Utils.addListJTree(t, bootList.values(), modus, "ObjectCarousels");
 		return t;
