@@ -154,19 +154,22 @@ public class TSPacket implements HTMLSource, TreeNode{
 	}
 
 	public boolean hasAdaptationField(){
-		return (getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3);
+		final int adaptationFieldControl = getAdaptationFieldControl();
+		return (adaptationFieldControl==2)||(adaptationFieldControl==3);
 
 	}
 
 	public byte[] getAdaptationFieldBytes(){
-		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+		final int adaptationFieldControl = getAdaptationFieldControl();
+		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
 			return copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1);
 		}
 		return new byte[0];
 	}
 
 	public AdaptationField getAdaptationField(){
-		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+		final int adaptationFieldControl = getAdaptationFieldControl();
+		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
 			return new AdaptationField(copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1));
 		}
 		return null;
@@ -176,9 +179,10 @@ public class TSPacket implements HTMLSource, TreeNode{
 	 * @return the payload of this TSPacket, direct after the adaptationField
 	 */
 	public byte[] getData(){
-		if((getAdaptationFieldControl()==1)) { //payload only
+		final int adaptationFieldControl = getAdaptationFieldControl();
+		if((adaptationFieldControl==1)) { //payload only
 			return copyOfRange(buffer,4, PAYLOAD_PACKET_LENGTH);
-		}else if((getAdaptationFieldControl()==3)) { //Adaptation followed by payload
+		}else if((adaptationFieldControl==3)) { //Adaptation followed by payload
 			final int start = Math.min(4+getUnsignedByte(buffer[4])+1, PAYLOAD_PACKET_LENGTH);
 			return copyOfRange(buffer, start,PAYLOAD_PACKET_LENGTH);
 		}
