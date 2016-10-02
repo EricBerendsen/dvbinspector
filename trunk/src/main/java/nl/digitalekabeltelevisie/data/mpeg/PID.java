@@ -31,7 +31,7 @@ import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.system_clock_fre
 import static nl.digitalekabeltelevisie.util.Utils.getUnsignedByte;
 import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
-import java.util.Formatter;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
@@ -39,7 +39,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
@@ -50,6 +50,27 @@ import nl.digitalekabeltelevisie.util.PIDPacketGetter;
  * Does not store all data packets for this PID
  */
 public class PID implements TreeNode{
+	
+	public class TimeStamp{
+		
+		private final long packetNo;
+		private final long time;
+
+		public TimeStamp(long packetNo, long time) {
+			super();
+			this.packetNo = packetNo;
+			this.time = time;
+		}
+
+		public long getPacketNo() {
+			return packetNo;
+		}
+
+		public long getTime() {
+			return time;
+		}
+		
+	}
 	private static final Logger logger = Logger.getLogger(PID.class.getName());
 
 	public static final int PES = 1;
@@ -98,6 +119,10 @@ public class PID implements TreeNode{
 	private String shortLabel=null;
 
 	private final GatherPIDData gatherer = new GatherPIDData();
+	
+	private final List<TimeStamp> pcrList = new ArrayList<>();
+	private final List<TimeStamp> ptsList = new ArrayList<>();
+	private final List<TimeStamp> dtsList = new ArrayList<>();
 
 	/**
 	 *
@@ -115,15 +140,16 @@ public class PID implements TreeNode{
 
 		}
 
-		public void processPayload(final TSPacket packet, final TransportStream ts, final PID parentPID)
+		private void processPayload(final TSPacket packet, final TransportStream ts, final PID parentPID)
 		{
 			parentTransportStream = ts;
 			final byte []data = packet.getData();
+			final int adaptationFieldControl = packet.getAdaptationFieldControl();
 			if((lastPSISection==null)){ // nothing started
 				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 				if(packet.isPayloadUnitStartIndicator() &&
 						(data.length>1) &&
-						((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3))){ //start something
+						((adaptationFieldControl==1)||(adaptationFieldControl==3))){ //start something
 					// at least one byte plus pointer available
 					int start;
 					int available;
@@ -144,11 +170,23 @@ public class PID implements TreeNode{
 					}else if((data.length>2) &&
 							(data[0]==0)&&(data[1]==0)&&(data[2]==1)){
 						type = PES;
+						
+						// insert into PTS /DTS List
+						PesHeader pesHeader = packet.getPesHeader();
+						if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
+							final int pts_dts_flags = pesHeader.getPts_dts_flags();
+							if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
+								ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
+							}
+							if (pts_dts_flags ==3){ // DTS present,
+								dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
+							}
+						}
 
 					}
 				}
 				//	something started
-			}else if((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3)){ // has payload?
+			}else if((adaptationFieldControl==1)||(adaptationFieldControl==3)){ // has payload?
 				// are we in a PSI PID??
 				if(type==PSI){
 					int start;
@@ -197,7 +235,9 @@ public class PID implements TreeNode{
 			}
 		}else{
 
-			processAdaptationField(packet);
+			if(packet.hasAdaptationField()){
+				processAdaptationField(packet);
+			}
 			if(((last_continuity_counter==-1)|| // first packet
 					(pid==0x1fff)|| // null packet
 					(((last_continuity_counter+1)%16)==packet.getContinuityCounter()))
@@ -211,6 +251,7 @@ public class PID implements TreeNode{
 				if(packet.getTransportScramblingControl()==0){ // not scrambled, or else payload is of no use
 
 					gatherer.processPayload(packet,parentTransportStream,this);
+					
 				}else{
 					scrambled=true;
 				}
@@ -243,6 +284,7 @@ public class PID implements TreeNode{
 		if(adaptationField!=null) { //Adaptation field present
 			if(adaptationField.isPCR_flag()){
 				final PCR newPCR = adaptationField.getProgram_clock_reference();
+				pcrList.add(new TimeStamp(packet.getPacketNo(), newPCR.getProgram_clock_reference_base()));
 				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
 					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
 
@@ -411,45 +453,6 @@ public class PID implements TreeNode{
 		this.generalPesHandler = abstractPesHandler;
 	}
 
-	/**
-	 * used when PID is already initiated, contains PES data and is not scrambled. Now we want to process only the actual PES data (may be very memory intensive)
-	 */
-	public void gatherPESPackets(final TSPacket packet) {
-
-		if(((last_continuity_counter==-1)|| // first packet
-				(pid==0x1fff)|| // null packet
-				(((last_continuity_counter+1)%16)==packet.getContinuityCounter()))
-				) {
-			// counter klopt
-			last_continuity_counter = packet.getContinuityCounter();
-			last_packet_no = packet.getPacketNo();
-			last_packet = packet;
-			dup_found = false;
-
-			if(packet.getTransportScramblingControl()==0){ // not scrambled, or else payload is of no use
-
-				gatherer.processPayload(packet,parentTransportStream,this);
-			}else{
-				scrambled=true;
-			}
-
-		}else if(last_continuity_counter==packet.getContinuityCounter()){
-			if(dup_found){ // second  dup packet (third total), illegal
-				logger.fine("second  dup packet (third total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
-			}else{ // just a dup, count it and ignore
-				dup_found = true;
-				dup_packets++;
-			}
-
-		}else 	{
-			logger.fine("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
-			last_continuity_counter=-1;
-			continuity_errors++;
-			gatherer.reset();
-		}
-
-	}
-
 	public int getType() {
 		return type;
 	}
@@ -488,6 +491,26 @@ public class PID implements TreeNode{
 
 	public GatherPIDData getGatherer() {
 		return gatherer;
+	}
+
+	public static Logger getLogger() {
+		return logger;
+	}
+
+	public static int getPes() {
+		return PES;
+	}
+
+	public List<TimeStamp> getPcrList() {
+		return pcrList;
+	}
+
+	public List<TimeStamp> getPtsList() {
+		return ptsList;
+	}
+
+	public List<TimeStamp> getDtsList() {
+		return dtsList;
 	}
 
 }

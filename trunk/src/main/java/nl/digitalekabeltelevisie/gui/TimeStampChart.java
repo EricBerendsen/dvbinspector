@@ -27,48 +27,28 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.FieldPosition;
-import java.text.NumberFormat;
-import java.text.ParsePosition;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.*;
 
-import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.AdaptationField;
-import nl.digitalekabeltelevisie.data.mpeg.PCR;
-import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
-import nl.digitalekabeltelevisie.data.mpeg.psi.*;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.gui.utils.DVBInspectorDefaultDrawingSupplier;
-import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.util.Utils;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
+import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.labels.XYToolTipGenerator;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.labels.*;
+import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.CategoryTableXYDataset;
+
+import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.PID.TimeStamp;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.gui.utils.*;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Shows variation over time of the bandwidth each PID uses
@@ -77,8 +57,6 @@ import org.jfree.data.xy.CategoryTableXYDataset;
  *
  */
 public class TimeStampChart extends JPanel implements TransportStreamView, ActionListener{
-
-	private static final Logger LOGGER = Logger.getLogger( TimeStampChart.class.getName());
 
 
 	/**
@@ -344,48 +322,41 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		int endPacket = viewContext.getEndPacket();
 
 		String pcrLabel = pcrPid+" - "+transportStream.getShortLabel(pcrPid)+" PCR";
-		long lastPCRBase = -1;
-		Iterator<TSPacket> iter = transportStream.getTSPacketsIterator(pcrPid, TransportStream.ADAPTATION_FIELD_FLAG,startPacket,endPacket);
-		while(iter.hasNext()){
-			TSPacket p = iter.next();
-			AdaptationField adaptationField = p.getAdaptationField();
-			if(adaptationField.isPCR_flag()){
-				PCR pcr = adaptationField.getProgram_clock_reference();
-				//System.err.println("pcr:"+pcr.getProgram_clock_reference_base()+", Packet mathc: "+p);
-				final long program_clock_reference_base = pcr.getProgram_clock_reference_base();
-				categoryTableXYDataset.add(p.getPacketNo(), program_clock_reference_base,pcrLabel);
-				if(program_clock_reference_base<lastPCRBase){
-					LOGGER.warning("Service:"+pcrLabel+", pcr:"+pcr.getProgram_clock_reference_base()+" < lastPCRBase: "+lastPCRBase);
-				}
-				lastPCRBase = program_clock_reference_base;
+		
+		for(TimeStamp pcrTimeStamp:transportStream.getPID(pcrPid).getPcrList()){
+			final long packetNo = pcrTimeStamp.getPacketNo();
+			if((startPacket<=packetNo)&&(packetNo<=endPacket)){
+				categoryTableXYDataset.add(packetNo, pcrTimeStamp.getTime(),pcrLabel,false);
 			}
 		}
+		
 		for(Component c:pmt.getComponentenList()){
 			short componentPid = (short) c.getElementaryPID();
 			String componentLabel = componentPid+" - "+transportStream.getShortLabel(componentPid);
+			final String componentLabelPTS = componentLabel+" PTS";
+			final String componentLabelDTS = componentLabel+" DTS";
 
-			iter = transportStream.getTSPacketsIterator(componentPid, TransportStream.PAYLOAD_UNIT_START_FLAG,startPacket,endPacket);
-			while(iter.hasNext()){
-				TSPacket p = iter.next();
-				if((p.getTransportScramblingControl()==0)){
-					PesHeader pesHeader = p.getPesHeader();
-					if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
-						final int pts_dts_flags = pesHeader.getPts_dts_flags();
-						if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
-							categoryTableXYDataset.add(p.getPacketNo(), pesHeader.getPts(), componentLabel+" PTS");
-						}
-						if (pts_dts_flags ==3){ // DTS present,
-							categoryTableXYDataset.add(p.getPacketNo(), pesHeader.getDts(),componentLabel+" DTS");
-						}
+			
+			final PID pid = transportStream.getPID(componentPid);
+			if(pid!=null){
+				for(TimeStamp ptsTimeStamp:pid.getPtsList()){
+					final long packetNo = ptsTimeStamp.getPacketNo();
+					if((startPacket<=packetNo)&&(packetNo<=endPacket)){
+						categoryTableXYDataset.add(packetNo, ptsTimeStamp.getTime(),componentLabelPTS,false);
 					}
 				}
+				
+				for(TimeStamp dtsTimeStamp:pid.getDtsList()){
+					final long packetNo = dtsTimeStamp.getPacketNo();
+					if((startPacket<=packetNo)&&(packetNo<=endPacket)){
+						categoryTableXYDataset.add(packetNo, dtsTimeStamp.getTime(),componentLabelDTS,false);
+					}
+				}
+
 			}
 		}
 		return categoryTableXYDataset;
 	}
-
-
-
 
 
 	private void addLegendRadioButtons(JPanel buttonPanel) {
