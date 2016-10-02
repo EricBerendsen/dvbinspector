@@ -71,8 +71,13 @@ public class FileOpenAction extends AbstractAction {
 				if(ts!=null){
 					contr.setTransportStream(get());
 				}
-			} catch (final Exception ignore) {
-				logger.log(Level.SEVERE, "Error loading stream", ignore);
+			} catch (final Throwable t) {
+				logger.log(Level.SEVERE, "Error displaying stream", t);
+				final String msg =
+						"Ooops. \n\n" + "While displaying your stream an error occured " + "from which DVB Inspector can not recover.\n\n" + "Error message: " + t.toString();
+
+				showMessage(msg);
+
 			}
 		}
 
