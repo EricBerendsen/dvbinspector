@@ -237,7 +237,7 @@ public class TransportStream implements TreeNode{
 	public void parseStream(final java.awt.Component component) throws IOException {
 		final PositionPushbackInputStream fileStream = getInputStream(component);
 		final byte [] buf = new byte[packetLength];
-		long count=0;
+		int count=0;
 		no_packets = 0;
 
 		pids = new PID [8192];
@@ -323,7 +323,7 @@ public class TransportStream implements TreeNode{
 		}
 		final PositionPushbackInputStream fileStream = getInputStream(component);
 		final byte [] buf = new byte[packetLength];
-		long count=0;
+		int count=0;
 
 
 		int bytes_read =0;

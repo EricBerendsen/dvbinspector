@@ -85,7 +85,7 @@ public class PIDPacketGetter implements LazyListItemGetter {
 			 // if p.getPackets()> MAX_INT means TSfile > 403.726.925.636 bytes
 			 // we'll never have enough memory for packet_offset[] (20GB)
 			 // so this cast is safe.
-			 return (int)p.getPackets();
+			 return p.getPackets();
 		 }
 		 return 0;
 
