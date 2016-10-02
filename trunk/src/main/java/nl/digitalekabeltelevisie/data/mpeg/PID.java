@@ -53,16 +53,16 @@ public class PID implements TreeNode{
 	
 	public class TimeStamp{
 		
-		private final long packetNo;
+		private final int packetNo;
 		private final long time;
 
-		public TimeStamp(long packetNo, long time) {
+		public TimeStamp(int packetNo, long time) {
 			super();
 			this.packetNo = packetNo;
 			this.time = time;
 		}
 
-		public long getPacketNo() {
+		public int getPacketNo() {
 			return packetNo;
 		}
 
@@ -94,11 +94,11 @@ public class PID implements TreeNode{
 	/**
 	 * number of TS packets in this PID
 	 */
-	private long packets = 0;
+	private int packets = 0;
 	/**
 	 * number of duplicate packets
 	 */
-	private long dup_packets = 0;
+	private int dup_packets = 0;
 	/**
 	 *  number of continuity_errors
 	 */
@@ -312,7 +312,7 @@ public class PID implements TreeNode{
 	/**
 	 * @return number of TS packets found for this PID
 	 */
-	public long getPackets() {
+	public int getPackets() {
 		return packets;
 	}
 	@Override
@@ -328,7 +328,7 @@ public class PID implements TreeNode{
 		return dup_found;
 	}
 
-	public long getDup_packets() {
+	public int getDup_packets() {
 		return dup_packets;
 	}
 

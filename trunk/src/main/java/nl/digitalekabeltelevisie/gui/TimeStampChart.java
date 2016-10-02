@@ -324,7 +324,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		String pcrLabel = pcrPid+" - "+transportStream.getShortLabel(pcrPid)+" PCR";
 		
 		for(TimeStamp pcrTimeStamp:transportStream.getPID(pcrPid).getPcrList()){
-			final long packetNo = pcrTimeStamp.getPacketNo();
+			final int packetNo = pcrTimeStamp.getPacketNo();
 			if((startPacket<=packetNo)&&(packetNo<=endPacket)){
 				categoryTableXYDataset.add(packetNo, pcrTimeStamp.getTime(),pcrLabel,false);
 			}
@@ -340,14 +340,14 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			final PID pid = transportStream.getPID(componentPid);
 			if(pid!=null){
 				for(TimeStamp ptsTimeStamp:pid.getPtsList()){
-					final long packetNo = ptsTimeStamp.getPacketNo();
+					final int packetNo = ptsTimeStamp.getPacketNo();
 					if((startPacket<=packetNo)&&(packetNo<=endPacket)){
 						categoryTableXYDataset.add(packetNo, ptsTimeStamp.getTime(),componentLabelPTS,false);
 					}
 				}
 				
 				for(TimeStamp dtsTimeStamp:pid.getDtsList()){
-					final long packetNo = dtsTimeStamp.getPacketNo();
+					final int packetNo = dtsTimeStamp.getPacketNo();
 					if((startPacket<=packetNo)&&(packetNo<=endPacket)){
 						categoryTableXYDataset.add(packetNo, dtsTimeStamp.getTime(),componentLabelDTS,false);
 					}

@@ -56,7 +56,7 @@ import nl.digitalekabeltelevisie.util.*;
 public class TSPacket implements HTMLSource, TreeNode{
 	private static final String ERROR_PARSING_ADAPTATION_FIELD = "Error parsing AdaptationField";
 	final private byte[] buffer ;
-	private long packetNo=-1;
+	private int packetNo=-1;
 	final private static Color HEADER_COLOR = new Color(0x0000ff);
 	final private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
 	final private static Color FEC_COLOR = new Color(0x800080);
@@ -85,7 +85,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	 * @param no position number of this packet in the stream
 	 * @param ts TransportStream this packet belongs to, needed to find stuff like service name.
 	 */
-	public TSPacket(final byte[] buf, final long no, final TransportStream ts) {
+	public TSPacket(final byte[] buf, final int no, final TransportStream ts) {
 		buffer=Arrays.copyOf(buf, buf.length); //buf should be copied, or else PID.getLast_packet() will always point to last packet parsed, regardless of the actual pid.
 		packetNo = no;
 		transportStream = ts;
@@ -206,14 +206,14 @@ public class TSPacket implements HTMLSource, TreeNode{
 	/**
 	 * @return the position of this packet in the TransportStream
 	 */
-	public long getPacketNo() {
+	public int getPacketNo() {
 		return packetNo;
 	}
 
 	/**
 	 * @param packet_no
 	 */
-	public void setPacketNo(final long packet_no) {
+	public void setPacketNo(final int packet_no) {
 		this.packetNo = packet_no;
 	}
 
@@ -230,7 +230,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 		}
 		if(transportStream!=null){
 			s.append("<br>Time: ").append(transportStream.getPacketTime(packetNo));
-			final short pid = transportStream.getPacket_pid((int)packetNo);
+			final short pid = transportStream.getPacket_pid(packetNo);
 			s.append("<br>").append(escapeHtmlBreakLines(transportStream.getShortLabel(pid))).append("<br>");
 		}
 
