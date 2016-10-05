@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -56,7 +56,8 @@ public class PesHeader implements HTMLSource, TreeNode{
 	}
 
 	public boolean isValidPesHeader(){
-		return (data[offset]==0) &&
+		return (data.length>=offset+2)&&
+				(data[offset]==0) &&
 				(data[offset+1]==0) &&
 				(data[offset+2]==1);
 	}

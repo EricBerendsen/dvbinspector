@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -113,15 +113,23 @@ public class GeneralPesHandler  implements TreeNode{
 			//	something started
 		}else if((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3)){ // has payload?
 			if(packet.isPayloadUnitStartIndicator()){ // previous pesPAcket Finished, tell it to process its data
-				pesData.processPayload();
-				processPesDataBytes(pesData);
+				if(pesData!=null){
+					pesData.processPayload();
+					processPesDataBytes(pesData);
+				}
 				//start a new pesPacket
-				pesStreamID = getInt(data, 3, 1, MASK_8BITS);
-				pesLength=getInt(data,4,2, 0xFFFF);
-				// for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-				pesData = new PesPacketData(pesStreamID,pesLength,this);
-				pesData.readBytes(data, 0, data.length);
-			}else{
+				// sometime a TSPacket has payload_unit_start_indicator set, and adaptation_field has 184 bytes, leaving nothing left for payload.
+				// i think it is illegal (2.4.3.3 Semantic definition of fields in Transport Stream packet layer), but we should handle it.
+				// TODO handle start of a PES packet when there are 1-5 bytes in the TS packet.
+				// This is legal, but we can not handle it
+				if(data.length>=6){
+					pesStreamID = getInt(data, 3, 1, MASK_8BITS);
+					pesLength=getInt(data,4,2, 0xFFFF);
+					// for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
+					pesData = new PesPacketData(pesStreamID,pesLength,this);
+					pesData.readBytes(data, 0, data.length);
+				}
+			}else if (pesData!=null){
 				// already in a packet,needs more data
 				pesData.readBytes(data, 0, data.length);
 			}
