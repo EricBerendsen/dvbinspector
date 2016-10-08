@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -102,6 +102,8 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 			rbsp=new Pic_parameter_set_rbsp(rbsp_byte, numBytesInRBSP);
 		}else if(nal_unit_type==9){
 			rbsp=new Access_unit_delimiter_rbsp(rbsp_byte, numBytesInRBSP);
+		}else if(nal_unit_type==10){
+			rbsp=new End_of_sequence_rbsp(rbsp_byte, numBytesInRBSP);
 		}else if(nal_unit_type==12){
 			rbsp=new Filler_data_rbsp(rbsp_byte, numBytesInRBSP);
 		}else if(nal_unit_type==15){
