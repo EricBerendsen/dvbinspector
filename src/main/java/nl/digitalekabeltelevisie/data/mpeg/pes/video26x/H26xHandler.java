@@ -2,7 +2,7 @@
  * 
  * http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- * This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  * This file is part of DVB Inspector.
  * 
@@ -57,6 +57,7 @@ public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends Abstr
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		private Iterator<N> getNextSectionIter(){
 
 			Iterator<N> result = null;
@@ -99,7 +100,7 @@ public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends Abstr
 	}
 
 	@Override
-	public void processPesDataBytes(final PesPacketData pesData) {
+	protected void processPesDataBytes(final PesPacketData pesData) {
 		pesPackets.add(createH26xPESDataField(pesData));
 
 	}
