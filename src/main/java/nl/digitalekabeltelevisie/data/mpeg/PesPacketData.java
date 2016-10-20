@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -69,6 +69,7 @@ public class PesPacketData  implements TreeNode{
 	protected int pesDataLen;
 
 	protected int bytesRead = 0;
+	protected int startPacketNo;
 
 	public static final int program_stream_map = 0xBC;
 	public static final int private_stream_1 = 0xBD;
@@ -95,11 +96,13 @@ public class PesPacketData  implements TreeNode{
 	 * @param pesStreamID
 	 * @param pesLength
 	 * @param pesHandler
+	 * @param i 
 	 */
-	public PesPacketData(final int pesStreamID, final int pesLength,final GeneralPesHandler pesHandler) {
+	public PesPacketData(final int pesStreamID, final int pesLength,final GeneralPesHandler pesHandler, int packetNo) {
 		this.stream_id = pesStreamID;
 		this.noBytes = pesLength;
 		this.pesHandler = pesHandler;
+		this.startPacketNo = packetNo;
 		if(pesLength==0){
 			this.data= new byte[20000]; // start default for video, should be able to handle small frames.
 		}else{
@@ -123,6 +126,7 @@ public class PesPacketData  implements TreeNode{
 		this.pesDataStart = pesPacket.getPesDataStart();
 		this.pesDataLen = pesPacket.getPesDataLen();
 		this.bytesRead = pesPacket.bytesRead;
+		this.startPacketNo = pesPacket.startPacketNo;
 		processPayload();
 
 	}
@@ -248,6 +252,7 @@ public class PesPacketData  implements TreeNode{
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(titleKVP);
 
+		t.add(new DefaultMutableTreeNode(new KVP("Start TS Packet No",startPacketNo,null)));
 		phv.addToJtree(t,modus);
 		if(noBytes==0){
 			t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
@@ -279,6 +284,10 @@ public class PesPacketData  implements TreeNode{
 	 */
 	public GeneralPesHandler getPesHandler() {
 		return pesHandler;
+	}
+
+	public int getStartPacketNo() {
+		return startPacketNo;
 	}
 
 
