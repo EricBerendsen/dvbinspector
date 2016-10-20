@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,82 +31,24 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.Iterator;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xHandler;
 
 /**
  * @author Eric Berendsen
  *
  */
-public class H265Handler extends GeneralPesHandler{
-
-
-	/**
-	 * Meta Iterator to iterate over all NALUnits in this PES stream, regardless of grouping in PES Packets
-	 *
-	 * In general this does not work for streams with no alignment, So every NALUnit should be contained in a PES packet.
-	 *
-	 * @author Eric
-	 *
-	 */
-	private class NALUnitIterator{
-
-		Iterator<PesPacketData> pesIterator = null;
-		H265NALUnit nextSection = null;
-		private Iterator<H265NALUnit> sectionIter;
-
-		public NALUnitIterator() {
-			pesIterator = pesPackets.iterator();
-			sectionIter = getNextSectionIter();
-			if(sectionIter!=null){
-				nextSection = sectionIter.next();
-			}
-		}
-
-		private Iterator<H265NALUnit> getNextSectionIter(){
-
-			Iterator<H265NALUnit> result = null;
-			do {
-				final Video265PESDataField pesPacket = (Video265PESDataField )pesIterator.next();
-				result = pesPacket.getNalUnits().iterator();
-
-			} while (((result==null)||!result.hasNext())&&(pesIterator.hasNext()));
-			return result;
-
-		}
-
-		public H265NALUnit next() {
-			final H265NALUnit result = nextSection;
-			if((sectionIter!=null)&&sectionIter.hasNext()){
-				nextSection = sectionIter.next();
-			}else if(pesIterator.hasNext()){
-				sectionIter= getNextSectionIter();
-				if(sectionIter.hasNext()){
-					nextSection = sectionIter.next();
-				}else{
-					nextSection = null;
-				}
-			}else{
-				nextSection = null;
-			}
-
-			return result;
-		}
-
-
-	}
+public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit>{
 
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
-	public void processPesDataBytes(final PesPacketData pesData){
+	protected void processPesDataBytes(final PesPacketData pesData){
 		pesPackets.add(new Video265PESDataField(pesData));
 
 	}
@@ -125,5 +67,9 @@ public class H265Handler extends GeneralPesHandler{
 
 
 
+	@Override
+	protected Video265PESDataField createH26xPESDataField(PesPacketData pesData) {
+		return new Video265PESDataField(pesData);
+	}
 
 }

@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -42,7 +42,7 @@ public class DVBSubtitleHandler extends GeneralPesHandler{
 
 
 	@Override
-	public void processPesDataBytes(final PesPacketData pesData) {
+	protected void processPesDataBytes(final PesPacketData pesData) {
 		final DVBSubtitlingPESDataField titlePesPacket = new DVBSubtitlingPESDataField(pesData);
 		pesPackets.add(titlePesPacket);
 		if((titlePesPacket.getPesStreamID()==0xBD)// "private_stream_1". 

@@ -80,7 +80,7 @@ public class GeneralPesHandler  implements TreeNode{
 	protected int bufEnd = 0;
 
 
-	public void processPesDataBytes(final PesPacketData pesData){
+	protected void processPesDataBytes(final PesPacketData pesData){
 		pesPackets.add(pesData);
 
 	}

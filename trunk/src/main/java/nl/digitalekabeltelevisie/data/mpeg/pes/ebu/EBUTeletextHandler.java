@@ -96,7 +96,7 @@ public class EBUTeletextHandler extends GeneralPesHandler{
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#porcessPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
-	public void processPesDataBytes(final PesPacketData pesData) {
+	protected void processPesDataBytes(final PesPacketData pesData) {
 
 		final EBUPESDataField pesDataField = new EBUPESDataField(pesData);
 		pesPackets.add(pesDataField);
