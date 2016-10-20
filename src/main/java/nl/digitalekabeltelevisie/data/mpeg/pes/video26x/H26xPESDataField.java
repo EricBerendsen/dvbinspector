@@ -2,7 +2,7 @@
  * 
  * http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- * This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  * This file is part of DVB Inspector.
  * 
@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
  * @author Eric
@@ -42,15 +41,6 @@ public abstract class H26xPESDataField<E extends AbstractNALUnit> extends PesPac
 	protected abstract E createNALUnitInstance( byte[] data, int i, int j);
 
 	protected List<E> nalUnits = new ArrayList<E>();
-
-	/**
-	 * @param pesStreamID
-	 * @param pesLength
-	 * @param pesHandler
-	 */
-	public H26xPESDataField(final int pesStreamID, final int pesLength, final GeneralPesHandler pesHandler) {
-		super(pesStreamID, pesLength, pesHandler);
-	}
 
 	/**
 	 * @param pesPacket
