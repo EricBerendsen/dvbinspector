@@ -105,7 +105,7 @@ public class GeneralPesHandler  implements TreeNode{
 					pesStreamID = getInt(data, 3, 1, MASK_8BITS);
 					pesLength=getInt(data,4,2, 0xFFFF);
 					//for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-					pesData = new PesPacketData(pesStreamID,pesLength,this);
+					pesData = new PesPacketData(pesStreamID,pesLength,this,packet.getPacketNo());
 					pesData.readBytes(data, 0, data.length);
 
 				}
@@ -126,7 +126,7 @@ public class GeneralPesHandler  implements TreeNode{
 					pesStreamID = getInt(data, 3, 1, MASK_8BITS);
 					pesLength=getInt(data,4,2, 0xFFFF);
 					// for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-					pesData = new PesPacketData(pesStreamID,pesLength,this);
+					pesData = new PesPacketData(pesStreamID,pesLength,this,packet.getPacketNo());
 					pesData.readBytes(data, 0, data.length);
 				}
 			}else if (pesData!=null){
