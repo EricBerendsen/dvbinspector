@@ -44,7 +44,7 @@ public class UserData extends VideoMPEG2Section {
 	private final int offset;
 	private final int len;
 
-	AuxiliaryData auxData = null;
+	private final AuxiliaryData auxData;
 
 
 	/**
@@ -93,5 +93,9 @@ public class UserData extends VideoMPEG2Section {
 	 */
 	public int getOffset() {
 		return offset;
+	}
+
+	public AuxiliaryData getAuxData() {
+		return auxData;
 	}
 }
