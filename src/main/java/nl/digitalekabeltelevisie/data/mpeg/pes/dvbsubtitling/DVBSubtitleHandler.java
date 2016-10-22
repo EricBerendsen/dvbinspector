@@ -72,4 +72,9 @@ public class DVBSubtitleHandler extends GeneralPesHandler{
 		return s;
 	}
 
+
+	public Titles getTitles() {
+		return titles;
+	}
+
 }

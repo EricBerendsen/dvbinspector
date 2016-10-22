@@ -414,4 +414,8 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 		kvp.setSubMenuAndOwner(objectMenu,this);
 	}
 
+	public List<AudioAccessUnit> getAudioAccessUnits() {
+		return audioAccessUnits;
+	}
+
 }

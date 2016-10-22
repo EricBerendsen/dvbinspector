@@ -68,4 +68,8 @@ public class Titles implements TreeNode {
 		}
 	}
 
+	public List<DisplaySet> getDisplaySets() {
+		return displaySets;
+	}
+
 }
