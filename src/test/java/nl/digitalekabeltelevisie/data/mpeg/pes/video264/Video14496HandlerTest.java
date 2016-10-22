@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -29,54 +29,23 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import static org.junit.Assert.*;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.List;
+
+//import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
-import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
-
-import org.junit.*;
-//import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Eric
  *
  */
-public class Video14496HandlerTest {
-
-	/**
-	 * 
-	 */
-	private static TransportStream transportStream;
-	private static final Integer NPO1_H264_PID = 2001;
-	private static final Integer NPO2_H264_PID = 2301;
-	private final static Object o = new Object();
-
-	@BeforeClass
-	public static void setUp() throws NotAnMPEGFileException, IOException, URISyntaxException{
-
-		//
-		final URL resource = o.getClass().getResource("/NPO12HD.ts");
-		// spaces in dirname...
-		final File ts =  new File(resource.toURI());
-		transportStream = new TransportStream(ts);
-		transportStream.parseStream();
-
-		final Map<Integer, GeneralPesHandler> map = new HashMap<>();
-
-		final PID p1= transportStream.getPID(NPO1_H264_PID);
-		map.put(NPO1_H264_PID, p1.getPesHandler());
-		final PID p2= transportStream.getPID(NPO2_H264_PID);
-		map.put(NPO2_H264_PID, p2.getPesHandler());
-		transportStream.parseStream(null, map);
-	}
-
+public class Video14496HandlerTest extends PesHandlerSetup{
 
 	@Test
-	public void testNPO1() {
+	public void testNPO1Video() {
 
 		assertNotNull("transportStream = null",transportStream);
 		final PID npo1 = transportStream.getPID(NPO1_H264_PID);
@@ -100,6 +69,30 @@ public class Video14496HandlerTest {
 		testFrame0(pesPackets.get(0));
 		testFrame2(pesPackets.get(2));
 		testFrame19(pesPackets.get(19));
+	}
+
+	
+	@Test
+	public void testNPO2Video() {
+
+		assertNotNull("transportStream = null",transportStream);
+		final PID npo2 = transportStream.getPID(NPO2_H264_PID);
+		assertNotNull("npo2 = null",npo2);
+
+		assertEquals("number of TS packets",36545, npo2.getPackets());
+		assertEquals("PID Type",PID.PES, npo2.getType());
+
+
+		assertEquals("PCR Count",125, npo2.getPcr_count());
+
+		final GeneralPesHandler pesHandler = npo2.getPesHandler();
+		assertEquals(Video14496Handler.class, pesHandler.getClass());
+
+		final H26xHandler<?, ?> video14496Handler = (H26xHandler<?, ?>) pesHandler;
+
+		final List<PesPacketData> pesPackets = video14496Handler.getPesPackets();
+		assertNotNull("pesPackets = null",pesPackets);
+		assertEquals("Number of PESPackets", 110, pesPackets.size());
 	}
 
 	/**
@@ -152,6 +145,7 @@ public class Video14496HandlerTest {
 	/**
 	 * @param bFrame
 	 */
+
 	private static void testFrame2(final PesPacketData pFrame) {
 		assertNotNull("bFrame = null",pFrame);
 
@@ -175,6 +169,7 @@ public class Video14496HandlerTest {
 	/**
 	 * @param bFrame
 	 */
+
 	private static void testFrame0(final PesPacketData bFrame) {
 		assertNotNull("bFrame = null",bFrame);
 
@@ -265,6 +260,7 @@ public class Video14496HandlerTest {
 	 * @param expectedClass
 	 * @param expectedType
 	 */
+
 	private static void testNALUnit(final NALUnit unit, final Class<? extends RBSP> expectedClass,
 			final int expectedType) {
 		assertNotNull("unit = null",unit);
