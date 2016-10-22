@@ -48,7 +48,9 @@ public class TxtService implements TreeNode{
 	}
 
 	private final Magazine[] magazineList = new Magazine[8];
-	private final List<TxtDataField>[] packet8_30 = new ArrayList[16]; // lines , desgnation code should be
+	@SuppressWarnings("unchecked")
+	private final List<TxtDataField>[] packet8_30 = new ArrayList[16]; // lines , designation code should be
+	@SuppressWarnings("unchecked")
 	private final List<TxtDataField>[] packet8_31 =new ArrayList[16]; // lines
 
 	void addTxtDataField(final TxtDataField txtDataField){
@@ -113,5 +115,13 @@ public class TxtService implements TreeNode{
 
 	public TransportStream getTransportStream() {
 		return transportStream;
+	}
+
+	public List<TxtDataField>[] getPacket8_30() {
+		return packet8_30;
+	}
+
+	public List<TxtDataField>[] getPacket8_31() {
+		return packet8_31;
 	}
 }
