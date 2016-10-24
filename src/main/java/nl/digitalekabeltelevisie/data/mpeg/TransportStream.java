@@ -313,54 +313,23 @@ public class TransportStream implements TreeNode{
 	 * Read the file, and parse only the packets for which a GeneralPesHandler is present in toParsePids. Used for analyzing PESdata, like a video, teletext or subtitle stream
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
 	 *
-	 * TODO: optimize to read only the packets needed for these Pids, using seek(). We now have the file offset, use it!
-	 *
 	 * @throws IOException
 	 */
 	public void parseStream(final java.awt.Component component, final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
-		final PositionPushbackInputStream fileStream = getInputStream(component);
-		final byte [] buf = new byte[packetLength];
-		int count=0;
-
-
-		int bytes_read =0;
-		do {
-			bytes_read = fileStream.read(buf, 0, packetLength);
-			final int next = fileStream.read();
-			if((bytes_read==packetLength)&&
-					(buf[0]==MPEGConstants.sync_byte) &&
-					((next==-1)||(next==MPEGConstants.sync_byte))) {
-				//always push back first byte of next packet
-				if((next!=-1)) {
-					fileStream.unread(next);
-				}
-
-				TSPacket packet = new TSPacket(buf, count,this);
-				if(!packet.isTransportErrorIndicator()){
-					final int pid = packet.getPID();
-					final GeneralPesHandler handler = toParsePids.get(pid);
-					if(handler!=null){
-						handler.processTSPacket(packet);
-					}
-
-					packet=null;
-				}else{
-					error_packets++;
-					logger.warning("TransportErrorIndicator set for packet "+ packet);
-				}
-				count++;
-			}else{ // something wrong, find next syncbyte. First push back the lot
-				if((next!=-1)) {
-					fileStream.unread(next);
-					fileStream.unread(buf, 0, bytes_read);
-					// now read 1 byte and restart all
-					fileStream.read(); //ignore result
+		
+		try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
+			for(int t=0; t<no_packets;t++){
+				int pid = getPacket_pid(t);
+				final GeneralPesHandler handler = toParsePids.get(pid);
+				if(handler!=null){
+					TSPacket packet = readPacket(t, randomAccessFile);
+					handler.processTSPacket(packet);
 				}
 			}
-		} while (bytes_read==packetLength);
+		}
 	}
 
 
@@ -945,22 +914,29 @@ public class TransportStream implements TreeNode{
 		if(offsetHelper.isEnabled()){
 			if(offsetHelper.getMaxPacket()>packetNo){
 				try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
-					final long offset = offsetHelper.getOffset(packetNo);
-					randomAccessFile.seek(offset);
-					final byte [] buf = new byte[packetLength];
-					final int bytesRead = randomAccessFile.read(buf);
-					if(bytesRead==packetLength){
-						packet = new TSPacket(buf, packetNo,this);
-						packet.setPacketOffset(offset);
-					}else{
-						logger.warning("read less then packetLenghth ("+packetLength+") bytes, actual read: "+bytesRead);
-					}
+					packet = readPacket(packetNo,randomAccessFile);
 				} catch (final IOException e) {
 					logger.warning("IOException:"+e);
 				}
 			}else{
 				logger.warning("offsetHelper.getMaxPacket() ("+offsetHelper.getMaxPacket()+") < packetNo ("+packetNo+")");
 			}
+		}
+		return packet;
+	}
+
+	private TSPacket readPacket(final int packetNo, final RandomAccessFile randomAccessFile)
+			throws IOException {
+		TSPacket packet = null;
+		final long offset = offsetHelper.getOffset(packetNo);
+		randomAccessFile.seek(offset);
+		final byte [] buf = new byte[packetLength];
+		final int bytesRead = randomAccessFile.read(buf);
+		if(bytesRead==packetLength){
+			packet = new TSPacket(buf, packetNo,this);
+			packet.setPacketOffset(offset);
+		}else{
+			logger.warning("read less then packetLenghth ("+packetLength+") bytes, actual read: "+bytesRead);
 		}
 		return packet;
 	}
