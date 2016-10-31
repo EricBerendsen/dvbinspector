@@ -1321,26 +1321,29 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	 * @param tripletOffset
 	 * @return
 	 */
-	private static List<TxtTriplet> getObjectDefinition(final SubPage objectDefSubPage, int lineNo, int tripletOffset) {
+	private static List<TxtTriplet> getObjectDefinition(final SubPage objectDefSubPage, final int lineNo, final int tripletOffset) {
+		
+		int lineNumber = lineNo;
+		int offset = tripletOffset;
 		final List<TxtTriplet> objectDefinition = new ArrayList<TxtTriplet>();
 
-		TxtDataField line = objectDefSubPage.getLine(lineNo);
+		TxtDataField line = objectDefSubPage.getLine(lineNumber);
 		if(line!=null){
 			List<TxtTriplet> lineTriplets = line.getTxtTripletList();
-			TxtTriplet triplet = lineTriplets.get(tripletOffset++);
+			TxtTriplet triplet = lineTriplets.get(offset++);
 
 
 			do{
 				objectDefinition.add(triplet);
-				if(tripletOffset==13){ // next line
-					tripletOffset = 0;
-					lineNo++;
-					line = objectDefSubPage.getLine(lineNo);
+				if(offset==13){ // next line
+					offset = 0;
+					lineNumber++;
+					line = objectDefSubPage.getLine(lineNumber);
 					if(line!=null){
 						lineTriplets = line.getTxtTripletList();
 					}
 				}
-				triplet = lineTriplets.get(tripletOffset++);
+				triplet = lineTriplets.get(offset++);
 
 
 			}while((triplet!=null)&&(!triplet.isTerminationMarker())&&(!triplet.isObjectDefinition())&&(line!=null));
@@ -1461,11 +1464,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		}
 	}
 
-	private boolean isValidMosaicCharacter(final int ch) {
+	private static boolean isValidMosaicCharacter(final int ch) {
 		return (ch < 0x40) || ((ch >= 0x60)&&(ch <= 0x7f));
 	}
 
-	private boolean isMosaicGraphicsMode(final int ef) {
+	private static boolean isMosaicGraphicsMode(final int ef) {
 		return (ef & MOSAIC_GRAPHICS) != 0;
 	}
 
