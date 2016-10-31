@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -40,13 +40,11 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.*;
 import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.CategoryTableXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.*;
-import nl.digitalekabeltelevisie.data.mpeg.PID.TimeStamp;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.utils.*;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -143,7 +141,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 
 	JComboBox<String> serviceChooser = new JComboBox<String>() ;
 	private ViewContext viewContext;
-
+	
 
 	/**
 	 * Creates a new TimeStampChart
@@ -203,9 +201,6 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		if(transportStream==null){
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
-		}else if(!transportStream.isEnableTSPackets()){
-			freeChart = null;
-			chartPanel.setChart(GuiUtils.createTitleOnlyChart("To enable this graph select \"Enable TS Packets\" in the settings menu"));
 		}else{
 			final PMTs streamPmts = transportStream.getPsi().getPmts();
 			if(streamPmts.getPmts().isEmpty()){
@@ -260,7 +255,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	private JFreeChart createChart(int selectedIndex) {
 
 
-		final CategoryTableXYDataset categoryTableXYDataset = createDataSet(selectedIndex);
+		final XYDataset categoryTableXYDataset = createDataSet(selectedIndex);
 		PMTsection section = pmts.get(selectedIndex);
 		String serviceLabel = getServiceName(transportStream, section.getProgramNumber());
 
@@ -304,58 +299,14 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 
 		rangeAxis.setNumberFormatOverride(timeStampNumberFormat);
 
-
 		return chart;
 	}
 
-	/**
-	 * @param selectedIndex
-	 * @return
-	 */
-	private CategoryTableXYDataset createDataSet(int selectedIndex) {
-		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
-
+	
+	private XYDataset createDataSet(int selectedIndex) {
+		
 		PMTsection pmt = pmts.get(selectedIndex);
-		short pcrPid= (short)pmt.getPcrPid();
-
-		int startPacket = viewContext.getStartPacket();
-		int endPacket = viewContext.getEndPacket();
-
-		String pcrLabel = pcrPid+" - "+transportStream.getShortLabel(pcrPid)+" PCR";
-		
-		for(TimeStamp pcrTimeStamp:transportStream.getPID(pcrPid).getPcrList()){
-			final int packetNo = pcrTimeStamp.getPacketNo();
-			if((startPacket<=packetNo)&&(packetNo<=endPacket)){
-				categoryTableXYDataset.add(packetNo, pcrTimeStamp.getTime(),pcrLabel,false);
-			}
-		}
-		
-		for(Component c:pmt.getComponentenList()){
-			short componentPid = (short) c.getElementaryPID();
-			String componentLabel = componentPid+" - "+transportStream.getShortLabel(componentPid);
-			final String componentLabelPTS = componentLabel+" PTS";
-			final String componentLabelDTS = componentLabel+" DTS";
-
-			
-			final PID pid = transportStream.getPID(componentPid);
-			if(pid!=null){
-				for(TimeStamp ptsTimeStamp:pid.getPtsList()){
-					final int packetNo = ptsTimeStamp.getPacketNo();
-					if((startPacket<=packetNo)&&(packetNo<=endPacket)){
-						categoryTableXYDataset.add(packetNo, ptsTimeStamp.getTime(),componentLabelPTS,false);
-					}
-				}
-				
-				for(TimeStamp dtsTimeStamp:pid.getDtsList()){
-					final int packetNo = dtsTimeStamp.getPacketNo();
-					if((startPacket<=packetNo)&&(packetNo<=endPacket)){
-						categoryTableXYDataset.add(packetNo, dtsTimeStamp.getTime(),componentLabelDTS,false);
-					}
-				}
-
-			}
-		}
-		return categoryTableXYDataset;
+		return new TimestampXYDataset(pmt,transportStream,viewContext);
 	}
 
 

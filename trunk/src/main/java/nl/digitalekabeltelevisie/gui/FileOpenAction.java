@@ -91,7 +91,6 @@ public class FileOpenAction extends AbstractAction {
 				transportStream = new TransportStream(file);
 				transportStream.setDefaultPrivateDataSpecifier(contr.getDefaultPrivateDataSpecifier());
 				transportStream.setDefaultG0CharacterSet(contr.getDefaultG0CharacterSet());
-				transportStream.setEnableTSPackets(contr.isEnableTSPackets());
 
 				transportStream.parseStream(contr.getFrame());
 			} catch (final NotAnMPEGFileException e) {

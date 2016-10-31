@@ -84,11 +84,8 @@ public class TransportStream implements TreeNode{
 	 * @see DescriptorFactory
 	 */
 	private long defaultPrivateDataSpecifier = 0;
-
 	private int defaultG0CharacterSet = 0;
 
-
-	private boolean enableTSPackets = false;
 
 	/**
 	 * File containing data of this TransportStream
@@ -245,7 +242,6 @@ public class TransportStream implements TreeNode{
 		error_packets = 0;
 		bitRate = -1;
 		bitRateTDT = -1;
-		offsetHelper.setEnabled(enableTSPackets);
 
 		int bytes_read =0;
 		int lastHandledSyncErrorPacket = -1;
@@ -274,9 +270,7 @@ public class TransportStream implements TreeNode{
 					pidFlags = (short) (pidFlags | TRANSPORT_ERROR_FLAG);
 				}
 				packet_pid[no_packets]=pidFlags;
-				if(offsetHelper.isEnabled()){
-					offsetHelper.addPacket(no_packets,offset);
-				}
+				offsetHelper.addPacket(no_packets,offset);
 				no_packets++;
 				if(!packet.isTransportErrorIndicator()){
 					if(pids[pid]==null) {
@@ -417,7 +411,7 @@ public class TransportStream implements TreeNode{
 			}
 		}
 
-		if(offsetHelper.isEnabled()&&!psiOnlyModus(modus)){
+		if(!psiOnlyModus(modus)){
 			final JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
 			t.add(list.getJTreeNode(modus, "Transport packets "));
 		}
@@ -911,16 +905,14 @@ public class TransportStream implements TreeNode{
 
 	public TSPacket getTSPacket(final int packetNo){
 		TSPacket packet = null;
-		if(offsetHelper.isEnabled()){
-			if(offsetHelper.getMaxPacket()>packetNo){
-				try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
-					packet = readPacket(packetNo,randomAccessFile);
-				} catch (final IOException e) {
-					logger.warning("IOException:"+e);
-				}
-			}else{
-				logger.warning("offsetHelper.getMaxPacket() ("+offsetHelper.getMaxPacket()+") < packetNo ("+packetNo+")");
+		if(offsetHelper.getMaxPacket()>packetNo){
+			try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
+				packet = readPacket(packetNo,randomAccessFile);
+			} catch (final IOException e) {
+				logger.warning("IOException:"+e);
 			}
+		}else{
+			logger.warning("offsetHelper.getMaxPacket() ("+offsetHelper.getMaxPacket()+") < packetNo ("+packetNo+")");
 		}
 		return packet;
 	}
@@ -987,19 +979,6 @@ public class TransportStream implements TreeNode{
 
 	}
 
-	public boolean isEnableTSPackets() {
-		return enableTSPackets;
-	}
-
-
-	public void setEnableTSPackets(final boolean enableTSPackets) {
-		this.enableTSPackets = enableTSPackets;
-	}
-
-	public boolean tsPacketsLoaded(){
-		return offsetHelper.isEnabled();
-	}
-
 	public PID getPID(final int p){
 		return pids[p];
 	}
@@ -1035,6 +1014,5 @@ public class TransportStream implements TreeNode{
 	public void setError_packets(int error_packets) {
 		this.error_packets = error_packets;
 	}
-
 	
 }
