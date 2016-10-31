@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,35 +26,25 @@
  */
 package nl.digitalekabeltelevisie.main;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import java.util.prefs.Preferences;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.event.*;
 
-import nl.digitalekabeltelevisie.controller.ChartLabel;
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import org.jfree.chart.plot.DefaultDrawingSupplier;
+
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.*;
-
-import org.jfree.chart.plot.DefaultDrawingSupplier;
 
 /**
  * Main class for DVB Inspector, creates and holds all GUI elements.
@@ -72,7 +62,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	public static final String DEFAULT_PRIVATE_DATA_SPECIFIER = "private_data_spcifier";
 	public static final String DEFAULT_G0_CHARACTER_SET = "defaultg0_character_set";
-	public static final String ENABLE_TS_PACKETS = "enable_ts_packets";
+	public static final String ENABLE_TIMESTAMP_GRAPH = "enable_timestamp_graph";
 
 	/**
 	 * key for storage of last used DEFAULT_VIEW_MODUS in Preferences
@@ -103,29 +93,15 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private long defaultPrivateDataSpecifier = 0;
 	private int defaultG0CharacterSet = 0;
 
-	private boolean enableTSPackets = false;
 
 	private ViewContext viewContext = new ViewContext();
 
 	private int modus;
 
-
-
 	private PIDDialogOpenAction pidOpenAction;
-
-
 	private AboutAction aboutAction;
-
-
-	private EnableTSPacketsAction enableTSPacketsAction;
-
-
 	private FindAction findAction;
-
-
 	private Action fileOpenAction;
-
-
 	private FindNextAction findNextAction;
 
 
@@ -158,9 +134,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 				final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
 
+				// TODO
 				ts.setDefaultPrivateDataSpecifier(prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0));
 				ts.setDefaultG0CharacterSet(prefs.getInt(DVBinspector.DEFAULT_G0_CHARACTER_SET, 0));
-				ts.setEnableTSPackets(prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false));
 
 				inspector.transportStream = ts;
 
@@ -191,7 +167,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
 		defaultPrivateDataSpecifier = prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
 		defaultG0CharacterSet = prefs.getInt(DVBinspector.DEFAULT_G0_CHARACTER_SET, 0);
-		enableTSPackets = prefs.getBoolean(DVBinspector.ENABLE_TS_PACKETS, false);
 		modus = prefs.getInt(DVBinspector.DEFAULT_VIEW_MODUS,0);
 
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
@@ -360,13 +335,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 		settingsMenu.add(defaultG0andG2CharacterSetDesignationMenu);
 
-		enableTSPacketsAction = new EnableTSPacketsAction(this);
-
-		final JCheckBoxMenuItem enableTSPacketsMenu = new JCheckBoxMenuItem(enableTSPacketsAction);
-		enableTSPacketsMenu.setMnemonic(KeyEvent.VK_E);
-		enableTSPacketsMenu.setSelected(enableTSPackets);
-		//enableTSPacketsMenu.addActionListener(enableTSPacketsAction);
-		settingsMenu.add(enableTSPacketsMenu);
 		return settingsMenu;
 	}
 
@@ -652,13 +620,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		this.modus = modus;
 	}
 
-	public boolean isEnableTSPackets() {
-		return enableTSPackets;
-	}
-
-	public void setEnableTSPackets(final boolean enableTSPackets) {
-		this.enableTSPackets = enableTSPackets;
-	}
 
 	public void setSearchEnumeration(DefaultMutableTreeNodePreorderEnumaration enummeration) {
 		this.searchEnummeration = enummeration;

@@ -51,26 +51,7 @@ import nl.digitalekabeltelevisie.util.PIDPacketGetter;
  */
 public class PID implements TreeNode{
 	
-	public class TimeStamp{
-		
-		private final int packetNo;
-		private final long time;
-
-		public TimeStamp(int packetNo, long time) {
-			super();
-			this.packetNo = packetNo;
-			this.time = time;
-		}
-
-		public int getPacketNo() {
-			return packetNo;
-		}
-
-		public long getTime() {
-			return time;
-		}
-		
-	}
+	
 	private static final Logger logger = Logger.getLogger(PID.class.getName());
 
 	public static final int PES = 1;
@@ -120,9 +101,9 @@ public class PID implements TreeNode{
 
 	private final GatherPIDData gatherer = new GatherPIDData();
 	
-	private final List<TimeStamp> pcrList = new ArrayList<>();
-	private final List<TimeStamp> ptsList = new ArrayList<>();
-	private final List<TimeStamp> dtsList = new ArrayList<>();
+	private final ArrayList<TimeStamp> pcrList = new ArrayList<>();
+	private final ArrayList<TimeStamp> ptsList = new ArrayList<>();
+	private final ArrayList<TimeStamp> dtsList = new ArrayList<>();
 
 	/**
 	 *
@@ -395,14 +376,8 @@ public class PID implements TreeNode{
 		}else if((type==PES)&&(generalPesHandler!=null)&&(generalPesHandler.isInitialized())) {
 			t.add(((TreeNode)generalPesHandler).getJTreeNode(modus));
 		}
-		if(parentTransportStream.isEnableTSPackets()&&parentTransportStream.tsPacketsLoaded()){
-
-			final JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
-			t.add(list.getJTreeNode(modus, "Transport packets "));
-
-		}
-
-
+		final JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
+		t.add(list.getJTreeNode(modus, "Transport packets "));
 
 		return t;
 	}
@@ -501,15 +476,15 @@ public class PID implements TreeNode{
 		return PES;
 	}
 
-	public List<TimeStamp> getPcrList() {
+	public ArrayList<TimeStamp> getPcrList() {
 		return pcrList;
 	}
 
-	public List<TimeStamp> getPtsList() {
+	public ArrayList<TimeStamp> getPtsList() {
 		return ptsList;
 	}
 
-	public List<TimeStamp> getDtsList() {
+	public ArrayList<TimeStamp> getDtsList() {
 		return dtsList;
 	}
 
