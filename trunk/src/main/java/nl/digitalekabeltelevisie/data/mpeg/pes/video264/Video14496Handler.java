@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -62,7 +62,6 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 	@Override
 	public BufferedImage getImage() {
 
-		ChartLabel label = null;
 		final List<int[]> frameSize  = new ArrayList<int[]>();
 		final List<ChartLabel> labels = new ArrayList<ChartLabel>();
 
@@ -79,12 +78,7 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 						( rbsp instanceof Pic_parameter_set_rbsp) ||
 						( rbsp instanceof Sei_rbsp)){
 
-					if(notZero(accessUnitData)){
-						label =new ChartLabel(""+count, (short)count);
-						labels.add(label);
-						frameSize.add(accessUnitData);
-						count++;
-					}
+					count = drawBarAccessUnit(frameSize, labels, accessUnitData, count);
 					accessUnitData = new int[6];
 				}else if( rbsp instanceof Slice_layer_without_partitioning_rbsp){
 					final Slice_header header = ((Slice_layer_without_partitioning_rbsp)rbsp).getSlice_header();
@@ -105,6 +99,8 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 			}
 			unit =  nalIter.next();
 		}
+		// last unit is not followed by delimiter
+		count = drawBarAccessUnit(frameSize, labels, accessUnitData, count);
 
 		final DefaultKeyedValues2DDataset dataset = new DefaultKeyedValues2DDataset();
 
@@ -144,6 +140,18 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 		final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, true	);
 
 		return chart.createBufferedImage(( frameSize.size()*18)+100, 640);
+	}
+
+	private static int drawBarAccessUnit(final List<int[]> frameSize, final List<ChartLabel> labels, int[] accessUnitData,
+			int c) {
+		int count = c;
+		if(notZero(accessUnitData)){
+			ChartLabel label =new ChartLabel(""+count, (short)count);
+			labels.add(label);
+			frameSize.add(accessUnitData);
+			count++;
+		}
+		return count;
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
