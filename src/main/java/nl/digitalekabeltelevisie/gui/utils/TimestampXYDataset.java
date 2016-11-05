@@ -104,7 +104,6 @@ public class TimestampXYDataset implements XYDataset {
 			if(endRange<0){ 
 				endRange = (-endRange)-1;
 			}
-			System.err.println("Label:"+componentLabel+"list.size:"+list.size()+", startOffset:"+startOffset+", endRange:"+endRange+",(endRange-startOffset):"+(endRange-startOffset));
 
 			seriesOffset.add(startOffset);
 			seriesViewContextLength.add(endRange-startOffset);
