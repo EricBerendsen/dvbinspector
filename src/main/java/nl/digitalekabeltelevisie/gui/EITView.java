@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,17 +27,10 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.awt.event.*;
 
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.*;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -53,7 +46,9 @@ public class EITView extends JPanel implements TransportStreamView{
 	 */
 	private JScrollPane scrollGrid;
 	private EITableImage eitPanel;
-	private JPanel buttonPanel;
+	private JPanel eitButtonPanel;
+	private JPanel copySaveButtonToolbar;
+	private JPanel toolbar;
 
 	/**
 	 * @param transportStream
@@ -61,19 +56,49 @@ public class EITView extends JPanel implements TransportStreamView{
 	 */
 	public EITView(final TransportStream transportStream, final ViewContext viewContext) {
 		super(new BorderLayout());
-
-		buttonPanel = new JPanel();
-		addPfScheduleRadioButtons();
-		buttonPanel.add(Box.createHorizontalStrut(10)); // spacer
-		addZoomRadioButtons();
-		add(buttonPanel,BorderLayout.PAGE_START);
-
 		eitPanel = new EITableImage(transportStream,viewContext);
 		scrollGrid = new JScrollPane(eitPanel);
 		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
+		
+		copySaveButtonToolbar = new JPanel();
+		createCopySaveButtonBar();
+		
+		eitButtonPanel = new JPanel();
+		addPfScheduleRadioButtons();
+		eitButtonPanel.add(Box.createHorizontalStrut(10)); // spacer
+		addZoomRadioButtons();
+		toolbar = new JPanel();
+		GridLayout gridLayout = new GridLayout(1,3);
+		toolbar.setLayout(gridLayout);
+		toolbar.add(copySaveButtonToolbar); 
+		toolbar.add(eitButtonPanel);
+		toolbar.add(new JPanel());
+		
+		add(toolbar,BorderLayout.PAGE_START);
+
+
 		add(scrollGrid,BorderLayout.CENTER);
+	}
+
+	private void createCopySaveButtonBar() {
+		FlowLayout layout = new FlowLayout(FlowLayout.LEFT);
+		copySaveButtonToolbar.setLayout(layout);
+
+		ImageCopyAction copyAction = new ImageCopyAction(this, "Copy", eitPanel);
+		JButton copyButton = new JButton(copyAction);
+		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(copyKey, "copy");
+		getActionMap().put("copy", copyAction);
+		copySaveButtonToolbar.add(copyButton);
+
+		ImageSaveAction saveAction = new ImageSaveAction(this, "Save As...",eitPanel);
+		JButton saveButton = new JButton(saveAction);
+		KeyStroke saveKey = KeyStroke.getKeyStroke(KeyEvent.VK_S,Event.CTRL_MASK);
+		getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(saveKey, "save");
+		getActionMap().put("save", saveAction);
+		copySaveButtonToolbar.add(saveButton);
 	}
 
 	/**
@@ -81,7 +106,7 @@ public class EITView extends JPanel implements TransportStreamView{
 	 */
 	private void addPfScheduleRadioButtons() {
 		JLabel typeLabel = new JLabel("Table:");
-		buttonPanel.add(typeLabel);
+		eitButtonPanel.add(typeLabel);
 		JRadioButton pfButton = new JRadioButton("Present/Following");
 		pfButton.addActionListener(new ActionListener() {
 			@Override
@@ -101,13 +126,13 @@ public class EITView extends JPanel implements TransportStreamView{
 		group.add(pfButton);
 		group.add(scheduleButton);
 
-		buttonPanel.add(pfButton);
-		buttonPanel.add(scheduleButton);
+		eitButtonPanel.add(pfButton);
+		eitButtonPanel.add(scheduleButton);
 	}
 
 	private void addZoomRadioButtons() {
 		JLabel typeLabel = new JLabel("Zoom:");
-		buttonPanel.add(typeLabel);
+		eitButtonPanel.add(typeLabel);
 		JRadioButton zoom1Button = new JRadioButton("1");
 		zoom1Button.addActionListener(new ActionListener() {
 			@Override
@@ -135,9 +160,9 @@ public class EITView extends JPanel implements TransportStreamView{
 		group.add(zoom2Button);
 		group.add(zoom3Button);
 
-		buttonPanel.add(zoom1Button);
-		buttonPanel.add(zoom2Button);
-		buttonPanel.add(zoom3Button);
+		eitButtonPanel.add(zoom1Button);
+		eitButtonPanel.add(zoom2Button);
+		eitButtonPanel.add(zoom3Button);
 	}
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
