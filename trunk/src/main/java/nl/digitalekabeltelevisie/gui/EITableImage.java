@@ -167,7 +167,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		int height = (serviceOrder.size()*LINE_HEIGHT)+1 + LEGEND_HEIGHT;
 		int legendWidth = (int)((endDate.getTime() - startDate.getTime())/milliSecsPerPixel);
 		int width = 1+SERVICE_NAME_WIDTH + legendWidth;
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		final Graphics2D gd = img.createGraphics();
 		gd.setColor(Color.BLUE);
 		gd.fillRect(0, 0, width, height);
