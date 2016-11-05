@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,14 +27,7 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -43,31 +36,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.prefs.Preferences;
 
-import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.*;
 
 /**
  * @author  Eric
  */
-public class ImagePanel extends JPanel implements FocusListener, MouseListener{
+public class ImagePanel extends JPanel implements FocusListener, MouseListener, ImageSource{
 
 	private class ImageCanvas extends JPanel {
 
@@ -90,104 +65,6 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener{
 		}
 
 	}
-
-	/**
-	 * Put image on clipboard
-	 *
-	 * @author Eric
-	 *
-	 */
-	public class CopyAction extends AbstractAction{
-
-		/**
-		 *
-		 */
-		public CopyAction(String name) {
-			super(name);
-		}
-
-		/* (non-Javadoc)
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			if(image!=null){
-				ImageTransferable it = new ImageTransferable(image);
-				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents( it, it );
-			}
-			setCursor(Cursor.getDefaultCursor());
-		}
-	}
-
-	/**
-	 * Start dialog to save image as PNG or JPG.
-	 *
-	 * @author Eric
-	 *
-	 */
-	public class SaveAction extends AbstractAction{
-
-		/**
-		 *
-		 */
-		public SaveAction(String name) {
-			super(name);
-		}
-
-		/* (non-Javadoc)
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-			File saveFile = new File("dvb_inspector_image_"+df.format(new Date()));
-			JFileChooser chooser = new JFileChooser();
-			FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("JPG", "jpg", "jpeg");
-			chooser.addChoosableFileFilter(jpgFilter);
-			FileNameExtensionFilter pngFilter = new FileNameExtensionFilter("PNG", "png");
-			chooser.addChoosableFileFilter(pngFilter);
-			chooser.setAcceptAllFileFilterUsed(false);
-			final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-			final String defaultDir = prefs.get(DVBtree.SAVE_DIR, null);
-			if (defaultDir != null) {
-				final File defDir = new File(defaultDir);
-				chooser.setCurrentDirectory(defDir);
-			}
-
-			chooser.setSelectedFile(saveFile);
-			int rval = chooser.showSaveDialog(imageCanvas);
-			if (rval == JFileChooser.APPROVE_OPTION) {
-				saveFile = chooser.getSelectedFile();
-				prefs.put(DVBtree.SAVE_DIR, saveFile.getParent());
-
-				FileNameExtensionFilter filter = (FileNameExtensionFilter) chooser.getFileFilter();
-				String extension = filter.getExtensions()[0];
-				if (!saveFile.getName().endsWith('.' + extension)) {
-					saveFile = new File(saveFile.getPath() + "." + extension);
-				}
-				boolean write = true;
-				if (saveFile.exists()) {
-					final int n = JOptionPane.showConfirmDialog(imageCanvas,
-							"File " + saveFile + " already exists, want to overwrite?",
-							"File already exists",
-							JOptionPane.YES_NO_OPTION);
-					if (n == JOptionPane.NO_OPTION) {
-						write = false;
-					}
-				}
-				if (write) {
-
-					try {
-						ImageIO.write(image, extension, saveFile);
-					} catch (IOException ex) {
-					}
-				}
-			}
-		}
-	}
-
 
 	/**
 	 *
@@ -220,7 +97,7 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener{
 		addZoomRadioButtons();
 
 		buttonToolbar.add(Box.createHorizontalStrut(10)); // spacer
-		CopyAction copyAction = new CopyAction("Copy");
+		ImageCopyAction copyAction = new ImageCopyAction(this, "Copy", this);
 		JButton copyButton = new JButton(copyAction);
 
 		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
@@ -229,7 +106,7 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener{
 
 		buttonToolbar.add(copyButton);
 
-		SaveAction saveAction = new SaveAction("Save As...");
+		ImageSaveAction saveAction = new ImageSaveAction(this, "Save As...",this);
 		JButton saveButton = new JButton(saveAction);
 
 		KeyStroke saveKey = KeyStroke.getKeyStroke(KeyEvent.VK_S,Event.CTRL_MASK);
@@ -255,21 +132,6 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener{
 	public void setButtonToolbar(JToolBar buttonToolbar) {
 		this.buttonToolbar = buttonToolbar;
 	}
-
-//	/**
-//	 * @return the imageCanvas
-//	 */
-//	public JLabel getLabel() {
-//		return imageCanvas;
-//	}
-
-//	/**
-//	 * @param imageCanvas the imageCanvas to set
-//	 */
-//	public void setLabel(JLabel imageCanvas) {
-//		this.label = imageCanvas;
-//	}
-
 
 
 	private void addZoomRadioButtons() {
