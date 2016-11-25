@@ -43,7 +43,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.gui.utils.*;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -210,7 +210,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 					PMTsection section = pmTsections[0]; //always one
 					//PCR_PID If no PCR is associated with a program definition for private
 					//streams, then this field shall take the value of 0x1FFF.
-					if(section.getPcrPid()!=8191){
+					if(section.getPcrPid()!=MPEGConstants.NO_PCR_PID){
 						pmts.add(section);
 						String name = getServiceName(transportStream, section.getProgramNumber());
 						serviceChooser.addItem(name+", PCR_PID : "+section.getPcrPid());

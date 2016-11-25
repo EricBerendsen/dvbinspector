@@ -595,7 +595,7 @@ public class TransportStream implements TreeNode{
 					}
 				}
 				final int PCR_pid = pmtSection.getPcrPid();
-				if(PCR_pid!=0x1FFF){ // ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
+				if(PCR_pid!=MPEGConstants.NO_PCR_PID){ // ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
 					final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
 					final String pcrShortLabel = "PCR "+service_name;
 					if(pids[PCR_pid]==null){
