@@ -285,7 +285,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 		int width =(int)( (noSamples*PIX_PER_SEC)/samplingFreq);  // force calculation in Long, truncate to int at the end
 
 		int lengthSecs = (int)(noSamples/samplingFreq);
-		BufferedImage img = new BufferedImage(width+LEFT_MARGIN, height,BufferedImage.TYPE_INT_ARGB);
+		BufferedImage img = new BufferedImage(width+LEFT_MARGIN, height,BufferedImage.TYPE_INT_RGB);
 
 		final Graphics2D gd = img.createGraphics();
 		gd.setColor(Color.BLACK);
