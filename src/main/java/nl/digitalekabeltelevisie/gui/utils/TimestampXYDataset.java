@@ -58,8 +58,10 @@ public class TimestampXYDataset implements XYDataset {
 		startPacket = viewContext.getStartPacket();
 		endPacket = viewContext.getEndPacket();
 
-		String pcrLabel = pcrPid+" - "+transportStream.getShortLabel(pcrPid)+" PCR";
-		addToSeriesList(transportStream.getPID(pcrPid).getPcrList(),pcrLabel);
+		if(transportStream.getPID(pcrPid)!=null){ // should not happen, however leave it up to UPC to fuck up...
+			String pcrLabel = pcrPid+" - "+transportStream.getShortLabel(pcrPid)+" PCR";
+			addToSeriesList(transportStream.getPID(pcrPid).getPcrList(),pcrLabel);
+		}
 		
 		for(Component c:pmt.getComponentenList()){
 			short componentPid = (short) c.getElementaryPID();
