@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -234,6 +234,7 @@ public class TableSection implements TreeNode{
 		case 0x77: return "TVA-content identifier section (CIT)";//(TS 102 323 [15])
 		case 0x78: return "MPE-FEC section (MFT)"; //(EN 301 192 [4])
 		case 0x79: return "TVA-resolution notification section (RNT)";//(TS 102 323 [15])
+		case 0x7A: return "MPE-IFEC section"; //  (TS 102 772 [51])
 
 		case 0x7E: return "discontinuity_information_section";
 		case 0x7F: return "selection_information_section";
