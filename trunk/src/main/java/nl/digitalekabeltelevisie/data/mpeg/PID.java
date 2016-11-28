@@ -42,8 +42,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
-import nl.digitalekabeltelevisie.util.JTreeLazyList;
-import nl.digitalekabeltelevisie.util.PIDPacketGetter;
+import nl.digitalekabeltelevisie.util.*;
 
 /**
  * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets tables are built, PES packets are (initially) only counted.
@@ -77,7 +76,7 @@ public class PID implements TreeNode{
 	 */
 	private int packets = 0;
 	/**
-	 * number of duplicate packets
+	 * number of different duplicate packets
 	 */
 	private int dup_packets = 0;
 	/**
@@ -88,7 +87,7 @@ public class PID implements TreeNode{
 	private int pid = -1;
 	private long last_packet_no=-1;
 	private TSPacket last_packet = null;
-	private boolean dup_found=false;
+	private int dup_found=0; // number of times current packet is duplicated. 
 	private PCR lastPCR;
 	private PCR firstPCR;
 	private long lastPCRpacketNo = -1;
@@ -227,7 +226,7 @@ public class PID implements TreeNode{
 				last_continuity_counter = packet.getContinuityCounter();
 				last_packet_no = packet.getPacketNo();
 				last_packet = packet;
-				dup_found = false;
+				dup_found = 0;
 
 				if(packet.getTransportScramblingControl()==0){ // not scrambled, or else payload is of no use
 
@@ -238,10 +237,13 @@ public class PID implements TreeNode{
 				}
 
 			}else if(last_continuity_counter==packet.getContinuityCounter()){
-				if(dup_found){ // second  dup packet (third total), illegal
-					logger.fine("second  dup packet (third total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+				if(dup_found>=1){ // third or more dup packet (third total), illegal
+					dup_found++;
+					logger.fine("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+					//System.out.println("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
 				}else{ // just a dup, count it and ignore
-					dup_found = true;
+					//System.out.println("duplicate packet found, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+					dup_found = 1;
 					dup_packets++;
 				}
 
@@ -265,7 +267,11 @@ public class PID implements TreeNode{
 		if(adaptationField!=null) { //Adaptation field present
 			if(adaptationField.isPCR_flag()){
 				final PCR newPCR = adaptationField.getProgram_clock_reference();
+				//System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+", PCR:"+newPCR.getProgram_clock_reference());
 				pcrList.add(new TimeStamp(packet.getPacketNo(), newPCR.getProgram_clock_reference_base()));
+//				if(adaptationField.isDiscontinuity_indicator()){
+//					//System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+" Discontinuity_indicator SET");
+//				}
 				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
 					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
 
@@ -274,6 +280,13 @@ public class PID implements TreeNode{
 					// (unless PCR reaches value of firstPCR again, this would mean stream of > 24 hours)
 					if((newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) >0){
 						bitRate = ((packetsDiff * parentTransportStream.getPacketLenghth() * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
+//						if(lastPCR!=null){ 
+//							long diff = newPCR.getProgram_clock_reference()- lastPCR.getProgram_clock_reference(); // max 100 mSec between PCR
+//							System.out.println("Packet:"+packet.getPacketNo()+", PCR diff:"+diff+", ("+Utils.printPCRTime(diff)+")");
+//						}
+//						//System.out.println("PCR diff:"+(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()));
+//					}else{
+//						System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+"newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) <=0"); 
 					}
 					lastPCR = newPCR;
 					lastPCRpacketNo = packet.getPacketNo();
@@ -306,7 +319,7 @@ public class PID implements TreeNode{
 	}
 
 	public boolean isDup_found() {
-		return dup_found;
+		return dup_found>1;
 	}
 
 	public int getDup_packets() {
