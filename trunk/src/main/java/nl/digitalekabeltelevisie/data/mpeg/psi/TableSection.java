@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -78,18 +78,20 @@ public class TableSection implements TreeNode{
 
 	/* non DVB fields */
 
-	private long first_packet_no=-1;
-	private long last_packet_no=-1;
-	private long occurrence_count=-1;
-	private long packet_no=-1;
+	private long firstPacketNo=-1;
+	private long lastPacketNo=-1;
+	private long minPacketDistance = Long.MAX_VALUE;
+	private long maxPacketDistance = 0;
+	private long occurrenceCount=-1;
+	private long packetNo=-1;
 
 	public TableSection(final PsiSectionData raw_data, final PID parent){
 		super();
 		this.raw_data = raw_data;
-		this.packet_no= raw_data.getPacket_no();
-		this.first_packet_no= raw_data.getPacket_no();
-		this.last_packet_no= raw_data.getPacket_no();
-		this.occurrence_count = 1;
+		this.packetNo= raw_data.getPacket_no();
+		this.firstPacketNo= raw_data.getPacket_no();
+		this.lastPacketNo= raw_data.getPacket_no();
+		this.occurrenceCount = 1;
 
 		parentPID = parent;
 		final byte[] bytes=raw_data.getData(); // just for convenience
@@ -116,7 +118,7 @@ public class TableSection implements TreeNode{
 			final long res = CRCcheck.crc32(bytes,sectionLength+3);
 			if(res!=0){
 				crc_error=true;
-				throw new RuntimeException("CRC Error in packet for pid:"+parent.getPid()+",CRC="+res+", packetNo="+packet_no);
+				throw new RuntimeException("CRC Error in packet for pid:"+parent.getPid()+",CRC="+res+", packetNo="+packetNo);
 			}
 		}
 	}
@@ -341,9 +343,13 @@ public class TableSection implements TreeNode{
 	protected void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
 		if(!Utils.simpleModus(modus)){
 			if(Utils.packetModus(modus)){
-				t.add(new DefaultMutableTreeNode(new KVP("first_packet_no",first_packet_no ,parentPID.getParentTransportStream().getPacketTime(first_packet_no))));
-				t.add(new DefaultMutableTreeNode(new KVP("last_packet_no",last_packet_no ,parentPID.getParentTransportStream().getPacketTime(last_packet_no))));
-				t.add(new DefaultMutableTreeNode(new KVP("occurrence_count",occurrence_count ,getRepetitionRate(occurrence_count,last_packet_no,first_packet_no))));
+				t.add(new DefaultMutableTreeNode(new KVP("first_packet_no",firstPacketNo ,parentPID.getParentTransportStream().getPacketTime(firstPacketNo))));
+				t.add(new DefaultMutableTreeNode(new KVP("last_packet_no",lastPacketNo ,parentPID.getParentTransportStream().getPacketTime(lastPacketNo))));
+				t.add(new DefaultMutableTreeNode(new KVP("occurrence_count",occurrenceCount ,getRepetitionRate(occurrenceCount,lastPacketNo,firstPacketNo))));
+				if(occurrenceCount>=2){
+					t.add(new DefaultMutableTreeNode(new KVP("min_packet_distance",minPacketDistance ,getDistanceSecs(minPacketDistance))));
+					t.add(new DefaultMutableTreeNode(new KVP("max_packet_distance",maxPacketDistance ,getDistanceSecs(maxPacketDistance))));
+				}
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("table_id",tableId ,getTableType(tableId))));
 			t.add(new DefaultMutableTreeNode(new KVP("section_syntax_indicator",sectionSyntaxIndicator,null)));
@@ -386,6 +392,19 @@ public class TableSection implements TreeNode{
 		return null;
 	}
 
+	private String getDistanceSecs(final long last) {
+		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
+		final long bitrate=parentTransportStream.getBitRate();
+		if(bitrate>0){
+			final float repRate=((float)(last)*parentTransportStream.getPacketLenghth()*8)/(bitrate);
+			try (Formatter formatter = new Formatter()){
+				String r = "interval: "+formatter.format("%3.3f seconds",repRate);
+				return r;
+			}
+		}
+		return null;
+	}
+	
 	public PID getParentPID() {
 		return parentPID;
 	}
@@ -443,35 +462,35 @@ public class TableSection implements TreeNode{
 	}
 
 	public long getFirst_packet_no() {
-		return first_packet_no;
+		return firstPacketNo;
 	}
 
 	public void setFirst_packet_no(final long first_packet_no) {
-		this.first_packet_no = first_packet_no;
+		this.firstPacketNo = first_packet_no;
 	}
 
 	public long getLast_packet_no() {
-		return last_packet_no;
+		return lastPacketNo;
 	}
 
 	public void setLast_packet_no(final long last_packet_no) {
-		this.last_packet_no = last_packet_no;
+		this.lastPacketNo = last_packet_no;
 	}
 
 	public long getOccurrence_count() {
-		return occurrence_count;
+		return occurrenceCount;
 	}
 
 	public void setOccurrence_count(final long occurrence_count) {
-		this.occurrence_count = occurrence_count;
+		this.occurrenceCount = occurrence_count;
 	}
 
 	public long getPacket_no() {
-		return packet_no;
+		return packetNo;
 	}
 
 	public void setPacket_no(final long packet_no) {
-		this.packet_no = packet_no;
+		this.packetNo = packet_no;
 	}
 
 	@Override
@@ -507,6 +526,22 @@ public class TableSection implements TreeNode{
 			return false;
 		}
 		return true;
+	}
+
+	public long getMinPacketDistance() {
+		return minPacketDistance;
+	}
+
+	public void setMinPacketDistance(long minPacketDistance) {
+		this.minPacketDistance = minPacketDistance;
+	}
+
+	public long getMaxPacketDistance() {
+		return maxPacketDistance;
+	}
+
+	public void setMaxPacketDistance(long maxPacketDistance) {
+		this.maxPacketDistance = maxPacketDistance;
 	}
 
 

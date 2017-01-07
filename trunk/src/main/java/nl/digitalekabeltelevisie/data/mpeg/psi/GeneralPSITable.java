@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -88,6 +88,15 @@ public class GeneralPSITable extends AbstractPSITabel{
 
 			for (final TableSection existingSection : simpleSectionsd) {
 				if(existingSection.equals(section)){
+					long previousPacketNo = existingSection.getLast_packet_no();
+					long distance = section.getPacket_no() - previousPacketNo;
+					if(distance>existingSection.getMaxPacketDistance()){
+						existingSection.setMaxPacketDistance(distance);
+					}
+					if(distance<existingSection.getMinPacketDistance()){
+						existingSection.setMinPacketDistance(distance);
+					}
+
 					existingSection.setLast_packet_no(section.getPacket_no());
 					existingSection.setOccurrence_count(existingSection.getOccurrence_count()+1);
 					return;

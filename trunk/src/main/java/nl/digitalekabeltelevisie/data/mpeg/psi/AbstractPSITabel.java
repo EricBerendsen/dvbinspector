@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -72,6 +72,14 @@ public abstract class AbstractPSITabel implements TreeNode{
 			last = last.getNextVersion();
 		}
 		if(last.equals(newSection)){ // already have an instance if this section, just update the stats on the existing section
+			long previousPacketNo = last.getLast_packet_no();
+			long distance = newSection.getPacket_no() - previousPacketNo;
+			if(distance>last.getMaxPacketDistance()){
+				last.setMaxPacketDistance(distance);
+			}
+			if(distance<last.getMinPacketDistance()){
+				last.setMinPacketDistance(distance);
+			}
 			last.setLast_packet_no(newSection.getPacket_no());
 			last.setOccurrence_count(last.getOccurrence_count()+1);
 		}else{
