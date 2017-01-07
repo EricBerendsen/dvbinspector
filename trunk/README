@@ -2,7 +2,7 @@ readme
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.5.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.8.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 directory structure
 
@@ -16,9 +16,9 @@ directory structure
     DVBinspector-1.2.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 
-DVBinspector-1.5.0.jar
+DVBinspector-1.8.0.jar
 
-Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.5.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.5.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.5.0.jar".
+Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.8.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.8.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.8.0.jar".
 DVB.bat
 
 This small windows batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path, and -Xmx sets the maximum memory heap size to 1 GB. This should be enough to read fairly large TS files (> 200 MB). You can modify this file for other environments like linux.
@@ -27,6 +27,47 @@ java -classpath .;.\lib\jfreechart-1.0.13.jar;.\lib\jcommon-1.0.16.jar;.\lib\ope
 Changelog
 
 List of the most important changes between releases
+
+Release 1.8.0
+Release date: 07/01/2017
+
+removed: option to enable/disable TS packets (now it is always enabled)
+added: some values from DVB BlueBook a038 Oct 2016
+fixed: handle missing PCRPid
+added: copy and save action to EITView
+fixed: in H264 frame graph last access unit was not drawn when not followed by delimiter
+improved: performance when parsing PES packets
+improved: less memory usage for loading TS packets
+added: display message when stream can not be displayed (most likely heap error)
+added: display minimum and maximum distance between repeating table sections
+
+
+Release 1.7.0
+Release date: 23/09/2016
+
+added: option to select default Teletext G0 and G2 Character Set Designation
+updated: several lookup tables from http://www.dvbservices.com/identifiers/
+fixed: tertiary_region_code is 16 bits in TargetRegionDescriptor and TargetRegionNameDescriptor
+fixed: don't treat char > 0x7f as mosaic graphics in teletext pages
+fixed: bug regarding the National Option Subset which leads to wrong display of e.g. the page 109 of the ZDF Teletext
+fixed: some bugs
+
+
+Release 1.6.0
+Release date: 17/01/2016
+
+added: support for SCTE-35 (Digital Program Insertion Cueing Message for Cable)
+fixed: support for ISO/IEC 10646 encoding
+added: MultilingualBouquetNameDescriptor
+added: MVC video sub-bitstream support (H264)
+added: text search in Tree View
+added: mnemonics and accelerators to menu
+fixed: last data byte of teletext data was not shown
+fixed: last field of EBU data PES field was not shown
+fixed: handle adaptation_field_length ==0 correctly (do not show flags that are not there)
+fixed: some bugs
+Thanks to Richard Mars for fixing the TxtDataField and EBUPESDataField
+
 
 Release 1.5.0
 Release date: 07/08/2015
