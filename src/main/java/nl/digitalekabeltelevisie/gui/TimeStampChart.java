@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -204,7 +204,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		}else{
 			final PMTs streamPmts = transportStream.getPsi().getPmts();
 			if(streamPmts.getPmts().isEmpty()){
-				chartPanel.setChart(GuiUtils.createTitleOnlyChart("No PMTs found to display in this graph"));
+				chartPanel.setChart(GuiUtils.createTitleOnlyChart("No PMTs found, nothing to display in this graph"));
 			}else{
 				for (PMTsection[] pmTsections : streamPmts) {
 					PMTsection section = pmTsections[0]; //always one
@@ -216,8 +216,12 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 						serviceChooser.addItem(name+", PCR_PID : "+section.getPcrPid());
 					}
 				}
-				serviceChooser.addActionListener(this);
-				updateChartPanel();
+				if(pmts.isEmpty()){
+					chartPanel.setChart(GuiUtils.createTitleOnlyChart("No PMTs with PCR found, nothing to display in this graph"));
+				}else{
+					serviceChooser.addActionListener(this);
+					updateChartPanel();
+				}
 			}
 		}
 	}
