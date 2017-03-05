@@ -41,6 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplication
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.DVBExtensionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.NetworkChangeNotifyDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SupplementaryAudioDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionDescriptor;
@@ -530,6 +531,9 @@ public final class DescriptorFactory {
 			break;
 		case 0x06:
 			d = new SupplementaryAudioDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x07:
+			d = new NetworkChangeNotifyDescriptor(data, t+offset, tableSection);
 			break;
 		case 0x08:
 			d = new nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.MessageDescriptor(data, t + offset, tableSection);
