@@ -513,11 +513,21 @@ public final class Utils {
 		return (b & mask) >> (9 - i - len);
 	}
 
-	public static String getBCD(final byte[] b, final int nibble_no, final int len) {
+	/**
+	 * Convert byte[] into string with BCD representation. Each byte consists of two nibbles.
+	 * Real BCD should only contain values 0 - 9 in each nibble. 0xA - 0xF are illegal. This method will allow them but log an error.
+	 * So it should not be abused for hex formatting.
+	 * 
+	 * @param b byte array 
+	 * @param startNibbleNo offset of first nibble. Note: not in bytes, so if you want to start at byte x, specify x*2
+	 * @param len number of nibbles needed
+	 * @return String with length len
+	 */
+	public static String getBCD(final byte[] b, final int startNibbleNo, final int len) {
 		final StringBuilder buf =  new StringBuilder();
 		for (int i = 0; i < len; i++) {
-			final int byteNo=(nibble_no+i)/2;
-			final boolean shift=((nibble_no+i)%2)==0;
+			final int byteNo=(startNibbleNo+i)/2;
+			final boolean shift=((startNibbleNo+i)%2)==0;
 			int t;
 			if(shift){
 				t= (getUnsignedByte(b[byteNo]) & 0xF0)>>4;
@@ -525,7 +535,7 @@ public final class Utils {
 				t= (getUnsignedByte(b[byteNo]) & 0x0F);
 			}
 			if(t>9){
-				logger.warning("Error parsing BCD: "+toHexString(b)+" ,nibble_no: "+nibble_no+" ,len: "+len);
+				logger.warning("Error parsing BCD: "+toHexString(b)+" ,nibble_no: "+startNibbleNo+" ,len: "+len);
 				//return "Error parsing BCD";
 			}
 			buf.append(Integer.toString(t,16));
@@ -533,6 +543,13 @@ public final class Utils {
 		return buf.toString();
 	}
 
+	/**
+	 * returns a copy of bytes from b, starting at offset with total length len. returns empy [] when len == 0
+	 * @param b
+	 * @param offset
+	 * @param len
+	 * @return
+	 */
 	public static byte[] getBytes(final byte[] b, final int offset, final int len) {
 		if(len==0){
 			return new byte[0];
@@ -2012,5 +2029,17 @@ public final class Utils {
 		}
 		return res;
 	}
+	
+	
+	public static String formatDuration(String duration){
+		if((duration==null)||(duration.length()!=6)){
+			return duration;
+		}
+		StringBuilder res= new StringBuilder(duration.substring(0, 2)).append('h');
+		res.append(duration.substring(2, 4)).append('m').append(duration.substring(4, 6));
+		return res.toString();
+	}
+	
+	
 }
 
