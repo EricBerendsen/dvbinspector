@@ -28,6 +28,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
 import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
+import static nl.digitalekabeltelevisie.util.Utils.formatDuration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -122,7 +123,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 
 			t.add(new DefaultMutableTreeNode(new KVP("event_id",eventID,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("start_time",startTime,Utils.getUTCFormattedString(startTime))));
-			t.add(new DefaultMutableTreeNode(new KVP("duration",duration,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("duration",duration,formatDuration(duration))));
 			t.add(new DefaultMutableTreeNode(new KVP("running_status",runningStatus,getRunningStatusString(runningStatus))));
 			t.add(new DefaultMutableTreeNode(new KVP("free_CA_mode",freeCAMode,getFreeCAmodeString(freeCAMode))));
 			t.add(new DefaultMutableTreeNode(new KVP("descriptors_loop_length",descriptorsLoopLength,null)));
@@ -179,9 +180,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		public String getHTML() {
 			final StringBuilder r1 = new StringBuilder();
 			r1.append("Start:&nbsp;").append(Utils.getUTCFormattedString(getStartTime())).append("&nbsp;Duration: ");
-			r1.append(getDuration().substring(0, 2)).append(":");
-			r1.append(getDuration().substring(2, 4)).append(":");
-			r1.append(getDuration().substring(4)).append("<br><br>");
+			r1.append(formatDuration(getDuration())).append("<br><br>");
 			final List<Descriptor> descList = getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
@@ -327,7 +326,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		final StringBuilder b = new StringBuilder();
 		for(final Event event:eventList){
 			b.append(Utils.escapeHTML(Utils.getUTCFormattedString(event.getStartTime()))).append("&nbsp;");
-			b.append(event.getDuration()).append("&nbsp;");
+			b.append(formatDuration(event.getDuration())).append("&nbsp;");
 			final List<Descriptor> descList = event.getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
