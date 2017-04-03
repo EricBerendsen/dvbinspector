@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,13 +28,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -114,6 +108,11 @@ public class EIT extends AbstractPSITabel{
 		EITsection [] serviceSection = table.get(section.getServiceID());
 		if(serviceSection==null){
 			serviceSection = new EITsection [section.getSectionLastNumber()+1];
+			table.put(section.getServiceID(),serviceSection);
+		}
+		
+		if(serviceSection.length<=section.getSectionNumber()){ //resize if needed
+			serviceSection = Arrays.copyOf(serviceSection, section.getSectionNumber()+1);
 			table.put(section.getServiceID(),serviceSection);
 		}
 		if(serviceSection[section.getSectionNumber()]==null){

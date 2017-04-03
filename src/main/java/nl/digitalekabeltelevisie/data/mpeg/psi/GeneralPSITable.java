@@ -73,6 +73,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 			}
 			if(sections.length<=section.getSectionNumber()){ //resize if needed
 				sections = Arrays.copyOf(sections, section.getSectionNumber()+1);
+				table.put(section.getTableIdExtension(),sections);
 			}
 			if(sections[section.getSectionNumber()]==null){
 				sections[section.getSectionNumber()] = section;
