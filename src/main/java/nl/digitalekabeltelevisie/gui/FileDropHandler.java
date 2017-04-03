@@ -77,7 +77,7 @@ public class FileDropHandler extends TransferHandler{
 
         if(!files.isEmpty()){ 
         	File file = files.get(0);// ignore extra files, only 1th is loaded
-        	System.out.println("file dropped: "+file.getName());
+        	logger.info("file dropped: "+file.getName());
         	if(file.isFile()){
     			final TSLoader tsLoader = new TSLoader(file,controller);
     			tsLoader.execute();
