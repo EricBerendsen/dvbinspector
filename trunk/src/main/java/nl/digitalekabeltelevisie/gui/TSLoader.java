@@ -28,7 +28,7 @@
 package nl.digitalekabeltelevisie.gui;
 
 import java.awt.Cursor;
-import java.io.File;
+import java.io.*;
 import java.util.logging.*;
 
 import javax.swing.*;
@@ -50,6 +50,8 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 		super();
 		this.file = file;
 		this.control = controller;
+		this.control.setTransportStream(null);
+		this.control.getFrame().repaint();
 	}
 
 	File file = null;
@@ -84,17 +86,21 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			transportStream = new TransportStream(file);
 			transportStream.setDefaultPrivateDataSpecifier(control.getDefaultPrivateDataSpecifier());
 			transportStream.setDefaultG0CharacterSet(control.getDefaultG0CharacterSet());
-
 			transportStream.parseStream(control.getFrame());
+
 		} catch (final NotAnMPEGFileException e) {
 			logger.log(Level.WARNING, "could not determine packet size stream");
-
 			final String msg =
 					"DVB Inspector could not determine packetsize for this file. \n" +
 							"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
-
 					"Are you sure this file contains a valid MPEG Transport Stream?\n\n ";
 			showMessage(msg);
+			
+		} catch (final InterruptedIOException t) {
+			logger.log(Level.INFO, "Interrupted while loading stream", t);
+			final String msg ="Loading file was interrupted.";
+			showMessage(msg);
+			
 		} catch (final Throwable t) {
 			transportStream = null;
 			logger.log(Level.WARNING, "error parsing transport stream",t);
