@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -40,12 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationLo
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationBoundaryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.DVBExtensionDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.NetworkChangeNotifyDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SupplementaryAudioDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.MPEGExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.INTDescriptor;
@@ -128,7 +123,7 @@ public final class DescriptorFactory {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
 				d = new Descriptor(data, t + offset, tableSection);
-				logger.info("Fall back for descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
+				logger.warning("Fall back for descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
 						+ Descriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
 						+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 						+ ",) data=" + d.getRawDataString()+", RuntimeException:"+iae);
@@ -528,6 +523,9 @@ public final class DescriptorFactory {
 
 		case 0x04:
 			d = new T2DeliverySystemDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x05:
+			d = new SHDeliverySystemDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x06:
 			d = new SupplementaryAudioDescriptor(data, t + offset, tableSection);
