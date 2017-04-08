@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -72,6 +72,8 @@ public class ProgressMonitorLargeInputStream  extends FilterInputStream{
         }
 
         monitor = new ProgressMonitor(parentComponent, message, null, 0, (int)(size / divider));
+        monitor.setMillisToPopup(2);
+        monitor.setMillisToDecideToPopup(1);
 	}
 
     /**
