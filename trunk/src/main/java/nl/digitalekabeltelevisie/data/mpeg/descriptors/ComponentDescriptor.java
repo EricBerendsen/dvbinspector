@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -57,7 +57,7 @@ public class ComponentDescriptor extends Descriptor {
 
 	public ComponentDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
-		streamContentExt = getInt(b, offset + 2, 2, 0xF0) >> 4;
+		streamContentExt = getInt(b, offset + 2, 1, 0xF0) >> 4;
 		streamContent = getInt(b, offset + 2, 1, MASK_4BITS);
 		componentType = getInt(b, offset + 3, 1, MASK_8BITS);
 		componentTag = getInt(b, offset + 4, 1, MASK_8BITS);
