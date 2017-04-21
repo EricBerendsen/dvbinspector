@@ -62,7 +62,6 @@ public class PesHandlerSetup {
 		
 		assertEquals(KVP.class, o.getClass());
 		KVP kvp = (KVP)o;
-		// preview image, size is default 720x576 because we don't have a preview pic of h264
 		ImageSource imgSrc = kvp.getImageSource();
 		assertNotNull(msg,imgSrc);
 		BufferedImage img = imgSrc.getImage();
