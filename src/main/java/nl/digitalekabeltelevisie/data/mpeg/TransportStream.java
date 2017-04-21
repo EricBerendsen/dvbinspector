@@ -838,18 +838,36 @@ public class TransportStream implements TreeNode{
 				now.setTimeInMillis(0);
 				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 				// return only the hours/min,secs and millisecs. Not TS recording will last days
-				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
+				r = getFormattedTime(now);
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
 				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 
-				r = now.get(Calendar.YEAR)+"/"+ (now.get(Calendar.MONTH)+1)+"/"+now.get(Calendar.DAY_OF_MONTH)+" "+now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
+				r = getFormattedDate(now)+ " "+getFormattedTime(now);
 			}
 		}else{ // no bitrate, return packet number
 			r = Long.toString(packetNo)+" (packetNo)";
 		}
 		return r;
+	}
+
+	private static String getFormattedDate(final Calendar now) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(now.get(Calendar.YEAR)).append("/").
+			append(now.get(Calendar.MONTH)+1).append("/").
+			append(now.get(Calendar.DAY_OF_MONTH));
+		return sb.toString();
+	}
+
+	private static String getFormattedTime(final Calendar now) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(df2pos.format(now.get(Calendar.HOUR_OF_DAY))).append("h").
+			append(df2pos.format(now.get(Calendar.MINUTE))).append("m").
+			append(df2pos.format(now.get(Calendar.SECOND))).append(":").
+			append(df3pos.format(now.get(Calendar.MILLISECOND)));
+		return sb.toString();
 	}
 
 	public String getShortPacketTime(final long packetNo){
