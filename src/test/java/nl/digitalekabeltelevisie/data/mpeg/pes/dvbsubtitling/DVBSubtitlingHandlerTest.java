@@ -61,13 +61,13 @@ public class DVBSubtitlingHandlerTest extends PesHandlerSetup{
 
 		final List<PesPacketData> pesPackets = dvbSubtitleHandler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);
-		assertEquals("Number of PESPackets", 2, pesPackets.size());
+		assertEquals("Number of PESPackets", 3, pesPackets.size());
 		
 		Titles titles = dvbSubtitleHandler.getTitles();
 		assertNotNull(titles);
 		
 		List<DisplaySet> sets = titles.getDisplaySets();
-		assertEquals(2, sets.size());
+		assertEquals("Number of display sets",3, sets.size());
 		
 		DisplaySet set0 = sets.get(0);
 		assertNotNull(set0);
