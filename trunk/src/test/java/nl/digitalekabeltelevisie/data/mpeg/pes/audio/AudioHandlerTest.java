@@ -59,14 +59,14 @@ public class AudioHandlerTest extends PesHandlerSetup{
 
 		final Audio138183Handler audio138182Handler = (Audio138183Handler) pesHandler;
 		
-		validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2208, "audio graph");
+		validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2268, "audio graph");
 
 		final List<PesPacketData> pesPackets = audio138182Handler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);
-		assertEquals("Number of PESPackets", 36, pesPackets.size());
+		assertEquals("Number of PESPackets", 37, pesPackets.size());
 		
 		List<AudioAccessUnit> audioAccessUnits = audio138182Handler.getAudioAccessUnits();
-		assertEquals(179, audioAccessUnits.size());
+		assertEquals(184, audioAccessUnits.size());
 		
 		AudioAccessUnit unit0 = audioAccessUnits.get(0);
 		assertEquals(1, unit0.getId());

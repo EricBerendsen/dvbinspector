@@ -149,9 +149,9 @@ public class PesPacketData  implements TreeNode{
 	public void readBytes(final byte [] payload, final int offset, final int available){
 		if(noBytes!=0){  //fixed length PES packet, we know how much to expect
 			if(bytesRead<(noBytes+6)){
-				final int read1 = Math.min((noBytes - bytesRead) + 6, available); // we are going to read this number of bytes
-				System.arraycopy(payload, offset, data, bytesRead, read1);
-				bytesRead+=read1;
+				final int bytesToRead = Math.min((noBytes - bytesRead) + 6, available); // we are going to read this number of bytes
+				System.arraycopy(payload, offset, data, bytesRead, bytesToRead);
+				bytesRead+=bytesToRead;
 			}
 		}else{ // noBytes==0, unbounded video packet, length unknown
 			final int newcount = bytesRead + available;
@@ -290,6 +290,13 @@ public class PesPacketData  implements TreeNode{
 		return startPacketNo;
 	}
 
+	public boolean isComplete(){
+		if(noBytes==0){
+			return false;
+		}else {
+			return ((noBytes+6)==bytesRead);
+		}
+	}
 
 
 }

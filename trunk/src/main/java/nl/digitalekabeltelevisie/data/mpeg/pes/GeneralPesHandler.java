@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -52,6 +53,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class GeneralPesHandler  implements TreeNode{
 
+	private static final Logger logger = Logger.getLogger(GeneralPesHandler.class.getName());
 
 	private PesPacketData pesData= null;
 	private TransportStream transportStream = null;
@@ -80,9 +82,13 @@ public class GeneralPesHandler  implements TreeNode{
 	protected int bufEnd = 0;
 
 
+	/**
+	 * Each specialist PesHandler has its own implementation of this method, responsible for decoding pictures, teletext or whatever.
+	 * This generic implementation just adds the pesData packet to the pesPackets List
+	 * @param pesData
+	 */
 	protected void processPesDataBytes(final PesPacketData pesData){
 		pesPackets.add(pesData);
-
 	}
 
 
@@ -107,14 +113,14 @@ public class GeneralPesHandler  implements TreeNode{
 					//for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
 					pesData = new PesPacketData(pesStreamID,pesLength,this,packet.getPacketNo());
 					pesData.readBytes(data, 0, data.length);
+					handlePesPacketIfComplete();
 
 				}
 			}
 			//	something started
 		}else if((packet.getAdaptationFieldControl()==1)||(packet.getAdaptationFieldControl()==3)){ // has payload?
-			if(packet.isPayloadUnitStartIndicator()){ // previous pesPAcket Finished, tell it to process its data
+			if(packet.isPayloadUnitStartIndicator()){ // previous pesPacket Finished, tell it to process its data
 				if(pesData!=null){
-					pesData.processPayload();
 					processPesDataBytes(pesData);
 				}
 				//start a new pesPacket
@@ -128,11 +134,24 @@ public class GeneralPesHandler  implements TreeNode{
 					// for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
 					pesData = new PesPacketData(pesStreamID,pesLength,this,packet.getPacketNo());
 					pesData.readBytes(data, 0, data.length);
+					handlePesPacketIfComplete();
+				}else{
+					logger.warning("Not supported: Found PES packet start with data.length<6 at TSPacket: "+packet.getPacketNo());
 				}
 			}else if (pesData!=null){
 				// already in a packet,needs more data
 				pesData.readBytes(data, 0, data.length);
+				handlePesPacketIfComplete();
+
 			}
+		}
+	}
+
+	private void handlePesPacketIfComplete() {
+		if(pesData.isComplete()){
+			pesData.processPayload();
+			processPesDataBytes(pesData);
+			pesData = null;
 		}
 	}
 
