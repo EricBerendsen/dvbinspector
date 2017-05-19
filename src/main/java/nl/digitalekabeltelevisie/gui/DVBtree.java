@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -411,17 +411,40 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final KVP kvp = (KVP)dmtn.getUserObject();
 				final PID p = (PID) kvp.getOwner();
 				final int pid = p.getPid();
-				final GeneralPesHandler pesH = p.getPesHandler();
+				GeneralPesHandler pesH = p.getPesHandler();
 				if(!pesH.isInitialized()){ // prevent double click
-					final HashMap<Integer, GeneralPesHandler> h = new HashMap<Integer, GeneralPesHandler>();
-					h.put(pid, pesH);
+					HashMap<Integer, GeneralPesHandler> handlerMap = new HashMap<Integer, GeneralPesHandler>();
+					handlerMap.put(pid, pesH);
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 					try {
-						ts.parseStream(null,h);
+						ts.parseStream(null,handlerMap);
 					} catch (final IOException e) {
-						logger.log(Level.WARNING,"could not read file"+ts.getFile().getName(),e);
+						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
 						setCursor(Cursor.getDefaultCursor());
+					}catch (Exception e) {
+						logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+pesH.getClass().getName(),e);
+						if(pesH.getClass() != GeneralPesHandler.class){ // only if specialized subclass of GeneralPesHandler
+							logger.log(Level.WARNING,"try again with GeneralPesHandler");
+							JOptionPane.showMessageDialog(this,
+									"Error parsing PID PES Packets for "+p.getShortLabel()+", falling back to general PES packets",
+									"DVB Inspector",
+									JOptionPane.WARNING_MESSAGE);
+							p.setPesHandler(new GeneralPesHandler());
+							pesH = p.getPesHandler();
+							handlerMap = new HashMap<Integer, GeneralPesHandler>();
+							handlerMap.put(pid, pesH);
+							try {
+								ts.parseStream(null,handlerMap);
+							} catch (IOException e1) {
+								logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e);
+								setCursor(Cursor.getDefaultCursor());
+							}
+						}else{
+							
+							
+						}
+						
 					}
 					final DefaultMutableTreeNode node =((TreeNode)p.getPesHandler()).getJTreeNode(mod);
 					// thanks to Yong Zhang for the tip for refreshing the tree structure.
