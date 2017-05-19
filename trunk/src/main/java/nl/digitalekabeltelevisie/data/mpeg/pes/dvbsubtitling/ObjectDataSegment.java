@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -252,7 +252,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	 */
 	private int readFieldDataBlock(final byte[] data, final int offset, final int fieldDataBlockLength, final List<PixelDataSubBlock> pixelDataSubBlockList) {
 		int processed_length = 0;
-		while(processed_length < fieldDataBlockLength  ){
+		while((processed_length < fieldDataBlockLength)&&isMoreDataAvaliable(offset, processed_length)){
 			final int blockStart = offset + processed_length;
 			final int dataType = getInt(data_block,blockStart, 1, MASK_8BITS);
 			final PixelDataSubBlock b = new PixelDataSubBlock(data, blockStart);
@@ -286,6 +286,14 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 			pixelDataSubBlockList.add(b);
 		}
 		return processed_length;
+	}
+
+	private boolean isMoreDataAvaliable(final int offset, int processed_length) {
+		final boolean moreDataAvailable = (offset + processed_length)<data_block.length;
+		if(!moreDataAvailable){
+			logger.warning("less data available than expected; (offset:"+offset+"+"+"processed_length:"+processed_length+")>=data_block.length:"+data_block.length);
+		}
+		return moreDataAvailable;
 	}
 
 	/**
@@ -378,51 +386,55 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 	private static void four_bit_pixel_code_string(final BitSource bs, final PixelDataSubBlock b) {
 
 		boolean readMore = true;
-		do{
-			final int bits = bs.readBits(4);
-			if (bits != 0) { //if (nextbits() != '0000') {
-				b.addPixel((byte)bits); // 4-bit_pixel-code 4 bslbf
+		do {
+			if (bs.available() < 4) {
+				readMore = false;
+				logger.warning("bits available: "+bs.available());
 			} else {
-				// 4-bit_zero 4 bslbf
-				final int switch_1 = bs.readBits(1);// switch_1 1 bslbf
-				if (switch_1 == 0) { // if (switch_1 == '0') {
-					final int nextbits = bs.readBits(3);//if (nextbits() != '000')
-					if(nextbits !=000){
-						final int run_length_3_9 = nextbits;
-						b.addIdenticalPixel((byte)0,run_length_3_9 +2);
-					} else{
-						readMore = false; //end_of_string_signal 3 bslbf
-					}
-				}else{
-					final int switch_2= bs.readBits(1);  //switch_2 1 bslbf
-					if(switch_2 == 0){
-						final int run_length_4_7= bs.readBits(2);//  2 bslbf
-						final int pixel_code = bs.readBits(4) ;// 4 bslbf
-						b.addIdenticalPixel((byte)pixel_code,run_length_4_7 +4);
-					}else{
-						final int switch_3 = bs.readBits(2);//switch_3 2 bslbf
-						if (switch_3 == 0) { //if (switch_3 == '0') {
-							b.addPixel((byte)0);
+				final int bits = bs.readBits(4);
+				if (bits != 0) { //if (nextbits() != '0000') {
+					b.addPixel((byte) bits); // 4-bit_pixel-code 4 bslbf
+				} else {
+					// 4-bit_zero 4 bslbf
+					final int switch_1 = bs.readBits(1);// switch_1 1 bslbf
+					if (switch_1 == 0) { // if (switch_1 == '0') {
+						final int nextbits = bs.readBits(3);//if (nextbits() != '000')
+						if (nextbits != 000) {
+							final int run_length_3_9 = nextbits;
+							b.addIdenticalPixel((byte) 0, run_length_3_9 + 2);
+						} else {
+							readMore = false; //end_of_string_signal 3 bslbf
 						}
-						if (switch_3 == 1) { //if (switch_3 == '01') {
-							b.addIdenticalPixel((byte)0,2);
-						}
-						if (switch_3 == 2) { //if (switch_3 == '10') {
-							final int run_length_9_24 = bs.readBits(4);//4 uimsbf
-							final int pixel_code = bs.readBits(4) ;// 4 bslbf
-							b.addIdenticalPixel((byte)pixel_code,run_length_9_24 +9);
-						}
-						if (switch_3 == 3) {//	if (switch_3 == '11') {
-							final int  run_length_25_280 = bs.readBits(8);//8 uimsbf
-							final int pixel_code = bs.readBits(4) ;// 4 bslbf
-							b.addIdenticalPixel((byte)pixel_code,run_length_25_280 +25);
+					} else {
+						final int switch_2 = bs.readBits(1); //switch_2 1 bslbf
+						if (switch_2 == 0) {
+							final int run_length_4_7 = bs.readBits(2);//  2 bslbf
+							final int pixel_code = bs.readBits(4);// 4 bslbf
+							b.addIdenticalPixel((byte) pixel_code, run_length_4_7 + 4);
+						} else {
+							final int switch_3 = bs.readBits(2);//switch_3 2 bslbf
+							if (switch_3 == 0) { //if (switch_3 == '0') {
+								b.addPixel((byte) 0);
+							}
+							if (switch_3 == 1) { //if (switch_3 == '01') {
+								b.addIdenticalPixel((byte) 0, 2);
+							}
+							if (switch_3 == 2) { //if (switch_3 == '10') {
+								final int run_length_9_24 = bs.readBits(4);//4 uimsbf
+								final int pixel_code = bs.readBits(4);// 4 bslbf
+								b.addIdenticalPixel((byte) pixel_code, run_length_9_24 + 9);
+							}
+							if (switch_3 == 3) {//	if (switch_3 == '11') {
+								final int run_length_25_280 = bs.readBits(8);//8 uimsbf
+								final int pixel_code = bs.readBits(4);// 4 bslbf
+								b.addIdenticalPixel((byte) pixel_code, run_length_25_280 + 25);
+							}
 						}
 					}
 				}
 			}
-		}while(readMore);
+		} while (readMore);
 	}
-
 
 	/**
 	 * @param bs
