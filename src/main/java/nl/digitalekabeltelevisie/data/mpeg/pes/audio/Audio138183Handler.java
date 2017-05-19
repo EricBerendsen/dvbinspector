@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -163,14 +163,21 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 						i++;
 					}else if((i+unitLen+2)<bufEnd){  // see if at where next frame should start we also have syncword, and
 						int nextIndex = indexOfSyncWord(pesDataBuffer,  i+unitLen);
-						if(nextIndex==(i+unitLen)){
+						if (nextIndex == (i + unitLen)) {
 							accessUnits.add(frame);
 							i = nextIndex;
 							bufStart = nextIndex;
-						}else{// not enough read, continu next time
+						} else if (nextIndex == -1) {// not enough read, continue next time
 							bufStart = i;
+							break;
+						} else {
+							// next sync byte is further away than expected .
+							// frame is probably not valid so discard, and restart from nextIndex
+							logger.fine("Sync error parsing PES audio data, pesPacket started at TSPacket:"+pesData.getStartPacketNo());
+							bufStart = nextIndex;
+							i = nextIndex;
 						}
-					}else{// not enough read, continu next time
+					}else{// not enough read, continue next time
 						bufStart = i;
 						break;
 
