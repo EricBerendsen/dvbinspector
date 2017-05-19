@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.getErrorKVP;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -258,6 +259,10 @@ public class PesPacketData  implements TreeNode{
 			t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("data",data,0,bytesRead,null)));
 		}else{
+			if((noBytes+6)!=bytesRead){
+				t.add(new DefaultMutableTreeNode(getErrorKVP("Actual PES length does not match PES Header Length")));
+				t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
+			}
 			t.add(new DefaultMutableTreeNode(new KVP("data",data,null)));
 		}
 
