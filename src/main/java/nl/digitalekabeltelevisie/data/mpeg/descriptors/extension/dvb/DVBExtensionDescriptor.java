@@ -85,8 +85,12 @@ public class DVBExtensionDescriptor extends ExtensionDescriptor {
 			return "C2_bundle_delivery_system_descriptor";
 		case 0x17:
 			return "S2X_satellite_delivery_system_descriptor";
+		case 0x18:
+			return "protection_message_descriptor";
 		case 0x19:
 			return "audio_preselection_descriptor";
+		case 0x20: // based on DVB BlueBook A038 jan 2017, shopuldn't this be 0x1a ?
+			return "TTML_subtitling_descriptor";
 
 		default:
 			return "reserved for future use";
