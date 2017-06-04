@@ -237,6 +237,8 @@ public class TableSection implements TreeNode{
 		case 0x78: return "MPE-FEC section (MFT)"; //(EN 301 192 [4])
 		case 0x79: return "TVA-resolution notification section (RNT)";//(TS 102 323 [15])
 		case 0x7A: return "MPE-IFEC section"; //  (TS 102 772 [51])
+		
+		case 0x7B: return "protection message section"; // (TS 102 809 [56])
 
 		case 0x7E: return "discontinuity_information_section";
 		case 0x7F: return "selection_information_section";
