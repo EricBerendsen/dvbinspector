@@ -78,7 +78,7 @@ public class DVBExtensionDescriptor extends ExtensionDescriptor {
 		case 0x13:
 			return "URI_linkage_descriptor";
 		case 0x14:
-			return "BCI_ancillary_data_descriptor";
+			return "CI_ancillary_data_descriptor";
 		case 0x15:
 			return "AC-4_descriptor";
 		case 0x16:
