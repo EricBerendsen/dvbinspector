@@ -542,8 +542,14 @@ public final class DescriptorFactory {
 		case 0x0A:
 			d = new TargetRegionNameDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x0B:
+			d = new ServiceRelocatedDescriptor(data, t + offset, tableSection);
+			break;
 		case 0x13:
 			d = new URILinkageDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x14:
+			d = new CIAncillaryDataDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x17:
 			d = new S2XSatelliteDeliverySystemDescriptor(data, t + offset, tableSection);

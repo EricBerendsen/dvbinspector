@@ -73,7 +73,8 @@ public class Descriptor implements TreeNode {
 	protected int			descriptorTag		= 0;
 	protected int			descriptorLength	= 0;
 
-	protected byte[]		privateData;
+	protected final byte[]	privateData;
+	private final int		descriptorOffset;
 	protected int			privateDataOffset;
 
 	protected TableSection	parentTableSection;
@@ -86,6 +87,7 @@ public class Descriptor implements TreeNode {
 	 */
 	public Descriptor(final byte[] b, final int offset, final TableSection parent) {
 		privateData = b;
+		descriptorOffset = offset;
 		privateDataOffset = offset + 2;
 
 		this.descriptorTag = Utils.getUnsignedByte(b[offset]);
@@ -500,7 +502,7 @@ public class Descriptor implements TreeNode {
 			t.add(new DefaultMutableTreeNode(new KVP("descriptor_length", descriptorLength, null)));
 		}
 		if ((this.getClass().equals(Descriptor.class)) || (!Utils.simpleModus(modus))) { // not simple layout, so show details
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_data", privateData, privateDataOffset,
+			t.add(new DefaultMutableTreeNode(new KVP("descriptor_data", privateData, descriptorOffset + 2,
 					descriptorLength, null)));
 		}
 	}
