@@ -41,8 +41,8 @@ public abstract class ExtensionDescriptor extends Descriptor {
 
 	public ExtensionDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
-		descriptor_tag_extension = getInt(b, offset+2, 1, MASK_8BITS);
-		selector_byte=getBytes(b, offset+3, descriptorLength-1);
+		descriptor_tag_extension = getInt(b, privateDataOffset++, 1, MASK_8BITS);
+		selector_byte=getBytes(b, privateDataOffset, descriptorLength-1);
 	}
 
 	@Override
