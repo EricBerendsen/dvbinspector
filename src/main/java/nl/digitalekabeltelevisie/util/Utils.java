@@ -800,6 +800,32 @@ public final class Utils {
 
 		return Long.toString(y)+"/"+df2pos.format(m)+"/"+df2pos.format(d)+" "+hours+":"+minutes+":"+secs;
 	}
+	
+	public static String getEITStartTimeAsString(final byte[] UTC_time) {
+		if(isFFFFFFFF(UTC_time)){
+			return "undefined";
+		}else{
+			return getUTCFormattedString(UTC_time);
+		}
+	}
+	
+	/**
+	 * Determines if the byte[] contains only FF (unsigned)
+	 * returns true if byte[] is empty
+	 *
+	 * @param uTC_time
+	 * @return true if all elements are 0xFF (unsigned) 
+	 */
+	public static boolean isFFFFFFFF(byte[] uTC_time) {
+		for (int i = 0; i < uTC_time.length; i++) {
+			if(uTC_time[i]!=-1){
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 
 	public static Date getUTCDate(final byte[] UTC_time) {
 		final Calendar t = getUTCCalender(UTC_time);

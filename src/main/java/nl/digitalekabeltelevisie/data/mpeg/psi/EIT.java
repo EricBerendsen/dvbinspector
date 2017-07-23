@@ -186,7 +186,11 @@ public class EIT extends AbstractPSITabel{
 				if(section!= null){
 					List<Event> eventList = section.getEventList();
 					for(Event event:eventList){
-						Date eventStart = getUTCDate( event.getStartTime());
+						final byte[] startTime = event.getStartTime();
+						if(isFFFFFFFF(startTime)){ // undefined start time
+							continue;
+						}
+						Date eventStart = getUTCDate( startTime);
 						if((startDate==null)||(startDate.after(eventStart))){
 							startDate = eventStart;
 						}

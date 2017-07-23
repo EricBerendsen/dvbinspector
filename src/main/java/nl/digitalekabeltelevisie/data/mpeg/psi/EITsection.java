@@ -117,12 +117,12 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		}
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-			final KVP kvp = new KVP("event",eventID,Utils.getUTCFormattedString(startTime)+" "+getEventName());
+			final KVP kvp = new KVP("event",eventID,Utils.getEITStartTimeAsString(startTime)+" "+getEventName());
 			kvp.setHtmlSource(this);
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 			t.add(new DefaultMutableTreeNode(new KVP("event_id",eventID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("start_time",startTime,Utils.getUTCFormattedString(startTime))));
+			t.add(new DefaultMutableTreeNode(new KVP("start_time",startTime,Utils.getEITStartTimeAsString(startTime))));
 			t.add(new DefaultMutableTreeNode(new KVP("duration",duration,formatDuration(duration))));
 			t.add(new DefaultMutableTreeNode(new KVP("running_status",runningStatus,getRunningStatusString(runningStatus))));
 			t.add(new DefaultMutableTreeNode(new KVP("free_CA_mode",freeCAMode,getFreeCAmodeString(freeCAMode))));
@@ -179,7 +179,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		 */
 		public String getHTML() {
 			final StringBuilder r1 = new StringBuilder();
-			r1.append("Start:&nbsp;").append(Utils.getUTCFormattedString(getStartTime())).append("&nbsp;Duration: ");
+			r1.append("Start:&nbsp;").append(Utils.getEITStartTimeAsString(getStartTime())).append("&nbsp;Duration: ");
 			r1.append(formatDuration(getDuration())).append("<br><br>");
 			final List<Descriptor> descList = getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
@@ -325,7 +325,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	public StringBuilder getHTMLLines(){
 		final StringBuilder b = new StringBuilder();
 		for(final Event event:eventList){
-			b.append(Utils.escapeHTML(Utils.getUTCFormattedString(event.getStartTime()))).append("&nbsp;");
+			b.append(Utils.escapeHTML(Utils.getEITStartTimeAsString(event.getStartTime()))).append("&nbsp;");
 			b.append(formatDuration(event.getDuration())).append("&nbsp;");
 			final List<Descriptor> descList = event.getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
