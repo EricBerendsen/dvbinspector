@@ -239,7 +239,11 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param char_descend
 	 */
 	private void drawEvent(final Graphics2D gd, Date startDate, Event event, int x, int y, int char_descend) {
-		Date eventStart = getUTCDate( event.getStartTime());
+		final byte[] startTime = event.getStartTime();
+		if(isFFFFFFFF(startTime)){ // undefined
+			return;
+		}
+		Date eventStart = getUTCDate( startTime);
 
 		try{
 		int w = (int)(getDurationMillis(event.getDuration())/milliSecsPerPixel);
