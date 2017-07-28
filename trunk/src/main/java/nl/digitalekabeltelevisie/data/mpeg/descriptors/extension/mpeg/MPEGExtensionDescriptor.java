@@ -20,6 +20,8 @@ public class MPEGExtensionDescriptor extends ExtensionDescriptor {
 			return "ODUpdate_descriptor";
 		case 0x3:
 			return "HEVC_timing_and_HRD_descriptor";
+		case 0x4:
+			return "af_extensions_descriptor";
 		default:
 			return "ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}

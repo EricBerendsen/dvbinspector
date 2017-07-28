@@ -28,6 +28,8 @@ package nl.digitalekabeltelevisie.controller;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.math.BigInteger;
+
 import javax.swing.JMenuItem;
 
 import nl.digitalekabeltelevisie.gui.*;
@@ -75,6 +77,7 @@ public class KVP{
 	private int			byteStart					= 0;
 	private int			byteLen						= 0;
 	private DVBString	dvbStringValue;
+	private BigInteger 	bigIntegerValue;
 
 	private static byte	numberDisplay				= 1;	// 1 - decimal, 2 -
 	// hex, 3 both
@@ -116,6 +119,7 @@ public class KVP{
 
 	 */
 	public static final byte	FIELD_TYPE_HTML				= 7;
+	public static final byte	FIELD_TYPE_BIGINT 			= 8;
 
 
 
@@ -226,6 +230,16 @@ public class KVP{
 		this.htmlSource = htmlSource;
 	}
 
+	public KVP(final String string, final BigInteger value, final String description) {
+		
+		super();
+		this.label = string;
+		this.bigIntegerValue = value;
+		this.fieldType = FIELD_TYPE_BIGINT;
+		this.description = description;
+		// TODO Auto-generated constructor stub
+	}
+
 	public String getDescription() {
 		return description;
 	}
@@ -305,6 +319,8 @@ public class KVP{
 			appendHexBytes(b);
 		} else if (fieldType == FIELD_TYPE_DVBSTRING) {
 			appendDVBString(b);
+		} else if (fieldType == FIELD_TYPE_BIGINT) {
+			appendBigInteger(numberFormat, b);	
 		}
 		if (description != null) {
 			b.append(" => ").append(description);
@@ -370,6 +386,17 @@ public class KVP{
 		}
 	}
 
+	private void appendBigInteger(final byte numberFormat, final StringBuilder b) {
+		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
+			b.append(bigIntegerValue.toString());
+		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
+			b.append("0x").append(bigIntegerValue.toString(16).toUpperCase());
+		} else { // assume both to be safe
+			b.append(getHexAndDecimalFormattedString(bigIntegerValue));
+		}
+	}
+
+	
 	public static byte getNumberDisplay() {
 		return numberDisplay;
 	}

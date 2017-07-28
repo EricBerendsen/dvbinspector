@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -89,6 +89,11 @@ public class TSPacket implements HTMLSource, TreeNode{
 		buffer=Arrays.copyOf(buf, buf.length); //buf should be copied, or else PID.getLast_packet() will always point to last packet parsed, regardless of the actual pid.
 		packetNo = no;
 		transportStream = ts;
+		
+//		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+//			getAdaptationField();
+//		}
+//
 //		if(getPayloadUnitStartIndicator()==1){
 //			if((getAdaptationFieldControl()!=1)&&(getAdaptationFieldControl()!=3)){
 //				System.out.println("Error: TSPacket:"+packetNo+", PID:"+getPID()+", If a PID is carrying PES packets or PSI sections, and payload_unit_start_indicator is set to 1, then test that adaptation_field_control is ‘01’ or ‘11’”");

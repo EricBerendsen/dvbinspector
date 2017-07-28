@@ -33,19 +33,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.DecimalFormat;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -120,7 +113,6 @@ public final class Utils {
 
 	public static final int MASK_32BITS=0xFFFFFFFF;
 	public static final long MASK_33BITS=0x1FFFFFFFFl;
-	public static final long MASK_64BITS=0xFFFFFFFFFFFFFFFFl;
 
 	private static Map<Integer, String>oui = new HashMap<Integer, String>();
 	private static RangeHashMap<Integer,String> bat = new RangeHashMap<Integer,String>();
@@ -480,6 +472,11 @@ public final class Utils {
 			r = (r<<8) | getUnsignedByte( bytes[offset+i]);
 		}
 		return (r&mask);
+	}
+	
+	public static BigInteger getBigInteger(final byte[] bytes, final int offset, final int len){
+		return new BigInteger(1,Arrays.copyOfRange(bytes,offset,offset+len));
+		
 	}
 
 	/**
@@ -1959,6 +1956,12 @@ public final class Utils {
 		return b.toString();
 	}
 
+	public static String getHexAndDecimalFormattedString(final BigInteger bigIntValue){
+		final StringBuilder b = new StringBuilder();
+		b.append("0x").append(bigIntValue.toString(16).toUpperCase()).append(" (").append(bigIntValue.toString())
+		.append(")");
+		return b.toString();
+	}
 
 	/**
 	 * Get single bit as boolean from byte

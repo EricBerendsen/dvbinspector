@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -37,7 +37,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.AFDescriptorFactory;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.LookUpList;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -49,7 +52,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			add(0x01,"Announcement switching data field").
 			add(0x02,"AU_information data field").
 			add(0x03,"PVR_assist_information data field").
-			add(0x04,0x9F,"Reserved for future use").
+			add(0x04,"TSAP_timeline data field").
+			add(0x05,0x9F,"Reserved for future use").
 			add(0xA0,0xFF,"User defined").
 			build();
 
@@ -134,6 +138,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 				buildAnnouncementSwitchingData(private_data_byte);
 			}else if(data_field_tag==0x02){ //AU_information
 				buildAU_information(private_data_byte);
+			}else{
+				logger.warning("data_field_tag=="+data_field_tag+" not implemented");
 			}
 		}
 
@@ -265,6 +271,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 						}
 					}
 				}
+			}else{
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("data_field_tag=="+data_field_tag)));
 			}
 			return t;
 		}
@@ -313,22 +321,24 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	private int offset = 2;
 
 	private int transport_private_data_length = 0;
+	private byte[] private_data_byte;
+	private List<PrivateDataField> privatedataFields = new ArrayList<PrivateDataField>();
 
 	private int adaptation_field_extension_length;
 
+	private byte[] adaptation_field_extension_byte;
 	private boolean ltw_flag;
-
 	private boolean piecewise_rate_flag;
-
 	private boolean seamless_splice_flag;
-
-	private byte[] private_data_byte;
-
-	private List<PrivateDataField> privatedataFields = new ArrayList<PrivateDataField>();
+	private boolean af_descriptor_not_present_flag;
 
 	private boolean ltw_valid_flag;
-
 	private int ltw_offset;
+	private int piecewise_rate;
+
+	private List<Descriptor> afDescriptorList;
+
+
 
 
 	public AdaptationField(final byte[] data) {
@@ -366,14 +376,30 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			if(adaptation_field_extension_flag&& (data.length>(offset+2))){ //extension is at least 2 bytes
 				adaptation_field_extension_length =  getInt(data,offset,1,MASK_8BITS);
 				offset+=1;
-				ltw_flag = getBitAsBoolean(data[offset],1);
-				piecewise_rate_flag =  getBitAsBoolean(data[offset],2);
-				seamless_splice_flag =  getBitAsBoolean(data[offset],3);
-				offset+=1;
+				adaptation_field_extension_byte = getBytes(data, offset, Math.min(adaptation_field_extension_length, (adaptation_field_length+ 1) - offset));
+				int adaptation_field_extension_offset = 0;
+				ltw_flag = getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],1);
+				piecewise_rate_flag =  getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],2);
+				seamless_splice_flag =  getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],3);
+				af_descriptor_not_present_flag = getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],4);
+				adaptation_field_extension_offset+=1;
 				if(ltw_flag){
-					ltw_valid_flag = getBitAsBoolean(data[offset],1);
-					ltw_offset = getInt(data,offset,2,MASK_15BITS);
+					ltw_valid_flag = getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],1);
+					ltw_offset = getInt(adaptation_field_extension_byte,adaptation_field_extension_offset,2,MASK_15BITS);
+					adaptation_field_extension_offset+=2;
+				}
+				if (piecewise_rate_flag) {
+					// reserved
+					piecewise_rate = getInt(adaptation_field_extension_byte, adaptation_field_extension_offset, 3, MASK_22BITS);
+					adaptation_field_extension_offset += 3;
+				}
 
+				if (seamless_splice_flag) {
+					// TODO not implemented
+					adaptation_field_extension_offset += 5;
+				}
+				if (!af_descriptor_not_present_flag){
+					afDescriptorList = AFDescriptorFactory.buildDescriptorList(adaptation_field_extension_byte, adaptation_field_extension_offset, adaptation_field_extension_length - adaptation_field_extension_offset);
 				}
 
 			}
@@ -563,21 +589,32 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		}
 		if(adaptation_field_extension_flag){
 			s.append("<br>adaptation_field_extension_length: ").append(getHexAndDecimalFormattedString(adaptation_field_extension_length));
+			s.append("<br>adaptation_field_extension_byte: ").append("0x").append(toHexString(adaptation_field_extension_byte)).append(" \"").append(
+					toSafeString(adaptation_field_extension_byte)).append("\"");
+			
 			s.append("<br>ltw_flag: ").append(getBooleanAsInt(ltw_flag));
 			s.append("<br>piecewise_rate_flag: ").append(getBooleanAsInt(piecewise_rate_flag));
 			s.append("<br>seamless_splice_flag: ").append(getBooleanAsInt(seamless_splice_flag));
+			s.append("<br>af_descriptor_not_present_flag: ").append(getBooleanAsInt(af_descriptor_not_present_flag));
 			if(ltw_flag){
 				s.append("<br>ltw_valid_flag: ").append(getBooleanAsInt(ltw_valid_flag));
 				s.append("<br>ltw_offset: ").append(getHexAndDecimalFormattedString(ltw_offset));
 
 			}
 			if(piecewise_rate_flag){
-				s.append("<br>piecewise_rate_flag: <span style=\"color:red\">Not implemented, please report!</span>");
-				logger.info("piecewise_rate_flag: Not implemented, please report!");
+				s.append("<br>piecewise_rate: ").append(getHexAndDecimalFormattedString(piecewise_rate));
 			}
 			if(seamless_splice_flag){
 				s.append("<br>seamless_splice_flag: <span style=\"color:red\">Not implemented, please report!</span>");
 				logger.info("seamless_splice_flag: Not implemented, please report!");
+			}
+			if(!af_descriptor_not_present_flag){
+				for (Descriptor afDescriptor : afDescriptorList) {
+					final DefaultMutableTreeNode treeNode = afDescriptor.getJTreeNode(0);
+					s.append("<br><br><b>"+afDescriptor.getDescriptorname()+"</b>");
+					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
+					
+				}
 			}
 		}
 
@@ -627,21 +664,26 @@ public class AdaptationField implements HTMLSource, TreeNode{
 
 		if(adaptation_field_extension_flag){
 			t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_extension_length",adaptation_field_extension_length ,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_extension_byte",adaptation_field_extension_byte ,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("ltw_flag",getBooleanAsInt(ltw_flag) ,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("piecewise_rate_flag",getBooleanAsInt(piecewise_rate_flag) ,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("seamless_splice_flag",getBooleanAsInt(seamless_splice_flag) ,null)));
-
+			t.add(new DefaultMutableTreeNode(new KVP("af_descriptor_not_present_flag",getBooleanAsInt(af_descriptor_not_present_flag) ,null)));
+			
 			if(ltw_flag){
 				t.add(new DefaultMutableTreeNode(new KVP("ltw_valid_flag",getBooleanAsInt(ltw_valid_flag) ,null)));
 				t.add(new DefaultMutableTreeNode(new KVP("ltw_offset",ltw_offset ,null)));
 			}
 			if(piecewise_rate_flag){
-				t.add(new DefaultMutableTreeNode(new KVP("piecewise_rate NOT implemented in DVB Inspector. Please report")));
+				t.add(new DefaultMutableTreeNode(new KVP("piecewise_rate",piecewise_rate,null)));
 
 			}
 			if(seamless_splice_flag){
-				t.add(new DefaultMutableTreeNode(new KVP("seamless_splice_flag NOT implemented in DVB Inspector. Please report")));
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("seamless_splice_flag")));
 
+			}
+			if(!af_descriptor_not_present_flag){
+				Utils.addListJTree(t,afDescriptorList,modus,"af_descriptors");
 			}
 		}
 
