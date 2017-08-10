@@ -5,7 +5,7 @@
  *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
- *
+ * 
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -703,6 +703,91 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	 */
 	private static String getAU_coding_formatString(int AU_coding_format) {
 		return AU_coding_format_list.get(AU_coding_format);
+	}
+
+
+	public static LookUpList getData_field_tag_list() {
+		return data_field_tag_list;
+	}
+
+
+	public static LookUpList getAU_coding_format_list() {
+		return AU_coding_format_list;
+	}
+
+
+	public static LookUpList getAU_frame_rate_code_list() {
+		return AU_frame_rate_code_list;
+	}
+
+
+	public int getSplice_countdown() {
+		return splice_countdown;
+	}
+
+
+	public int getTransport_private_data_length() {
+		return transport_private_data_length;
+	}
+
+
+	public byte[] getPrivate_data_byte() {
+		return private_data_byte;
+	}
+
+
+	public List<PrivateDataField> getPrivatedataFields() {
+		return privatedataFields;
+	}
+
+
+	public int getAdaptation_field_extension_length() {
+		return adaptation_field_extension_length;
+	}
+
+
+	public byte[] getAdaptation_field_extension_byte() {
+		return adaptation_field_extension_byte;
+	}
+
+
+	public boolean isLtw_flag() {
+		return ltw_flag;
+	}
+
+
+	public boolean isPiecewise_rate_flag() {
+		return piecewise_rate_flag;
+	}
+
+
+	public boolean isSeamless_splice_flag() {
+		return seamless_splice_flag;
+	}
+
+
+	public boolean isAf_descriptor_not_present_flag() {
+		return af_descriptor_not_present_flag;
+	}
+
+
+	public boolean isLtw_valid_flag() {
+		return ltw_valid_flag;
+	}
+
+
+	public int getLtw_offset() {
+		return ltw_offset;
+	}
+
+
+	public int getPiecewise_rate() {
+		return piecewise_rate;
+	}
+
+
+	public List<Descriptor> getAfDescriptorList() {
+		return afDescriptorList;
 	}
 
 }
