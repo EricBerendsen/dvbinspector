@@ -133,4 +133,52 @@ public class TimelineDescriptor extends AFDescriptor {
 		return t;
 	}
 
+	public static Logger getLogger() {
+		return logger;
+	}
+
+	public int getHas_timestamp() {
+		return has_timestamp;
+	}
+
+	public int getHas_ntp() {
+		return has_ntp;
+	}
+
+	public int getHas_ptp() {
+		return has_ptp;
+	}
+
+	public int getHas_timecode() {
+		return has_timecode;
+	}
+
+	public int getForce_reload() {
+		return force_reload;
+	}
+
+	public int getPaused() {
+		return paused;
+	}
+
+	public int getDiscontinuity() {
+		return discontinuity;
+	}
+
+	public int getReserved() {
+		return reserved;
+	}
+
+	public int getTimeline_id() {
+		return timeline_id;
+	}
+
+	public long getTimescale() {
+		return timescale;
+	}
+
+	public BigInteger getMedia_timestamp() {
+		return media_timestamp;
+	}
+
 }

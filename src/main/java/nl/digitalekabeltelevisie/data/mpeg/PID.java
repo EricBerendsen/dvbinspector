@@ -39,6 +39,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.TimelineDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
@@ -103,6 +105,8 @@ public class PID implements TreeNode{
 	private final ArrayList<TimeStamp> pcrList = new ArrayList<>();
 	private final ArrayList<TimeStamp> ptsList = new ArrayList<>();
 	private final ArrayList<TimeStamp> dtsList = new ArrayList<>();
+	
+	private final HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = new HashMap<Integer, ArrayList<TemiTimeStamp>>();
 
 	/**
 	 *
@@ -265,6 +269,7 @@ public class PID implements TreeNode{
 			adaptationField = null;
 		}
 		if(adaptationField!=null) { //Adaptation field present
+			processTEMI(adaptationField,temiList,packet.getPacketNo());
 			if(adaptationField.isPCR_flag()){
 				final PCR newPCR = adaptationField.getProgram_clock_reference();
 				//System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+", PCR:"+newPCR.getProgram_clock_reference());
@@ -301,6 +306,29 @@ public class PID implements TreeNode{
 				}
 			}
 		}
+	}
+
+	private static void processTEMI(AdaptationField adaptationField, HashMap<Integer, ArrayList<TemiTimeStamp>> temiList, int packetNo) {
+		if(adaptationField.isAdaptation_field_extension_flag()){
+			if(!adaptationField.isAf_descriptor_not_present_flag()){
+				List<Descriptor> afDescriptorList = adaptationField.getAfDescriptorList();
+				for (Descriptor descriptor : afDescriptorList) {
+					if(descriptor instanceof TimelineDescriptor){
+						TimelineDescriptor timelineDescriptor = (TimelineDescriptor) descriptor;
+						if((timelineDescriptor.getHas_timestamp()==1)||
+							(timelineDescriptor.getHas_timestamp()==2)){
+							ArrayList<TemiTimeStamp> tl = temiList.get(timelineDescriptor.getTimeline_id());
+							if(tl==null){
+								tl = new ArrayList<TemiTimeStamp>();
+								temiList.put(timelineDescriptor.getTimeline_id(), tl);
+							}
+							tl.add(new TemiTimeStamp(packetNo, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
+						}
+					}
+				}
+			}
+		}
+		
 	}
 
 	/**
@@ -499,6 +527,10 @@ public class PID implements TreeNode{
 
 	public ArrayList<TimeStamp> getDtsList() {
 		return dtsList;
+	}
+
+	public HashMap<Integer, ArrayList<TemiTimeStamp>> getTemiList() {
+		return temiList;
 	}
 
 }
