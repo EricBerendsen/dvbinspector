@@ -311,6 +311,8 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		
 		// use larger shapes
 		plot.setDrawingSupplier(new DVBInspectorDefaultDrawingSupplier());
+		plot.setRangePannable(true);
+		plot.setDomainPannable(true);
 
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 
