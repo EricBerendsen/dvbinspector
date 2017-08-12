@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,29 +27,29 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
 import java.util.*;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.*;
 
 
 /**
- * based on ANSI/SCTE 35 2014
+ * based on ANSI/SCTE 35 2017
  * 
- * http://www.scte.org/documents/pdf/Standards/ANSI_SCTE%2035%202014.pdf
+ * http://www.scte.org/SCTEDocs/Standards/SCTE%2035%202017.pdf
  * 
  * @author Eric
  *
  */
 public class SpliceInfoSection extends TableSection {
+	
+	private static final Logger logger = Logger.getLogger(SpliceInfoSection.class.getName());
 	
 	private class SpliceTime implements TreeNode{
 		
@@ -59,10 +59,10 @@ public class SpliceInfoSection extends TableSection {
 		private SpliceTime(BitSource bs){
 			time_specified_flag = bs.readBits(1);
 			if(time_specified_flag==1){
-				bs.readBits(1);
+				bs.readBits(6);
 				pts_time = bs.readBitsLong(33);
 			}else{
-				bs.readBits(1);
+				bs.readBits(7);
 			}
 		}
 
@@ -71,12 +71,133 @@ public class SpliceInfoSection extends TableSection {
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("splice_time"));
 			t.add(new DefaultMutableTreeNode(new KVP("time_specified_flag",time_specified_flag,null)));
 			if(time_specified_flag==1){
-				t.add(new DefaultMutableTreeNode(new KVP("pts_time",pts_time,null)));
+				t.add(new DefaultMutableTreeNode(new KVP("pts_time",pts_time,Utils.printTimebase90kHz(pts_time))));
 			}
-
-
 			return t;
 		}
+	}
+	
+	
+	private class BreakDuration implements TreeNode {
+
+		private int auto_return;
+		private int reserved;
+		private long duration;
+
+		private BreakDuration(BitSource bs) {
+			auto_return = bs.readBits(1);
+			reserved = bs.readBits(6);
+			duration = bs.readBitsLong(33);
+		}
+
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("break_duration"));
+			t.add(new DefaultMutableTreeNode(new KVP("auto_return", auto_return, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("duration", duration, Utils.printTimebase90kHz(duration))));
+			return t;
+		}
+	}
+	
+	private class SpliceInsert implements TreeNode{
+		
+		private long splice_event_id;
+		private int splice_event_cancel_indicator;
+		private int out_of_network_indicator;
+		private int program_splice_flag;
+		private int duration_flag;
+		private int splice_immediate_flag;
+		
+		private int unique_program_id;
+		private int avail_num;
+		private int avails_expected;
+		private int component_count;
+		private SpliceTime splice_time;
+		private BreakDuration break_duration;
+		private List<Integer> componentTags = new ArrayList<>();
+		private List<SpliceTime> componentSpliceTimes = new ArrayList<>();
+		
+		private SpliceInsert(BitSource bitSource){
+			splice_event_id =  bitSource.readBitsLong(32); //getLong(data, 14, 4, MASK_32BITS);
+			splice_event_cancel_indicator = bitSource.readBits(1); //Utils.getInt(data,18,1,0x80)>>7;
+			bitSource.readBits(7); // reserved
+			if(splice_event_cancel_indicator==0){
+				out_of_network_indicator =  bitSource.readBits(1); //Utils.getInt(data,19,1,0x80)>>7;
+				program_splice_flag =  bitSource.readBits(1); //Utils.getInt(data,19,1,0x40)>>6;
+				duration_flag =  bitSource.readBits(1); //Utils.getInt(data,19,1,0x20)>>5;
+				splice_immediate_flag =  bitSource.readBits(1); //Utils.getInt(data,19,1,0x10)>>4;
+				 bitSource.readBits(4); // reserved
+				if((program_splice_flag == 1) && (splice_immediate_flag == 0)){
+					splice_time = new SpliceTime(bitSource);
+				}
+				if(program_splice_flag == 0) {
+					component_count = bitSource.readBits(8);// Utils.getInt(data,20,1,Utils.MASK_8BITS);
+					for(int i=0;i<component_count;i++) {
+						int component_tag = bitSource.readBits(8) ; //8 uimsbf
+						componentTags .add(component_tag);
+						 if(splice_immediate_flag == 0){
+							 SpliceTime component_splice_time = new SpliceTime(bitSource);
+							 componentSpliceTimes.add(component_splice_time);
+						}
+					}
+				}
+				if(duration_flag == 1){
+					break_duration = new BreakDuration(bitSource);
+				}
+				unique_program_id = bitSource.readBits(16); // bs.readBits(16);
+				avail_num =  bitSource.readBits(8); //bs.readBits(8);
+				avails_expected =  bitSource.readBits(8); //bs.readBits(8);
+			}
+		}
+
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("splice_insert"));
+
+			t.add(new DefaultMutableTreeNode(new KVP("splice_event_id",splice_event_id,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("splice_event_cancel_indicator",splice_event_cancel_indicator,splice_event_cancel_indicator==1?"a previously sent splice event, identified by splice_event_id, has been cancelled":null)));
+			if(splice_event_cancel_indicator==0){
+				t.add(new DefaultMutableTreeNode(new KVP("out_of_network_indicator",out_of_network_indicator,out_of_network_indicator==1?"the splice event is an opportunity to exit from the network feed":"the splice event is an opportunity to return to the network feed")));
+				t.add(new DefaultMutableTreeNode(new KVP("program_splice_flag",program_splice_flag,program_splice_flag==1?"the message refers to a Program Splice Point":"each component that is intended to be spliced will be listed separately")));
+				t.add(new DefaultMutableTreeNode(new KVP("duration_flag",duration_flag,duration_flag==1?"break_duration() field present":"break_duration() field not present")));
+				t.add(new DefaultMutableTreeNode(new KVP("splice_immediate_flag",splice_immediate_flag,splice_immediate_flag==1?"splice mode shall be the Splice Immediate Mode":"splice_time() field present")));
+				if((program_splice_flag == 1) && (splice_immediate_flag == 0)){
+					t.add(splice_time.getJTreeNode(modus));
+				}
+				if(program_splice_flag == 0) {
+					t.add(new DefaultMutableTreeNode(new KVP("component_count",component_count,null)));
+					for(int i=0;i<component_count;i++) {
+						t.add(new DefaultMutableTreeNode(new KVP("component_tag ["+i+"]",componentTags.get(i),null)));
+						 if(splice_immediate_flag == 0){
+								t.add(componentSpliceTimes.get(i).getJTreeNode(modus));
+						}
+					}
+				}
+				if(duration_flag == 1){
+					t.add(break_duration.getJTreeNode(modus));
+				}
+				
+				t.add(new DefaultMutableTreeNode(new KVP("unique_program_id",unique_program_id,null)));
+				t.add(new DefaultMutableTreeNode(new KVP("avail_num",avail_num,null)));
+				t.add(new DefaultMutableTreeNode(new KVP("avails_expected",avails_expected,null)));
+			}
+			return t;
+		}	
+	}
+	
+	private class SpliceNull implements TreeNode{
+
+		private SpliceNull(BitSource bs){
+			super();
+		}
+		
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			return new DefaultMutableTreeNode(new KVP("splice_null"));
+		}
+		
 	}
 
 	private int protocol_version;
@@ -87,82 +208,51 @@ public class SpliceInfoSection extends TableSection {
 	private int tier;
 	private int splice_command_length;
 	private int splice_command_type;
-	private long splice_event_id;
-	private int splice_event_cancel_indicator;
-	private int out_of_network_indicator;
-	private int program_splice_flag;
-	private int duration_flag;
-	private int splice_immediate_flag;
-	
+	private int descriptor_loop_length;
 	
 	List<Descriptor> splice_descriptors = new ArrayList<>();
-	private int unique_program_id;
-	private int avail_num;
-	private int avails_expected;
-	private int descriptor_loop_length;
+	private TreeNode splice_command;
+
 
 	public SpliceInfoSection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 		final byte[] data = raw_data.getData();
-		protocol_version = Utils.getInt(data,3,1,Utils.MASK_8BITS);
-		encrypted_packet = Utils.getInt(data,4,1,0x80)>>7;
-		encryption_algorithm = Utils.getInt(data,4,1,0x7E)>>1;
+		BitSource bitSource = new BitSource(data, 3, sectionLength);
+		protocol_version = bitSource.readBits(8); // Utils.getInt(data,3,1,Utils.MASK_8BITS);
+		encrypted_packet =  bitSource.readBits(1); //Utils.getInt(data,4,1,0x80)>>7;
+		encryption_algorithm =  bitSource.readBits(6); //Utils.getInt(data,4,1,0x7E)>>1;
 		
-		pts_adjustment = getLong(data,4, 5, MASK_33BITS);
-		cw_index = Utils.getInt(data,9,1,Utils.MASK_8BITS);
-		tier = Utils.getInt(data,10,2,0xFFF0)>>4;
-		splice_command_length = Utils.getInt(data,11,2,Utils.MASK_12BITS);
+		pts_adjustment =  bitSource.readBitsLong(33); //getLong(data,4, 5, MASK_33BITS);
+		cw_index =  bitSource.readBits(8); //Utils.getInt(data,9,1,Utils.MASK_8BITS);
+		tier =  bitSource.readBits(12); //Utils.getInt(data,10,2,0xFFF0)>>4;
+		splice_command_length =  bitSource.readBits(12); //Utils.getInt(data,11,2,Utils.MASK_12BITS);
 		if(encrypted_packet==0){
-			splice_command_type= Utils.getInt(data,13,1,Utils.MASK_8BITS);
-			if(splice_command_type==5){
-				splice_event_id = getLong(data, 14, 4, MASK_32BITS);
-				splice_event_cancel_indicator = Utils.getInt(data,18,1,0x80)>>7;
-				if(splice_event_cancel_indicator==0){
-					out_of_network_indicator = Utils.getInt(data,19,1,0x80)>>7;
-					program_splice_flag = Utils.getInt(data,19,1,0x40)>>6;
-					duration_flag = Utils.getInt(data,19,1,0x20)>>5;
-					splice_immediate_flag = Utils.getInt(data,19,1,0x10)>>4;
-					
-					BitSource bs = new BitSource(data, 20);
-					if((program_splice_flag == 1) && (splice_immediate_flag == 0)){
-						//splice_time
-					}
-					if(program_splice_flag == 0) {
-	//					component_count = Utils.getInt(data,20,1,Utils.MASK_8BITS);
-	//					int offset = 20;
-	//					for(int i=0;i<component_count;i++) {
-	//					component_tag 8 uimsbf
-	//					 if(splice_immediate_flag == ‘0’)
-	//					 splice_time()
-	//					}
-					}
-					if(duration_flag == 1){
-						//break_duration()
-					}
-					unique_program_id = bs.readBits(16);
-					avail_num = bs.readBits(8);
-					avails_expected = bs.readBits(8);
-					
-					
-				}
-				
+			splice_command_type=  bitSource.readBits(8); //Utils.getInt(data,13,1,Utils.MASK_8BITS);
+			if(splice_command_type==0){
+				splice_command = new SpliceNull(bitSource);
+			}else if(splice_command_type==5){
+				splice_command = new SpliceInsert(bitSource);
+			}else{
+				logger.info("Not implemented: splice_command_type="+splice_command_type+" ("+getSpliceCommandTypeString(splice_command_type)+")");
 			}
 			
-			int loopstart = 14 + splice_command_length;
-			
-			descriptor_loop_length = Utils.getInt(data,loopstart,2,Utils.MASK_12BITS);
-			splice_descriptors = DescriptorFactory.buildDescriptorList(data, loopstart+2, descriptor_loop_length, this);
+			int loopstart = 0;
+			if ((splice_command_type == 0) || (splice_command_type == 5)) {
+				loopstart = bitSource.getNextFullByteOffset();
+			} else if (splice_command_length != 0xFFF) {
+				loopstart = 14 + splice_command_length;
+			}
+			if (loopstart != 0) {
+				descriptor_loop_length = Utils.getInt(data, loopstart, 2, Utils.MASK_12BITS);
+				splice_descriptors = DescriptorFactory.buildDescriptorList(data,
+						loopstart + 2,
+						descriptor_loop_length,
+						this);
+			}
 		
 		}
 	}
 
-
-	@Override
-	public String toString(){
-		final StringBuilder b = new StringBuilder("SpliceInfoSection");
-		//b.append(Utils.toHexString(UTC_time)).append(", UTC_timeString=").append(getUTC_timeString()).append(", length=").append(getSectionLength());
-		return b.toString();
-	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
@@ -174,43 +264,23 @@ public class SpliceInfoSection extends TableSection {
 		t.add(new DefaultMutableTreeNode(new KVP("pts_adjustment",pts_adjustment,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("cw_index",cw_index,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("tier",tier,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("splice_command_length",splice_command_length,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("splice_command_length",splice_command_length,splice_command_length==0xFFF?"The value of 0xFFF provides backwards compatibility and shall be ignored by downstream equipment":null)));
 		if(encrypted_packet==0){
 			t.add(new DefaultMutableTreeNode(new KVP("splice_command_type",splice_command_type,getSpliceCommandTypeString(splice_command_type))));
-			if(splice_command_type==5){
-				t.add(new DefaultMutableTreeNode(new KVP("splice_event_id",splice_event_id,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("splice_event_cancel_indicator",splice_event_cancel_indicator,splice_event_cancel_indicator==1?"a previously sent splice event, identified by splice_event_id, has been cancelled":null)));
-				if(splice_event_cancel_indicator==0){
-					t.add(new DefaultMutableTreeNode(new KVP("out_of_network_indicator",out_of_network_indicator,out_of_network_indicator==1?"the splice event is an opportunity to exit from the network feed":"the splice event is an opportunity to return to the network feed")));
-					t.add(new DefaultMutableTreeNode(new KVP("program_splice_flag",program_splice_flag,program_splice_flag==1?"the message refers to a Program Splice Point":"each component that is intended to be spliced will be listed separately")));
-					t.add(new DefaultMutableTreeNode(new KVP("duration_flag",duration_flag,duration_flag==1?"break_duration() field present":"break_duration() field not present")));
-					t.add(new DefaultMutableTreeNode(new KVP("splice_immediate_flag",splice_immediate_flag,splice_immediate_flag==1?"splice mode shall be the Splice Immediate Mode":"splice_time() field present")));
-					if((program_splice_flag == 1) && (splice_immediate_flag == 0)){
-						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("splice_time()")));
-						return t;
-					}else if(program_splice_flag == 0) {
-						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("component_count")));
-						return t;
-					}else if(duration_flag == 1){
-						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("break_duration")));
-						return t;
-					}else{
-						t.add(new DefaultMutableTreeNode(new KVP("unique_program_id",unique_program_id,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("avail_num",avail_num,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("avails_expected",avails_expected,null)));
-						
-					}
-				}
+
+			if(splice_command_type==0){
+				t.add(splice_command.getJTreeNode(modus));
+			}else if(splice_command_type==5){
+				t.add(splice_command.getJTreeNode(modus));
 			}else{
 				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("splice_command_type ="+splice_command_type+" ("+ getSpliceCommandTypeString(splice_command_type)+")")));
+				return t;
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length",descriptor_loop_length,null)));
 			Utils.addListJTree(t,splice_descriptors,modus,"splice_descriptors");
 		}else{
 			t.add(new DefaultMutableTreeNode(new KVP("this portion of the splice_info_section, starting with splice_command_type and ending with and including E_CRC_32, is encrypted")));
 		}
-		
-		
 		return t;
 	}
 
