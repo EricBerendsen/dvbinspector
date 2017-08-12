@@ -674,7 +674,7 @@ public final class DescriptorFactory {
 		default:
 			d = new SCTE35Descriptor(data, t + offset, tableSection);
 			logger.info("Not implemented SCTE35Descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ AITDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+					+ SCTE35Descriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;
