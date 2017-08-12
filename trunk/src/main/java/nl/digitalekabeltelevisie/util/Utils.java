@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -693,11 +693,12 @@ public final class Utils {
 		int filteredLength=0;
 
 		// this is where we loose formatting, like newlines and character emphasis
-		for (int i = offset; i < (offset+length); i++) {
-			if(b[i]>-97){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f)){
-				filteredBytes[filteredLength++]=b[i];
+		for (int i = offset; i < (offset + length); i++) {
+			final byte c = b[i];
+			if ((c > -97) && // bytes are signed, what we really mean is (b[i]<0x80)||(b[i]>0x9f)
+					(c != 0)) { 
+				filteredBytes[filteredLength++] = c;
 			}
-
 		}
 
 		if(charset==null){
