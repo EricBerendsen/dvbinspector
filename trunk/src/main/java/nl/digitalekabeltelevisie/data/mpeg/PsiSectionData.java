@@ -182,22 +182,32 @@ public class PsiSectionData {
 		
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
 
-		for (final PMTsection[] pmt : pmtList.values()){
-			final PMTsection p=pmt[0]; // PMT always one section
-			for(final Component component : p.getComponentenList() ){
+		for (final PMTsection[] pmtSections : pmtList.values()){
+			final PMTsection pmt=pmtSections[0]; // PMT always one section
+			// The registration descriptor shall be carried in the program_info loop of the PMT
+			boolean foundSCTE35RegistrationInProgramInfo = hasSCTE35RegistrationDescriptor(pmt.getDescriptorList());
+			for(final Component component : pmt.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
-					final List<RegistrationDescriptor> registration_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RegistrationDescriptor.class);
-					for(RegistrationDescriptor registrationDescriptor:registration_descriptors){
-						final byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
-						if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.SCTE_35,0,RegistrationDescriptor.SCTE_35.length)){
-							return true;
-						}
+					// sometimes it is in the component descriptor list
+					if(foundSCTE35RegistrationInProgramInfo || hasSCTE35RegistrationDescriptor(component.getComponentDescriptorList())){
+						return true;
 					}
 				}
 			}
 		}
 		return false;
 
+	}
+
+	private static boolean hasSCTE35RegistrationDescriptor(final List<Descriptor> componentDescriptorList) {
+		final List<RegistrationDescriptor> registration_descriptors = Descriptor.findGenericDescriptorsInList(componentDescriptorList, RegistrationDescriptor.class);
+		for(RegistrationDescriptor registrationDescriptor:registration_descriptors){
+			final byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
+			if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.SCTE_35,0,RegistrationDescriptor.SCTE_35.length)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
