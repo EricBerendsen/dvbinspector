@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -242,6 +242,26 @@ Triplet implements TreeNode {
 			0x03a9, 0x00c6, 0x0110, 0x0061, 0x0126, 0x0020, 0x0132, 0x013f, 0x0141, 0x00d8, 0x0152, 0x006f, 0x00de, 0x0166, 0x014a, 0x0149,
 			0x0138, 0x00e6, 0x0111, 0x010f, 0x0127, 0x0131, 0x0133, 0x0140, 0x0142, 0x00f8, 0x0153, 0x00df, 0x00fe, 0x0167, 0x014b, 0x0020,
 		}
+	};
+
+	//4 bits main triple + 3 bits character_set
+	private final static int G0_set_mapping[][] = {
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //0, latin
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //1, latin
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //2, latin
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //3, latin
+		{ 1, 2, 0, 0, 0, 3, 0, 0 }, //4, cy-1,cy-2,la,la,la,cy-3,la,la
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //5, all res.
+		{ 0, 0, 0, 0, 0, 0, 0, 4 }, //6, res,res,res,la,res,res,res,gre
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //7, all res.
+		{ 0, 0, 0, 0, 0, 0, 0, 5 }, //8, la,la,res,res,res,res,res,ara
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //9, all res.
+		{ 0, 0, 0, 0, 0, 6, 0, 5 }, //10, res,res,res,res,res,heb,res,ara
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //11, all res.
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //12, all res.
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //13, all res.
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //14, all res.
+		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //15, all res.
 	};
 
 
@@ -654,7 +674,13 @@ Triplet implements TreeNode {
 	 */
 	public static char getNationalOptionChar(final byte ch, final int nocs) {
 		char targetChar1;
-		int subset_idx = national_subset_mapping[(nocs & 0x78) >>> 3][nocs & 0x7];
+		final int g0SetDesignation = (nocs & 0x78) >>> 3;
+		final int controlBits = nocs & 0x7;
+		//System.err.println("g0SetDesignation:"+g0SetDesignation+", controlBits:"+controlBits);
+		int subset_idx = national_subset_mapping[g0SetDesignation][controlBits];
+		if(subset_idx==13){
+			return getG0Character(ch, g0SetDesignation, controlBits);
+		}
 		switch (ch) // special national characters
 		{
 		case 0x23:
@@ -700,9 +726,13 @@ Triplet implements TreeNode {
 			targetChar1 = (char) 0x25A0;
 			break;
 		default:
-			targetChar1 = (char) ch;
+			targetChar1 = getG0Character(ch, g0SetDesignation, controlBits);
 		}
 		return targetChar1;
+	}
+
+	private static char getG0Character(final byte ch, final int g0SetDesignation, final int controlBits) {
+		return (char) G0_sets[G0_set_mapping[g0SetDesignation][controlBits]][ch];
 	}
 
 }
