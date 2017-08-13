@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -115,7 +115,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 	}
 
-	public int getNationalOptionCharSubset() {
+	public int getNationalOptionCharSubset(boolean useSecondaryG0set) {
 		int r = 0; // sane default
 		
 		/* check for page enhancement data first. if X/28/0 is available, use
@@ -126,25 +126,37 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				: getMagazine().getPageEnhanceMentDataPackes(0);
 		if(pageEnhancement != null)
 		{
-			/* the national option selection data is contained in bits 14-8 of
-			 * triplet 1. */
-
-			final int tripletVal = pageEnhancement.getTripletList().get(0).getVal();
-
-			/* EB very dirty hack, the order of the last 3 bits is reversed from the order used in getNationalOptionCharacterSubset()
-			 * Table 32 in ETSI EN 300 706 V1.2.1 (2003-04) suggest the order from triplet 1 is correct. 
-			 * However we use look up tables from ProjectX, and these also have the 'wrong' order.  
-			 *  
-			 */
-
+			if(!useSecondaryG0set){
+				/* the national option selection data is contained in bits 14-8 of
+				 * triplet 1. */
+	
+				final int tripletVal = pageEnhancement.getTripletList().get(0).getVal();
+	
+				/* EB very dirty hack, the order of the last 3 bits is reversed from the order used in getNationalOptionCharacterSubset()
+				 * Table 32 in ETSI EN 300 706 V1.2.1 (2003-04) suggest the order from triplet 1 is correct. 
+				 * However we use look up tables from ProjectX, and these also have the 'wrong' order.  
+				 *  
+				 */
+	
 			
-			// G0 character set part
-			final int g0CharacterSet = (tripletVal & 0x3c00) >>> 7;
-			
-			// National Option subset part, reverse bits with a lookup table
-			final int  nationalOptionSubset =Utils.invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
-			
-			r = g0CharacterSet | nationalOptionSubset;
+				// G0 character set part
+				final int g0CharacterSet = (tripletVal & 0x3c00) >>> 7;
+				
+				// National Option subset part, reverse bits with a lookup table
+				final int  nationalOptionSubset =Utils.invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
+				
+				r = g0CharacterSet | nationalOptionSubset;
+			}else{
+				// secondary G0 set
+				final int triplet1Val = pageEnhancement.getTripletList().get(0).getVal();
+				final int triplet2Val = pageEnhancement.getTripletList().get(1).getVal();
+				final int value = (triplet1Val&0b11_1100_0000_0000_0000)>>14 | ((triplet2Val & 0b0111)<<4);
+				// G0 character set part
+				r = (value & 0b1111000) | Utils.invNationalOptionSet[value & 0b111];
+				
+				
+
+			}
 		}
 		else if(linesList[0] != null) {
 			/* 
@@ -964,6 +976,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				// define outside loop for Hold Mosaics
 				char targetChar1;
 				char heldMosaicCharacter = ' ';
+				boolean useSecondaryG0set = false;
 
 				for (int column = 0; column < rowData.length; column++) {
 
@@ -976,7 +989,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 					final byte ch = rowData[column];
 					if (ch >= 32) { // national option charset subset
-						final int nocs = getNationalOptionCharSubset();
+						final int nocs = getNationalOptionCharSubset(useSecondaryG0set);
 						// all chars 0x20..7F
 						if ((effectFlags & (MOSAIC_GRAPHICS)) == 0) { // not in block graphics
 							targetChar1 = TxtTriplet.getNationalOptionChar(ch, nocs);
@@ -1091,6 +1104,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 						} else {
 							targetChar1 = ' ';
 						}
+					} else if (ch == 0x1b) { //ESC (or Switch) ("Set-After")
+						useSecondaryG0set =! useSecondaryG0set;
+						targetChar1 = ' ';
 					} else if (ch == 0x1c) { //Black Background ("Set-At")
 						bg = 0;
 						bgColor[row][column] = bg;
