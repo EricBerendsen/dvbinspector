@@ -165,11 +165,11 @@ public class Descriptor implements TreeNode {
 
 			/* 0x13 - 0x1A DSM-CC ISO13818-6, TR 102 006 */
 		case 0x13:
-			return "Carousel_Identifier_descriptor";
+			return "DSM-CC Carousel_Identifier_descriptor";
 		case 0x14:
-			return "Association_tag_descriptor";
+			return "DSM-CC Association_tag_descriptor";
 		case 0x15:
-			return "Deferred_Association_tags_descriptor";
+			return "DSM-CC Deferred_Association_tags_descriptor";
 
 			/* DSM-CC stream descriptors */
 			// case 0x16: reserved....
