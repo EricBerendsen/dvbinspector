@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -185,8 +185,8 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
 				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
-					r1.append("<b><span style=\"background-color: white\">");
-					r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b><br>");
+					r1.append("<b>");
+					r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</b><br>");
 					final String shortText = shortEventDescriptor.getText().toString();
 					if((shortText!=null)&&!shortText.isEmpty()){
 						r1.append(escapeHtmlBreakLines(shortText)).append("<br>");
