@@ -1827,7 +1827,7 @@ public final class Utils {
 			final int start=l*16;
 			b.append("").append(Utils.toHexString(start,6));
 			b.append("&nbsp;");
-			b.append("<span style=\"background-color: white\">");
+			b.append("<span>");
 			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
 
 			Color currentColor = coloring.find(l*16);
