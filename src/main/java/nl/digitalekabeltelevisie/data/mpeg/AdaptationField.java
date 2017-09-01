@@ -362,6 +362,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			}
 			if(splicing_point_flag){
 				splice_countdown =  getInt(data,offset,1,MASK_8BITS);
+				logger.info("splicing_point_flag is set, splice_countdown="+splice_countdown);
 				offset+=1;
 			}
 			if(transport_private_data_flag){
@@ -397,6 +398,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 				if (seamless_splice_flag) {
 					// TODO not implemented
 					adaptation_field_extension_offset += 5;
+					logger.info("seamless_splice_flag set, not implemented");
 				}
 				if (!af_descriptor_not_present_flag){
 					afDescriptorList = AFDescriptorFactory.buildDescriptorList(adaptation_field_extension_byte, adaptation_field_extension_offset, adaptation_field_extension_length - adaptation_field_extension_offset);
