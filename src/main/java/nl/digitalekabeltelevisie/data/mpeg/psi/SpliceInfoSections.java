@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -51,7 +51,9 @@ public class SpliceInfoSections extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SpliceInfoSections PID="+pid));
+		int programNumber = getParentPSI().getPmts().findPMTsFromComponentPID(pid).get(0).getProgramNumber();
+		
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SpliceInfoSections PID="+pid + " for program",programNumber,getParentPSI().getSdt().getServiceName(programNumber)));
 
 		for (SpliceInfoSection toTsection : spliceInfoSectionList) {
 			t.add(toTsection.getJTreeNode(modus));
