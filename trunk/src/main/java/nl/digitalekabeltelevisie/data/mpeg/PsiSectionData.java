@@ -185,18 +185,15 @@ public class PsiSectionData {
 		for (final PMTsection[] pmtSections : pmtList.values()){
 			final PMTsection pmt=pmtSections[0]; // PMT always one section
 			// The registration descriptor shall be carried in the program_info loop of the PMT
-			boolean foundSCTE35RegistrationInProgramInfo = hasSCTE35RegistrationDescriptor(pmt.getDescriptorList());
-			for(final Component component : pmt.getComponentenList() ){
-				if(component.getElementaryPID()==pid){
-					// sometimes it is in the component descriptor list
-					if(foundSCTE35RegistrationInProgramInfo || hasSCTE35RegistrationDescriptor(component.getComponentDescriptorList())){
+			if(hasSCTE35RegistrationDescriptor(pmt.getDescriptorList())){
+				for(final Component component : pmt.getComponentenList() ){
+					if((component.getElementaryPID()==pid) && (component.getStreamtype()==0x86)){
 						return true;
 					}
 				}
 			}
 		}
 		return false;
-
 	}
 
 	private static boolean hasSCTE35RegistrationDescriptor(final List<Descriptor> componentDescriptorList) {
