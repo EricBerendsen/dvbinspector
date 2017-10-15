@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,15 +28,13 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
@@ -102,6 +100,20 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 			}
 		}
 		return -1;
+	}
+	
+	public List<PMTsection>findPMTsFromComponentPID(int pid){
+		ArrayList<PMTsection> result = new ArrayList<PMTsection>();
+		for(PMTsection[] pmtArray: pmts.values()){
+			PMTsection p = pmtArray[0];
+			for(Component component:p.getComponentenList()){
+				if(component.getElementaryPID()==pid){
+					result.add(p);
+					break; // every PMT is included once, even if more components wold point to same PID (which is illegal)
+				}
+			}
+		}
+		return result;
 	}
 
 	// PMT is always one section per program
