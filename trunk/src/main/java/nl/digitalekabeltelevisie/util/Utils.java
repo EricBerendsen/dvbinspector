@@ -878,14 +878,6 @@ public final class Utils {
 
 
 	public static String getStreamTypeString(final int tag){
-		if((0x27<=tag)&&(tag<=0x7e)){
-			return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
-		}
-
-		if((0x80<=tag)&&(tag<=0xFF)){
-			return "User Private";
-		}
-
 		switch (tag) {
 		case 0x00: return"ITU-T | ISO/IEC Reserved";
 		case 0x01: return"ISO/IEC 11172 Video";
@@ -934,8 +926,20 @@ public final class Utils {
 		case 0x25: return"HEVC temporal video subset of an HEVC video stream conforming to one or more profiles defined in Annex A of Rec. ITU-T H.265 | ISO/IEC 23008-2";
 		case 0x26: return"MVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
 		case 0x7f: return"IPMP stream";
+		case 0x81: return"User Private / AC-3 (ATSC)";
+		case 0x86: return"User Private / SCTE-35 splice_info_section";
+		case 0x87: return"User Private / E-AC-3 (ATSC)";
 
 		default:
+			if((0x27<=tag)&&(tag<=0x7e)){
+				return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
+			}
+
+			if((0x80<=tag)&&(tag<=0xFF)){
+				return "User Private";
+			}
+
+			
 			return "illegal/unknown value";
 		}
 	}
@@ -1013,13 +1017,6 @@ public final class Utils {
 
 	public static String getStreamTypeShortString(final int tag){
 
-		if((0x27<=tag)&&(tag<=0x7e)){
-			return "ISO/IEC 13818-1 Reserved";
-		}
-
-		if((0x80<=tag)&&(tag<=0xFF)){
-			return "User Private";
-		}
 
 		switch (tag) {
 		case 0x00: return"ITU-T | ISO/IEC Reserved";
@@ -1068,8 +1065,22 @@ public final class Utils {
 		case 0x25: return"H.265 temporal video subset";
 		case 0x26: return"MVCD video sub-bitstream of an AVC video stream";
 		case 0x7f: return"IPMP stream";
+		
+		case 0x81: return"AC-3 (ATSC)";
+		case 0x86: return"SCTE-35";
+		case 0x87: return"E-AC-3 (ATSC)";
+
 
 		default:
+			
+			if((0x27<=tag)&&(tag<=0x7e)){
+				return "ISO/IEC 13818-1 Reserved";
+			}
+
+			if((0x80<=tag)&&(tag<=0xFF)){
+				return "User Private";
+			}
+
 			return "illegal value";
 		}
 	}
