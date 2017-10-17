@@ -224,9 +224,10 @@ public class PID implements TreeNode{
 			}
 			if(((last_continuity_counter==-1)|| // first packet
 					(pid==0x1fff)|| // null packet
-					(((last_continuity_counter+1)%16)==packet.getContinuityCounter()))
+					(((last_continuity_counter+1)%16)==packet.getContinuityCounter())) || // counter ok
+					(packet.hasAdaptationField() && packet.getAdaptationField().isDiscontinuity_indicator()) // discontinuity_indicator true
 					) {
-				// counter ok
+				
 				last_continuity_counter = packet.getContinuityCounter();
 				last_packet_no = packet.getPacketNo();
 				last_packet = packet;
