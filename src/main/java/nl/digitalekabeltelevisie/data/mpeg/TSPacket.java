@@ -365,12 +365,12 @@ public class TSPacket implements HTMLSource, TreeNode{
 		AdaptationField adaptationField = null;
 		try{
 			adaptationField = getAdaptationField();
+			if(adaptationField!=null){
+				t.add(adaptationField.getJTreeNode(modus));
+			}
 		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			adaptationField = null;
 			t.add(new DefaultMutableTreeNode(getErrorKVP(ERROR_PARSING_ADAPTATION_FIELD)));
-		}
-		if(adaptationField!=null){
-			t.add(adaptationField.getJTreeNode(modus));
 		}
 
 		if(hasPayload()) {
