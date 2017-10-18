@@ -330,7 +330,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	private boolean ltw_flag;
 	private boolean piecewise_rate_flag;
 	private boolean seamless_splice_flag;
-	private boolean af_descriptor_not_present_flag;
+	private boolean af_descriptor_not_present_flag = true;
 
 	private boolean ltw_valid_flag;
 	private int ltw_offset;
