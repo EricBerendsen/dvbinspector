@@ -27,16 +27,21 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 /**
@@ -49,6 +54,20 @@ import nl.digitalekabeltelevisie.util.*;
  */
 public class SpliceInfoSection extends TableSection {
 	
+	public class BandwidthReservation implements TreeNode {
+		
+		private BandwidthReservation(BitSource bs){
+			super();
+		}
+
+
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			return new DefaultMutableTreeNode(new KVP("bandwidth_reservation"));
+		}
+
+	}
+
 	private static final Logger logger = Logger.getLogger(SpliceInfoSection.class.getName());
 	
 	private class SpliceTime implements TreeNode{
@@ -232,12 +251,14 @@ public class SpliceInfoSection extends TableSection {
 				splice_command = new SpliceNull(bitSource);
 			}else if(splice_command_type==5){
 				splice_command = new SpliceInsert(bitSource);
+			}else if(splice_command_type==7){
+				splice_command = new BandwidthReservation(bitSource);
 			}else{
 				logger.info("Not implemented: splice_command_type="+splice_command_type+" ("+getSpliceCommandTypeString(splice_command_type)+")");
 			}
 			
 			int loopstart = 0;
-			if ((splice_command_type == 0) || (splice_command_type == 5)) {
+			if ((splice_command_type == 0) || (splice_command_type == 5)|| (splice_command_type == 7)) {
 				loopstart = bitSource.getNextFullByteOffset();
 			} else if (splice_command_length != 0xFFF) {
 				loopstart = 14 + splice_command_length;
@@ -271,6 +292,8 @@ public class SpliceInfoSection extends TableSection {
 			if(splice_command_type==0){
 				t.add(splice_command.getJTreeNode(modus));
 			}else if(splice_command_type==5){
+				t.add(splice_command.getJTreeNode(modus));
+			}else if(splice_command_type==7){
 				t.add(splice_command.getJTreeNode(modus));
 			}else{
 				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("splice_command_type ="+splice_command_type+" ("+ getSpliceCommandTypeString(splice_command_type)+")")));
