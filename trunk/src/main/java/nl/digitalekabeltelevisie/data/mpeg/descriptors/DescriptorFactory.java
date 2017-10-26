@@ -101,15 +101,15 @@ public final class DescriptorFactory {
 			Descriptor d;
 			final int descriptorTag = Utils.getUnsignedByte(data[t + offset]);
 			try {
-				if (descriptorTag <= 0x3f) {
+				if (tableSection.getTableId() == 0xFC) {
+					d = getSCTE35Descriptor(data, offset, tableSection, t);
+				} else if (descriptorTag <= 0x3f) {
 					if (tableSection.getTableId() == 0x4c) {
 						d = getINTDescriptor(data, offset, tableSection, t);
 					} else if (tableSection.getTableId() == 0x4b) {
 						d = getUNTDescriptor(data, offset, tableSection, t);
 					} else if (tableSection.getTableId() == 0x74) {
 						d = getAITDescriptor(data, offset, tableSection, t);
-					} else if (tableSection.getTableId() == 0xFC) {
-						d = getSCTE35Descriptor(data, offset, tableSection, t);
 					} else {
 						d = getMPEGDescriptor(data, offset, tableSection, t);
 					}
