@@ -301,6 +301,122 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			this.data_field_length = data_field_length;
 		}
 
+		public byte[] getData_byte() {
+			return data_byte;
+		}
+
+		public int getAnnouncement_switching_flag_field() {
+			return announcement_switching_flag_field;
+		}
+
+		public int getAU_coding_format() {
+			return AU_coding_format;
+		}
+
+		public int getAU_coding_type_information() {
+			return AU_coding_type_information;
+		}
+
+		public int getAU_ref_pic_idc() {
+			return AU_ref_pic_idc;
+		}
+
+		public int getAU_pic_struct() {
+			return AU_pic_struct;
+		}
+
+		public int getAU_PTS_present_flag() {
+			return AU_PTS_present_flag;
+		}
+
+		public int getAU_profile_info_present_flag() {
+			return AU_profile_info_present_flag;
+		}
+
+		public int getAU_stream_info_present_flag() {
+			return AU_stream_info_present_flag;
+		}
+
+		public int getAU_trick_mode_info_present_flag() {
+			return AU_trick_mode_info_present_flag;
+		}
+
+		public long getAU_PTS_32() {
+			return AU_PTS_32;
+		}
+
+		public int getReserved() {
+			return reserved;
+		}
+
+		public int getAU_frame_rate_code() {
+			return AU_frame_rate_code;
+		}
+
+		public int getAU_profile() {
+			return AU_profile;
+		}
+
+		public int getAU_constraint_set0_flag() {
+			return AU_constraint_set0_flag;
+		}
+
+		public int getAU_constraint_set1_flag() {
+			return AU_constraint_set1_flag;
+		}
+
+		public int getAU_constraint_set2_flag() {
+			return AU_constraint_set2_flag;
+		}
+
+		public int getAU_AVC_compatible_flags() {
+			return AU_AVC_compatible_flags;
+		}
+
+		public int getAU_level() {
+			return AU_level;
+		}
+
+		public int getAU_max_I_picture_size() {
+			return AU_max_I_picture_size;
+		}
+
+		public int getAU_nominal_I_period() {
+			return AU_nominal_I_period;
+		}
+
+		public int getAU_max_I_period() {
+			return AU_max_I_period;
+		}
+
+		public int getReserved2() {
+			return reserved2;
+		}
+
+		public int getAU_Pulldown_info_present_flag() {
+			return AU_Pulldown_info_present_flag;
+		}
+
+		public int getAU_reserved_zero() {
+			return AU_reserved_zero;
+		}
+
+		public int getAU_flags_extension_1() {
+			return AU_flags_extension_1;
+		}
+
+		public boolean isExtraDataPresent() {
+			return extraDataPresent;
+		}
+
+		public int getAU_reserved() {
+			return AU_reserved;
+		}
+
+		public byte[] getAU_reserved_byte() {
+			return AU_reserved_byte;
+		}
+
 	}
 
 	private static Logger	logger	= Logger.getLogger(AdaptationField.class.getName());
@@ -588,6 +704,12 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			s.append("<br>transport_private_data_length: ").append(getHexAndDecimalFormattedString(transport_private_data_length));
 			s.append("<br>private_data_byte: ").append("0x").append(toHexString(private_data_byte)).append(" \"").append(
 					toSafeString(private_data_byte)).append("\"");
+			for (PrivateDataField privatedataField : privatedataFields) {
+				final DefaultMutableTreeNode treeNode = privatedataField.getJTreeNode(0);
+				s.append("<br><br><b>"+ getDataFieldTagString(privatedataField.getData_field_tag()) +"</b>");
+				s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
+				
+			}
 		}
 		if(adaptation_field_extension_flag){
 			s.append("<br>adaptation_field_extension_length: ").append(getHexAndDecimalFormattedString(adaptation_field_extension_length));
