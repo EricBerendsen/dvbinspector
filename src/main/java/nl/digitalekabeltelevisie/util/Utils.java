@@ -924,7 +924,7 @@ public final class Utils {
 		case 0x23: return"Additional view Rec. ITU-T H.264 | ISO/IEC 14496-10 video stream conforming to one or more profiles defined in Annex A for service-compatible stereoscopic 3D services";
 		case 0x24: return"ITU-T H.265 | ISO/IEC 23008-2 video stream or an HEVC temporal video sub-bitstream";
 		case 0x25: return"HEVC temporal video subset of an HEVC video stream conforming to one or more profiles defined in Annex A of Rec. ITU-T H.265 | ISO/IEC 23008-2";
-		case 0x26: return"MVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
+		case 0x26: return"Timeline and External Media Information streams / MVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
 		case 0x7f: return"IPMP stream";
 		case 0x81: return"User Private / AC-3 (ATSC)";
 		case 0x86: return"User Private / SCTE-35 splice_info_section";
