@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,7 +32,8 @@ import static nl.digitalekabeltelevisie.util.Utils.getUnsignedByte;
 import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
 import java.util.*;
-import java.util.logging.Logger;
+import java.util.Formatter;
+import java.util.logging.*;
 
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -151,22 +152,28 @@ public class PID implements TreeNode{
 						}
 
 						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
-					}else if((data.length>2) &&
-							(data[0]==0)&&(data[1]==0)&&(data[2]==1)){
+					}else if((data.length>2) && 
+							(data[0]==0) &&
+							(data[1]==0) &&
+							(data[2]==1)){
 						type = PES;
 						
-						// insert into PTS /DTS List
-						PesHeader pesHeader = packet.getPesHeader();
-						if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
-							final int pts_dts_flags = pesHeader.getPts_dts_flags();
-							if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
-								ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
-							}
-							if (pts_dts_flags ==3){ // DTS present,
-								dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
-							}
-						}
+						try {
+							// insert into PTS /DTS List
+							PesHeader pesHeader = packet.getPesHeader();
+							if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
 
+								final int pts_dts_flags = pesHeader.getPts_dts_flags();
+								if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
+									ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
+								}
+								if (pts_dts_flags ==3){ // DTS present,
+									dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
+								}
+							}
+						} catch (Exception e) {
+							logger.log(Level.WARNING, "Error getting PTS/DTS from PESHeader in packet:"+packet.getPacketNo() + " from PID:"+parentPID.getPid(), e);
+						}
 					}
 				}
 				//	something started
