@@ -64,6 +64,7 @@ public class AboutAction extends AbstractAction {
 				"it under the terms of the GNU General Public License as published by\n"+
 				"the Free Software Foundation, either version 3 of the License, or\n"+
 				"(at your option) any later version.\n\n"+
+				"DVB and MHP are registered trademarks of the DVB Project.\n\n"+
 				"Java Version: "+javaVersion +"\n"+
 				"Java Vendor: "+javaVendor+"\n"+
 				"Java Home: "+javaHome+"\n"+
