@@ -54,7 +54,7 @@ public class PsiSectionData {
 
 	private byte [] data ;
 	private int noBytes=0;
-	private long packet_no=0;
+	private int packet_no=0;
 	private final TransportStream transportStream;
 	private final PID parentPID;
 
@@ -65,7 +65,7 @@ public class PsiSectionData {
 	private static final Logger logger = Logger.getLogger(PsiSectionData.class.getName());
 
 
-	public PsiSectionData(final PID parent, final long packetNo,final TransportStream transportStream) {
+	public PsiSectionData(final PID parent, final int packetNo,final TransportStream transportStream) {
 		this.parentPID = parent;
 		this.packet_no=packetNo;
 		this.transportStream=transportStream;
@@ -196,7 +196,7 @@ public class PsiSectionData {
 		return false;
 	}
 
-	private static boolean hasSCTE35RegistrationDescriptor(final List<Descriptor> componentDescriptorList) {
+	public static boolean hasSCTE35RegistrationDescriptor(final List<Descriptor> componentDescriptorList) {
 		final List<RegistrationDescriptor> registration_descriptors = Descriptor.findGenericDescriptorsInList(componentDescriptorList, RegistrationDescriptor.class);
 		for(RegistrationDescriptor registrationDescriptor:registration_descriptors){
 			final byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
@@ -211,7 +211,7 @@ public class PsiSectionData {
 	 * @return the position of the first TSpacket of this PSISection in the TransportStream
 	 */
 
-	public long getPacket_no() {
+	public int getPacket_no() {
 		return packet_no;
 	}
 	private boolean isINTSection(final int pid){
@@ -371,7 +371,7 @@ public class PsiSectionData {
 		return false;
 	}
 
-	public void setPacket_no(final long packet_no) {
+	public void setPacket_no(final int packet_no) {
 		this.packet_no = packet_no;
 	}
 

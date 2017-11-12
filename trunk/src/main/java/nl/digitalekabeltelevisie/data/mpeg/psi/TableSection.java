@@ -78,12 +78,12 @@ public class TableSection implements TreeNode{
 
 	/* non DVB fields */
 
-	private long firstPacketNo=-1;
-	private long lastPacketNo=-1;
-	private long minPacketDistance = Long.MAX_VALUE;
-	private long maxPacketDistance = 0;
-	private long occurrenceCount=-1;
-	private long packetNo=-1;
+	private int firstPacketNo=-1;
+	private int lastPacketNo=-1;
+	private int minPacketDistance = Integer.MAX_VALUE;
+	private int maxPacketDistance = 0;
+	private int occurrenceCount=-1;
+	private int packetNo=-1;
 
 	public TableSection(final PsiSectionData raw_data, final PID parent){
 		super();
@@ -381,7 +381,7 @@ public class TableSection implements TreeNode{
 	/**
 	 * @return
 	 */
-	private String getRepetitionRate(final long count,final long last, final long  first) {
+	private String getRepetitionRate(final int count,final int last, final int  first) {
 		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
 		final long bitrate=parentTransportStream.getBitRate();
 		if((bitrate>0)&&(count>=2)){
@@ -467,31 +467,31 @@ public class TableSection implements TreeNode{
 		return firstPacketNo;
 	}
 
-	public void setFirst_packet_no(final long first_packet_no) {
+	public void setFirst_packet_no(final int first_packet_no) {
 		this.firstPacketNo = first_packet_no;
 	}
 
-	public long getLast_packet_no() {
+	public int getLast_packet_no() {
 		return lastPacketNo;
 	}
 
-	public void setLast_packet_no(final long last_packet_no) {
+	public void setLast_packet_no(final int last_packet_no) {
 		this.lastPacketNo = last_packet_no;
 	}
 
-	public long getOccurrence_count() {
+	public int getOccurrence_count() {
 		return occurrenceCount;
 	}
 
-	public void setOccurrence_count(final long occurrence_count) {
+	public void setOccurrence_count(final int occurrence_count) {
 		this.occurrenceCount = occurrence_count;
 	}
 
-	public long getPacket_no() {
+	public int getPacket_no() {
 		return packetNo;
 	}
 
-	public void setPacket_no(final long packet_no) {
+	public void setPacket_no(final int packet_no) {
 		this.packetNo = packet_no;
 	}
 
@@ -530,19 +530,19 @@ public class TableSection implements TreeNode{
 		return true;
 	}
 
-	public long getMinPacketDistance() {
+	public int getMinPacketDistance() {
 		return minPacketDistance;
 	}
 
-	public void setMinPacketDistance(long minPacketDistance) {
+	public void setMinPacketDistance(int minPacketDistance) {
 		this.minPacketDistance = minPacketDistance;
 	}
 
-	public long getMaxPacketDistance() {
+	public int getMaxPacketDistance() {
 		return maxPacketDistance;
 	}
 
-	public void setMaxPacketDistance(long maxPacketDistance) {
+	public void setMaxPacketDistance(int maxPacketDistance) {
 		this.maxPacketDistance = maxPacketDistance;
 	}
 
