@@ -89,8 +89,8 @@ public class GeneralPSITable extends AbstractPSITabel{
 
 			for (final TableSection existingSection : simpleSectionsd) {
 				if(existingSection.equals(section)){
-					long previousPacketNo = existingSection.getLast_packet_no();
-					long distance = section.getPacket_no() - previousPacketNo;
+					int previousPacketNo = existingSection.getLast_packet_no();
+					int distance = section.getPacket_no() - previousPacketNo;
 					if(distance>existingSection.getMaxPacketDistance()){
 						existingSection.setMaxPacketDistance(distance);
 					}

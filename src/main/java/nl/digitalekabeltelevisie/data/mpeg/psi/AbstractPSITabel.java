@@ -72,8 +72,8 @@ public abstract class AbstractPSITabel implements TreeNode{
 			last = last.getNextVersion();
 		}
 		if(last.equals(newSection)){ // already have an instance if this section, just update the stats on the existing section
-			long previousPacketNo = last.getLast_packet_no();
-			long distance = newSection.getPacket_no() - previousPacketNo;
+			int previousPacketNo = last.getLast_packet_no();
+			int distance = newSection.getPacket_no() - previousPacketNo;
 			if(distance>last.getMaxPacketDistance()){
 				last.setMaxPacketDistance(distance);
 			}
