@@ -251,10 +251,8 @@ public class PID implements TreeNode{
 			}else if(last_continuity_counter==packet.getContinuityCounter()){
 				if(dup_found>=1){ // third or more dup packet (third total), illegal
 					dup_found++;
-					logger.fine("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
-					//System.out.println("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+					logger.warning("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
 				}else{ // just a dup, count it and ignore
-					//System.out.println("duplicate packet found, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
 					dup_found = 1;
 					dup_packets++;
 				}
