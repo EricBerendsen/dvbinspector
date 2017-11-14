@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,7 @@
 package nl.digitalekabeltelevisie.gui.utils;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import org.jfree.data.DomainOrder;
 import org.jfree.data.general.*;
@@ -34,8 +35,9 @@ import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.*;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class TimestampXYDataset implements XYDataset {
 	
@@ -50,6 +52,9 @@ public class TimestampXYDataset implements XYDataset {
     int startPacket;
     int endPacket;
     
+	private static final Logger logger = Logger.getLogger(TimestampXYDataset.class.getName());
+
+    
 
 	public TimestampXYDataset(PMTsection pmt, TransportStream transportStream, ViewContext viewContext) {
 		
@@ -63,15 +68,69 @@ public class TimestampXYDataset implements XYDataset {
 			addToSeriesList(transportStream.getPID(pcrPid).getPcrList(),pcrLabel);
 		}
 		
-		for(Component c:pmt.getComponentenList()){
-			short componentPid = (short) c.getElementaryPID();
-			String componentLabel = componentPid+" - "+transportStream.getShortLabel(componentPid);
-			final PID pid = transportStream.getPID(componentPid);
+		boolean hasSCTE35 = PsiSectionData.hasSCTE35RegistrationDescriptor(pmt.getDescriptorList());
+		for(Component component:pmt.getComponentenList()){
+			final PID pid = transportStream.getPID((short) component.getElementaryPID());
 			if(pid!=null){
-				addToSeriesList(pid.getPtsList(),componentLabel+" PTS");
-				addToSeriesList(pid.getDtsList(),componentLabel+" DTS");
+				addToSeriesList(pid.getPtsList(),getComponentLabel(transportStream, component)+" PTS");
+				addToSeriesList(pid.getDtsList(),getComponentLabel(transportStream, component)+" DTS");
+				
+				findSCTE35Points(transportStream, hasSCTE35, component);
 			}
 		}
+		
+	}
+
+	private void findSCTE35Points(TransportStream transportStream, boolean hasSCTE35, Component component) {
+		if(hasSCTE35 && component.getStreamtype()==0x86){
+			List<TimeStamp> exitPoints = new ArrayList<TimeStamp>();
+			List<TimeStamp> returnPoints = new ArrayList<TimeStamp>();
+			SpliceInfoSections spliceSections = transportStream.getPsi().getScte35_table().getSpliceInfoSections((short) component.getElementaryPID());
+			if(spliceSections!=null){
+				findSpliceInserts(exitPoints, returnPoints, spliceSections);
+				addToSeriesList(exitPoints, getComponentLabel(transportStream, component) + " Exit Point");
+				addToSeriesList(returnPoints, getComponentLabel(transportStream, component) + " Return Point");
+			}
+		}
+	}
+
+	private static void findSpliceInserts(List<TimeStamp> exitPoints, List<TimeStamp> returnPoints,
+			SpliceInfoSections spliceSections) {
+		List<SpliceInfoSection> spliceInfoSectionList = spliceSections.getSpliceInfoSectionList();
+		for (SpliceInfoSection spliceSection : spliceInfoSectionList) {
+			if (spliceSection.getSplice_command_type() == 5) {
+				SpliceInfoSection.SpliceInsert spliceInsert = (SpliceInfoSection.SpliceInsert) spliceSection
+						.getSplice_command();
+				// handle Program Splice Point whereby all PIDs/components of the program are to be spliced.
+				if ((spliceInsert.getProgram_splice_flag() == 1) && (spliceInsert.getSplice_immediate_flag() == 0)) {
+					handleProgramSplicePoint(exitPoints, returnPoints, spliceSection, spliceInsert);
+				}else{
+					// TODO handle Component Splice Mode whereby each component that is intended to be spliced will be listed separately
+					logger.warning("SCTE35 Component Splice Mode not yet supported, please report");
+				}
+			}
+		}
+	}
+
+	private static void handleProgramSplicePoint(List<TimeStamp> exitPoints, List<TimeStamp> returnPoints,
+			SpliceInfoSection spliceSection, SpliceInfoSection.SpliceInsert spliceInsert) {
+		SpliceInfoSection.SpliceTime spliceTime = spliceInsert.getSplice_time();
+		if ((spliceTime != null) && (spliceTime.getTime_specified_flag() == 1)) {
+			long ptsTime = spliceTime.getPts_time();
+			long ptsAdjust = spliceSection.getPts_adjustment();
+			long time = (ptsTime + ptsAdjust) & Utils.MASK_33BITS;
+			int packetNo = spliceSection.getPacket_no();
+			TimeStamp ts = new TimeStamp(packetNo, time);
+			if (spliceInsert.getOut_of_network_indicator() == 1) {
+				exitPoints.add(ts);
+			} else {
+				returnPoints.add(ts);
+			}
+		}
+	}
+
+	private static String getComponentLabel(TransportStream transportStream, Component component) {
+		return (short) component.getElementaryPID()+" - "+transportStream.getShortLabel((short) component.getElementaryPID());
 	}
 
 	private void addToSeriesList(final List<TimeStamp> list, String componentLabel) {
@@ -156,7 +215,6 @@ public class TimestampXYDataset implements XYDataset {
 
 	@Override
 	public int getItemCount(int series) {
-		//return seriesList.get(series).size();
 		return seriesViewContextLength.get(series);
 	}
 
