@@ -70,7 +70,7 @@ public class SpliceInfoSection extends TableSection {
 
 	private static final Logger logger = Logger.getLogger(SpliceInfoSection.class.getName());
 	
-	private class SpliceTime implements TreeNode{
+	public class SpliceTime implements TreeNode{
 		
 		private int time_specified_flag;
 		private long pts_time;
@@ -93,6 +93,14 @@ public class SpliceInfoSection extends TableSection {
 				t.add(new DefaultMutableTreeNode(new KVP("pts_time",pts_time,Utils.printTimebase90kHz(pts_time))));
 			}
 			return t;
+		}
+
+		public int getTime_specified_flag() {
+			return time_specified_flag;
+		}
+
+		public long getPts_time() {
+			return pts_time;
 		}
 	}
 	
@@ -119,7 +127,7 @@ public class SpliceInfoSection extends TableSection {
 		}
 	}
 	
-	private class SpliceInsert implements TreeNode{
+	public class SpliceInsert implements TreeNode{
 		
 		private long splice_event_id;
 		private int splice_event_cancel_indicator;
@@ -203,6 +211,62 @@ public class SpliceInfoSection extends TableSection {
 				t.add(new DefaultMutableTreeNode(new KVP("avails_expected",avails_expected,null)));
 			}
 			return t;
+		}
+
+		public long getSplice_event_id() {
+			return splice_event_id;
+		}
+
+		public int getSplice_event_cancel_indicator() {
+			return splice_event_cancel_indicator;
+		}
+
+		public int getOut_of_network_indicator() {
+			return out_of_network_indicator;
+		}
+
+		public int getProgram_splice_flag() {
+			return program_splice_flag;
+		}
+
+		public int getDuration_flag() {
+			return duration_flag;
+		}
+
+		public int getSplice_immediate_flag() {
+			return splice_immediate_flag;
+		}
+
+		public int getUnique_program_id() {
+			return unique_program_id;
+		}
+
+		public int getAvail_num() {
+			return avail_num;
+		}
+
+		public int getAvails_expected() {
+			return avails_expected;
+		}
+
+		public int getComponent_count() {
+			return component_count;
+		}
+
+		public SpliceTime getSplice_time() {
+			return splice_time;
+		}
+
+		public BreakDuration getBreak_duration() {
+			return break_duration;
+		}
+
+		public List<Integer> getComponentTags() {
+			return componentTags;
+		}
+
+		public List<SpliceTime> getComponentSpliceTimes() {
+			return componentSpliceTimes;
 		}	
 	}
 	
@@ -325,6 +389,61 @@ public class SpliceInfoSection extends TableSection {
 		default:
 			return "Reserved";
 		}
+	}
+
+
+	public int getProtocol_version() {
+		return protocol_version;
+	}
+
+
+	public int getEncrypted_packet() {
+		return encrypted_packet;
+	}
+
+
+	public int getEncryption_algorithm() {
+		return encryption_algorithm;
+	}
+
+
+	public long getPts_adjustment() {
+		return pts_adjustment;
+	}
+
+
+	public int getCw_index() {
+		return cw_index;
+	}
+
+
+	public int getTier() {
+		return tier;
+	}
+
+
+	public int getSplice_command_length() {
+		return splice_command_length;
+	}
+
+
+	public int getSplice_command_type() {
+		return splice_command_type;
+	}
+
+
+	public int getDescriptor_loop_length() {
+		return descriptor_loop_length;
+	}
+
+
+	public List<Descriptor> getSplice_descriptors() {
+		return splice_descriptors;
+	}
+
+
+	public TreeNode getSplice_command() {
+		return splice_command;
 	}
 
 }

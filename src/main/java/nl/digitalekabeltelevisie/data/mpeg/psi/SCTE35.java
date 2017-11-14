@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -78,5 +78,9 @@ public class SCTE35 extends AbstractPSITabel{
 		return t;
 	}
 
+	
+	public SpliceInfoSections getSpliceInfoSections(int pid){
+		return spliceSections.get(pid);
+	}
 
 }
