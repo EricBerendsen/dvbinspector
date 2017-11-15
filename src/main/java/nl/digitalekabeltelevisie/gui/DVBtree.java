@@ -413,7 +413,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final int pid = p.getPid();
 				GeneralPesHandler pesH = p.getPesHandler();
 				if(!pesH.isInitialized()){ // prevent double click
-					HashMap<Integer, GeneralPesHandler> handlerMap = new HashMap<Integer, GeneralPesHandler>();
+					HashMap<Integer, GeneralPesHandler> handlerMap = new HashMap<>();
 					handlerMap.put(pid, pesH);
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -432,19 +432,15 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 									JOptionPane.WARNING_MESSAGE);
 							p.setPesHandler(new GeneralPesHandler());
 							pesH = p.getPesHandler();
-							handlerMap = new HashMap<Integer, GeneralPesHandler>();
+							handlerMap = new HashMap<>();
 							handlerMap.put(pid, pesH);
 							try {
 								ts.parseStream(null,handlerMap);
 							} catch (IOException e1) {
-								logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e);
+								logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
 								setCursor(Cursor.getDefaultCursor());
 							}
-						}else{
-							
-							
 						}
-						
 					}
 					final DefaultMutableTreeNode node =((TreeNode)p.getPesHandler()).getJTreeNode(mod);
 					// thanks to Yong Zhang for the tip for refreshing the tree structure.
