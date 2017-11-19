@@ -322,7 +322,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	/**
 	 * @return
 	 */
-	private boolean hasPayload() {
+	public boolean hasPayload() {
 		return (getAdaptationFieldControl() == 1) || (getAdaptationFieldControl() == 3);
 	}
 

@@ -231,7 +231,7 @@ public class PID implements TreeNode{
 			}
 			if(((last_continuity_counter==-1)|| // first packet
 					(pid==0x1fff)|| // null packet
-					(((last_continuity_counter+1)%16)==packet.getContinuityCounter())) || // counter ok
+					((((last_continuity_counter+1)%16)==packet.getContinuityCounter()))&&packet.hasPayload()) || // counter ok
 					(packet.hasAdaptationField() && packet.getAdaptationField().isDiscontinuity_indicator()) // discontinuity_indicator true
 					) {
 				
@@ -248,7 +248,7 @@ public class PID implements TreeNode{
 					scrambled=true;
 				}
 
-			}else if(last_continuity_counter==packet.getContinuityCounter()){
+			}else if(packet.hasPayload() &&(last_continuity_counter==packet.getContinuityCounter())){
 				if(dup_found>=1){ // third or more dup packet (third total), illegal
 					dup_found++;
 					logger.warning("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
@@ -257,8 +257,10 @@ public class PID implements TreeNode{
 					dup_packets++;
 				}
 
-			}else 	{
-				logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+			}else if(packet.hasPayload() || // not dup, and not consecutive, so error
+					(last_continuity_counter!=packet.getContinuityCounter()) // if no payload, counter should not increment 
+					){
+				logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo()+", adaptation_field_control="+packet.getAdaptationFieldControl());
 				last_continuity_counter=-1;
 				continuity_errors++;
 				gatherer.reset();
