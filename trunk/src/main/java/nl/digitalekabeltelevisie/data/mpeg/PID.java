@@ -226,13 +226,21 @@ public class PID implements TreeNode{
 			}
 		}else{
 
+			AdaptationField adaptationField = null;
+
 			if(packet.hasAdaptationField()){
-				processAdaptationField(packet);
+				try{
+					adaptationField = packet.getAdaptationField();
+					processAdaptationField(adaptationField,packet.getPacketNo());
+				}catch(final RuntimeException re){ // might be some error in adaptation field, it is not well protected
+					logger.log(Level.WARNING, "Error getting adaptationField", re);
+					adaptationField = null;
+				}
 			}
 			if(((last_continuity_counter==-1)|| // first packet
 					(pid==0x1fff)|| // null packet
 					((((last_continuity_counter+1)%16)==packet.getContinuityCounter()))&&packet.hasPayload()) || // counter ok
-					(packet.hasAdaptationField() && packet.getAdaptationField().isDiscontinuity_indicator()) // discontinuity_indicator true
+					(adaptationField!=null && adaptationField.isDiscontinuity_indicator()) // discontinuity_indicator true
 					) {
 				
 				last_continuity_counter = packet.getContinuityCounter();
@@ -260,58 +268,43 @@ public class PID implements TreeNode{
 			}else if(packet.hasPayload() || // not dup, and not consecutive, so error
 					(last_continuity_counter!=packet.getContinuityCounter()) // if no payload, counter should not increment 
 					){
-				logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo()+", adaptation_field_control="+packet.getAdaptationFieldControl());
-				last_continuity_counter=-1;
+				//logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo()+", adaptation_field_control="+packet.getAdaptationFieldControl());
+				last_continuity_counter=packet.getContinuityCounter();
+				last_packet_no = packet.getPacketNo();
+				last_packet = packet;
 				continuity_errors++;
 				gatherer.reset();
-			}
+			}// else{ // no payload, only adaptation. Don't Increase continuity_counter
 		}
 		packets++;
 	}
 
-	private void processAdaptationField(final TSPacket packet) {
-		AdaptationField adaptationField = null;
-		try{
-			adaptationField = packet.getAdaptationField();
-		}catch(final RuntimeException re){ // might be some error in adaptation field, it is not well protected
-			adaptationField = null;
-		}
-		if(adaptationField!=null) { //Adaptation field present
-			processTEMI(adaptationField,temiList,packet.getPacketNo());
-			if(adaptationField.isPCR_flag()){
-				final PCR newPCR = adaptationField.getProgram_clock_reference();
-				//System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+", PCR:"+newPCR.getProgram_clock_reference());
-				pcrList.add(new TimeStamp(packet.getPacketNo(), newPCR.getProgram_clock_reference_base()));
-//				if(adaptationField.isDiscontinuity_indicator()){
-//					//System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+" Discontinuity_indicator SET");
-//				}
-				if((firstPCR != null)&&!adaptationField.isDiscontinuity_indicator()){
-					final long packetsDiff = packet.getPacketNo() - firstPCRpacketNo;
 
-					// This will ignore single PCR packets that have lower values than previous.
-					// when PCR wraps around we only use first part till wrap around for bitrate calculation
-					// (unless PCR reaches value of firstPCR again, this would mean stream of > 24 hours)
-					if((newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) >0){
-						bitRate = ((packetsDiff * parentTransportStream.getPacketLenghth() * system_clock_frequency * 8))/(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference());
-//						if(lastPCR!=null){ 
-//							long diff = newPCR.getProgram_clock_reference()- lastPCR.getProgram_clock_reference(); // max 100 mSec between PCR
-//							System.out.println("Packet:"+packet.getPacketNo()+", PCR diff:"+diff+", ("+Utils.printPCRTime(diff)+")");
-//						}
-//						//System.out.println("PCR diff:"+(newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()));
-//					}else{
-//						System.out.println("PID:"+pid+", Packet no:"+packet.getPacketNo()+"newPCR.getProgram_clock_reference()- firstPCR.getProgram_clock_reference()) <=0"); 
-					}
-					lastPCR = newPCR;
-					lastPCRpacketNo = packet.getPacketNo();
-					pcr_count++;
+	private void processAdaptationField(AdaptationField adaptationField, int packetNo) {
+		processTEMI(adaptationField, temiList, packetNo);
+		if (adaptationField.isPCR_flag()) {
+			final PCR newPCR = adaptationField.getProgram_clock_reference();
+			pcrList.add(new TimeStamp(packetNo, newPCR.getProgram_clock_reference_base()));
+			if ((firstPCR != null) && !adaptationField.isDiscontinuity_indicator()) {
+				final long packetsDiff = packetNo - firstPCRpacketNo;
 
-				}else{ // start, or restart of discontinuity
-					firstPCR = newPCR;
-					firstPCRpacketNo = packet.getPacketNo();
-					lastPCR = null;
-					lastPCRpacketNo = -1;
-					pcr_count=1;
+				// This will ignore single PCR packets that have lower values than previous.
+				// when PCR wraps around we only use first part till wrap around for bitrate calculation
+				// (unless PCR reaches value of firstPCR again, this would mean stream of > 24 hours)
+				if ((newPCR.getProgram_clock_reference() - firstPCR.getProgram_clock_reference()) > 0) {
+					bitRate = ((packetsDiff * parentTransportStream.getPacketLenghth() * system_clock_frequency * 8))
+							/ (newPCR.getProgram_clock_reference() - firstPCR.getProgram_clock_reference());
 				}
+				lastPCR = newPCR;
+				lastPCRpacketNo = packetNo;
+				pcr_count++;
+
+			} else { // start, or restart of discontinuity
+				firstPCR = newPCR;
+				firstPCRpacketNo = packetNo;
+				lastPCR = null;
+				lastPCRpacketNo = -1;
+				pcr_count = 1;
 			}
 		}
 	}
@@ -327,7 +320,7 @@ public class PID implements TreeNode{
 							(timelineDescriptor.getHas_timestamp()==2)){
 							ArrayList<TemiTimeStamp> tl = temiList.get(timelineDescriptor.getTimeline_id());
 							if(tl==null){
-								tl = new ArrayList<TemiTimeStamp>();
+								tl = new ArrayList<>();
 								temiList.put(timelineDescriptor.getTimeline_id(), tl);
 							}
 							tl.add(new TemiTimeStamp(packetNo, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
