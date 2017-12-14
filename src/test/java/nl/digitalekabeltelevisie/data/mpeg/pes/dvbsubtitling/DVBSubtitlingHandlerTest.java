@@ -49,7 +49,7 @@ public class DVBSubtitlingHandlerTest extends PesHandlerSetup{
 		assertNotNull("subPid = null",subPid);
 
 		assertEquals("number of TS packets",32, subPid.getPackets());
-		assertEquals("number of duplicate TS packets",2, subPid.getDup_packets());
+		assertEquals("number of duplicate TS packets",0, subPid.getDup_packets());
 		assertEquals("PID Type",PID.PES, subPid.getType());
 
 
