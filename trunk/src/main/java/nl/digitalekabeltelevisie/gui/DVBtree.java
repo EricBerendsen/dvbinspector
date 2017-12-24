@@ -418,7 +418,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 					try {
-						ts.parseStream(null,handlerMap);
+						ts.parsePESStreams(handlerMap);
 					} catch (final IOException e) {
 						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
 						setCursor(Cursor.getDefaultCursor());
@@ -435,7 +435,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 							handlerMap = new HashMap<>();
 							handlerMap.put(pid, pesH);
 							try {
-								ts.parseStream(null,handlerMap);
+								ts.parsePESStreams(handlerMap);
 							} catch (IOException e1) {
 								logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
 								setCursor(Cursor.getDefaultCursor());

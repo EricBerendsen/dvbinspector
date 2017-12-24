@@ -79,7 +79,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 	private JFrame frame;
 
-	private final List<TransportStreamView> views = new ArrayList<TransportStreamView>();
+	private final List<TransportStreamView> views = new ArrayList<>();
 	private DVBtree treeView;
 	private TimeStampChart timeStampChart;
 	private BitRateChart bitRateView;
@@ -144,7 +144,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 				if(args.length>=2){
 
 					final PID[] pids = ts.getPids();
-					final Map<Integer, GeneralPesHandler> pesHandlerMap = new HashMap<Integer, GeneralPesHandler>();
+					final Map<Integer, GeneralPesHandler> pesHandlerMap = new HashMap<>();
 					for (int i = 1; i < args.length; i++) {
 						final int pid=Integer.parseInt(args[i]);
 						final PID p= pids[pid];
@@ -152,7 +152,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			                pesHandlerMap.put(Integer.valueOf(p.getPid()), p.getPesHandler());
 			            }
 			        }
-			        ts.parseStream(null,pesHandlerMap);
+			        ts.parsePESStreams(pesHandlerMap);
 				}
 			} catch (final NotAnMPEGFileException e) {
 				LOGGER.log(Level.WARNING, "error determining packetsize transportStream", e);
@@ -193,7 +193,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (final Exception e)
 		{
-			LOGGER.warning("Couldn't use system look and feel.");
+			LOGGER.warning("Couldn't use system look and feel. Exception:"+e.getMessage());
 		}
 
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
@@ -323,17 +323,17 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		privateDataSubMenu.setMnemonic(KeyEvent.VK_G);
 		final ButtonGroup g0Group = new ButtonGroup();
 
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x00, "0 0 0 0 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x01, "0 0 0 1 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x02, "0 0 1 0 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x03, "0 0 1 1 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x04, "0 1 0 0 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x05, "0 1 0 1 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x06, "0 1 1 0 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x07, "0 1 1 1 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x08, "1 0 0 0 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x09, "1 0 0 1 x x x",defaultG0CharacterSet);
-		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x0A, "1 0 1 0 x x x",defaultG0CharacterSet);
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x00, "0 0 0 0 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x01, "0 0 0 1 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x02, "0 0 1 0 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x03, "0 0 1 1 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x04, "0 1 0 0 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x05, "0 1 0 1 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x06, "0 1 1 0 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x07, "0 1 1 1 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x08, "1 0 0 0 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x09, "1 0 0 1 x x x");
+		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x0A, "1 0 1 0 x x x");
 
 		settingsMenu.add(defaultG0andG2CharacterSetDesignationMenu);
 
@@ -430,16 +430,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		fileMenu.add(openMenuItem);
 
-//		exportMenuItem = new JMenuItem("Export as HTML");
-//		exportMenuItem.setEnabled(false);
 		final JMenuItem exitMenuItem = new JMenuItem("Exit",KeyEvent.VK_X);
 		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
-
-
-//		final Action exportAction= new ExportAction(frame,this);
-//		fileMenu.add(exportMenuItem);
-//		exportMenuItem.addActionListener(exportAction);
-
 		exitMenuItem.addActionListener(this);
 		fileMenu.add(exitMenuItem);
 		return fileMenu;
@@ -464,7 +456,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	}
 
 	
-	private void addG0CharacterSet(final JMenu privateDataSubMenu, final ButtonGroup group, final int spec, final String name, final long defaultSpecifier) {
+	private void addG0CharacterSet(final JMenu privateDataSubMenu, final ButtonGroup group, final int spec, final String name) {
 		final JMenuItem menuItem = new JRadioButtonMenuItem(name);
 		group.add(menuItem);
 		menuItem.addActionListener(new SetG0DefaultAction(this,spec));
@@ -516,8 +508,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private void updatePIDLists(final TransportStream tStream, final PIDDialog pDialog){
 
 		final ViewContext viewConfig = new ViewContext();
-		final ArrayList<ChartLabel> used = new ArrayList<ChartLabel>();
-		final ArrayList<ChartLabel> notUsed = new ArrayList<ChartLabel>();
+		final ArrayList<ChartLabel> used = new ArrayList<>();
+		final ArrayList<ChartLabel> notUsed = new ArrayList<>();
 
 		if(tStream!=null){
 			final short[] used_pids=tStream.getUsedPids();
