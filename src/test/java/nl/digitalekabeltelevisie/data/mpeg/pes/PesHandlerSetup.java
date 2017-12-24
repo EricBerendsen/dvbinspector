@@ -49,7 +49,7 @@ public class PesHandlerSetup {
 		addPesHandler(map,NPO2_SUB_PID);
 		addPesHandler(map,TVE_H222_PID);
 		
-		transportStream.parseStream(null, map);
+		transportStream.parsePESStreams(map);
 	}
 
 	private static void addPesHandler(final Map<Integer, GeneralPesHandler> map, Integer pid) {

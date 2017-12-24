@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -211,9 +211,8 @@ public class TransportStream implements TreeNode{
 			}
 			if(seqFound){
 				return true;
-			}else{
-				startPos++;
 			}
+			startPos++;
 		}while(startPos <MAX_SEARCH_BYTES);
 		return false;
 	}
@@ -223,7 +222,7 @@ public class TransportStream implements TreeNode{
 	 * @throws IOException
 	 */
 	public void parseStream() throws IOException {
-		parseStream(null);
+		parsePSITables(null);
 	}
 
 
@@ -231,7 +230,7 @@ public class TransportStream implements TreeNode{
 	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
 	 * @throws IOException
 	 */
-	public void parseStream(final java.awt.Component component) throws IOException {
+	public void parsePSITables(final java.awt.Component component) throws IOException {
 		final PositionPushbackInputStream fileStream = getInputStream(component);
 		final byte [] buf = new byte[packetLength];
 		int count=0;
@@ -256,33 +255,8 @@ public class TransportStream implements TreeNode{
 				if((next!=-1)) {
 					fileStream.unread(next);
 				}
-
-				TSPacket packet = new TSPacket(buf, count,this);
-				final short pid = packet.getPID();
-				short pidFlags = pid;
-				if(packet.hasAdaptationField()){
-					pidFlags = (short) (pidFlags | ADAPTATION_FIELD_FLAG);
-				}
-				if(packet.isPayloadUnitStartIndicator()){
-					pidFlags = (short) (pidFlags | PAYLOAD_UNIT_START_FLAG);
-				}
-				if(packet.isTransportErrorIndicator()){
-					pidFlags = (short) (pidFlags | TRANSPORT_ERROR_FLAG);
-				}
-				packet_pid[no_packets]=pidFlags;
 				offsetHelper.addPacket(no_packets,offset);
-				no_packets++;
-				if(!packet.isTransportErrorIndicator()){
-					if(pids[pid]==null) {
-						pids[pid] = new PID(pid,this);
-					}
-					pids[pid].update_packet(packet);
-					packet=null;
-				}else{
-					error_packets++;
-					logger.warning("TransportErrorIndicator set for packet "+ packet);
-					packet=null;
-				}
+				processPacket(new TSPacket(buf, count,this));
 				count++;
 			}else{ // something wrong, find next syncbyte. First push back the lot
 				if((next!=-1)) {
@@ -302,14 +276,42 @@ public class TransportStream implements TreeNode{
 		calculateBitRate();
 	}
 
+	private void processPacket(TSPacket packet) {
+		final short pid = packet.getPID();
+		packet_pid[no_packets]=addPIDFlags(packet, pid);
+		no_packets++;
+		if(!packet.isTransportErrorIndicator()){
+			if(pids[pid]==null) {
+				pids[pid] = new PID(pid,this);
+			}
+			pids[pid].update_packet(packet);
+		}else{
+			error_packets++;
+			logger.warning("TransportErrorIndicator set for packet "+ packet);
+		}
+	}
+
+	private static short addPIDFlags(TSPacket packet, final short pid) {
+		short pidFlags = pid;
+		if(packet.hasAdaptationField()){
+			pidFlags = (short) (pidFlags | ADAPTATION_FIELD_FLAG);
+		}
+		if(packet.isPayloadUnitStartIndicator()){
+			pidFlags = (short) (pidFlags | PAYLOAD_UNIT_START_FLAG);
+		}
+		if(packet.isTransportErrorIndicator()){
+			pidFlags = (short) (pidFlags | TRANSPORT_ERROR_FLAG);
+		}
+		return pidFlags;
+	}
+
 	/**
 	 *
 	 * Read the file, and parse only the packets for which a GeneralPesHandler is present in toParsePids. Used for analyzing PESdata, like a video, teletext or subtitle stream
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
-	 *
 	 * @throws IOException
 	 */
-	public void parseStream(final java.awt.Component component, final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
+	public void parsePESStreams(final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
@@ -332,10 +334,9 @@ public class TransportStream implements TreeNode{
 		final long expectedSize=file.length();
 		if(component==null){
 			return new PositionPushbackInputStream(new BufferedInputStream(is),200);
-		}else{
-			return new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
-					"Reading file \"" + file.getPath() +"\"",is, expectedSize)),200);
 		}
+		return new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
+				"Reading file \"" + file.getPath() +"\"",is, expectedSize)),200);
 	}
 
 
@@ -794,13 +795,12 @@ public class TransportStream implements TreeNode{
 	public String getLabel(final short pid){
 		return pids[pid].getLabel();
 	}
+	
 	public String getShortLabel(final short pid){
 		if(pids[pid]!=null){
 			return pids[pid].getShortLabel();
-		}else{
-			return null;
 		}
-
+		return null;
 	}
 
 	/**

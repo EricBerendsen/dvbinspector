@@ -86,9 +86,9 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			transportStream = new TransportStream(file);
 			transportStream.setDefaultPrivateDataSpecifier(control.getDefaultPrivateDataSpecifier());
 			transportStream.setDefaultG0CharacterSet(control.getDefaultG0CharacterSet());
-			transportStream.parseStream(control.getFrame());
+			transportStream.parsePSITables(control.getFrame());
 
-		} catch (final NotAnMPEGFileException e) {
+		} catch (@SuppressWarnings("unused") final NotAnMPEGFileException e) {
 			logger.log(Level.WARNING, "could not determine packet size stream");
 			final String msg =
 					"DVB Inspector could not determine packetsize for this file. \n" +
