@@ -48,7 +48,7 @@ public final class AFDescriptorFactory {
 
 
 	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {
-		final List<Descriptor> r = new ArrayList<Descriptor>();
+		final List<Descriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
@@ -63,7 +63,7 @@ public final class AFDescriptorFactory {
 				d = new AFDescriptor(data, t + offset);
 				logger.info("Fall back for descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
 						+ AFDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]))
-						+ ")in section DSMCC data=" + d.getRawDataString()+", RuntimeException:"+iae);
+						+ ")in AFDescriptorList adaptationField. data=" + d.getRawDataString()+", RuntimeException:"+iae);
 			}
 
 			t += d.getDescriptorLength() + 2;
