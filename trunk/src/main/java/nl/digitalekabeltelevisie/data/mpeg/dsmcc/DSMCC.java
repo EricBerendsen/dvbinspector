@@ -112,7 +112,7 @@ public class DSMCC extends AbstractPSITabel{
 					updateSectionVersion(downloadMessage, last);
 				}
 			}else{
-				logger.info("section.getSectionNumber()>section.getSectionLastNumber()"+section);
+				logger.info("SectionNumber > lastSectionNumber: pid:"+pid+",section.getSectionNumber:"+section.getSectionNumber()+" section.getSectionLastNumber:"+section.getSectionLastNumber()+",tableID:"+tableID);
 			}
 		}else if(tableID==0x3d){ // DSM-CC - stream descriptorlist;
 
@@ -131,6 +131,9 @@ public class DSMCC extends AbstractPSITabel{
 				updateSectionVersion(streamDescriptorListSection, last);
 			}
 
+		}else{
+			logger.info("Unhandled tableId: pid:"+pid+",section.getSectionNumber:"+section.getSectionNumber()+" section.getSectionLastNumber:"+section.getSectionLastNumber()+",tableID:"+tableID);
+			
 		}
 
 	}
