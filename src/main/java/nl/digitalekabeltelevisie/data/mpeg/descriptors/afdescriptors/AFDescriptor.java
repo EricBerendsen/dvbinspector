@@ -71,6 +71,11 @@ public class AFDescriptor extends Descriptor {
 		case 0x05: return "Location Descriptor";
 		case 0x06: return "BaseURL Descriptor";
 		case 0x07: return "Cets_byte_range_descriptor"; //ISO/IEC 13818-1:2015/Amd.1/Cor.2:2016 (E)
+		case 0x08: return "MPEG-H_3dAudio_extStreamID_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+		case 0x09: return "AF_MPEG-H_3dAudio_multi-stream_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+		case 0x0a: return "AF_MPEG-H_3dAudio_command_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+		case 0x0b: return "Boundary Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+		case 0x0c: return "Labeling Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
 		default:
 
 			return "User Private";
