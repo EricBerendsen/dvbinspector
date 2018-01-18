@@ -80,15 +80,6 @@ public class AncillaryDataDescriptor extends Descriptor {
 		if ((id & 0x80)!=0) {
 			r.append("reserved for future use ");
 		}
-		if ((id & 0x01)!=0) {
-			r.append("DVD-Video Ancillary Data ");
-		}
-		if ((id & 0x01)!=0) {
-			r.append("DVD-Video Ancillary Data ");
-		}
-		if ((id & 0x01)!=0) {
-			r.append("DVD-Video Ancillary Data ");
-		}
 		return r.toString();
 	}
 
