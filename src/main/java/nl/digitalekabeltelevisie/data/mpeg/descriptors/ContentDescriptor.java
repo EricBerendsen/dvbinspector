@@ -145,6 +145,7 @@ public class ContentDescriptor extends Descriptor {
 		case 0x9: return "Education/Science/Factual topics:";
 		case 0xA: return "Leisure hobbies:";
 		case 0xB: return "Special characteristics:";
+		case 0xC: return "Adult:";
 		case 0xF: return "user defined";
 		default: return "reserved for future use:";
 		}
@@ -284,6 +285,14 @@ public class ContentDescriptor extends Descriptor {
 			case 0x1 : return "black and white";
 			case 0x2 : return "unpublished";
 			case 0x3 : return "live broadcast";
+			case 0x4 : return "plano-stereoscopic";
+			case 0x5 : return "local or regional";
+			case 0xF: return "user defined";
+			default: return "reserved for future use";
+			}
+		case 0xC: // Adult:
+			switch (nibble2) {
+			case 0x0 : return "adult (general)";
 			case 0xF: return "user defined";
 			default: return "reserved for future use";
 			}

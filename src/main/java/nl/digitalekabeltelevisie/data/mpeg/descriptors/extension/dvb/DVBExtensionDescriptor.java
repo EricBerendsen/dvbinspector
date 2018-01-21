@@ -89,7 +89,7 @@ public class DVBExtensionDescriptor extends ExtensionDescriptor {
 			return "protection_message_descriptor";
 		case 0x19:
 			return "audio_preselection_descriptor";
-		case 0x20: // based on DVB BlueBook A038 jan 2017, shopuldn't this be 0x1a ?
+		case 0x20: // based on DVB BlueBook A038 jan 2017, shpuldn't this be 0x1a ?
 			return "TTML_subtitling_descriptor";
 
 		default:

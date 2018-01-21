@@ -369,8 +369,9 @@ public class LinkageDescriptor extends Descriptor {
 		case 0x0B : return "IP/MAC Notification Service";
 		case 0x0C : return "TS containing INT BAT or NIT";
 		case 0x0D : return "event linkage";
-		case 0x0E : return "extended event linkage";
 
+		case 0x20 : return "downloadable font info linkage";
+		
 		case 0x81 : return "user defined: (linkage to NorDig bootloader)";
 		case 0x82 : return "user defined: (NorDig Simulcast replacement service/linkage to Ziggo software update)"; // or NorDig Simulcast replacement service.
 
@@ -381,6 +382,7 @@ public class LinkageDescriptor extends Descriptor {
 		case 0xFF : return "reserved for future use";
 
 		default:
+			if((0x0E<=linkageType)&&(linkageType<=0x1F )){return "extended event linkage";}
 			if((0x0D<=linkageType)&&(linkageType<=0x7F )){return "reserved for future use";}
 			if((0x80<=linkageType)&&(linkageType<=0xFE )){return "user defined";}
 
