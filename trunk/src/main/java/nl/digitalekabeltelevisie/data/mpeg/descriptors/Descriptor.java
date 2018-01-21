@@ -654,6 +654,8 @@ public class Descriptor implements TreeNode {
 			return "H.264/AVC frame compatible plano-stereoscopic HD NVOD reference service";
 		case 0x1F:
 			return "HEVC digital television service";
+		case 0x20:
+			return "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a any combination of HDR and these frame rates"; 
 
 		case 0x84:
 			return "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
@@ -676,7 +678,7 @@ public class Descriptor implements TreeNode {
 			// ICD60).
 
 		default:
-			if ((0x20 <= serviceType) && (serviceType <= 0x7F)) {
+			if ((0x21 <= serviceType) && (serviceType <= 0x7F)) {
 				return "reserved for future use";
 			}
 
@@ -799,7 +801,10 @@ public class Descriptor implements TreeNode {
 		case 0x09:
 			return getComponentType0x09String(stream_content_ext,component_type);
 		case 0x0b:
-			if(stream_content_ext==0xf){
+			if(stream_content_ext==0xE){
+				return "NGA component type feature flags, NOT implemented in DVB Inspector, please report!";
+			}
+			else if(stream_content_ext==0xf){
 				if (component_type == 0x00) {
 					return "less than 16:9 aspect ratio";
 				} else if (component_type == 0x01) {
@@ -809,7 +814,11 @@ public class Descriptor implements TreeNode {
 				} else if (component_type == 0x03) {
 					return "plano-stereoscopic top and\r\n" +
 							"bottom (TaB) frame-packing";
-				}else{
+				} else if (component_type == 0x04) {
+					return "HLG10 HDR";
+				} else if (component_type == 0x05) {
+					return "HEVC temporal video subset for a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz";
+			}else{
 					return "reserved for future use";
 				}
 			}else{
@@ -843,6 +852,12 @@ public class Descriptor implements TreeNode {
 				return "HEVC Main 10 Profile high definition video, 60 Hz";
 			case 0x04:
 				return "HEVC ultra high definition video";
+			case 0x05:
+				return "HEVC ultra high definition video with PQ10 HDR with a frame rate lower than or equal to 60 Hz";
+			case 0x06:
+				return "HEVC ultra high definition video, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bitstream";
+			case 0x07:
+				return "HEVC ultra high definition video with PQ10 HDR, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bit-stream";
 			default:
 				return "reserved for future use";
 			}
@@ -876,9 +891,19 @@ public class Descriptor implements TreeNode {
 				return "AC-4 receiver-mix audio description, mono, for the visually impaired";
 			case 0x0d:
 				return "AC-4 receiver-mix audio description, stereo, for the visually impaired";
+				// see a038_dvb_spec_december_2017_pdf.pdf
+			case 0x0E: 
+				return "AC-4 Part-2";
+			case 0x0F: 
+				return "MPEG-H Audio LC Profile";
 			default:
 				return "reserved for future use";
 			}
+		case 0x02:
+			// see a038_dvb_spec_december_2017_pdf.pdf
+			return "TTML subtitles";
+			
+
 		}
 		return "reserved for future use";
 	}
@@ -998,6 +1023,8 @@ public class Descriptor implements TreeNode {
 			return "DVB subtitles (normal) for display on a high definition monitor";
 		case 0x15:
 			return "DVB subtitles (normal) with plano-stereoscopic disparity for display on a high definition monitor";
+		case 0x16:
+			return "DVB subtitles (normal) for display on an ultra high definition monitor";
 		case 0x20:
 			return "DVB subtitles (for the hard of hearing) with no monitor aspect ratio criticality";
 		case 0x21:
@@ -1010,12 +1037,24 @@ public class Descriptor implements TreeNode {
 			return "DVB subtitles (for the hard of hearing) for display on a high definition monitor";
 		case 0x25:
 			return "DVB subtitles (for the hard of hearing) with planostereoscopic disparity for display on a high definition monitor";
+		case 0x26:
+			return "DVB subtitles (for the hard of hearing) for display on an ultra high definition monitor";
 		case 0x30:
 			return "Open (in-vision) sign language interpretation for the deaf";
 		case 0x31:
 			return "Closed sign language interpretation for the deaf";
 		case 0x40:
 			return "video up-sampled from standard definition source material";
+		case 0x41:
+			return "Video is standard dynamic range (SDR)";
+		case 0x42:
+			return "Video is high dynamic range (HDR) remapped from standard dynamic range (SDR) source material";
+		case 0x43:
+			return "Video is high dynamic range (HDR) up-converted from standard dynamic range (SDR) source material";
+		case 0x44:
+			return "Video is standard frame rate, less than or equal to 60 Hz"; 
+		case 0x45:
+			return "High frame rate video generated from lower frame rate source material";
 		case 0x80:
 			return "dependent SAOC-DE data stream";
 		case 0xFF:
@@ -1137,6 +1176,8 @@ public class Descriptor implements TreeNode {
 			return "HE-AAC v2 receiver mix audio description for the visually impaired";
 		case 0x4A:
 			return "HE-AAC v2 broadcaster mix audio description for the visually impaired";
+		case 0xA0:
+			return "HE AAC, or HE AAC v2 with SAOC-DE ancillary data";
 		case 0xFF:
 			return "reserved for future use";
 
