@@ -912,7 +912,7 @@ public final class Utils {
 		case 0x18: return"Metadata carried in ISO/IEC 13818-6 Object Carousel";
 		case 0x19: return"Metadata carried in ISO/IEC 13818-6 Synchronized Download Protocol";
 		case 0x1A: return"IPMP stream (defined in ISO/IEC 13818-11, MPEG-2 IPMP)";
-		case 0x1B: return"AVC video stream as defined in ITU-T Rec. H.264 | ISO/IEC 14496-10 Video";
+		case 0x1B: return"AVC video stream as defined in ITU-T Rec. H.264 | ISO/IEC 14496-10 Video, or AVC base layer of an HEVC video stream as defined in ITU-T H.265 | ISO/IEC 23008-2 ";
 		case 0x1C: return"ISO/IEC 14496-3 Audio, without using any additional transport syntax, such as DST, ALS and SLS";
 		case 0x1D: return"ISO/IEC 14496-17 Text";
 		case 0x1E: return"Auxiliary video stream as defined in ISO/IEC 23002-3";
@@ -924,14 +924,21 @@ public final class Utils {
 		case 0x23: return"Additional view Rec. ITU-T H.264 | ISO/IEC 14496-10 video stream conforming to one or more profiles defined in Annex A for service-compatible stereoscopic 3D services";
 		case 0x24: return"ITU-T H.265 | ISO/IEC 23008-2 video stream or an HEVC temporal video sub-bitstream";
 		case 0x25: return"HEVC temporal video subset of an HEVC video stream conforming to one or more profiles defined in Annex A of Rec. ITU-T H.265 | ISO/IEC 23008-2";
-		case 0x26: return"Timeline and External Media Information streams / MVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
+		case 0x26: return "TMVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
+		// ISO/IEC 13818-1:2015/Amd.1:2015 (E) /R ec. ITU-T H.222.0 (2014)/Amd.1 (04/2015)
+		case 0x27: return "Timeline and External Media Information Stream"; 
+		// ISO/IEC 13818-1:2015/Amd.2:2016 (E) / Rec. ITU-T H.222.0 (2014)/Amd.2 (12/2015)
+		case 0x28: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NALs units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2 ";
+		case 0x29: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		case 0x2a: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		case 0x2b: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
 		case 0x7f: return"IPMP stream";
 		case 0x81: return"User Private / AC-3 (ATSC)";
 		case 0x86: return"User Private / SCTE-35 splice_info_section";
 		case 0x87: return"User Private / E-AC-3 (ATSC)";
 
 		default:
-			if((0x27<=tag)&&(tag<=0x7e)){
+			if((0x2c<=tag)&&(tag<=0x7e)){
 				return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
 			}
 
