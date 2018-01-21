@@ -452,6 +452,10 @@ public class TransportStream implements TreeNode{
 			return "CAT";
 		case 2:
 			return "TSDT";
+		case 3:
+			return "IPMP control information table "; // ISO/IEC 13818-1:2013 (E) 
+		case 4:
+			return "Adaptive streaming information"; // ISO/IEC 13818-1:2013/Amd.4:2014 (E) 
 		case 16:
 			return  "NIT";
 		case 17:
