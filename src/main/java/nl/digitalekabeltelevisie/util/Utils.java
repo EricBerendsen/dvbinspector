@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -105,14 +105,15 @@ public final class Utils {
 	public static final int MASK_14BITS=0x3FFF;
 	public static final int MASK_15BITS=0x7FFF;
 	public static final int MASK_16BITS=0xFFFF;
-	public static final int MASK_18BITS=0x3FFFF;
-	public static final int MASK_20BITS=0xFFFFF;
-	public static final int MASK_22BITS=0x3FFFFF;
-	public static final int MASK_24BITS=0xFFFFFF;
-	public static final int MASK_31BITS=0x7FFFFFFF;
+	public static final int MASK_18BITS=0x3_FFFF;
+	public static final int MASK_20BITS=0xF_FFFF;
+	public static final int MASK_22BITS=0x3F_FFFF;
+	public static final int MASK_24BITS=0xFF_FFFF;
+	public static final int MASK_31BITS=0x7FF_FFFFF;
 
-	public static final int MASK_32BITS=0xFFFFFFFF;
-	public static final long MASK_33BITS=0x1FFFFFFFFl;
+	public static final int MASK_32BITS=0xFFFF_FFFF;
+	public static final long MASK_33BITS=0x1_FFFF_FFFFl;
+	public static final long MASK_40BITS=0xFF_FFFF_FFFFl;
 
 	private static Map<Integer, String>oui = new HashMap<Integer, String>();
 	private static RangeHashMap<Integer,String> bat = new RangeHashMap<Integer,String>();
