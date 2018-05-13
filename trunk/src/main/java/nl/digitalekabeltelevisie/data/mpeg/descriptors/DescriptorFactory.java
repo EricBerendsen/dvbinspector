@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -670,6 +670,9 @@ public final class DescriptorFactory {
 		switch (Utils.getUnsignedByte(data[t + offset])) {
 		case 0x00:
 			d = new AvailDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x02:
+			d = new SegmentationDescriptor(data, t + offset, tableSection);
 			break;
 		default:
 			d = new SCTE35Descriptor(data, t + offset, tableSection);
