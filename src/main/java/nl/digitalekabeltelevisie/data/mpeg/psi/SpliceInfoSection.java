@@ -270,6 +270,29 @@ public class SpliceInfoSection extends TableSection {
 		}	
 	}
 	
+	private class TimeSignal implements TreeNode{
+		
+		private SpliceTime splice_time;
+
+		private TimeSignal(BitSource bs){
+			super();
+			splice_time = new SpliceTime(bs);
+		}
+		
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("time_signal"));
+			t.add(splice_time.getJTreeNode(modus));
+			return t;
+		}
+
+		public SpliceTime getSplice_time() {
+			return splice_time;
+		}
+
+		
+	}
+	
 	private class SpliceNull implements TreeNode{
 
 		private SpliceNull(BitSource bs){
@@ -315,6 +338,8 @@ public class SpliceInfoSection extends TableSection {
 				splice_command = new SpliceNull(bitSource);
 			}else if(splice_command_type==5){
 				splice_command = new SpliceInsert(bitSource);
+			}else if(splice_command_type==6){
+				splice_command = new TimeSignal(bitSource);
 			}else if(splice_command_type==7){
 				splice_command = new BandwidthReservation(bitSource);
 			}else{
@@ -356,6 +381,8 @@ public class SpliceInfoSection extends TableSection {
 			if(splice_command_type==0){
 				t.add(splice_command.getJTreeNode(modus));
 			}else if(splice_command_type==5){
+				t.add(splice_command.getJTreeNode(modus));
+			}else if(splice_command_type==6){
 				t.add(splice_command.getJTreeNode(modus));
 			}else if(splice_command_type==7){
 				t.add(splice_command.getJTreeNode(modus));
