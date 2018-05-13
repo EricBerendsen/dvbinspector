@@ -54,7 +54,9 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			add(0x03,"PVR_assist_information data field").
 			add(0x04,"TSAP_timeline data field").
 			add(0x05,0x9F,"Reserved for future use").
-			add(0xA0,0xFF,"User defined").
+			add(0xA0,0xDE,"User defined").
+			add(0xDF,"Registered Private Data").
+			add(0xE0,0xFF,"User defined").
 			build();
 
 
