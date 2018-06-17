@@ -280,12 +280,11 @@ public class TransportStream implements TreeNode{
 		final short pid = packet.getPID();
 		packet_pid[no_packets]=addPIDFlags(packet, pid);
 		no_packets++;
-		if(!packet.isTransportErrorIndicator()){
-			if(pids[pid]==null) {
-				pids[pid] = new PID(pid,this);
-			}
-			pids[pid].update_packet(packet);
-		}else{
+		if(pids[pid]==null) {
+			pids[pid] = new PID(pid,this);
+		}
+		pids[pid].updatePacket(packet);
+		if(packet.isTransportErrorIndicator()){
 			error_packets++;
 			logger.warning("TransportErrorIndicator set for packet "+ packet);
 		}
