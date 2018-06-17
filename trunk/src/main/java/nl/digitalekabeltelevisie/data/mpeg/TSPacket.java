@@ -206,7 +206,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	}
 	@Override
 	public String toString() {
-		return "bytes="+ toHexString(buffer, 4) +" , PID="+Integer.toHexString(getPID())+", packetNo="+packetNo+" , continuity_counter="+getContinuityCounter()+", Adaptation_field_control="+getAdaptationFieldControlString()+", Transport Scrambling Control="+getTransportScramblingControlString() ;
+		return "bytes="+ toHexString(buffer, 4) +" , PID="+getPID()+" (0x"+Integer.toHexString(getPID())+"), packetNo="+packetNo+" , continuity_counter="+getContinuityCounter()+", Adaptation_field_control="+getAdaptationFieldControlString()+", Transport Scrambling Control="+getTransportScramblingControlString() ;
 	}
 
 	public int  getContinuityCounter() {
