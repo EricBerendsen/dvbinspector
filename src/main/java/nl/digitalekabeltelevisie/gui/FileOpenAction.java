@@ -39,8 +39,6 @@ import nl.digitalekabeltelevisie.main.DVBinspector;
 public class FileOpenAction extends AbstractAction {
 
 
-	private static final String DIR = "stream_directory";
-
 	private final JFileChooser	fileChooser;
 	private final DVBinspector	contr;
 
@@ -54,9 +52,9 @@ public class FileOpenAction extends AbstractAction {
 
 	public void actionPerformed(final ActionEvent e) {
 
-		final Preferences prefs = Preferences.userNodeForPackage(FileOpenAction.class);
+		final Preferences prefs = Preferences.userNodeForPackage(contr.getClass());
 
-		final String defaultDir = prefs.get(DIR, null);
+		final String defaultDir = prefs.get(DVBinspector.DIR, null);
 		if(defaultDir!=null){
 			final File defDir = new File(defaultDir);
 			fileChooser.setCurrentDirectory(defDir);
@@ -67,7 +65,7 @@ public class FileOpenAction extends AbstractAction {
 			contr.getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 			final File file = fileChooser.getSelectedFile();
-			prefs.put(DIR,file.getParent());
+			prefs.put(DVBinspector.DIR,file.getParent());
 
 			final TSLoader tsLoader = new TSLoader(file,contr);
 			tsLoader.execute();
