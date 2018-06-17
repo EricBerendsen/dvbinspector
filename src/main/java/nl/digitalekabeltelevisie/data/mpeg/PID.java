@@ -216,67 +216,100 @@ public class PID implements TreeNode{
 
 	}
 
-	public void update_packet(final TSPacket packet) {
+	public void updatePacket(final TSPacket packet) {
 		// handle 0x015 Mega-frame Initialization Packet (MIP)
-		if(pid==0x015){
-			// MIP has only TSPackets, no structure with PSISectionData
-			if((packet.getData()!=null)&&(packet.getData().length>=14)){
-				final MegaFrameInitializationPacket mip= new MegaFrameInitializationPacket(packet);
-				parentTransportStream.getPsi().getNetworkSync().update(mip);
-			}
-		}else{
-
-			AdaptationField adaptationField = null;
-
-			if(packet.hasAdaptationField()){
-				try{
-					adaptationField = packet.getAdaptationField();
-					processAdaptationField(adaptationField,packet.getPacketNo());
-				}catch(final RuntimeException re){ // might be some error in adaptation field, it is not well protected
-					logger.log(Level.WARNING, "Error getting adaptationField", re);
-					adaptationField = null;
-				}
-			}
-			if(((last_continuity_counter==-1)|| // first packet
-					(pid==0x1fff)|| // null packet
-					((((last_continuity_counter+1)%16)==packet.getContinuityCounter()))&&packet.hasPayload()) || // counter ok
-					(adaptationField!=null && adaptationField.isDiscontinuity_indicator()) // discontinuity_indicator true
-					) {
-				
-				last_continuity_counter = packet.getContinuityCounter();
-				last_packet_no = packet.getPacketNo();
-				last_packet = packet;
-				dup_found = 0;
-
-				if(packet.getTransportScramblingControl()==0){ // not scrambled, or else payload is of no use
-
-					gatherer.processPayload(packet,parentTransportStream,this);
-					
-				}else{
-					scrambled=true;
-				}
-
-			}else if(packet.hasPayload() &&(last_continuity_counter==packet.getContinuityCounter())){
-				if(dup_found>=1){ // third or more dup packet (third total), illegal
-					dup_found++;
-					logger.warning("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
-				}else{ // just a dup, count it and ignore
-					dup_found = 1;
-					dup_packets++;
-				}
-
-			}else if(packet.hasPayload() || // not dup, and not consecutive, so error
-					(last_continuity_counter!=packet.getContinuityCounter()) // if no payload, counter should not increment 
-					){
-				//logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo()+", adaptation_field_control="+packet.getAdaptationFieldControl());
-				last_continuity_counter=packet.getContinuityCounter();
-				last_packet_no = packet.getPacketNo();
-				last_packet = packet;
-				continuity_errors++;
-				gatherer.reset();
-			}// else{ // no payload, only adaptation. Don't Increase continuity_counter
+		
+		if(!packet.isTransportErrorIndicator()){
+			updateNonErrorPacket(packet);
 		}
 		packets++;
+	}
+
+	private void updateNonErrorPacket(final TSPacket packet) {
+		if (pid == 0x015) {
+			updateMegaFrameInitializationPacket(packet);
+		} else {
+
+			AdaptationField adaptationField = null;
+			if (packet.hasAdaptationField()) {
+				adaptationField = handleAdaptationField(packet);
+			}
+			if (isNormalPacket(packet, adaptationField)) {
+				handleNormalPacket(packet);
+			} else if (packet.hasPayload() && (last_continuity_counter == packet.getContinuityCounter())) {
+				handleDuplicatePacket(packet);
+			} else if (packet.hasPayload() || // not dup, and not consecutive, so error
+					(last_continuity_counter != packet.getContinuityCounter()) // if no payload, counter should not
+																				// increment
+			) {
+				handleContinuityError(packet);
+			} // else{ // no payload, only adaptation. Don't Increase continuity_counter
+		}
+	}
+
+	/**
+	 * @param packet
+	 * @param adaptationField
+	 * @return true if this packet is expected here, i.e. first packet for this PID, or null packet, or has next continuityCounter, or disContinuity indicator has been set.
+	 */
+	private boolean isNormalPacket(final TSPacket packet, AdaptationField adaptationField) {
+		return ((last_continuity_counter==-1)|| // first packet
+				(pid==0x1fff)|| // null packet
+				((((last_continuity_counter+1)%16)==packet.getContinuityCounter()))&&packet.hasPayload()) || // counter ok
+				(adaptationField!=null && adaptationField.isDiscontinuity_indicator()) // discontinuity_indicator true
+;
+	}
+
+	private void handleDuplicatePacket(final TSPacket packet) {
+		if(dup_found>=1){ // third or more dup packet (third total), illegal
+			dup_found++;
+			logger.warning("multiple dup packet ("+dup_found+"th total), illegal, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo());
+		}else{ // just a dup, count it and ignore
+			dup_found = 1;
+			dup_packets++;
+		}
+	}
+
+	private void handleNormalPacket(final TSPacket packet) {
+		last_continuity_counter = packet.getContinuityCounter();
+		last_packet_no = packet.getPacketNo();
+		last_packet = packet;
+		dup_found = 0;
+
+		if(packet.getTransportScramblingControl()==0){ // not scrambled, or else payload is of no use
+			gatherer.processPayload(packet,parentTransportStream,this);
+		}else{
+			scrambled=true;
+		}
+	}
+
+	private AdaptationField handleAdaptationField(final TSPacket packet) {
+		AdaptationField adaptationField;
+		try{
+			adaptationField = packet.getAdaptationField();
+			processAdaptationField(adaptationField,packet.getPacketNo());
+		}catch(final RuntimeException re){ // might be some error in adaptation field, it is not well protected
+			logger.log(Level.WARNING, "Error getting adaptationField", re);
+			adaptationField = null;
+		}
+		return adaptationField;
+	}
+
+	private void handleContinuityError(final TSPacket packet) {
+		//logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo()+", adaptation_field_control="+packet.getAdaptationFieldControl());
+		last_continuity_counter=packet.getContinuityCounter();
+		last_packet_no = packet.getPacketNo();
+		last_packet = packet;
+		continuity_errors++;
+		gatherer.reset();
+	}
+
+	private void updateMegaFrameInitializationPacket(final TSPacket packet) {
+		// MIP has only TSPackets, no structure with PSISectionData
+		if((packet.getData()!=null)&&(packet.getData().length>=14)){
+			final MegaFrameInitializationPacket mip= new MegaFrameInitializationPacket(packet);
+			parentTransportStream.getPsi().getNetworkSync().update(mip);
+		}
 	}
 
 
