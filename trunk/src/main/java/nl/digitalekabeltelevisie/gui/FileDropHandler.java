@@ -33,6 +33,7 @@ import java.awt.datatransfer.*;
 import java.io.*;
 import java.util.List;
 import java.util.logging.*;
+import java.util.prefs.Preferences;
 
 import javax.swing.TransferHandler;
 
@@ -76,8 +77,10 @@ public class FileDropHandler extends TransferHandler{
         }
 
         if(!files.isEmpty()){ 
-        	File file = files.get(0);// ignore extra files, only 1th is loaded
+        	File file = files.get(0);// ignore extra files, only 1st is loaded
         	logger.info("file dropped: "+file.getName());
+        	final Preferences prefs = Preferences.userNodeForPackage(controller.getClass());
+        	prefs.put(DVBinspector.DIR,file.getParent());
         	if(file.isFile()){
     			final TSLoader tsLoader = new TSLoader(file,controller);
     			tsLoader.execute();

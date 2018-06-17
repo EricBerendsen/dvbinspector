@@ -70,10 +70,18 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	public static final String DEFAULT_VIEW_MODUS = "view_modus";
 
 
+	/**
+	 * keys for storage of last used window location/size in Preferences
+	 */
 	public static final String WINDOW_WIDTH = "window_width";
 	public static final String WINDOW_HEIGHT = "window_height";
 	public static final String WINDOW_X = "window_x";
 	public static final String WINDOW_Y = "window_y";
+
+	/**
+	 * key for storage of last used directory in Preferences
+	 */
+	public static final String DIR = "stream_directory";
 
 	private TransportStream transportStream;
 
@@ -107,6 +115,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 	private DefaultMutableTreeNodePreorderEnumaration searchEnummeration;
 	private String searchString;
+
+
 
 
 
