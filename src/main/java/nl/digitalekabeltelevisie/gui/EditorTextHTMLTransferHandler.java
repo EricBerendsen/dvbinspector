@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,20 +30,15 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.TransferHandler;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.parser.ParserDelegator;
+
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 /**
@@ -56,7 +51,7 @@ import javax.swing.text.html.parser.ParserDelegator;
  * @author Steve McLeod, Eric Berendsen
  *
  */
-public class MyTransferHandler extends TransferHandler {
+public class EditorTextHTMLTransferHandler extends TransferHandler {
 
 
     protected Transferable createTransferable(JComponent c) {
@@ -76,52 +71,10 @@ public class MyTransferHandler extends TransferHandler {
 
 		}
         String htmlString = sw.toString();
-        // now exctract plain text from HTML,  replacing &lt;br&gt; and &lt;/p&gt; with newlines.
-        final String plainText = extractText(new StringReader(htmlString));
-        return new MyTransferable(plainText, htmlString);
+        // now extract plain text from HTML,  replacing &lt;br&gt; and &lt;/p&gt; with newlines.
+        final String plainText = Utils.extractTextFromHTML(htmlString);
+        return new TextHTMLTransferable(plainText, htmlString);
     }
-
-    public String extractText(Reader reader) {
-        final ArrayList<String> list = new ArrayList<String>();
-
-        HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
-            public void handleText(final char[] data, final int pos) {
-                list.add(new String(data));
-            }
-
-            public void handleStartTag(HTML.Tag tag, MutableAttributeSet attribute, int pos) {
-            }
-
-            public void handleEndTag(HTML.Tag t, final int pos) {
-            	if (t.equals(HTML.Tag.P)) {
-                    list.add("\n");
-                }
-            }
-
-            public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, final int pos) {
-                if (t.equals(HTML.Tag.BR)) {
-                    list.add("\n");
-                }
-            }
-
-            public void handleComment(final char[] data, final int pos) {
-            }
-
-            public void handleError(final String errMsg, final int pos) {
-            }
-        };
-        try {
-            new ParserDelegator().parse(reader, parserCallback, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        StringBuilder result = new StringBuilder();
-        for (String s : list) {
-        	result.append(s);
-        }
-        return result.toString();
-    }
-
 
     @Override
     public void exportToClipboard(JComponent comp, Clipboard clip, int action) throws IllegalStateException {
