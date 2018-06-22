@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,22 +27,34 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.MouseInfo;
 import java.awt.Paint;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
@@ -50,6 +62,7 @@ import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Grid to show individual TS-packets color coded. Mouse over will display PID.
@@ -57,8 +70,32 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
  * @author Eric
  *
  */
-public class Grid extends JPanel implements ComponentListener, Scrollable
+public class Grid extends JPanel implements ComponentListener, Scrollable, FocusListener, MouseListener
 {
+	
+	class GridCopyAction extends AbstractAction{
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			
+			Point windowLocation = getLocationOnScreen();
+			Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+			int x=mouseLocation.x - windowLocation.x;
+			int y=mouseLocation.y - windowLocation.y;
+			
+			final int realPacketNo = getPacketNumber(x,y);
+			if(realPacketNo>=0) {
+				final short pid = stream.getPacket_pid(realPacketNo);
+				if(colors.containsKey(pid)){ // don't care about actual color, just want to know is this pid shown
+					String htmlString = getPacketHTML(realPacketNo);
+					String plainData = Utils.extractTextFromHTML(htmlString);
+					TextHTMLTransferable transferable = new TextHTMLTransferable(plainData, htmlString);
+					final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+					clipboard.setContents( transferable, transferable );
+				}
+			}
+		}
+	}
 
 	private final static float DASH1[] = {3.0f};
 	private final static BasicStroke DASHED =
@@ -84,7 +121,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	private Map<Short, Paint> colors;
 	private int startPacket;
 	private int endPacket;
-	private int noPackets;
+	private int noPacketsInView;
 	private boolean showAdaptationField = false;
 	private boolean showPayloadStart = false;
 	private boolean showErrorIndicator = false;
@@ -95,9 +132,15 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 */
 	public Grid(final TransportStream stream, final ViewContext viewContext) {
 		super();
+		//setFocusable(true);
+	    addMouseListener(this);
+	    addFocusListener(this);
+
 		this.addComponentListener(this);
 
 		setTransportStream(stream, viewContext);
+		
+
 	}
 
 	public final void setTransportStream(final TransportStream stream, final ViewContext viewContext) {
@@ -107,10 +150,10 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		if(stream!=null){
 			startPacket = viewContext.getStartPacket();
 			endPacket = viewContext.getEndPacket();
-			noPackets = endPacket - startPacket;
+			noPacketsInView = endPacket - startPacket;
 
-			lines = (noPackets/blocksPerRow);
-			if((noPackets%blocksPerRow)!=0){
+			lines = (noPacketsInView/blocksPerRow);
+			if((noPacketsInView%blocksPerRow)!=0){
 				lines++;
 			}
 
@@ -121,6 +164,12 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 
 		// exact text does not matter. getToolTipText overridden. This is only needed to activate tool tips
 		setToolTipText("Test");
+		GridCopyAction copyAction = new GridCopyAction();
+
+		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		getInputMap().put(copyKey, "copy");
+		getActionMap().put("copy", copyAction);
+
 		revalidate();
 	}
 
@@ -150,7 +199,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	 */
 	private void paintPacket(final Graphics2D graphics2d, final int row, final int column) {
 		final int packetNo = (row*blocksPerRow)+column;
-		if(packetNo<noPackets){
+		if(packetNo<noPacketsInView){
 			final short pidFlags = stream.getPacketPidFlags(packetNo+startPacket);
 			final short pid = (short) (pidFlags & 0x1fff);
 			final Color packetPidColor = (Color)colors.get(pid);
@@ -274,32 +323,57 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 
 	@Override
 	public String getToolTipText(final MouseEvent e){
-		final StringBuilder r=new StringBuilder();
+		
 		if(stream!=null){
 			final int x=e.getX();
-			if((x/blockW)<blocksPerRow){ // empty space to the right
-				final int y=e.getY();
-				final int packetNo = ((y/blockH)*blocksPerRow)+(x/blockW);
-				if(packetNo<noPackets){
-					final int realPacketNo = packetNo +startPacket;
-					final short pid = stream.getPacket_pid(realPacketNo);
-					if(colors.containsKey(pid)){ // don't care about actual color, just want to know is this pid shown
-						final TSPacket packet = stream.getTSPacket(realPacketNo);
-						r.append("<html>");
-						if(packet==null){ // no packets loaded, just show pid
-							r.append("Packet: ").append(realPacketNo);
-							r.append("<br>PID: ").append(pid);
-							r.append("<br>Time: ").append(stream.getPacketTime(packetNo));
-							r.append("<br>").append(escapeHtmlBreakLines(stream.getShortLabel(pid)));
-						}else{
-							r.append(packet.getHTML());
-						}
-						r.append("</html>");
-					}
+			final int y=e.getY();
+			
+			final int realPacketNo = getPacketNumber(x,y);
+			if(realPacketNo>=0) {
+				final short pid = stream.getPacket_pid(realPacketNo);
+				if(colors.containsKey(pid)){ // don't care about actual color, just want to know is this pid shown
+					String htmlString = getPacketHTML(realPacketNo);
+					return htmlString;
 				}
 			}
 		}
-		return r.toString();
+		return "";
+	}
+
+	
+	private int getPacketNumber(int x, int y) {
+		if((x>=0)&&(y>=0)){
+			if((x/blockW)<blocksPerRow){ // empty space to the right
+				final int packetNo = ((y/blockH)*blocksPerRow)+(x/blockW);
+				if(packetNo<noPacketsInView){
+					final int realPacketNo = packetNo +startPacket;
+					return realPacketNo;
+				}
+			}
+		}
+		return -1;
+	}
+	/**
+	 * @param realPacketNo
+	 * @return
+	 */
+	private String getPacketHTML(final int realPacketNo) {
+		final StringBuilder r=new StringBuilder();
+		final TSPacket packet = stream.getTSPacket(realPacketNo);
+		r.append("<html>");
+		if(packet==null){ // no packets loaded, just show pid
+			// should not happen now, as packets always should be loaded.
+			final short pid = stream.getPacket_pid(realPacketNo);
+			r.append("Packet: ").append(realPacketNo);
+			r.append("<br>PID: ").append(pid);
+			r.append("<br>Time: ").append(stream.getPacketTime(realPacketNo));
+			r.append("<br>").append(escapeHtmlBreakLines(stream.getShortLabel(pid)));
+		}else{
+			r.append(packet.getHTML());
+		}
+		r.append("</html>");
+		String htmlString = r.toString();
+		return htmlString;
 	}
 
 
@@ -326,8 +400,8 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 		final int wid = (int)getVisibleRect().getWidth();
 		blocksPerRow = wid/blockW;
 		if(stream!=null){
-			lines = (noPackets/blocksPerRow);
-			if((noPackets%blocksPerRow)!=0){
+			lines = (noPacketsInView/blocksPerRow);
+			if((noPacketsInView%blocksPerRow)!=0){
 				lines++;
 			}
 		}
@@ -436,5 +510,62 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 	public void setGridLines(final int gridLines) {
 		this.gridLines = gridLines;
 		repaint();
+	}
+
+/*//	/* (non-Javadoc)
+	 * @see java.awt.event.FocusListener#focusGained(java.awt.event.FocusEvent)
+	 */
+	@Override
+	public void focusGained(FocusEvent e) {
+		// ignore
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.FocusListener#focusLost(java.awt.event.FocusEvent)
+	 */
+	@Override
+	public void focusLost(FocusEvent e) {
+		// ignore
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		 //Since the user clicked on us, let us get focus!
+	    requestFocusInWindow();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// ignore
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// ignore
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// ignore
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// ignore
 	}
 }

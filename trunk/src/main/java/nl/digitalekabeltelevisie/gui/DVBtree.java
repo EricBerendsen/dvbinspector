@@ -240,7 +240,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		editorPane.setEditable(false);
 		editorPane.setBackground(Color.LIGHT_GRAY);
 		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-		editorPane.setTransferHandler(new MyTransferHandler());
+		editorPane.setTransferHandler(new EditorTextHTMLTransferHandler());
 
 		detailPanel = new JPanel(new CardLayout());
 		JPanel empty = new JPanel();

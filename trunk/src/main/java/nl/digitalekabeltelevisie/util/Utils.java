@@ -33,25 +33,41 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import au.com.bytecode.opencsv.CSVReader;
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.DVBtree;
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Only static helper methods
@@ -2088,6 +2104,53 @@ public final class Utils {
 		StringBuilder res= new StringBuilder(duration.substring(0, 2)).append('h');
 		res.append(duration.substring(2, 4)).append('m').append(duration.substring(4, 6));
 		return res.toString();
+	}
+
+	/**
+	 * extract plain text from HTML,  replacing &lt;br&gt; and &lt;/p&gt; with newlines.
+	 * @param htmlString
+	 * @return
+	 */
+	public static String extractTextFromHTML(String htmlString) {
+		Reader reader = new StringReader(htmlString);
+	    final ArrayList<String> list = new ArrayList<String>();
+	
+	    HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
+	        public void handleText(final char[] data, final int pos) {
+	            list.add(new String(data));
+	        }
+	
+	        public void handleStartTag(HTML.Tag tag, MutableAttributeSet attribute, int pos) {
+	        }
+	
+	        public void handleEndTag(HTML.Tag t, final int pos) {
+	        	if (t.equals(HTML.Tag.P)) {
+	                list.add("\n");
+	            }
+	        }
+	
+	        public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, final int pos) {
+	            if (t.equals(HTML.Tag.BR)) {
+	                list.add("\n");
+	            }
+	        }
+	
+	        public void handleComment(final char[] data, final int pos) {
+	        }
+	
+	        public void handleError(final String errMsg, final int pos) {
+	        }
+	    };
+	    try {
+	        new ParserDelegator().parse(reader, parserCallback, true);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    StringBuilder result = new StringBuilder();
+	    for (String s : list) {
+	    	result.append(s);
+	    }
+	    return result.toString();
 	}
 	
 	

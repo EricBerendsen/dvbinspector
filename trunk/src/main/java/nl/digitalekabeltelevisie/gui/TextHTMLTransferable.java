@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -40,7 +42,7 @@ import java.io.IOException;
  * @author Steve McLeod
  *
  */
-public class MyTransferable implements Transferable {
+public class TextHTMLTransferable implements Transferable, ClipboardOwner {
 
     private static final DataFlavor[] supportedFlavors;
 
@@ -58,7 +60,7 @@ public class MyTransferable implements Transferable {
     private final String plainData;
     private final String htmlData;
 
-    public MyTransferable(String plainData, String htmlData) {
+    public TextHTMLTransferable(String plainData, String htmlData) {
         this.plainData = plainData;
         this.htmlData = htmlData;
     }
@@ -85,4 +87,10 @@ public class MyTransferable implements Transferable {
         }
         throw new UnsupportedFlavorException(flavor);
     }
+
+	@Override
+	public void lostOwnership(Clipboard clipboard, Transferable contents) {
+		// Empty
+		
+	}
 }
