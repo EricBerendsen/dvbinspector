@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -59,14 +59,14 @@ public class AudioHandlerTest extends PesHandlerSetup{
 
 		final Audio138183Handler audio138182Handler = (Audio138183Handler) pesHandler;
 		
-		validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2268, "audio graph");
+		validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2280, "audio graph");
 
 		final List<PesPacketData> pesPackets = audio138182Handler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);
 		assertEquals("Number of PESPackets", 37, pesPackets.size());
 		
 		List<AudioAccessUnit> audioAccessUnits = audio138182Handler.getAudioAccessUnits();
-		assertEquals(184, audioAccessUnits.size());
+		assertEquals("Number of audioAccessUnits",185, audioAccessUnits.size());
 		
 		AudioAccessUnit unit0 = audioAccessUnits.get(0);
 		assertEquals(1, unit0.getId());
