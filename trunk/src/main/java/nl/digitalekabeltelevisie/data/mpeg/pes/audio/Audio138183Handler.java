@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -177,10 +177,13 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 							bufStart = nextIndex;
 							i = nextIndex;
 						}
+					}else if(i+unitLen == bufEnd) {  // exact fit, buffer now empty
+						accessUnits.add(frame);
+						bufStart = 0;
+						bufEnd = 0;
 					}else{// not enough read, continue next time
 						bufStart = i;
 						break;
-
 					}
 				}
 			}
