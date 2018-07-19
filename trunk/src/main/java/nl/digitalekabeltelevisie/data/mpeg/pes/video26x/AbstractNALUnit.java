@@ -2,7 +2,7 @@
  * 
  * http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- * This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  * This file is part of DVB Inspector.
  * 
@@ -103,6 +103,15 @@ public abstract class AbstractNALUnit  implements TreeNode{
 
 	public RBSP getRbsp() {
 		return rbsp;
+	}
+	public static Logger getLogger() {
+		return logger;
+	}
+	public int getOffset() {
+		return offset;
+	}
+	public BitSource getBs() {
+		return bs;
 	}
 
 }

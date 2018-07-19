@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -50,9 +50,13 @@ public abstract class RBSP implements TreeNode {
 	}
 
 	protected BitSource bitSource;
+	protected byte[] bytes;
+	protected int numBytesInRBSP;
 
 	protected RBSP(byte[] rbsp_bytes, int numBytesInRBSP){
 		bitSource = new BitSource(rbsp_bytes, 0,numBytesInRBSP);
+		bytes = rbsp_bytes;
+		this.numBytesInRBSP = numBytesInRBSP;
 	}
 
 	// used in Pic_parameter_set_rbsp and Seq_parameter_set_rbsp
@@ -126,5 +130,17 @@ public abstract class RBSP implements TreeNode {
 		default:
 			return "unknown";
 		}
+	}
+
+	public BitSource getBitSource() {
+		return bitSource;
+	}
+
+	public byte[] getBytes() {
+		return bytes;
+	}
+
+	public int getNumBytesInRBSP() {
+		return numBytesInRBSP;
 	}
 }
