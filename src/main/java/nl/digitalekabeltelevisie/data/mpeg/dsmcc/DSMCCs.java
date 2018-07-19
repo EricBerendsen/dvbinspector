@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -35,11 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.AssociationTagDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.CarouselIdentifierDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor;
@@ -54,6 +55,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 
 public class DSMCCs extends AbstractPSITabel{
 
+	private static final Logger logger = Logger.getLogger(DSMCCs.class.getName());
 
 	private PMTs pmts;
 	public DSMCCs(final PSI parentPSI) {
@@ -64,14 +66,14 @@ public class DSMCCs extends AbstractPSITabel{
 	/**
 	 * map (pid, carousel) just the data per pid
 	 */
-	private Map<Integer, DSMCC> dsmccs = new HashMap<Integer, DSMCC>();
+	private Map<Integer, DSMCC> dsmccs = new HashMap<>();
 
 	/**
 	 * map ( serviceID  all the data for a carousel for a service
 	 *
 	 */
 
-	private Map<Integer, ServiceDSMCC> objectCarousels = new HashMap<Integer, ServiceDSMCC>();
+	private Map<Integer, ServiceDSMCC> objectCarousels = new HashMap<>();
 
 	/**
 	 *
@@ -122,6 +124,7 @@ public class DSMCCs extends AbstractPSITabel{
 
 		if(!(isPartOfObjectCarousel||isSSU)){
 			// NOT supported
+			logger.warning("Not supported type; isPartOfObjectCarousel:"+isPartOfObjectCarousel+", isSSU:"+isSSU+", pid:"+pid);
 			return;
 		}
 
@@ -193,7 +196,7 @@ public class DSMCCs extends AbstractPSITabel{
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CCs"));
 
 
-		final SortedSet<Integer> s = new TreeSet<Integer>(dsmccs.keySet());
+		final SortedSet<Integer> s = new TreeSet<>(dsmccs.keySet());
 
 		final Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
@@ -203,7 +206,7 @@ public class DSMCCs extends AbstractPSITabel{
 
 		}
 
-		final SortedSet<Integer> s1 = new TreeSet<Integer>(objectCarousels.keySet());
+		final SortedSet<Integer> s1 = new TreeSet<>(objectCarousels.keySet());
 
 		final Iterator<Integer> i1 = s1.iterator();
 		while(i1.hasNext()){
