@@ -53,7 +53,7 @@ public class IPMACStreamLocationDescriptor extends INTDescriptor {
 		originalNetworkId = getInt(b,offset+4,2,MASK_16BITS);
 		transportStreamId = getInt(b,offset+6,2,MASK_16BITS);
 		serviceId = getInt(b,offset+8,2,MASK_16BITS);
-		componentTag = getInt(b,offset+8,1,MASK_8BITS);
+		componentTag = getInt(b,offset+10,1,MASK_8BITS);
 	}
 
 	@Override
