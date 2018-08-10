@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,21 +27,25 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_1BIT;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
+import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
 /**
  * @author Eric
  *
  */
-public class PesHeader implements HTMLSource, TreeNode{
+public class PesHeader implements TreeNode{
 
 	private final byte[] data;
 	private final int offset;
@@ -114,7 +118,7 @@ public class PesHeader implements HTMLSource, TreeNode{
 	 * @param stream_id
 	 * @return
 	 */
-	public boolean hasExtendedHeader(final int stream_id) {
+	public static boolean hasExtendedHeader(final int stream_id) {
 		return (stream_id != PesPacketData.program_stream_map)
 				&& (stream_id != PesPacketData.padding_stream)
 				&& (stream_id != PesPacketData.private_stream_2)
@@ -252,14 +256,14 @@ public class PesHeader implements HTMLSource, TreeNode{
 		return t;
 	}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
-	 */
-	@Override
-	public String getHTML() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	/* (non-Javadoc)
+//	 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
+//	 */
+//	@Override
+//	public String getHTML() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 	public static String getPts_dts_flagsString(final int pts_dts_flags) {
 		switch (pts_dts_flags) {
