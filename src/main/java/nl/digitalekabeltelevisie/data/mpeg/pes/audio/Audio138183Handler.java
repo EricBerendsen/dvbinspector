@@ -179,8 +179,8 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 						}
 					}else if(i+unitLen == bufEnd) {  // exact fit, buffer now empty
 						accessUnits.add(frame);
-						bufStart = 0;
-						bufEnd = 0;
+						bufStart = bufEnd;
+						break;
 					}else{// not enough read, continue next time
 						bufStart = i;
 						break;

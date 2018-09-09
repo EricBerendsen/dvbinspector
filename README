@@ -2,7 +2,7 @@ readme
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.8.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.10.1-dist.zip to a directory of your choice. It will create the following directory structure;
 
 directory structure
 
@@ -16,17 +16,69 @@ directory structure
     DVBinspector-1.2.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 
-DVBinspector-1.8.0.jar
+DVBinspector-1.10.1.jar
 
-Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.8.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.8.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.8.0.jar".
-DVB.bat
+Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.10.1.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.10.1.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.10.1.jar".
+
+dvb.bat
 
 This small windows batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path, and -Xmx sets the maximum memory heap size to 1 GB. This should be enough to read fairly large TS files (> 200 MB). You can modify this file for other environments like linux.
 java -classpath .;.\lib\jfreechart-1.0.13.jar;.\lib\jcommon-1.0.16.jar;.\lib\opencsv-2.1.jar;.\lib\jlayer-1.0.1-1.jar;.\DVBInspector.jar -Xmx1000m -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector
 
+dvb.sh
+
+The linux/unix version of dvb.bat. This small batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path. Memory heap size  is not set, but you cvan add that option if needed.
+
 Changelog
 
 List of the most important changes between releases
+
+Release 1.10.1 (bug fix release)
+Release date: 09/09/2018
+
+fixed: parsing of 138181 Audio. This bug resulted in looping (when playing and in the graph) of the audio in a single PES Packet. 
+
+Release 1.10.0
+Release date: 12/08/2018
+
+fixed: IPMACStreamLocationDescriptor componentTag was read wrong
+fixed: Parsing of Audio Access Units in Pes Packet, last unit of Pes packet was incorrectly shown at next Pes packet
+added: option to CTRL-C packet content from Grid view (after click to set focus)
+added: remember directory of dropped file, next "File Open" will open in that directory
+fixed: handling of TSPackets with transportErrorIndicator set, this caused Pid packetview to crash
+added: splice_command_type TimeSignal and SegmentationDescriptor support for SCTE-35
+added: added new streamType strings
+added: values from bluebook a038 dec 2017 for a.o. ContentDescriptor, LinkageDescriptor, DVBExtensionDescriptor
+improved: error handling for errors in adaptationField
+changed: upgraded to java 1.8
+added: display SCTE35 Program Splice Points (with spliceTime) in PCR/PTS Graph
+added: error handling when PESHeader not complete in TSPacket
+Thanks to every one that has reported bugs in DVB Inspector! This helps to make the program better and more robust. Please contact me if you think there is an error or option for improvement in the program. I really do appreciate it!
+
+
+Release 1.9.0
+Release date: 27/10/2017
+
+added: NetworkChangeNotifyDescriptor
+added: drag-and-drop support
+fixed: PSI table handling of new versions with more subtables than initial table
+added: SHDeliverySystemDescriptor
+fixed: value of streamContextEExt was reported wrong in ComponentDescriptor
+fixed: last PESPacket was not handled when not followed by payload_start_indicator. Now it is handled when all bytes are read (does not work for video, because there PES_packet_length is not set)
+added: S2XSatelliteDeliverySystemDescriptor based on DVB BlueBook A038 jan 2017
+added: URILinkageDescriptor
+added: ServiceRelocatedDescriptor and CIAncillaryDataDescriptor
+fixed: handle start_time = 0xFFFFFFFF (undefined) for EITsection Event (like VOD)
+added: support for TEMI information in Adaptation Field, added Timeline descriptor
+added: show TEMI data in TimeStampChart (second y-axis)
+added: panning in BitRateChart and TimeStampChart (use CTRL+mouse for panning/drag)
+fixed: detection of SCTE35 pid in PMT
+added: Teletext support for G0 character sets, switching between normal and alternate G0 set
+fixed: wrong line endings in dvb.sh
+upgraded: versions of jfreechart and jcommon
+fixed: some smaller bugs
+Thanks to Michael Cullen for contributing the NetworkChangeNotifyDescriptor.
+
 
 Release 1.8.0
 Release date: 07/01/2017
