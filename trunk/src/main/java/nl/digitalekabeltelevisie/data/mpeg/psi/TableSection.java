@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Formatter;
@@ -110,10 +111,10 @@ public class TableSection implements TreeNode{
 			sectionLastNumber = getInt(bytes,7,1,MASK_8BITS);
 
 			final int startCRC = sectionLength -1 ; // +3 - 4, first 3 bytes not included, skip back 4 bytes till begin CRC
-			crc = (((long)getUnsignedByte(bytes[startCRC]))<<24) |
-					(((long)getUnsignedByte(bytes[startCRC+1]))<<16) |
-					(((long)getUnsignedByte(bytes[startCRC+2]))<<8) |
-					(getUnsignedByte(bytes[startCRC+3]));
+			crc = (((long)toUnsignedInt(bytes[startCRC]))<<24) |
+					(((long)toUnsignedInt(bytes[startCRC+1]))<<16) |
+					(((long)toUnsignedInt(bytes[startCRC+2]))<<8) |
+					(toUnsignedInt(bytes[startCRC+3]));
 
 			final long res = CRCcheck.crc32(bytes,sectionLength+3);
 			if(res!=0){

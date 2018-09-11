@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,12 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
+import static java.lang.Byte.toUnsignedInt;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.util.Utils;
 
 public final class DSMCCDescriptorFactory {
 
@@ -61,8 +62,8 @@ public final class DSMCCDescriptorFactory {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
 				d = new DSMCCDescriptor(data, t + offset);
-				logger.info("Fall back for descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-						+ DSMCCDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]))
+				logger.info("Fall back for descriptor:" + toUnsignedInt(data[t + offset]) + " ("
+						+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
 						+ ")in section DSMCC data=" + d.getRawDataString()+", RuntimeException:"+iae);
 			}
 
@@ -75,7 +76,7 @@ public final class DSMCCDescriptorFactory {
 
 	private static Descriptor getDSMCCDescriptor(final byte[] data, final int offset, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 		case 0x05:
 			d = new CRC32Descriptor(data, t + offset);
 			break;
@@ -99,8 +100,8 @@ public final class DSMCCDescriptorFactory {
 
 		default:
 			d = new DSMCCDescriptor(data, t + offset);
-			logger.info("Not implemented DSMCCDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ DSMCCDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]))
+			logger.info("Not implemented DSMCCDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
 					+ ",) data=" + d.getRawDataString());
 			break;
 		}

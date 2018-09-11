@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import nl.digitalekabeltelevisie.util.Utils;
+import static java.lang.Byte.toUnsignedInt;
 
 /**
 
@@ -98,7 +98,7 @@ final public class CRCcheck {
 		long crc = 0xffffffffL;
 
 		for (i=0; i<len; i++){
-			crc = ((crc << 8)&0xffffffffL) ^ crc_table[(((int)(crc >> 24)) ^ Utils.getUnsignedByte(data[i])) & 0xff];
+			crc = ((crc << 8)&0xffffffffL) ^ crc_table[(((int)(crc >> 24)) ^ toUnsignedInt(data[i])) & 0xff];
 		}
 
 		return crc;

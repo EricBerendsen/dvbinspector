@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,6 +26,8 @@
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
+
+import static java.lang.Byte.toUnsignedInt;
 
 import java.util.*;
 
@@ -90,8 +92,8 @@ public class Descriptor implements TreeNode {
 		descriptorOffset = offset;
 		privateDataOffset = offset + 2;
 
-		this.descriptorTag = Utils.getUnsignedByte(b[offset]);
-		this.descriptorLength = Utils.getUnsignedByte(b[offset + 1]);
+		this.descriptorTag = toUnsignedInt(b[offset]);
+		this.descriptorLength = toUnsignedInt(b[offset + 1]);
 		parentTableSection = parent;
 	}
 

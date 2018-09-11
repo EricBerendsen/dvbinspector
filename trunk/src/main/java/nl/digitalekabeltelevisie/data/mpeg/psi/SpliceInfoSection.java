@@ -285,11 +285,6 @@ public class SpliceInfoSection extends TableSection {
 			t.add(splice_time.getJTreeNode(modus));
 			return t;
 		}
-
-		public SpliceTime getSplice_time() {
-			return splice_time;
-		}
-
 		
 	}
 	

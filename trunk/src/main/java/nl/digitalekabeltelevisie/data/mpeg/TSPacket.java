@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.PAYLOAD_PACKET_LENGTH;
 import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.getErrorKVP;
 import static nl.digitalekabeltelevisie.util.Utils.*;
@@ -173,7 +174,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public byte[] getAdaptationFieldBytes(){
 		final int adaptationFieldControl = getAdaptationFieldControl();
 		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
-			return copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1);
+			return copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1);
 		}
 		return new byte[0];
 	}
@@ -181,7 +182,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public AdaptationField getAdaptationField(){
 		final int adaptationFieldControl = getAdaptationFieldControl();
 		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
-			return new AdaptationField(copyOfRange(buffer,4, 4+getUnsignedByte(buffer[4])+1));
+			return new AdaptationField(copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1));
 		}
 		return null;
 	}
@@ -194,7 +195,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 		if((adaptationFieldControl==1)) { //payload only
 			return copyOfRange(buffer,4, PAYLOAD_PACKET_LENGTH);
 		}else if((adaptationFieldControl==3)) { //Adaptation followed by payload
-			final int start = Math.min(4+getUnsignedByte(buffer[4])+1, PAYLOAD_PACKET_LENGTH);
+			final int start = Math.min(4+toUnsignedInt(buffer[4])+1, PAYLOAD_PACKET_LENGTH);
 			return copyOfRange(buffer, start,PAYLOAD_PACKET_LENGTH);
 		}
 		return new byte[0];

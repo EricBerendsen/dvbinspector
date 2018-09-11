@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,6 +26,8 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+
+import static java.lang.Byte.toUnsignedInt;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -133,9 +135,9 @@ public class PMTsection extends TableSectionExtendedSyntax {
 		int t =0;
 		while(t<length){
 			final Component c = new Component();
-			c.setStreamtype(Utils.getUnsignedByte(data[i+t]));
-			c.setElementaryPID((256 *(Utils.getUnsignedByte(data[i+t+1])& 0x1F)) + Utils.getUnsignedByte(data[i+t+2]));
-			c.setEsInfoLength((256 *(Utils.getUnsignedByte(data[i+t+3])& 0x0F)) + Utils.getUnsignedByte(data[i+t+4]));
+			c.setStreamtype(toUnsignedInt(data[i+t]));
+			c.setElementaryPID((256 *(toUnsignedInt(data[i+t+1])& 0x1F)) + toUnsignedInt(data[i+t+2]));
+			c.setEsInfoLength((256 *(toUnsignedInt(data[i+t+3])& 0x0F)) + toUnsignedInt(data[i+t+4]));
 			c.setComponentDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,c.getEsInfoLength(), this));
 			t+=5+c.getEsInfoLength();
 			r.add(c);
@@ -166,7 +168,7 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	}
 
 	public int getElementaryPID(final int i){
-		return ((Utils.getUnsignedByte(raw_data.getData()[10+programInfoLength+(i*4)])& 0x1F )*256) + Utils.getUnsignedByte(raw_data.getData()[11+programInfoLength+(i*4)]);
+		return ((toUnsignedInt(raw_data.getData()[10+programInfoLength+(i*4)])& 0x1F )*256) + toUnsignedInt(raw_data.getData()[11+programInfoLength+(i*4)]);
 	}
 	@Override
 	public String toString(){

@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.lang.Byte.toUnsignedInt;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -40,7 +42,17 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationLo
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationBoundaryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.CIAncillaryDataDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.DVBExtensionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.NetworkChangeNotifyDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.S2XSatelliteDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SHDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.ServiceRelocatedDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SupplementaryAudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.URILinkageDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.MPEGExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.INTDescriptor;
@@ -59,7 +71,9 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV2;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.AvailDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SCTE35Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SegmentationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.MessageDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUEventNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSULocationDescriptor;
@@ -67,8 +81,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUSubgroupAssoci
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SchedulingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UNTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UpdateDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.*;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public final class DescriptorFactory {
 
@@ -99,7 +112,7 @@ public final class DescriptorFactory {
 		while (t < len) {
 
 			Descriptor d;
-			final int descriptorTag = Utils.getUnsignedByte(data[t + offset]);
+			final int descriptorTag = toUnsignedInt(data[t + offset]);
 			try {
 				if (tableSection.getTableId() == 0xFC) {
 					d = getSCTE35Descriptor(data, offset, tableSection, t);
@@ -123,8 +136,8 @@ public final class DescriptorFactory {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
 				d = new Descriptor(data, t + offset, tableSection);
-				logger.warning("Fall back for descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-						+ Descriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+				logger.warning("Fall back for descriptor:" + toUnsignedInt(data[t + offset]) + " ("
+						+ Descriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 						+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 						+ ",) data=" + d.getRawDataString()+", RuntimeException:"+iae);
 			}
@@ -158,7 +171,7 @@ public final class DescriptorFactory {
 		Descriptor d = null;
 
 		if (private_data_specifier == 0x600) { // UPC1
-			switch (Utils.getUnsignedByte(data[t + offset])) {
+			switch (toUnsignedInt(data[t + offset])) {
 			case 0x81:
 				d = new UPCLogicalChannelDescriptor(data, t + offset, tableSection);
 				break;
@@ -167,7 +180,7 @@ public final class DescriptorFactory {
 				break;
 			}
 		} else if (private_data_specifier == 0x16) { // Casema / Ziggo
-			switch (Utils.getUnsignedByte(data[t + offset])) {
+			switch (toUnsignedInt(data[t + offset])) {
 			case 0x87:
 				d = new ZiggoVodDeliveryDescriptor(data, t + offset, tableSection);
 				break;
@@ -179,7 +192,7 @@ public final class DescriptorFactory {
 				break;
 			}
 		} else if (private_data_specifier == 0x28) { // EACEM
-			switch (Utils.getUnsignedByte(data[t + offset])) {
+			switch (toUnsignedInt(data[t + offset])) {
 			case 0x83:
 				d = new LogicalChannelDescriptor(data, t + offset, tableSection);
 				break;
@@ -191,7 +204,7 @@ public final class DescriptorFactory {
 				break;
 			}
 		} else if (private_data_specifier == 0x29) { // Nordig
-			switch (Utils.getUnsignedByte(data[t + offset])) {
+			switch (toUnsignedInt(data[t + offset])) {
 			case 0x83:
 				d = new NordigLogicalChannelDescriptorV1(data, t + offset, tableSection);
 				break;
@@ -202,13 +215,13 @@ public final class DescriptorFactory {
 
 
 		} else if (private_data_specifier == 0x40) { // CI Plus LLP
-			switch (Utils.getUnsignedByte(data[t + offset])) {
+			switch (toUnsignedInt(data[t + offset])) {
 			case 0xCE:
 				d = new CIProtectionDescriptor(data, t + offset, tableSection);
 				break;
 			}
 		} else if (private_data_specifier == 0x233a) { // DTG
-			switch (Utils.getUnsignedByte(data[t + offset])) {
+			switch (toUnsignedInt(data[t + offset])) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
 				d = new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, t + offset, tableSection);
 				break;
@@ -219,7 +232,7 @@ public final class DescriptorFactory {
 		}
 		if (d == null) {
 			logger.info("Unimplemented private descriptor, private_data_specifier=" + private_data_specifier
-					+ ", descriptortag=" + Utils.getUnsignedByte(data[t + offset]) + ", tableSection=" + tableSection);
+					+ ", descriptortag=" + toUnsignedInt(data[t + offset]) + ", tableSection=" + tableSection);
 			d = new Descriptor(data, t + offset, tableSection);
 		}
 
@@ -228,7 +241,7 @@ public final class DescriptorFactory {
 
 	private static Descriptor getMPEGDescriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 		case 0x02:
 			d = new VideoStreamDescriptor(data, t + offset, tableSection);
 			break;
@@ -316,8 +329,8 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new Descriptor(data, t + offset, tableSection);
-			logger.info("Not implemented descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ Descriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+			logger.info("Not implemented descriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ Descriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;
@@ -329,7 +342,7 @@ public final class DescriptorFactory {
 			final TableSection tableSection, final int t) {
 
 		MPEGExtensionDescriptor d;
-		final int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
+		final int descriptor_tag_extension = toUnsignedInt(data[t + offset+2]);
 		switch(descriptor_tag_extension){
 		
 		case 0x03:
@@ -347,7 +360,7 @@ public final class DescriptorFactory {
 
 	private static Descriptor getDVBSIDescriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 
 		case 0x40:
 			d = new NetworkNameDescriptor(data, t + offset, tableSection);
@@ -498,8 +511,8 @@ public final class DescriptorFactory {
 
 		default:
 			d = new Descriptor(data, t + offset, tableSection);
-			logger.info("Not implemented descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ Descriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+			logger.info("Not implemented descriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ Descriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;
@@ -518,7 +531,7 @@ public final class DescriptorFactory {
 			final TableSection tableSection, final int t) {
 
 		DVBExtensionDescriptor d;
-		final int descriptor_tag_extension = Utils.getUnsignedByte(data[t + offset+2]);
+		final int descriptor_tag_extension = toUnsignedInt(data[t + offset+2]);
 		switch(descriptor_tag_extension){
 
 		case 0x04:
@@ -569,7 +582,7 @@ public final class DescriptorFactory {
 
 	private static Descriptor getINTDescriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 		case 0x0C:
 			d = new IPMACPlatformNameDescriptor(data, t + offset, tableSection);
 			break;
@@ -584,8 +597,8 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new INTDescriptor(data, t + offset, tableSection);
-			logger.info("Not implemented IntDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ INTDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+			logger.info("Not implemented IntDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ INTDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;
@@ -595,7 +608,7 @@ public final class DescriptorFactory {
 
 	private static Descriptor getUNTDescriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 		case 0x01:
 			d = new SchedulingDescriptor(data, t + offset, tableSection);
 			break;
@@ -616,8 +629,8 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new UNTDescriptor(data, t + offset, tableSection);
-			logger.info("Not implemented UNTDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ UNTDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+			logger.info("Not implemented UNTDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ UNTDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;
@@ -627,7 +640,7 @@ public final class DescriptorFactory {
 
 	private static Descriptor getAITDescriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 		case 0x00:
 			d = new ApplicationDescriptor(data, t + offset, tableSection);
 			break;
@@ -656,8 +669,8 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new AITDescriptor(data, t + offset, tableSection);
-			logger.info("Not implemented AITDescriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ AITDescriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+			logger.info("Not implemented AITDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ AITDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;
@@ -667,7 +680,7 @@ public final class DescriptorFactory {
 
 	private static Descriptor getSCTE35Descriptor(final byte[] data, final int offset, final TableSection tableSection, final int t) {
 		Descriptor d;
-		switch (Utils.getUnsignedByte(data[t + offset])) {
+		switch (toUnsignedInt(data[t + offset])) {
 		case 0x00:
 			d = new AvailDescriptor(data, t + offset, tableSection);
 			break;
@@ -676,8 +689,8 @@ public final class DescriptorFactory {
 			break;
 		default:
 			d = new SCTE35Descriptor(data, t + offset, tableSection);
-			logger.info("Not implemented SCTE35Descriptor:" + Utils.getUnsignedByte(data[t + offset]) + " ("
-					+ SCTE35Descriptor.getDescriptorname(Utils.getUnsignedByte(data[t + offset]), tableSection)
+			logger.info("Not implemented SCTE35Descriptor:" + toUnsignedInt(data[t + offset]) + " ("
+					+ SCTE35Descriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			break;

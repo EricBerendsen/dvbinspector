@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,13 +27,16 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.system_clock_frequency;
-import static nl.digitalekabeltelevisie.util.Utils.getUnsignedByte;
 import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.logging.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -42,10 +45,12 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.TimelineDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.pes.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.JTreeLazyList;
+import nl.digitalekabeltelevisie.util.PIDPacketGetter;
 
 /**
  * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets tables are built, PES packets are (initially) only counted.
@@ -142,13 +147,13 @@ public class PID implements TreeNode{
 						// this is just an educated guess, it might still be private data of unspecified format
 						type = PSI;
 
-						start = 1+getUnsignedByte(data[0]);
-						available = data.length -start;
-						while ((available>0) && (getUnsignedByte(data[start])!= 0xFF)){
-							lastPSISection = new PsiSectionData(parentPID,packet.getPacketNo(),parentTransportStream);
-							final int bytes_read=lastPSISection.readBytes(data, start, available);
-							start+=bytes_read;
-							available-=bytes_read;
+						start = 1 + toUnsignedInt(data[0]);
+						available = data.length - start;
+						while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
+							lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
+							final int bytes_read = lastPSISection.readBytes(data, start, available);
+							start += bytes_read;
+							available -= bytes_read;
 						}
 
 						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
@@ -192,11 +197,11 @@ public class PID implements TreeNode{
 						start+=bytes_read;
 						available-=bytes_read;
 					}
-					while ((available>0) && (getUnsignedByte(data[start])!= 0xFF)){
-						lastPSISection = new PsiSectionData(parentPID,packet.getPacketNo(),parentTransportStream);
-						final int bytes_read=lastPSISection.readBytes(data, start, available);
-						start+=bytes_read;
-						available-=bytes_read;
+					while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
+						lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
+						final int bytes_read = lastPSISection.readBytes(data, start, available);
+						start += bytes_read;
+						available -= bytes_read;
 					}
 				}
 			}

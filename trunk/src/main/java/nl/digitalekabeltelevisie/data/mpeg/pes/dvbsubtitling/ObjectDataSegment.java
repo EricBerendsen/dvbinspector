@@ -554,7 +554,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 		case 0x1:
 			return "coded as a string of characters";
 		case 0x2:
-			return "reserved";
+			return "progressive coding of pixels";
 		case 0x3:
 			return "reserved";
 		default:
