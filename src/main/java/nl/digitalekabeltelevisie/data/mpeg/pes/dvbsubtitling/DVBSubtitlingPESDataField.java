@@ -325,6 +325,8 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 			return "display definition segment";
 		case 0x15:
 			return "disparity signalling segment";
+		case 0x16:
+			return "alternative_CLUT_segment";
 		case 0x80:
 			return "end of display set segment";
 		case 0xFF:

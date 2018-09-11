@@ -26,6 +26,8 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+import static java.lang.Byte.toUnsignedInt;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,11 +106,11 @@ public class PATsection extends TableSectionExtendedSyntax {
 	}
 
 	public int getProgramNumber(final int i){
-		return (Utils.getUnsignedByte(raw_data.getData()[8+(i*4)]) *256) + Utils.getUnsignedByte(raw_data.getData()[9+(i*4)]);
+		return (toUnsignedInt(raw_data.getData()[8+(i*4)]) *256) + toUnsignedInt(raw_data.getData()[9+(i*4)]);
 	}
 
 	public int getProgramMapPID(final int i){
-		return ((Utils.getUnsignedByte(raw_data.getData()[10+(i*4)])& 0x1F )*256) + Utils.getUnsignedByte(raw_data.getData()[11+(i*4)]);
+		return ((toUnsignedInt(raw_data.getData()[10+(i*4)])& 0x1F )*256) + toUnsignedInt(raw_data.getData()[11+(i*4)]);
 	}
 	@Override
 	public String toString(){

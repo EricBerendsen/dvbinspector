@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,6 +26,7 @@
  */
 package nl.digitalekabeltelevisie.controller;
 
+import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.nio.charset.Charset;
@@ -93,7 +94,7 @@ public class DVBString {
 			return "-";
 		}
 
-		final int fb = getUnsignedByte(data[offset+1]);
+		final int fb = toUnsignedInt(data[offset+1]);
 		if(0x20<=fb)
 		{
 			return "default (ISO 6937, latin)";

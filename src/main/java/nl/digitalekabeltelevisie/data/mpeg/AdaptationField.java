@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  * 
@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static java.lang.Byte.toUnsignedLong;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
@@ -190,7 +191,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 						reserved2 = getInt(private_data_byte, localOffset,1, MASK_4BITS);
 						localOffset++;
 					}
-					if((localOffset-2) < data_field_length){
+					if(localOffset-2 < data_field_length){
 						extraDataPresent  = true;
 						AU_Pulldown_info_present_flag = getInt(private_data_byte, localOffset,1, 0x80)>>7;
 						AU_reserved_zero = getInt(private_data_byte, localOffset,1, 0x7E)>>1;
@@ -201,8 +202,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 							localOffset ++;
 						}
 					}
-					if((localOffset-2) < data_field_length){
-						AU_reserved_byte = getBytes(private_data_byte, localOffset, (data_field_length - localOffset) + 2);
+					if(localOffset-2 < data_field_length){
+						AU_reserved_byte = getBytes(private_data_byte, localOffset, data_field_length - localOffset + 2);
 					}
 				}
 			}
@@ -486,16 +487,16 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			if(transport_private_data_flag){
 				transport_private_data_length = getInt(data,offset,1,MASK_8BITS);
 				offset+= 1;
-				private_data_byte = getBytes(data, offset, Math.min(transport_private_data_length, (adaptation_field_length+ 1) - offset));
+				private_data_byte = getBytes(data, offset, Math.min(transport_private_data_length, adaptation_field_length+ 1 - offset));
 				if(private_data_byte.length>0){
 					privatedataFields = buildPrivatedataFieldsList(private_data_byte);
 				}
 				offset+= transport_private_data_length ;
 			}
-			if(adaptation_field_extension_flag&& (data.length>(offset+2))){ //extension is at least 2 bytes
+			if(adaptation_field_extension_flag&& data.length>offset+2){ //extension is at least 2 bytes
 				adaptation_field_extension_length =  getInt(data,offset,1,MASK_8BITS);
 				offset+=1;
-				adaptation_field_extension_byte = getBytes(data, offset, Math.min(adaptation_field_extension_length, (adaptation_field_length+ 1) - offset));
+				adaptation_field_extension_byte = getBytes(data, offset, Math.min(adaptation_field_extension_length, adaptation_field_length+ 1 - offset));
 				int adaptation_field_extension_offset = 0;
 				ltw_flag = getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],1);
 				piecewise_rate_flag =  getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],2);
@@ -544,21 +545,19 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	}
 
 
-	private static PCR getPCRfromBytes(final byte[] array, final int offset)
-	{
-		long pcr = ((long)getUnsignedByte(array[offset]))<<25;
-		pcr |= ((long)getUnsignedByte(array[offset + 1]))<<17;
-		pcr |= ((long)getUnsignedByte(array[offset + 2]))<<9 ;
-		pcr |=((long)getUnsignedByte(array[offset + 3]))<<1 ;
-		pcr |= ((long)(0x80 & getUnsignedByte(array[offset + 4])))>>>7;
-		final long reserved =(0x7E & getUnsignedByte(array[offset + 4]))>>>1;
+	private static PCR getPCRfromBytes(final byte[] array, final int offset) {
+		long pcr = toUnsignedLong(array[offset]) << 25;
+		pcr |= toUnsignedLong(array[offset + 1]) << 17;
+		pcr |= toUnsignedLong(array[offset + 2]) << 9;
+		pcr |= toUnsignedLong(array[offset + 3]) << 1;
+		pcr |= (0x80L & toUnsignedLong(array[offset + 4])) >>> 7;
+		final long reserved = (0x7EL & toUnsignedLong(array[offset + 4])) >>> 1;
 
-		long pcr_extension = (0x01 & (getUnsignedByte(array[offset+4])))<<8;
-		pcr_extension |= getUnsignedByte(array[offset+5]);
+		long pcr_extension = (0x01L & toUnsignedLong(array[offset + 4])) << 8;
+		pcr_extension |= toUnsignedLong(array[offset + 5]);
 
 		return new PCR(pcr, reserved, pcr_extension);
 	}
-
 
 	public boolean isAdaptation_field_extension_flag() {
 		return adaptation_field_extension_flag;

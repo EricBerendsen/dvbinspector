@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
+import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.data.mpeg.pes.video.ExtensionHeader.*;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
@@ -67,14 +68,14 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			i = indexOf(data, new byte[]{0,0,1},i);
 			if(i>=0){
 				VideoMPEG2Section section;
-				if(getUnsignedByte(data[i+3])==0x00){
+				if(toUnsignedInt(data[i+3])==0x00){
 					section = new PictureHeader(data,i+3);
-				}else if(getUnsignedByte(data[i+3])==0xB2){
+				}else if(toUnsignedInt(data[i+3])==0xB2){
 					section = new UserData(data,i+3);
-				}else if(getUnsignedByte(data[i+3])==0xB3){
+				}else if(toUnsignedInt(data[i+3])==0xB3){
 					section = new SequenceHeader(data,i+3);
-				}else if(getUnsignedByte(data[i+3])==0xB5){ // extension, use extension_start_code_identifier to make sub selection
-					final int extensionStartCodeIdentifier = (getUnsignedByte(data[i+4])&0xF0)>>4;
+				}else if(toUnsignedInt(data[i+3])==0xB5){ // extension, use extension_start_code_identifier to make sub selection
+					final int extensionStartCodeIdentifier = (toUnsignedInt(data[i+4])&0xF0)>>4;
 					if(extensionStartCodeIdentifier==1){ // Sequence extension
 						section = new SequenceExtension(data,i+3);
 					}else if(extensionStartCodeIdentifier==8){ // Picture coding extension
@@ -85,7 +86,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 						section = new ExtensionHeader(data,i+3); // default Base Extension
 						logger.warning("Not implemented extendsion start code identifier:"+extensionStartCodeIdentifier+" ("+getExtensionStartCodeIdentifierString(extensionStartCodeIdentifier)+")");
 					}
-				}else if(getUnsignedByte(data[i+3])==0xB8){
+				}else if(toUnsignedInt(data[i+3])==0xB8){
 					section = new GroupOfPicturesHeader(data,i+3);
 				}else{
 					section = new VideoMPEG2Section(data,i+3);

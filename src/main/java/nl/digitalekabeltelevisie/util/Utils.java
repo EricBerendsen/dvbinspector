@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.util;
 
+import static java.lang.Byte.toUnsignedInt;
+
 import java.awt.Color;
 import java.awt.Image;
 import java.io.BufferedReader;
@@ -432,20 +434,7 @@ public final class Utils {
 	}
 
 	/**
-	 * interpret byte as unsigned byte, always returning a positive value
-	 * @param b byte
-	 * @return integer between 0 and 255 (inclusive)
-	 */
-	public static int getUnsignedByte(final byte b){
-		if(b>=0){
-			return b;
-		}
-		return b+256;
-	}
-
-
-	/**
-	 * convert  nteger between 0 and 255 (inclusive) into byte (byte is interpreted as unsigned, even though that does not exist in java)
+	 * convert integer between 0 and 255 (inclusive) into byte (byte is interpreted as unsigned, even though that does not exist in java)
 	 *
 	 * @param b
 	 * @return
@@ -471,7 +460,7 @@ public final class Utils {
 	public static int getInt(final byte[] bytes, final int offset, final int len, final int mask){
 		int r=0;
 		for (int i = 0; i < len; i++) {
-			r = (r<<8) | getUnsignedByte( bytes[offset+i]);
+			r = (r<<8) | toUnsignedInt(bytes[offset+i]);
 		}
 		return (r&mask);
 	}
@@ -486,7 +475,7 @@ public final class Utils {
 	public static long getLong(final byte[] bytes, final int offset, final int len, final long mask){
 		long r=0;
 		for (int i = 0; i < len; i++) {
-			r = (r<<8) | getUnsignedByte( bytes[offset+i]);
+			r = (r<<8) | toUnsignedInt(bytes[offset+i]);
 		}
 		return (r&mask);
 	}
@@ -545,9 +534,9 @@ public final class Utils {
 			final boolean shift=((startNibbleNo+i)%2)==0;
 			int t;
 			if(shift){
-				t= (getUnsignedByte(b[byteNo]) & 0xF0)>>4;
+				t= (toUnsignedInt(b[byteNo]) & 0xF0)>>4;
 			}else{
-				t= (getUnsignedByte(b[byteNo]) & 0x0F);
+				t= (toUnsignedInt(b[byteNo]) & 0x0F);
 			}
 			if(t>9){
 				logger.warning("Error parsing BCD: "+toHexString(b)+" ,nibble_no: "+startNibbleNo+" ,len: "+len);
@@ -1203,7 +1192,7 @@ public final class Utils {
 
 		final int len = block.length;
 		for (int i = 0; i < len; i++) {
-			if((32<=getUnsignedByte(block[i]))&&(getUnsignedByte(block[i])<=127)){
+			if((32<=toUnsignedInt(block[i]))&&(toUnsignedInt(block[i])<=127)){
 				buf.append((char)(block[i]));
 			}else{
 				buf.append('.');
@@ -1227,7 +1216,7 @@ public final class Utils {
 		final int end = Math.min(block.length, offset+len);
 		for (int i = offset; i < end; i++) {
 			final byte b=block[i];
-			if((32<=getUnsignedByte(b))&&(getUnsignedByte(b)<127)){
+			if((32<=toUnsignedInt(b))&&(toUnsignedInt(b)<127)){
 				buf.append((char)(b));
 			}else{
 				buf.append('.');
@@ -1620,10 +1609,10 @@ public final class Utils {
 	public static String formatIPNumber(final byte[] ip){
 		final StringBuilder r = new StringBuilder();
 		if(ip.length>0){
-			r.append(getUnsignedByte(ip[0]));
+			r.append(toUnsignedInt(ip[0]));
 		}
 		for(int i=1;i<ip.length;i++){
-			r.append('.').append(getUnsignedByte(ip[i]));
+			r.append('.').append(toUnsignedInt(ip[i]));
 		}
 		return r.toString();
 	}
@@ -1674,7 +1663,7 @@ public final class Utils {
 	}
 
 	public static int getHammingReverseByte(final byte b){
-		final int t= getUnsignedByte(b);
+		final int t= toUnsignedInt(b);
 		int r = (t & 0x40)>>6;
 		r |= (t & 0x10)>>3;
 		r |= (t & 0x04);
@@ -1684,7 +1673,7 @@ public final class Utils {
 	}
 
 	public static int getHammingByte(final byte b){
-		final int t= getUnsignedByte(b);
+		final int t= toUnsignedInt(b);
 		int r = (t & 0x40)>>3;
 		r |= (t & 0x10)>>2;
 			r |= (t & 0x04)>>1;

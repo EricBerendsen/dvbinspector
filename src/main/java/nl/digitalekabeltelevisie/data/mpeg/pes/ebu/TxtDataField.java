@@ -26,6 +26,7 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
+import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
@@ -421,7 +422,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	public byte[] getHeaderDataBytes(){
 		final byte[] r = new byte[32];
 		for (int i = 14; i < 46; i++) {
-			r[i-14] = (byte)(invtab[getUnsignedByte(data_block[i+offset])]&0x7f);
+			r[i-14] = (byte)(invtab[toUnsignedInt(data_block[i+offset])]&0x7f);
 		}
 		return r;
 	}
@@ -429,7 +430,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	public byte[] getDataBytes(final int start, final int end){
 		final byte[] r = new byte[end-start];
 		for (int i = start; i < end; i++) {
-			r[i-start] = (byte)(invtab[getUnsignedByte(data_block[i+offset])]&0x7f);
+			r[i-start] = (byte)(invtab[toUnsignedInt(data_block[i+offset])]&0x7f);
 		}
 		return r;
 	}
@@ -584,13 +585,13 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	public byte[] getPageDataBytes(){
 		final byte[] r = new byte[40];
 		for (int i = 6; i < 46; i++) {
-			r[i-6] = (byte)(invtab[getUnsignedByte(data_block[i+offset])]&0x7f);
+			r[i-6] = (byte)(invtab[toUnsignedInt(data_block[i+offset])]&0x7f);
 		}
 		return r;
 	}
 
 	public byte getPageDataByte(final int i){
-		return (byte)(invtab[getUnsignedByte(data_block[i+offset+6])]&0x7f);
+		return (byte)(invtab[toUnsignedInt(data_block[i+offset+6])]&0x7f);
 	}
 
 	public int getPageNumberUnits(){
@@ -632,9 +633,9 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 
 	private int getMagazineComplement(final int localOffset){
-		final int m1 = (getUnsignedByte(data_block[offset+localOffset]) &0x01);
-		final int m2 = (getUnsignedByte(data_block[offset+localOffset+2]) &0x04)>>1;
-		final int m3 = (getUnsignedByte(data_block[offset+localOffset+2]) &0x01)<<2;
+		final int m1 = (toUnsignedInt(data_block[offset+localOffset]) &0x01);
+		final int m2 = (toUnsignedInt(data_block[offset+localOffset+2]) &0x04)>>1;
+		final int m3 = (toUnsignedInt(data_block[offset+localOffset+2]) &0x01)<<2;
 		return m1|m2|m3;
 	}
 
