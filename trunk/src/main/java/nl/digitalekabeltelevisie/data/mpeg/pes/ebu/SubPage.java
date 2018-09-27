@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -169,7 +169,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 			 *   
 			 */
 			
-			int defaultG0CharacterSet = pageHandler.getMagazine().getTxtService().getTransportStream().getDefaultG0CharacterSet();
+			int defaultG0CharacterSet = PreferencesManager.getDefaultG0CharacterSet();
 			/* if we have no page enhancement data, revert to the data available
 			 * in the page's header. this only gives us the last 3 bits of the
 			 * selection bits. Add the user specified default G0 and G2 set to this 

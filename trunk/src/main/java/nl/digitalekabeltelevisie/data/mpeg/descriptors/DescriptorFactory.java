@@ -82,6 +82,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SchedulingDescrip
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UNTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UpdateDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public final class DescriptorFactory {
 
@@ -105,7 +106,7 @@ public final class DescriptorFactory {
 	 */
 	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len,
 			final TableSection tableSection) {
-		long private_data_specifier = tableSection.getParentTransportStream().getDefaultPrivateDataSpecifier();
+		long private_data_specifier = PreferencesManager.getDefaultPrivateDataSpecifier();
 		final List<Descriptor> r = new ArrayList<Descriptor>();
 		int t = 0;
 

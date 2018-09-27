@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,64 +28,23 @@
 package nl.digitalekabeltelevisie.gui;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
-import javax.swing.AbstractAction;
-import javax.swing.JOptionPane;
-
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.main.DVBinspector;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
-public class SetPrivateDataSpecifierAction extends AbstractAction {
+public class SetPrivateDataSpecifierAction extends AbstractSetPreferenceAction {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 7867550384009016903L;
-	private DVBinspector contr;
 	private long specifier=0;
-	private static final Logger	logger	= Logger.getLogger(SetPrivateDataSpecifierAction.class.getName());
 
 	public SetPrivateDataSpecifierAction(final DVBinspector controller, final long spec) {
-		super();
-
-		contr=controller;
+		super(controller);
 		specifier=spec;
 	}
 	public void actionPerformed(final ActionEvent e) {
-		final Preferences prefs = Preferences.userNodeForPackage(contr.getClass());
-		prefs.putLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, specifier);
-		contr.setDefaultPrivateDataSpecifier(specifier);
-
-		final TransportStream ts = contr.getTransportStream();
-		if(ts!=null){
-			Object[] options = {"Yes, reload stream (may take some time)",
-                    "No, setting only takes effect after next load"
-                    };
-			int n = JOptionPane.showOptionDialog(contr.getFrame(),
-				    "For this option to take effect the stream has to be reloaded.\n "
-				    + "Do you want to reload the stream now?",
-				    "reload stream?",
-				    JOptionPane.YES_NO_OPTION,
-				    JOptionPane.QUESTION_MESSAGE,
-				    null,
-				    options,
-				    options[1]); // default to no
-			if(n==0){
-				try {
-					ts.setDefaultPrivateDataSpecifier(specifier);
-					// TODO use swingworker to enable progressIndicator (see FileOpenAction)
-					//ts.parseStream((JRadioButtonMenuItem)e.getSource());
-					ts.parseStream();
-					contr.setTransportStream(ts);
-					contr.resetSearch();
-				} catch (final IOException e1) {
-					logger.log (Level.SEVERE,"Error (re)reading transport stream: ",e1);
-				}
-			}
-		}
-
+		PreferencesManager.setDefaultPrivateDataSpecifier(specifier);
+		askReloadStream();
 	}
 }

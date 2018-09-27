@@ -1,0 +1,119 @@
+/**
+ *
+ *  http://www.digitalekabeltelevisie.nl/dvb_inspector
+ *
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *
+ *  This file is part of DVB Inspector.
+ *
+ *  DVB Inspector is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  DVB Inspector is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  The author requests that he be notified of any application, applet, or
+ *  other binary that makes use of this code, but that's more out of curiosity
+ *  than anything and is not required.
+ *
+ */
+
+package nl.digitalekabeltelevisie.util;
+
+import java.util.prefs.Preferences;
+
+import nl.digitalekabeltelevisie.main.DVBinspector;
+
+public class PreferencesManager {
+
+    final static Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
+
+    private static final String DEFAULT_G0_CHARACTER_SET = "defaultg0_character_set";
+    private static final String DEFAULT_PRIVATE_DATA_SPECIFIER = "private_data_spcifier";
+    private static final String DEFAULT_VIEW_MODUS = "view_modus";
+
+    private static final String LAST_USED_DIR = "stream_directory";
+
+    /**
+     * keys for storage of last used window location/size in Preferences
+     */
+    private static final String WINDOW_WIDTH = "window_width";
+    private static final String WINDOW_HEIGHT = "window_height";
+    private static final String WINDOW_X = "window_x";
+    private static final String WINDOW_Y = "window_y";
+
+    // private constructor to avoid client applications to use constructor
+    private PreferencesManager() {
+    }
+
+    public static int getDefaultG0CharacterSet() {
+	return prefs.getInt(DEFAULT_G0_CHARACTER_SET, 0);
+    }
+
+    public static void setDefaultG0CharacterSet(int defaultG0CharacterSet) {
+	prefs.putInt(DEFAULT_G0_CHARACTER_SET, defaultG0CharacterSet);
+    }
+
+    public static void setDefaultPrivateDataSpecifier(long specifier) {
+	prefs.putLong(DEFAULT_PRIVATE_DATA_SPECIFIER, specifier);
+    }
+
+    public static long getDefaultPrivateDataSpecifier() {
+	return prefs.getLong(DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
+    }
+
+    public static int getDefaultViewModus() {
+	return prefs.getInt(DEFAULT_VIEW_MODUS, 0);
+    }
+
+    public static void setDefaultViewModus(int mod) {
+	prefs.putInt(DEFAULT_VIEW_MODUS, mod);
+    }
+
+    public static void setLastUsedDir(String parent) {
+	prefs.put(LAST_USED_DIR,parent);
+    }
+
+    public static String getLastUsedDir() {
+	return prefs.get(LAST_USED_DIR, null);
+    }
+
+    public static int getWindowX() {
+	return prefs.getInt(WINDOW_X, 10);
+    }
+
+    public static int getWindowY() {
+	return prefs.getInt(WINDOW_Y, 10);
+    }
+
+    public static int getWindowWidth() {
+	return prefs.getInt(PreferencesManager.WINDOW_WIDTH, 980);
+    }
+
+    public static int getWindowHeight() {
+	return prefs.getInt(PreferencesManager.WINDOW_HEIGHT, 700);
+    }
+
+    public static void setWindowX(int x) {
+	prefs.putInt(WINDOW_X, x);
+    }
+
+    public static void setWindowY(int y) {
+	prefs.putInt(WINDOW_Y, y);
+    }
+
+    public static void setWindowWidth(int width) {
+	prefs.putInt(WINDOW_WIDTH, width);
+    }
+
+    public static void setWindowHeight(int height) {
+	prefs.putInt(WINDOW_HEIGHT, height);
+    }
+}

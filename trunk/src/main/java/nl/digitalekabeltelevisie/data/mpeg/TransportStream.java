@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -78,14 +78,6 @@ public class TransportStream implements TreeNode{
 
 
 	private static final Logger logger = Logger.getLogger(TransportStream.class.getName());
-
-	/**
-	 * used when building DescriptorLists, for transportStreams that do use private descriptors, but (incorrectly) do not use a PrivateDataSpecifierDescriptor
-	 * @see DescriptorFactory
-	 */
-	private long defaultPrivateDataSpecifier = 0;
-	private int defaultG0CharacterSet = 0;
-
 
 	/**
 	 * File containing data of this TransportStream
@@ -897,20 +889,6 @@ public class TransportStream implements TreeNode{
 		return r;
 	}
 
-	/**
-	 * @return the defaultPrivateDataSpecifier
-	 */
-	public long getDefaultPrivateDataSpecifier() {
-		return defaultPrivateDataSpecifier;
-	}
-
-	/**
-	 * @param defaultPrivateDataSpecifier the defaultPrivateDataSpecifier to set
-	 */
-	public void setDefaultPrivateDataSpecifier(final long defaultPrivateDataSpecifier) {
-		this.defaultPrivateDataSpecifier = defaultPrivateDataSpecifier;
-	}
-
 	public PMTsection getPMTforPID(final int thisPID) {
 		final PMTs pmts = getPsi().getPmts();
 		for (final PMTsection[] pmTsections : pmts) {
@@ -1010,14 +988,6 @@ public class TransportStream implements TreeNode{
 
 	public long getLen() {
 		return len;
-	}
-
-	public int getDefaultG0CharacterSet() {
-		return defaultG0CharacterSet;
-	}
-
-	public void setDefaultG0CharacterSet(int defaultG0CharacterSet) {
-		this.defaultG0CharacterSet = defaultG0CharacterSet;
 	}
 
 	public int getSync_errors() {
