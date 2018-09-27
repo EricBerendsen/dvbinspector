@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -81,8 +81,8 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
-import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
  * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
@@ -304,8 +304,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public boolean toggleMod(final int modus) {
 		this.mod = this.mod ^ modus;
 
-		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
-		prefs.putInt(DVBinspector.DEFAULT_VIEW_MODUS, mod);
+		PreferencesManager.setDefaultViewModus(mod);
 
 		refreshView();
 		return (this.mod&modus)!=0;

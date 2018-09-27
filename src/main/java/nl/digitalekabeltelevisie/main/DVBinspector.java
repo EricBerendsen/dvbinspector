@@ -26,25 +26,70 @@
  */
 package nl.digitalekabeltelevisie.main;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.*;
-import java.util.prefs.Preferences;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.controller.ChartLabel;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.gui.*;
+import nl.digitalekabeltelevisie.gui.AboutAction;
+import nl.digitalekabeltelevisie.gui.BarChart;
+import nl.digitalekabeltelevisie.gui.BitRateChart;
+import nl.digitalekabeltelevisie.gui.DVBtree;
+import nl.digitalekabeltelevisie.gui.EITView;
+import nl.digitalekabeltelevisie.gui.FileDropHandler;
+import nl.digitalekabeltelevisie.gui.FileOpenAction;
+import nl.digitalekabeltelevisie.gui.FindAction;
+import nl.digitalekabeltelevisie.gui.FindNextAction;
+import nl.digitalekabeltelevisie.gui.GridView;
+import nl.digitalekabeltelevisie.gui.PIDDialog;
+import nl.digitalekabeltelevisie.gui.PIDDialogOpenAction;
+import nl.digitalekabeltelevisie.gui.SetG0DefaultAction;
+import nl.digitalekabeltelevisie.gui.SetPrivateDataSpecifierAction;
+import nl.digitalekabeltelevisie.gui.TimeStampChart;
+import nl.digitalekabeltelevisie.gui.ToggleViewAction;
+import nl.digitalekabeltelevisie.gui.TransportStreamView;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Main class for DVB Inspector, creates and holds all GUI elements.
@@ -57,31 +102,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private static final Logger LOGGER = Logger.getLogger(DVBinspector.class.getName());
 
 
-	/**
-	 * key for storage of last used DEFAULT_PRIVATE_DATA_SPECIFIER in Preferences
-	 */
-	public static final String DEFAULT_PRIVATE_DATA_SPECIFIER = "private_data_spcifier";
-	public static final String DEFAULT_G0_CHARACTER_SET = "defaultg0_character_set";
 	public static final String ENABLE_TIMESTAMP_GRAPH = "enable_timestamp_graph";
-
-	/**
-	 * key for storage of last used DEFAULT_VIEW_MODUS in Preferences
-	 */
-	public static final String DEFAULT_VIEW_MODUS = "view_modus";
-
-
-	/**
-	 * keys for storage of last used window location/size in Preferences
-	 */
-	public static final String WINDOW_WIDTH = "window_width";
-	public static final String WINDOW_HEIGHT = "window_height";
-	public static final String WINDOW_X = "window_x";
-	public static final String WINDOW_Y = "window_y";
-
-	/**
-	 * key for storage of last used directory in Preferences
-	 */
-	public static final String DIR = "stream_directory";
 
 	private TransportStream transportStream;
 
@@ -97,10 +118,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private JMenu viewTreeMenu;
 	private JMenu viewMenu;
 	private PIDDialog pidDialog = null;
-
-	private long defaultPrivateDataSpecifier = 0;
-	private int defaultG0CharacterSet = 0;
-
 
 	private ViewContext viewContext = new ViewContext();
 
@@ -141,13 +158,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			final String filename= args[0];
 			try {
 				final TransportStream ts = new TransportStream(filename);
-
-				final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
-
-				// TODO
-				ts.setDefaultPrivateDataSpecifier(prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0));
-				ts.setDefaultG0CharacterSet(prefs.getInt(DVBinspector.DEFAULT_G0_CHARACTER_SET, 0));
-
 				inspector.transportStream = ts;
 
 				inspector.transportStream.parseStream();
@@ -174,16 +184,12 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	}
 
 	public void run() {
-		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
-		defaultPrivateDataSpecifier = prefs.getLong(DVBinspector.DEFAULT_PRIVATE_DATA_SPECIFIER, 0);
-		defaultG0CharacterSet = prefs.getInt(DVBinspector.DEFAULT_G0_CHARACTER_SET, 0);
-		modus = prefs.getInt(DVBinspector.DEFAULT_VIEW_MODUS,0);
 
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
 		KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				createAndShowGUI(transportStream,modus);
+				createAndShowGUI(transportStream);
 			}
 		});
 
@@ -197,7 +203,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param tStream Transport stream (can be <code>null</code>)
 	 * @param modus display Modus
 	 */
-	private void createAndShowGUI(final TransportStream tStream,final int modus) {
+	private void createAndShowGUI(final TransportStream tStream) {
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -205,6 +211,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		{
 			LOGGER.warning("Couldn't use system look and feel. Exception:"+e.getMessage());
 		}
+		
+		int modus = PreferencesManager.getDefaultViewModus();
 
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
 		//Create and set up the window.
@@ -260,7 +268,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final Image image = Utils.readIconImage("magnifying_glass.bmp");
 		frame.setIconImage(image);
 
-		frame.setBounds(calculateBounds(Preferences.userNodeForPackage(DVBinspector.class)));
+		frame.setBounds(calculateBounds());
 
 		frame.setVisible(true);
 	}
@@ -289,10 +297,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param prefs
 	 * @return
 	 */
-	private static Rectangle calculateBounds(final Preferences prefs) {
+	private static Rectangle calculateBounds() {
 
-		int x = Math.max(0, prefs.getInt(DVBinspector.WINDOW_X, 10));
-		int y = Math.max(0, prefs.getInt(DVBinspector.WINDOW_Y, 10));
+		int x = Math.max(0, PreferencesManager.getWindowX());
+		int y = Math.max(0, PreferencesManager.getWindowY());
 
 		// if last used on larger screen, it might open too large, or out of range
 		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -301,8 +309,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 		x = Math.min(screenWidth-200, x); // at least 200 pix visible
 		y = Math.min(screenHeight-200, y); // at least 200 pix visible
-		final int w = Math.min(screenWidth, prefs.getInt(DVBinspector.WINDOW_WIDTH, 980));
-		final int h = Math.min(screenHeight, prefs.getInt(DVBinspector.WINDOW_HEIGHT, 700));
+		final int w = Math.min(screenWidth, PreferencesManager.getWindowWidth());
+		final int h = Math.min(screenHeight, PreferencesManager.getWindowHeight());
 		return new Rectangle(x,y,w,h);
 	}
 
@@ -316,6 +324,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final JMenu privateDataSubMenu = new JMenu("Private Data Specifier Default");
 		privateDataSubMenu.setMnemonic(KeyEvent.VK_P);
 		final ButtonGroup group = new ButtonGroup();
+		
+		long defaultPrivateDataSpecifier = PreferencesManager.getDefaultPrivateDataSpecifier();
 
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x00, "none",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x16, "Casema",defaultPrivateDataSpecifier);
@@ -470,7 +480,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final JMenuItem menuItem = new JRadioButtonMenuItem(name);
 		group.add(menuItem);
 		menuItem.addActionListener(new SetG0DefaultAction(this,spec));
-		menuItem.setSelected(spec==defaultG0CharacterSet);
+		menuItem.setSelected(spec==PreferencesManager.getDefaultG0CharacterSet());
 		privateDataSubMenu.add(menuItem);
 	}
 	
@@ -556,19 +566,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		}
 	}
 
-	/**
-	 * @return the defaultPrivateDataSpecifier
-	 */
-	public long getDefaultPrivateDataSpecifier() {
-		return defaultPrivateDataSpecifier;
-	}
-
-	/**
-	 * @param defaultPrivateDataSpecifier the defaultPrivateDataSpecifier to set
-	 */
-	public void setDefaultPrivateDataSpecifier(final long defaultPrivateDataSpecifier) {
-		this.defaultPrivateDataSpecifier = defaultPrivateDataSpecifier;
-	}
 
 	/**
 	 * Listen for changes caused by selecting another tab from tabbedPane. Then enable/disable appropriate menu's.
@@ -595,12 +592,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * store current window position and size in preferences
 	 */
 	private void saveWindowState(){
-		final Preferences prefs = Preferences.userNodeForPackage(DVBinspector.class);
-		prefs.putInt(WINDOW_WIDTH,frame.getWidth());
-		prefs.putInt(WINDOW_HEIGHT,frame.getHeight());
-		prefs.putInt(WINDOW_X,frame.getX());
-		prefs.putInt(WINDOW_Y,frame.getY());
-
+		PreferencesManager.setWindowX(frame.getX());
+		PreferencesManager.setWindowY(frame.getY());
+		PreferencesManager.setWindowWidth(frame.getWidth());
+		PreferencesManager.setWindowHeight(frame.getHeight());
 	}
 
 	/**
@@ -661,14 +656,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		searchEnummeration = null;
 		searchString = null;
 		findNextAction.setEnabled(false);
-	}
-
-	public int getDefaultG0CharacterSet() {
-		return defaultG0CharacterSet;
-	}
-
-	public void setDefaultG0CharacterSet(int defaultG0CharacterSet) {
-		this.defaultG0CharacterSet = defaultG0CharacterSet;
 	}
 
 

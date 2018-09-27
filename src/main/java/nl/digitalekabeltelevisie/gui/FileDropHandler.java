@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -33,60 +33,59 @@ import java.awt.datatransfer.*;
 import java.io.*;
 import java.util.List;
 import java.util.logging.*;
-import java.util.prefs.Preferences;
 
 import javax.swing.TransferHandler;
 
 import nl.digitalekabeltelevisie.main.DVBinspector;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
-public class FileDropHandler extends TransferHandler{
+public class FileDropHandler extends TransferHandler {
 
-	private static final Logger logger = Logger.getLogger(FileDropHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(FileDropHandler.class.getName());
 
-	public FileDropHandler(DVBinspector controller) {
-		super();
-		this.controller = controller;
-	}
+    private DVBinspector controller = null;
 
-	private DVBinspector controller = null;
+    public FileDropHandler(DVBinspector controller) {
+	super();
+	this.controller = controller;
+    }
+
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
-        for (DataFlavor flavor : support.getDataFlavors()) {
-            if (flavor.isFlavorJavaFileListType()) {
-                return true;
-            }
-        }
-        return false;
+	for (DataFlavor flavor : support.getDataFlavors()) {
+	    if (flavor.isFlavorJavaFileListType()) {
+		return true;
+	    }
+	}
+	return false;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean importData(TransferHandler.TransferSupport support) {
-        if (!this.canImport(support))
-            return false;
+	if (!this.canImport(support))
+	    return false;
 
-        List <File> files;
-        try {
-            files = (List<File>) support.getTransferable()
-                    .getTransferData(DataFlavor.javaFileListFlavor);
-        } catch (UnsupportedFlavorException | IOException ex) {
-            // should never happen (or JDK is buggy)
-        	logger.log(Level.WARNING, "File drophandler error, should never happen (or JDK is buggy)", ex);
-            return false;
-        }
+	List<File> files;
+	try {
+	    files = (List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+	} catch (UnsupportedFlavorException | IOException ex) {
+	    // should never happen (or JDK is buggy)
+	    logger.log(Level.WARNING, "File drophandler error, should never happen (or JDK is buggy)", ex);
+	    return false;
+	}
 
-        if(!files.isEmpty()){ 
-        	File file = files.get(0);// ignore extra files, only 1st is loaded
-        	logger.info("file dropped: "+file.getName());
-        	final Preferences prefs = Preferences.userNodeForPackage(controller.getClass());
-        	prefs.put(DVBinspector.DIR,file.getParent());
-        	if(file.isFile()){
-    			final TSLoader tsLoader = new TSLoader(file,controller);
-    			tsLoader.execute();
+	if (!files.isEmpty()) {
+	    File file = files.get(0);// ignore extra files, only 1st is loaded
+	    logger.info("file dropped: " + file.getName());
+	    PreferencesManager.setLastUsedDir(file.getParent());
+	    if (file.isFile()) {
+		final TSLoader tsLoader = new TSLoader(file, controller);
+		tsLoader.execute();
 
-        	}
-        }
-        return true;
+	    }
+	}
+	return true;
     }
 }

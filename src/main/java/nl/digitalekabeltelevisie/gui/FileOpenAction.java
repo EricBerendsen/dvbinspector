@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,11 +30,12 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.prefs.Preferences;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 
 import nl.digitalekabeltelevisie.main.DVBinspector;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public class FileOpenAction extends AbstractAction {
 
@@ -46,15 +47,12 @@ public class FileOpenAction extends AbstractAction {
 	public FileOpenAction(final JFileChooser jf, final DVBinspector controller) {
 		super("Open");
 		fileChooser = jf;
-		
 		contr = controller;
 	}
 
 	public void actionPerformed(final ActionEvent e) {
 
-		final Preferences prefs = Preferences.userNodeForPackage(contr.getClass());
-
-		final String defaultDir = prefs.get(DVBinspector.DIR, null);
+		final String defaultDir = PreferencesManager.getLastUsedDir(); 
 		if(defaultDir!=null){
 			final File defDir = new File(defaultDir);
 			fileChooser.setCurrentDirectory(defDir);
@@ -65,12 +63,10 @@ public class FileOpenAction extends AbstractAction {
 			contr.getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 			final File file = fileChooser.getSelectedFile();
-			prefs.put(DVBinspector.DIR,file.getParent());
+			PreferencesManager.setLastUsedDir(file.getParent());
 
 			final TSLoader tsLoader = new TSLoader(file,contr);
 			tsLoader.execute();
-
-			
 		}
 	}
 }
