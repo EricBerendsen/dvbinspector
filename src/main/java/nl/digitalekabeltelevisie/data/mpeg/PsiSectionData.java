@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -42,6 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
@@ -111,11 +112,13 @@ public class PsiSectionData {
 				// now put it in general PID table
 				// when it is not valid an exception will be thrown, caught and ignored. The section will be discarded
 
-				try {
-					final TableSection psi= new TableSection(this,parentPID);
-					parentPID.getPsi().update(psi);
-				} catch (final RuntimeException re) {
-					logger.log(Level.WARNING, "RuntimeException in readBytes PIDs: pid="+pid, re);
+				if(PreferencesManager.isEnableGenericPSI()) {
+        				try {
+        					final TableSection psi= new TableSection(this,parentPID);
+        					parentPID.getPsi().update(psi);
+        				} catch (final RuntimeException re) {
+        					logger.log(Level.WARNING, "RuntimeException in readBytes PIDs: pid="+pid, re);
+        				}
 				}
 				complete=true;
 			}
@@ -169,8 +172,9 @@ public class PsiSectionData {
 					// These might be referenced from DSI in other stream (or even from multiple)
 					// Also, include PMTs to store the stream_identifier_descriptor
 					// all handled in DSMCCs.
-
-					transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
+					if(PreferencesManager.isEnableDSMCC()) {
+						transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
+					}
 				}
 			}
 		} catch (final RuntimeException re) {

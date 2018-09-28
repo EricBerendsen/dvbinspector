@@ -46,6 +46,7 @@ import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.gui.utils.*;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
@@ -231,6 +232,11 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
 			temiOptionCheckBox.setEnabled(false);
+		}else if(!PreferencesManager.isEnablePcrPtsView()) {
+			freeChart = null;
+			chartPanel.setChart(GuiUtils.createTitleOnlyChart("PCR/PTS/DTS View not enabled, select 'Settings -> Enable PCR/PTS/DTS View' to enable "));
+			temiOptionCheckBox.setEnabled(false);
+			
 		}else{
 			final PMTs streamPmts = transportStream.getPsi().getPmts();
 			if(streamPmts.getPmts().isEmpty()){

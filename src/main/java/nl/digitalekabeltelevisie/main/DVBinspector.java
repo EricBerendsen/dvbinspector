@@ -74,6 +74,9 @@ import nl.digitalekabeltelevisie.gui.BarChart;
 import nl.digitalekabeltelevisie.gui.BitRateChart;
 import nl.digitalekabeltelevisie.gui.DVBtree;
 import nl.digitalekabeltelevisie.gui.EITView;
+import nl.digitalekabeltelevisie.gui.EnableDSMCCAction;
+import nl.digitalekabeltelevisie.gui.EnableGenericPSIAction;
+import nl.digitalekabeltelevisie.gui.EnablePcrPtsViewAction;
 import nl.digitalekabeltelevisie.gui.FileDropHandler;
 import nl.digitalekabeltelevisie.gui.FileOpenAction;
 import nl.digitalekabeltelevisie.gui.FindAction;
@@ -100,9 +103,6 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class DVBinspector implements ChangeListener, ActionListener{
 
 	private static final Logger LOGGER = Logger.getLogger(DVBinspector.class.getName());
-
-
-	public static final String ENABLE_TIMESTAMP_GRAPH = "enable_timestamp_graph";
 
 	private TransportStream transportStream;
 
@@ -356,7 +356,22 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x0A, "1 0 1 0 x x x");
 
 		settingsMenu.add(defaultG0andG2CharacterSetDesignationMenu);
+		
+		final JCheckBoxMenuItem enableGenericPSI = new JCheckBoxMenuItem(new EnableGenericPSIAction(this));
+		enableGenericPSI.setMnemonic(KeyEvent.VK_G);
+		enableGenericPSI.setSelected(PreferencesManager.isEnableGenericPSI());
+		settingsMenu.add(enableGenericPSI);
 
+		final JCheckBoxMenuItem enableDSMCC = new JCheckBoxMenuItem(new EnableDSMCCAction(this));
+		enableDSMCC.setMnemonic(KeyEvent.VK_D);
+		enableDSMCC.setSelected(PreferencesManager.isEnableDSMCC());
+		settingsMenu.add(enableDSMCC);
+
+		final JCheckBoxMenuItem enablePcrPtsView = new JCheckBoxMenuItem(new EnablePcrPtsViewAction(this));
+		enablePcrPtsView.setMnemonic(KeyEvent.VK_P);
+		enablePcrPtsView.setSelected(PreferencesManager.isEnablePcrPtsView());
+		settingsMenu.add(enablePcrPtsView);
+		
 		return settingsMenu;
 	}
 
