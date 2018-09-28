@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,6 +38,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
@@ -107,9 +109,16 @@ public class GeneralPSITable extends AbstractPSITabel{
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
+	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PSI Data"));
+		if(!PreferencesManager.isEnableGenericPSI()) {
+		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable ")));
+		    return t;
+		}
 		final TreeSet<Integer> tableSet = new TreeSet<Integer>(data.keySet());
 
 		final Iterator<Integer> i = tableSet.iterator();

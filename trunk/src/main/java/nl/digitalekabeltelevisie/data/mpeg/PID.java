@@ -51,6 +51,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
 import nl.digitalekabeltelevisie.util.PIDPacketGetter;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
  * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets tables are built, PES packets are (initially) only counted.
@@ -163,21 +164,23 @@ public class PID implements TreeNode{
 							(data[2]==1)){
 						type = PES;
 						
-						try {
-							// insert into PTS /DTS List
-							PesHeader pesHeader = packet.getPesHeader();
-							if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
-
-								final int pts_dts_flags = pesHeader.getPts_dts_flags();
-								if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
-									ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
+						if(PreferencesManager.isEnablePcrPtsView()) {
+							try {
+								// insert into PTS /DTS List
+								PesHeader pesHeader = packet.getPesHeader();
+								if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
+	
+									final int pts_dts_flags = pesHeader.getPts_dts_flags();
+									if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
+										ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
+									}
+									if (pts_dts_flags ==3){ // DTS present,
+										dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
+									}
 								}
-								if (pts_dts_flags ==3){ // DTS present,
-									dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
-								}
+							} catch (Exception e) {
+								logger.log(Level.WARNING, "Error getting PTS/DTS from PESHeader in packet:"+packet.getPacketNo() + " from PID:"+parentPID.getPid(), e);
 							}
-						} catch (Exception e) {
-							logger.log(Level.WARNING, "Error getting PTS/DTS from PESHeader in packet:"+packet.getPacketNo() + " from PID:"+parentPID.getPid(), e);
 						}
 					}
 				}
@@ -322,7 +325,9 @@ public class PID implements TreeNode{
 		processTEMI(adaptationField, temiList, packetNo);
 		if (adaptationField.isPCR_flag()) {
 			final PCR newPCR = adaptationField.getProgram_clock_reference();
-			pcrList.add(new TimeStamp(packetNo, newPCR.getProgram_clock_reference_base()));
+			if(PreferencesManager.isEnablePcrPtsView()) {
+				pcrList.add(new TimeStamp(packetNo, newPCR.getProgram_clock_reference_base()));
+			}
 			if ((firstPCR != null) && !adaptationField.isDiscontinuity_indicator()) {
 				final long packetsDiff = packetNo - firstPCRpacketNo;
 

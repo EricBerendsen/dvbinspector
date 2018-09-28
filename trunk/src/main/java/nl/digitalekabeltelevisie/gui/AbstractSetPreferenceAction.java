@@ -43,9 +43,14 @@ public abstract class AbstractSetPreferenceAction extends AbstractAction {
 
     static final Logger logger = Logger.getLogger(AbstractSetPreferenceAction.class.getName());
 
-    public AbstractSetPreferenceAction(DVBinspector controller) {
-	contr = controller;
-    }
+	public AbstractSetPreferenceAction(DVBinspector controller) {
+		contr = controller;
+	}
+
+	public AbstractSetPreferenceAction(DVBinspector controller, String label) {
+		super(label);
+		contr = controller;
+	}
 
     /**
      * 

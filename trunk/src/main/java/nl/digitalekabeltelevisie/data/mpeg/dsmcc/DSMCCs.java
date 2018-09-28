@@ -51,7 +51,9 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public class DSMCCs extends AbstractPSITabel{
 
@@ -194,6 +196,11 @@ public class DSMCCs extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CCs"));
+		if(!PreferencesManager.isEnableDSMCC()) {
+		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("DSM-CC not enabled, select 'Settings -> Enable DSM-CC' to enable ")));
+		    return t;
+			
+		}
 
 
 		final SortedSet<Integer> s = new TreeSet<>(dsmccs.keySet());
