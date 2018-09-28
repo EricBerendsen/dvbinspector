@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -344,33 +344,37 @@ public class TableSection implements TreeNode{
 	}
 
 	protected void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
-		if(!Utils.simpleModus(modus)){
-			if(Utils.packetModus(modus)){
-				t.add(new DefaultMutableTreeNode(new KVP("first_packet_no",firstPacketNo ,parentPID.getParentTransportStream().getPacketTime(firstPacketNo))));
-				t.add(new DefaultMutableTreeNode(new KVP("last_packet_no",lastPacketNo ,parentPID.getParentTransportStream().getPacketTime(lastPacketNo))));
-				t.add(new DefaultMutableTreeNode(new KVP("occurrence_count",occurrenceCount ,getRepetitionRate(occurrenceCount,lastPacketNo,firstPacketNo))));
-				if(occurrenceCount>=2){
-					t.add(new DefaultMutableTreeNode(new KVP("min_packet_distance",minPacketDistance ,getDistanceSecs(minPacketDistance))));
-					t.add(new DefaultMutableTreeNode(new KVP("max_packet_distance",maxPacketDistance ,getDistanceSecs(maxPacketDistance))));
-				}
-			}
-			t.add(new DefaultMutableTreeNode(new KVP("table_id",tableId ,getTableType(tableId))));
-			t.add(new DefaultMutableTreeNode(new KVP("section_syntax_indicator",sectionSyntaxIndicator,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("private_indicator",privateIndicator,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("section_length",sectionLength,null)));
-			if(sectionSyntaxIndicator==1){ //long format
-				t.add(new DefaultMutableTreeNode(new KVP("table_id_extension",tableIdExtension ,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("version",version ,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("current_next_indicator",currentNext ,(currentNext==1)?"current":"next")));
-				t.add(new DefaultMutableTreeNode(new KVP("section_number",sectionNumber ,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("last_section_number",sectionLastNumber ,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("private_data",raw_data.getData(), 8, sectionLength -5 ,null)));
-			}else{
-				t.add(new DefaultMutableTreeNode(new KVP("private_data",raw_data.getData(), 3, sectionLength ,null)));
+		if (Utils.packetModus(modus)) {
+			t.add(new DefaultMutableTreeNode(new KVP("first_packet_no", firstPacketNo,
+					parentPID.getParentTransportStream().getPacketTime(firstPacketNo))));
+			t.add(new DefaultMutableTreeNode(new KVP("last_packet_no", lastPacketNo,
+					parentPID.getParentTransportStream().getPacketTime(lastPacketNo))));
+			t.add(new DefaultMutableTreeNode(new KVP("occurrence_count", occurrenceCount,
+					getRepetitionRate(occurrenceCount, lastPacketNo, firstPacketNo))));
+			if (occurrenceCount >= 2) {
+				t.add(new DefaultMutableTreeNode(
+						new KVP("min_packet_distance", minPacketDistance, getDistanceSecs(minPacketDistance))));
+				t.add(new DefaultMutableTreeNode(
+						new KVP("max_packet_distance", maxPacketDistance, getDistanceSecs(maxPacketDistance))));
 			}
 		}
+		t.add(new DefaultMutableTreeNode(new KVP("table_id", tableId, getTableType(tableId))));
+		t.add(new DefaultMutableTreeNode(new KVP("section_syntax_indicator", sectionSyntaxIndicator, null)));
+		t.add(new DefaultMutableTreeNode(new KVP("private_indicator", privateIndicator, null)));
+		t.add(new DefaultMutableTreeNode(new KVP("section_length", sectionLength, null)));
+		if (sectionSyntaxIndicator == 1) { // long format
+			t.add(new DefaultMutableTreeNode(new KVP("table_id_extension", tableIdExtension, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("version", version, null)));
+			t.add(new DefaultMutableTreeNode(
+					new KVP("current_next_indicator", currentNext, (currentNext == 1) ? "current" : "next")));
+			t.add(new DefaultMutableTreeNode(new KVP("section_number", sectionNumber, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("last_section_number", sectionLastNumber, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("private_data", raw_data.getData(), 8, sectionLength - 5, null)));
+		} else {
+			t.add(new DefaultMutableTreeNode(new KVP("private_data", raw_data.getData(), 3, sectionLength, null)));
+		}
 	}
-
+    
 	public DefaultMutableTreeNode getJTreeNode(final int modus,final HTMLSource htmlSource){
 		KVP kvp = getSectionKVP(modus);
 		kvp.setHtmlSource(htmlSource);
