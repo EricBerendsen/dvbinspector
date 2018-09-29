@@ -50,6 +50,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SHDeliveryS
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.ServiceRelocatedDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SupplementaryAudioDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.URILinkageDescriptor;
@@ -558,6 +559,9 @@ public final class DescriptorFactory {
 			break;
 		case 0x0B:
 			d = new ServiceRelocatedDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x11:
+			d = new T2MIDescriptor(data, t + offset, tableSection);
 			break;
 		case 0x13:
 			d = new URILinkageDescriptor(data, t + offset, tableSection);
