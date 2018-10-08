@@ -2110,6 +2110,7 @@ public final class Utils {
 	        }
 	
 	        public void handleStartTag(HTML.Tag tag, MutableAttributeSet attribute, int pos) {
+	        	// ignore
 	        }
 	
 	        public void handleEndTag(HTML.Tag t, final int pos) {
@@ -2125,9 +2126,11 @@ public final class Utils {
 	        }
 	
 	        public void handleComment(final char[] data, final int pos) {
+	        	// ignore
 	        }
 	
 	        public void handleError(final String errMsg, final int pos) {
+	        	// ignore
 	        }
 	    };
 	    try {
