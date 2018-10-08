@@ -39,6 +39,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
@@ -47,6 +49,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
@@ -60,7 +63,7 @@ import nl.digitalekabeltelevisie.util.*;
 public class TransportStream implements TreeNode{
 	
 	private enum ComponentType{
-		AC3, E_AC3, VBI, TELETEXT, DVB_SUBTITLING, AIT, RCT, ECM
+		AC3, E_AC3, VBI, TELETEXT, DVB_SUBTITLING, AIT, RCT, ECM, T2MI
 	}
 
 
@@ -302,7 +305,7 @@ public class TransportStream implements TreeNode{
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
 	 * @throws IOException
 	 */
-	public void parsePESStreams(final Map<Integer,GeneralPesHandler> toParsePids) throws IOException {
+	public void parsePidStreams(final Map<Integer,GeneralPidHandler> toParsePids) throws IOException {
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
@@ -310,7 +313,7 @@ public class TransportStream implements TreeNode{
 		try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
 			for(int t=0; t<no_packets;t++){
 				int pid = getPacket_pid(t);
-				final GeneralPesHandler handler = toParsePids.get(pid);
+				final GeneralPidHandler handler = toParsePids.get(pid);
 				if(handler!=null){
 					TSPacket packet = readPacket(t, randomAccessFile);
 					handler.processTSPacket(packet);
@@ -521,7 +524,7 @@ public class TransportStream implements TreeNode{
 					final int streamType = component.getStreamtype();
 					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
 					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
-					GeneralPesHandler abstractPesHandler = determinePesHandlerByStreamType(component,streamType);
+					GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
 
 					ComponentType componentType = determineComponentType(component.getComponentDescriptorList());
 					if(componentType!=null){
@@ -529,27 +532,27 @@ public class TransportStream implements TreeNode{
 						case DVB_SUBTITLING:
 								compt_type.append(" DVB subtitling");
 								short_compt_type.append("DVB subtitling");
-								abstractPesHandler = new DVBSubtitleHandler();
+								generalPidHandler = new DVBSubtitleHandler();
 								break;
 						case TELETEXT:
 								compt_type.append(" Teletext");
 								short_compt_type.append("Teletext");
-								abstractPesHandler = new EBUTeletextHandler();
+								generalPidHandler = new EBUTeletextHandler();
 								break;
 						case VBI:
 								compt_type.append(" VBI Data");
 								short_compt_type.append("VBI Data");
-								abstractPesHandler = new EBUTeletextHandler();
+								generalPidHandler = new EBUTeletextHandler();
 								break;
 						case AC3:
 								compt_type.append(" Dolby Audio (AC3)");
 								short_compt_type.append("Dolby Audio (AC3)");
-								abstractPesHandler = new AC3Handler();
+								generalPidHandler = new AC3Handler();
 								break;
 						case E_AC3:
 								compt_type.append(" Enhanced Dolby Audio (AC3)");
 								short_compt_type.append(" Enhanced Dolby Audio (AC3)");
-								abstractPesHandler = new EAC3Handler();
+								generalPidHandler = new EAC3Handler();
 								break;
 						case AIT:
 								compt_type.append(" Application Information Table (AIT)");
@@ -566,6 +569,12 @@ public class TransportStream implements TreeNode{
 										setLabel(cad.getCaPID(),pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
 									}
 								break;
+						case T2MI:
+							compt_type.append(" T2-MI");
+							short_compt_type.append(" T2-MI");
+							generalPidHandler = new T2miPidHandler();
+							break;
+							
 						default:
 								logger.warning("no componenttype found for pid "+component.getElementaryPID()+", part of service "+service_id);
 						}
@@ -583,10 +592,10 @@ public class TransportStream implements TreeNode{
 						}else if(!pid.getShortLabel().contains(short_compt_type)){
 							pid.setShortLabel(pid.getShortLabel()+'/'+short_compt_type);
 						}
-						if(abstractPesHandler!=null){
-							abstractPesHandler.setTransportStream(this);
-							abstractPesHandler.setPID(pid);
-							pid.setPesHandler(abstractPesHandler);
+						if(generalPidHandler!=null){
+							generalPidHandler.setTransportStream(this);
+							generalPidHandler.setPID(pid);
+							pid.setPidHandler(generalPidHandler);
 						}
 					}
 				}
@@ -652,6 +661,8 @@ public class TransportStream implements TreeNode{
 				return ComponentType.AIT;
 			}else if(d instanceof RelatedContentDescriptor){
 				return ComponentType.RCT;
+			}else if(d instanceof T2MIDescriptor){
+				return ComponentType.T2MI;
 			}if(d instanceof CADescriptor) {
 				return ComponentType.ECM;
 			}
@@ -660,26 +671,26 @@ public class TransportStream implements TreeNode{
 		return null;
 	}
 
-	private GeneralPesHandler determinePesHandlerByStreamType(final Component component,
+	private GeneralPidHandler determinePesHandlerByStreamType(final Component component,
 			final int streamType) {
 		int comp_pid = component.getElementaryPID();
-		GeneralPesHandler abstractPesHandler = null;
+		GeneralPidHandler abstractPidHandler = null;
 		if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
 			if((streamType==1)||(streamType==2)){
-				abstractPesHandler = new Video138182Handler();
+				abstractPidHandler = new Video138182Handler();
 			}else if((streamType==3)||(streamType==4)){
-				abstractPesHandler = new Audio138183Handler(getAncillaryDataIdentifier(component));
+				abstractPidHandler = new Audio138183Handler(getAncillaryDataIdentifier(component));
 			}else if(streamType==0x1B){
-				abstractPesHandler = new Video14496Handler();
+				abstractPidHandler = new Video14496Handler();
 			}else if(streamType==0x20){ //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
-				abstractPesHandler = new Video14496Handler();
+				abstractPidHandler = new Video14496Handler();
 			}else if(streamType==0x24){
-				abstractPesHandler = new H265Handler();
+				abstractPidHandler = new H265Handler();
 			}else{
-				abstractPesHandler = new GeneralPesHandler();
+				abstractPidHandler = new GeneralPesHandler();
 			}
 		}
-		return abstractPesHandler;
+		return abstractPidHandler;
 	}
 
 	private static int getAncillaryDataIdentifier(final Component component) {

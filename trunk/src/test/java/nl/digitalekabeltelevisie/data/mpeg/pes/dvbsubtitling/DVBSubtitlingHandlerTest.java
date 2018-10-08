@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -54,10 +54,10 @@ public class DVBSubtitlingHandlerTest extends PesHandlerSetup{
 
 
 
-		final GeneralPesHandler pesHandler = subPid.getPesHandler();
-		assertEquals(DVBSubtitleHandler.class, pesHandler.getClass());
+		final GeneralPidHandler pidHandler = subPid.getPidHandler();
+		assertEquals(DVBSubtitleHandler.class, pidHandler.getClass());
 
-		final DVBSubtitleHandler dvbSubtitleHandler = (DVBSubtitleHandler) pesHandler;
+		final DVBSubtitleHandler dvbSubtitleHandler = (DVBSubtitleHandler) pidHandler;
 
 		final List<PesPacketData> pesPackets = dvbSubtitleHandler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);

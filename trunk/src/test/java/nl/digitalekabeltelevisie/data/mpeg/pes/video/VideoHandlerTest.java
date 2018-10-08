@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -58,10 +58,10 @@ public class VideoHandlerTest extends PesHandlerSetup{
 
 		assertEquals("PCR Count",121, tvePid.getPcr_count());
 
-		final GeneralPesHandler pesHandler = tvePid.getPesHandler();
-		assertEquals(Video138182Handler.class, pesHandler.getClass());
+		final GeneralPidHandler pidHandler = tvePid.getPidHandler();
+		assertEquals(Video138182Handler.class, pidHandler.getClass());
 
-		final Video138182Handler video138182Handler = (Video138182Handler) pesHandler;
+		final Video138182Handler video138182Handler = (Video138182Handler) pidHandler;
 		
 		validatePreviewImageSize(video138182Handler.getJTreeNode(0),640, 2098, "video bar chart");
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,7 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -37,11 +39,9 @@ import java.util.logging.Logger;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitlingPESDataField;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
@@ -51,31 +51,15 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  *
  */
-public class GeneralPesHandler  implements TreeNode{
+public class GeneralPesHandler extends GeneralPidHandler{
 
 	private static final Logger logger = Logger.getLogger(GeneralPesHandler.class.getName());
 
 	private PesPacketData pesData= null;
-	private TransportStream transportStream = null;
-
-	public TransportStream getTransportStream() {
-		return transportStream;
-	}
-
-	public void setTransportStream(TransportStream transportStream) {
-		this.transportStream = transportStream;
-	}
-
 	private int pesStreamID =-1;
 	private int pesLength =-1;
 
-	/**
-	 * by default the contents of a PES PID is not read or analyzed. After explicit user command processTSPacket is called, and PID is initialized
-	 */
-	private boolean initialized = false;
-
 	protected final List<PesPacketData>	pesPackets	= new ArrayList<PesPacketData>();
-	private PID pid;
 	protected int DEFAULT_BUF_LEN = 10;
 	protected byte[] pesDataBuffer = new byte[DEFAULT_BUF_LEN];
 	protected int bufStart = 0;
@@ -92,6 +76,7 @@ public class GeneralPesHandler  implements TreeNode{
 	}
 
 
+	@Override
 	public void processTSPacket(final TSPacket packet)
 	{
 		initialized = true;
@@ -155,13 +140,7 @@ public class GeneralPesHandler  implements TreeNode{
 		}
 	}
 
-	/**
-	 * @return
-	 */
-	public boolean isInitialized() {
-		return initialized;
-	}
-
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES Data"));
 		addListJTree(s,pesPackets,modus,"PES Packets");
@@ -171,16 +150,6 @@ public class GeneralPesHandler  implements TreeNode{
 
 	public List<PesPacketData> getPesPackets() {
 		return pesPackets;
-	}
-
-	public void setPID(PID pid) {
-		this.pid = pid;
-
-	}
-
-	public PID getPID() {
-		return pid;
-
 	}
 
 	public BufferedImage getBGImage(int height, int width, long pts) {
@@ -198,7 +167,7 @@ public class GeneralPesHandler  implements TreeNode{
 				// see if it has a PESHandler (i.e. not scrambled) and if it is already parsed
 				PID pid = getTransportStream().getPids()[videoPID];
 				if(pid!=null){ // in partial stream the video PID may be missing
-					GeneralPesHandler pesHandler = pid.getPesHandler();
+					GeneralPidHandler pesHandler = pid.getPidHandler();
 					if((pesHandler!=null)&&
 						pesHandler.isInitialized() &&
 						(pesHandler instanceof Video138182Handler)){

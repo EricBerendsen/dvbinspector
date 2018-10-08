@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -57,10 +57,10 @@ public class Video14496HandlerTest extends PesHandlerSetup{
 
 		assertEquals("PCR Count",125, npo1.getPcr_count());
 
-		final GeneralPesHandler pesHandler = npo1.getPesHandler();
-		assertEquals(Video14496Handler.class, pesHandler.getClass());
+		final GeneralPidHandler pidHandler = npo1.getPidHandler();
+		assertEquals(Video14496Handler.class, pidHandler.getClass());
 
-		final H26xHandler<?, ?> video14496Handler = (H26xHandler<?, ?>) pesHandler;
+		final H26xHandler<?, ?> video14496Handler = (H26xHandler<?, ?>) pidHandler;
 
 		final List<PesPacketData> pesPackets = video14496Handler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);
@@ -85,10 +85,10 @@ public class Video14496HandlerTest extends PesHandlerSetup{
 
 		assertEquals("PCR Count",125, npo2.getPcr_count());
 
-		final GeneralPesHandler pesHandler = npo2.getPesHandler();
-		assertEquals(Video14496Handler.class, pesHandler.getClass());
+		final GeneralPidHandler pidHandler = npo2.getPidHandler();
+		assertEquals(Video14496Handler.class, pidHandler.getClass());
 
-		final H26xHandler<?, ?> video14496Handler = (H26xHandler<?, ?>) pesHandler;
+		final H26xHandler<?, ?> video14496Handler = (H26xHandler<?, ?>) pidHandler;
 
 		final List<PesPacketData> pesPackets = video14496Handler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);
