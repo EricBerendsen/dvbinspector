@@ -92,15 +92,32 @@ final public class CRCcheck {
 		0x933eb0bb, 0x97ffad0c, 0xafb010b1, 0xab710d06, 0xa6322bdf, 0xa2f33668,
 		0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4};
 
-	public static long crc32 (final byte[]data, final int len)
-	{
+	/**
+	 * check the crc32 check of the data
+	 * @param data to be checked, starting from [0]
+	 * @param len total length, INCLUDING the crc bytes!
+	 * @return 0 if crc correct, everything else is fail.
+	 */
+	public static long crc32(final byte[] data, final int len) {
+		return crc32(data, 0, len);
+	}
+
+	/**
+	 * check the crc32 check of the data
+	 * @param data to be checked, starting from [offset]
+	 * @param offset offset if data
+	 * @param len total length to be checked, INCLUDING the crc bytes!
+	 * @return 0 if crc correct, everything else is fail.
+	 */
+	public static long crc32(final byte[] data, final int offset, final int len) {
 		int i;
 		long crc = 0xffffffffL;
 
-		for (i=0; i<len; i++){
-			crc = ((crc << 8)&0xffffffffL) ^ crc_table[(((int)(crc >> 24)) ^ toUnsignedInt(data[i])) & 0xff];
+		for (i = offset; i < (len + offset); i++) {
+			crc = ((crc << 8) & 0xffffffffL) ^ crc_table[(((int) (crc >> 24)) ^ toUnsignedInt(data[i])) & 0xff];
 		}
 
 		return crc;
 	}
+
 }
