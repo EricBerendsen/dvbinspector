@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -69,6 +69,12 @@ public class BitSource {
 	}
 
 
+	/**
+	 * Warning, there is no check for reading past len,  except when underlying bytes array runs out, then there is an ArrayIndexOutOfBounds
+	 * @param bytes
+	 * @param offset
+	 * @param len index after last byte to be used, so NOT len of usefull bytes. ie to read bytes 5..8 use offset = 5, and len = 9 (NOT 4!)
+	 */
 	public BitSource(final byte[] bytes,final int offset,final int len) {
 		this.bytes = bytes;
 		this.byteOffset = offset;
@@ -177,11 +183,7 @@ public class BitSource {
 	public byte[] readBytes(final int noBytes) {
 		byte[] result = null;
 
-		// First, skip remainder from current byte
-		if (bitOffset > 0) {
-			bitOffset = 0;
-			byteOffset++;
-		}
+		skiptoByteBoundary();
 
 		// Next read whole bytes
 		if(noBytes>0){
@@ -193,14 +195,21 @@ public class BitSource {
 		return result;
 	}
 
-	public DVBString readDVBString() {
-		DVBString result = null;
 
-		// First, skip remainder from current byte
+	/**
+	 * skip remainder from current byte, if any 
+	 */
+	public void skiptoByteBoundary() {
 		if (bitOffset > 0) {
 			bitOffset = 0;
 			byteOffset++;
 		}
+	}
+
+	public DVBString readDVBString() {
+		DVBString result = null;
+
+		skiptoByteBoundary();
 
 		// Next read whole bytes
 		result = new DVBString(bytes, byteOffset);

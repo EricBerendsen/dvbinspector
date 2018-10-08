@@ -26,73 +26,24 @@
  */
 package nl.digitalekabeltelevisie.main;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
-import javax.swing.Action;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.*;
+import javax.swing.event.*;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 
-import nl.digitalekabeltelevisie.controller.ChartLabel;
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.gui.AboutAction;
-import nl.digitalekabeltelevisie.gui.BarChart;
-import nl.digitalekabeltelevisie.gui.BitRateChart;
-import nl.digitalekabeltelevisie.gui.DVBtree;
-import nl.digitalekabeltelevisie.gui.EITView;
-import nl.digitalekabeltelevisie.gui.EnableDSMCCAction;
-import nl.digitalekabeltelevisie.gui.EnableGenericPSIAction;
-import nl.digitalekabeltelevisie.gui.EnablePcrPtsViewAction;
-import nl.digitalekabeltelevisie.gui.FileDropHandler;
-import nl.digitalekabeltelevisie.gui.FileOpenAction;
-import nl.digitalekabeltelevisie.gui.FindAction;
-import nl.digitalekabeltelevisie.gui.FindNextAction;
-import nl.digitalekabeltelevisie.gui.GridView;
-import nl.digitalekabeltelevisie.gui.PIDDialog;
-import nl.digitalekabeltelevisie.gui.PIDDialogOpenAction;
-import nl.digitalekabeltelevisie.gui.SetG0DefaultAction;
-import nl.digitalekabeltelevisie.gui.SetPrivateDataSpecifierAction;
-import nl.digitalekabeltelevisie.gui.TimeStampChart;
-import nl.digitalekabeltelevisie.gui.ToggleViewAction;
-import nl.digitalekabeltelevisie.gui.TransportStreamView;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
+import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
-import nl.digitalekabeltelevisie.util.PreferencesManager;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 
 /**
  * Main class for DVB Inspector, creates and holds all GUI elements.
@@ -160,24 +111,28 @@ public class DVBinspector implements ChangeListener, ActionListener{
 				final TransportStream ts = new TransportStream(filename);
 				inspector.transportStream = ts;
 
+				
 				inspector.transportStream.parseStream();
+								
 				if(args.length>=2){
 
 					final PID[] pids = ts.getPids();
-					final Map<Integer, GeneralPesHandler> pesHandlerMap = new HashMap<>();
+					final Map<Integer, GeneralPidHandler> pidHandlerMap = new HashMap<>();
 					for (int i = 1; i < args.length; i++) {
 						final int pid=Integer.parseInt(args[i]);
 						final PID p= pids[pid];
 			            if (p != null) {
-			                pesHandlerMap.put(Integer.valueOf(p.getPid()), p.getPesHandler());
+			                pidHandlerMap.put(Integer.valueOf(p.getPid()), p.getPidHandler());
 			            }
 			        }
-			        ts.parsePESStreams(pesHandlerMap);
+			        ts.parsePidStreams(pidHandlerMap);
 				}
 			} catch (final NotAnMPEGFileException e) {
 				LOGGER.log(Level.WARNING, "error determining packetsize transportStream", e);
 			} catch (final IOException e) {
 				LOGGER.log(Level.WARNING, "error parsing transportStream", e);
+			} catch (final Throwable t) {
+				LOGGER.log(Level.WARNING, "error parsing transportStream", t);
 			}
 		}
 		inspector.run();

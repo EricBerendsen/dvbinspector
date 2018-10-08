@@ -54,10 +54,10 @@ public class AudioHandlerTest extends PesHandlerSetup{
 
 
 
-		final GeneralPesHandler pesHandler = audPid.getPesHandler();
-		assertEquals(Audio138183Handler.class, pesHandler.getClass());
+		final GeneralPidHandler pidHandler = audPid.getPidHandler();
+		assertEquals(Audio138183Handler.class, pidHandler.getClass());
 
-		final Audio138183Handler audio138182Handler = (Audio138183Handler) pesHandler;
+		final Audio138183Handler audio138182Handler = (Audio138183Handler) pidHandler;
 		
 		validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2280, "audio graph");
 

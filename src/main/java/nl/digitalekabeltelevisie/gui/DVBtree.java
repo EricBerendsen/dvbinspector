@@ -79,6 +79,7 @@ import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
@@ -410,14 +411,14 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final KVP kvp = (KVP)dmtn.getUserObject();
 				final PID p = (PID) kvp.getOwner();
 				final int pid = p.getPid();
-				GeneralPesHandler pesH = p.getPesHandler();
+				GeneralPidHandler pesH = p.getPidHandler();
 				if(!pesH.isInitialized()){ // prevent double click
-					HashMap<Integer, GeneralPesHandler> handlerMap = new HashMap<>();
+					HashMap<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
 					handlerMap.put(pid, pesH);
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 					try {
-						ts.parsePESStreams(handlerMap);
+						ts.parsePidStreams(handlerMap);
 					} catch (final IOException e) {
 						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
 						setCursor(Cursor.getDefaultCursor());
@@ -429,19 +430,19 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 									"Error parsing PID PES Packets for "+p.getShortLabel()+", falling back to general PES packets",
 									"DVB Inspector",
 									JOptionPane.WARNING_MESSAGE);
-							p.setPesHandler(new GeneralPesHandler());
-							pesH = p.getPesHandler();
+							p.setPidHandler(new GeneralPesHandler());
+							pesH = p.getPidHandler();
 							handlerMap = new HashMap<>();
 							handlerMap.put(pid, pesH);
 							try {
-								ts.parsePESStreams(handlerMap);
+								ts.parsePidStreams(handlerMap);
 							} catch (IOException e1) {
 								logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
 								setCursor(Cursor.getDefaultCursor());
 							}
 						}
 					}
-					final DefaultMutableTreeNode node =((TreeNode)p.getPesHandler()).getJTreeNode(mod);
+					final DefaultMutableTreeNode node =((TreeNode)p.getPidHandler()).getJTreeNode(mod);
 					// thanks to Yong Zhang for the tip for refreshing the tree structure.
 					dmtn.add(node);
 					((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);
@@ -638,7 +639,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					final Object owner =  kvp.getOwner();
 					if(owner instanceof PID){ // if PID has a owner, it is a PES that maybe has not been parsed yet.
 						final PID p = (PID) owner;
-						final GeneralPesHandler pesH = p.getPesHandler();
+						final GeneralPidHandler pesH = p.getPidHandler();
 						if(!pesH.isInitialized()){
 							subMenu.addActionListener(this);
 							popup.add(subMenu);

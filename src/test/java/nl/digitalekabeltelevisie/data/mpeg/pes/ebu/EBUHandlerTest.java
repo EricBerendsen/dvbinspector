@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -53,10 +53,10 @@ public class EBUHandlerTest extends PesHandlerSetup{
 
 
 
-		final GeneralPesHandler pesHandler = ebuPid.getPesHandler();
-		assertEquals(EBUTeletextHandler.class, pesHandler.getClass());
+		final GeneralPidHandler pidHandler = ebuPid.getPidHandler();
+		assertEquals(EBUTeletextHandler.class, pidHandler.getClass());
 
-		final EBUTeletextHandler ebuTeletextHandler = (EBUTeletextHandler) pesHandler;
+		final EBUTeletextHandler ebuTeletextHandler = (EBUTeletextHandler) pidHandler;
 
 		final List<PesPacketData> pesPackets = ebuTeletextHandler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);

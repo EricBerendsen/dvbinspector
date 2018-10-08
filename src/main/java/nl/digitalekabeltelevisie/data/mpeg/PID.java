@@ -45,7 +45,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.TimelineDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
@@ -78,7 +78,7 @@ public class PID implements TreeNode{
 	/**
 	 * generalPesHandler that is able to interpret the PES_packet_data_byte, and turn it into something we can display
 	 */
-	private GeneralPesHandler generalPesHandler=null;
+	private GeneralPidHandler generalPidHandler=null;
 
 	/**
 	 * number of TS packets in this PID
@@ -428,8 +428,8 @@ public class PID implements TreeNode{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final KVP kvp=new KVP("pid",getPid(),getLabel());
-		if((generalPesHandler!=null)&&(!scrambled)){
-			final JMenuItem pesMenu = new JMenuItem("Parse PES data");
+		if((generalPidHandler!=null)&&(!scrambled)){
+			final JMenuItem pesMenu = new JMenuItem("Parse data");
 			pesMenu.setActionCommand("parse");
 			kvp.setSubMenuAndOwner(pesMenu,this);
 		}
@@ -458,8 +458,9 @@ public class PID implements TreeNode{
 		}
 		if(type==PSI){
 			t.add(psi.getJTreeNode(modus));
-		}else if((type==PES)&&(generalPesHandler!=null)&&(generalPesHandler.isInitialized())) {
-			t.add(((TreeNode)generalPesHandler).getJTreeNode(modus));
+		}
+		if((generalPidHandler!=null)&&(generalPidHandler.isInitialized())) {
+			t.add(((TreeNode)generalPidHandler).getJTreeNode(modus));
 		}
 		final JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
 		t.add(list.getJTreeNode(modus, "Transport packets "));
@@ -502,15 +503,15 @@ public class PID implements TreeNode{
 	/**
 	 * @return the generalPesHandler
 	 */
-	public GeneralPesHandler getPesHandler() {
-		return generalPesHandler;
+	public GeneralPidHandler getPidHandler() {
+		return generalPidHandler;
 	}
 
 	/**
-	 * @param generalPesHandler the generalPesHandler to set
+	 * @param generalPidHandler the generalPesHandler to set
 	 */
-	public void setPesHandler(final GeneralPesHandler abstractPesHandler) {
-		this.generalPesHandler = abstractPesHandler;
+	public void setPidHandler(final GeneralPidHandler generalPidHandler) {
+		this.generalPidHandler = generalPidHandler;
 	}
 
 	public int getType() {
@@ -519,10 +520,6 @@ public class PID implements TreeNode{
 
 	public boolean isScrambled() {
 		return scrambled;
-	}
-
-	public GeneralPesHandler getGeneralPesHandler() {
-		return generalPesHandler;
 	}
 
 	public long getContinuity_errors() {
