@@ -41,6 +41,16 @@ import org.jfree.chart.plot.DefaultDrawingSupplier;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.AC3Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.EAC3Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
+
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.*;
@@ -85,9 +95,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private String searchString;
 
 
-
-
-
 	/**
 	 * Default constructor for DVBinspector
 	 */
@@ -95,6 +102,29 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		super();
 	}
 
+	enum PidHandlers{
+		t2mi(T2miPidHandler.class),
+		ac3(AC3Handler.class),
+		eac3(EAC3Handler.class),
+		mpeg2audio(Audio138183Handler.class),
+		dvbsub(DVBSubtitleHandler.class),
+		ttx(EBUTeletextHandler.class),
+		h222(Video138182Handler.class),
+		h264(Video14496Handler.class),
+		h265(H265Handler.class);
+		
+		PidHandlers(Class<? extends GeneralPidHandler> a) {
+			pidHandler = a;
+		}
+
+		private Class<? extends GeneralPidHandler> pidHandler;
+
+		Class<? extends GeneralPidHandler> getPidHandler() {
+			return pidHandler;
+		}
+
+	}
+	
 	/**
 	 * Starting point for DVB Inspector
 	 *
@@ -110,22 +140,11 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			try {
 				final TransportStream ts = new TransportStream(filename);
 				inspector.transportStream = ts;
-
-				
 				inspector.transportStream.parseStream();
 								
-				if(args.length>=2){
-
-					final PID[] pids = ts.getPids();
-					final Map<Integer, GeneralPidHandler> pidHandlerMap = new HashMap<>();
-					for (int i = 1; i < args.length; i++) {
-						final int pid=Integer.parseInt(args[i]);
-						final PID p= pids[pid];
-			            if (p != null) {
-			                pidHandlerMap.put(Integer.valueOf(p.getPid()), p.getPidHandler());
-			            }
-			        }
-			        ts.parsePidStreams(pidHandlerMap);
+				if (args.length >= 2) {
+					final Map<Integer, GeneralPidHandler> pidHandlerMap = determinePidHandlers(args, ts);
+					ts.parsePidStreams(pidHandlerMap);
 				}
 			} catch (final NotAnMPEGFileException e) {
 				LOGGER.log(Level.WARNING, "error determining packetsize transportStream", e);
@@ -138,11 +157,49 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		inspector.run();
 	}
 
+	/**
+	 * @param args
+	 * @param ts
+	 * @return
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public static Map<Integer, GeneralPidHandler> determinePidHandlers(final String[] args, final TransportStream ts)
+			throws InstantiationException, IllegalAccessException {
+		Class<? extends GeneralPidHandler> forcedHandlerClass = null;
+		final PID[] pids = ts.getPids();
+		final Map<Integer, GeneralPidHandler> pidHandlerMap = new HashMap<>();
+		for (int i = 1; i < args.length; i++) {
+
+			if (args[i].equalsIgnoreCase("-")) { // single - resets forced handler, use normal handler according to PSI
+				forcedHandlerClass = null;
+			} else if (args[i].startsWith("-")) {
+				forcedHandlerClass = PidHandlers.valueOf(args[i].substring(1)).getPidHandler();
+			} else {
+				final int pid = Integer.parseInt(args[i]);
+				final PID p = pids[pid];
+				if (p != null) { // pid exists
+					if (forcedHandlerClass == null) {
+						pidHandlerMap.put(pid, p.getPidHandler());
+					} else {
+						GeneralPidHandler handlerInstance = forcedHandlerClass.newInstance();
+						handlerInstance.setPID(p);
+						handlerInstance.setTransportStream(ts);
+						p.setPidHandler(handlerInstance);
+						pidHandlerMap.put(pid, handlerInstance);
+					}
+				}
+			}
+		}
+		return pidHandlerMap;
+	}
+
 	public void run() {
 
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
 		KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				createAndShowGUI(transportStream);
 			}
