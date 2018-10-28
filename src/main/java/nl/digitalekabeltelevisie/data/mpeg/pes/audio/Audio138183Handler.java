@@ -59,7 +59,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds.UECP;
-import nl.digitalekabeltelevisie.gui.ImageSource;
+import nl.digitalekabeltelevisie.gui.*;
 
 /**
  * @author Eric Berendsen
@@ -105,7 +105,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 	      @Override
 	       protected void done() {
 	  		JMenuItem objectMenu = new JMenuItem("Play Audio");
-			objectMenu.setActionCommand("play");
+			objectMenu.setActionCommand(DVBtree.PLAY);
 			kvp.setSubMenu(objectMenu);
 
 
@@ -212,11 +212,11 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 		kvp = new KVP("PES Data",this);
 		if(swPlayer==null){
 			JMenuItem objectMenu = new JMenuItem("Play Audio");
-			objectMenu.setActionCommand("play");
+			objectMenu.setActionCommand(DVBtree.PLAY);
 			kvp.setSubMenuAndOwner(objectMenu,this);
 		}else{
 			final JMenuItem objectMenu = new JMenuItem("Stop Audio");
-			objectMenu.setActionCommand("stop");
+			objectMenu.setActionCommand(DVBtree.STOP);
 			kvp.setSubMenuAndOwner(objectMenu,this);
 		}
 
@@ -412,7 +412,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 		swPlayer = new SwingPlayer();
 		swPlayer.execute();
 		final JMenuItem objectMenu = new JMenuItem("Stop Audio");
-		objectMenu.setActionCommand("stop");
+		objectMenu.setActionCommand(DVBtree.STOP);
 		kvp.setSubMenuAndOwner(objectMenu,this);
 	}
 
@@ -420,7 +420,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 	public void stop() {
 		swPlayer.stop();
 		JMenuItem objectMenu = new JMenuItem("Play Audio");
-		objectMenu.setActionCommand("play");
+		objectMenu.setActionCommand(DVBtree.PLAY);
 		kvp.setSubMenuAndOwner(objectMenu,this);
 	}
 

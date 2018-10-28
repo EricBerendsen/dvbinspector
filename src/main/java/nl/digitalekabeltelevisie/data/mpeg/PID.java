@@ -49,6 +49,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.MegaFrameInitializationPacket;
+import nl.digitalekabeltelevisie.gui.DVBtree;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
 import nl.digitalekabeltelevisie.util.PIDPacketGetter;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
@@ -430,7 +431,7 @@ public class PID implements TreeNode{
 		final KVP kvp=new KVP("pid",getPid(),getLabel());
 		if((generalPidHandler!=null)&&(!scrambled)){
 			final JMenuItem pesMenu = new JMenuItem("Parse data");
-			pesMenu.setActionCommand("parse");
+			pesMenu.setActionCommand(DVBtree.PARSE);
 			kvp.setSubMenuAndOwner(pesMenu,this);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);

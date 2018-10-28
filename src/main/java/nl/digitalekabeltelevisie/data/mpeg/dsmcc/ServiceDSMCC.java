@@ -52,7 +52,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.CompressedModuleDes
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.BIOPDirectoryMessage.Binding;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.BIOPStreamEventMessage.EventName;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCC_UNMessageSection.ModuleInfo;
-import nl.digitalekabeltelevisie.gui.HTMLSource;
+import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
@@ -202,7 +202,7 @@ public class ServiceDSMCC implements TreeNode {
 				kvp.setHtmlSource(dsmFile);
 
 				final JMenuItem objectMenu = new JMenuItem("Export (sub)tree...");
-				objectMenu.setActionCommand("export");
+				objectMenu.setActionCommand(DVBtree.EXPORT);
 				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
 				final List<Binding> bindings = dir.getBindingList();
 				for(final Binding binding:bindings){
@@ -215,7 +215,7 @@ public class ServiceDSMCC implements TreeNode {
 				}
 			}else if(biopMessage instanceof BIOPFileMessage){
 				final JMenuItem objectMenu = new JMenuItem("Save as...");
-				objectMenu.setActionCommand("save");
+				objectMenu.setActionCommand(DVBtree.SAVE);
 				final DSMFile dsmFile = new DSMFile(biopMessage,label);
 				kvp.setHtmlSource(dsmFile);
 
