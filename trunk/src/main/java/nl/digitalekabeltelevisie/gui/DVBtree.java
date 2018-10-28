@@ -94,6 +94,11 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  */
 public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
 
+	public static final String STOP = "stop";
+	public static final String PLAY = "play";
+	public static final String EXPORT = "export";
+	public static final String SAVE = "save";
+	public static final String PARSE = "parse";
 	private static final String COPY = "copy";
 	private static final String VIEW = "view";
 	private static final String TREE = "tree";
@@ -378,179 +383,226 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		if(path!=null){
 
 			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
+			final KVP kvp = (KVP)dmtn.getUserObject();
 			if (ae.getActionCommand().equals(COPY)) {
-				final KVP kvp = (KVP)dmtn.getUserObject();
-
-				final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
-				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents( stringSelection, this );
+				copyItemToClipboard(kvp);
 			}
 			if (ae.getActionCommand().equals(TREE)){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final String lineSep = System.getProperty("line.separator");
-				final StringBuilder res = new StringBuilder(kvp.getPlainText());
-				res.append(lineSep);
-
-				res.append(getEntireTree(dmtn,""));
-				final StringSelection stringSelection = new StringSelection( res.toString() );
-				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents( stringSelection, this );
+				copyEntireSubTreeToClipboard(dmtn, kvp);
 			}
 			if (ae.getActionCommand().equals(VIEW)){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final String lineSep = System.getProperty("line.separator");
-				final StringBuilder res = new StringBuilder(kvp.getPlainText());
-				res.append(lineSep);
-
-				res.append(getViewTree(dmtn,"",path));
-				final StringSelection stringSelection = new StringSelection( res.toString() );
-				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents( stringSelection, this );
+				copyVisibleSubTreeToClipboard(dmtn, path, kvp);
 			}
-			if (ae.getActionCommand().equals("parse")){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final PID p = (PID) kvp.getOwner();
-				final int pid = p.getPid();
-				GeneralPidHandler pesH = p.getPidHandler();
-				if(!pesH.isInitialized()){ // prevent double click
-					HashMap<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
-					handlerMap.put(pid, pesH);
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			if (ae.getActionCommand().equals(PARSE)){
+				parsePid(dmtn, kvp);
+			}
+			if (ae.getActionCommand().equals(SAVE)){
+				saveDsmccFile(kvp);
+			}
+			if (ae.getActionCommand().equals(EXPORT)){
+				saveDsmccTree(kvp);
+			}
+			if (ae.getActionCommand().equals(PLAY)){
+				playAudio138183(kvp);
+			}
+			if (ae.getActionCommand().equals(STOP)){
+				stopAudio138183(kvp);
+			}
+		}
+	}
 
+	/**
+	 * @param kvp
+	 */
+	private void stopAudio138183(final KVP kvp) {
+		final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
+		audioHandler.stop();
+	}
+
+	/**
+	 * @param kvp
+	 */
+	private void playAudio138183(final KVP kvp) {
+		final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
+		audioHandler.play();
+	}
+
+	/**
+	 * @param kvp
+	 */
+	private void saveDsmccTree(final KVP kvp) {
+		final DSMFile dsmFile = (DSMFile) kvp.getOwner();
+
+		final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
+
+		final String defaultDir = prefs.get(SAVE_DIR, null);
+		final JFileChooser chooser = new JFileChooser();
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		if(defaultDir!=null){
+			final File defDir = new File(defaultDir);
+			chooser.setCurrentDirectory(defDir);
+		}
+
+		final int returnVal = chooser.showSaveDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			final File file = chooser.getSelectedFile();
+			prefs.put(SAVE_DIR,file.getAbsolutePath());
+
+			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
+			// start at selected directory, first create new subFolder with name "label"
+			final File newDir = new File(file,dsmFile.getLabel());
+			boolean write=true;
+			if(newDir.exists()){
+				logger.info("file "+newDir+" already exists.");
+				final int n = JOptionPane.showConfirmDialog(
+						this, "Directory "+newDir+" already exists, want to overwrite?",
+						"Directory already exists",
+						JOptionPane.YES_NO_OPTION);
+				if (n == JOptionPane.NO_OPTION) {
+					write=false;
+					logger.info("User canceled overwrite");
+				}else{
+					logger.info("User confirmed overwrite");
+				}
+			}
+			if(write){
+				dsmFile.saveFile(newDir,dsmFile.getBiopMessage());
+			}
+		} else {
+			logger.info("Open command cancelled by user." );
+		}
+	}
+
+	/**
+	 * @param kvp
+	 */
+	private void saveDsmccFile(final KVP kvp) {
+		final nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile dsmFile = (DSMFile) kvp.getOwner();
+
+		final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
+
+		final String defaultDir = prefs.get(SAVE_DIR, null);
+		final JFileChooser chooser = new JFileChooser();
+		if(defaultDir!=null){
+			final File defDir = new File(defaultDir);
+			chooser.setCurrentDirectory(defDir);
+		}
+
+		chooser.setSelectedFile(new File(dsmFile.getLabel()));
+
+		final int returnVal = chooser.showSaveDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			final File file = chooser.getSelectedFile();
+			prefs.put(SAVE_DIR,file.getParent());
+
+			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
+			boolean write=true;
+			if(file.exists()){
+				logger.info("file "+file+" already exists.");
+				final int n = JOptionPane.showConfirmDialog(
+						this, "File "+file+" already exists, want to overwrite?",
+						"File already exists",
+						JOptionPane.YES_NO_OPTION);
+				if (n == JOptionPane.NO_OPTION) {
+					write=false;
+					logger.info("User canceled overwrite");
+				}else{
+					logger.info("User confirmed overwrite");
+				}
+			}
+			if(write){
+				dsmFile.saveFile(file,dsmFile.getBiopMessage());
+			}
+
+		} else {
+			logger.info("Open command cancelled by user." );
+		}
+	}
+
+	/**
+	 * @param dmtn
+	 * @param kvp
+	 */
+	private void parsePid(DefaultMutableTreeNode dmtn, final KVP kvp) {
+		final PID p = (PID) kvp.getOwner();
+		final int pid = p.getPid();
+		GeneralPidHandler pesH = p.getPidHandler();
+		if(!pesH.isInitialized()){ // prevent double click
+			HashMap<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
+			handlerMap.put(pid, pesH);
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+			try {
+				ts.parsePidStreams(handlerMap);
+			} catch (final IOException e) {
+				logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
+				setCursor(Cursor.getDefaultCursor());
+			}catch (Exception e) {
+				logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+pesH.getClass().getName(),e);
+				if(pesH.getClass() != GeneralPesHandler.class){ // only if specialized subclass of GeneralPesHandler
+					logger.log(Level.WARNING,"try again with GeneralPesHandler");
+					JOptionPane.showMessageDialog(this,
+							"Error parsing PID PES Packets for "+p.getShortLabel()+", falling back to general PES packets",
+							"DVB Inspector",
+							JOptionPane.WARNING_MESSAGE);
+					p.setPidHandler(new GeneralPesHandler());
+					pesH = p.getPidHandler();
+					handlerMap = new HashMap<>();
+					handlerMap.put(pid, pesH);
 					try {
 						ts.parsePidStreams(handlerMap);
-					} catch (final IOException e) {
-						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
+					} catch (IOException e1) {
+						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
 						setCursor(Cursor.getDefaultCursor());
-					}catch (Exception e) {
-						logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+pesH.getClass().getName(),e);
-						if(pesH.getClass() != GeneralPesHandler.class){ // only if specialized subclass of GeneralPesHandler
-							logger.log(Level.WARNING,"try again with GeneralPesHandler");
-							JOptionPane.showMessageDialog(this,
-									"Error parsing PID PES Packets for "+p.getShortLabel()+", falling back to general PES packets",
-									"DVB Inspector",
-									JOptionPane.WARNING_MESSAGE);
-							p.setPidHandler(new GeneralPesHandler());
-							pesH = p.getPidHandler();
-							handlerMap = new HashMap<>();
-							handlerMap.put(pid, pesH);
-							try {
-								ts.parsePidStreams(handlerMap);
-							} catch (IOException e1) {
-								logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
-								setCursor(Cursor.getDefaultCursor());
-							}
-						}
 					}
-					final DefaultMutableTreeNode node =((TreeNode)p.getPidHandler()).getJTreeNode(mod);
-					// thanks to Yong Zhang for the tip for refreshing the tree structure.
-					dmtn.add(node);
-					((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);
-					setCursor(Cursor.getDefaultCursor());
 				}
 			}
-			if (ae.getActionCommand().equals("save")){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile dsmFile = (DSMFile) kvp.getOwner();
-
-				final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-
-				final String defaultDir = prefs.get(SAVE_DIR, null);
-				final JFileChooser chooser = new JFileChooser();
-				if(defaultDir!=null){
-					final File defDir = new File(defaultDir);
-					chooser.setCurrentDirectory(defDir);
-				}
-
-				chooser.setSelectedFile(new File(dsmFile.getLabel()));
-
-				final int returnVal = chooser.showSaveDialog(this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					final File file = chooser.getSelectedFile();
-					prefs.put(SAVE_DIR,file.getParent());
-
-					logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
-					boolean write=true;
-					if(file.exists()){
-						logger.info("file "+file+" already exists.");
-						final int n = JOptionPane.showConfirmDialog(
-								this, "File "+file+" already exists, want to overwrite?",
-								"File already exists",
-								JOptionPane.YES_NO_OPTION);
-						if (n == JOptionPane.NO_OPTION) {
-							write=false;
-							logger.info("User canceled overwrite");
-						}else{
-							logger.info("User confirmed overwrite");
-						}
-					}
-					if(write){
-						dsmFile.saveFile(file,dsmFile.getBiopMessage());
-					}
-
-				} else {
-					logger.info("Open command cancelled by user." );
-				}
-
-			}
-			if (ae.getActionCommand().equals("export")){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final DSMFile dsmFile = (DSMFile) kvp.getOwner();
-
-				final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-
-				final String defaultDir = prefs.get(SAVE_DIR, null);
-				final JFileChooser chooser = new JFileChooser();
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				if(defaultDir!=null){
-					final File defDir = new File(defaultDir);
-					chooser.setCurrentDirectory(defDir);
-				}
-
-				final int returnVal = chooser.showSaveDialog(this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					final File file = chooser.getSelectedFile();
-					prefs.put(SAVE_DIR,file.getAbsolutePath());
-
-					logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
-					// start at selected directory, first create new subFolder with name "label"
-					final File newDir = new File(file,dsmFile.getLabel());
-					boolean write=true;
-					if(newDir.exists()){
-						logger.info("file "+newDir+" already exists.");
-						final int n = JOptionPane.showConfirmDialog(
-								this, "Directory "+newDir+" already exists, want to overwrite?",
-								"Directory already exists",
-								JOptionPane.YES_NO_OPTION);
-						if (n == JOptionPane.NO_OPTION) {
-							write=false;
-							logger.info("User canceled overwrite");
-						}else{
-							logger.info("User confirmed overwrite");
-						}
-					}
-					if(write){
-						dsmFile.saveFile(newDir,dsmFile.getBiopMessage());
-					}
-				} else {
-					logger.info("Open command cancelled by user." );
-				}
-			}
-			if (ae.getActionCommand().equals("play")){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
-				audioHandler.play();
-
-			}
-			if (ae.getActionCommand().equals("stop")){
-				final KVP kvp = (KVP)dmtn.getUserObject();
-				final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
-				audioHandler.stop();
-
-			}
-
-
+			final DefaultMutableTreeNode node =((TreeNode)p.getPidHandler()).getJTreeNode(mod);
+			// thanks to Yong Zhang for the tip for refreshing the tree structure.
+			dmtn.add(node);
+			((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);
+			setCursor(Cursor.getDefaultCursor());
 		}
+	}
+
+	/**
+	 * @param dmtn
+	 * @param path
+	 * @param kvp
+	 */
+	private void copyVisibleSubTreeToClipboard(DefaultMutableTreeNode dmtn, final TreePath path, final KVP kvp) {
+		final String lineSep = System.getProperty("line.separator");
+		final StringBuilder res = new StringBuilder(kvp.getPlainText());
+		res.append(lineSep);
+
+		res.append(getViewTree(dmtn,"",path));
+		final StringSelection stringSelection = new StringSelection( res.toString() );
+		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents( stringSelection, this );
+	}
+
+	/**
+	 * @param dmtn
+	 * @param kvp
+	 */
+	private void copyEntireSubTreeToClipboard(DefaultMutableTreeNode dmtn, final KVP kvp) {
+		final String lineSep = System.getProperty("line.separator");
+		final StringBuilder res = new StringBuilder(kvp.getPlainText());
+		res.append(lineSep);
+
+		res.append(getEntireTree(dmtn,""));
+		final StringSelection stringSelection = new StringSelection( res.toString() );
+		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents( stringSelection, this );
+	}
+
+	/**
+	 * @param kvp
+	 */
+	private void copyItemToClipboard(final KVP kvp) {
+		final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
+		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents( stringSelection, this );
 	}
 
 	/**
