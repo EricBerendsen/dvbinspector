@@ -80,6 +80,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUEventNameDescr
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSULocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUSubgroupAssociationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SchedulingDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.TargetSmartcardDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UNTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UpdateDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -629,6 +630,10 @@ public final class DescriptorFactory {
 		case 0x05:
 			d = new SSUEventNameDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x06:
+			d = new TargetSmartcardDescriptor(data, t + offset, tableSection);
+			break;
+			
 		case 0x0B:
 			d = new SSUSubgroupAssociationDescriptor(data, t + offset, tableSection);
 			break;
@@ -637,7 +642,7 @@ public final class DescriptorFactory {
 			logger.info("Not implemented UNTDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
 					+ UNTDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
-					+ ",) data=" + d.getRawDataString());
+					+ ",) data=" + d.getRawDataString() + ", pid:"+tableSection.getParentPID().getPid());
 			break;
 		}
 		return d;
