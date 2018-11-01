@@ -27,63 +27,25 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.datatransfer.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.Preferences;
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
 
-import javax.swing.AbstractAction;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.KeyStroke;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.tree.*;
 
-import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
-import nl.digitalekabeltelevisie.util.PreferencesManager;
+import nl.digitalekabeltelevisie.util.*;
 
 /**
  * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
@@ -102,7 +64,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private static final String COPY = "copy";
 	private static final String VIEW = "view";
 	private static final String TREE = "tree";
-
+	
 	public class CopyAction extends AbstractAction implements ClipboardOwner{
 
 		/* (non-Javadoc)
@@ -149,7 +111,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * key for preferences which dir was last used for save
 	 */
-	public static final String SAVE_DIR = "save_directory";
+	//public static final String SAVE_DIR = "save_directory";
 
 	private final JTree tree;
 	private final JPanel detailPanel;
@@ -433,9 +395,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private void saveDsmccTree(final KVP kvp) {
 		final DSMFile dsmFile = (DSMFile) kvp.getOwner();
 
-		final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-
-		final String defaultDir = prefs.get(SAVE_DIR, null);
+		final String defaultDir = PreferencesManager.getSaveDir();
 		final JFileChooser chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if(defaultDir!=null){
@@ -446,7 +406,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			final File file = chooser.getSelectedFile();
-			prefs.put(SAVE_DIR,file.getAbsolutePath());
+			PreferencesManager.setSaveDir(file.getAbsolutePath());
 
 			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
 			// start at selected directory, first create new subFolder with name "label"
@@ -479,9 +439,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private void saveDsmccFile(final KVP kvp) {
 		final nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile dsmFile = (DSMFile) kvp.getOwner();
 
-		final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-
-		final String defaultDir = prefs.get(SAVE_DIR, null);
+		final String defaultDir = PreferencesManager.getSaveDir();
 		final JFileChooser chooser = new JFileChooser();
 		if(defaultDir!=null){
 			final File defDir = new File(defaultDir);
@@ -493,7 +451,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			final File file = chooser.getSelectedFile();
-			prefs.put(SAVE_DIR,file.getParent());
+			PreferencesManager.setSaveDir(file.getParent());
 
 			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
 			boolean write=true;
