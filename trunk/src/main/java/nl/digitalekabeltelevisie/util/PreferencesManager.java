@@ -40,6 +40,8 @@ public class PreferencesManager {
 	private static final String DEFAULT_VIEW_MODUS = "view_modus";
 
 	private static final String LAST_USED_DIR = "stream_directory";
+	
+	private static final String SAVE_DIR = "save_directory";
 
 	/**
 	 * keys for storage of last used window location/size in Preferences
@@ -81,12 +83,20 @@ public class PreferencesManager {
 		prefs.putInt(DEFAULT_VIEW_MODUS, mod);
 	}
 
-	public static void setLastUsedDir(String parent) {
-		prefs.put(LAST_USED_DIR, parent);
+	public static void setLastUsedDir(String dir) {
+		prefs.put(LAST_USED_DIR, dir);
 	}
 
 	public static String getLastUsedDir() {
 		return prefs.get(LAST_USED_DIR, null);
+	}
+
+	public static void setSaveDir(String dir) {
+		prefs.put(SAVE_DIR, dir);
+	}
+
+	public static String getSaveDir() {
+		return prefs.get(SAVE_DIR, null);
 	}
 
 	public static int getWindowX() {
