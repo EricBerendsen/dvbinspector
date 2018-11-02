@@ -38,6 +38,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import nl.digitalekabeltelevisie.util.PreferencesManager;
+
 /**
  * Start dialog to save image as PNG or JPG.
  *
@@ -79,7 +81,7 @@ public class ImageSaveAction extends AbstractAction{
 			int rval = chooser.showSaveDialog(panel);
 			if (rval == JFileChooser.APPROVE_OPTION) {
 				saveFile = chooser.getSelectedFile();
-				prefs.put(DVBtree.SAVE_DIR, saveFile.getParent());
+				PreferencesManager.setSaveDir(saveFile.getParent());
 
 				FileNameExtensionFilter filter = (FileNameExtensionFilter) chooser.getFileFilter();
 				String extension = filter.getExtensions()[0];
@@ -114,7 +116,7 @@ public class ImageSaveAction extends AbstractAction{
 		FileNameExtensionFilter pngFilter = new FileNameExtensionFilter("PNG", "png");
 		chooser.addChoosableFileFilter(pngFilter);
 		chooser.setAcceptAllFileFilterUsed(false);
-		final String defaultDir = prefs.get(DVBtree.SAVE_DIR, null);
+		final String defaultDir = PreferencesManager.getSaveDir();
 		if (defaultDir != null) {
 			final File defDir = new File(defaultDir);
 			chooser.setCurrentDirectory(defDir);
