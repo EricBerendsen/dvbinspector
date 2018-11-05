@@ -1226,12 +1226,13 @@ public final class Utils {
 	}
 
 	/**
-	 * create a copy of a part of a byte[]
+	 * create a copy of a part of a byte[], use Arrays.copyOfRange instead
 	 * @param original
 	 * @param from
 	 * @param to
 	 * @return
 	 */
+	@Deprecated
 	public static byte[] copyOfRange(final byte[] original, final int from, final int to) {
 		final int newLength = to - from;
 		if (newLength < 0) {

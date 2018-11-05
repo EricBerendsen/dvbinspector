@@ -120,12 +120,22 @@ public class IndividualAddressingPayload extends Payload{
 
 	}
 
-	private static final LookUpList function_type_list = new LookUpList.Builder().add(0x00, "Transmitter time offset")
-			.add(0x01, "Transmitter frequency offset").add(0x02, "Transmitter power").add(0x03, "Private data")
-			.add(0x04, "Cell id").add(0x05, "Enable").add(0x06, "Bandwidth").add(0x10, "ACE-PAPR")
-			.add(0x11, "Transmitter MISO group").add(0x12, "TR-PAPR").add(0x13, "L1-ACE-PAPR")
-			.add(0x14, "TX-SIG FEF: Sequence Numbers").add(0x15, "TX-SIG Aux stream: Transmitter ID")
-			.add(0x16, "Frequency").build();
+	private static final LookUpList function_type_list = new LookUpList.Builder()
+			.add(0x00, "Transmitter time offset")
+			.add(0x01, "Transmitter frequency offset")
+			.add(0x02, "Transmitter power")
+			.add(0x03, "Private data")
+			.add(0x04, "Cell id")
+			.add(0x05, "Enable")
+			.add(0x06, "Bandwidth")
+			.add(0x10, "ACE-PAPR")
+			.add(0x11, "Transmitter MISO group")
+			.add(0x12, "TR-PAPR")
+			.add(0x13, "L1-ACE-PAPR")
+			.add(0x14, "TX-SIG FEF: Sequence Numbers")
+			.add(0x15, "TX-SIG Aux stream: Transmitter ID")
+			.add(0x16, "Frequency")
+			.build();
 
 	private int individual_addressing_length;
 

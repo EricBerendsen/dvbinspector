@@ -27,17 +27,18 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
+import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
+import nl.digitalekabeltelevisie.gui.DVBtree;
 
 public class T2miPidHandler extends GeneralPidHandler {
 	
@@ -49,11 +50,29 @@ public class T2miPidHandler extends GeneralPidHandler {
 	private int dataBytesRead = 0;
 	private int headerBytesRead = 0;
 	private boolean packetStarted = false;
+	private Map<Integer, List<T2miPacket>> plps = new HashMap<>();
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("T2MI"));
 		addListJTree(t,t2miPackets,modus,"T2MI Packets");
+		DefaultMutableTreeNode plpsTree = new DefaultMutableTreeNode(new KVP("PLPs"));
+		final Iterator<Integer> plpIter = new TreeSet<Integer>(plps.keySet()).iterator();
+		while(plpIter.hasNext()){
+			final Integer plpId=plpIter.next();
+			List<T2miPacket> itemList = plps.get(plpId);
+			if((itemList!=null)&&(itemList.size()!=0)){
+					KVP kvp = new KVP("plp:"+plpId +": "+ itemList.size()+" entries");
+					final DefaultMutableTreeNode plpListNode = new DefaultMutableTreeNode(kvp);
+					final JMenuItem objectMenu = new JMenuItem("Save embedded TS as...");
+					objectMenu.setActionCommand(DVBtree.T2MI);
+					kvp.setSubMenuAndOwner(objectMenu,new PlpHandler(pid.getPid(), plpId, itemList));
+
+					addToList(plpListNode, itemList, modus);
+					plpsTree.add(plpListNode);
+			}
+		}
+		t.add(plpsTree);
 		return t;
 	}
 
@@ -119,7 +138,7 @@ public class T2miPidHandler extends GeneralPidHandler {
 					packetStarted = false;
 					return;
 				}
-				t2miPackets.add(packet);
+				handleT2miPacket(packet);
 				if (bytesLeft == 0) {
 					packetStarted = false;
 					return;
@@ -128,6 +147,18 @@ public class T2miPidHandler extends GeneralPidHandler {
 
 		}
 		
+	}
+
+	/**
+	 * @param packet
+	 */
+	private void handleT2miPacket(T2miPacket packet) {
+		t2miPackets.add(packet);
+		if(packet.getPacketType()==0) { // Baseband frame
+			int plpId = ((BasebandFramePayload)packet.getPayload()).getPlpId();
+			List<T2miPacket> plpList = plps.computeIfAbsent(plpId,k ->new ArrayList<>());
+			plpList.add(packet);
+		}
 	}
 
 }

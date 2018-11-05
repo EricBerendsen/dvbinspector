@@ -45,6 +45,7 @@ import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
 import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
 import nl.digitalekabeltelevisie.util.*;
 
 /**
@@ -61,6 +62,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public static final String EXPORT = "export";
 	public static final String SAVE = "save";
 	public static final String PARSE = "parse";
+	public static final String T2MI = "t2mi";
+
 	private static final String COPY = "copy";
 	private static final String VIEW = "view";
 	private static final String TREE = "tree";
@@ -370,7 +373,63 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			if (ae.getActionCommand().equals(STOP)){
 				stopAudio138183(kvp);
 			}
+			if (ae.getActionCommand().equals(T2MI)){
+				saveT2miTs(kvp);
+			}
 		}
+	}
+
+	private void saveT2miTs(KVP kvp) {
+		
+		logger.warning("saveT2miTs called, not implemented");
+		
+		PlpHandler plpHandler = (PlpHandler)kvp.getOwner();
+		
+		final String defaultDir = PreferencesManager.getSaveDir();
+		final JFileChooser chooser = new JFileChooser();
+		if(defaultDir!=null){
+			final File defDir = new File(defaultDir);
+			chooser.setCurrentDirectory(defDir);
+		}
+
+		String fileName = ts.getFile().getName()+"_pid_"+plpHandler.getPid()+"_plp_"+plpHandler.getPlpId()+".ts";
+		chooser.setSelectedFile(new File(fileName));
+
+		final int returnVal = chooser.showSaveDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			final File file = chooser.getSelectedFile();
+			PreferencesManager.setSaveDir(file.getParent());
+
+			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
+			boolean write=true;
+			if(file.exists()){
+				logger.info("file "+file+" already exists.");
+				final int n = JOptionPane.showConfirmDialog(
+						this, "File "+file+" already exists, want to overwrite?",
+						"File already exists",
+						JOptionPane.YES_NO_OPTION);
+				if (n == JOptionPane.NO_OPTION) {
+					write=false;
+					logger.info("User canceled overwrite");
+				}else{
+					logger.info("User confirmed overwrite");
+				}
+			}
+			if (write) {
+				try (FileOutputStream out = new FileOutputStream(file)) {
+					while (plpHandler.hasMoreTsPackets()) {
+						TSPacket packet = plpHandler.getTsPacket();
+						out.write(packet.getBuffer());
+					}
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "could not write file", e);
+				}
+			}
+		} else {
+			logger.info("Save T2MI as TS command cancelled by user." );
+		}
+
+		
 	}
 
 	/**
