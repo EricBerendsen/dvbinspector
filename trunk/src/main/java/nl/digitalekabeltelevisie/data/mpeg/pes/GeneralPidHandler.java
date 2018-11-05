@@ -51,7 +51,7 @@ public abstract class GeneralPidHandler implements TreeNode{
 		this.transportStream = transportStream;
 	}
 
-	private PID pid;
+	protected PID pid;
 
 	public GeneralPidHandler() {
 		super();

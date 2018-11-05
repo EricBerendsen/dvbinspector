@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -57,6 +57,7 @@ import nl.digitalekabeltelevisie.util.*;
 public class TSPacket implements HTMLSource, TreeNode{
 	private static final String ERROR_PARSING_ADAPTATION_FIELD = "Error parsing AdaptationField";
 	final private byte[] buffer ;
+
 	private int packetNo=-1;
 	final private static Color HEADER_COLOR = new Color(0x0000ff);
 	final private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
@@ -174,7 +175,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public byte[] getAdaptationFieldBytes(){
 		final int adaptationFieldControl = getAdaptationFieldControl();
 		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
-			return copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1);
+			return Arrays.copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1);
 		}
 		return new byte[0];
 	}
@@ -182,7 +183,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public AdaptationField getAdaptationField(){
 		final int adaptationFieldControl = getAdaptationFieldControl();
 		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
-			return new AdaptationField(copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1));
+			return new AdaptationField(Arrays.copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1));
 		}
 		return null;
 	}
@@ -193,10 +194,10 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public byte[] getData(){
 		final int adaptationFieldControl = getAdaptationFieldControl();
 		if((adaptationFieldControl==1)) { //payload only
-			return copyOfRange(buffer,4, PAYLOAD_PACKET_LENGTH);
+			return Arrays.copyOfRange(buffer,4, PAYLOAD_PACKET_LENGTH);
 		}else if((adaptationFieldControl==3)) { //Adaptation followed by payload
 			final int start = Math.min(4+toUnsignedInt(buffer[4])+1, PAYLOAD_PACKET_LENGTH);
-			return copyOfRange(buffer, start,PAYLOAD_PACKET_LENGTH);
+			return Arrays.copyOfRange(buffer, start,PAYLOAD_PACKET_LENGTH);
 		}
 		return new byte[0];
 	}
@@ -399,6 +400,13 @@ public class TSPacket implements HTMLSource, TreeNode{
 
 	public void setPacketOffset(long packetOffset) {
 		this.packetOffset = packetOffset;
+	}
+
+	/**
+	 * @return all data in TSPacket, including Header, Adaptation field and any bytes > 188
+	 */
+	public byte[] getBuffer() {
+		return buffer;
 	}
 
 }

@@ -153,4 +153,12 @@ public class T2miPacket implements TreeNode {
 
 	}
 
+	public int getPacketNo() {
+		return packetNo;
+	}
+
+	public Payload getPayload() {
+		return payload;
+	}
+
 }
