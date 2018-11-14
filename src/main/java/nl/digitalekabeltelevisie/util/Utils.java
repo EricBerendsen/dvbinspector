@@ -938,6 +938,15 @@ public final class Utils {
 		case 0x29: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2";
 		case 0x2a: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
 		case 0x2b: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		
+		
+		//ISO/IEC 13818-1:2018 (E)
+		case 0x2c: return "Green access units carried in MPEG-2 sections";
+		case 0x2d: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – main stream";
+		case 0x2e: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – auxiliary stream";
+		case 0x2f: return "Quality access units carried in sections";
+
+		
 		case 0x7f: return"IPMP stream";
 		case 0x81: return"User Private / AC-3 (ATSC)";
 		case 0x86: return"User Private / SCTE-35 splice_info_section";
