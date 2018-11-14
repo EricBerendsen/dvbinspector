@@ -204,6 +204,12 @@ public class TableSection implements TreeNode{
 		// DVBSnoop dvb_str.c
 		case 0x06: return "Metadata Table";				// H.222.0 AMD1
 		case 0x07: return "IPMP_Control_Information_section (ISO 13818-11)";  //  H.222.0 AMD1
+		
+		
+		// ISO/IEC 13818-1:2018 (E)
+		case 0x08: return "ISO_IEC_14496_section";
+		case 0x09: return "ISO/IEC 23001-11 (Green access unit) section";
+		case 0x0a: return "ISO/IEC 23001-10 (Quality access unit) section";
 
 		case 0x38: return "ISO/IEC 13818-6 reserved";
 		case 0x39: return "ISO/IEC 13818-6 reserved";
