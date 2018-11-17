@@ -64,37 +64,80 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public static final String PARSE = "parse";
 	public static final String T2MI = "t2mi";
 
+	private static final String EXPAND = "expand";
+	private static final String EXPAND_ALL = "expand_all";
+
 	private static final String COPY = "copy";
 	private static final String VIEW = "view";
 	private static final String TREE = "tree";
 	
-	public class CopyAction extends AbstractAction implements ClipboardOwner{
+	// update when adding a menu option that is always present
+	private static final int NO_DEFAULT_ELEMENTS_POP_UP_MENU = 5;
+	private static final long MAX_EXPAND_ALL_TIME_MILLISECS = 500L;
 
-		/* (non-Javadoc)
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	public class CopyAction extends AbstractAction implements ClipboardOwner {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			final TreePath path = tree.getSelectionPath();
-			if(path!=null){
-				DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
-				final KVP kvp = (KVP)dmtn.getUserObject();
-
-				final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
-				final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents( stringSelection, this );
+			if (path != null) {
+				Object comp = path.getLastPathComponent();
+				if(comp instanceof DefaultMutableTreeNode) {
+					DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) comp;
+					Object userObject = dmtn.getUserObject();
+					if (userObject instanceof KVP) {
+						final KVP kvp = (KVP) userObject;
+						copyItemToClipboard(kvp);
+					}
+				}
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.
+		 * Clipboard, java.awt.datatransfer.Transferable)
 		 */
 		@Override
 		public void lostOwnership(Clipboard clipboard, Transferable contents) {
 			// ignore
 		}
 
+	}	
+	
+	public class ExpandAllAction extends AbstractAction {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			final TreePath path = tree.getSelectionPath();
+			if (path != null) {
+				Object comp = path.getLastPathComponent();
+				if(comp instanceof DefaultMutableTreeNode) {
+					DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) comp;
+					Object userObject = dmtn.getUserObject();
+					if (userObject instanceof KVP) {
+						final KVP kvp = (KVP) userObject;
+						expandAllItems(dmtn, kvp);
+					}
+				}
+			}
+		}
 	}
+	
 	/**
 	 * key for cardlayout
 	 */
@@ -116,11 +159,13 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	//public static final String SAVE_DIR = "save_directory";
 
-	private final JTree tree;
+	final JTree tree;
 	private final JPanel detailPanel;
 	private final JEditorPane editorPane;
 	private final JSplitPane splitPane;
 	private final JPopupMenu popup;
+	private final JMenuItem expandMenuItem;
+	private final JMenuItem expandAllMenuItem;
 	private final JMenuItem copyMenuItem;
 	private final JMenuItem treeMenuItem;
 	private final JMenuItem viewMenuItem;
@@ -162,6 +207,17 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		tree.addTreeSelectionListener(this);
 
 		popup = new JPopupMenu();
+		
+		expandMenuItem = new JMenuItem("Expand");
+		expandMenuItem.addActionListener(this);
+		expandMenuItem.setActionCommand(EXPAND);
+		popup.add(expandMenuItem);
+		
+		expandAllMenuItem = new JMenuItem("Expand All");
+		expandAllMenuItem.addActionListener(this);
+		expandAllMenuItem.setActionCommand(EXPAND_ALL);
+		popup.add(expandAllMenuItem);
+		
 		copyMenuItem = new JMenuItem("Copy Item to clipboard");
 		copyMenuItem.addActionListener(this);
 		copyMenuItem.setActionCommand(COPY);
@@ -201,6 +257,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
 		inputMap.put(key, COPY);
 		tree.getActionMap().put(COPY, new CopyAction());
+		
+		KeyStroke keyStar = KeyStroke.getKeyStroke('*');
+		inputMap.put(keyStar, EXPAND_ALL);
+		tree.getActionMap().put(EXPAND_ALL, new ExpandAllAction());
 
 
 
@@ -245,6 +305,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
+	@Override
 	public void setTransportStream(final TransportStream transportStream, final ViewContext v){
 		ts=transportStream;
 		if(ts!=null){
@@ -293,6 +354,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/* (non-Javadoc)
 	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
 	 */
+	@Override
 	public void valueChanged(final TreeSelectionEvent e) {
 		// node1 is either a DefaultMutableTreeNode (most normal items) or a MutableTreeNode (for LazyList)
 		final MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
@@ -321,13 +383,16 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						cardLayout.show(detailPanel, IMAGE_PANEL);
 						return;
 					}
-				}else  if(kvp.getHTMLSource()!=null){
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
-					editorPane.setText(html.toString());
-					setCursor(Cursor.getDefaultCursor());
-					cardLayout.show(detailPanel, HTML_PANEL);
-					return;
+				} else {
+					HTMLSource htmlSource = kvp.getHTMLSource();
+					if(htmlSource!=null){
+						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						final StringBuilder html = new StringBuilder("<html>").append(htmlSource.getHTML()).append("</html>");
+						editorPane.setText(html.toString());
+						setCursor(Cursor.getDefaultCursor());
+						cardLayout.show(detailPanel, HTML_PANEL);
+						return;
+					}
 				}
 
 			}
@@ -341,6 +406,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/* (non-Javadoc)
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	public void actionPerformed(final ActionEvent ae) {
 		DefaultMutableTreeNode dmtn;
 
@@ -349,6 +415,12 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 			final KVP kvp = (KVP)dmtn.getUserObject();
+			if (ae.getActionCommand().equals(EXPAND)) {
+				expandItem(dmtn,kvp);
+			}
+			if (ae.getActionCommand().equals(EXPAND_ALL)) {
+				expandAllItems(dmtn, kvp);
+			}
 			if (ae.getActionCommand().equals(COPY)) {
 				copyItemToClipboard(kvp);
 			}
@@ -379,9 +451,42 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		}
 	}
 
+	/**
+	 * @param dmtn
+	 * @param kvp
+	 */
+	void expandAllItems(DefaultMutableTreeNode dmtn, final KVP kvp) {
+		expandItem(dmtn,kvp);
+		long end = System.currentTimeMillis() + MAX_EXPAND_ALL_TIME_MILLISECS;
+		expandAllItemsRecursive(dmtn,end);
+	}
+	
+	void expandAllItemsRecursive(final DefaultMutableTreeNode dmtn, long end) {
+		if(System.currentTimeMillis() > end){
+			return;
+		}
+
+		tree.expandPath(new TreePath(dmtn.getPath()));
+		final Enumeration<?> children = dmtn.children();
+
+		while (children.hasMoreElements()) {
+			Object nextElement = children.nextElement();
+			if(nextElement instanceof DefaultMutableTreeNode) {
+				DefaultMutableTreeNode child = (DefaultMutableTreeNode) nextElement;
+				if (!child.isLeaf()) {
+					expandAllItemsRecursive(child,end);
+				}
+			}
+		}
+	}
+	
+
+	void expandItem(DefaultMutableTreeNode dmtn, KVP kvp) {
+		TreePath selectedPath = tree.getSelectionPath();
+		tree.expandPath(selectedPath);
+	}
+
 	private void saveT2miTs(KVP kvp) {
-		
-		logger.warning("saveT2miTs called, not implemented");
 		
 		PlpHandler plpHandler = (PlpHandler)kvp.getOwner();
 		
@@ -435,7 +540,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param kvp
 	 */
-	private void stopAudio138183(final KVP kvp) {
+	private static void stopAudio138183(final KVP kvp) {
 		final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
 		audioHandler.stop();
 	}
@@ -443,7 +548,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param kvp
 	 */
-	private void playAudio138183(final KVP kvp) {
+	private static void playAudio138183(final KVP kvp) {
 		final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
 		audioHandler.play();
 	}
@@ -616,7 +721,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param kvp
 	 */
-	private void copyItemToClipboard(final KVP kvp) {
+	void copyItemToClipboard(final KVP kvp) {
 		final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
 		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
@@ -636,14 +741,19 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			Object next = children.nextElement();
 			if(next instanceof DefaultMutableTreeNode){
 				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
-				final KVP chKVP = (KVP)child.getUserObject();
-				res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
-				if(!child.isLeaf()){
-					if(child!=dmtn.getLastChild()){
-						res.append(getEntireTree(child,preFix+"| ")); // more children follow, so start with "| "
-					}else{ // lastChild
-						res.append(getEntireTree(child,preFix+"  ")); // last , so prefix with "  "
+				Object userObject = child.getUserObject();
+				if( userObject instanceof KVP) {
+					final KVP chKVP = (KVP)userObject;
+					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
+					if(!child.isLeaf()){
+						if(child!=dmtn.getLastChild()){
+							res.append(getEntireTree(child,preFix+"| ")); // more children follow, so start with "| "
+						}else{ // lastChild
+							res.append(getEntireTree(child,preFix+"  ")); // last , so prefix with "  "
+						}
 					}
+				}else {
+					logger.severe("Not an KVP:"+ userObject);
 				}
 			}
 		}
@@ -685,14 +795,20 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param e
 	 */
-	private void showContextMenu(final MouseEvent e) {
+	void showContextMenu(final MouseEvent e) {
 		final TreePath path = tree.getSelectionPath();
-		treeMenuItem.setEnabled(path!=null);
-		copyMenuItem.setEnabled(path!=null);
-		viewMenuItem.setEnabled(path!=null);
+		
+		
+		 MenuElement[] subs = popup.getSubElements();
+		for (int i = 0; i < subs.length; i++) {
+			JMenuItem menuElement = (JMenuItem)subs[i];
+			menuElement.setEnabled(path!=null);
+			
+		}
+		
 		// remove option menu from previous invocation
-		if(popup.getSubElements().length >= 4){
-			popup.remove(3);
+		if(popup.getSubElements().length > NO_DEFAULT_ELEMENTS_POP_UP_MENU){
+			popup.remove(NO_DEFAULT_ELEMENTS_POP_UP_MENU);
 		}
 
 		//		add optional menu
@@ -720,9 +836,12 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					}
 				}
 			}else{ //not a defaultMutableTreeNode, so it is a mutabletree node. Only used for TS packets lazy tree, so disable menu's
-				treeMenuItem.setEnabled(false);
-				copyMenuItem.setEnabled(false);
-				viewMenuItem.setEnabled(false);
+				 	subs = popup.getSubElements();
+					for (int i = 0; i < subs.length; i++) {
+						JMenuItem menuElement = (JMenuItem)subs[i];
+						menuElement.setEnabled(false);
+						
+					}
 
 			}
 		}
@@ -734,6 +853,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/* (non-Javadoc)
 	 * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
 	 */
+	@Override
 	public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
 		// empty block, we don't care
 
