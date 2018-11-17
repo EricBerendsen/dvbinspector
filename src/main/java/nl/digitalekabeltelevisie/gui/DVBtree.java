@@ -335,11 +335,27 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	public boolean toggleMod(final int modus) {
 		this.mod = this.mod ^ modus;
+		
+		String state = "";
+		if(isNotStructuralChange(modus)) {
+			state = getExpansionState();
+		}
 
 		PreferencesManager.setDefaultViewModus(mod);
 
 		refreshView();
+		if(isNotStructuralChange(modus)) {
+			setExpansionState(state);
+		}
 		return (this.mod&modus)!=0;
+	}
+
+	/**
+	 * @param modus
+	 * @return
+	 */
+	boolean isNotStructuralChange(final int modus) {
+		return (modus != SIMPLE_MODUS) && (modus != PSI_ONLY_MODUS) && (modus != PACKET_MODUS);
 	}
 
 	private void refreshView(){
@@ -348,6 +364,44 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			tree.setModel(model);
 		} else {
 			tree.setModel(null);
+		}
+	}
+	
+	
+	
+	/**
+	 * 
+	 * Retrieves the expansion state as a String, defined by a comma delimited list
+	 * of each row node that is expanded.
+	 * 
+	 * @return
+	 * 
+	 */
+
+	public String getExpansionState() {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < tree.getRowCount(); i++) {
+			if (tree.isExpanded(i)) {
+				sb.append(i).append(",");
+			}
+		}
+		return sb.toString();
+	}
+	
+
+	/**
+	 * Sets the expansion state based upon a comma delimited list of row indexes that 
+	 * are expanded. 
+	 * @param s
+	 */
+
+	public void setExpansionState(String s) {
+		String[] indexes = s.split(",");
+
+		for (String st : indexes) {
+			int row = Integer.parseInt(st);
+			tree.expandRow(row);
 		}
 	}
 
