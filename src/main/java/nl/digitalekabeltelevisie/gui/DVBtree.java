@@ -351,8 +351,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	}
 
 	/**
+	 * 
 	 * @param modus
-	 * @return
+	 * @return true when toggling this modus will not change the number of nodes in the tree, or the structure of it
 	 */
 	boolean isNotStructuralChange(final int modus) {
 		return (modus != SIMPLE_MODUS) && (modus != PSI_ONLY_MODUS) && (modus != PACKET_MODUS);
@@ -374,7 +375,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * Retrieves the expansion state as a String, defined by a comma delimited list
 	 * of each row node that is expanded.
 	 * 
-	 * @return
+	 * Based on {@link http://www.algosome.com/articles/save-jtree-expand-state.html}
+	 * 
+	 * @return the expansion state as a String, defined by a comma delimited list
 	 * 
 	 */
 
@@ -393,7 +396,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * Sets the expansion state based upon a comma delimited list of row indexes that 
 	 * are expanded. 
-	 * @param s
+	 * 
+	 * Based on {@link http://www.algosome.com/articles/save-jtree-expand-state.html}
+	 * 
+	 * @param s the expansion state based upon a comma delimited list of row indexes that need to be expanded
 	 */
 
 	public void setExpansionState(String s) {
@@ -504,10 +510,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			}
 		}
 	}
-
 	/**
-	 * @param dmtn
-	 * @param kvp
+	 * @param dmtn start node from where to expand
+	 * @param kvp 
 	 */
 	void expandAllItems(DefaultMutableTreeNode dmtn, final KVP kvp) {
 		expandItem(dmtn,kvp);
@@ -515,6 +520,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		expandAllItemsRecursive(dmtn,end);
 	}
 	
+	/**
+	 * @param dmtn start node from where to expand
+	 * @param end time (System.currentTimeMillis()) when this should stop expanding, to prevent long responses in the AWT Event thread
+	 */
 	void expandAllItemsRecursive(final DefaultMutableTreeNode dmtn, long end) {
 		if(System.currentTimeMillis() > end){
 			return;
