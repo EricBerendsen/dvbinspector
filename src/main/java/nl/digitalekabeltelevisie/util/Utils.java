@@ -1058,7 +1058,7 @@ public final class Utils {
 		case 0x0E: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 auxiliary";
 		case 0x0F: return"ISO/IEC 13818-7 Audio with ADTS transport syntax";
 		case 0x10: return"ISO/IEC 14496-2 Visual";
-		case 0x11: return"ISO/IEC 14496-3 Audio with the LATM transport syntax as defined in ISO/IEC 14496-3 / AMD 1";
+		case 0x11: return"Audio AAC";
 		case 0x12: return"ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in PES packets";
 		case 0x13: return"ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in ISO/IEC14496_sections.";
 		case 0x14: return"ISO/IEC 13818-6 Synchronized Download Protocol";
@@ -1073,7 +1073,7 @@ public final class Utils {
 		case 0x18: return"Metadata 13818-6 Object Carousel";
 		case 0x19: return"Metadata 13818-6 Synchronized Download Protocol";
 		case 0x1A: return"IPMP stream (13818-11, MPEG-2 IPMP)";
-		case 0x1B: return"H.264 | ISO/IEC 14496-10 Video";
+		case 0x1B: return"Video H.264";
 		case 0x1C: return"ISO/IEC 14496-3 Audio, like DST, ALS and SLS";
 		case 0x1D: return"ISO/IEC 14496-17 Text";
 		case 0x1E: return"ISO/IEC 23002-3 Aux. video stream ";
@@ -1083,9 +1083,25 @@ public final class Utils {
 		case 0x21: return"J2K Video stream";
 		case 0x22: return"H.262 video stream for 3D services";
 		case 0x23: return"H.264 video stream for 3D services";
-		case 0x24: return"H.265 video stream or an HEVC temporal video sub-bitstream";
+		case 0x24: return"Video HEVC";
 		case 0x25: return"H.265 temporal video subset";
 		case 0x26: return"MVCD video sub-bitstream of an AVC video stream";
+		
+		// ISO/IEC 13818-1:2015/Amd.1:2015 (E) /R ec. ITU-T H.222.0 (2014)/Amd.1 (04/2015)
+		case 0x27: return "TEMI Stream"; 
+		// ISO/IEC 13818-1:2015/Amd.2:2016 (E) / Rec. ITU-T H.222.0 (2014)/Amd.2 (12/2015)
+		case 0x28: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NALs units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2 ";
+		case 0x29: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		case 0x2a: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		case 0x2b: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
+		
+		
+		//ISO/IEC 13818-1:2018 (E)
+		case 0x2c: return "Green access units carried in MPEG-2 sections";
+		case 0x2d: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – main stream";
+		case 0x2e: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – auxiliary stream";
+		case 0x2f: return "Quality access units carried in sections";
+		
 		case 0x7f: return"IPMP stream";
 		
 		case 0x81: return"AC-3 (ATSC)";
