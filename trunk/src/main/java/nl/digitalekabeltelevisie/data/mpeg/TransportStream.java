@@ -484,7 +484,7 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	private void namePIDs() {
+	public void namePIDs() {
 
 		// first the easy ones, the fixed values
 		for (short i = 0; i <=0x1f; i++) {
@@ -707,7 +707,7 @@ public class TransportStream implements TreeNode{
 	/**
 	 *
 	 */
-	private void calculateBitRate() {
+	public void calculateBitRate() {
 
 		// now calculate bitrate of stream by averaging bitrates of PIDS with PCR
 
