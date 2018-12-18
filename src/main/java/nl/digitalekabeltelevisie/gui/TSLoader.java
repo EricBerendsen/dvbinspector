@@ -98,6 +98,8 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			logger.log(Level.INFO, "Interrupted while loading stream", t);
 			final String msg ="Loading file was interrupted.";
 			showMessage(msg);
+			transportStream.namePIDs();
+			transportStream.calculateBitRate();
 			
 		} catch (final Throwable t) {
 			transportStream = null;
