@@ -69,7 +69,7 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor {
 			
 			@Override
 			public DefaultMutableTreeNode getJTreeNode(final int modus){
-				DefaultMutableTreeNode s = new DefaultMutableTreeNode("SubCellInfo");
+				DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("SubCellInfo"));
 				s.add(new DefaultMutableTreeNode(new KVP("cell_id_extension",cell_id_extension,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("transposer_frequency",transposer_frequency,Descriptor.formatTerrestrialFrequency(transposer_frequency))));
 				return s;
@@ -108,7 +108,7 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor {
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode s = new DefaultMutableTreeNode("CellInfo");
+			DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("CellInfo"));
 			s.add(new DefaultMutableTreeNode(new KVP("cell_id",cell_id,null)));
 			if (tfs_flag == 1){ 
 				s.add(new DefaultMutableTreeNode(new KVP("frequency_loop_length",frequency_loop_length,null)));
