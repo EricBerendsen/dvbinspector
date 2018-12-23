@@ -29,12 +29,17 @@ package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.PAYLOAD_PACKET_LENGTH;
 
+import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
+import nl.digitalekabeltelevisie.gui.*;
 
-public class PlpHandler {
-	
+public class PlpHandler implements SaveAble{
+
+	private static final Logger logger = Logger.getLogger(PlpHandler.class.getName());
+
 	private static final int T2_BBHEADER_SIZE = 10;
 	private static final int PKT_SIZE = 188;
 	private byte[] buffer = new byte[0];
@@ -55,6 +60,14 @@ public class PlpHandler {
 		this.pid = pid;
 		this.plpId = plpId;
 		this.plpPackets = plpPackets;
+		plpIter = plpPackets.iterator();
+	}
+	
+	public void reset() {
+		buffer = new byte[0];
+		bufferStart = 0;
+		bufferEnd = 0;
+		packetsProduced = 0;
 		plpIter = plpPackets.iterator();
 	}
 	
@@ -180,6 +193,20 @@ public class PlpHandler {
 
 	public void setPlpPackets(List<T2miPacket> plpPackets) {
 		this.plpPackets = plpPackets;
+	}
+
+	@Override
+	public void save(File file) {
+		try (FileOutputStream out = new FileOutputStream(file)) {
+			reset();
+			while (hasMoreTsPackets()) {
+				TSPacket packet = getTsPacket();
+				out.write(packet.getBuffer());
+			}
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "could not write file", e);
+		}
+		
 	}
 
 
