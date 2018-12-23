@@ -71,6 +71,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private static final String VIEW = "view";
 	private static final String TREE = "tree";
 	
+	private static final String SAVE_BYTES = "save_bytes";
+	
 	// update when adding a menu option that is always present
 	private static final int NO_DEFAULT_ELEMENTS_POP_UP_MENU = 5;
 	private static final long MAX_EXPAND_ALL_TIME_MILLISECS = 500L;
@@ -508,6 +510,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			if (ae.getActionCommand().equals(T2MI)){
 				saveT2miTs(kvp);
 			}
+			if (ae.getActionCommand().equals(SAVE_BYTES)){
+				saveBytes(kvp);
+			}
 		}
 	}
 	/**
@@ -552,52 +557,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private void saveT2miTs(KVP kvp) {
 		
 		PlpHandler plpHandler = (PlpHandler)kvp.getOwner();
-		
-		final String defaultDir = PreferencesManager.getSaveDir();
-		final JFileChooser chooser = new JFileChooser();
-		if(defaultDir!=null){
-			final File defDir = new File(defaultDir);
-			chooser.setCurrentDirectory(defDir);
-		}
-
 		String fileName = ts.getFile().getName()+"_pid_"+plpHandler.getPid()+"_plp_"+plpHandler.getPlpId()+".ts";
-		chooser.setSelectedFile(new File(fileName));
-
-		final int returnVal = chooser.showSaveDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File file = chooser.getSelectedFile();
-			PreferencesManager.setSaveDir(file.getParent());
-
-			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
-			boolean write=true;
-			if(file.exists()){
-				logger.info("file "+file+" already exists.");
-				final int n = JOptionPane.showConfirmDialog(
-						this, "File "+file+" already exists, want to overwrite?",
-						"File already exists",
-						JOptionPane.YES_NO_OPTION);
-				if (n == JOptionPane.NO_OPTION) {
-					write=false;
-					logger.info("User canceled overwrite");
-				}else{
-					logger.info("User confirmed overwrite");
-				}
-			}
-			if (write) {
-				try (FileOutputStream out = new FileOutputStream(file)) {
-					while (plpHandler.hasMoreTsPackets()) {
-						TSPacket packet = plpHandler.getTsPacket();
-						out.write(packet.getBuffer());
-					}
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "could not write file", e);
-				}
-			}
-		} else {
-			logger.info("Save T2MI as TS command cancelled by user." );
-		}
-
 		
+		selectFileAndSave(fileName, plpHandler);
+
 	}
 
 	/**
@@ -622,86 +585,41 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private void saveDsmccTree(final KVP kvp) {
 		final DSMFile dsmFile = (DSMFile) kvp.getOwner();
 
-		final String defaultDir = PreferencesManager.getSaveDir();
-		final JFileChooser chooser = new JFileChooser();
+		final JFileChooser chooser = createFileChooserDefaultSaveDir();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		if(defaultDir!=null){
-			final File defDir = new File(defaultDir);
-			chooser.setCurrentDirectory(defDir);
-		}
 
 		final int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			final File file = chooser.getSelectedFile();
 			PreferencesManager.setSaveDir(file.getAbsolutePath());
 
-			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
+			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath());
 			// start at selected directory, first create new subFolder with name "label"
-			final File newDir = new File(file,dsmFile.getLabel());
-			boolean write=true;
-			if(newDir.exists()){
-				logger.info("file "+newDir+" already exists.");
-				final int n = JOptionPane.showConfirmDialog(
-						this, "Directory "+newDir+" already exists, want to overwrite?",
-						"Directory already exists",
-						JOptionPane.YES_NO_OPTION);
-				if (n == JOptionPane.NO_OPTION) {
-					write=false;
-					logger.info("User canceled overwrite");
-				}else{
-					logger.info("User confirmed overwrite");
-				}
-			}
-			if(write){
-				dsmFile.saveFile(newDir,dsmFile.getBiopMessage());
-			}
+			final File newDir = new File(file, dsmFile.getLabel());
+			confirmOverwriteIfExisting(newDir, dsmFile);
 		} else {
-			logger.info("Open command cancelled by user." );
+			logger.info("Open command cancelled by user.");
 		}
 	}
 
-	/**
-	 * @param kvp
-	 */
-	private void saveDsmccFile(final KVP kvp) {
-		final nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile dsmFile = (DSMFile) kvp.getOwner();
-
+	private JFileChooser createFileChooserDefaultSaveDir() {
 		final String defaultDir = PreferencesManager.getSaveDir();
 		final JFileChooser chooser = new JFileChooser();
 		if(defaultDir!=null){
 			final File defDir = new File(defaultDir);
 			chooser.setCurrentDirectory(defDir);
 		}
+		return chooser;
+	}
 
-		chooser.setSelectedFile(new File(dsmFile.getLabel()));
+	/**
+	 * @param kvp
+	 */
+	private void saveDsmccFile(final KVP kvp) {
+		final DSMFile dsmFile = (DSMFile) kvp.getOwner();
+		String fileName = dsmFile.getLabel();
 
-		final int returnVal = chooser.showSaveDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File file = chooser.getSelectedFile();
-			PreferencesManager.setSaveDir(file.getParent());
-
-			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
-			boolean write=true;
-			if(file.exists()){
-				logger.info("file "+file+" already exists.");
-				final int n = JOptionPane.showConfirmDialog(
-						this, "File "+file+" already exists, want to overwrite?",
-						"File already exists",
-						JOptionPane.YES_NO_OPTION);
-				if (n == JOptionPane.NO_OPTION) {
-					write=false;
-					logger.info("User canceled overwrite");
-				}else{
-					logger.info("User confirmed overwrite");
-				}
-			}
-			if(write){
-				dsmFile.saveFile(file,dsmFile.getBiopMessage());
-			}
-
-		} else {
-			logger.info("Open command cancelled by user." );
-		}
+		selectFileAndSave(fileName, dsmFile);
 	}
 
 	/**
@@ -897,6 +815,14 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						subMenu.addActionListener(this);
 						popup.add(subMenu);
 					}
+				}else{
+					if(kvp.getFieldType()== KVP.FIELD_TYPE_BYTES){
+						final JMenuItem bytesMenu = new JMenuItem("Save bytes as...");
+						
+						bytesMenu.setActionCommand(SAVE_BYTES);
+						bytesMenu.addActionListener(this);
+						popup.add(bytesMenu);
+					}
 				}
 			}else{ //not a defaultMutableTreeNode, so it is a mutabletree node. Only used for TS packets lazy tree, so disable menu's
 				 	subs = popup.getSubElements();
@@ -953,5 +879,75 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		return null;
 	}
 
+
+	private void saveBytes(KVP kvp) {
+		
+		if(kvp.getFieldType()!= KVP.FIELD_TYPE_BYTES) {
+			return;
+		}
+		String fileName = kvp.getLabel();
+		SaveAble saveAble = new SaveAble() {
+			
+			@Override
+			public void save(File file) {
+				try (FileOutputStream out = new FileOutputStream(file)) {
+					out.write(kvp.getByteValue());
+					
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "could not write file", e);
+				}
+				
+			}
+		};
+		
+		selectFileAndSave(fileName, saveAble);
+
+		
+	}
+
+	/**
+	 * @param fileName
+	 * @param saveAble
+	 */
+	protected void selectFileAndSave(String fileName, SaveAble saveAble) {
+		final JFileChooser chooser = createFileChooserDefaultSaveDir();
+
+		chooser.setSelectedFile(new File(fileName));
+
+		final int returnVal = chooser.showSaveDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			final File file = chooser.getSelectedFile();
+			PreferencesManager.setSaveDir(file.getParent());
+
+			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
+			confirmOverwriteIfExisting(file, saveAble);
+		} else {
+			logger.info("Save cancelled by user." );
+		}
+	}
+
+	/**
+	 * @param file
+	 * @param saveAble
+	 */
+	protected void confirmOverwriteIfExisting(final File file, SaveAble saveAble) {
+		boolean write=true;
+		if(file.exists()){
+			logger.info("file "+file+" already exists.");
+			final int n = JOptionPane.showConfirmDialog(
+					this, "File "+file+" already exists, want to overwrite?",
+					"File already exists",
+					JOptionPane.YES_NO_OPTION);
+			if (n == JOptionPane.NO_OPTION) {
+				write=false;
+				logger.info("User canceled overwrite");
+			}else{
+				logger.info("User confirmed overwrite");
+			}
+		}
+		if (write) {
+			saveAble.save(file);
+		}
+	}
 
 }

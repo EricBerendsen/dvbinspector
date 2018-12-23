@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,6 +26,7 @@
  */
 package nl.digitalekabeltelevisie.controller;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.math.BigInteger;
@@ -486,5 +487,17 @@ public class KVP{
 		}else{
 			return htmlSource;
 		}
+	}
+
+	public byte getFieldType() {
+		return fieldType;
+	}
+	
+	public byte[] getByteValue() {
+		if(fieldType == FIELD_TYPE_BYTES){
+			return copyOfRange(byteValue, byteStart, byteStart+byteLen);
+		}
+		
+		return null;
 	}
 }
