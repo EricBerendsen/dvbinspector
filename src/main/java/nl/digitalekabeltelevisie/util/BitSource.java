@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.util;
 import java.util.Arrays;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.gui.HTMLSource;
 
 
 /**
@@ -45,12 +46,12 @@ import nl.digitalekabeltelevisie.controller.DVBString;
  *
  *
  */
-public class BitSource {
+public class BitSource implements HTMLSource{
 	private final byte[] bytes;
 	private int byteOffset = 0;
 	private int bitOffset = 0;
 
-	private final int len;
+	private final int lastBytePlusOne;
 
 
 	public static final int[] powerOf2 = {1,2,4,8, 16,32,64,128,
@@ -65,7 +66,7 @@ public class BitSource {
 	public BitSource(final byte[] bytes,final int offset) {
 		this.bytes = bytes;
 		this.byteOffset = offset;
-		this.len=bytes.length;
+		this.lastBytePlusOne=bytes.length;
 	}
 
 
@@ -73,13 +74,33 @@ public class BitSource {
 	 * Warning, there is no check for reading past len,  except when underlying bytes array runs out, then there is an ArrayIndexOutOfBounds
 	 * @param bytes
 	 * @param offset
-	 * @param len index after last byte to be used, so NOT len of usefull bytes. ie to read bytes 5..8 use offset = 5, and len = 9 (NOT 4!)
+	 * @param lastBytePlusOne index after last byte to be used, so NOT len of usefull bytes. ie to read bytes 5..8 use offset = 5, and len = 9 (NOT 4!)
 	 */
-	public BitSource(final byte[] bytes,final int offset,final int len) {
+	public BitSource(final byte[] bytes,final int offset,final int lastBytePlusOne) {
 		this.bytes = bytes;
 		this.byteOffset = offset;
-		this.len=len;
+		this.lastBytePlusOne=lastBytePlusOne;
 	}
+
+	
+	/**
+	 * @param src
+	 * @param len number of whole bytes to read, so if src is not byteAligned, the first partial byte does not count 
+	 */
+	public BitSource(BitSource src, final int len) {
+		this.bytes = src.bytes;
+		this.byteOffset = src.byteOffset;
+		this.bitOffset = src.bitOffset;
+		this.lastBytePlusOne = src.byteOffset + len;
+	}
+	
+	public BitSource(BitSource src) {
+		this.bytes = src.bytes;
+		this.byteOffset = src.byteOffset;
+		this.bitOffset = src.bitOffset;
+		this.lastBytePlusOne = src.lastBytePlusOne;
+	}
+
 
 	/**
 	 * read bits from source, consuming them (no longer available)
@@ -195,7 +216,11 @@ public class BitSource {
 		return result;
 	}
 
-
+	public void advanceBytes(int number) {
+		skiptoByteBoundary();
+		byteOffset += number;
+	}	
+	
 	/**
 	 * skip remainder from current byte, if any 
 	 */
@@ -206,6 +231,10 @@ public class BitSource {
 		}
 	}
 
+	public boolean isByteAligned() {
+		return (bitOffset == 0);
+	}
+	
 	public DVBString readDVBString() {
 		DVBString result = null;
 
@@ -225,7 +254,7 @@ public class BitSource {
 	 * @return number of bits that can be read successfully
 	 */
 	public int available() {
-		return (8 * (len - byteOffset)) - bitOffset;
+		return (8 * (lastBytePlusOne - byteOffset)) - bitOffset;
 	}
 
 	public int getNextFullByteOffset() {
@@ -233,12 +262,6 @@ public class BitSource {
 	}
 
 
-	// TODO
-	public String getBits(){
-		final StringBuilder b = new StringBuilder();
-
-		return b.toString();
-	}
 
 	/**
 	 * preview bits from source, without removing them
@@ -375,4 +398,30 @@ public class BitSource {
 
 		return b.toString();
 	}
+	
+	
+	@Override
+	public String getHTML() {
+		StringBuffer b = new StringBuffer();
+		int localByteOffset = byteOffset;
+		if (bitOffset != 0) {
+			int bitsLeft = 8 - bitOffset;
+			int intValueWholeByte = Byte.toUnsignedInt(bytes[localByteOffset]);
+			String binaryString = Integer.toBinaryString(intValueWholeByte);
+			String binaryStringPadded = ("0000000"+binaryString).substring(binaryString.length()- bitsLeft+7);
+			b.append(bitsLeft + " bits left of " + intValueWholeByte + " ( 0b"
+					+ binaryStringPadded + ")");
+			b.append("<br><br>");
+			localByteOffset++;
+
+		}
+		if (bytes != null) {
+			b.append(Utils.getHTMLHexview(bytes, localByteOffset, lastBytePlusOne - localByteOffset));
+		} else {
+			b.append("bytes == null");
+		}
+
+		return b.toString();
+	}
+
 }
