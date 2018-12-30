@@ -66,7 +66,7 @@ public class ServiceDSMCC implements TreeNode {
 
 	private static final Logger logger = Logger.getLogger(ServiceDSMCC.class.getName());
 
-	public class DSMFile implements HTMLSource{
+	public class DSMFile implements HTMLSource, SaveAble{
 
 		private BIOPMessage biopMessage;
 		private String label;
@@ -117,6 +117,11 @@ public class ServiceDSMCC implements TreeNode {
 			}
 
 			return b.toString();
+		}
+		
+		@Override
+		public void save(final File file) {
+			saveFile(file, this.getBiopMessage());
 		}
 
 		public void saveFile(final File file, final BIOPMessage biopMessage) {
