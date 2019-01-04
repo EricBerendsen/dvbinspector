@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -471,7 +471,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final JMenu fileMenu =new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 		
-		fileOpenAction = new FileOpenAction(new JFileChooser(),this);
+		fileOpenAction = new FileOpenAction(this);
 		final JMenuItem openMenuItem = new JMenuItem(fileOpenAction);
 		openMenuItem.setMnemonic(KeyEvent.VK_O);
 		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
