@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -54,7 +54,9 @@ public class PreferencesManager {
 	private static final String ENABLE_GENERIC_PSI = "enable_generic_psi";
 	private static final String ENABLE_DSMCC = "enable_dsmcc";
 	private static final String ENABLE_PCR_PTS = "enable_pcr_pts";
-	
+
+	private static final String SELECT_MPEG_FILE_FILTER = "select_mpeg_file_filter";
+
 	// private constructor to avoid client applications to use constructor
 	private PreferencesManager() {
 	}
@@ -167,5 +169,20 @@ public class PreferencesManager {
 	public static boolean isEnablePcrPtsView() {
 		return getEnablePcrPtsView();
 	}
+	
+
+	public static void setSelectMpegFileFilter(boolean enabled) {
+		prefs.putBoolean(SELECT_MPEG_FILE_FILTER, enabled);
+
+	}
+
+	public static boolean getSelectMpegFileFilter() {
+		return prefs.getBoolean(SELECT_MPEG_FILE_FILTER, true);
+	}
+
+	public static boolean isSelectMpegFileFilter() {
+		return getSelectMpegFileFilter();
+	}
+
 
 }

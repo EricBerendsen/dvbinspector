@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -33,6 +33,7 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
@@ -40,13 +41,16 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
 public class FileOpenAction extends AbstractAction {
 
 
+	private final FileNameExtensionFilter tsFilter = new FileNameExtensionFilter("MPEG-TS", "ts","mpg","mpeg","m2ts","mts","tsa","tsv");
 	private final JFileChooser	fileChooser;
 	private final DVBinspector	contr;
 
 
-	public FileOpenAction(final JFileChooser jf, final DVBinspector controller) {
+	public FileOpenAction(final DVBinspector controller) {
 		super("Open");
-		fileChooser = jf;
+		fileChooser = new JFileChooser();
+		fileChooser.addChoosableFileFilter(tsFilter);
+		
 		contr = controller;
 	}
 
@@ -57,12 +61,18 @@ public class FileOpenAction extends AbstractAction {
 			final File defDir = new File(defaultDir);
 			fileChooser.setCurrentDirectory(defDir);
 		}
+		if(PreferencesManager.getSelectMpegFileFilter()) {
+			fileChooser.setFileFilter(tsFilter);
+		}else {
+			fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+		}
 
 		final int returnVal = fileChooser.showOpenDialog(contr.getFrame());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			contr.getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 			final File file = fileChooser.getSelectedFile();
+			PreferencesManager.setSelectMpegFileFilter(fileChooser.getFileFilter()==tsFilter);
 			PreferencesManager.setLastUsedDir(file.getParent());
 
 			final TSLoader tsLoader = new TSLoader(file,contr);
