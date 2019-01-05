@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -41,12 +41,14 @@ public class AboutAction extends AbstractAction {
 	 *
 	 */
 	private static final long serialVersionUID = -6710642864878320650L;
-	private final JFrame f;
+	private final JFrame frame;
 
 	public AboutAction(final JDialog jf, final JFrame fr, final DVBinspector controller) {
 		super("About...");
-		f=fr;
+		frame = fr;
 	}
+	
+	@Override
 	public void actionPerformed(final ActionEvent e) {
 		final String javaVersion=System.getProperty("java.version");
 		final String javaVendor=System.getProperty("java.vendor");
@@ -57,8 +59,8 @@ public class AboutAction extends AbstractAction {
 		final Image image = Utils.readIconImage("magnifying_glass.bmp");
 		final ImageIcon icon = new ImageIcon(image);
 
-		JOptionPane.showMessageDialog(f, "DVB Inspector Version: "+GuiUtils.getVersionString()+"\n\n"+
-				"This code is Copyright 2009,2010,2011,2012,2013,2014,2015,2016,2017,2018 by Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n"+
+		JOptionPane.showMessageDialog(frame, "DVB Inspector Version: "+GuiUtils.getVersionString()+"\n\n"+
+				"This code is Copyright 2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019 by Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n"+
 				"http://www.digitalekabeltelevisie.nl/dvb_inspector\n\n"+
 				"DVB Inspector is free software: you can redistribute it and/or modify \n"+
 				"it under the terms of the GNU General Public License as published by\n"+
