@@ -50,6 +50,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
@@ -111,7 +112,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		ttx(EBUTeletextHandler.class),
 		h222(Video138182Handler.class),
 		h264(Video14496Handler.class),
-		h265(H265Handler.class);
+		h265(H265Handler.class),
+		aac(Audio144963Handler.class);
 		
 		PidHandlers(Class<? extends GeneralPidHandler> a) {
 			pidHandler = a;

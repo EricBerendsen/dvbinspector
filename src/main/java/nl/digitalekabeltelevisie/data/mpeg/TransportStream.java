@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -44,6 +44,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
@@ -680,6 +681,8 @@ public class TransportStream implements TreeNode{
 				abstractPidHandler = new Video138182Handler();
 			}else if((streamType==3)||(streamType==4)){
 				abstractPidHandler = new Audio138183Handler(getAncillaryDataIdentifier(component));
+			}else if(streamType==0x11){
+				abstractPidHandler = new Audio144963Handler();
 			}else if(streamType==0x1B){
 				abstractPidHandler = new Video14496Handler();
 			}else if(streamType==0x20){ //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
