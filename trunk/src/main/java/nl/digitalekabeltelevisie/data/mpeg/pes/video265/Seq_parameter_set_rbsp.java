@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -79,6 +79,8 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private final int scaling_list_enabled_flag;
 
 	private int sps_scaling_list_data_present_flag;
+	
+	private ScalingListData sps_scaling_list_data;
 
 	private final int amp_enabled_flag;
 	private final int sample_adaptive_offset_enabled_flag;
@@ -111,10 +113,14 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private final int sps_extension_present_flag;
 
 	private int sps_range_extension_flag;
-
 	private int sps_multilayer_extension_flag;
+	private int sps_3d_extension_flag;
+	private int sps_scc_extension_flag; 
+	
 
-	private int sps_extension_6bits;
+	private int sps_extension_4bits;
+
+
 
 
 
@@ -170,8 +176,8 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		if(scaling_list_enabled_flag==1) {
 			sps_scaling_list_data_present_flag = bitSource.u(1);
 			if( sps_scaling_list_data_present_flag==1){
-				logger.warning("scaling_list_data( ) not implemented");
-				//scaling_list_data( )
+				
+				sps_scaling_list_data= new ScalingListData(bitSource);
 			}
 		}
 
@@ -213,7 +219,10 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		if( sps_extension_present_flag !=0) {
 			sps_range_extension_flag = bitSource.u(1);
 			sps_multilayer_extension_flag = bitSource.u(1);
-			sps_extension_6bits = bitSource.u(6);
+			sps_3d_extension_flag = bitSource.u(1);
+			sps_scc_extension_flag = bitSource.u(1);
+			
+			sps_extension_4bits = bitSource.u(6);
 		}
 
 	}
@@ -273,10 +282,11 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 		if(scaling_list_enabled_flag==1) {
 			sps_scaling_list_data_present_flag = bitSource.u(1);
-			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_list_data_present_flag",sps_scaling_list_data_present_flag,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_list_data_present_flag_present_flag",sps_scaling_list_data_present_flag,null)));
 			if(sps_scaling_list_data_present_flag==1){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("scaling_list_data()")));
-				return t;
+				t.add(sps_scaling_list_data.getJTreeNode(modus));
+				//t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("scaling_list_data()")));
+				// return t;
 			}
 		}
 
@@ -320,7 +330,26 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		if( sps_extension_present_flag !=0) {
 			t.add(new DefaultMutableTreeNode(new KVP("sps_range_extension_flag",sps_range_extension_flag,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("sps_multilayer_extension_flag",sps_multilayer_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_extension_6bits",sps_extension_6bits,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("sps_3d_extension_flag",sps_3d_extension_flag,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("sps_scc_extension_flag",sps_scc_extension_flag,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("sps_extension_4bits",sps_extension_4bits,null)));
+
+			if(sps_range_extension_flag!=0){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_range_extension()")));
+				return t;
+			}
+			if(sps_multilayer_extension_flag!=0){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_multilayer_extension()")));
+				return t;
+			}
+			if(sps_3d_extension_flag!=0){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_3d_extension()")));
+				return t;
+			}
+			if(sps_scc_extension_flag!=0){
+				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_scc_extension()")));
+				return t;
+			}
 		}
 
 		return t;
