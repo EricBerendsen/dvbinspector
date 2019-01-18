@@ -460,11 +460,12 @@ public class PID implements TreeNode{
 		if(type==PSI){
 			t.add(psi.getJTreeNode(modus));
 		}
+		final JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
+		t.add(list.getJTreeNode(modus, "Transport packets "));
+
 		if((generalPidHandler!=null)&&(generalPidHandler.isInitialized())) {
 			t.add(((TreeNode)generalPidHandler).getJTreeNode(modus));
 		}
-		final JTreeLazyList list = new JTreeLazyList(new PIDPacketGetter(parentTransportStream,pid,modus));
-		t.add(list.getJTreeNode(modus, "Transport packets "));
 
 		return t;
 	}
