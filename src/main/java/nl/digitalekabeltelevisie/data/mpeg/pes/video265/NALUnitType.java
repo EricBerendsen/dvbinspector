@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -33,26 +33,26 @@ public enum NALUnitType {
 
 	TRAIL_N(0,"Coded slice segment of a non-TSA, non-STSA trailing picture"),
 	TRAIL_R(1,"Coded slice segment of a non-TSA, non-STSA trailing picture"),
-	TSA_N(2,"Coded slice segment of a TSA picture"),
-	TSA_R(3,"Coded slice segment of a TSA picture"),
-	STSA_N(4,"Coded slice segment of an STSA picture"),
-	STSA_R(5,"Coded slice segment of an STSA picture"),
-	RADL_N(6,"Coded slice segment of a RADL picture"),
-	RADL_R(7,"Coded slice segment of a RADL picture"),
-	RASL_N(8,"Coded slice segment of a RASL picture"),
-	RASL_R(9,"Coded slice segment of a RASL picture"),
+	TSA_N(2,"Coded slice segment of a Temporal Sublayer Access (TSA)  picture"),
+	TSA_R(3,"Coded slice segment of a Temporal Sublayer Access (TSA)  picture"),
+	STSA_N(4,"Coded slice segment of an Stepwise Temporal Sublayer Access (STSA) picture"),
+	STSA_R(5,"Coded slice segment of an Stepwise Temporal Sublayer Access (STSA) picture"),
+	RADL_N(6,"Coded slice segment of a Random Access Decodable Leading (RADL) picture"),
+	RADL_R(7,"Coded slice segment of a Random Access Decodable Leading (RADL) picture"),
+	RASL_N(8,"Coded slice segment of a Random Access Skipped Leading (RASL) picture"),
+	RASL_R(9,"Coded slice segment of a Random Access Skipped Leading (RASL) picture"),
 	RSV_VCL_N10(10,"Reserved non-IRAP SLNR VCL NAL unit types"),
 	RSV_VCL_R11(11,"Reserved non-IRAP sub-layer reference VCL NAL unit types"),
 	RSV_VCL_N12(12,"Reserved non-IRAP SLNR VCL NAL unit types"),
 	RSV_VCL_R13(13,"Reserved non-IRAP sub-layer reference VCL NAL unit types"),
 	RSV_VCL_N14(14,"Reserved non-IRAP SLNR VCL NAL unit types"),
 	RSV_VCL_R15(15,"Reserved non-IRAP sub-layer reference VCL NAL unit types"),
-	BLA_W_LP(16,"Coded slice segment of a BLA picture"),
-	BLA_W_RADL(17,"Coded slice segment of a BLA picture"),
-	BLA_N_LP(18,"Coded slice segment of a BLA picture"),
-	IDR_W_RADL(19,"Coded slice segment of an IDR picture"),
-	IDR_N_LP(20,"Coded slice segment of an IDR picture"),
-	CRA_NUT(21,"Coded slice segment of a CRA picture"),
+	BLA_W_LP(16,"Coded slice segment of a Broken Link Access (BLA) picture"),
+	BLA_W_RADL(17,"Coded slice segment of a Broken Link Access (BLA) picture"),
+	BLA_N_LP(18,"Coded slice segment of a Broken Link Access (BLA) picture"),
+	IDR_W_RADL(19,"Coded slice segment of an Instantaneous Decoder Refresh (IDR) picture"),
+	IDR_N_LP(20,"Coded slice segment of an Instantaneous Decoder Refresh (IDR) picture"),
+	CRA_NUT(21,"Coded slice segment of a Clean Random Access (CRA) picture"),
 	RSV_IRAP_VCL22(22,"Reserved IRAP VCL NAL unit types"),
 	RSV_IRAP_VCL23(23,"Reserved IRAP VCL NAL unit types"),
 	VPS_NUT(32,"Video parameter set"),

@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -34,6 +35,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class Seq_parameter_set_rbsp extends RBSP {
 
@@ -97,20 +99,22 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private int pcm_loop_filter_disabled_flag;
 
 	private final int num_short_term_ref_pic_sets;
+	
+	private List<StRefPicSet> stRefPicSetList = new ArrayList<>();
 
-	private final int long_term_ref_pics_present_flag;
+	private int long_term_ref_pics_present_flag;
 
 	private int num_long_term_ref_pics_sps;
 
-	private final int sps_temporal_mvp_enabled_flag;
+	private int sps_temporal_mvp_enabled_flag;
 
-	private final int strong_intra_smoothing_enabled_flag;
+	private int strong_intra_smoothing_enabled_flag;
 
-	private final int vui_parameters_present_flag;
+	private int vui_parameters_present_flag;
 
 	private H265VuiParameters vui_parameters;
 
-	private final int sps_extension_present_flag;
+	private int sps_extension_present_flag;
 
 	private int sps_range_extension_flag;
 	private int sps_multilayer_extension_flag;
@@ -195,9 +199,13 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 		num_short_term_ref_pic_sets = bitSource.ue();
 		if(num_short_term_ref_pic_sets!=0){
-			logger.warning("st_ref_pic_set( i ) not implemented");
-			//			for( i = 0; i < num_short_term_ref_pic_sets; i++)
-			//				st_ref_pic_set( i )
+			for(int i = 0; i < num_short_term_ref_pic_sets; i++) {
+				StRefPicSet st_ref_pic_set = new StRefPicSet(i, num_short_term_ref_pic_sets, bitSource);
+				if(st_ref_pic_set.notImplemented) {
+					return;
+				}
+				stRefPicSetList.add(st_ref_pic_set);
+			}
 		}
 		long_term_ref_pics_present_flag = bitSource.u(1);
 		if( long_term_ref_pics_present_flag==1 ) {
@@ -240,7 +248,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 
 		if( chroma_format_idc == 3 ){
-			separate_colour_plane_flag = bitSource.u(1);
 			t.add(new DefaultMutableTreeNode(new KVP("separate_colour_plane_flag",separate_colour_plane_flag,null)));
 		}
 
@@ -281,12 +288,9 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 
 		if(scaling_list_enabled_flag==1) {
-			sps_scaling_list_data_present_flag = bitSource.u(1);
 			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_list_data_present_flag_present_flag",sps_scaling_list_data_present_flag,null)));
 			if(sps_scaling_list_data_present_flag==1){
 				t.add(sps_scaling_list_data.getJTreeNode(modus));
-				//t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("scaling_list_data()")));
-				// return t;
 			}
 		}
 
@@ -305,9 +309,9 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		}
 
 		t.add(new DefaultMutableTreeNode(new KVP("num_short_term_ref_pic_sets",num_short_term_ref_pic_sets,null)));
-		if(num_short_term_ref_pic_sets!=0){
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("st_ref_pic_set( i )")));
-			return t;
+		if (num_short_term_ref_pic_sets != 0) {
+			Utils.addListJTree(t, stRefPicSetList, modus, "st_ref_pic_sets");
+
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("long_term_ref_pics_present_flag",long_term_ref_pics_present_flag,null)));
 
@@ -355,28 +359,5 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		return t;
 	}
 
-
-	public static String getProfileIdcString(final int profile_idc) {
-
-		switch (profile_idc) {
-		case 66: return "Baseline profile";
-		case 77: return "Main profile";
-		case 88: return "Extended profile";
-		case 100: return "High profile";
-		case 110: return "High 10 profile";
-		case 122: return "High 4:2:2 profile";
-		case 44: return "CAVLC 4:4:4 Intra profile";
-		case 144: return "High 4:4:4 Predictive profile";
-
-		// these are used in Rec. ITU-T H.264 (03/2010) – Prepublished version, but not defined in Annex A
-		case 83: return "??";
-		case 86: return "??";
-		case 118: return "??";
-		case 128: return "??";
-
-		default:
-			return "unknown";
-		}
-	}
 
 }
