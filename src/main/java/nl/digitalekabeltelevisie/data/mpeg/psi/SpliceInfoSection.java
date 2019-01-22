@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -270,9 +270,13 @@ public class SpliceInfoSection extends TableSection {
 		}	
 	}
 	
-	private class TimeSignal implements TreeNode{
+	public class TimeSignal implements TreeNode{
 		
 		private SpliceTime splice_time;
+
+		public SpliceTime getSplice_time() {
+			return splice_time;
+		}
 
 		private TimeSignal(BitSource bs){
 			super();
