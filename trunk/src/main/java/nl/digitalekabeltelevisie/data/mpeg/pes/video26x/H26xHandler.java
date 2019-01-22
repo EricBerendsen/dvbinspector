@@ -2,7 +2,7 @@
  * 
  * http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- * This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  * This file is part of DVB Inspector.
  * 
@@ -23,11 +23,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
-import java.util.Iterator;
+import java.util.*;
 
+import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496PESDataField;
 
 /**
  * @author Eric
@@ -62,7 +62,7 @@ public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends Abstr
 
 			Iterator<N> result = null;
 			do {
-				final Video14496PESDataField pesPacket = (Video14496PESDataField )pesIterator.next();
+				final P pesPacket = (P)pesIterator.next();
 				result = (Iterator<N>) pesPacket.getNalUnits().iterator();
 
 			} while (((result==null)||!result.hasNext())&&(pesIterator.hasNext()));
@@ -110,6 +110,34 @@ public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends Abstr
 	 * @return
 	 */
 	abstract protected P createH26xPESDataField(final PesPacketData pesData);
+	
+	
+	// helpers for drawing frame size graph
+	/**
+	 * @param accessUnitData
+	 * @return
+	 */
+	protected static boolean notZero(final int[] accessUnitData) {
+		for (final int i : accessUnitData) {
+			if(i!=0){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	protected static int drawBarAccessUnit(final List<int[]> frameSize, final List<ChartLabel> labels, int[] accessUnitData, int c) {
+		int count = c;
+		if(notZero(accessUnitData)){
+			ChartLabel label =new ChartLabel(""+count, (short)count);
+			labels.add(label);
+			frameSize.add(accessUnitData);
+			count++;
+		}
+		return count;
+	}
+
 
 
 }

@@ -142,20 +142,8 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 		return chart.createBufferedImage(( frameSize.size()*18)+100, 640);
 	}
 
-	private static int drawBarAccessUnit(final List<int[]> frameSize, final List<ChartLabel> labels, int[] accessUnitData,
-			int c) {
-		int count = c;
-		if(notZero(accessUnitData)){
-			ChartLabel label =new ChartLabel(""+count, (short)count);
-			labels.add(label);
-			frameSize.add(accessUnitData);
-			count++;
-		}
-		return count;
-	}
-
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES Data",this));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.264 PES Data",this));
 		addListJTree(s,pesPackets,modus,"PES Packets");
 
 		return s;
@@ -171,19 +159,6 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 	}
 
 
-	/**
-	 * @param accessUnitData
-	 * @return
-	 */
-	private static boolean notZero(final int[] accessUnitData) {
-		for (final int i : accessUnitData) {
-			if(i!=0){
-				return true;
-			}
-		}
-
-		return false;
-	}
 
 
 	private static String getSlice_typeString(final int slice_type){
