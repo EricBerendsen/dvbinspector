@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -159,7 +159,7 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES Data",this));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("13818-2 PES Data",this));
 		addListJTree(s,pesPackets,modus,"PES Packets");
 
 		return s;
