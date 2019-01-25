@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -142,10 +142,12 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 
 			this.serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
 			this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
-
-			setSize(getDimension());
-			repaint();
+		} else {
+			eit = null;
+			interval = null;
 		}
+		setSize(getDimension());
+		repaint();
 	}
 
 	/* (non-Javadoc)
