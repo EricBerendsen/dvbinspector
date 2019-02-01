@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -46,6 +46,7 @@ import javax.swing.ScrollPaneConstants;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.gui.utils.WrapLayout;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
@@ -68,7 +69,7 @@ public class GridView extends JPanel implements TransportStreamView{
 	public GridView(final TransportStream transportStream, final ViewContext viewContext) {
 		//super(new GridLayout(1,0));
 		super(new BorderLayout());
-		buttonPanel = new JPanel();
+		buttonPanel = new JPanel(new WrapLayout());
 
 		addPacketCheckBoxes();
 
