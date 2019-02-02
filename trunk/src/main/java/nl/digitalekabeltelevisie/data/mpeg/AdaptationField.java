@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  * 
@@ -135,12 +135,12 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		PrivateDataField(byte [] private_data_byte, int offset){
 
 			data_byte = private_data_byte;
-			data_field_tag = getInt(private_data_byte, 0, 1, MASK_8BITS);
-			data_field_length = getInt(private_data_byte, 1, 1, MASK_8BITS);
+			data_field_tag = getInt(private_data_byte, offset, 1, MASK_8BITS);
+			data_field_length = getInt(private_data_byte, offset + 1, 1, MASK_8BITS);
 			if(data_field_tag==0x01){ // Announcement Switching Data
-				buildAnnouncementSwitchingData(private_data_byte);
+				buildAnnouncementSwitchingData(private_data_byte, offset);
 			}else if(data_field_tag==0x02){ //AU_information
-				buildAU_information(private_data_byte);
+				buildAU_information(private_data_byte,offset);
 			}else{
 				logger.warning("data_field_tag=="+data_field_tag+" not implemented");
 			}
@@ -149,20 +149,20 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		/**
 		 * @param private_data_byte
 		 */
-		public void buildAU_information(byte[] private_data_byte) {
+		public void buildAU_information(byte[] private_data_byte, int offset) {
 			if(data_field_length>0){
-				AU_coding_format = getInt(private_data_byte, 2,1, 0xF0)>>4;
-				AU_coding_type_information = getInt(private_data_byte, 2,1, MASK_4BITS);
+				AU_coding_format = getInt(private_data_byte, offset + 2, 1, 0xF0) >> 4;
+				AU_coding_type_information = getInt(private_data_byte, offset + 2, 1, MASK_4BITS);
 				if(data_field_length>1){
-					AU_ref_pic_idc = getInt(private_data_byte, 3,1, 0xC0)>>6;
-					AU_pic_struct = getInt(private_data_byte, 3,1, 0x30)>>4;
-					AU_PTS_present_flag = getInt(private_data_byte, 3,1, 0x08)>>3;
-					AU_profile_info_present_flag = getInt(private_data_byte, 3,1, 0x04)>>2;
-					AU_stream_info_present_flag = getInt(private_data_byte, 3,1, 0x02)>>1;
-					AU_trick_mode_info_present_flag = getInt(private_data_byte, 3,1, 0x01);
-					int localOffset = 4;
-					if(AU_PTS_present_flag == 1){
-						AU_PTS_32 = getLong(private_data_byte, localOffset,4, MASK_32BITS);
+					AU_ref_pic_idc = getInt(private_data_byte, offset + 3, 1, 0xC0) >> 6;
+					AU_pic_struct = getInt(private_data_byte, offset + 3, 1, 0x30) >> 4;
+					AU_PTS_present_flag = getInt(private_data_byte, offset + 3, 1, 0x08) >> 3;
+					AU_profile_info_present_flag = getInt(private_data_byte, offset + 3, 1, 0x04) >> 2;
+					AU_stream_info_present_flag = getInt(private_data_byte, offset + 3, 1, 0x02) >> 1;
+					AU_trick_mode_info_present_flag = getInt(private_data_byte, offset + 3, 1, 0x01);
+					int localOffset = offset + 4;
+					if (AU_PTS_present_flag == 1) {
+						AU_PTS_32 = getLong(private_data_byte, localOffset, 4, MASK_32BITS);
 						localOffset += 4;
 					}
 					if(AU_stream_info_present_flag == 1){
@@ -212,8 +212,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		/**
 		 * @param private_data_byte
 		 */
-		public void buildAnnouncementSwitchingData(byte[] private_data_byte) {
-			announcement_switching_flag_field = getInt(private_data_byte, 2,2, MASK_16BITS);
+		public void buildAnnouncementSwitchingData(byte[] private_data_byte, int offset) {
+			announcement_switching_flag_field = getInt(private_data_byte, offset + 2, 2, MASK_16BITS);
 		}
 
 		/* (non-Javadoc)
