@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -39,15 +39,14 @@ import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.*;
 import org.jfree.chart.plot.*;
-import org.jfree.chart.renderer.xy.*;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.gui.utils.*;
-import nl.digitalekabeltelevisie.util.PreferencesManager;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 
 /**
  * Shows variation over time of the bandwidth each PID uses
@@ -65,7 +64,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	private final class TimeStampNumberFormat extends NumberFormat {
 		@Override
 		public Number parse(String source, ParsePosition parsePosition) {
-			// TODO Auto-generated method stub
+			// not used
 			return null;
 		}
 
@@ -148,6 +147,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		}
 	}
 
+	
 	private JFreeChart freeChart;
 	
 
@@ -167,6 +167,9 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	
 	static DecimalFormat df = new DecimalFormat("#0.00");
 	private JCheckBox temiOptionCheckBox = new JCheckBox("enable");
+	private JPanel topRowbuttonPanel;
+	private JPanel seriesSelectionPanel;
+	private JPanel controls;
 
 
 	/**
@@ -178,7 +181,29 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	public TimeStampChart(final TransportStream transportStream, final ViewContext viewContext){
 		super(new BorderLayout());
 		this.transportStream = transportStream;
-		JPanel buttonPanel = new JPanel();
+		topRowbuttonPanel = createTopRowButtonPanel();
+		seriesSelectionPanel = new JPanel(new WrapLayout());;
+		controls = new JPanel();
+		controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
+		controls.add(topRowbuttonPanel);
+		controls.add(seriesSelectionPanel);
+		add(controls,BorderLayout.PAGE_START);
+
+		chartPanel = new ChartPanel(null);
+		// see http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=28118
+		// Bug in ChartPanel.setMouseWheelEnabled in jfreechart 1.0.13
+		chartPanel.isMouseWheelEnabled();
+		chartPanel.setMouseWheelEnabled(true);
+
+		setTransportStream(transportStream,viewContext);
+		add(chartPanel,BorderLayout.CENTER);
+	}
+
+	/**
+	 * @return
+	 */
+	private JPanel createTopRowButtonPanel() {
+		JPanel buttonPanel = new JPanel(new WrapLayout());
 		addServicesSelect(buttonPanel);
 		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
 		addLegendRadioButtons(buttonPanel);
@@ -187,18 +212,8 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		addTimePacketNoRadioButtons(buttonPanel);
 		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
 		addTEMIOption(buttonPanel);
-		add(buttonPanel,BorderLayout.PAGE_START);
-		
-
-		chartPanel = new ChartPanel(null);
-		// see http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=28118
-		// Bug in ChartPanel.setMouseWheelEnabled in jfreechart 1.0.13
-		chartPanel.isMouseWheelEnabled();
-		chartPanel.setMouseWheelEnabled(true);
-
-
-		setTransportStream(transportStream,viewContext);
-		add(chartPanel,BorderLayout.CENTER);
+		buttonPanel.invalidate();
+		return buttonPanel;
 	}
 
 	/**
@@ -231,6 +246,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		if(transportStream==null){
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
+			seriesSelectionPanel.removeAll();
 			temiOptionCheckBox.setEnabled(false);
 		}else if(!PreferencesManager.isEnablePcrPtsView()) {
 			freeChart = null;
@@ -278,12 +294,47 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	/**
 	 *
 	 */
-	public void updateChartPanel() {
+	private void updateChartPanel() {
 		freeChart = createChart(serviceChooser.getSelectedIndex());
 		chartPanel.setChart(freeChart);
 		freeChart.getLegend().setVisible(legendVisible);
 		chartPanel.setDomainZoomable(true);
 		chartPanel.setRangeZoomable(true);
+		fillSeriesSelectionPanel(seriesSelectionPanel,freeChart);
+	}
+
+	private void fillSeriesSelectionPanel(JPanel seriesSelectionPanel, JFreeChart freeChart2) {
+		seriesSelectionPanel.removeAll();
+	
+		XYDataset dataset = freeChart2.getXYPlot().getDataset();
+		int count = dataset.getSeriesCount();
+		for (int i = 0; i < count; i++) {
+			String label = (String) dataset.getSeriesKey(i);
+			JCheckBox cb1 = new JCheckBox(label,true);
+			
+			cb1.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(final ActionEvent actionEvent) {
+					
+					XYPlot plot = (XYPlot) freeChart.getPlot();
+					XYDataset dataset = plot.getDataset();
+					XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+					JCheckBox source = (JCheckBox)actionEvent.getSource();
+					int index = dataset.indexOf(label);
+					
+					renderer.setSeriesVisible(index, source.isSelected());
+				}
+			});
+			seriesSelectionPanel.validate();
+
+			seriesSelectionPanel.add(cb1);
+			if(i<(count-1)) {
+				seriesSelectionPanel.add(Box.createHorizontalStrut(20)); // spacer
+			}
+		}
+		
+		seriesSelectionPanel.revalidate();
+//		updateUI();
 	}
 
 	/**
@@ -309,11 +360,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 				false // urls
 				);
 
-
-		// make legend visible
-		//freeChart.getLegend().setVisible(legendVisible);
 		XYPlot plot = (XYPlot) chart.getPlot();
-
 		
 		// use larger shapes
 		plot.setDrawingSupplier(new DVBInspectorDefaultDrawingSupplier());
