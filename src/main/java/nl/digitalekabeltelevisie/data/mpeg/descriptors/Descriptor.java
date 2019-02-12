@@ -425,6 +425,12 @@ public class Descriptor implements TreeNode {
 		case 0x93:
 			return "user defined: Ziggo/OpenTV Video On Demand URL";
 
+		// ANSI/SCTE 128 2010-a AVC Video Systems and Transport Constraints for Cable Television
+		// https://www.scte.org/documents/pdf/Standards/ANSI_SCTE%20128%202010-a.pdf
+		// 6.3.2.3 SCTE Adaptation field data descriptor 
+		case 0x97:
+			return "user defined: SCTE adaptation field data descriptor";
+		
 		case 0xA0:
 			return "user defined: NorDig Content Protection Descriptor";
 
@@ -433,6 +439,13 @@ public class Descriptor implements TreeNode {
 
 		case 0xD4:
 			return "user defined: Ziggo Package Descriptor";
+
+			
+			// OpenCable™ Specifications Encoder Boundary Point Specification 			OC-SP-EBP-I01-130118
+			// https://specification-search.cablelabs.com/encoder-boundary-point-specification
+			
+		case 0xE9:
+			return "user defined: SCTE EBP_descriptor";
 
 			/* http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf */
 		case 0xF1:
