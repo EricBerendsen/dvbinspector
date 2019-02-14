@@ -42,8 +42,8 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.AFDescriptorFactory;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.util.LookUpList;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.NtpTimeStamp;
 
 
 public class AdaptationField implements HTMLSource, TreeNode{
@@ -82,6 +82,9 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			add(8, "60").
 			add(9,0xF, "Reserved").
 			build();
+
+
+
 
 	/**
 	 *
@@ -132,6 +135,25 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		private int AU_reserved;
 		private byte[] AU_reserved_byte;
 
+		
+		public byte[] formatIdentifier;
+		public int EBP_fragment_flag;
+		public int EBP_segment_flag;
+		public int EBP_SAP_flag;
+		private int EBP_grouping_flag;
+		private int EBP_time_flag;
+		private int EBP_concealment_flag;
+		private int EBP_extension_flag;
+		private int EBP_ext_partition_flag;
+		private int EBP_SAP_type;
+		private int reserved3;
+		private int EBP_grouping_ext_flag;
+		
+		private List<Integer> groupingList = new  ArrayList<>();
+		private long EBP_acquisition_time;
+		private int EBP_ext_partitions;
+		private int EBP_grouping_id;
+
 		PrivateDataField(byte [] private_data_byte, int offset){
 
 			data_byte = private_data_byte;
@@ -141,6 +163,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 				buildAnnouncementSwitchingData(private_data_byte, offset);
 			}else if(data_field_tag==0x02){ //AU_information
 				buildAU_information(private_data_byte,offset);
+			}else if(data_field_tag==0x0DF){ //EBP_info
+				buildEBP_info(private_data_byte,offset);
 			}else{
 				logger.warning("data_field_tag=="+data_field_tag+" not implemented");
 			}
@@ -215,6 +239,54 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		public void buildAnnouncementSwitchingData(byte[] private_data_byte, int offset) {
 			announcement_switching_flag_field = getInt(private_data_byte, offset + 2, 2, MASK_16BITS);
 		}
+		
+		public void buildEBP_info(byte[] private_data_byte, int offset) {
+			
+			formatIdentifier = getBytes(private_data_byte,offset+2,4);
+			EBP_fragment_flag  = getInt(private_data_byte, offset + 6, 1, 0b1000_0000)>>7;
+			EBP_segment_flag  = getInt(private_data_byte, offset + 6, 1, 0b0100_0000)>>6;
+			EBP_SAP_flag  = getInt(private_data_byte, offset + 6, 1, 0b0010_0000)>>5;
+			EBP_grouping_flag  = getInt(private_data_byte, offset + 6, 1, 0b0001_0000)>>4;
+			EBP_time_flag  = getInt(private_data_byte, offset + 6, 1, 0b0000_1000)>>3;
+			EBP_concealment_flag  = getInt(private_data_byte, offset + 6, 1, 0b0000_0100)>>2;
+			reserved  = getInt(private_data_byte, offset + 6, 1, 0b0000_0010)>>1;
+			EBP_extension_flag = getInt(private_data_byte, offset + 6, 1, 0b0000_0001);
+			
+			int localOffset = offset + 7;
+			if (EBP_extension_flag==1) {
+				EBP_ext_partition_flag  = getInt(private_data_byte, localOffset, 1, 0b1000_0000)>>7;
+				reserved2 = getInt(private_data_byte, localOffset, 1, 0b0111_1111);
+				localOffset++;
+			}   
+			 if (EBP_SAP_flag==1 ){
+				 EBP_SAP_type  = getInt(private_data_byte, localOffset, 1, 0b1110_0000)>>5;
+				 reserved3 = getInt(private_data_byte, localOffset, 1, 0b0001_1111);
+				 localOffset++;
+			 }
+			 
+			if (EBP_grouping_flag == 1) {
+				int grouping = getInt(private_data_byte, localOffset++, 1, MASK_8BITS);
+				groupingList.add(grouping);
+				EBP_grouping_ext_flag = (grouping & 0b1000_0000) >> 7;
+				while (EBP_grouping_ext_flag == 1) {
+					grouping = getInt(private_data_byte, localOffset++, 1, MASK_8BITS);
+					EBP_grouping_ext_flag = (grouping & 0b1000_0000) >> 7;
+					groupingList.add(grouping);
+				}
+			}
+			
+			if (EBP_time_flag == 1) {
+				EBP_acquisition_time = getLong(private_data_byte, localOffset, 8, MASK_64BITS);
+				localOffset += 8;
+			}		
+			
+			if (EBP_ext_partition_flag==1 ){
+				EBP_ext_partitions = getInt(private_data_byte, localOffset++, 1, MASK_8BITS);
+			}
+			
+			 
+		}
+		
 
 		/* (non-Javadoc)
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
@@ -274,7 +346,49 @@ public class AdaptationField implements HTMLSource, TreeNode{
 						}
 					}
 				}
-			}else{
+			} else if (data_field_tag == 0xDF) {
+				t.add(new DefaultMutableTreeNode(new KVP("format_identifier", formatIdentifier, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_fragment_flag", EBP_fragment_flag, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_segment_flag", EBP_segment_flag, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_SAP_flag", EBP_SAP_flag, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_flag", EBP_grouping_flag, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_time_flag", EBP_time_flag, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_concealment_flag", EBP_concealment_flag, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("EBP_extension_flag", EBP_extension_flag, null)));
+				if (EBP_extension_flag == 1) {
+					t.add(new DefaultMutableTreeNode(new KVP("EBP_ext_partition_flag", EBP_ext_partition_flag, null)));
+					t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved2, null)));
+				}
+				if (EBP_SAP_flag == 1) {
+					t.add(new DefaultMutableTreeNode(new KVP("EBP_SAP_type", EBP_SAP_type, null)));
+					t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved3, null)));
+				}
+
+				 
+				if (EBP_grouping_flag == 1) {
+					DefaultMutableTreeNode list = new DefaultMutableTreeNode(new KVP("GroupingList"));
+					for(Integer grouping:groupingList) {
+						EBP_grouping_ext_flag = (grouping & 0b1000_0000) >> 7;
+						EBP_grouping_id = (grouping & 0b0111_1111);
+						list.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_ext_flag", EBP_grouping_ext_flag, null)));
+						list.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_id", EBP_grouping_id, null)));
+					}
+					t.add(list);
+				}
+
+				
+				if (EBP_time_flag == 1) {
+					t.add(new DefaultMutableTreeNode(new KVP("EBP_acquisition_time", EBP_acquisition_time, new NtpTimeStamp(EBP_acquisition_time).toDateString())));
+				}		
+				
+				if (EBP_ext_partition_flag==1 ){
+					t.add(new DefaultMutableTreeNode(new KVP("EBP_ext_partitions", EBP_ext_partitions , null)));
+
+				}
+				
+
+			} else {
 				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("data_field_tag=="+data_field_tag)));
 			}
 			return t;
