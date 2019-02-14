@@ -44,7 +44,7 @@ public final class GuiUtils {
 	/**
 	 * 
 	 */
-	public static final String NO_TRANSPORTSTREAM_LOADED = "No transportstream loaded";
+	public static final String NO_TRANSPORTSTREAM_LOADED = "No transportstream loaded, drag a MPEG-TS (*.ts;*.mpg;*.mpeg;*.m2ts;*.mts;*.tsa;*.tsv) file here";
 
 	/**
 	 *
