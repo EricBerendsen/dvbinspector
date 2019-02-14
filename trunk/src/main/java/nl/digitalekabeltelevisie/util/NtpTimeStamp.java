@@ -45,14 +45,9 @@ import java.util.TimeZone;
 
 
 /*
- * copied from TimeStamp.java, part of Apache Commons
+ * copied from TimeStamp.java, part of Apache Commons Net
  * source http://svn.apache.org/viewvc/commons/proper/net/trunk/src/main/java/org/apache/commons/net/ntp/TimeStamp.java?view=markup
  *  
- *  
- * 
- * 
- * 
- * 
  */
 
 
