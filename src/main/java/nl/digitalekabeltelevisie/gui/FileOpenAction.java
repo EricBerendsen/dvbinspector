@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
 public class FileOpenAction extends AbstractAction {
 
 
-	private final FileNameExtensionFilter tsFilter = new FileNameExtensionFilter("MPEG-TS", "ts","mpg","mpeg","m2ts","mts","tsa","tsv");
+	private final FileNameExtensionFilter tsFilter = new FileNameExtensionFilter("MPEG-TS (*.ts;*.mpg;*.mpeg;*.m2ts;*.mts;*.tsa;*.tsv)", "ts","mpg","mpeg","m2ts","mts","tsa","tsv");
 	private final JFileChooser	fileChooser;
 	private final DVBinspector	contr;
 
