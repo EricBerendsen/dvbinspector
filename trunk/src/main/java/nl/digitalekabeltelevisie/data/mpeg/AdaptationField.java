@@ -379,7 +379,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 
 				
 				if (EBP_time_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("EBP_acquisition_time", EBP_acquisition_time, new NtpTimeStamp(EBP_acquisition_time).toDateString())));
+					t.add(new DefaultMutableTreeNode(new KVP("EBP_acquisition_time", EBP_acquisition_time, new NtpTimeStamp(EBP_acquisition_time).toUTCString())));
 				}		
 				
 				if (EBP_ext_partition_flag==1 ){
