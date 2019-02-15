@@ -71,6 +71,8 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV2;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.opencable.EBPDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.scte.SCTEAdaptationFieldDataDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.AvailDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SCTE35Descriptor;
@@ -117,8 +119,29 @@ public final class DescriptorFactory {
 			Descriptor d;
 			final int descriptorTag = toUnsignedInt(data[t + offset]);
 			try {
-				if (tableSection.getTableId() == 0xFC) {
-					d = getSCTE35Descriptor(data, offset, tableSection, t);
+				if(descriptorTag == 0xE9) {
+					// OpenCable™ Specifications 
+					// Encoder Boundary Point Specification 
+					// OC-SP-EBP-I01-130118 
+					// Should be user private descriptor, but no private_data_specifier
+					// exists for OpenCable / SCTE
+					// For now no conflict with other private descriptors
+					// 
+					// TODO Make this switchable (user preferences)
+					//
+					d = new EBPDescriptor(data, t + offset, tableSection);
+				}else if (descriptorTag == 0x97) {
+					// OpenCable™ Specifications 
+					// Encoder Boundary Point Specification 
+					// OC-SP-EBP-I01-130118 
+					// Should be user private descriptor, but no private_data_specifier
+					// exists for OpenCable / SCTE
+					// For now no conflict with other private descriptors
+					// 
+					// TODO Make this switchable (user preferences)
+					//
+					
+					d = new SCTEAdaptationFieldDataDescriptor(data, t + offset, tableSection);
 				} else if (descriptorTag <= 0x3f) {
 					if (tableSection.getTableId() == 0x4c) {
 						d = getINTDescriptor(data, offset, tableSection, t);
@@ -126,6 +149,8 @@ public final class DescriptorFactory {
 						d = getUNTDescriptor(data, offset, tableSection, t);
 					} else if (tableSection.getTableId() == 0x74) {
 						d = getAITDescriptor(data, offset, tableSection, t);
+					}else if (tableSection.getTableId() == 0xFC) {
+						d = getSCTE35Descriptor(data, offset, tableSection, t);
 					} else {
 						d = getMPEGDescriptor(data, offset, tableSection, t);
 					}
