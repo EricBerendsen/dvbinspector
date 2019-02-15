@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -35,9 +35,61 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 
 public class SegmentationDescriptor extends SCTE35Descriptor {
+	
+	LookUpList segmentationUpidTypeList = new LookUpList.Builder().
+			add(0x00,"Not Used").
+			add(0x01, "User Defined").
+			add(0x02, "ISCI").
+			add(0x03, "Ad-ID").
+			add(0x04, "UMID (SMPTE 330M)").
+			add(0x05, "ISAN").
+			add(0x06, "ISAN (Formerly known as V-ISAN)").
+			add(0x07, "TID (Tribune Media Systems Program identifier)").
+			add(0x08, "TI (AiringID ,Formerly Turner ID)").
+			add(0x09, "ADI (CableLabs metadata identifier)").
+			add(0x0A, "EIDR").
+			add(0x0B, "ATSC Content Identifier").
+			add(0x0C, "MPU()").
+			add(0x0D, "MID()").
+			add(0x0E, "ADS Information").
+			add(0x0F, "URI").
+			add(0x1F,0xFF, "Reserved").
+			build();
+	
+	LookUpList segmentationTypeIdList = new LookUpList.Builder().
+			add(0x00,"Not Indicated").
+			add(0x01,"Content Identification").
+			add(0x10,"Program Start").
+			add(0x11,"Program End").
+			add(0x12,"Program Early Termination").
+			add(0x13,"Program Breakaway").
+			add(0x14,"Program Resumption").
+			add(0x15,"Program Runover Planned").
+			add(0x16,"Program Runover Unplanned").
+			add(0x17,"Program Overlap Start").
+			add(0x18,"Program Blackout Override").
+			add(0x19,"Program Start – In Progress").
+			add(0x20,"Chapter Start").
+			add(0x21,"Chapter End").
+			add(0x22,"Break Start").
+			add(0x23,"Break End").
+			add(0x30,"Provider Advertisement Start").
+			add(0x31,"Provider Advertisement End").
+			add(0x32,"Distributor Advertisement Start").
+			add(0x33,"Distributor Advertisement End").
+			add(0x34,"Provider Placement Opportunity Start").
+			add(0x35,"Provider Placement Opportunity End").
+			add(0x36,"Distributor Placement Opportunity Start").
+			add(0x37,"Distributor Placement Opportunity End").
+			add(0x40,"Unscheduled Event Start").
+			add(0x41,"Unscheduled Event End").
+			add(0x50,"Network Start").
+			add(0x51,"Network End").
+			build();
+
 	
 	public class ComponentOffset implements TreeNode {
 
@@ -102,7 +154,7 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 				web_delivery_allowed_flag  = getInt(b,localOffset,1,0b0001_0000)>>4;
 				no_regional_blackout_flag  = getInt(b,localOffset,1,0b0000_1000)>>3;
 				archive_allowed_flag = getInt(b,localOffset,1,0b0000_0100)>>2; 
-				device_restrictions  = getInt(b,localOffset,1,0b1000_0011); 
+				device_restrictions  = getInt(b,localOffset,1,0b0000_0011); 
 			} else {
 				reserved2  = getInt(b,localOffset,1,0b0001_1111); 
 			}
@@ -172,15 +224,15 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 				Utils.addListJTree(t, componentOffsetList, modus, "Component Offsets");
 			}
 			if (segmentation_duration_flag == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("segmentation_duration", segmentation_duration, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("segmentation_duration", segmentation_duration, Utils.printTimebase90kHz(segmentation_duration))));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid_type", segmentation_upid_type, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid_type", segmentation_upid_type, getSegmentationUpidTypeString(segmentation_upid_type))));
 			t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid_length", segmentation_upid_length, null)));
 
 			if (segmentation_upid_length > 0) {
 				t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid", segmentation_upid, null)));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("segmentation_type_id", segmentation_type_id, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("segmentation_type_id", segmentation_type_id, getSegmentationTypeIdString(segmentation_type_id))));
 			t.add(new DefaultMutableTreeNode(new KVP("segment_num", segment_num, null)));
 			t.add(new DefaultMutableTreeNode(new KVP("segments_expected", segments_expected, null)));
 			if (segmentation_type_id == 0x34 || segmentation_type_id == 0x36) {
@@ -191,6 +243,14 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 		}
 
 		return t;
+	}
+
+	private String getSegmentationUpidTypeString(int segmentation_upid_type) {
+		return segmentationUpidTypeList.get(segmentation_upid_type);
+	}
+	
+	private String getSegmentationTypeIdString(int segmentation_type_id) {
+		return segmentationTypeIdList.get(segmentation_type_id);
 	}
 
 }
