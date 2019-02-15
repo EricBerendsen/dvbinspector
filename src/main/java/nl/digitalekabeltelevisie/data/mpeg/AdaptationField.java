@@ -240,6 +240,12 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			announcement_switching_flag_field = getInt(private_data_byte, offset + 2, 2, MASK_16BITS);
 		}
 		
+		
+		// based on OpenCable™ Specifications 
+		// Encoder Boundary Point Specification 
+		// OC-SP-EBP-I01-130118
+		// 5.2 Structure 
+
 		public void buildEBP_info(byte[] private_data_byte, int offset) {
 			
 			formatIdentifier = getBytes(private_data_byte,offset+2,4);
