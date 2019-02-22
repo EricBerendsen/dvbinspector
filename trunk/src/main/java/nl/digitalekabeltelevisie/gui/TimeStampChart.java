@@ -305,25 +305,21 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 
 	private void fillSeriesSelectionPanel(JPanel seriesSelectionPanel, JFreeChart freeChart2) {
 		seriesSelectionPanel.removeAll();
-	
-		XYDataset dataset = freeChart2.getXYPlot().getDataset();
+
+		XYPlot plot = (XYPlot) freeChart.getPlot();
+		XYDataset dataset = plot.getDataset();
+
 		int count = dataset.getSeriesCount();
+		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+
 		for (int i = 0; i < count; i++) {
 			String label = (String) dataset.getSeriesKey(i);
 			JCheckBox cb1 = new JCheckBox(label,true);
 			
-			cb1.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(final ActionEvent actionEvent) {
-					
-					XYPlot plot = (XYPlot) freeChart.getPlot();
-					XYDataset dataset = plot.getDataset();
-					XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-					JCheckBox source = (JCheckBox)actionEvent.getSource();
-					int index = dataset.indexOf(label);
-					
-					renderer.setSeriesVisible(index, source.isSelected());
-				}
+			cb1.addActionListener(actionEvent -> {
+				JCheckBox source = (JCheckBox)actionEvent.getSource();
+				int index = dataset.indexOf(label);
+				renderer.setSeriesVisible(index, source.isSelected());
 			});
 			seriesSelectionPanel.validate();
 
