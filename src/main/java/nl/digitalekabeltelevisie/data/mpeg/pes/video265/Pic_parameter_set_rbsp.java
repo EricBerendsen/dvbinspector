@@ -245,11 +245,9 @@ public class Pic_parameter_set_rbsp extends RBSP {
 			t.add(new DefaultMutableTreeNode(new KVP("uniform_spacing_flag",uniform_spacing_flag,null)));
 			if( uniform_spacing_flag ==0) {
 				for(int i = 0; i < num_tile_columns_minus1; i++ ){
-					column_width_minus1[ i ] = bitSource.ue();
 					t.add(new DefaultMutableTreeNode(new KVP("column_width_minus1["+i+"]",column_width_minus1[ i ],null)));
 				}
 				for(int i = 0; i < num_tile_rows_minus1; i++ ){
-					row_height_minus1[ i ] = bitSource.ue();
 					t.add(new DefaultMutableTreeNode(new KVP("row_height_minus1["+i+"]",row_height_minus1[ i ],null)));
 				}
 			}
