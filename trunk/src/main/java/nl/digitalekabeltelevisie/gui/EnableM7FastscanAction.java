@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -25,57 +25,30 @@
  *
  */
 
-package nl.digitalekabeltelevisie.util;
+package nl.digitalekabeltelevisie.gui;
 
-/**
- * @author Eric
- *
- */
-public class LookUpList {
+import java.awt.event.ActionEvent;
 
-	RangeHashMap<Integer,String> table;
+import javax.swing.JCheckBoxMenuItem;
 
-	public static class Builder{
-		RangeHashMap<Integer,String> table;
+import nl.digitalekabeltelevisie.main.DVBinspector;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
-		public Builder(){
-			table = new RangeHashMap<Integer,String>();
-		}
+public class EnableM7FastscanAction extends AbstractSetPreferenceAction {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 7867550384009016903L;
 
-		public Builder add(int i, String s){
-			table.put(i, i, s);
-			return this;
-		}
-
-		public Builder add(int i, int j, String s){
-			table.put(i, j, s);
-			return this;
-		}
-
-		public LookUpList build(){
-			return new LookUpList(this);
-		}
-
-		public RangeHashMap<Integer, String> getTable() {
-			return table;
-		}
-
+	public EnableM7FastscanAction(final DVBinspector controller) {
+		super(controller, "Enable M7 Fastscan Tables");
+		contr = controller;
 	}
 
-	private LookUpList(Builder builder){
-		table = builder.getTable();
+	@Override
+	public void actionPerformed(final ActionEvent e) {
+		JCheckBoxMenuItem cb = (JCheckBoxMenuItem) e.getSource();
+		PreferencesManager.setEnableM7Fastscan(cb.isSelected());
+		askReloadStream();
 	}
-
-	public String get(int i){
-		return table.find(i);
-	}
-	
-	public String get(int i, String notFound){
-		String r = get(i);
-		if(r == null) {
-			return notFound;
-		}
-		return r;
-	}
-	
 }
