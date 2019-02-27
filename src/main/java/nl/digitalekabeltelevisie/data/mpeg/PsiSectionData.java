@@ -163,7 +163,7 @@ public class PsiSectionData {
 					transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
 				}else if((tableId==0x76)&&isRCTSection(pid)){
 					transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
-				}else if((tableId==-4)&&isSpliceInfoSection(pid)){ // 0xFC
+				}else if((Byte.toUnsignedInt(tableId)==0xFC)&&isSpliceInfoSection(pid)){ // 0xFC
 					transportStream.getPsi().getScte35_table().update(new SpliceInfoSection(this,parentPID));
 				}else if((tableId>=0x37)&&(tableId<=0x3F)){
 					// also include all PES streams component (ISO/IEC 13818-6 type B) which
@@ -174,6 +174,12 @@ public class PsiSectionData {
 					// all handled in DSMCCs.
 					if(PreferencesManager.isEnableDSMCC()) {
 						transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
+					}
+				}else if(PreferencesManager.isEnableM7Fastscan()) {
+					if(Byte.toUnsignedInt(tableId)== 0xBC) {
+						transportStream.getPsi().getFnt().update(new FNTsection(this, parentPID));
+					}else if(Byte.toUnsignedInt(tableId)== 0xBD) {
+						transportStream.getPsi().getFst().update(new FSTsection(this, parentPID));
 					}
 				}
 			}

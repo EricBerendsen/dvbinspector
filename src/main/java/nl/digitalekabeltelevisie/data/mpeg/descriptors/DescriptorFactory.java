@@ -69,6 +69,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.Gu
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.EACEMStreamIdentifierDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV2;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.opencable.EBPDescriptor;
@@ -142,6 +143,8 @@ public final class DescriptorFactory {
 					//
 					
 					d = new SCTEAdaptationFieldDataDescriptor(data, t + offset, tableSection);
+				}else if(descriptorTag == 0x83 && tableSection.getTableId() == 0xBC && PreferencesManager.isEnableM7Fastscan() ) { // FNTsection
+					d = new M7LogicalChannelDescriptor(data, t + offset, tableSection);
 				} else if (descriptorTag <= 0x3f) {
 					if (tableSection.getTableId() == 0x4c) {
 						d = getINTDescriptor(data, offset, tableSection, t);

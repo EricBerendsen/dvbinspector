@@ -32,6 +32,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
  * Container for all PSI related data
@@ -60,10 +61,10 @@ public class PSI {
 	private final DSMCCs dsm_table = new DSMCCs(this);
 	private final SCTE35 scte35_table = new SCTE35(this);
 	
+	private final FNT fnt = new FNT(this);
+	private final FST fst = new FST(this);
+	
 
-	public NIT getNit() {
-		return nit;
-	}
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PSI"));
@@ -84,6 +85,10 @@ public class PSI {
 		t.add(rct_table.getJTreeNode(modus));
 		t.add(dsm_table.getJTreeNode(modus));
 		t.add(scte35_table.getJTreeNode(modus));
+		if(PreferencesManager.isEnableM7Fastscan()) {
+			t.add(fnt.getJTreeNode(modus));
+			t.add(fst.getJTreeNode(modus));
+		}
 		return t;
 	}
 	public PMTs getPmts() {
@@ -162,5 +167,13 @@ public class PSI {
 	public SCTE35 getScte35_table() {
 		return scte35_table;
 	}
-
+	public FNT getFnt() {
+		return fnt;
+	}
+	public FST getFst() {
+		return fst;
+	}
+	public NIT getNit() {
+		return nit;
+	}
 }

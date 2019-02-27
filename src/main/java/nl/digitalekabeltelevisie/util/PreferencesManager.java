@@ -51,9 +51,11 @@ public class PreferencesManager {
 	private static final String WINDOW_X = "window_x";
 	private static final String WINDOW_Y = "window_y";
 
+	
 	private static final String ENABLE_GENERIC_PSI = "enable_generic_psi";
 	private static final String ENABLE_DSMCC = "enable_dsmcc";
 	private static final String ENABLE_PCR_PTS = "enable_pcr_pts";
+	private static final String ENABLE_M7_FASTSCAN = "enable_m7_fastscan";
 
 	private static final String SELECT_MPEG_FILE_FILTER = "select_mpeg_file_filter";
 
@@ -170,6 +172,17 @@ public class PreferencesManager {
 		return getEnablePcrPtsView();
 	}
 	
+	public static void setEnableM7Fastscan(boolean enabled) {
+		prefs.putBoolean(ENABLE_M7_FASTSCAN, enabled);
+	}
+
+	public static boolean getEnableM7Fastscan() {
+		return prefs.getBoolean(ENABLE_M7_FASTSCAN, true);
+	}
+
+	public static boolean isEnableM7Fastscan() {
+		return getEnableM7Fastscan();
+	}
 
 	public static void setSelectMpegFileFilter(boolean enabled) {
 		prefs.putBoolean(SELECT_MPEG_FILE_FILTER, enabled);

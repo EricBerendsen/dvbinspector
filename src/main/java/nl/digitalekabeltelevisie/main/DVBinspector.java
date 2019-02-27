@@ -371,6 +371,13 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 		settingsMenu.add(defaultG0andG2CharacterSetDesignationMenu);
 		
+		final JCheckBoxMenuItem enableM7Fastscan = new JCheckBoxMenuItem(new EnableM7FastscanAction(this));
+		enableM7Fastscan.setMnemonic(KeyEvent.VK_M);
+		enableM7Fastscan.setSelected(PreferencesManager.isEnableM7Fastscan());
+		settingsMenu.add(enableM7Fastscan);
+		
+		settingsMenu.addSeparator();
+		
 		final JCheckBoxMenuItem enableGenericPSI = new JCheckBoxMenuItem(new EnableGenericPSIAction(this));
 		enableGenericPSI.setMnemonic(KeyEvent.VK_G);
 		enableGenericPSI.setSelected(PreferencesManager.isEnableGenericPSI());
@@ -385,6 +392,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		enablePcrPtsView.setMnemonic(KeyEvent.VK_P);
 		enablePcrPtsView.setSelected(PreferencesManager.isEnablePcrPtsView());
 		settingsMenu.add(enablePcrPtsView);
+		
+
 		
 		return settingsMenu;
 	}

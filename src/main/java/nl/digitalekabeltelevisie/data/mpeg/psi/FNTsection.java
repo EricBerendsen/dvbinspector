@@ -41,12 +41,12 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class NITsection extends TableSectionExtendedSyntax{
+public class FNTsection extends TableSectionExtendedSyntax{
 
 	private List<Descriptor> networkDescriptorList;
 	private List<TransportStream> transportStreamList;
-	private int networkDescriptorsLength;
-	private int transportStreamLoopLength;
+	private int network_descriptors_loop_length;
+	private int transport_stream_loop_length;
 
 	public static class TransportStream implements TreeNode{
 		private int transportStreamID;
@@ -119,25 +119,25 @@ public class NITsection extends TableSectionExtendedSyntax{
 
 
 
-	public NITsection(final PsiSectionData raw_data, final PID parent){
+	public FNTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
 
-		networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
-		transportStreamLoopLength= Utils.getInt(raw_data.getData(), 10+networkDescriptorsLength, 2, Utils.MASK_12BITS);
+		network_descriptors_loop_length = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
+		transport_stream_loop_length= Utils.getInt(raw_data.getData(), 10+network_descriptors_loop_length, 2, Utils.MASK_12BITS);
 
-		networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,networkDescriptorsLength,this);
-		transportStreamList = buildTransportStreamList(raw_data.getData(), 12+networkDescriptorsLength, transportStreamLoopLength);
+		networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,network_descriptors_loop_length,this);
+		transportStreamList = buildTransportStreamList(raw_data.getData(), 12+network_descriptors_loop_length, transport_stream_loop_length);
 	}
 
 
-	public int getNetworkID(){
+	public int getOperatorNetworkID(){
 		return getTableIdExtension();
 	}
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("NITsection section=");
-		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=").append(getTableType(tableId)). append(", NetworkID=").append(getNetworkID()).append(", ");
+		final StringBuilder b = new StringBuilder("FNTsection section=");
+		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=").append(getTableType(tableId)). append(", NetworkID=").append(getOperatorNetworkID()).append(", ");
 
 		return b.toString();
 	}
@@ -148,55 +148,19 @@ public class NITsection extends TableSectionExtendedSyntax{
 	}
 
 
-	public void setNetworkDescriptorList(final List<Descriptor> networkDescriptorList) {
-		this.networkDescriptorList = networkDescriptorList;
-	}
-
-
-	public int getNetworkDescriptorsLength() {
-		return networkDescriptorsLength;
-	}
-
-
-	public void setNetworkDescriptorsLength(final int networkDescriptorsLength) {
-		this.networkDescriptorsLength = networkDescriptorsLength;
-	}
-
 
 	public List<TransportStream> getTransportStreamList() {
 		return transportStreamList;
 	}
 
 
-	/**
-	 * @param streamID
-	 * @return
-	 */
-	public TransportStream getTransportStream(final int streamID) {
-		for(final TransportStream tStream:transportStreamList){
-			if(tStream.getTransportStreamID()==streamID){
-				return tStream;
-			}
-		}
-		return null;
-	}
-
-	public void setTransportStreamList(
-			final List<TransportStream> transportStreamList) {
-		this.transportStreamList = transportStreamList;
-	}
-
 
 	public int getTransportStreamLoopLength() {
-		return transportStreamLoopLength;
+		return transport_stream_loop_length;
 	}
 
 	public int noTransportStreams() {
 		return transportStreamList.size();
-	}
-
-	public void setTransportStreamLoopLength(final int transportStreamLoopLength) {
-		this.transportStreamLoopLength = transportStreamLoopLength;
 	}
 
 	private final List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
@@ -220,7 +184,7 @@ public class NITsection extends TableSectionExtendedSyntax{
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_length",getNetworkDescriptorsLength(),null)));
+		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_loop_length",network_descriptors_loop_length,null)));
 		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length",getTransportStreamLoopLength(),null)));
 
