@@ -1,9 +1,9 @@
-package nl.digitalekabeltelevisie.data.mpeg.psi;
+package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 /**
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,13 +38,14 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
 public class FNTsection extends TableSectionExtendedSyntax{
 
-	private List<Descriptor> networkDescriptorList;
-	private List<TransportStream> transportStreamList;
+	List<Descriptor> networkDescriptorList;
+	public List<TransportStream> transportStreamList;
 	private int network_descriptors_loop_length;
 	private int transport_stream_loop_length;
 
@@ -53,7 +54,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 		private int originalNetworkID;
 		private int transportDescriptorsLength;
 
-		private List<Descriptor> descriptorList;
+		public List<Descriptor> descriptorList;
 
 		public List<Descriptor> getDescriptorList() {
 			return descriptorList;
