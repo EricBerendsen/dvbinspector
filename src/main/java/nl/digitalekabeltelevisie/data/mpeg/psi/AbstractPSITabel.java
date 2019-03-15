@@ -55,7 +55,7 @@ public abstract class AbstractPSITabel implements TreeNode{
 	 * @param tableSection
 	 * @param modus
 	 */
-	protected void addSectionVersionsToJTree(final DefaultMutableTreeNode n, final TableSection tableSection, final int modus) {
+	public static void addSectionVersionsToJTree(final DefaultMutableTreeNode n, final TableSection tableSection, final int modus) {
 		n.add(tableSection.getJTreeNode(modus));
 		TableSection versions = tableSection.getNextVersion();
 		while(versions!=null){ // even show new versions
@@ -64,7 +64,7 @@ public abstract class AbstractPSITabel implements TreeNode{
 		}
 	}
 
-	protected static void updateSectionVersion(final TableSection newSection, final TableSection section) {
+	public static void updateSectionVersion(final TableSection newSection, final TableSection section) {
 
 		TableSection last = section;
 

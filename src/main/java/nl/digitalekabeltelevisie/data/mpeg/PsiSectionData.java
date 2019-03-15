@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -42,6 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.*;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -177,9 +178,9 @@ public class PsiSectionData {
 					}
 				}else if(PreferencesManager.isEnableM7Fastscan()) {
 					if(Byte.toUnsignedInt(tableId)== 0xBC) {
-						transportStream.getPsi().getFnt().update(new FNTsection(this, parentPID));
+						transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
 					}else if(Byte.toUnsignedInt(tableId)== 0xBD) {
-						transportStream.getPsi().getFst().update(new FSTsection(this, parentPID));
+						transportStream.getPsi().getM7fastscan().update(new FSTsection(this, parentPID));
 					}
 				}
 			}
