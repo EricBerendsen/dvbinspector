@@ -96,7 +96,7 @@ public class H265HrdParameters  implements TreeNode{
 		fixed_pic_rate_general_flag = new int[maxNumSubLayersMinus1+1];
 		fixed_pic_rate_within_cvs_flag = new int[maxNumSubLayersMinus1+1];
 		elemental_duration_in_tc_minus1 = new int[maxNumSubLayersMinus1+1];
-		low_delay_hrd_flag = new int[maxNumSubLayersMinus1+1];
+		low_delay_hrd_flag = new  int[maxNumSubLayersMinus1+1];
 		cpb_cnt_minus1 = new int[maxNumSubLayersMinus1+1];
 		sub_layer_hrd_parameters_nal = new SubLayerHRDParameters[maxNumSubLayersMinus1+1];
 		sub_layer_hrd_parameters_vcl = new SubLayerHRDParameters[maxNumSubLayersMinus1+1];
@@ -105,6 +105,10 @@ public class H265HrdParameters  implements TreeNode{
 			fixed_pic_rate_general_flag[ i ]=bitSource.u(1);
 			if(fixed_pic_rate_general_flag[ i ]==0 ){
 				fixed_pic_rate_within_cvs_flag[ i ]=bitSource.u(1);
+			} else {  //
+				// Rec. ITU-T H.265 v5 (02/2018) 419  E.3.2 HRD parameters semantics 
+				//When fixed_pic_rate_general_flag[ i ] is equal to 1, the value of fixed_pic_rate_within_cvs_flag[ i ] is inferred to be equal to 1. 
+				fixed_pic_rate_within_cvs_flag[ i ]= 1;
 			}
 			if( fixed_pic_rate_within_cvs_flag[ i ]!=0 ){
 				elemental_duration_in_tc_minus1[ i ]=bitSource.ue();
@@ -141,7 +145,7 @@ public class H265HrdParameters  implements TreeNode{
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("bit_rate_scale",bit_rate_scale,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("cpb_size_scale",cpb_size_scale,null)));
-			if( sub_pic_hrd_params_present_flag==1 ){
+			if (sub_pic_hrd_params_present_flag == 1) {
 				t.add(new DefaultMutableTreeNode(new KVP("cpb_size_du_scale",cpb_size_du_scale,null)));
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("initial_cpb_removal_delay_length_minus1",initial_cpb_removal_delay_length_minus1,null)));
@@ -149,19 +153,19 @@ public class H265HrdParameters  implements TreeNode{
 			t.add(new DefaultMutableTreeNode(new KVP("dpb_output_delay_length_minus1",dpb_output_delay_length_minus1,null)));
 		}
 		for(int i = 0; i <= maxNumSubLayersMinus1; i++ ) {
-			t.add(new DefaultMutableTreeNode(new KVP("fixed_pic_rate_general_flag["+i+"]",fixed_pic_rate_general_flag[i],null)));
-			if(fixed_pic_rate_general_flag[ i ]==0 ){
-				t.add(new DefaultMutableTreeNode(new KVP("fixed_pic_rate_within_cvs_flag["+i+"]",fixed_pic_rate_within_cvs_flag[i],null)));
+			t.add(new DefaultMutableTreeNode(new KVP("fixed_pic_rate_general_flag["+i+"]",fixed_pic_rate_general_flag[i],fixed_pic_rate_general_flag[i] ==1?"the value of fixed_pic_rate_within_cvs_flag[i] is inferred to be equal to 1":"fixed_pic_rate_within_cvs_flag[i] specified next")));
+			if (fixed_pic_rate_general_flag[i] == 0) {
+				t.add(new DefaultMutableTreeNode(new KVP("fixed_pic_rate_within_cvs_flag[" + i + "]", fixed_pic_rate_within_cvs_flag[i], null)));
 			}
-			if( fixed_pic_rate_within_cvs_flag[ i ]!=0 ){
+			if (fixed_pic_rate_within_cvs_flag[i] != 0) {
 				t.add(new DefaultMutableTreeNode(new KVP("elemental_duration_in_tc_minus1["+i+"]",elemental_duration_in_tc_minus1[i],null)));
 			}else{
 				t.add(new DefaultMutableTreeNode(new KVP("low_delay_hrd_flag["+i+"]",low_delay_hrd_flag[i],null)));
 			}
-			if(low_delay_hrd_flag[ i ]==0 ){
+			if (low_delay_hrd_flag[i] == 0) {
 				t.add(new DefaultMutableTreeNode(new KVP("cpb_cnt_minus1["+i+"]",cpb_cnt_minus1[i],null)));
 			}
-			if( nal_hrd_parameters_present_flag!=0 ){
+			if (nal_hrd_parameters_present_flag != 0) {
 				t.add(sub_layer_hrd_parameters_nal[i].getJTreeNode(modus));
 			}
 			if( vcl_hrd_parameters_present_flag!=0 ){
