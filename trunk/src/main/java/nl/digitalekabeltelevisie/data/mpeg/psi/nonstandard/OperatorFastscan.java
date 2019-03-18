@@ -57,6 +57,8 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 			add(960,"Diveo").
 			build();
 			
+	// encoding is always ISO-8859-9, ignoring character selection information as defined in Annex A of ETSI EN 300 468
+	private static Charset charset = Charset.forName("ISO-8859-9");
 	
 	private int pid;
 	
@@ -153,15 +155,6 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 				}
 			}
 		}
-		
-		Charset charset;
-		
-		if((pid==30)||(pid==31)){  // Czech Republic and Slovakia use ISO 6937 
-			charset = null;
-		}else { // rest should use ISO 8859-9, according  to M7 FastScan Spec v7.1, but it appears to be UTF-8
-			charset = StandardCharsets.UTF_8; //charset = Charset.forName("ISO-8859-9");
-		}
-
 		
 		StringBuilder sb = new StringBuilder("<code>");
 		String header = String.format("%5s %5s %5s %5s %-40s %-30s %-40s<br>","LCN","ONID","TS_ID","SID","Service Name","Service Type", "Service Provider");
