@@ -16,9 +16,9 @@ directory structure
     DVBinspector-1.2.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 
-DVBinspector-1.10.1.jar
+DVBinspector-1.11.0.jar
 
-Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.10.1.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.10.1.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.10.1.jar".
+Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.11.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.11.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.11.0.jar".
 
 dvb.bat
 
@@ -33,10 +33,34 @@ Changelog
 
 List of the most important changes between releases
 
+
+Release 1.11.0
+Release date: 13/04/2019
+
+improved: make generic PSI tables, DSM-CC parsing and PCR/PTS view switchable, this will reduce memory usage and processing time.
+added: support for t2mi, including exporting plp as new .TS file
+improved: T2DeliverySystemDescriptor now full specification implemented
+added: TargetSmartcardDescriptor
+updated: use new values from ISO/IEC 13818-1:2018
+added: option to fully expand tree node using keyboard and/or context menu
+improved: do post processing after user interrupts file loading, so labels will be set and packets will display
+added: HDR_WCG_idc field to HEVCVideoDescriptor
+added: option to save byte[] from Tree
+added: filter to show only mpeg-ts files in File Open Dialog
+added: support for 14496-3 Audio (AAC) parsing
+added: display SCTE-35 time_signal in PCR/PTS Graph
+improved: support for h.265 video (HEVC), added graph with frame sizes, added Slice_segment_header, Slice_segment_layer_rbsp, st_ref_pic_set
+added: option to filter series in PCR/PTS/DTS Graph
+fixed: when multiple PrivateDataFields were present in AdaptationField the list was not constructed correctly
+added: SCTE adaptation field data descriptor and EBP_descriptor
+added: support for M7 Fastscan Tables
+
+
 Release 1.10.1 (bug fix release)
 Release date: 09/09/2018
 
 fixed: parsing of 138181 Audio. This bug resulted in looping (when playing and in the graph) of the audio in a single PES Packet. 
+
 
 Release 1.10.0
 Release date: 12/08/2018
