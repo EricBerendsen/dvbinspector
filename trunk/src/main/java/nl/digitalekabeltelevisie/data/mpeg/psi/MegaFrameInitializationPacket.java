@@ -29,22 +29,137 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.nio.*;
+import java.util.*;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
+import nl.digitalekabeltelevisie.util.*;
 
 
 // based on TS 101 191 V1.4.1 (2004-06) DVB mega-frame for Single Frequency Network (SFN) synchronization
 public class MegaFrameInitializationPacket implements TreeNode{
+	
+	private LookUpList txFunctionType = new LookUpList.Builder().
+			add(0x00,"tx_time_offset_function").
+			add(0x01,"tx_frequency_offset_function").
+			add(0x02,"tx_power_function").
+			add(0x03,"private_data_function").
+			add(0x04,"cell_id_function").
+			add(0x05,"enable_function").
+			add(0x06,"bandwidth_function").
+			add(0x07, 0xFF,"Future_use").
+			build();
 
+	public class TxFunctions implements TreeNode {
+
+		public class Function implements TreeNode {
+
+			private int function_tag;
+			private int function_length;
+
+			private int cell_id;
+			private int wait_for_enable_flag;
+			private int reserved_future_use;
+			private byte[] function_data;
+
+			public Function(byte[] d, int st) {
+				function_tag = getInt(d, st, 1, MASK_8BITS);
+				function_length = getInt(d, st + 1, 1, MASK_8BITS);
+				function_data = Arrays.copyOfRange(d, st + 2, st + function_length); // also used for 0 Transmitter time offset function
+				if (function_tag == 4) { // Cell id function
+					cell_id = getInt(d, st + 2, 2, MASK_16BITS);
+					wait_for_enable_flag = getInt(d, st + 4, 1, 0b1000_0000) >>> 7;
+					reserved_future_use = getInt(d, st + 4, 1, MASK_7BITS);
+				}
+			}
+
+			@Override
+			public DefaultMutableTreeNode getJTreeNode(int modus) {
+				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Function"));
+				t.add(new DefaultMutableTreeNode(
+						new KVP("function_tag", function_tag, txFunctionType.get(function_tag))));
+				t.add(new DefaultMutableTreeNode(new KVP("function_length", function_length, null)));
+				if (function_tag == 0) { // Transmitter time offset function
+					t.add(new DefaultMutableTreeNode(new KVP("time_offset", function_data,
+							"" + ByteBuffer.wrap(function_data).getShort() + " * 100 ns")));
+
+				} else if (function_tag == 4) { // Cell id function
+					t.add(new DefaultMutableTreeNode(new KVP("cell_id", cell_id, null)));
+					t.add(new DefaultMutableTreeNode(new KVP("wait_for_enable_flag", wait_for_enable_flag, null)));
+					t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use", reserved_future_use, null)));
+				} else {
+					t.add(new DefaultMutableTreeNode(new KVP("function_data", function_data, null)));
+				}
+
+				return t;
+			}
+
+			public int getFunction_tag() {
+				return function_tag;
+			}
+
+			public int getFunction_length() {
+				return function_length;
+			}
+
+		}
+
+		int tx_identifier;
+		int function_loop_length;
+		private List<Function> functionList = new ArrayList<>();
+
+		public TxFunctions(byte[] d, int start) {
+			tx_identifier = getInt(d, 0 + start, 2, MASK_16BITS);
+			function_loop_length = getInt(d, 2 + start, 1, MASK_8BITS);
+			int localStart = start + 3;
+			while (localStart < start + 3 + function_loop_length) {
+				Function txFunction = new Function(d, localStart);
+				functionList.add(txFunction);
+				localStart += txFunction.getFunction_length();
+			}
+		}
+
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TxFunctions"));
+			t.add(new DefaultMutableTreeNode(new KVP("tx_identifier", tx_identifier, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("function_loop_length", function_loop_length, null)));
+			Utils.addListJTree(t, functionList, modus, "Functions");
+			return t;
+		}
+
+		public int getTx_identifier() {
+			return tx_identifier;
+		}
+
+		public int getFunction_loop_length() {
+			return function_loop_length;
+		}
+
+	}
 
 	//TSPacket tsPacket;
 	private byte[] data;
+	private int individual_addressing_length;
+	private byte[] individual_addressing_byte;
+	
+	private List<TxFunctions> txFunctionsList = new ArrayList<>();
 
 	public MegaFrameInitializationPacket(final TSPacket tsPack){
 		data=tsPack.getData();
+		individual_addressing_length = getInt(data, 16, 1, MASK_8BITS);
+		individual_addressing_byte = Arrays.copyOfRange(data,17,17+individual_addressing_length);
+		int start = 0;
+		while(start < individual_addressing_length) {
+			TxFunctions txFunctions = new TxFunctions(individual_addressing_byte,start);
+			txFunctionsList.add(txFunctions);
+			start += 3 + txFunctions.getFunction_loop_length();
+			
+		}
+		
 	}
 
 
@@ -55,6 +170,7 @@ public class MegaFrameInitializationPacket implements TreeNode{
 		return b.toString();
 	}
 
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Mega-frame Initialization Packet"));
@@ -77,10 +193,10 @@ public class MegaFrameInitializationPacket implements TreeNode{
 		tps.add(new DefaultMutableTreeNode(new KVP("DVB-H signalling",getDVBHSignalling(),getDVBHSignallingString(getDVBHSignalling()))));
 		tps.add(new DefaultMutableTreeNode(new KVP("reserved",getReserved(),null)));
 
-
 		t.add(new DefaultMutableTreeNode(new KVP("individual_addressing_length",getIndividualAddressingLength(),null)));
+		t.add(new DefaultMutableTreeNode(new KVP("individual_addressing_byte",individual_addressing_byte,null)));
 
-
+		Utils.addListJTree(t,txFunctionsList,modus,"TxFunctions");
 		return t;
 	}
 
