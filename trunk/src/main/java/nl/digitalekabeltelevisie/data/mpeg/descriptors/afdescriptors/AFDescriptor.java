@@ -62,7 +62,7 @@ public class AFDescriptor extends Descriptor {
 		if((tag>=0x00)&&(tag<=0x03)){
 			return "Rec. ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
-		if((tag>=0x07)&&(tag<=0x7f)){
+		if((tag>=0x0d)&&(tag<=0x7f)){
 			return "Rec. ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
 
