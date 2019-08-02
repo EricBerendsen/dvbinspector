@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -833,6 +833,12 @@ public class Descriptor implements TreeNode {
 					return "HLG10 HDR";
 				} else if (component_type == 0x05) {
 					return "HEVC temporal video subset for a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz";
+				} else if (component_type == 0x06) {
+					return "SMPTE ST 2094-10 DMI format";
+				} else if (component_type == 0x07) {
+					return "SL-HDR2 DMI format";
+				} else if (component_type == 0x08) {
+					return "SMPTE ST 2094-40 DMI format";
 			}else{
 					return "reserved for future use";
 				}
@@ -853,7 +859,7 @@ public class Descriptor implements TreeNode {
 	 * @param component_type
 	 * @return
 	 */
-	private static String getComponentType0x09String(final int stream_content_ext, final int component_type) {
+	public static String getComponentType0x09String(final int stream_content_ext, final int component_type) {
 		switch(stream_content_ext){
 		case 0x00:
 			switch(component_type){
@@ -911,6 +917,36 @@ public class Descriptor implements TreeNode {
 				return "AC-4 Part-2";
 			case 0x0F: 
 				return "MPEG-H Audio LC Profile";
+			case 0x10:
+				return "DTS-UHD main audio, mono";
+			case 0x11:
+				return "DTS-UHD main audio, mono, dialogue enhancement enabled ";
+			case 0x12:
+				return "DTS-UHD main audio, stereo";
+			case 0x13:
+				return "DTS-UHD main audio, stereo, dialogue enhancement enabled";
+			case 0x14:
+				return "DTS-UHD main audio, multichannel";
+			case 0x15:
+				return "DTS-UHD main audio, multichannel, dialogue enhancement enabled";
+			case 0x16:
+				return "DTS-UHD broadcast-mix audio description, mono, for the visually impaired ";
+			case 0x17:
+				return "DTS-UHD broadcast-mix audio description, mono, for the visually impaired, dialogue enhancement enabled";
+			case 0x18:
+				return "DTS-UHD broadcast-mix audio description, stereo, for the visually impaired";
+			case 0x19:
+				return "DTS-UHD broadcast-mix audio description, stereo, for the visually impaired, dialogue enhancement enabled";
+			case 0x1a:
+				return "DTS-UHD broadcast-mix audio description, multichannel, for the visually impaired";
+			case 0x1b:
+				return "DTS-UHD broadcast-mix audio description, multichannel, for the visually impaired, dialogue enhancement enabled ";
+			case 0x1c:
+				return "DTS-UHD receiver-mix audio description, mono, for the visually impaired ";
+			case 0x1d:
+				return "DTS-UHD receiver-mix audio description, stereo, for the visually impaired ";
+			case 0x1e:
+				return "DTS-UHD NGA Audio";
 			default:
 				return "reserved for future use";
 			}
@@ -1115,7 +1151,7 @@ public class Descriptor implements TreeNode {
 		case 0x07:
 			return "H.264/AVC standard definition video, 16:9 aspect ratio, 30 Hz";
 		case 0x08:
-			return "H.264/AVC standard definition video, > 16:9 aspect ratio, 30 Hz)";
+			return "H.264/AVC standard definition video, > 16:9 aspect ratio, 30 Hz";
 		case 0x0B:
 			return "H.264/AVC high definition video, 16:9 aspect ratio, 25 Hz";
 		case 0x0C:
