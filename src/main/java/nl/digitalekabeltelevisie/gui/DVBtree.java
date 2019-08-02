@@ -662,6 +662,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				}
 			}
 			final DefaultMutableTreeNode node =((TreeNode)p.getPidHandler()).getJTreeNode(mod);
+			// https://www.java-tips.org/java-se-tips-100019/15-javax-swing/2393-have-a-popup-attached-to-a-jtree.html
 			// thanks to Yong Zhang for the tip for refreshing the tree structure.
 			dmtn.add(node);
 			((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);

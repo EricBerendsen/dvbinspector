@@ -37,6 +37,10 @@ public abstract class GeneralPidHandler implements TreeNode{
 	private TransportStream transportStream = null;
 
 	public abstract void processTSPacket(final TSPacket packet);
+	
+	public void postProcess() {
+		// EMPTY default
+	}
 
 	/**
 	 * by default the contents of a PES PID is not read or analyzed. After explicit user command PID is initialized

@@ -320,6 +320,9 @@ public class TransportStream implements TreeNode{
 					handler.processTSPacket(packet);
 				}
 			}
+			for(GeneralPidHandler pidHandler: toParsePids.values()) {
+				pidHandler.postProcess();
+			}
 		}
 	}
 

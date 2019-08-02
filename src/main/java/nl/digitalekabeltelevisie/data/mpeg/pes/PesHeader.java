@@ -99,7 +99,7 @@ public class PesHeader implements TreeNode{
 				t.add(new DefaultMutableTreeNode(new KVP("pes_crc_flag",getPes_crc_flag(),getPes_crc_flag()==1?"CRC field is present":"CRC field is not present")));
 				t.add(new DefaultMutableTreeNode(new KVP("pes_extension_flag",getPes_extension_flag() ,getPes_extension_flag()==1?"extension field is present":"extension field is not present")));
 				t.add(new DefaultMutableTreeNode(new KVP("pes_header_data_length",getPes_header_data_length(),null)));
-				if ((pts_dts_flags ==2) || (pts_dts_flags ==3)) {
+				if (hasPTS(pts_dts_flags)) {
 					final long pts = getPts();
 					t.add(new DefaultMutableTreeNode(new KVP("pts",pts,printTimebase90kHz(pts))));
 				}
@@ -114,6 +114,17 @@ public class PesHeader implements TreeNode{
 		}
 	}
 
+	/**
+	 * @param pts_dts_flags
+	 * @return
+	 */
+	boolean hasPTS(final int pts_dts_flags) {
+		return (pts_dts_flags ==2) || (pts_dts_flags ==3);
+	}
+
+	public boolean hasPTS() {
+		return hasPTS(getPts_dts_flags());
+	}
 	/**
 	 * @param stream_id
 	 * @return

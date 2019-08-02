@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -245,11 +245,8 @@ public class PesPacketData  implements TreeNode{
 	public DefaultMutableTreeNode getJTreeNode(final int modus, final KVP titleKVP) {
 
 		final PesHeader phv = getPesHeader();
-		if(showPtsModus(modus)&&phv.isValidPesHeader()&&phv.hasExtendedHeader()){
-			final int pts_dts_flags = phv.getPts_dts_flags();
-			if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present, so decorate top node with it
-				titleKVP.appendLabel(" [pts="+ printTimebase90kHz(phv.getPts())+"]");
-			}
+		if(showPtsModus(modus)&& hasPTS(phv)){ // PTS present, so decorate top node with it
+			titleKVP.appendLabel(" [pts="+ printTimebase90kHz(phv.getPts())+"]");
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(titleKVP);
 
@@ -268,6 +265,19 @@ public class PesPacketData  implements TreeNode{
 
 		return t;
 	}
+	
+	public boolean hasPTS(PesHeader phv) {
+		return phv.isValidPesHeader()&&phv.hasExtendedHeader()&& phv.hasPTS();
+	}
+	
+	public boolean hasPTS() {
+		return hasPTS(getPesHeader());
+	}
+	
+	public long getPts() {
+		return getPesHeader().getPts();
+	}
+
 
 	/**
 	 * @return the pesDataLen,the actual len of the payload (without prefix, stream_id, and header)

@@ -31,36 +31,35 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.awt.Color;
-import java.awt.Paint;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.ChartLabel;
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.gui.ImageSource;
-
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.*;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DefaultKeyedValues2DDataset;
 
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.*;
+import nl.digitalekabeltelevisie.gui.ImageSource;
+
 /**
  * @author Eric Berendsen
  *
  */
-public class Video138182Handler  extends GeneralPesHandler implements ImageSource{
+public class Video138182Handler extends VideoHandler implements ImageSource{
 
+	private static final Logger logger = Logger.getLogger(Video138182Handler.class.getName());
+
+	
 	/**
 	 * Helper class for the getImage method, to color the bars in the bar chart different for I, B and P frames.
 	 *
@@ -161,7 +160,8 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("13818-2 PES Data",this));
 		addListJTree(s,pesPackets,modus,"PES Packets");
-
+		addCCDataToTree(modus, s);
+		
 		return s;
 	}
 
@@ -186,9 +186,8 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 		}
 		if(resultPES!=null){
 			return resultPES.getImage(width,height);
-		}else{
-			return null;
 		}
+		return null;
 	}
 
 	public MPEG2SectionIterator getSectionIterator(){
@@ -279,5 +278,30 @@ public class Video138182Handler  extends GeneralPesHandler implements ImageSourc
 			return chart.createBufferedImage((displayCount*18)+100, 640);
 
 		}
+
+	
+	
+	/**
+	 * 
+	 */
+	protected void collectCEA708Data() {
+		for(PesPacketData pesPacket :pesPackets) {
+			final VideoPESDataField videoPesPacket = (VideoPESDataField)pesPacket;
+			if(videoPesPacket.hasPTS()) {
+				long pts = videoPesPacket.getPts();
+				for( VideoMPEG2Section section:videoPesPacket.getSections()) {
+
+					if(section instanceof UserData) {
+						UserData userData = (UserData)section;
+						AuxiliaryData auxData = userData.getAuxData();
+						find708AuxData(pts, auxData);
+					}
+				}
+			}else {
+				logger.warning("no pts for PES Field, ignoring possible cc_data");
+			}
+		}
+	}
+
 
 }
