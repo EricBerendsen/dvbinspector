@@ -619,10 +619,9 @@ public class Descriptor implements TreeNode {
 		case 0x06:
 			return "mosaic service";
 		case 0x07:
-			return "reserved for future use / PAL coded signal"; // http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf,
-			// p.14
+			return "FM radio service"; 
 		case 0x08:
-			return "reserved for future use";
+			return "DVB SRM service";
 		case 0x09:
 			return "reserved for future use";
 		case 0x0A:

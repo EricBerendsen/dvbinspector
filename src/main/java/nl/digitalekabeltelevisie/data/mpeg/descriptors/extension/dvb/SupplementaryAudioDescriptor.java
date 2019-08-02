@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,11 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.util.Arrays;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 public class SupplementaryAudioDescriptor extends DVBExtensionDescriptor {
 
@@ -56,7 +57,7 @@ public class SupplementaryAudioDescriptor extends DVBExtensionDescriptor {
 			iso639LanguageCode = getISO8859_1String(b, offset+4, 3);
 			t=7;
 		}
-		private_data_byte = Utils.copyOfRange(b, offset+t,offset+descriptorLength+2);
+		private_data_byte = Arrays.copyOfRange(b, offset+t,offset+descriptorLength+2);
 	}
 
 
@@ -86,6 +87,10 @@ public class SupplementaryAudioDescriptor extends DVBExtensionDescriptor {
 			return "Clean audio for the hearing impaired";
 		case 0x3:
 			return "Spoken subtitles for the visually impaired";
+		case 0x4:
+			return "Dependent parametric data stream";
+		case 0x17:
+			return "Unspecific supplementary audio for the general audience";
 
 		default:
 			return "reserved for future use";

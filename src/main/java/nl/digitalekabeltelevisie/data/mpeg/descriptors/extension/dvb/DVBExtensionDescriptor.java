@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -91,7 +91,8 @@ public class DVBExtensionDescriptor extends ExtensionDescriptor {
 			return "audio_preselection_descriptor";
 		case 0x20: // based on DVB BlueBook A038 jan 2017, shpuldn't this be 0x1a ?
 			return "TTML_subtitling_descriptor";
-
+		case 0x21:// based on DVB BlueBook A038 jun 2019
+			return "DTS-UHD_descriptor";
 		default:
 			return "reserved for future use";
 		}
