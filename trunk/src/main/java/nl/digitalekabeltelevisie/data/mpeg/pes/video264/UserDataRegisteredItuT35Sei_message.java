@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,7 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.pes.AuxiliaryData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
 import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.Utils;
 

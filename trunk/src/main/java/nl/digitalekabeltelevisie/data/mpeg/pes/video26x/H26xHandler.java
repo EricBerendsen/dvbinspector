@@ -24,16 +24,20 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
 
 /**
  * @author Eric
  *
  */
-public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends AbstractNALUnit> extends GeneralPesHandler {
+public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends AbstractNALUnit> extends VideoHandler {
+	
+	private static final Logger logger = Logger.getLogger(H26xHandler.class.getName());
 
 	/**
 	 * Meta Iterator to iterate over all NALUnits in this PES stream, regardless of grouping in PES Packets
@@ -105,6 +109,40 @@ public abstract class H26xHandler<P extends H26xPESDataField<?>, N extends Abstr
 
 	}
 
+	
+
+	/**
+	 * 
+	 */
+	protected void collectCEA708Data() {
+		for(PesPacketData pesPacket :pesPackets) {
+			final P h26xPesPacket = (P)pesPacket;
+			if(h26xPesPacket.hasPTS()) {
+				long pts = h26xPesPacket.getPts();
+				for(AbstractNALUnit nalUnit:h26xPesPacket.getNalUnits()) {
+					RBSP rbsp = nalUnit.getRbsp();
+					if(rbsp instanceof Sei_rbsp) {
+						List<Sei_message> messages = ((Sei_rbsp)rbsp).getSei_messages();
+						for(Sei_message message:messages) {
+							if((message.getPayloadType() == 4) &&  // 0x4 (4) => user_data_registered_itu_t_t35
+								(message instanceof UserDataRegisteredItuT35Sei_message)) {
+								UserDataRegisteredItuT35Sei_message userDataRegisteredItuT35Sei_message = (UserDataRegisteredItuT35Sei_message)message;
+								if((userDataRegisteredItuT35Sei_message.getItu_t_t35_country_code() == 181) &&
+									(userDataRegisteredItuT35Sei_message.getItu_t_t35_provider_code() == 49)) {
+									AuxiliaryData auxData = userDataRegisteredItuT35Sei_message.getAuxData();
+									find708AuxData(pts, auxData);
+								}
+							}
+						}
+					}
+				}
+			}else {
+				logger.warning("no pts for PES Field, ignoring possible cc_data");
+			}
+		}
+	}
+
+	
 	/**
 	 * @param pesData
 	 * @return

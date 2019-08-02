@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -728,6 +728,8 @@ public final class Utils {
 					} // else == reserved for future use, so not implemented
 				}else if((selectorByte==0x11 )){ // ISO/IEC 10646
 					charset = Charset.forName("UTF-16");
+				}else if((selectorByte==0x14 )){ // Big5 subset of ISO/IEC 10646
+					charset = Charset.forName("Big5");
 				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
 					charset = Charset.forName("UTF-8");
 				}
@@ -2170,6 +2172,29 @@ public final class Utils {
 	    	result.append(s);
 	    }
 	    return result.toString();
+	}
+	
+	
+	/**
+	 * @param list
+	 * @param pay
+	 * @return
+	 */
+	public static boolean listContainsByteArray(List<byte[]> list, byte[] pay) {
+		for (byte[] inList : list) {
+			if (Arrays.equals(inList, pay)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static byte[] bytesListToArray(List<Byte> payLoad) {
+		byte[] res = new byte[payLoad.size()];
+		for(int i=0; i<payLoad.size(); i++) {
+			res[i] = payLoad.get(i);
+		}
+		return res;
 	}
 	
 	

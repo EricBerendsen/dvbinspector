@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -145,7 +145,8 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.264 PES Data",this));
 		addListJTree(s,pesPackets,modus,"PES Packets");
-
+		addCCDataToTree(modus, s);
+		
 		return s;
 	}
 
