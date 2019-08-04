@@ -131,6 +131,7 @@ public class Sei_message implements TreeNode{
 		case 52: return "depth_timing"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
 		case 53: return "depth_sampling_info"; /* specified in Annex I Rec. ITU-T H.264 (02/2014)*/
 		case 54: return "constrained_depth_parameter_set_identifier";
+		case 56: return "green_metadata";
 		case 128: return "structure_of_pictures_info";
 		case 129: return "active_parameter_sets";
 		case 130: return "decoding_unit_info";
@@ -147,6 +148,20 @@ public class Sei_message implements TreeNode{
 		case 141: return "knee_function_info";
 		case 142: return "colour_remapping_info";
 		case 143: return "deinterlaced_field_identification";
+		case 144: return "content_light_level_info";
+		case 145: return "dependent_rap_indication";
+		case 146: return "coded_region_completion";
+		case 147: return "alternative_transfer_characteristics";
+		case 148: return "ambient_viewing_environment";
+		case 149: return "content_colour_volume";
+		case 150: return "equirectangular_projection";
+		case 151: return "cubemap_projection";
+		case 154: return "sphere_rotation";
+		case 155: return "regionwise_packing";
+		case 156: return "omni_viewport";
+		case 157: return "regional_nesting";
+		case 158: return "mcts_extraction_info_sets";
+		case 159: return "mcts_extraction_info_nesting";
 		case 160: return "layers_not_present";
 		case 161: return "inter_layer_constrained_tile_sets";
 		case 162: return "bsp_nesting";
@@ -161,6 +176,7 @@ public class Sei_message implements TreeNode{
 		case 178: return "multiview_scene_info";
 		case 179: return "multiview_acquisition_info";
 		case 180: return "multiview_view_position";
+		case 181: return "alternative_depth_info";
 
 
 
