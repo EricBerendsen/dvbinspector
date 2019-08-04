@@ -143,6 +143,8 @@ public class AuxiliaryData implements TreeNode{
 			return "bar data";
 		case 0x07:
 			return "multi_region_disparity";
+		case 0x09:
+			return "ST2094-10_data";
 		default:
 			if((user_data_type_code >=0)&&(user_data_type_code <=0xff)){
 				return "DVB Reserved";
