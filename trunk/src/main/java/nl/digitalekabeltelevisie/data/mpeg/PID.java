@@ -137,11 +137,11 @@ public class PID implements TreeNode{
 			parentTransportStream = ts;
 			final byte []data = packet.getData();
 			final int adaptationFieldControl = packet.getAdaptationFieldControl();
+			final boolean packetHasPayload = (adaptationFieldControl==1)||(adaptationFieldControl==3);
 			if((lastPSISection==null)){ // nothing started
 				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 				if(packet.isPayloadUnitStartIndicator() &&
-						(data.length>1) &&
-						((adaptationFieldControl==1)||(adaptationFieldControl==3))){ //start something
+						(data.length>1) && packetHasPayload){ //start something
 					// at least one byte plus pointer available
 					int start;
 					int available;
@@ -186,7 +186,7 @@ public class PID implements TreeNode{
 					}
 				}
 				//	something started
-			}else if((adaptationFieldControl==1)||(adaptationFieldControl==3)){ // has payload?
+			}else if(packetHasPayload){
 				// are we in a PSI PID??
 				if(type==PSI){
 					int start;
@@ -201,11 +201,16 @@ public class PID implements TreeNode{
 						start+=bytes_read;
 						available-=bytes_read;
 					}
-					while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
-						lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
-						final int bytes_read = lastPSISection.readBytes(data, start, available);
-						start += bytes_read;
-						available -= bytes_read;
+					if(lastPSISection.isComplete()) {
+						lastPSISection = null;
+					}
+					if(packet.isPayloadUnitStartIndicator()){
+						while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
+							lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
+							final int bytes_read = lastPSISection.readBytes(data, start, available);
+							start += bytes_read;
+							available -= bytes_read;
+						}
 					}
 				}
 			}
