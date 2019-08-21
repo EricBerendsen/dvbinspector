@@ -157,7 +157,9 @@ public class PID implements TreeNode{
 							start += bytes_read;
 							available -= bytes_read;
 						}
-
+						if(lastPSISection.isComplete()) {
+							lastPSISection = null;
+						}
 						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
 					}else if((data.length>2) && 
 							(data[0]==0) &&
