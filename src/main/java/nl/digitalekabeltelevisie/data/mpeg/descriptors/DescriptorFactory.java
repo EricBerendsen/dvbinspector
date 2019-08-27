@@ -42,18 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationLo
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationBoundaryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.CIAncillaryDataDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.DVBExtensionDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.NetworkChangeNotifyDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.S2XSatelliteDeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SHDeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.ServiceRelocatedDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.SupplementaryAudioDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TargetRegionNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.URILinkageDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.MPEGExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.INTDescriptor;
@@ -598,8 +587,14 @@ public final class DescriptorFactory {
 		case 0x14:
 			d = new CIAncillaryDataDescriptor(data, t + offset, tableSection);
 			break;
+		case 0x15:
+			d = new AC4Descriptor(data, t + offset, tableSection);
+			break;
 		case 0x17:
 			d = new S2XSatelliteDeliverySystemDescriptor(data, t + offset, tableSection);
+			break;
+		case 0x19:
+			d = new AudioPreselectionDescriptor(data, t + offset, tableSection);
 			break;
 
 
