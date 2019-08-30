@@ -34,11 +34,10 @@ import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 //based on M7 FastScan Spec v7.1 Page 28 
-public class M7LogicalChannelDescriptor extends Descriptor {
+public class M7LogicalChannelDescriptor extends M7Descriptor {
 
 	private List<LogicalChannel> channelList = new ArrayList<LogicalChannel>();
 
@@ -137,12 +136,5 @@ public class M7LogicalChannelDescriptor extends Descriptor {
 	public List<LogicalChannel> getChannelList() {
 		return channelList;
 	}
-
-
-	@Override
-	public String getDescriptorname(){
-		return "M7 Fastscan Logical Channel Descriptor";
-	}
-
 
 }

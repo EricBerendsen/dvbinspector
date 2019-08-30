@@ -33,11 +33,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
 public class M7Fastscan implements TreeNode {
 	
 	Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
+	ONTSection[] ontSections; 
 
 	@SuppressWarnings("unused")
 	private PSI parentPSI;
@@ -49,13 +51,33 @@ public class M7Fastscan implements TreeNode {
 			add(100, "HD Austria").
 			add(200, "Skylink").
 			add(400, "Diveo").
+			add(500, "freeSAT").
+			add(510, "FocusSAT").
+			add(520, "UPC Direct").
 			build();
+	
+	public static boolean isValidM7Code(int code) {
+		return (code>= 0x7701) && (code<= 0x77FF);
+	}
 	
 	public M7Fastscan(PSI psi) {
 		this.parentPSI = psi;
 	}
 
 
+	
+	public void update(final ONTSection section){
+		if(ontSections == null) {
+			ontSections = new ONTSection[section.getSectionLastNumber()+1];
+		}
+		if(ontSections[section.getSectionNumber()]==null){
+			ontSections[section.getSectionNumber()] = section;
+		}else{
+			final TableSection last = ontSections[section.getSectionNumber()];
+			AbstractPSITabel.updateSectionVersion(section, last);
+		}	
+	}
+	
 	public void update(final FSTsection section){
 		final int pid = section.getParentPID().getPid();
 		int operator = section.getOperatorNetworkID();
@@ -84,6 +106,18 @@ public class M7Fastscan implements TreeNode {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("M7 Fastscan"));
+		
+		if(ontSections!=null) {
+			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(new KVP("ONT"));
+			for (final ONTSection ontSection : ontSections) {
+				if(ontSection!= null){
+					AbstractPSITabel.addSectionVersionsToJTree(ont, ontSection, modus);
+				}
+			}
+			
+			t.add(ont);
+		}
+
 		for (Integer operatorId : new TreeSet<Integer>(operators.keySet())) {
 			Map<Integer, OperatorFastscan> operatorsInPid = operators.get(operatorId);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("operator_network_id",operatorId, operatorName.get(operatorId,"unknown")));

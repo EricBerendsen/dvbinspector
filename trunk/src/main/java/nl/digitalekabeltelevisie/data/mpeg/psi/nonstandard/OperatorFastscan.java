@@ -75,28 +75,32 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 		networkKVP.setHtmlSource(this);
 		final DefaultMutableTreeNode n = new DefaultMutableTreeNode(networkKVP);
 		
-		DefaultMutableTreeNode fst = new DefaultMutableTreeNode(new KVP("FST"));
-		for (final FSTsection fstSection : fstSections) {
-			if(fstSection!= null){
-				AbstractPSITabel.addSectionVersionsToJTree(fst, fstSection, modus);
+		if(fstSections!=null) {
+			DefaultMutableTreeNode fst = new DefaultMutableTreeNode(new KVP("FST"));
+			for (final FSTsection fstSection : fstSections) {
+				if(fstSection!= null){
+					AbstractPSITabel.addSectionVersionsToJTree(fst, fstSection, modus);
+				}
 			}
-		}
-		
-		n.add(fst);
-
-		DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(new KVP("FNT"));
-		for (final FNTsection fntSection : fntSections) {
-			if(fntSection!= null){
-				AbstractPSITabel.addSectionVersionsToJTree(fnt, fntSection, modus);
-			}
+			
+			n.add(fst);
 		}
 
-		n.add(fnt);
+		if (fntSections != null) {
+			DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(new KVP("FNT"));
+			for (final FNTsection fntSection : fntSections) {
+				if (fntSection != null) {
+					AbstractPSITabel.addSectionVersionsToJTree(fnt, fntSection, modus);
+				}
+			}
+
+			n.add(fnt);
+		}
 		return n;
 	}
 
 	public void update(FSTsection section) {
-		// TODO Auto-generated method stub
+
 		if(fstSections == null) {
 			fstSections = new FSTsection[section.getSectionLastNumber()+1];
 		}
