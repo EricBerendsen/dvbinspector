@@ -124,9 +124,8 @@ public class FNTsection extends TableSectionExtendedSyntax{
 		super(raw_data,parent);
 
 		network_descriptors_loop_length = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
-		transport_stream_loop_length= Utils.getInt(raw_data.getData(), 10+network_descriptors_loop_length, 2, Utils.MASK_12BITS);
-
 		networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,network_descriptors_loop_length,this);
+		transport_stream_loop_length= Utils.getInt(raw_data.getData(), 10+network_descriptors_loop_length, 2, Utils.MASK_12BITS);
 		transportStreamList = buildTransportStreamList(raw_data.getData(), 12+network_descriptors_loop_length, transport_stream_loop_length);
 	}
 

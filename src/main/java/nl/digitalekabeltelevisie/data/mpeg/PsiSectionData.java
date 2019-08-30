@@ -136,7 +136,7 @@ public class PsiSectionData {
 				transportStream.getPsi().getPat().update(new PATsection(this,parentPID));
 			} else {
 
-				final byte tableId = data[0];
+				final int tableId = Byte.toUnsignedInt(data[0]);
 				if((tableId==0x02)&&
 						(transportStream.getPsi().getPat().inPAT(pid))){
 					transportStream.getPsi().getPmts().update(new PMTsection(this,parentPID));
@@ -164,7 +164,7 @@ public class PsiSectionData {
 					transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
 				}else if((tableId==0x76)&&isRCTSection(pid)){
 					transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
-				}else if((Byte.toUnsignedInt(tableId)==0xFC)&&isSpliceInfoSection(pid)){ // 0xFC
+				}else if((tableId==0xFC)&&isSpliceInfoSection(pid)){ // 0xFC
 					transportStream.getPsi().getScte35_table().update(new SpliceInfoSection(this,parentPID));
 				}else if((tableId>=0x37)&&(tableId<=0x3F)){
 					// also include all PES streams component (ISO/IEC 13818-6 type B) which
@@ -177,16 +177,35 @@ public class PsiSectionData {
 						transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
 					}
 				}else if(PreferencesManager.isEnableM7Fastscan()) {
-					if(Byte.toUnsignedInt(tableId)== 0xBC) {
+					if(tableId== 0xBC){
 						transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
-					}else if(Byte.toUnsignedInt(tableId)== 0xBD) {
+					}else if(tableId== 0xBD) {
 						transportStream.getPsi().getM7fastscan().update(new FSTsection(this, parentPID));
+					}else if((tableId== 0xBE) && isONTSection(pid)) {
+						transportStream.getPsi().getM7fastscan().update(new ONTSection(this, parentPID));
 					}
 				}
 			}
 		} catch (final RuntimeException re) {
 			logger.log(Level.WARNING, "RuntimeException in updatePSI PSI data: pid="+pid, re);
 		}
+	}
+
+	private boolean isONTSection(int pid) {
+		final List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptors();
+		
+		final int actualNetworkID = transportStream.getPsi().getNit().getActualNetworkID();
+
+		for (final LinkageDescriptor ld : linkageDescriptors) {
+			if(ld.getLinkageType()==0x8D &&
+				ld.getTransportStreamId()==transportStream.getStreamID() &&
+				ld.getOriginalNetworkId() == actualNetworkID &&
+				ld.getServiceId() == pid &&
+				M7Fastscan.isValidM7Code(ld.getM7_code())){
+						return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isSpliceInfoSection(int pid) {
@@ -226,9 +245,7 @@ public class PsiSectionData {
 		return packet_no;
 	}
 	private boolean isINTSection(final int pid){
-		final int actualNetwork = transportStream.getPsi().getNit().getActualNetworkID();
-		final List<Descriptor> descriptors = transportStream.getPsi().getNit().getNetworkDescriptors(actualNetwork);
-		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
+		final List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptors();
 
 		for (final LinkageDescriptor ld : linkageDescriptors) {
 			if(ld.getLinkageType()==0x0B){
@@ -251,6 +268,17 @@ public class PsiSectionData {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @return
+	 */
+	private List<LinkageDescriptor> getLinkageDescriptors() {
+		final NIT nit = transportStream.getPsi().getNit();
+		final int actualNetworkID = nit.getActualNetworkID();
+		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
+		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
+		return linkageDescriptors;
 	}
 
 
