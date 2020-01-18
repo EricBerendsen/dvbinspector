@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -59,7 +59,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 */
 	private final static Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
 
-	private final int data_identifier;
+	private int data_identifier;
 	private int subtitle_stream_id;
 
 	private DisplayDefinitionSegment displayDefinitionSegment = null;
@@ -107,46 +107,48 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 		super(pesPacket);
 
 		final int offset = getPesDataStart();
+		if(pesDataLen>0) { // PES packet with more than just header
 		data_identifier = getInt(data, offset, 1, MASK_8BITS);
-		if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
-			subtitle_stream_id = getInt(data, offset + 1, 1, MASK_8BITS);
-
-
-			int t = 2;
-			while (data[offset + t] == 0x0f) { // sync byte
-				Segment segment;
-				final int segment_type = getInt(data, offset + t + 1, 1, MASK_8BITS);
-				switch (segment_type) {
-				case 0x10:
-					segment = new PageCompositionSegment(data, offset + t);
-					break;
-				case 0x11:
-					final RegionCompositionSegment rc = new RegionCompositionSegment(data, offset + t);
-					segment = rc;
-					regionCompositionsSegments.put(rc.getRegionId(), rc);
-					break;
-				case 0x12:
-					final CLUTDefinitionSegment cl = new CLUTDefinitionSegment(data, offset + t);
-					segment = cl;
-					clutDefinitions.put(cl.getCLUTId(), cl);
-					break;
-				case 0x13:
-					final ObjectDataSegment obj = new ObjectDataSegment(data, offset + t);
-					segment = obj;
-					objects.put(obj.getObjectId(), obj);
-					break;
-				case 0x14:
-					segment = new DisplayDefinitionSegment(data, offset + t);
-					displayDefinitionSegment = (DisplayDefinitionSegment)segment;
-					break;
-
-				default:
-					segment = new Segment(data, offset + t);
-					break;
+			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
+				subtitle_stream_id = getInt(data, offset + 1, 1, MASK_8BITS);
+	
+	
+				int t = 2;
+				while (data[offset + t] == 0x0f) { // sync byte
+					Segment segment;
+					final int segment_type = getInt(data, offset + t + 1, 1, MASK_8BITS);
+					switch (segment_type) {
+					case 0x10:
+						segment = new PageCompositionSegment(data, offset + t);
+						break;
+					case 0x11:
+						final RegionCompositionSegment rc = new RegionCompositionSegment(data, offset + t);
+						segment = rc;
+						regionCompositionsSegments.put(rc.getRegionId(), rc);
+						break;
+					case 0x12:
+						final CLUTDefinitionSegment cl = new CLUTDefinitionSegment(data, offset + t);
+						segment = cl;
+						clutDefinitions.put(cl.getCLUTId(), cl);
+						break;
+					case 0x13:
+						final ObjectDataSegment obj = new ObjectDataSegment(data, offset + t);
+						segment = obj;
+						objects.put(obj.getObjectId(), obj);
+						break;
+					case 0x14:
+						segment = new DisplayDefinitionSegment(data, offset + t);
+						displayDefinitionSegment = (DisplayDefinitionSegment)segment;
+						break;
+	
+					default:
+						segment = new Segment(data, offset + t);
+						break;
+					}
+	
+					segmentList.add(segment);
+					t += 6 + getInt(data, offset + t + 4, 2, MASK_16BITS);
 				}
-
-				segmentList.add(segment);
-				t += 6 + getInt(data, offset + t + 4, 2, MASK_16BITS);
 			}
 		}
 	}
@@ -160,11 +162,12 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("DVBSubtitlingSegments",this));
-
-		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier, getDataIDString(data_identifier))));
-		if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
-			s.add(new DefaultMutableTreeNode(new KVP("subtitle_stream_id",subtitle_stream_id, null)));
-			addListJTree(s, segmentList, modus, "segments");
+		if(pesDataLen>0) { // PES packet with more than just header
+			s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier, getDataIDString(data_identifier))));
+			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
+				s.add(new DefaultMutableTreeNode(new KVP("subtitle_stream_id",subtitle_stream_id, null)));
+				addListJTree(s, segmentList, modus, "segments");
+			}
 		}
 		return s;
 	}
@@ -255,12 +258,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 					}
 				}
 			}
-
-
 			return img;
-		}else{
-			return null;
 		}
+		return null;
 	}
 
 	/**
