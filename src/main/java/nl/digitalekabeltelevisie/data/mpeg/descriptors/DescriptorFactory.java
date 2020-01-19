@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -446,6 +446,8 @@ public final class DescriptorFactory {
 			return new PartialTransportStreamDescriptor(data, offset, tableSection);
 		case 0x64:
 			return new DataBroadcastDescriptor(data, offset, tableSection);
+		case 0x65:
+			return new ScramblingDescriptor(data, offset, tableSection);
 		case 0x66:
 			return new DataBroadcastIDDescriptor(data, offset, tableSection);
 		case 0x69:
