@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -56,7 +56,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
-import nl.digitalekabeltelevisie.util.Interval;
+import nl.digitalekabeltelevisie.util.*;
 
 /**
  * Class to create a grid image of EIT information, like the EPG in decoders.
@@ -78,8 +78,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 
 	private EIT eit;
 	private long milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
-	private Map<Integer, EITsection[]> servicesTable;
-	private SortedSet<Integer> serviceOrder;
+	private Map<ServiceIdentification, EITsection[]> servicesTable;
+	private SortedSet<ServiceIdentification> serviceOrder;
 	private Interval interval;
 	private boolean selectedSchedule = true;
 
@@ -99,10 +99,10 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param eit
 	 * @param table
 	 */
-	public EITableImage(EIT eit, Map<Integer, EITsection[]> table){
+	public EITableImage(EIT eit, Map<ServiceIdentification, EITsection[]> table){
 		this.eit = eit;
 		this.servicesTable = table;
-		serviceOrder = new TreeSet<Integer>(table.keySet());
+		serviceOrder = new TreeSet<ServiceIdentification>(table.keySet());
 		this.interval = EIT.getSpanningInterval(serviceOrder, table);
 		this.milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
 	}
@@ -140,7 +140,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 				servicesTable = eit.getCombinedPresentFollowing();
 			}
 
-			this.serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+			this.serviceOrder = new TreeSet<ServiceIdentification>(servicesTable.keySet());
 			this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
 		} else {
 			eit = null;
@@ -198,7 +198,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		offset=LEGEND_HEIGHT;
 
 		gd.setFont(font);
-		for(final Integer serviceNo : serviceOrder){
+		for(final ServiceIdentification serviceNo : serviceOrder){
 			EITsection[] eiTsections = servicesTable.get(serviceNo);
 			drawServiceEvents(gd, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
 			offset+=LINE_HEIGHT;
@@ -287,16 +287,18 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param y
 	 * @param char_descend
 	 */
-	private void drawLabels(final Graphics2D gd, final SortedSet<Integer> serviceSet, final Font nameFont,
+	private void drawLabels(final Graphics2D gd, final SortedSet<ServiceIdentification> serviceSet, final Font nameFont,
 			int x,  int y, int char_descend) {
-		int labelY = y;
+		int labelY = y; 
 		gd.setFont(nameFont);
 
-		for(final Integer serviceNo : serviceSet){
-			String serviceName = this.eit.getParentPSI().getSdt().getServiceName(serviceNo);
-			if(serviceName==null){
-				serviceName = "Service "+serviceNo;
-			}
+		for(final ServiceIdentification serviceNo : serviceSet){
+			String serviceName = this.eit.
+					getParentPSI().
+					getSdt().
+					getServiceNameDVBString(serviceNo).
+					map(DVBString::toString).
+					orElse("Service "+serviceNo);
 			gd.setColor(Color.BLUE);
 			gd.fillRect(x, labelY, SERVICE_NAME_WIDTH, LINE_HEIGHT);
 			gd.setColor(Color.WHITE);
@@ -409,29 +411,43 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		if((eit!=null)&&(interval!=null)){
 			final int x=e.getX();
 			final int y=e.getY();
-			if((x>(translatedX+SERVICE_NAME_WIDTH))&& // mouse not over labels or legend?
-					(y>(translatedY+LEGEND_HEIGHT))){
+			if( y>(translatedY+LEGEND_HEIGHT)){ // mouse not over legend?
 
 				int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
-				if(row<serviceOrder.size()){
+				if(row<serviceOrder.size()){ // not below last line
 					r1.append("<html><b>");
-					int serviceId = (Integer) serviceOrder.toArray()[row];
-					DVBString name = eit.getParentPSI().getSdt().getServiceNameDVBString(serviceId);
-					if(name==null){
-						r1.append("Service ").append(serviceId);
-					}else{
-						r1.append(name.toEscapedHTML());
-					}
-					r1.append("</b><br>");
+					ServiceIdentification serviceIdent = serviceOrder.toArray(new ServiceIdentification[0])[row];
 
-					Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
-					Event event = findEvent(serviceId, thisDate);
-					if(event!=null){
-						r1.append(event.getHTML());
-					}else{ // NO event found, just display time
-						String timeString =   tf.format(thisDate);
-						String dateString =   df.format(thisDate);
-						r1.append(dateString).append(" ").append(timeString);
+					if(x>(translatedX+SERVICE_NAME_WIDTH)) { // over event line 
+						String name = eit.getParentPSI().
+								getSdt().
+								getServiceNameDVBString(serviceIdent).
+								map(DVBString::toEscapedHTML).
+								orElse("Service "+serviceIdent.getServiceId()+"<br><br>");
+						r1.append(name).append("</b>");
+	
+						Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
+						Event event = findEvent(serviceIdent, thisDate);
+						if(event!=null){
+							r1.append(event.getHTML());
+						}else{ // NO event found, just display time
+							String timeString =   tf.format(thisDate);
+							String dateString =   df.format(thisDate);
+							r1.append(dateString).append(" ").append(timeString);
+						}
+					}else { // over service names
+						String name = eit.getParentPSI().
+								getSdt().
+								getServiceNameDVBString(serviceIdent).
+								map(DVBString::toEscapedHTML).
+								orElse("[Name not in SDT]<br><br>");
+						r1.append(name).
+						append("</b>original_network_id:").
+						append(serviceIdent.getOriginalNetworkId()).
+						append("<br>transport_stream_id:").
+						append(serviceIdent.getTransportStreamId()).
+						append("<br>service_id:").
+						append(serviceIdent.getServiceId());
 					}
 					r1.append("</html>");
 				}
@@ -447,7 +463,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param date
 	 * @return
 	 */
-	private Event findEvent(int serviceID, Date date){
+	private Event findEvent(ServiceIdentification serviceID, Date date){
 		EITsection[] list = servicesTable.get(serviceID);
 		for(EITsection section:list){
 			if(section!=null){
@@ -551,8 +567,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			gd2.setFont(font);
 			gd2.clipRect(translatedX+SERVICE_NAME_WIDTH, translatedY+LEGEND_HEIGHT, viewWidth-SERVICE_NAME_WIDTH, viewHeight- LEGEND_HEIGHT);
 
-			SortedSet<Integer> order = serviceOrder;
-			for(final Integer serviceNo : order){
+			SortedSet<ServiceIdentification> order = serviceOrder;
+			for(final ServiceIdentification serviceNo : order){
 				EITsection[] eiTsections = servicesTable.get(serviceNo);
 				drawServiceEvents(gd2, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
 				offset+=LINE_HEIGHT;
@@ -581,7 +597,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		selectedSchedule = false;
 		if(eit!=null){
 			servicesTable = eit.getCombinedPresentFollowing();
-			serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+			serviceOrder = new TreeSet<ServiceIdentification>(servicesTable.keySet());
 			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
 			setSize(getDimension());
 			repaint();
@@ -599,7 +615,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		selectedSchedule = true;
 		if(eit!=null){
 			servicesTable = eit.getCombinedSchedule();
-			serviceOrder = new TreeSet<Integer>(servicesTable.keySet());
+			serviceOrder = new TreeSet<ServiceIdentification>(servicesTable.keySet());
 			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
 			setSize(getDimension());
 			repaint();

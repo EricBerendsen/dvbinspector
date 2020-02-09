@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -100,7 +100,7 @@ public class SDTsection extends TableSectionExtendedSyntax {
 		}
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service (" +getPSI().getSdt().getServiceName(serviceID)+")"));
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service (" +getPSI().getSdt().getServiceName(originalNetworkID, tableIdExtension, serviceID)+")"));
 
 			t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved,null)));

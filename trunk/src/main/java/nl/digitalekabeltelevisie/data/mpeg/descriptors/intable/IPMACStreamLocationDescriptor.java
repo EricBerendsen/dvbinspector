@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -67,7 +67,7 @@ public class IPMACStreamLocationDescriptor extends INTDescriptor {
 		t.add(new DefaultMutableTreeNode(new KVP("network_id",networkId ,Utils.getOriginalNetworkIDString(networkId))));
 		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId ,Utils.getOriginalNetworkIDString(originalNetworkId))));
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId ,parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(serviceId))));
+		t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId ,parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId, transportStreamId, serviceId))));
 		t.add(new DefaultMutableTreeNode(new KVP("component_tag",componentTag ,null)));
 		return t;
 	}

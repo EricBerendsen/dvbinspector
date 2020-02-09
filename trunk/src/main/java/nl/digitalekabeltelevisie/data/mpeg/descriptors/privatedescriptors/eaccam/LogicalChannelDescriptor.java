@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -76,7 +76,8 @@ public class LogicalChannelDescriptor extends Descriptor {
 
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel (" + getPSI().getSdt().getServiceName(serviceID)+"): "+logicalChannelNumber));
+			//TODO SDT.getServiceName needs original_network_id and transport_stream_id from enclosing NIT section TS loop.
+			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel  "+logicalChannelNumber));
 			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("visible_service",visibleServiceFlag,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));

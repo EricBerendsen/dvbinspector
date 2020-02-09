@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -73,7 +73,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		while(i.hasNext()){
 			final Integer programNumber=i.next();
 			final PMTsection[] sections = pmts.get(programNumber);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("program",programNumber,getParentPSI().getSdt().getServiceName(programNumber)));
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("program",programNumber,getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber)));
 			for (final PMTsection pmtSection : sections) {
 				if(pmtSection!= null){
 					if(Utils.simpleModus(modus)){

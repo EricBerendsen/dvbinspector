@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,12 +29,10 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
-
+import java.util.Arrays;
 import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Based on ISO/IEC 13818-1:2013, ch.2.6.58, and ETSI TS 102 323 V1.5.1, ch.5.3.3.2 and DTG D-Book 8.14.7.1
@@ -93,7 +91,7 @@ public class MetaDataPointerDescriptor extends Descriptor {
 			transport_stream_id = getInt(b, localOffset, 2, MASK_16BITS);
 			localOffset += 2;
 		}
-		private_data_byte = Utils.copyOfRange(b, localOffset, offset+descriptorLength+2);
+		private_data_byte = Arrays.copyOfRange(b, localOffset, offset+descriptorLength+2);
 	}
 
 	@Override
@@ -118,7 +116,10 @@ public class MetaDataPointerDescriptor extends Descriptor {
 			t.add(new DefaultMutableTreeNode(new KVP("metadata_locator_record_byte",metadata_locator_record_byte,null)));
 		}
 		if(MPEG_carriage_flags!=3){ // 0|1|2
-			t.add(new DefaultMutableTreeNode(new KVP("program_number",program_number,getPSI().getSdt().getServiceName(program_number))));
+			String serviceName = (MPEG_carriage_flags == 1)? 
+					getPSI().getSdt().getServiceName(transport_stream_location,transport_stream_id,program_number)
+					:getPSI().getSdt().getServiceNameForActualTransportStream(program_number);
+			t.add(new DefaultMutableTreeNode(new KVP("program_number",program_number,serviceName)));
 		}
 		if (MPEG_carriage_flags == 1) { // '1'
 			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_location",transport_stream_location,null)));
