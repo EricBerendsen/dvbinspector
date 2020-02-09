@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -95,19 +95,19 @@ public class MosaicDescriptor extends Descriptor {
 				s.add(new DefaultMutableTreeNode(new KVP("bouquet_id",bouquetId,null)));
 			}
 			if(cellLinkageInfo==0x02){
-				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",bouquetId,null)));
+				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(serviceId))));
+				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId))));
 			}
 			if(cellLinkageInfo==0x03){
-				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",bouquetId,null)));
+				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(serviceId))));
+				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId))));
 			}
 			if(cellLinkageInfo==0x04){
-				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",bouquetId,null)));
+				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(serviceId))));
+				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId))));
 				s.add(new DefaultMutableTreeNode(new KVP("event",eventId,null)));
 			}
 

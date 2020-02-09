@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,11 +28,10 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
 import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
-import static nl.digitalekabeltelevisie.util.Utils.formatDuration;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
+import static nl.digitalekabeltelevisie.util.Utils.formatDuration;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -115,6 +114,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			return "";
 
 		}
+		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 			final KVP kvp = new KVP("event",eventID,Utils.getEITStartTimeAsString(startTime)+" "+getEventName());
@@ -177,6 +177,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		/* (non-Javadoc)
 		 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
 		 */
+		@Override
 		public String getHTML() {
 			final StringBuilder r1 = new StringBuilder();
 			r1.append("Start:&nbsp;").append(Utils.getEITStartTimeAsString(getStartTime())).append("&nbsp;Duration: ");
@@ -236,9 +237,6 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			}
 			return r1.toString();
 		}
-
-
-
 	}
 
 
@@ -262,7 +260,12 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	@Override
 	public String toString(){
 		final StringBuilder b = new StringBuilder("EITsection section=");
-		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=").append(getTableType(tableId)). append(", ServiceD=").append(getServiceID()).append(", ");
+		b.append(getSectionNumber())
+		.append(", OrgNetworkId=").append(getOriginalNetworkID())
+		.append(", TransportStreamID=").append(getTransportStreamID())
+		.append(", ServiceD=").append(getServiceID())
+		.append(", tableType=").append(getTableType(getTableId()))
+		.append(", lastSection=").append(getSectionLastNumber());
 
 
 
@@ -292,7 +295,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		while(t<programInfoLength){
 			final Event c = new Event();
 			c.setEventID(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-			c.setStartTime(Utils.copyOfRange(data,i+t+2,i+t+7));
+			c.setStartTime(Arrays.copyOfRange(data,i+t+2,i+t+7));
 			c.setDuration(Utils.getBCD(data, (i+t+7)*2,6));
 			c.setRunningStatus(Utils.getInt(data, i+t+10, 1, 0xE0)>>5);
 			c.setFreeCAMode(Utils.getInt(data, i+t+10, 1, 0x10)>>4);
@@ -347,11 +350,22 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	}
 
 
+	@Override
 	public String getHTML() {
 		final StringBuilder b = new StringBuilder();
 		b.append("<code>");
 		b.append(getHTMLLines());
 		b.append("</code>");
 		return b.toString();
+	}
+
+
+	public int getTransportStreamID() {
+		return transportStreamID;
+	}
+
+
+	public int getOriginalNetworkID() {
+		return originalNetworkID;
 	}
 }

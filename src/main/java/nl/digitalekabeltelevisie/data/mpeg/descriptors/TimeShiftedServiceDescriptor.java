@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -50,7 +50,7 @@ public class TimeShiftedServiceDescriptor extends Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("reference_service_id",reference_service_id ,parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(reference_service_id))));
+		t.add(new DefaultMutableTreeNode(new KVP("reference_service_id",reference_service_id ,parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceNameForActualTransportStream(reference_service_id))));
 		return t;
 	}
 

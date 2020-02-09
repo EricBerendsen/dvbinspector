@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,8 +29,11 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -39,7 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.gui.EITableImage;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.util.Interval;
+import nl.digitalekabeltelevisie.util.*;
 
 
 /**
@@ -51,44 +54,11 @@ import nl.digitalekabeltelevisie.util.Interval;
  */
 public class EIT extends AbstractPSITabel{
 
-	private final Map<Integer, HashMap<Integer,EITsection []>> eit = new HashMap<Integer, HashMap<Integer, EITsection []>>();
+	//     original_network_id,transport_stream_id,  serviceId, table_id 
+	private final Map<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer,EITsection []>>>> newEit = 
+			new TreeMap<>();
+	
 	private static final Logger	logger	= Logger.getLogger(EIT.class.getName());
-
-
-	/**
-	 * Helper to implement a HTMLSource for the program information for a single service (channel)
-	 * in a single tableID (now/next actual stream, now/next other stream, schedule current stream,
-	 * schedule other stream).
-	 *
-	 * @author Eric
-	 *
-	 */
-
-	 // TODO as this is pure presentation logic, move to gui package ??
-
-	public class ServiceListing implements HTMLSource {
-		private final int tableID;
-		private final int serviceNo;
-
-		public ServiceListing(final int tableID, final int serviceNo){
-			this.tableID = tableID;
-			this.serviceNo=serviceNo;
-		}
-
-		public String getHTML() {
-			final StringBuilder b = new StringBuilder();
-			b.append("<code>");
-
-			for(final EITsection section :eit.get(tableID).get(serviceNo)){
-				if(section!=null){
-					b.append(section.getHTMLLines());
-				}
-			}
-
-			b.append("</code>");
-			return b.toString();
-		}
-	}
 
 
 	public EIT(final PSI parent){
@@ -97,76 +67,137 @@ public class EIT extends AbstractPSITabel{
 
 	public void update(final EITsection section){
 
+		final int original_network_id = section.getOriginalNetworkID();
+		final int streamId = section.getTransportStreamID();
+		final int serviceId = section.getServiceID();
 		final int tableId = section.getTableId();
-		HashMap<Integer, EITsection []>  table= eit.get(tableId);
 
-		if(table==null){
-			table = new HashMap<Integer, EITsection []>();
-			eit.put(tableId, table);
-		}
-
-		EITsection [] serviceSection = table.get(section.getServiceID());
-		if(serviceSection==null){
-			serviceSection = new EITsection [section.getSectionLastNumber()+1];
-			table.put(section.getServiceID(),serviceSection);
+		TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> networkSections = newEit.computeIfAbsent(original_network_id,k -> new TreeMap<>());
+		TreeMap<Integer, TreeMap<Integer, EITsection[]>> programStreamSections = networkSections.computeIfAbsent(streamId,k -> new TreeMap<>());
+		TreeMap<Integer, EITsection[]> serviceSections = programStreamSections.computeIfAbsent(serviceId,k -> new TreeMap<>());
+		EITsection[] tableSectionArray = serviceSections.computeIfAbsent(tableId,k -> new EITsection[section.getSectionLastNumber()+1]);
+		
+		if(tableSectionArray.length<=section.getSectionNumber()){ //resize if needed
+			System.out.println("expanding tableSectionArray, old length:"+tableSectionArray.length+", new length:"+(section.getSectionNumber()+1));
+			tableSectionArray = Arrays.copyOf(tableSectionArray, section.getSectionNumber()+1);
+			serviceSections.put(tableId,tableSectionArray);
 		}
 		
-		if(serviceSection.length<=section.getSectionNumber()){ //resize if needed
-			serviceSection = Arrays.copyOf(serviceSection, section.getSectionNumber()+1);
-			table.put(section.getServiceID(),serviceSection);
-		}
-		if(serviceSection[section.getSectionNumber()]==null){
-			serviceSection[section.getSectionNumber()] = section;
+		if(tableSectionArray[section.getSectionNumber()]==null){
+			tableSectionArray[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = serviceSection[section.getSectionNumber()];
+			final TableSection last = tableSectionArray[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final TreeSet<Integer> tableSet = new TreeSet<Integer>(eit.keySet());
+		// need this KVP at end of loop to set ImageSource
+		final KVP eitKVP = new KVP("EIT");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(eitKVP);
+		
+		Map<ServiceIdentification, EITsection[]> allEitImageMap = new TreeMap<>();
+		
+		for(Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> network:newEit.entrySet()) {
+			final Integer orgNetworkId= network.getKey();
+			TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> networkSections = network.getValue();
+			
+			// need this KVP at end of loop to set ImageSource
+			final KVP networkNodeKVP = new KVP("original_network_id", orgNetworkId,Utils.getOriginalNetworkIDString(orgNetworkId));
+			final DefaultMutableTreeNode networkNode = new DefaultMutableTreeNode(networkNodeKVP);
+			t.add(networkNode);
+			
+			Map<ServiceIdentification, EITsection[]> networkImageMap = new TreeMap<>();
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("EIT"));
+			for(Entry<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> netWorkSection:networkSections.entrySet()) {
+				final Integer transport_stream_id = netWorkSection.getKey();
+				TreeMap<Integer, TreeMap<Integer, EITsection[]>> streams = netWorkSection.getValue();
 
-		for(final Integer tableID : tableSet ){
-			final KVP tableKVP = new KVP("table_id",tableID, TableSection.getTableType(tableID));
-			tableKVP.setImageSource(new EITableImage(this, eit.get(tableID)));
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(tableKVP);
-			final HashMap<Integer, EITsection []> table= eit.get(tableID);
+				// need this KVP at end of loop to set ImageSource
+				final KVP streamNodeKVP = new KVP("transport_stream_id", transport_stream_id,null);
+				final DefaultMutableTreeNode streamNode = new DefaultMutableTreeNode(streamNodeKVP);
+				networkNode.add(streamNode);
 
-			final TreeSet<Integer> serviceSet = new TreeSet<Integer>(table.keySet());
-			for(final Integer serviceNo : serviceSet){
-				final KVP kvp = new KVP("service_id",serviceNo, getParentPSI().getSdt().getServiceName(serviceNo));
-				kvp.setHtmlSource(new ServiceListing(tableID, serviceNo)); // set listing for whole service
+				Map<ServiceIdentification, EITsection[]> streamImageMap = new TreeMap<>();
 
-				final DefaultMutableTreeNode o = new DefaultMutableTreeNode(kvp);
-				for(final EITsection section :table.get(serviceNo)){
-					if(section!= null){
-						if(!simpleModus(modus)){
-							addSectionVersionsToJTree(o, section, modus);
-						}else{
-							addListJTree(o,section.getEventList(),modus,"events");
+				for(Entry<Integer, TreeMap<Integer, EITsection[]>> streamEntry: streams.entrySet()) {
+					final Integer serviceId = streamEntry.getKey();
+					TreeMap<Integer, EITsection[]> service = streamEntry.getValue();
+					
+					// for EITImage, sections of this service with tableID >80
+					EITsection[] serviceSections = new EITsection[0];
+				
+					final KVP serviceNodeKVP = new KVP("service_id", serviceId,getParentPSI().getSdt().getServiceName(orgNetworkId, transport_stream_id, serviceId));
+					final DefaultMutableTreeNode serviceNode = new DefaultMutableTreeNode(serviceNodeKVP);
+										
+					serviceNodeKVP.setHtmlSource(() -> service.entrySet().
+							stream().
+							filter(s -> s.getKey()>=80).
+							map(s -> s.getValue()). 
+							flatMap((EITsection[] s) -> Arrays.stream(s)).
+							filter(Objects::nonNull).
+							map(HTMLSource::getHTML).
+							collect(Collectors.joining("","<b>Schedule</b><br><br>","")));
+					
+					streamNode.add(serviceNode);
+				
+					for(Entry<Integer, EITsection[]> serviceEntry : service.entrySet()) {
+						Integer tableId = serviceEntry.getKey();
+						EITsection[] sections = serviceEntry.getValue();
+
+						final KVP tableNodeKVP = new KVP("tableid", tableId,TableSection.getTableType(tableId));
+						tableNodeKVP.setHtmlSource(() -> Arrays.stream(sections).
+								filter(Objects::nonNull).
+								map(HTMLSource::getHTML).
+								collect(Collectors.joining())
+								);
+
+						final DefaultMutableTreeNode tableNode = new DefaultMutableTreeNode(tableNodeKVP);
+						serviceNode.add(tableNode);
+
+						if(tableId>=80) {
+							serviceSections = appendSections(serviceSections, sections);
+						}
+						
+
+						for (EITsection section : sections) {
+							if(section!= null){
+								if(!simpleModus(modus)){
+									addSectionVersionsToJTree(tableNode, section, modus);
+								}else{
+									addListJTree(tableNode,section.getEventList(),modus,"events");
+								}
+							}
 						}
 					}
+					// now all sections for service are in serviceSections
+					streamImageMap.put(new ServiceIdentification(orgNetworkId, transport_stream_id, serviceId), serviceSections);
 				}
-				n.add(o);
+				streamNodeKVP.setImageSource(new EITableImage(this, streamImageMap));
+				networkImageMap.putAll(streamImageMap);
 			}
-			t.add(n);
+			networkNodeKVP.setImageSource(new EITableImage(this, networkImageMap));
+			allEitImageMap.putAll(networkImageMap);
 		}
+		eitKVP.setImageSource(new EITableImage(this, allEitImageMap));
 		return t;
+
 	}
 
-	public boolean exists(final int tableId, final int tableIdExtension, final int section){
-		return ((eit.get(tableId)!=null) &&
-				(eit.get(tableId).get(tableIdExtension)!=null) &&
-				(eit.get(tableId).get(tableIdExtension).length >section) &&
-				(eit.get(tableId).get(tableIdExtension)[section]!=null));
+	/**
+	 * @param serviceSections
+	 * @param sections
+	 * @return
+	 */
+	private static EITsection[] appendSections(EITsection[] serviceSections, EITsection[] sections) {
+		EITsection[] tmpArray = new EITsection[serviceSections.length + sections.length];
+		System.arraycopy(serviceSections, 0, tmpArray, 0, serviceSections.length);
+		System.arraycopy(sections, 0, tmpArray, serviceSections.length, sections.length);
+		return tmpArray;
 	}
-
-	public Map<Integer, HashMap<Integer, EITsection[]>> getEITsectionsMap() {
-		return eit;
-	}
+	
 
 	/**
 	 * Returns the start time of the first, and the end time of the last event of the services in this EIT table.
@@ -176,12 +207,12 @@ public class EIT extends AbstractPSITabel{
 	 * @param eitTable map of service IDs to EITSection[] Can contain sections from different Table IDs, like 0x50 and 0x51, etc... (for very long EPGs)
 	 * @return Interval that covers all events in eitTable
 	 */
-	public static Interval getSpanningInterval(final Set<Integer> serviceSet, Map<Integer, EITsection[]> eitTable) {
+	public static Interval getSpanningInterval(final Set<ServiceIdentification> serviceSet, Map<ServiceIdentification, EITsection[]> eitTable) {
 		Date startDate = null;
 		Date endDate = null;
 		// services to be displayed
 
-		for(final Integer serviceNo : serviceSet){
+		for(final ServiceIdentification serviceNo : serviceSet){
 			for(final EITsection section :eitTable.get(serviceNo)){
 				if(section!= null){
 					List<Event> eventList = section.getEventList();
@@ -210,58 +241,44 @@ public class EIT extends AbstractPSITabel{
 		}
 		if((startDate!=null)&&(endDate!=null)){
 			return new Interval(startDate,endDate);
-		}else{
-			return null;
 		}
+		return null;
 	}
 
-	public Map<Integer, EITsection[]> getCombinedSchedule(){
-
-		HashMap<Integer, EITsection[]> res = new HashMap<Integer, EITsection[]>();
-		// actual TS
-		for (int tableID = 0x50; tableID < 0x60; tableID++) {
-			addSections(res, tableID);
-		}
-		// other TS
-		for (int tableID = 0x60; tableID < 0x70; tableID++) {
-			addSections(res, tableID);
-		}
-		return res;
+	public Map<ServiceIdentification, EITsection[]> getCombinedSchedule() {
+		return getFlatEit(tableId -> tableId >= 80);
 	}
 
-	public Map<Integer, EITsection[]> getCombinedPresentFollowing(){
-
-		HashMap<Integer, EITsection[]> res = new HashMap<Integer, EITsection[]>();
-		// actual TS
-		addSections(res, 0x4E);
-		// other TS
-		addSections(res, 0x4F);
-		return res;
+	public Map<ServiceIdentification, EITsection[]> getCombinedPresentFollowing() {
+		return getFlatEit(tableId -> tableId < 80);
 	}
 
-	/**
-	 * @param res
-	 * @param tableID
-	 */
-	private void addSections(Map<Integer, EITsection[]> res, int tableID) {
-		Map<Integer, EITsection []> table= eit.get(tableID);
-		if(table!=null){
-			HashSet<Integer> serviceSet = new HashSet<Integer>(table.keySet());
-			for(final Integer serviceNo : serviceSet){
-				EITsection[] eitArray = table.get(serviceNo); // array to be added to already found EITSections
-				if((eitArray!=null)&&(eitArray.length>0)){
-					EITsection[] resArray = res.get(serviceNo); //already found EITSections
-					if(resArray==null){ // nothing yet, so put in new found
-						res.put(serviceNo, eitArray);
-					}else{
-						EITsection[] combinedArray = new EITsection[resArray.length + eitArray.length];
-						System.arraycopy(resArray, 0, combinedArray, 0, resArray.length);
-						System.arraycopy(eitArray, 0, combinedArray, resArray.length, eitArray.length);
-						res.put(serviceNo, combinedArray);
+	public Map<ServiceIdentification, EITsection[]> getFlatEit(Predicate<Integer> predicate) {
+		Map<ServiceIdentification, EITsection[]> result = new TreeMap<>();
+
+		for (Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> networkEntry : newEit.entrySet()) {
+			int orgNetworkId = networkEntry.getKey();
+			TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> network = networkEntry.getValue();
+
+			for (Entry<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> streamEntry : network.entrySet()) {
+				int streamId = streamEntry.getKey();
+				TreeMap<Integer, TreeMap<Integer, EITsection[]>> stream = streamEntry.getValue();
+
+				for (Entry<Integer, TreeMap<Integer, EITsection[]>> serviceEntry : stream.entrySet()) {
+					int serviceId = serviceEntry.getKey();
+					TreeMap<Integer, EITsection[]> service = serviceEntry.getValue();
+
+					for (Entry<Integer, EITsection[]> tableEntry : service.entrySet()) {
+						int tableId = tableEntry.getKey();
+						if (predicate.test(tableId)) {
+							result.put(new ServiceIdentification(orgNetworkId, streamId, serviceId),
+									tableEntry.getValue());
+						}
 					}
 				}
 			}
 		}
+		return result;
 	}
 
 }

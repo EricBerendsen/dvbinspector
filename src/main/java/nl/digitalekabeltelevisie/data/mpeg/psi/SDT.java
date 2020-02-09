@@ -27,21 +27,17 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.DVBString;
-import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceDescriptor;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection.Service;
+import nl.digitalekabeltelevisie.util.*;
 
 public class SDT extends AbstractPSITabel{
 
@@ -49,51 +45,80 @@ public class SDT extends AbstractPSITabel{
 		super(parentPSI);
 
 	}
-
-	private Map<Integer, SDTsection []> transportStreams = new HashMap<Integer, SDTsection []>();
+	
+	// map<orgNetworkId,TransportStreamId>
+	private Map<Integer,HashMap<Integer, SDTsection []>> networks = new HashMap<Integer, HashMap<Integer, SDTsection []>>();
+	private SDTsection [] actualTransportStreamSDT;
 
 	public void update(final SDTsection section){
 
-		final int key = section.getTransportStreamID();
-		SDTsection [] sections= transportStreams.get(key);
+		final int original_network_id = section.getOriginalNetworkID();
+		final int streamId = section.getTransportStreamID();
+		
+		Map<Integer, SDTsection []> networkSections = networks.computeIfAbsent(original_network_id, HashMap::new);
+		SDTsection [] tsSections = networkSections.computeIfAbsent(streamId, k -> new SDTsection[section.getSectionLastNumber()+1]);
 
-		if(sections==null){
-			sections = new SDTsection[section.getSectionLastNumber()+1];
-			transportStreams.put(key, sections);
+		addSectionToArray(section, tsSections);
+		
+		if(section.getTableId()==0x42) { 
+			if(actualTransportStreamSDT == null) {
+				actualTransportStreamSDT = new SDTsection[section.getSectionLastNumber()+1];
+			}
+			addSectionToArray(section, actualTransportStreamSDT);
 		}
-		if(sections[section.getSectionNumber()]==null){
-			sections[section.getSectionNumber()] = section;
+	}
+
+	/**
+	 * @param section
+	 * @param tsSections
+	 */
+	private static void addSectionToArray(final SDTsection section, SDTsection[] tsSections) {
+		if(tsSections[section.getSectionNumber()]==null){
+			tsSections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			final TableSection last = tsSections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SDT"));
-		final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
 
-		final Iterator<Integer> i = s.iterator();
+		final TreeSet<Integer> networksTreeSet = new TreeSet<Integer>(networks.keySet());
+		final Iterator<Integer> i = networksTreeSet.iterator();
 		while(i.hasNext()){
-			final Integer transportStreamID=i.next();
-			final SDTsection [] sections = transportStreams.get(transportStreamID);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("transport stream", transportStreamID.toString(),null));
-			for (SDTsection section : sections) {
-				if(section!= null){
-					if(!Utils.simpleModus(modus)){
-						addSectionVersionsToJTree(n, section, modus);
-					}else{
-						addListJTree(n,section.getServiceList(),modus,"services");
+			final Integer orgNetworkId=i.next();
+			final Map<Integer, SDTsection []> networkSections = networks.get(orgNetworkId);
+			
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("original_network_id", orgNetworkId,Utils.getOriginalNetworkIDString(orgNetworkId)));
+			t.add(n);			
+			
+			final TreeSet<Integer> streamsTreeSet = new TreeSet<Integer>(networkSections.keySet());
+			final Iterator<Integer> j = streamsTreeSet.iterator();
+			while(j.hasNext()){
+				final Integer transport_stream_id = j.next();
+				SDTsection[] sections = networkSections.get(transport_stream_id);
+
+				final DefaultMutableTreeNode m = new DefaultMutableTreeNode(new KVP("transport_stream_id", transport_stream_id,null));
+				n.add(m);
+
+				for (SDTsection section : sections) {
+					if(section!= null){
+						if(!Utils.simpleModus(modus)){
+							addSectionVersionsToJTree(m, section, modus);
+						}else{
+							addListJTree(m,section.getServiceList(),modus,"services");
+						}
 					}
 				}
 			}
-			t.add(n);
-
 		}
 		return t;
 	}
-
+	
+	@Deprecated
 	public String getServiceName(final int serviceID){
 		DVBString dvbString = getServiceNameDVBString(serviceID);
 		if(dvbString!=null){
@@ -104,6 +129,85 @@ public class SDT extends AbstractPSITabel{
 	}
 
 
+	public Optional<String> getServiceNameForActualTransportStreamOptional(final int serviceID){
+		return  getServiceNameForActualTransportStreamDVBString(serviceID).map(DVBString::toString);
+
+	}
+
+	public String getServiceNameForActualTransportStream(final int serviceID){
+		return  getServiceNameForActualTransportStreamDVBString(serviceID).map(DVBString::toString).orElse(null);
+
+	}
+	
+	public Optional<DVBString> getServiceNameForActualTransportStreamDVBString(int serviceID){
+		return getServiceForActualTransportStream(serviceID)
+				.map(SDTsection.Service::getDescriptorList)
+				.orElseGet(ArrayList<Descriptor>::new)
+				.stream()
+				.filter(d -> d instanceof ServiceDescriptor)
+				.map(d -> (ServiceDescriptor)d)
+				.findFirst()
+				.map(ServiceDescriptor::getServiceName);
+	}
+	
+	public String getServiceName(final int original_network_id, final int transport_stream_id, final int serviceID){
+		return getServiceNameDVBString(original_network_id,transport_stream_id,serviceID).map(DVBString::toString).orElse(null);
+	}
+	
+	public String getServiceName(final ServiceIdentification serviceIdentification){
+		return getServiceNameDVBString(serviceIdentification.getOriginalNetworkId(),serviceIdentification.getTransportStreamId(),serviceIdentification.getServiceId()).
+				map(DVBString::toString).
+				orElse(null);
+	}
+	
+	public Optional<DVBString> getServiceNameDVBString(final ServiceIdentification serviceIdentification){
+		return getServiceNameDVBString(serviceIdentification.getOriginalNetworkId(),serviceIdentification.getTransportStreamId(),serviceIdentification.getServiceId());
+	}
+	
+	public Optional<DVBString> getServiceNameDVBString(final int original_network_id, final int transport_stream_id, final int serviceID){
+
+//		Optional<List<Descriptor>> descriptorList = getService(original_network_id,transport_stream_id,serviceID)
+//				.map(SDTsection.Service::getDescriptorList);
+//					
+//		if (descriptorList.isPresent()) {
+//			return descriptorList
+//				.get()
+//				.stream()
+//				.filter(d -> d instanceof ServiceDescriptor)
+//				.map(d -> (ServiceDescriptor) d)
+//				.findFirst()
+//				.map(ServiceDescriptor::getServiceName);
+//		}
+//		return Optional.empty();	
+//
+
+
+
+		return getService(original_network_id,transport_stream_id,serviceID)
+				.map(SDTsection.Service::getDescriptorList)
+				.orElseGet(ArrayList<Descriptor>::new)
+				.stream()
+				.filter(d -> d instanceof ServiceDescriptor)
+				.map(d -> (ServiceDescriptor)d)
+				.findFirst()
+				.map(ServiceDescriptor::getServiceName);
+
+
+
+//					Optional<List<Descriptor>> r = getService(original_network_id,transport_stream_id,serviceID)
+//							.map(SDTsection.Service::getDescriptorList);
+//							List<Descriptor> t = r.get();
+//			
+//							return t.stream()
+//							.filter(d -> d instanceof ServiceDescriptor)
+//							.map(d -> (ServiceDescriptor)d)
+//							.findFirst()
+//							.map(ServiceDescriptor::getServiceName);
+//
+
+	}
+
+	@Deprecated
 	public DVBString getServiceNameDVBString(final int serviceID){
 		DVBString r = null;
 
@@ -124,6 +228,7 @@ public class SDT extends AbstractPSITabel{
 		}
 	}
 
+	@Deprecated
 	public int getServiceType(final int serviceID){
 		int r = 0;
 
@@ -146,37 +251,87 @@ public class SDT extends AbstractPSITabel{
 	}
 
 
-	public boolean exists(final int tableIdExtension, final int section){
-		return ((transportStreams.get(tableIdExtension)!=null) &&
-				(transportStreams.get(tableIdExtension).length >section) &&
-				(transportStreams.get(tableIdExtension)[section]!=null));
-	}
 
 	public Map<Integer, SDTsection[]> getTransportStreams() {
-		return transportStreams;
+		return null;
 	}
 
-	public void setTransportStreams(final Map<Integer, SDTsection[]> transportStreams) {
-		this.transportStreams = transportStreams;
-	}
 
-	public SDTsection.Service getService(final int serviceID){
+	public Optional<SDTsection.Service> getService(final int orgNetworkId, final int transportStreamID, final int serviceID){
 
-
-		final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
-
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer transportStreamID=i.next();
+		HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
+		
+		if(transportStreams !=null) {
+		
 			final SDTsection [] sections = transportStreams.get(transportStreamID);
 			if(sections!=null){
 				for (SDTsection section : sections) {
-					if(section!= null){
-						final Iterator<SDTsection.Service> serviceIter=section.getServiceList().iterator();
-						while(serviceIter.hasNext()){
-							final SDTsection.Service service=serviceIter.next();
-							if(serviceID== service.getServiceID()) {
-								return service;
+					if(section!= null)  {
+						for(Service service: section.getServiceList()) {
+							if(service.getServiceID() == serviceID) {
+								return Optional.of(service);
+							}
+						}
+					}
+				}
+			}
+		}
+		// no service found, give up
+		return Optional.empty();
+	}
+	
+	
+	public Optional<SDTsection.Service> getServiceForActualTransportStream(final int serviceID){
+
+			
+		if(actualTransportStreamSDT !=null) {
+		
+			final SDTsection [] sections = actualTransportStreamSDT;
+			if(sections!=null){
+				for (SDTsection section : sections) {
+					if(section!= null)  {
+						for(Service service: section.getServiceList()) {
+							if(service.getServiceID() == serviceID) {
+								return Optional.of(service);
+							}
+						}
+					}
+				}
+			}
+		}
+		// no service found, give up
+		return Optional.empty();
+	}
+	
+	
+
+	@Deprecated
+	public SDTsection.Service getService(final int serviceID){
+
+		
+		final TreeSet<Integer> t = new TreeSet<Integer>(networks.keySet());
+		final Iterator<Integer> j = t.iterator();
+		
+		while(j.hasNext()) {
+			
+			int orgNetworkId = j.next();
+			HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
+	
+			final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
+	
+			final Iterator<Integer> i = s.iterator();
+			while(i.hasNext()){
+				final Integer transportStreamID=i.next();
+				final SDTsection [] sections = transportStreams.get(transportStreamID);
+				if(sections!=null){
+					for (SDTsection section : sections) {
+						if(section!= null){
+							final Iterator<SDTsection.Service> serviceIter=section.getServiceList().iterator();
+							while(serviceIter.hasNext()){
+								final SDTsection.Service service=serviceIter.next();
+								if(serviceID== service.getServiceID()) {
+									return service;
+								}
 							}
 						}
 					}
@@ -190,20 +345,29 @@ public class SDT extends AbstractPSITabel{
 	public int getTransportStreamID(final int serviceID){
 
 
-		final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
-
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer transportStreamID=i.next();
-			final SDTsection [] sections = transportStreams.get(transportStreamID);
-			if(sections!=null){
-				for (SDTsection section : sections) {
-					if(section!= null){
-						final Iterator<SDTsection.Service> serviceIter=section.getServiceList().iterator();
-						while(serviceIter.hasNext()){
-							final SDTsection.Service service=serviceIter.next();
-							if(serviceID== service.getServiceID()) {
-								return transportStreamID;
+		final TreeSet<Integer> t = new TreeSet<Integer>(networks.keySet());
+		final Iterator<Integer> j = t.iterator();
+		
+		while(j.hasNext()) {
+			
+			int orgNetworkId = j.next();
+		
+			HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
+			final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
+	
+			final Iterator<Integer> i = s.iterator();
+			while(i.hasNext()){
+				final Integer transportStreamID=i.next();
+				final SDTsection [] sections = transportStreams.get(transportStreamID);
+				if(sections!=null){
+					for (SDTsection section : sections) {
+						if(section!= null){
+							final Iterator<SDTsection.Service> serviceIter=section.getServiceList().iterator();
+							while(serviceIter.hasNext()){
+								final SDTsection.Service service=serviceIter.next();
+								if(serviceID== service.getServiceID()) {
+									return transportStreamID;
+								}
 							}
 						}
 					}

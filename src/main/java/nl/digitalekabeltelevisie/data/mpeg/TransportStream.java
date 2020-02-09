@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -511,10 +511,7 @@ public class TransportStream implements TreeNode{
 			PMTsection pmtSection = pmt[0];
 			while(pmtSection!=null){
 				final int service_id=pmtSection.getProgramNumber();
-				String service_name = getPsi().getSdt().getServiceName(service_id);
-				if(service_name==null){
-					service_name="Service "+service_id;
-				}
+				String service_name = getPsi().getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
 				final int pmt_pid=pmtSection.getParentPID().getPid();
 				setLabel(pmt_pid,pids,"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
 

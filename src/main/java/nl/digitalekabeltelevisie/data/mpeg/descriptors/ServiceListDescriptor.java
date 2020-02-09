@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -75,14 +75,18 @@ public class ServiceListDescriptor extends Descriptor {
 		}
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final String serviceName = parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(serviceID);
-			String nodeName;
-			if(serviceName==null){
-				nodeName="service";
-			}else{
-				nodeName="service ("+serviceName+")";
-			}
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(nodeName));
+			// TODO the correct service name can only be found using the original_network_id and transport_stream_id from the enclosing NIT/BAT section
+			// Not even from section values, but from inner transport stream loop. 
+			
+			
+//			final String serviceName = parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(serviceID);
+//			String nodeName;
+//			if(serviceName==null){
+//				nodeName="service";
+//			}else{
+//				nodeName="service ("+serviceName+")";
+//			}
+			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("service"));
 			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("service_type",serviceType,Descriptor.getServiceTypeString(serviceType))));
 			return s;
