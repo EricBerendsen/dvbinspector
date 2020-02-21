@@ -78,7 +78,6 @@ public class EIT extends AbstractPSITabel{
 		EITsection[] tableSectionArray = serviceSections.computeIfAbsent(tableId,k -> new EITsection[section.getSectionLastNumber()+1]);
 		
 		if(tableSectionArray.length<=section.getSectionNumber()){ //resize if needed
-			System.out.println("expanding tableSectionArray, old length:"+tableSectionArray.length+", new length:"+(section.getSectionNumber()+1));
 			tableSectionArray = Arrays.copyOf(tableSectionArray, section.getSectionNumber()+1);
 			serviceSections.put(tableId,tableSectionArray);
 		}
