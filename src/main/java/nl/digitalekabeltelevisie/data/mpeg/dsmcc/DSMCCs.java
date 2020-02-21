@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,13 +28,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -68,14 +62,14 @@ public class DSMCCs extends AbstractPSITabel{
 	/**
 	 * map (pid, carousel) just the data per pid
 	 */
-	private Map<Integer, DSMCC> dsmccs = new HashMap<>();
+	private Map<Integer, DSMCC> dsmccs = new TreeMap<>();
 
 	/**
 	 * map ( serviceID  all the data for a carousel for a service
 	 *
 	 */
 
-	private Map<Integer, ServiceDSMCC> objectCarousels = new HashMap<>();
+	private Map<Integer, ServiceDSMCC> objectCarousels = new TreeMap<>();
 
 	/**
 	 *
@@ -201,27 +195,18 @@ public class DSMCCs extends AbstractPSITabel{
 		    return t;
 			
 		}
+		
+		dsmccs
+			.values()
+			.parallelStream()
+			.map(k -> k.getJTreeNode(modus))
+			.forEachOrdered(t::add);
 
-
-		final SortedSet<Integer> s = new TreeSet<>(dsmccs.keySet());
-
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer pid=i.next();
-			final DSMCC dsm = dsmccs.get(pid);
-			t.add(dsm.getJTreeNode(modus));
-
-		}
-
-		final SortedSet<Integer> s1 = new TreeSet<>(objectCarousels.keySet());
-
-		final Iterator<Integer> i1 = s1.iterator();
-		while(i1.hasNext()){
-			final Integer serviceId=i1.next();
-			final ServiceDSMCC objCar = objectCarousels.get(serviceId);
-			t.add(objCar.getJTreeNode(modus));
-
-		}
+		objectCarousels
+			.values()
+			.parallelStream()
+			.map(k -> k.getJTreeNode(modus))
+			.forEachOrdered(t::add);
 
 		return t;
 	}

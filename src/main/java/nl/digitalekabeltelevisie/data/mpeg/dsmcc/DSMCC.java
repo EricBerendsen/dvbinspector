@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -140,7 +140,7 @@ public class DSMCC extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC PID="+pid ));
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC PID",pid,null ));
 		TreeSet<Integer> s = new TreeSet<Integer>(unMessages.keySet());
 
 		Iterator<Integer> i = s.iterator();
@@ -266,15 +266,14 @@ public class DSMCC extends AbstractPSITabel{
 		for(DSMCC_DownLoadDataMessageSection s:sections){
 			if(s==null){
 				return null;
+			}
+			while((s!=null)&&(s.getModuleVersion()!=version)){ // start looking for right version
+				s = (DSMCC_DownLoadDataMessageSection)s.getNextVersion();
+			}
+			if((s!=null)&&(s.getModuleVersion()==version)){ // do we have right version?
+				len+= s.getPayLoadLength();
 			}else{
-				while((s!=null)&&(s.getModuleVersion()!=version)){ // start looking for right version
-					s = (DSMCC_DownLoadDataMessageSection)s.getNextVersion();
-				}
-				if((s!=null)&&(s.getModuleVersion()==version)){ // do we have right version?
-					len+= s.getPayLoadLength();
-				}else{
-					return null;
-				}
+				return null;
 			}
 		}
 		if(len!=moduleInfo.getModuleSize()){
