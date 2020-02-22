@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -77,6 +77,12 @@ public final class DSMCCDescriptorFactory {
 	private static Descriptor getDSMCCDescriptor(final byte[] data, final int offset, final int t) {
 		Descriptor d;
 		switch (toUnsignedInt(data[t + offset])) {
+		case 0x02:
+			d = new NameDescriptor(data, t + offset);
+			break;
+		case 0x04:
+			d = new ModuleLinkDescriptor(data, t + offset);
+			break;
 		case 0x05:
 			d = new CRC32Descriptor(data, t + offset);
 			break;
