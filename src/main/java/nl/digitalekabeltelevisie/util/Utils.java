@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -948,6 +948,10 @@ public final class Utils {
 		case 0x2d: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – main stream";
 		case 0x2e: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – auxiliary stream";
 		case 0x2f: return "Quality access units carried in sections";
+		//ISO/IEC 13818-1:2019/Amd.1:2020(E)
+		case 0x30: return "Media Orchestration Access Units carried in sections";
+		case 0x31: return "Substream of a Rec. ITU-T H.265 | ISO/IEC 23008 2 video stream that contains a Motion Constrained Tile Set, parameter sets, slice headers or a combination thereof.";
+		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
 
 		
 		case 0x7f: return"IPMP stream";
