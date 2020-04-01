@@ -44,17 +44,6 @@ import nl.digitalekabeltelevisie.util.*;
 
 public class LinkageDescriptor extends Descriptor {
 
-	private static LookUpList m7BrandList = new LookUpList.Builder().
-			add(0x01, "Canal Digitaal").
-			add(0x02, "TV VLAANDEREN").
-			add(0x03, "TELESAT").
-			add(0x04, "HD Austria").
-			add(0x05, "Skylink CZ").
-			add(0x06, "Skylink SK").
-			add(0x07, "Diveo").
-			add(0x08, "UPC 1").
-			add(0x09, "UPC 2").
-			build();
 
 	private static final Logger logger = Logger.getLogger(LinkageDescriptor.class.getName());
 
@@ -205,6 +194,51 @@ public class LinkageDescriptor extends Descriptor {
 			s.add(new DefaultMutableTreeNode(new KVP("FST_version_number",fst_version_number,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 			return s;
+		}
+
+
+		public int getOperator_network_id() {
+			return operator_network_id;
+		}
+
+
+		public int getOperator_sublist_id() {
+			return operator_sublist_id;
+		}
+
+
+		public int getHome_transport_stream_id() {
+			return home_transport_stream_id;
+		}
+
+
+		public int getHome_original_network_id() {
+			return home_original_network_id;
+		}
+
+
+		public int getHomebckp_transport_stream_id() {
+			return homebckp_transport_stream_id;
+		}
+
+
+		public int getHomebckp_original_network_id() {
+			return homebckp_original_network_id;
+		}
+
+
+		public int getFst_pid() {
+			return fst_pid;
+		}
+
+
+		public int getFst_version_number() {
+			return fst_version_number;
+		}
+
+
+		public int getReserved() {
+			return reserved;
 		}
 	}
 
@@ -585,6 +619,10 @@ public class LinkageDescriptor extends Descriptor {
 
 	public int getM7_code() {
 		return m7_code;
+	}
+
+	public List<BrandHomeTransponder> getM7BrandHomeTransponderList() {
+		return m7BrandHomeTransponderList;
 	}
 
 }

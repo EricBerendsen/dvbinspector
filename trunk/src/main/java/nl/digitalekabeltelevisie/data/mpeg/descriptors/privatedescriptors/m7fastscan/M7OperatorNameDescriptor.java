@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -46,6 +46,10 @@ public class M7OperatorNameDescriptor extends M7Descriptor {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		t.add(new DefaultMutableTreeNode(new KVP("operator_name",operatorName ,null)));
 		return t;
+	}
+
+	public DVBString getOperatorName() {
+		return operatorName;
 	}
 
 }

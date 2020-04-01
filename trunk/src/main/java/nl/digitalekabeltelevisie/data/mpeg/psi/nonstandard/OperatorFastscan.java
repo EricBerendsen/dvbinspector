@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -29,6 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 
 import java.nio.charset.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -43,35 +44,28 @@ import nl.digitalekabeltelevisie.util.*;
 
 public class OperatorFastscan implements TreeNode, HTMLSource {
 	
-	private static LookUpList pidAllocation = new LookUpList.Builder().
-			add(30,"Skylink Czech Republic list").
-			add(31,"Skylink Slovak Republic list").
-			add(900,"Canal Digitaal SD list").
-			add(901,"Canal Digitaal HD list").
-			add(910,"TV VLAANDEREN SD").
-			add(911,"TV VLAANDEREN HD").
-			add(920,"TELESAT Belgium").
-			add(921,"TELESAT Luxembourg").
-			add(950,"HD Austria").
-			add(952,"HD Austria FTA").
-			add(960,"Diveo").
-			build();
 			
 	// encoding is always ISO-8859-9, ignoring character selection information as defined in Annex A of ETSI EN 300 468
 	private static Charset charset = Charset.forName("ISO-8859-9");
 	
+	private static final Logger	logger	= Logger.getLogger(OperatorFastscan.class.getName());
+
+	
 	private int pid;
+	private int operatorNetworkId = -1;
+	private M7Fastscan m7Fastscan;
 	
 	FNTsection[] fntSections;
 	FSTsection[] fstSections;
 
-	public OperatorFastscan(int pid) {
+	public OperatorFastscan(int pid, M7Fastscan m7Fastscan) {
 		this.pid = pid;
+		this.m7Fastscan = m7Fastscan;
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final KVP networkKVP = new KVP("Network",pid, pidAllocation.get(pid, "unknown"));
+		final KVP networkKVP = new KVP("Pid",pid,getOperatorSubListName());
 		networkKVP.setHtmlSource(this);
 		final DefaultMutableTreeNode n = new DefaultMutableTreeNode(networkKVP);
 		
@@ -99,7 +93,18 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 		return n;
 	}
 
+	private String getOperatorSubListName() {
+		return m7Fastscan.getOperatorSubListName(operatorNetworkId,pid);
+	}
+
 	public void update(FSTsection section) {
+		if(operatorNetworkId==-1) {
+			operatorNetworkId = section.getOperatorNetworkID();
+		}else {
+			if(operatorNetworkId != section.getOperatorNetworkID()) {
+				logger.log(Level.WARNING, "update::FSTsection, ocurrent peratorNetworkId:"+ operatorNetworkId +" not equal to section.getOperatorNetworkID():"+section.getOperatorNetworkID());
+			}
+		}
 
 		if(fstSections == null) {
 			fstSections = new FSTsection[section.getSectionLastNumber()+1];
@@ -114,6 +119,13 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 	}
 
 	public void update(FNTsection section) {
+		if(operatorNetworkId==-1) {
+			operatorNetworkId = section.getOperatorNetworkID();
+		}else {
+			if(operatorNetworkId != section.getOperatorNetworkID()) {
+				logger.log(Level.WARNING, "update::FNTsection, ocurrent peratorNetworkId:"+ operatorNetworkId +" not equal to section.getOperatorNetworkID():"+section.getOperatorNetworkID());
+			}
+		}
 		if(fntSections == null) {
 			fntSections = new FNTsection[section.getSectionLastNumber()+1];
 		}
@@ -132,6 +144,14 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 		//   onid        ts_id       
 		Map<Integer,Map<Integer,TransportStream>> fntStreams = new HashMap<>();
 
+		if(fntSections==null){
+			return "FNT Missing";
+		}
+		
+		if(fstSections==null){
+			return "FST Missing";
+		}
+
 		for (FNTsection fnTsection : fntSections) {
 			for (FNTsection.TransportStream stream : fnTsection.transportStreamList) {
 				final int onid = stream.getOriginalNetworkID();
@@ -144,17 +164,19 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 		
 		Map<Integer, FSTsection.Service> channelMap = new HashMap<>();
 		for (FSTsection fsTsection : fstSections) {
-			for (FSTsection.Service service : fsTsection.serviceList) {
-				int onid = service.getOriginal_network_id();
-				int ts_id = service.getTransport_stream_id();
-
-				TransportStream stream = fntStreams.get(onid).get(ts_id);
-				List<M7LogicalChannelDescriptor> m7LogicalChannelDescriptorList = Descriptor
-						.findGenericDescriptorsInList(stream.descriptorList, M7LogicalChannelDescriptor.class);
-				M7LogicalChannelDescriptor m7LogicalChannelDescriptor = m7LogicalChannelDescriptorList.get(0);
-				for (M7LogicalChannelDescriptor.LogicalChannel channel : m7LogicalChannelDescriptor.getChannelList()) {
-					if (channel.getServiceID() == service.getService_id()) {
-						channelMap.put(channel.getLogicalChannelNumber(), service);
+			if(fsTsection!=null) {
+				for (FSTsection.Service service : fsTsection.serviceList) {
+					int onid = service.getOriginal_network_id();
+					int ts_id = service.getTransport_stream_id();
+	
+					TransportStream stream = fntStreams.get(onid).get(ts_id);
+					List<M7LogicalChannelDescriptor> m7LogicalChannelDescriptorList = Descriptor
+							.findGenericDescriptorsInList(stream.descriptorList, M7LogicalChannelDescriptor.class);
+					M7LogicalChannelDescriptor m7LogicalChannelDescriptor = m7LogicalChannelDescriptorList.get(0);
+					for (M7LogicalChannelDescriptor.LogicalChannel channel : m7LogicalChannelDescriptor.getChannelList()) {
+						if (channel.getServiceID() == service.getService_id()) {
+							channelMap.put(channel.getLogicalChannelNumber(), service);
+						}
 					}
 				}
 			}
