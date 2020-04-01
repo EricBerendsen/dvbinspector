@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,6 +34,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -158,5 +159,31 @@ public class ONTSection extends TableSectionExtendedSyntax {
 		return t;
 	}
 
+	public String getOperatorName(int operator_network_id) {
+		
+		for( OperatorBrand operatorBrand: operatorBrandList) {
+			if(operatorBrand.getOperator_network_id()==operator_network_id) {
+				List<M7OperatorNameDescriptor> operatorNameDescriptors = Descriptor.findGenericDescriptorsInList(operatorBrand.getDescriptorList(), M7OperatorNameDescriptor.class);
+				if(operatorNameDescriptors.size()>=1) {
+					return operatorNameDescriptors.get(0).getOperatorName().toString();
+				}
+			}
+		}
+		return null;
+	}
+
+	public String getOperatorSublistName(int operator_network_id, int operator_sublist_id) {
+		
+		for( OperatorBrand operatorBrand: operatorBrandList) {
+			if((operatorBrand.getOperator_network_id()==operator_network_id) && 
+					(operatorBrand.getOperator_sublist_id()==operator_sublist_id)){
+				List<M7OperatorSublistNameDescriptor> operatorSublistNameDescriptors = Descriptor.findGenericDescriptorsInList(operatorBrand.getDescriptorList(), M7OperatorSublistNameDescriptor.class);
+				if(operatorSublistNameDescriptors.size()>=1) {
+					return operatorSublistNameDescriptors.get(0).getOperatorSublistName().toString();
+				}
+			}
+		}
+		return null;
+	}
 
 }
