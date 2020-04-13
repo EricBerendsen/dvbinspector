@@ -2,7 +2,7 @@ readme
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.10.1-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.12.1-dist.zip to a directory of your choice. It will create the following directory structure;
 
 directory structure
 
@@ -11,14 +11,15 @@ directory structure
     src/main/resources, contains images needed by DVB Inspector
     src/main/resources/res, contains comma separated resource files for bouquet_id, ca_system_id, data_broadcast_id, original_network, platform_id, oui_registration. The files can be updated if needed, see below.
     COPYING, contains the GPL license
-    dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default. For linux/unix you have to modify it yourself. Should not be very difficult.
-    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat script.
-    DVBinspector-1.2.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
+    dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default.
+    dvb.sh Bash script to start the program using Linux.
+    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
+    DVBinspector-1.12.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 
-DVBinspector-1.11.0.jar
+DVBinspector-1.12.0.jar
 
-Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.11.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.11.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.11.0.jar".
+Starting from release 0.0.3 there are now two ways to start DVBInspector. The easiest is to use DVBinspector-1.12.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.12.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.12.0.jar".
 
 dvb.bat
 
@@ -27,11 +28,27 @@ java -classpath .;.\lib\jfreechart-1.0.13.jar;.\lib\jcommon-1.0.16.jar;.\lib\ope
 
 dvb.sh
 
-The linux/unix version of dvb.bat. This small batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path. Memory heap size  is not set, but you cvan add that option if needed.
+The linux/unix version of dvb.bat. This small batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path. Memory heap size  is not set, but you can add that option if needed.
 
 Changelog
 
 List of the most important changes between releases
+
+Release 1.12.0
+Release date: 13/04/2020
+updated: stream_type descriptions and MPEG Extension descriptor names based on H.222.0 (2018) Amendment 1
+fixed: a service is not uniquely identified by service_id only, but by original_network_id, transport_stream_id and service_id, chn.
+changed: SDT and EIT tree representation to match the fix for service_id
+updated: M7 Fastscan to v.8.2.0
+added: AC4Descriptor and AudioPreselectionDescriptor (DVBExtensionDescriptors)
+improved: MegaFrameInitializationPacket to support Optional MIP section parameters
+added: Name descriptor and Module link descriptor support for DSM-CC UN-Message
+improved: performance on DSMCCs getTreeNode by using parallel streams
+added: ScramblingDescriptor
+fixed: handle PesPackets without data for subtitling
+added: detect SL-HDR data (Annex A of TS 103 433-1)
+added: label for ST2094-10_data (HDR Signalling)
+updated: several descriptions to match DVB BlueBook A038 June 2019
 
 
 Release 1.11.0
