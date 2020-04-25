@@ -55,13 +55,12 @@ public class PesHandlerSetup {
 	protected static final Integer NPO2_H264_PID = 2301;
 	protected static final Integer NPO2_SUB_PID = 2403;
 	protected static final Integer TVE_H222_PID = 2901;
-	private static final Object o = new Object();
 
 	@BeforeClass
 	public static void setUp() throws NotAnMPEGFileException, IOException, URISyntaxException {
 	
 		//
-		final URL resource = o.getClass().getResource("/NPO12HD.ts");
+		final URL resource = PesHandlerSetup.class.getResource("/NPO12HD.ts");
 		// spaces in dirname...
 		final File ts =  new File(resource.toURI());
 		transportStream = new TransportStream(ts);

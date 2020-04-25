@@ -12,13 +12,12 @@ import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 public class TransportStreamMissingPacketsTest {
 
 	private static TransportStream transportStream;
-	private final static Object o = new Object();
 
 	@BeforeClass
 	public static void setUp() throws NotAnMPEGFileException, IOException, URISyntaxException{
 
 		//
-		final URL resource = o.getClass().getResource("/missing packets digitenne 482000 06-30 19-43-54.ts");
+		final URL resource = TransportStreamMissingPacketsTest.class.getResource("/missing packets digitenne 482000 06-30 19-43-54.ts");
 		// spaces in dirname...
 		final File ts =  new File(resource.toURI());
 		transportStream = new TransportStream(ts);
