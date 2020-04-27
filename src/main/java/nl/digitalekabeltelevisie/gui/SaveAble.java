@@ -28,6 +28,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.io.File;
 
+@FunctionalInterface
 public interface SaveAble {
 	
 	void save(File file);

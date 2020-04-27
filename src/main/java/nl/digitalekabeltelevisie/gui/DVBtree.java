@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -256,15 +256,13 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final JScrollPane treeView = new JScrollPane(tree);
 
 		InputMap inputMap = tree.getInputMap();
-		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_DOWN_MASK);
 		inputMap.put(key, COPY);
 		tree.getActionMap().put(COPY, new CopyAction());
 		
 		KeyStroke keyStar = KeyStroke.getKeyStroke('*');
 		inputMap.put(keyStar, EXPAND_ALL);
 		tree.getActionMap().put(EXPAND_ALL, new ExpandAllAction());
-
-
 
 		editorPane = new JEditorPane();
 		editorPane.getTransferHandler();
@@ -887,24 +885,17 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		if(kvp.getFieldType()!= KVP.FIELD_TYPE_BYTES) {
 			return;
 		}
-		String fileName = kvp.getLabel();
-		SaveAble saveAble = new SaveAble() {
-			
-			@Override
-			public void save(File file) {
-				try (FileOutputStream out = new FileOutputStream(file)) {
-					out.write(kvp.getByteValue());
-					
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "could not write file", e);
-				}
+		SaveAble saveAble = file -> {
+			try (FileOutputStream out = new FileOutputStream(file)) {
+				out.write(kvp.getByteValue());
 				
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "could not write file", e);
 			}
+			
 		};
 		
-		selectFileAndSave(fileName, saveAble);
-
-		
+		selectFileAndSave(kvp.getLabel(), saveAble);
 	}
 
 	/**

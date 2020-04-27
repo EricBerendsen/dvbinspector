@@ -238,7 +238,6 @@ public class KVP{
 		this.bigIntegerValue = value;
 		this.fieldType = FIELD_TYPE_BIGINT;
 		this.description = description;
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getDescription() {
@@ -285,9 +284,8 @@ public class KVP{
 		}
 		if (stringFormat == STRING_DISPLAY_JAVASCRIPT) {
 			return  b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
-		} else {
-			return b.toString();
 		}
+		return b.toString();
 	}
 
 	/**
@@ -476,17 +474,11 @@ public class KVP{
 		return owner;
 	}
 
-	public HTMLSource getHTMLSource(){
-		if(fieldType == FIELD_TYPE_BYTES){
-			return new HTMLSource() {
-				@Override
-				public String getHTML() {
-					return getHTMLHexview(byteValue, byteStart, byteLen);
-				}
-			};
-		}else{
-			return htmlSource;
+	public HTMLSource getHTMLSource() {
+		if (fieldType == FIELD_TYPE_BYTES) {
+			return () -> getHTMLHexview(byteValue, byteStart, byteLen);
 		}
+		return htmlSource;
 	}
 
 	public byte getFieldType() {

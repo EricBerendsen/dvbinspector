@@ -29,7 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.awt.image.BufferedImage;
 
-
+@FunctionalInterface
 public interface ImageSource {
 
 	BufferedImage getImage();

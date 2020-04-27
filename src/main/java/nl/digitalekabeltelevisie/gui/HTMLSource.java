@@ -33,6 +33,8 @@ package nl.digitalekabeltelevisie.gui;
  * @author Eric
  *
  */
+
+@FunctionalInterface
 public interface HTMLSource {
 
 	/**
