@@ -153,6 +153,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	private static final String IMAGE_PANEL = "image";
 
+	/**
+	 * key for cardlayout
+	 */
+	private static final String TABLE_PANEL = "table";
+
 	private static final long serialVersionUID = 9200238343077897328L;
 	private static final Logger logger = Logger.getLogger(DVBtree.class.getName());
 
@@ -183,6 +188,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private TransportStream ts;
 	private DefaultTreeModel model;
 	private ImagePanel imagePanel = new ImagePanel();
+	private JTable jTable = new JTable();
+	private TablePanel tablePanel = new TablePanel(jTable);
 
 	/**
 	 *
@@ -278,6 +285,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		detailPanel.add(empty,EMPTY_PANEL);
 		detailPanel.add(imagePanel,IMAGE_PANEL);
 		detailPanel.add(editorPane,HTML_PANEL);
+		detailPanel.add(tablePanel,TABLE_PANEL);
 
 
 		final JScrollPane detailView = new JScrollPane(detailPanel);
@@ -443,15 +451,19 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						cardLayout.show(detailPanel, IMAGE_PANEL);
 						return;
 					}
-				} else {
-					HTMLSource htmlSource = kvp.getHTMLSource();
-					if(htmlSource!=null){
+				} else if(kvp.getHTMLSource()!=null){
 						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						final StringBuilder html = new StringBuilder("<html>").append(htmlSource.getHTML()).append("</html>");
+						final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
 						editorPane.setText(html.toString());
 						editorPane.setCaretPosition(0);
 						setCursor(Cursor.getDefaultCursor());
 						cardLayout.show(detailPanel, HTML_PANEL);
+						return;
+				} else {
+					TableSource tableSource = kvp.getTableSource();
+					if(tableSource!=null) {
+						tablePanel.setModel(tableSource.getTableModel());
+						cardLayout.show(detailPanel, TABLE_PANEL);
 						return;
 					}
 				}

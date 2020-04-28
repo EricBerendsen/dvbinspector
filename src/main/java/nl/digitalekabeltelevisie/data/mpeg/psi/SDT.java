@@ -135,7 +135,7 @@ public class SDT extends AbstractPSITabel{
 	}
 
 	public String getServiceNameForActualTransportStream(final int serviceID){
-		return  getServiceNameForActualTransportStreamDVBString(serviceID).map(DVBString::toString).orElse(null);
+		return  getServiceNameForActualTransportStreamOptional(serviceID).orElse(null);
 
 	}
 	

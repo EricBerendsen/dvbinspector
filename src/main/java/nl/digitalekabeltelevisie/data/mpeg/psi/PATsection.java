@@ -31,18 +31,80 @@ import static java.lang.Byte.toUnsignedInt;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class PATsection extends TableSectionExtendedSyntax {
+public class PATsection extends TableSectionExtendedSyntax implements TableSource{
 
 	private List<Program> programs;
+
+	private final class PatTableModel extends AbstractNonEditableTableModel {
+		
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			Program program = programs.get(rowIndex);
+			switch (columnIndex) {
+			case 0:
+			    return program.program_number;
+			case 1:
+			    return program.program_map_PID;
+			case 2:
+			    return program.getServiceNameOrNit();
+
+			default:
+				return null;
+			}
+		}
+
+		@Override
+		public int getRowCount() {
+			return programs.size();
+		}
+
+		@Override
+		public int getColumnCount() {
+			return 3;
+		}
+
+		@Override
+		public Class getColumnClass(int columnIndex) {
+			switch (columnIndex) {
+			case 0:
+			    return Integer.class;
+			case 1:
+			    return Integer.class;
+			case 2:
+			    return String.class;
+
+			default:
+				return Object.class;
+			}
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			switch (columnIndex) {
+			case 0:
+				return "program_number";
+			case 1:
+				return "program_map_PID";
+			case 2:
+				return "name";
+
+			default:
+				return "";
+			}
+		}
+
+	}
 
 	public class Program implements TreeNode{
 		private int program_number;
@@ -66,14 +128,27 @@ public class PATsection extends TableSectionExtendedSyntax {
 			this.program_number = program_number;
 		}
 
+		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
+			String postFix = "";
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("program ("+ getParentPID().getParentTransportStream().getPsi().getSdt().getServiceNameForActualTransportStream(program_number)+")"));
+			String serviceName = getServiceNameOrNit();
+			if(serviceName!=null) {
+				postFix = " ("+serviceName+")";
+			}
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("program"+ postFix));
 
 			t.add(new DefaultMutableTreeNode(new KVP("program_number",program_number,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("program_map_PID",program_map_PID,null)));
 
 			return t;
+		}
+		private String getServiceNameOrNit() {
+			String serviceName = getParentPID().getParentTransportStream().getPsi().getSdt().getServiceNameForActualTransportStream(program_number);
+			if(serviceName==null && program_map_PID==16) {
+				serviceName = "NIT";
+			}
+			return serviceName;
 		}
 	}
 
@@ -126,6 +201,8 @@ public class PATsection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this);
 
 		Utils.addListJTree(t,programs,modus,"programs");
 		return t;
@@ -137,5 +214,13 @@ public class PATsection extends TableSectionExtendedSyntax {
 
 	public void setPrograms(final List<Program> programs) {
 		this.programs = programs;
+	}
+
+	@Override
+	public TableModel getTableModel() {
+		
+		TableModel tm = new PatTableModel();
+		
+		return tm;
 	}
 }

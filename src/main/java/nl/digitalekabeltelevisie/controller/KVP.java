@@ -133,6 +133,7 @@ public class KVP{
 	 */
 	private HTMLSource 	htmlSource;
 
+	private TableSource tableSource;
 
 
 	public void setHtmlSource(final HTMLSource htmlSource) {
@@ -492,4 +493,13 @@ public class KVP{
 		
 		return null;
 	}
+
+	public TableSource getTableSource() {
+		return tableSource;
+	}
+
+	public void setTableSource(TableSource tableSource) {
+		this.tableSource = tableSource;
+	}
+
 }
