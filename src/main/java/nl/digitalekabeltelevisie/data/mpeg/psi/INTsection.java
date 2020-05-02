@@ -205,6 +205,12 @@ public class INTsection extends TableSectionExtendedSyntax {
 		Utils.addListJTree(t,targetLoopList,modus,"target_loop");
 		return t;
 	}
+	
+	@Override
+	String getTableIdExtensionLabel() {
+		return "action_type (8) / platform_id_hash (8)";
+	}
+
 
 
 	public int getPlatformID() {

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -373,7 +373,7 @@ public class TableSection implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("private_indicator", privateIndicator, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("section_length", sectionLength, null)));
 		if (sectionSyntaxIndicator == 1) { // long format
-			t.add(new DefaultMutableTreeNode(new KVP("table_id_extension", tableIdExtension, null)));
+			t.add(new DefaultMutableTreeNode(new KVP(getTableIdExtensionLabel(), tableIdExtension, null)));
 			t.add(new DefaultMutableTreeNode(new KVP("version", version, null)));
 			t.add(new DefaultMutableTreeNode(
 					new KVP("current_next_indicator", currentNext, (currentNext == 1) ? "current" : "next")));
@@ -383,6 +383,15 @@ public class TableSection implements TreeNode{
 		} else {
 			t.add(new DefaultMutableTreeNode(new KVP("private_data", raw_data.getData(), 3, sectionLength, null)));
 		}
+	}
+
+	/**
+	 * The field table_id_extension has different meaning for different sub classes. By overriding this method
+	 * the correct specific label can be displayed.
+	 * @return label to be displayed in TreeView
+	 */
+	String getTableIdExtensionLabel() {
+		return "table_id_extension";
 	}
     
 	public DefaultMutableTreeNode getJTreeNode(final int modus,final HTMLSource htmlSource){

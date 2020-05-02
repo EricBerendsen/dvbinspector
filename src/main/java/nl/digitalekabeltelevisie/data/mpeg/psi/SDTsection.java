@@ -230,7 +230,11 @@ public class SDTsection extends TableSectionExtendedSyntax {
 		return t;
 	}
 
-
+	@Override
+	String getTableIdExtensionLabel() {
+		return "transport_stream_id";
+	}
+    
 	public int getOriginalNetworkID() {
 		return originalNetworkID;
 	}
