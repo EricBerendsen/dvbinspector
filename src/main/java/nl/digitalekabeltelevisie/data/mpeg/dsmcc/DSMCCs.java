@@ -189,12 +189,12 @@ public class DSMCCs extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CCs"));
+		
 		if(!PreferencesManager.isEnableDSMCC()) {
-		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("DSM-CC not enabled, select 'Settings -> Enable DSM-CC' to enable ")));
-		    return t;
-			
+			return new DefaultMutableTreeNode(new KVP("DSM-CCs (not enabled, select 'Settings -> Enable DSM-CC' to enable )"));
 		}
+		
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CCs"));
 		
 		dsmccs
 			.values()
