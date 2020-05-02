@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -29,12 +29,15 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.util.HashMap;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class SatelliteDeliverySystemDescriptor extends Descriptor {
+public class SatelliteDeliverySystemDescriptor extends Descriptor implements TableRowSource{
 
 	private String frequency; // use as bits, BCD coded.
 	private final String orbitalPosition;
@@ -134,9 +137,9 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor {
 
 		t.add(new DefaultMutableTreeNode(new KVP("frequency",frequency ,Descriptor.formatSatelliteFrequency(frequency))));
 		t.add(new DefaultMutableTreeNode(new KVP("orbital_position",orbitalPosition,Descriptor.formatOrbitualPosition(orbitalPosition))));
-		t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,westEastFlag==1?"east":"west")));
+		t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,getWestEastFlagString())));
 		t.add(new DefaultMutableTreeNode(new KVP("polarization",polarization,getPolarizationString(polarization))));
-		t.add(new DefaultMutableTreeNode(new KVP("modulation_system",modulationSystem,modulationSystem==1?"DVB-S2":"DVB-S")));
+		t.add(new DefaultMutableTreeNode(new KVP("modulation_system",modulationSystem,getModulationSystemString())));
 		if(modulationSystem==1){
 			t.add(new DefaultMutableTreeNode(new KVP("roll_off",rollOff,getRollOffString(rollOff))));
 		}
@@ -145,6 +148,16 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor {
 		t.add(new DefaultMutableTreeNode(new KVP("FEC_inner",FEC_inner ,Descriptor.getFEC_innerString(FEC_inner))));
 
 		return t;
+	}
+
+
+	String getModulationSystemString() {
+		return modulationSystem==1?"DVB-S2":"DVB-S";
+	}
+
+
+	String getWestEastFlagString() {
+		return westEastFlag==1?"east":"west";
 	}
 
 
@@ -175,5 +188,25 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor {
 
 	public int getModulationType() {
 		return modulationType;
+	}
+
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("satellite.frequency", Descriptor.formatSatelliteFrequency(frequency));
+		rowData.put("satellite.orbital_position", Descriptor.formatOrbitualPosition(orbitalPosition));
+		rowData.put("satellite.west_east_flag",getWestEastFlagString());
+		rowData.put("satellite.polarization", getPolarizationString(polarization));
+		rowData.put("satellite.modulation_system", getModulationSystemString());
+		if(modulationSystem==1){
+			rowData.put("satellite.roll_off", getRollOffString(rollOff));
+		}
+		rowData.put("satellite.modulation_type", getModulationString(modulationType));
+		rowData.put("satellite.symbol_rate", Descriptor.formatSymbolRate(symbol_rate));
+		rowData.put("satellite.fec_inner", Descriptor.getFEC_innerString(FEC_inner));
+
+		return rowData;
 	}
 }

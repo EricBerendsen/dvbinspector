@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,15 +27,16 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PATsection.Program;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class PAT extends AbstractPSITabel{
 
@@ -96,7 +97,9 @@ public class PAT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PAT"));
+		KVP kvp = new KVP("PAT");
+		kvp.setTableSource(()->getTableModel());
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 
 		if (pat != null) {
@@ -178,6 +181,26 @@ public class PAT extends AbstractPSITabel{
 			}
 		return null;
 		}
+	}
+
+
+	public TableModel getTableModel() {
+		
+		FlexTableModel tableModel = new FlexTableModel(PATsection.buildPatTableHeader());
+
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		if (pat != null) {
+			for (PATsection element : pat) {
+				if(element!= null){
+					rowData.addAll(element.getRowData());
+				}
+			}
+		}
+		tableModel.addRowData(rowData);
+		
+		tableModel.process();
+		return tableModel;
 	}
 
 

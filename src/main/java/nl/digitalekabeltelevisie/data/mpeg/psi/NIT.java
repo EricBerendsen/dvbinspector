@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,25 +26,20 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class NIT extends AbstractPSITabel{
 
@@ -73,14 +68,18 @@ public class NIT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("NIT"));
+		KVP kvpNit = new KVP("NIT");
+		kvpNit.setTableSource(()->getTableModel());
+		final DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode( kvpNit);
 		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
 
 		final Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
 			final Integer networkNo=i.next();
 			final NITsection [] sections = networks.get(networkNo);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("network_id",networkNo, getNetworkName(networkNo)));
+			KVP kvp = new KVP("network_id",networkNo, getNetworkName(networkNo));
+			kvp.setTableSource(()->getTableForNetworkID(networkNo));
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			for (final NITsection tsection : sections) {
 				if(tsection!= null){
 					if(!Utils.simpleModus(modus)){
@@ -91,10 +90,11 @@ public class NIT extends AbstractPSITabel{
 					}
 				}
 			}
-			t.add(n);
+			treeNode.add(n);
 		}
-		return t;
+		return treeNode;
 	}
+
 
 	public String getNetworkName(final int networkNo){
 		String r = null;
@@ -237,6 +237,45 @@ public class NIT extends AbstractPSITabel{
 			}
 		}
 		return null;
+	}
+
+	private TableModel getTableForNetworkID(Integer networkNo) {
+		FlexTableModel tableModel = new FlexTableModel(NITsection.buildNitTableHeader());
+
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+
+		final NITsection [] sections = networks.get(networkNo);
+		
+		for (final NITsection tsection : sections) {
+			if(tsection!= null){
+				rowData.addAll(tsection.getRowData());
+			}
+		}
+
+		tableModel.addRowData(rowData);
+		
+		tableModel.process();
+		return tableModel;
+	}
+
+	
+	public TableModel getTableModel() {
+		
+		FlexTableModel tableModel = new FlexTableModel(NITsection.buildNitTableHeader());
+
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for(NITsection[] nitSections:networks.values()) {
+			for (final NITsection tsection : nitSections) {
+				if(tsection!= null){
+					rowData.addAll(tsection.getRowData());
+				}
+			}
+		}
+		tableModel.addRowData(rowData);
+		
+		tableModel.process();
+		return tableModel;
 	}
 
 

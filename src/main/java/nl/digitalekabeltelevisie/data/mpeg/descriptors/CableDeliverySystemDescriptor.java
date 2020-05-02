@@ -29,12 +29,15 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
+import java.util.HashMap;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class CableDeliverySystemDescriptor extends Descriptor {
+public class CableDeliverySystemDescriptor extends Descriptor implements TableRowSource{
 
 	private String frequency; // use as bits, BCD coded.
 	private int FEC_outer;
@@ -144,4 +147,17 @@ public class CableDeliverySystemDescriptor extends Descriptor {
 
 		return t;
 	}
+	
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("cable.frequency", Descriptor.formatCableFrequency(frequency));
+		rowData.put("cable.fec_outter", getFEC_outerString());
+		rowData.put("cable.modulation", getModulationString(modulation));
+		rowData.put("cable.symbol_rate", Descriptor.formatSymbolRate(symbol_rate));
+		rowData.put("cable.fec_inner", Descriptor.getFEC_innerString(FEC_inner));
+
+		return rowData;
+	}
+
 }

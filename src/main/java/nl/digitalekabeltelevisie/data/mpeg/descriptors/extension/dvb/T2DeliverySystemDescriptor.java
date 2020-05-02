@@ -37,8 +37,9 @@ import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor {
+public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor  implements TableRowSource{
 	
 	private class CellInfo implements TreeNode{
 		
@@ -218,5 +219,18 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor {
 		return t;
 	}
 
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("t2.plp_id", plp_id);
+		rowData.put("t2.t2_system_id", t2_system_id);
+		if (descriptorLength > 4) {
+			rowData.put("t2.siso_miso", siso_miso_mode_list.get(siso_miso));
+			rowData.put("t2.bandwidth", bandwidth_list.get(bandwidth));
+			rowData.put("t2.guard_interval", guard_interval_list.get(guard_interval));
+			rowData.put("t2.transmission_mode", transmission_mode_list.get(transmission_mode));
+		}
+		return rowData;
+	}
 
 }

@@ -28,8 +28,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static java.lang.Byte.toUnsignedInt;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.table.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -40,71 +39,12 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 
 public class PATsection extends TableSectionExtendedSyntax implements TableSource{
 
 	private List<Program> programs;
-
-	private final class PatTableModel extends AbstractNonEditableTableModel {
-		
-		@Override
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			Program program = programs.get(rowIndex);
-			switch (columnIndex) {
-			case 0:
-			    return program.program_number;
-			case 1:
-			    return program.program_map_PID;
-			case 2:
-			    return program.getServiceNameOrNit();
-
-			default:
-				return null;
-			}
-		}
-
-		@Override
-		public int getRowCount() {
-			return programs.size();
-		}
-
-		@Override
-		public int getColumnCount() {
-			return 3;
-		}
-
-		@Override
-		public Class getColumnClass(int columnIndex) {
-			switch (columnIndex) {
-			case 0:
-			    return Integer.class;
-			case 1:
-			    return Integer.class;
-			case 2:
-			    return String.class;
-
-			default:
-				return Object.class;
-			}
-		}
-
-		@Override
-		public String getColumnName(int columnIndex) {
-			switch (columnIndex) {
-			case 0:
-				return "program_number";
-			case 1:
-				return "program_map_PID";
-			case 2:
-				return "name";
-
-			default:
-				return "";
-			}
-		}
-
-	}
 
 	public class Program implements TreeNode{
 		private int program_number;
@@ -150,6 +90,14 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 			}
 			return serviceName;
 		}
+		public Map<String, Object> getTableRowData() {
+			HashMap<String, Object> programData = new HashMap<String, Object>();
+			programData.put("program_number", program_number);
+			programData.put("program_map_PID", program_map_PID);
+			programData.put("name", getServiceNameOrNit());
+
+			return programData;
+		}
 	}
 
 	public PATsection(final PsiSectionData raw_data, final PID parent){
@@ -187,6 +135,7 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 	public int getProgramMapPID(final int i){
 		return ((toUnsignedInt(raw_data.getData()[10+(i*4)])& 0x1F )*256) + toUnsignedInt(raw_data.getData()[11+(i*4)]);
 	}
+	
 	@Override
 	public String toString(){
 		final StringBuilder b = new StringBuilder("PATsection section=");
@@ -215,12 +164,32 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 	public void setPrograms(final List<Program> programs) {
 		this.programs = programs;
 	}
+	
+	static TableHeader buildPatTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("program_number", "program_number", Integer.class).
+				addOptionalColumn("program_map_PID", "program_map_PID", Integer.class).
+				addOptionalColumn("name", "name", String.class).
+				build();
+		return tableHeader;
+	}
 
 	@Override
 	public TableModel getTableModel() {
 		
-		TableModel tm = new PatTableModel();
-		
-		return tm;
+		FlexTableModel tableModel = new FlexTableModel(buildPatTableHeader());
+		tableModel.addRowData(getRowData());
+		tableModel.process();
+		return tableModel;
 	}
+	
+	public List<Map<String, Object>> getRowData() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for( Program program:programs) {
+			rowData.add(program.getTableRowData());
+		}
+		return rowData;
+	}
+
 }

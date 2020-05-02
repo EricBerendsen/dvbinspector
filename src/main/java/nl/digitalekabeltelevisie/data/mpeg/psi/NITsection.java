@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,10 +26,9 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -38,17 +37,19 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 
-public class NITsection extends TableSectionExtendedSyntax{
+public class NITsection extends TableSectionExtendedSyntax implements TableSource{
 
 	private List<Descriptor> networkDescriptorList;
 	private List<TransportStream> transportStreamList;
 	private int networkDescriptorsLength;
 	private int transportStreamLoopLength;
 
-	public static class TransportStream implements TreeNode{
+	public class TransportStream implements TreeNode, TableRowSource{
 		private int transportStreamID;
 		private int originalNetworkID;
 		private int transportDescriptorsLength;
@@ -111,6 +112,21 @@ public class NITsection extends TableSectionExtendedSyntax{
 			Utils.addListJTree(t,descriptorList,modus,"transport_descriptors");
 
 			return t;
+		}
+
+		@Override
+		public HashMap<String, Object> getTableRowData() {
+			HashMap<String, Object> streamData = new HashMap<String, Object>();
+			streamData.put("transport_stream_id", getTransportStreamID());
+			streamData.put("original_network_id", getOriginalNetworkID());
+			streamData.put("network_id", getTableIdExtension());
+			
+			for(Descriptor descriptor:getDescriptorList()) {
+				if(descriptor instanceof TableRowSource) {
+					streamData.putAll(((TableRowSource)descriptor).getTableRowData());
+				}
+			}
+			return streamData;
 		}
 
 
@@ -220,6 +236,8 @@ public class NITsection extends TableSectionExtendedSyntax{
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this);
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_length",getNetworkDescriptorsLength(),null)));
 		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length",getTransportStreamLoopLength(),null)));
@@ -228,6 +246,71 @@ public class NITsection extends TableSectionExtendedSyntax{
 
 
 		return t;
+	}
+
+
+	@Override
+	public TableModel getTableModel() {
+		
+		FlexTableModel tableModel = new FlexTableModel(buildNitTableHeader());
+		
+		tableModel.addRowData(getRowData());
+		
+		tableModel.process();
+		return tableModel;
+	}
+
+
+	static TableHeader buildNitTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("network_id", "network_id", Integer.class).
+				addOptionalColumn("transport_stream_id", "transport_stream_id", Integer.class).
+				addOptionalColumn("original_network_id", "original_network_id", Integer.class).
+				
+				// Number.class is abused to force right align of String.  
+				addOptionalColumn("terrestrial frequency", "terrestrial.frequency", Number.class).
+				addOptionalColumn("terrestrial bandwidth", "terrestrial.bandwidth", Number.class).
+				addOptionalColumn("terrestrial priority", "terrestrial.priority", String.class).
+				addOptionalColumn("terrestrial time_slicing_indicator", "terrestrial.time_slicing_indicator", String.class).
+				addOptionalColumn("terrestrial fec_inner", "terrestrial.fec_inner", String.class).
+				
+				addOptionalColumn("T2 plp_id", "t2.plp_id", Integer.class).
+				addOptionalColumn("T2_system_id", "t2.t2_system_id", Integer.class).
+
+				addOptionalColumn("T2 siso_miso", "t2.siso_miso", Number.class).
+				addOptionalColumn("T2 bandwidth", "t2.bandwidth", Number.class).
+				addOptionalColumn("T2 guard_interval", "t2.guard_interval", Number.class).
+				addOptionalColumn("T2 transmission_mode", "t2.transmission_mode", Number.class).
+				
+				addOptionalColumn("cable frequency", "cable.frequency", Number.class).
+				addOptionalColumn("cable fec_outter", "cable.fec_outter", String.class).
+				addOptionalColumn("cable modulation", "cable.modulation", String.class).
+				addOptionalColumn("cable symbol_rate", "cable.symbol_rate", Number.class).
+				addOptionalColumn("cable fec_inner", "cable.fec_inner", Number.class).
+	
+				addOptionalColumn("satellite frequency", "satellite.frequency", Number.class).
+				addOptionalColumn("satellite orbital_position", "satellite.orbital_position", Number.class).
+				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
+				addOptionalColumn("satellite polarization", "satellite.polarization", String.class).
+				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
+				addOptionalColumn("satellite modulation_system", "satellite.modulation_system", String.class).
+				addOptionalColumn("satellite roll_off", "satellite.roll_off", Number.class).
+				addOptionalColumn("satellite modulation_type", "satellite.modulation_type", String.class).
+				addOptionalColumn("satellite symbol_rate", "satellite.symbol_rate", Number.class).
+				addOptionalColumn("satellite fec_inner", "satellite.fec_inner", String.class).
+				
+				build();
+		return tableHeader;
+	}
+
+
+	public List<Map<String, Object>> getRowData() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for(TransportStream stream:transportStreamList) {
+			rowData.add(stream.getTableRowData());
+		}
+		return rowData;
 	}
 
 
