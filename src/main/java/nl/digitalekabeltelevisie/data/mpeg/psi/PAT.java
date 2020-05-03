@@ -36,7 +36,8 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PATsection.Program;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader.Builder;
 
 public class PAT extends AbstractPSITabel{
 
@@ -185,9 +186,10 @@ public class PAT extends AbstractPSITabel{
 
 
 	public TableModel getTableModel() {
-		
-		FlexTableModel tableModel = new FlexTableModel(PATsection.buildPatTableHeader());
+		return TableUtils.getTableModel(PAT::buildPatTableHeader,()->getPatRowData());
+	}
 
+	List<Map<String, Object>> getPatRowData() {
 		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
 		
 		if (pat != null) {
@@ -197,10 +199,16 @@ public class PAT extends AbstractPSITabel{
 				}
 			}
 		}
-		tableModel.addRowData(rowData);
-		
-		tableModel.process();
-		return tableModel;
+		return rowData;
+	}
+
+	static TableHeader buildPatTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("program_number", "program_number", Integer.class).
+				addOptionalColumn("program_map_PID", "program_map_PID", Integer.class).
+				addOptionalColumn("name", "name", String.class).
+				build();
+		return tableHeader;
 	}
 
 

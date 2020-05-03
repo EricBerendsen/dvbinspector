@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -29,13 +29,16 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
+import java.util.HashMap;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class ServiceDescriptor extends Descriptor {
+public class ServiceDescriptor extends Descriptor implements TableRowSource {
 
 	private final int serviceType;
 	private final DVBString  serviceProviderName;
@@ -87,6 +90,18 @@ public class ServiceDescriptor extends Descriptor {
 
 	public int getServiceProviderNameLength() {
 		return serviceProviderName.getLength();
+	}
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("service_type", serviceType);
+		rowData.put("service_type_string", getServiceTypeString(serviceType));
+		rowData.put("service_provider_name", serviceProviderName.toString());
+		rowData.put("service_name", serviceName.toString());
+
+		return rowData;
 	}
 
 }

@@ -49,6 +49,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	private int networkDescriptorsLength;
 	private int transportStreamLoopLength;
 
+	
 	public class TransportStream implements TreeNode, TableRowSource{
 		private int transportStreamID;
 		private int originalNetworkID;
@@ -121,14 +122,9 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 			streamData.put("original_network_id", getOriginalNetworkID());
 			streamData.put("network_id", getTableIdExtension());
 			
-			for(Descriptor descriptor:getDescriptorList()) {
-				if(descriptor instanceof TableRowSource) {
-					streamData.putAll(((TableRowSource)descriptor).getTableRowData());
-				}
-			}
+			streamData.putAll(TableUtils.getDescriptorTableData(getDescriptorList()));
 			return streamData;
 		}
-
 
 
 	}
@@ -251,56 +247,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 
 	@Override
 	public TableModel getTableModel() {
-		
-		FlexTableModel tableModel = new FlexTableModel(buildNitTableHeader());
-		
-		tableModel.addRowData(getRowData());
-		
-		tableModel.process();
-		return tableModel;
-	}
-
-
-	static TableHeader buildNitTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("network_id", "network_id", Integer.class).
-				addOptionalColumn("transport_stream_id", "transport_stream_id", Integer.class).
-				addOptionalColumn("original_network_id", "original_network_id", Integer.class).
-				
-				// Number.class is abused to force right align of String.  
-				addOptionalColumn("terrestrial frequency", "terrestrial.frequency", Number.class).
-				addOptionalColumn("terrestrial bandwidth", "terrestrial.bandwidth", Number.class).
-				addOptionalColumn("terrestrial priority", "terrestrial.priority", String.class).
-				addOptionalColumn("terrestrial time_slicing_indicator", "terrestrial.time_slicing_indicator", String.class).
-				addOptionalColumn("terrestrial fec_inner", "terrestrial.fec_inner", String.class).
-				
-				addOptionalColumn("T2 plp_id", "t2.plp_id", Integer.class).
-				addOptionalColumn("T2_system_id", "t2.t2_system_id", Integer.class).
-
-				addOptionalColumn("T2 siso_miso", "t2.siso_miso", Number.class).
-				addOptionalColumn("T2 bandwidth", "t2.bandwidth", Number.class).
-				addOptionalColumn("T2 guard_interval", "t2.guard_interval", Number.class).
-				addOptionalColumn("T2 transmission_mode", "t2.transmission_mode", Number.class).
-				
-				addOptionalColumn("cable frequency", "cable.frequency", Number.class).
-				addOptionalColumn("cable fec_outter", "cable.fec_outter", String.class).
-				addOptionalColumn("cable modulation", "cable.modulation", String.class).
-				addOptionalColumn("cable symbol_rate", "cable.symbol_rate", Number.class).
-				addOptionalColumn("cable fec_inner", "cable.fec_inner", Number.class).
-	
-				addOptionalColumn("satellite frequency", "satellite.frequency", Number.class).
-				addOptionalColumn("satellite orbital_position", "satellite.orbital_position", Number.class).
-				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
-				addOptionalColumn("satellite polarization", "satellite.polarization", String.class).
-				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
-				addOptionalColumn("satellite modulation_system", "satellite.modulation_system", String.class).
-				addOptionalColumn("satellite roll_off", "satellite.roll_off", Number.class).
-				addOptionalColumn("satellite modulation_type", "satellite.modulation_type", String.class).
-				addOptionalColumn("satellite symbol_rate", "satellite.symbol_rate", Number.class).
-				addOptionalColumn("satellite fec_inner", "satellite.fec_inner", String.class).
-				
-				build();
-		return tableHeader;
+		return TableUtils.getTableModel(NIT::buildNitTableHeader,()->getRowData()) ;
 	}
 
 

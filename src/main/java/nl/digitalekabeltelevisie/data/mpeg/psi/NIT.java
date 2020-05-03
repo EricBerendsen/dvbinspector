@@ -39,7 +39,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class NIT extends AbstractPSITabel{
 
@@ -76,10 +76,12 @@ public class NIT extends AbstractPSITabel{
 		final Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
 			final Integer networkNo=i.next();
-			final NITsection [] sections = networks.get(networkNo);
+
 			KVP kvp = new KVP("network_id",networkNo, getNetworkName(networkNo));
 			kvp.setTableSource(()->getTableForNetworkID(networkNo));
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
+
+			final NITsection [] sections = networks.get(networkNo);
 			for (final NITsection tsection : sections) {
 				if(tsection!= null){
 					if(!Utils.simpleModus(modus)){
@@ -239,9 +241,11 @@ public class NIT extends AbstractPSITabel{
 		return null;
 	}
 
-	private TableModel getTableForNetworkID(Integer networkNo) {
-		FlexTableModel tableModel = new FlexTableModel(NITsection.buildNitTableHeader());
+	private TableModel getTableForNetworkID(int networkNo) {
+		return TableUtils.getTableModel(NIT::buildNitTableHeader,()->getRowDataForNetworkId(networkNo));
+	}
 
+	List<Map<String, Object>> getRowDataForNetworkId(int networkNo) {
 		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
 
 		final NITsection [] sections = networks.get(networkNo);
@@ -251,18 +255,15 @@ public class NIT extends AbstractPSITabel{
 				rowData.addAll(tsection.getRowData());
 			}
 		}
-
-		tableModel.addRowData(rowData);
-		
-		tableModel.process();
-		return tableModel;
+		return rowData;
 	}
 
 	
 	public TableModel getTableModel() {
-		
-		FlexTableModel tableModel = new FlexTableModel(NITsection.buildNitTableHeader());
+		return TableUtils.getTableModel(NIT::buildNitTableHeader,()->getRowDataForNit());
+	}
 
+	List<Map<String, Object>> getRowDataForNit() {
 		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
 		
 		for(NITsection[] nitSections:networks.values()) {
@@ -272,10 +273,49 @@ public class NIT extends AbstractPSITabel{
 				}
 			}
 		}
-		tableModel.addRowData(rowData);
-		
-		tableModel.process();
-		return tableModel;
+		return rowData;
+	}
+
+	static TableHeader buildNitTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("network_id", "network_id", Integer.class).
+				addOptionalColumn("transport_stream_id", "transport_stream_id", Integer.class).
+				addOptionalColumn("original_network_id", "original_network_id", Integer.class).
+				
+				// Number.class is abused to force right align of String.  
+				addOptionalColumn("terrestrial frequency", "terrestrial.frequency", Number.class).
+				addOptionalColumn("terrestrial bandwidth", "terrestrial.bandwidth", Number.class).
+				addOptionalColumn("terrestrial priority", "terrestrial.priority", String.class).
+				addOptionalColumn("terrestrial time_slicing_indicator", "terrestrial.time_slicing_indicator", String.class).
+				addOptionalColumn("terrestrial fec_inner", "terrestrial.fec_inner", String.class).
+				
+				addOptionalColumn("T2 plp_id", "t2.plp_id", Integer.class).
+				addOptionalColumn("T2_system_id", "t2.t2_system_id", Integer.class).
+	
+				addOptionalColumn("T2 siso_miso", "t2.siso_miso", Number.class).
+				addOptionalColumn("T2 bandwidth", "t2.bandwidth", Number.class).
+				addOptionalColumn("T2 guard_interval", "t2.guard_interval", Number.class).
+				addOptionalColumn("T2 transmission_mode", "t2.transmission_mode", Number.class).
+				
+				addOptionalColumn("cable frequency", "cable.frequency", Number.class).
+				addOptionalColumn("cable fec_outter", "cable.fec_outter", String.class).
+				addOptionalColumn("cable modulation", "cable.modulation", String.class).
+				addOptionalColumn("cable symbol_rate", "cable.symbol_rate", Number.class).
+				addOptionalColumn("cable fec_inner", "cable.fec_inner", Number.class).
+	
+				addOptionalColumn("satellite frequency", "satellite.frequency", Number.class).
+				addOptionalColumn("satellite orbital_position", "satellite.orbital_position", Number.class).
+				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
+				addOptionalColumn("satellite polarization", "satellite.polarization", String.class).
+				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
+				addOptionalColumn("satellite modulation_system", "satellite.modulation_system", String.class).
+				addOptionalColumn("satellite roll_off", "satellite.roll_off", Number.class).
+				addOptionalColumn("satellite modulation_type", "satellite.modulation_type", String.class).
+				addOptionalColumn("satellite symbol_rate", "satellite.symbol_rate", Number.class).
+				addOptionalColumn("satellite fec_inner", "satellite.fec_inner", String.class).
+				
+				build();
+		return tableHeader;
 	}
 
 

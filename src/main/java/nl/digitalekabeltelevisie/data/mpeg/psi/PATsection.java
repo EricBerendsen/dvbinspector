@@ -165,22 +165,9 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 		this.programs = programs;
 	}
 	
-	static TableHeader buildPatTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("program_number", "program_number", Integer.class).
-				addOptionalColumn("program_map_PID", "program_map_PID", Integer.class).
-				addOptionalColumn("name", "name", String.class).
-				build();
-		return tableHeader;
-	}
-
 	@Override
 	public TableModel getTableModel() {
-		
-		FlexTableModel tableModel = new FlexTableModel(buildPatTableHeader());
-		tableModel.addRowData(getRowData());
-		tableModel.process();
-		return tableModel;
+		return TableUtils.getTableModel(PAT::buildPatTableHeader,()->getRowData());
 	}
 	
 	public List<Map<String, Object>> getRowData() {

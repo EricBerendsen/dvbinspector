@@ -31,6 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
@@ -38,6 +39,8 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection.Service;
 import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader.Builder;
 
 public class SDT extends AbstractPSITabel{
 
@@ -84,7 +87,10 @@ public class SDT extends AbstractPSITabel{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SDT"));
+		KVP sdtKvp = new KVP("SDT");
+		sdtKvp.setTableSource(()->getTableForSdt());
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(sdtKvp);
+		
 
 		final TreeSet<Integer> networksTreeSet = new TreeSet<Integer>(networks.keySet());
 		final Iterator<Integer> i = networksTreeSet.iterator();
@@ -92,7 +98,9 @@ public class SDT extends AbstractPSITabel{
 			final Integer orgNetworkId=i.next();
 			final Map<Integer, SDTsection []> networkSections = networks.get(orgNetworkId);
 			
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("original_network_id", orgNetworkId,Utils.getOriginalNetworkIDString(orgNetworkId)));
+			KVP kvpOrgNetwork = new KVP("original_network_id", orgNetworkId,Utils.getOriginalNetworkIDString(orgNetworkId));
+			kvpOrgNetwork.setTableSource(()->getTableForOriginalNetwork(orgNetworkId));
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvpOrgNetwork);
 			t.add(n);			
 			
 			final TreeSet<Integer> streamsTreeSet = new TreeSet<Integer>(networkSections.keySet());
@@ -101,7 +109,10 @@ public class SDT extends AbstractPSITabel{
 				final Integer transport_stream_id = j.next();
 				SDTsection[] sections = networkSections.get(transport_stream_id);
 
-				final DefaultMutableTreeNode m = new DefaultMutableTreeNode(new KVP("transport_stream_id", transport_stream_id,null));
+				KVP kvpTsId = new KVP("transport_stream_id", transport_stream_id,null);
+				kvpTsId.setTableSource(()->getTableForTransportStreamID(orgNetworkId,transport_stream_id));
+
+				final DefaultMutableTreeNode m = new DefaultMutableTreeNode(kvpTsId);
 				n.add(m);
 
 				for (SDTsection section : sections) {
@@ -118,6 +129,7 @@ public class SDT extends AbstractPSITabel{
 		return t;
 	}
 	
+
 	@Deprecated
 	public String getServiceName(final int serviceID){
 		DVBString dvbString = getServiceNameDVBString(serviceID);
@@ -377,4 +389,74 @@ public class SDT extends AbstractPSITabel{
 		// no service found, give up
 		return -1;
 	}
+	
+	
+	private TableModel getTableForTransportStreamID(int orgNetworkId, int tsId) {
+		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowDataForTransportStreamId(orgNetworkId, tsId)) ;
+	}
+
+
+	List<Map<String, Object>> getRowDataForTransportStreamId(int orgNetworkId, int tsId) {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
+		
+		for (final SDTsection tsection : sections) {
+			if(tsection!= null){
+				rowData.addAll(tsection.getRowData());
+			}
+		}
+		return rowData;
+	}
+
+	private TableModel getTableForOriginalNetwork(int orgNetworkId) {
+		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowDataForOriginalNetwork(orgNetworkId)) ;
+	}
+	
+	private List<Map<String, Object>> getRowDataForOriginalNetwork(int orgNetworkId) {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		HashMap<Integer, SDTsection[]> tsSections = networks.get(orgNetworkId);
+		
+		for (int ts : tsSections.keySet()) {
+			rowData.addAll(getRowDataForTransportStreamId(orgNetworkId, ts));
+		}
+		return rowData;
+	}
+
+	private TableModel getTableForSdt() {
+		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowDataForSdt()) ;
+	}
+
+	private List<Map<String, Object>> getRowDataForSdt() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for (int orgNetworkId : networks.keySet()) {
+			rowData.addAll(getRowDataForOriginalNetwork(orgNetworkId));
+		}
+		return rowData;
+	}
+
+	static TableHeader buildSdtTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				
+				// table values
+				addOptionalColumn("original_network_id", "original_network_id", Integer.class).
+				addOptionalColumn("transport_stream_id", "transport_stream_id", Integer.class).
+				
+				addOptionalColumn("service_id", "service_id", Integer.class). // row (service) values
+				addOptionalColumn("service_name", "service_name", String.class).// from Service_descriptor
+				addOptionalColumn("service_type", "service_type", Integer.class).// from Service_descriptor
+				addOptionalColumn("service_type description", "service_type_string", String.class).// from Service_descriptor
+				
+				addOptionalColumn("service_provider_name", "service_provider_name", String.class).// from Service_descriptor
+				
+				addOptionalColumn("EIT_schedule_flag", "eit_schedule_flag", Integer.class). // row (service) values
+				addOptionalColumn("EIT_present_following_flag", "eit_present_following_flag", Integer.class). // row (service) values
+				addOptionalColumn("running_status", "running_status", Integer.class).// row (service) values
+				addOptionalColumn("free_CA_mode", "free_ca_mode", Integer.class).// row (service) values
+				
+				build();
+		return tableHeader;
+	}
+
+	
 }

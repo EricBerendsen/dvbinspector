@@ -27,10 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -40,6 +39,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 
 public class SDTsection extends TableSectionExtendedSyntax {
@@ -155,6 +155,29 @@ public class SDTsection extends TableSectionExtendedSyntax {
 			this.reserved = reserved;
 		}
 
+		public Map<String, Object> getTableRowData() {
+			HashMap<String, Object> serviceData = new HashMap<String, Object>();
+
+			// table values
+			serviceData.put("transport_stream_id", getTableIdExtension());
+			serviceData.put("original_network_id", getOriginalNetworkID());
+			
+			// row (service) values
+			serviceData.put("service_id", serviceID);
+			serviceData.put("eit_schedule_flag", eitScheduleFlag);
+			serviceData.put("eit_present_following_flag", eitPresentFollowingFlag);
+			serviceData.put("running_status", runningStatus);
+			serviceData.put("free_ca_mode", freeCAmode);
+			
+			// from Service_descriptor
+			serviceData.putAll(TableUtils.getDescriptorTableData(getDescriptorList()));
+
+			
+			
+
+			return serviceData;
+		}
+
 	}
 
 
@@ -223,6 +246,8 @@ public class SDTsection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		((KVP) t.getUserObject()).setTableSource(() -> getTableModel());
+
 		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID))));
 
 		Utils.addListJTree(t,serviceList,modus,"services_loop");
@@ -263,4 +288,20 @@ public class SDTsection extends TableSectionExtendedSyntax {
 		}
 
 	}
+
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowData()) ;
+	}
+
+
+	public List<Map<String, Object>> getRowData() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for(Service service:serviceList) {
+			rowData.add(service.getTableRowData());
+		}
+		return rowData;
+	}
+
+
 }

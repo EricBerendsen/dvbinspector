@@ -53,7 +53,9 @@ public class FlexTableModel extends AbstractTableModel {
 	public void process() {
 		for (Map<String, Object> map : model) {
 			for (String key : map.keySet()) {
-				tableHeader.flagUsed(key);
+				if(map.get(key)!=null) {
+					tableHeader.flagUsed(key);
+				}
 			}
 		}
 		
