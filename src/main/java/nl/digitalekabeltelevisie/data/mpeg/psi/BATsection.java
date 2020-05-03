@@ -211,4 +211,10 @@ public class BATsection extends TableSectionExtendedSyntax {
 		return t;
 	}
 
+	@Override
+	String getTableIdExtensionLabel() {
+		return "bouquet_id";
+	}
+    
+
 }

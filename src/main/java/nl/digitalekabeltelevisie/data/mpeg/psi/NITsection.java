@@ -244,6 +244,11 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 		return t;
 	}
 
+	@Override
+	String getTableIdExtensionLabel() {
+		return "network_id";
+	}
+    
 
 	@Override
 	public TableModel getTableModel() {

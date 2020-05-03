@@ -325,6 +325,11 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		return t;
 	}
 
+	@Override
+	String getTableIdExtensionLabel() {
+		return "service_id";
+	}
+
 	public StringBuilder getHTMLLines(){
 		final StringBuilder b = new StringBuilder();
 		for(final Event event:eventList){

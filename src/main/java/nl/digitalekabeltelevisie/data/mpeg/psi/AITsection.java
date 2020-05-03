@@ -243,6 +243,11 @@ public class AITsection extends TableSectionExtendedSyntax {
 	}
 
 
+	@Override
+	String getTableIdExtensionLabel() {
+		return "test_application_flag (1) / application_type (15)";
+	}
+
 	/**
 	 * @return the application_loop_length
 	 */

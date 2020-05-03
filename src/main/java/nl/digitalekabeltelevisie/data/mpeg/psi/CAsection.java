@@ -60,6 +60,13 @@ public class CAsection extends TableSectionExtendedSyntax {
 		Utils.addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
 	}
+	
+
+	@Override
+	String getTableIdExtensionLabel() {
+		return "reserved";
+	}
+
 
 	public List<Descriptor> getDescriptorList() {
 		return descriptorList;

@@ -157,6 +157,11 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 		return t;
 	}
 
+	@Override
+	String getTableIdExtensionLabel() {
+		return "transport_stream_id";
+	}
+
 	public List<Program> getPrograms() {
 		return programs;
 	}
