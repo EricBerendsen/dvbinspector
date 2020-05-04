@@ -38,6 +38,7 @@ public class TablePanel extends JScrollPane{
 	public TablePanel(JTable table) {
 		super(table);
 		this.table = table;
+		//table.setDefaultRenderer(StreamType.class, new StreamType.Renderer());
 		
 		table.setAutoCreateRowSorter(true);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

@@ -32,16 +32,20 @@ class ColumnDetails{
 	private String name;
 	private String key;
 	private Class<?> dataClass;
+	boolean isList;
 	boolean required;
 	boolean used;
+	int listMax;
 	
-	public ColumnDetails(String name, String key, Class<?> dataClass, boolean required) {
+	public ColumnDetails(String name, String key, Class<?> dataClass, boolean required,boolean isList) {
 		super();
 		this.name = name;
 		this.key = key;
 		this.dataClass = dataClass;
 		this.required = required;
+		this.isList = isList;
 		this.used = false;
+		this.listMax = 0;
 	}
 	
 
@@ -78,5 +82,25 @@ class ColumnDetails{
 
 	public void setUsed(boolean used) {
 		this.used = used;
+	}
+
+
+	public boolean isList() {
+		return isList;
+	}
+
+
+	public void setList(boolean isList) {
+		this.isList = isList;
+	}
+
+
+	public int getListMax() {
+		return listMax;
+	}
+
+
+	public void setListMax(int listMax) {
+		this.listMax = listMax;
 	}
 }

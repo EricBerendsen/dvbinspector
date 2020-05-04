@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,15 +29,14 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
 /**
  * Based on ETSI TS 102 809 V1.1.1 (2010-01) "Signalling and carriage of interactive applications and services in Hybrid broadcast/broadband environments"
@@ -45,7 +44,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric
  *
  */
-public class ApplicationSignallingDescriptor extends Descriptor {
+public class ApplicationSignallingDescriptor extends Descriptor implements TableRowSource{
 
 	private List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
 
@@ -95,5 +94,18 @@ public class ApplicationSignallingDescriptor extends Descriptor {
 		addListJTree(t,applicationTypeList,modus,"Application Information Table");
 
 		return t;
+	}
+
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		
+		for (int i = 0; i < applicationTypeList.size(); i++) {
+			ApplicationType appType = applicationTypeList.get(i);
+			rowData.put("application.type:"+i, getAppTypeIDString(appType.applicationType));
+		}
+
+		return rowData;
 	}
 }

@@ -29,31 +29,29 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static java.lang.Byte.toUnsignedInt;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 
-public class PMTsection extends TableSectionExtendedSyntax {
+public class PMTsection extends TableSectionExtendedSyntax  implements TableSource{
 
 
 	private int pcrPid = 0;
 	private int programInfoLength = 0;
 
 	private List<Descriptor> descriptorList;
-	private final List<Component> componentenList ;
+	private final List<Component> componentsList ;
 
-	public static class Component implements TreeNode{
+	public class Component implements TreeNode{
 
 		private int streamtype;
 		private int elementaryPID;
@@ -127,6 +125,20 @@ public class PMTsection extends TableSectionExtendedSyntax {
 			return t;
 		}
 
+
+
+
+		public Map<String, Object> getTableRowData() {
+			HashMap<String, Object> componentData = new HashMap<String, Object>();
+			componentData.put("program_number", tableIdExtension);
+			componentData.put("stream_type", streamtype);
+			componentData.put("stream_type_string", Utils.getStreamTypeString(streamtype));
+			componentData.put("elementary_pid", elementaryPID);
+			
+			componentData.putAll(TableUtils.getDescriptorTableData(getComponentDescriptorList()));
+			return componentData;
+		}
+
 	}
 
 
@@ -154,7 +166,7 @@ public class PMTsection extends TableSectionExtendedSyntax {
 		pcrPid = Utils.getInt(raw_data.getData(),8,2, 0x1FFF);
 		programInfoLength = Utils.getInt(raw_data.getData(),10,2, 0x0FFF);
 		descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),12,programInfoLength,this);
-		componentenList = buildComponentList(raw_data.getData(),12+programInfoLength, raw_data.getNoBytes()-16-programInfoLength);
+		componentsList = buildComponentList(raw_data.getData(),12+programInfoLength, raw_data.getNoBytes()-16-programInfoLength);
 	}
 
 
@@ -164,7 +176,7 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	}
 
 	public int noStreams(){
-		return componentenList.size();
+		return componentsList.size();
 	}
 
 	public int getElementaryPID(final int i){
@@ -202,18 +214,21 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	}
 
 	public List<Component> getComponentenList() {
-		return componentenList;
+		return componentsList;
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this);
+
 		t.add(new DefaultMutableTreeNode(new KVP("PMT_PID",getParentPID().getPid(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("PCR_PID",pcrPid,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("program_info_length",programInfoLength,null)));
 		Utils.addListJTree(t,descriptorList,modus,"program_info");
-		Utils.addListJTree(t,componentenList,modus,"components");
+		Utils.addListJTree(t,componentsList,modus,"components");
 		return t;
 	}
 
@@ -221,6 +236,39 @@ public class PMTsection extends TableSectionExtendedSyntax {
 	String getTableIdExtensionLabel() {
 		return "program_number";
 	}
-    
+
+
+	
+	@Override
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(PMTsection::buildPmtTableHeader,()->getRowData());
+	}
+	
+	public List<Map<String, Object>> getRowData() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for(Component component:componentsList) {
+			rowData.add(component.getTableRowData());
+		}
+		return rowData;
+	}
+
+
+	static TableHeader buildPmtTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("program_number", "program_number", Integer.class).
+				addOptionalColumn("stream_type", "stream_type", Integer.class).
+				addOptionalColumn("stream_type description", "stream_type_string", String.class).
+				addOptionalColumn("elementary_PID:", "elementary_pid", Integer.class).
+
+				addOptionalRepeatingColumn("teletext language", "teletext.language", String.class).
+				addOptionalRepeatingColumn("teletext type", "teletext.type", String.class).
+				
+				addOptionalRepeatingColumn("application type", "application.type", String.class).
+		
+//				addOptionalColumn("stream_type", "stream_type", Integer.class).
+				build();
+		return tableHeader;
+	}
 
 }

@@ -33,6 +33,7 @@ import javax.swing.table.AbstractTableModel;
 
 public class FlexTableModel extends AbstractTableModel {
 	
+	private static final String REPEATING_KEY_SEPARATOR = ":";
 	private List<Map<String, Object>> model = new ArrayList<>();
 	private TableHeader tableHeader;
 	private List<String> displayableColumns = new ArrayList<String>();
@@ -53,7 +54,13 @@ public class FlexTableModel extends AbstractTableModel {
 	public void process() {
 		for (Map<String, Object> map : model) {
 			for (String key : map.keySet()) {
-				if(map.get(key)!=null) {
+				if(isRepeatingKey(key)) {
+					String keyBase = getBase(key);
+					int keyOrd = getOrdinal(key);
+					if(tableHeader.isRepeatingColumn(keyBase)) {
+						tableHeader.countOrdinal(keyBase,keyOrd);
+					}
+				}else if(map.get(key)!=null) {
 					tableHeader.flagUsed(key);
 				}
 			}
@@ -61,11 +68,36 @@ public class FlexTableModel extends AbstractTableModel {
 		
 		for(ColumnDetails column:tableHeader.getHeader()) {
 			if(column.isUsed()||column.isRequired()) {
-				displayableColumns.add(column.getKey());
+				if(column.isList()) {
+					String baseKey = column.getKey();
+					for (int i = 0; i <= column.getListMax(); i++) {
+						displayableColumns.add(baseKey + REPEATING_KEY_SEPARATOR + i);
+					}
+					
+				}else {
+					displayableColumns.add(column.getKey());
+				}
 			}
 		}
 	}
 	
+
+	private static int getOrdinal(String key) {
+		int i = key.indexOf(REPEATING_KEY_SEPARATOR);
+		return Integer.parseInt(key.substring(i+1));
+	}
+
+	private static String getBase(String key) {
+		int i = key.indexOf(REPEATING_KEY_SEPARATOR);
+		if(i==-1) {
+			return key;
+		}
+		return key.substring(0,i);
+	}
+
+	private static boolean isRepeatingKey(String key) {
+		return key.contains(REPEATING_KEY_SEPARATOR);
+	}
 
 	@Override
 	public int getRowCount() {
@@ -77,13 +109,25 @@ public class FlexTableModel extends AbstractTableModel {
 		return displayableColumns.size();
 	}
 
-    public Class<?> getColumnClass(int columnIndex) {
-        return tableHeader.getMap().get(displayableColumns.get(columnIndex)).getDataClass();
+    @Override
+	public Class<?> getColumnClass(int columnIndex) {
+        ColumnDetails columnDetails = tableHeader.getMap().get(getBaseKey(columnIndex));
+		return columnDetails.getDataClass();
     }
     
+	private Object getBaseKey(int columnIndex) {
+		return getBase(displayableColumns.get(columnIndex));
+	}
+
 	@Override
 	public String getColumnName(int columnIndex) {
-		 return tableHeader.getMap().get(displayableColumns.get(columnIndex)).getName();
+		String key = displayableColumns.get(columnIndex);
+		ColumnDetails columnDetails = tableHeader.getMap().get(getBase(key));
+		if (columnDetails.isList()) {
+			String baseName = columnDetails.getName();
+			return baseName + " " + getOrdinal(key);
+		}
+		return columnDetails.getName();
 	}
 		
 	@Override

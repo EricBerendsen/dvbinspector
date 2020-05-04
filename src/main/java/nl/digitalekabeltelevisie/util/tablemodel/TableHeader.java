@@ -41,19 +41,26 @@ public class TableHeader {
 		}
 
 		public Builder addRequiredColumn(String name, String key, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, key, type, true);
+			ColumnDetails cd = new ColumnDetails(name, key, type, true, false);
 			header.add(cd);
 			map.put(key, cd);
 			return this;
 		}
 
 		public Builder addOptionalColumn(String name, String key, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, key, type, false);
+			ColumnDetails cd = new ColumnDetails(name, key, type, false, false);
 			header.add(cd);
 			map.put(key, cd);
 			return this;
 		}
-		
+
+		public Builder addOptionalRepeatingColumn(String name, String keyBase, Class<?> type) {
+			ColumnDetails cd = new ColumnDetails(name, keyBase, type, false, true);
+			header.add(cd);
+			map.put(keyBase, cd);
+			return this;
+		}
+
 		public TableHeader build() {
 			return new TableHeader(header, map);
 		}
@@ -82,6 +89,24 @@ public class TableHeader {
 
 	public Map<String, ColumnDetails> getMap() {
 		return map;
+	}
+
+	public boolean isRepeatingColumn(String keyBase) {
+		ColumnDetails cd = map.get(keyBase);
+		if (cd != null) {
+			return cd.isList();
+		}
+		return false;
+	}
+
+	public void countOrdinal(String keyBase, int keyOrd) {
+		ColumnDetails cd = map.get(keyBase);
+		if(cd!=null) {
+			cd.setUsed(true);
+			cd.setListMax(Integer.max(cd.getListMax(), keyOrd));
+		}
+		
+		
 	}
 
 }
