@@ -34,16 +34,19 @@ class ColumnDetails{
 	private Class<?> dataClass;
 	boolean isList;
 	boolean required;
+	String groupId;
+
 	boolean used;
 	int listMax;
 	
-	public ColumnDetails(String name, String key, Class<?> dataClass, boolean required,boolean isList) {
+	public ColumnDetails(String name, String key, Class<?> dataClass, boolean required,boolean isList, String groupId) {
 		super();
 		this.name = name;
 		this.key = key;
 		this.dataClass = dataClass;
 		this.required = required;
 		this.isList = isList;
+		this.groupId = groupId;
 		this.used = false;
 		this.listMax = 0;
 	}
@@ -102,5 +105,15 @@ class ColumnDetails{
 
 	public void setListMax(int listMax) {
 		this.listMax = listMax;
+	}
+
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
 }

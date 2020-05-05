@@ -41,21 +41,28 @@ public class TableHeader {
 		}
 
 		public Builder addRequiredColumn(String name, String key, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, key, type, true, false);
+			ColumnDetails cd = new ColumnDetails(name, key, type, true, false,null);
 			header.add(cd);
 			map.put(key, cd);
 			return this;
 		}
 
 		public Builder addOptionalColumn(String name, String key, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, key, type, false, false);
+			ColumnDetails cd = new ColumnDetails(name, key, type, false, false,null);
 			header.add(cd);
 			map.put(key, cd);
 			return this;
 		}
 
 		public Builder addOptionalRepeatingColumn(String name, String keyBase, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, keyBase, type, false, true);
+			ColumnDetails cd = new ColumnDetails(name, keyBase, type, false, true,null);
+			header.add(cd);
+			map.put(keyBase, cd);
+			return this;
+		}
+
+		public Builder addOptionalRepeatingGroupedColumn(String name, String keyBase, Class<?> type, String groupId) {
+			ColumnDetails cd = new ColumnDetails(name, keyBase, type, false, true,groupId);
 			header.add(cd);
 			map.put(keyBase, cd);
 			return this;

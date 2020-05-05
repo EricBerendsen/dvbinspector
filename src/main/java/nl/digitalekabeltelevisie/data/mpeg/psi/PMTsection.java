@@ -261,8 +261,8 @@ public class PMTsection extends TableSectionExtendedSyntax  implements TableSour
 				addOptionalColumn("stream_type description", "stream_type_string", String.class).
 				addOptionalColumn("elementary_PID:", "elementary_pid", Integer.class).
 
-				addOptionalRepeatingColumn("teletext language", "teletext.language", String.class).
-				addOptionalRepeatingColumn("teletext type", "teletext.type", String.class).
+				addOptionalRepeatingGroupedColumn("teletext language", "teletext.language", String.class,"ttx").
+				addOptionalRepeatingGroupedColumn("teletext type", "teletext.type", String.class,"ttx").
 				
 				addOptionalRepeatingColumn("application type", "application.type", String.class).
 		
