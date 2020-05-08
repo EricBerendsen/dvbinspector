@@ -913,7 +913,6 @@ public final class Utils {
 		// 29n9184t.doc Text of ISO/IEC 13818-1:2007/FPDAM 3.2 - Transport of Scalable Video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
 		// Amendment 3: Transport of Scalable Video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
 		// ISO/IEC 13818-1:2007/FPDAM 3.2
-		// Amendment 5: Transport of JPEG 2000 Part 1 (ITU-T Rec T.800 | ISO/IEC 15444-1) video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
 
 		case 0x15: return"Metadata carried in PES packets";
 		case 0x16: return"Metadata carried in metadata_sections";
@@ -1045,8 +1044,6 @@ public final class Utils {
 	}
 
 	public static String getStreamTypeShortString(final int tag){
-
-
 		switch (tag) {
 		case 0x00: return"ITU-T | ISO/IEC Reserved";
 		case 0x01: return"Video MPEG1";
@@ -1054,7 +1051,7 @@ public final class Utils {
 		case 0x03: return"Audio MPEG1";
 		case 0x04: return"Audio MPEG2";
 		case 0x05: return"private_sections MPEG2";
-		case 0x06: return"";
+		case 0x06: return"private data";
 		case 0x07: return"MHEG";
 		case 0x08: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Annex A DSM-CC";
 		case 0x09: return"ITU-T Rec. H.222.1";
@@ -1108,6 +1105,11 @@ public final class Utils {
 		case 0x2d: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – main stream";
 		case 0x2e: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – auxiliary stream";
 		case 0x2f: return "Quality access units carried in sections";
+
+		//ISO/IEC 13818-1:2019/Amd.1:2020(E)
+		case 0x30: return "Media Orchestration Access Units carried in sections";
+		case 0x31: return "Substream of a Rec. ITU-T H.265 | ISO/IEC 23008 2 video stream that contains a Motion Constrained Tile Set, parameter sets, slice headers or a combination thereof.";
+		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
 		
 		case 0x7f: return"IPMP stream";
 		

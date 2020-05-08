@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,13 +27,16 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import java.util.HashMap;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class StreamIdentifierDescriptor extends Descriptor {
+public class StreamIdentifierDescriptor extends Descriptor implements TableRowSource{
 
 
 	private final int  componentTag;
@@ -57,6 +60,14 @@ public class StreamIdentifierDescriptor extends Descriptor {
 
 	public int getComponentTag() {
 		return componentTag;
+	}
+
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("component.tag",componentTag);
+		return rowData;
 	}
 
 }

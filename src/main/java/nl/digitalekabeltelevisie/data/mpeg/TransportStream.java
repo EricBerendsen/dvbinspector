@@ -532,22 +532,22 @@ public class TransportStream implements TreeNode{
 						switch(componentType){
 						case DVB_SUBTITLING:
 								compt_type.append(" DVB subtitling");
-								short_compt_type.append("DVB subtitling");
+								short_compt_type.append(" DVB subtitling");
 								generalPidHandler = new DVBSubtitleHandler();
 								break;
 						case TELETEXT:
 								compt_type.append(" Teletext");
-								short_compt_type.append("Teletext");
+								short_compt_type.append(" Teletext");
 								generalPidHandler = new EBUTeletextHandler();
 								break;
 						case VBI:
 								compt_type.append(" VBI Data");
-								short_compt_type.append("VBI Data");
+								short_compt_type.append(" VBI Data");
 								generalPidHandler = new EBUTeletextHandler();
 								break;
 						case AC3:
 								compt_type.append(" Dolby Audio (AC3)");
-								short_compt_type.append("Dolby Audio (AC3)");
+								short_compt_type.append(" Dolby Audio (AC3)");
 								generalPidHandler = new AC3Handler();
 								break;
 						case E_AC3:

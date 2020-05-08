@@ -132,7 +132,7 @@ public class PMTsection extends TableSectionExtendedSyntax  implements TableSour
 			HashMap<String, Object> componentData = new HashMap<String, Object>();
 			componentData.put("program_number", tableIdExtension);
 			componentData.put("stream_type", streamtype);
-			componentData.put("stream_type_string", Utils.getStreamTypeString(streamtype));
+			componentData.put("stream_type_string", Utils.getStreamTypeShortString(streamtype));
 			componentData.put("elementary_pid", elementaryPID);
 			
 			componentData.putAll(TableUtils.getDescriptorTableData(getComponentDescriptorList()));
@@ -256,17 +256,29 @@ public class PMTsection extends TableSectionExtendedSyntax  implements TableSour
 
 	static TableHeader buildPmtTableHeader() {
 		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("program_number", "program_number", Integer.class).
-				addOptionalColumn("stream_type", "stream_type", Integer.class).
-				addOptionalColumn("stream_type description", "stream_type_string", String.class).
-				addOptionalColumn("elementary_PID:", "elementary_pid", Integer.class).
+				addOptionalColumn("program number", "program_number", Integer.class).
+				addOptionalColumn("stream type", "stream_type", Integer.class).
+				addOptionalColumn("stream type description", "stream_type_string", String.class).
+				addOptionalColumn("elementary PID", "elementary_pid", Integer.class).
+				
+				//StreamIdentifierDescriptor
+				addOptionalColumn("component tag", "component.tag", Integer.class).
 
+				//ISO639LanguageDescriptor
+				addOptionalRepeatingGroupedColumn("audio language", "language.language", String.class,"audio").
+				addOptionalRepeatingGroupedColumn("audio type", "language.type", String.class,"audio").
+				
+				//TeletextDescriptor
 				addOptionalRepeatingGroupedColumn("teletext language", "teletext.language", String.class,"ttx").
 				addOptionalRepeatingGroupedColumn("teletext type", "teletext.type", String.class,"ttx").
-				
+	
+				//SubtitlingDescriptor
+				addOptionalRepeatingGroupedColumn("subtitle language", "subtitle.language", String.class,"sub").
+				addOptionalRepeatingGroupedColumn("subtitle type", "subtitle.type", String.class,"sub").
+					
+				//ApplicationSignallingDescriptor
 				addOptionalRepeatingColumn("application type", "application.type", String.class).
 		
-//				addOptionalColumn("stream_type", "stream_type", Integer.class).
 				build();
 		return tableHeader;
 	}

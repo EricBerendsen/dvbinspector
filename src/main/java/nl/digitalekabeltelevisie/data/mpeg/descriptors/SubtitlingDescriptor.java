@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,8 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -36,8 +35,9 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class SubtitlingDescriptor extends Descriptor {
+public class SubtitlingDescriptor extends Descriptor implements TableRowSource{
 
 	private final List<Subtitle> subtitleList = new ArrayList<Subtitle>();
 
@@ -135,5 +135,16 @@ public class SubtitlingDescriptor extends Descriptor {
 
 	public List<Subtitle> getSubtitleList() {
 		return subtitleList;
+	}
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		for (int i = 0; i < subtitleList.size(); i++) {
+			Subtitle subtitle = subtitleList.get(i);
+			rowData.put("subtitle.language:"+i, subtitle.getIso639LanguageCode());
+			rowData.put("subtitle.type:"+i, getComponentType0x03String(subtitle.getSubtitlingType()));
+		}
+		return rowData;
 	}
 }

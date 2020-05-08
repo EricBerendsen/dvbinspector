@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,16 +29,16 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class ISO639LanguageDescriptor extends Descriptor {
+public class ISO639LanguageDescriptor extends Descriptor implements TableRowSource{
 
 	private final List<Language> languageList = new ArrayList<Language>();
 
@@ -133,5 +133,16 @@ public class ISO639LanguageDescriptor extends Descriptor {
 
 	public List<Language> getLanguageList() {
 		return languageList;
+	}
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		for (int i = 0; i < languageList.size(); i++) {
+			Language language = languageList.get(i);
+			rowData.put("language.language:" + i, language.getIso639LanguageCode());
+			rowData.put("language.type:" + i, getAudioTypeString(language.getAudioType()));
+		}
+		return rowData;
 	}
 }
