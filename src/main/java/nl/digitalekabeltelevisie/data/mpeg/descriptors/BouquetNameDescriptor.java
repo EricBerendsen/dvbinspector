@@ -27,13 +27,16 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import java.util.HashMap;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class BouquetNameDescriptor extends Descriptor {
+public class BouquetNameDescriptor extends Descriptor  implements TableRowSource{
 
 
 	private final DVBString  bouquetName;
@@ -59,6 +62,13 @@ public class BouquetNameDescriptor extends Descriptor {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		t.add(new DefaultMutableTreeNode(new KVP("bouquet_name",bouquetName ,null)));
 		return t;
+	}
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("bouquet.name", bouquetName.toString());
+		return rowData;
 	}
 
 }

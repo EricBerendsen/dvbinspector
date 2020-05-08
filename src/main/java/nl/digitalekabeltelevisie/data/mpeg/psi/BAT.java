@@ -29,16 +29,15 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class BAT extends AbstractPSITabel{
 
@@ -67,14 +66,20 @@ public class BAT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("BAT"));
+		KVP kvpBat = new KVP("BAT");
+		kvpBat.setTableSource(this::getTableModel);
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvpBat);
 		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
 
 		final Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
 			final Integer bouquetNo=i.next();
+
+
+			KVP kvp = new KVP("bouqet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
+			kvp.setTableSource(()->getTableForBouqetID(bouquetNo));
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			final BATsection [] sections = networks.get(bouquetNo);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("bouqet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo)));
 			for (final BATsection tsection : sections) {
 				if(tsection!= null){
 					if(!Utils.simpleModus(modus)){ // show all details
@@ -91,6 +96,64 @@ public class BAT extends AbstractPSITabel{
 		}
 		return t;
 	}
+	
+	
+	private TableModel getTableForBouqetID(int bouqetNo) {
+		return TableUtils.getTableModel(BAT::buildBatTableHeader,()->getRowDataForBouqetID(bouqetNo));
+	}
+
+	List<Map<String, Object>> getRowDataForBouqetID(int bouqetNo) {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+
+		final BATsection [] sections = networks.get(bouqetNo);
+		
+		for (final BATsection tsection : sections) {
+			if(tsection!= null){
+				rowData.addAll(tsection.getRowData());
+			}
+		}
+		return rowData;
+	}
+
+	
+	
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(BAT::buildBatTableHeader,()->getRowDataForBat());
+	}
+
+	List<Map<String, Object>> getRowDataForBat() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for(BATsection[] batSections:networks.values()) {
+			for (final BATsection tsection : batSections) {
+				if(tsection!= null){
+					rowData.addAll(tsection.getRowData());
+				}
+			}
+		}
+		return rowData;
+	}
+
+	
+	
+	
+	static TableHeader buildBatTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("bouquet id", "bouquet_id", Integer.class).
+				addOptionalColumn("bouquet id name", "bouquet_id_name", String.class).
+				
+				addOptionalColumn("bouquet name descriptor", "bouquet.name", String.class).
+				
+				addOptionalColumn("transport stream id", "transport_stream_id", Integer.class).
+				addOptionalColumn("original network id", "original_network_id", Integer.class).
+				addOptionalColumn("original network name", "original_network_name", String.class).
+				
+				
+				
+				build();
+		return tableHeader;
+	}
+
 
 
 }

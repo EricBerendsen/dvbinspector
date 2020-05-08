@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,10 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -39,16 +38,18 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
-public class BATsection extends TableSectionExtendedSyntax {
+public class BATsection extends TableSectionExtendedSyntax implements TableSource {
 
 	private List<Descriptor>		networkDescriptorList;
 	private List<TransportStream>	transportStreamList;
 	private int						networkDescriptorsLength;
 	private int						transportStreamLoopLength;
 
-	public static class TransportStream implements TreeNode {
+	public class TransportStream implements TreeNode {
 
 		private int			transportStreamID;
 		private int			originalNetworkID;
@@ -115,6 +116,21 @@ public class BATsection extends TableSectionExtendedSyntax {
 			Utils.addListJTree(t, descriptorList, modus, "transport_descriptors");
 
 			return t;
+		}
+
+		public Map<String, Object> getTableRowData() {
+			HashMap<String, Object> streamData = new HashMap<String, Object>();
+
+			streamData.put("bouquet_id",getTableIdExtension());
+			streamData.put("bouquet_id_name",Utils.getBouquetIDString(getTableIdExtension()));
+
+			streamData.put("transport_stream_id", getTransportStreamID());
+			streamData.put("original_network_id", getOriginalNetworkID());
+			streamData.put("original_network_name", Utils.getOriginalNetworkIDString(originalNetworkID));
+			
+
+			return streamData;
+
 		}
 
 	}
@@ -202,6 +218,8 @@ public class BATsection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this);
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_lengt", getNetworkDescriptorsLength(), null)));
 		Utils.addListJTree(t, networkDescriptorList, modus, "network_descriptors");
 		t
@@ -215,6 +233,25 @@ public class BATsection extends TableSectionExtendedSyntax {
 	String getTableIdExtensionLabel() {
 		return "bouquet_id";
 	}
+
+
+	
+	@Override
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(BAT::buildBatTableHeader,()->getRowData()) ;	
+	}
     
+	public List<Map<String, Object>> getRowData() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+
+		HashMap<String, Object> networkTableData = TableUtils.getDescriptorTableData(getNetworkDescriptorList());
+		for(TransportStream stream:transportStreamList) {
+			Map<String, Object> transportStreamTableRow = stream.getTableRowData();
+			transportStreamTableRow.putAll(networkTableData);
+			rowData.add(transportStreamTableRow);
+		}
+		return rowData;
+	}
+
 
 }
