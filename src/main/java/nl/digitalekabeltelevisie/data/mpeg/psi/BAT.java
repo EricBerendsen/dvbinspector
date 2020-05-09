@@ -67,7 +67,9 @@ public class BAT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		KVP kvpBat = new KVP("BAT");
-		kvpBat.setTableSource(this::getTableModel);
+		if(!networks.isEmpty()) {
+			kvpBat.setTableSource(this::getTableModel);
+		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvpBat);
 		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
 

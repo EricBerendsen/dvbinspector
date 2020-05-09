@@ -37,7 +37,6 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PATsection.Program;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
-import nl.digitalekabeltelevisie.util.tablemodel.TableHeader.Builder;
 
 public class PAT extends AbstractPSITabel{
 
@@ -99,11 +98,10 @@ public class PAT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		KVP kvp = new KVP("PAT");
-		kvp.setTableSource(()->getTableModel());
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
-
 		if (pat != null) {
+			kvp.setTableSource(() -> getTableModel());
 			for (PATsection element : pat) {
 				if(element!= null){
 					if(!Utils.simpleModus(modus)){ // show all versions

@@ -66,10 +66,13 @@ public class NIT extends AbstractPSITabel{
 		}
 	}
 
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		KVP kvpNit = new KVP("NIT");
-		kvpNit.setTableSource(()->getTableModel());
+		if(!networks.isEmpty()) {
+			kvpNit.setTableSource(()->getTableModel());
+		}
 		final DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode( kvpNit);
 		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
 

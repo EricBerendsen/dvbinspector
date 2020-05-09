@@ -40,7 +40,6 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection.Service;
 import nl.digitalekabeltelevisie.util.*;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
-import nl.digitalekabeltelevisie.util.tablemodel.TableHeader.Builder;
 
 public class SDT extends AbstractPSITabel{
 
@@ -88,9 +87,10 @@ public class SDT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		KVP sdtKvp = new KVP("SDT");
-		sdtKvp.setTableSource(()->getTableForSdt());
+		if(!networks.isEmpty()) {
+			sdtKvp.setTableSource(()->getTableForSdt());
+		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(sdtKvp);
-		
 
 		final TreeSet<Integer> networksTreeSet = new TreeSet<Integer>(networks.keySet());
 		final Iterator<Integer> i = networksTreeSet.iterator();
