@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -448,9 +448,9 @@ public class PID implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("continuity errors",continuity_errors,null)));
 
 
-		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",(scrambled)?"true":"false",null)));
+		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",Boolean.toString(scrambled),null)));
 		if(!scrambled){
-			t.add(new DefaultMutableTreeNode(new KVP("type",(type==PSI)?"PSI":((type==PES)?"PES":"-"),null)));
+			t.add(new DefaultMutableTreeNode(new KVP("type",getTypeString(),null)));
 		}
 		if(firstPCR!=null){
 			t.add(new DefaultMutableTreeNode(new KVP("First PCR",firstPCR.getProgram_clock_reference(),printPCRTime(firstPCR.getProgram_clock_reference()))));
@@ -475,6 +475,10 @@ public class PID implements TreeNode{
 		}
 
 		return t;
+	}
+
+	public String getTypeString() {
+		return (type==PSI)?"PSI":((type==PES)?"PES":"-");
 	}
 
 	public GeneralPSITable getPsi() {

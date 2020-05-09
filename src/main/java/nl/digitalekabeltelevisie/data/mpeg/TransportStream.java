@@ -35,6 +35,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
@@ -55,6 +56,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 
 /**
@@ -400,11 +402,13 @@ public class TransportStream implements TreeNode{
 
 		t.add(psi.getJTreeNode(modus));
 		if(!psiOnlyModus(modus)){
-			final DefaultMutableTreeNode pid = new DefaultMutableTreeNode(new KVP("PIDs"));
-			t.add(pid);
-			for (final PID pid2 : pids) {
-				if((pid2)!=null){
-					pid.add(pid2.getJTreeNode(modus));
+			KVP kvp = new KVP("PIDs");
+			kvp.setTableSource(() -> getTableModel());
+			final DefaultMutableTreeNode pidTreeNode = new DefaultMutableTreeNode(kvp);
+			t.add(pidTreeNode);
+			for (final PID pid : pids) {
+				if((pid)!=null){
+					pidTreeNode.add(pid.getJTreeNode(modus));
 				}
 
 			}
@@ -418,6 +422,54 @@ public class TransportStream implements TreeNode{
 		return t;
 	}
 
+	
+	
+	static TableHeader buildPidTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("pid", "pid", Integer.class).
+				addOptionalColumn("label", "label", String.class).
+				addOptionalColumn("pid type", "type", String.class).
+
+				addOptionalColumn("packets", "packets", Integer.class).
+				addOptionalColumn("duplicate packets", "duplicate_packets", Integer.class).
+				addOptionalColumn("continuity errors", "continuity_errors", Integer.class).
+
+				addOptionalColumn("scrambled", "transport_scrambling_control", Boolean.class).
+
+				build();
+		return tableHeader;
+	}
+
+	
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(TransportStream::buildPidTableHeader,()->getRowDataForPids());
+	}
+
+	
+	List<Map<String, Object>> getRowDataForPids() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for (final PID pid : pids) {
+			if((pid)!=null){
+				Map<String, Object> tableRow = new HashMap<String,Object>();
+				tableRow.put("pid",pid.getPid());
+				
+				tableRow.put("type",pid.getTypeString());
+				tableRow.put("label",pid.getShortLabel());
+				tableRow.put("packets",pid.getPackets());
+				tableRow.put("duplicate_packets",pid.getDup_packets());
+				tableRow.put("continuity_errors",pid.getContinuity_errors());
+				tableRow.put("transport_scrambling_control", pid.isScrambled());
+
+				rowData.add(tableRow);
+			}
+		}
+		return rowData;
+	}
+
+	
+	
+	
 	private static void setLabel(final int pidNo, final PID[] pids, final String text)
 	{
 		if(pids[pidNo]!=null){
