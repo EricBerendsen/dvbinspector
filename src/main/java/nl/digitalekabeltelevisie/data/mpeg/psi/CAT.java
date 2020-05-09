@@ -27,14 +27,15 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class CAT extends AbstractPSITabel {
 
@@ -74,7 +75,11 @@ public class CAT extends AbstractPSITabel {
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("CAT"));
+		KVP kvp = new KVP("CAT");
+		if(hasCADescriptors()) {
+			kvp.setTableSource(()->getTableModel());
+		}
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		if (cat != null) {
 			for (CAsection element : cat) {
@@ -84,6 +89,48 @@ public class CAT extends AbstractPSITabel {
 			}
 		}
 		return t;
+	}
+
+	
+	static TableHeader buildCatTableHeader() {
+		TableHeader tableHeader =  new TableHeader.Builder().
+				addOptionalColumn("ca system id", "ca_system_id", Integer.class).
+				addOptionalColumn("ca pid", "ca_pid", Integer.class).
+				addOptionalColumn("ca system specifier", "ca_system_specifier", String.class).
+
+				build();
+		return tableHeader;
+	}
+
+	
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(CAT::buildCatTableHeader,()->getRowDataForCat());
+	}
+
+	
+	List<Map<String, Object>> getRowDataForCat() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		if (cat != null) {
+			for (CAsection caSection : cat) {
+				if (caSection != null) {
+					rowData.addAll(caSection.getRowData());
+				}
+			}
+		}
+		return rowData;
+	}
+	
+	private boolean hasCADescriptors() {
+
+		if (cat != null) {
+			for (CAsection caSection : cat) {
+				if (caSection != null && caSection.getDescriptorList().size() > 0) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

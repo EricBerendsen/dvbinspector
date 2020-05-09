@@ -27,17 +27,21 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import java.util.List;
+import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
-public class CAsection extends TableSectionExtendedSyntax {
+public class CAsection extends TableSectionExtendedSyntax implements TableSource{
 
 	private List<Descriptor>	descriptorList;
 
@@ -57,6 +61,11 @@ public class CAsection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		if(!descriptorList.isEmpty()) {
+			KVP kvp = (KVP) t.getUserObject();
+			kvp.setTableSource(this);
+
+		}
 		Utils.addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
 	}
@@ -74,6 +83,24 @@ public class CAsection extends TableSectionExtendedSyntax {
 
 	public void setDescriptorList(final List<Descriptor> descriptorList) {
 		this.descriptorList = descriptorList;
+	}
+
+	
+
+	@Override
+	public TableModel getTableModel() {
+		return TableUtils.getTableModel(CAT::buildCatTableHeader,()->getRowData()) ;
+	}
+
+
+	public List<Map<String, Object>> getRowData() {
+		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		
+		for( Descriptor descriptor:descriptorList) {
+			if(descriptor instanceof TableRowSource)
+			rowData.add(((TableRowSource)descriptor).getTableRowData());
+		}
+		return rowData;
 	}
 
 }

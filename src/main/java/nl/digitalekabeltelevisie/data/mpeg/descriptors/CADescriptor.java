@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,14 +27,18 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
+
+import java.util.HashMap;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class CADescriptor extends Descriptor {
+public class CADescriptor extends Descriptor implements TableRowSource{
 
 	private int caSystemID;
 	private int caPID;
@@ -73,6 +77,15 @@ public class CADescriptor extends Descriptor {
 
 	public byte[] getPrivateDataByte() {
 		return privateDataByte;
+	}
+
+	@Override
+	public HashMap<String, Object> getTableRowData() {
+		HashMap<String, Object> rowData = new HashMap<String, Object>();
+		rowData.put("ca_system_id",caSystemID);
+		rowData.put("ca_pid",caPID);
+		rowData.put("ca_system_specifier",getCASystemIDString(caSystemID));
+		return rowData;
 	}
 
 }
