@@ -89,12 +89,14 @@ public class M7Fastscan implements TreeNode {
 	}
 	
 	public String getOperatorName(int operator_network_id) {
-		
-		for(ONTSection ontSection:ontSections) {
-			if(ontSection!=null) {
-				String r = ontSection.getOperatorName(operator_network_id);
-				if(r != null) {
-					return r;
+
+		if (ontSections != null) {
+			for (ONTSection ontSection : ontSections) {
+				if (ontSection != null) {
+					String r = ontSection.getOperatorName(operator_network_id);
+					if (r != null) {
+						return r;
+					}
 				}
 			}
 		}
