@@ -298,7 +298,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 					getSdt().
 					getServiceNameDVBString(serviceNo).
 					map(DVBString::toString).
-					orElse("Service "+serviceNo);
+					orElse("Service " + serviceNo.getServiceId());
 			gd.setColor(Color.BLUE);
 			gd.fillRect(x, labelY, SERVICE_NAME_WIDTH, LINE_HEIGHT);
 			gd.setColor(Color.WHITE);
