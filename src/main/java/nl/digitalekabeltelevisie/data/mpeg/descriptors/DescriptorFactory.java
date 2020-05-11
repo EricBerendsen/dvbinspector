@@ -29,52 +29,25 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static java.lang.Byte.toUnsignedInt;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.AITDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.ApplicationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.ApplicationNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.ApplicationUsageDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.DVBJApplicationLocationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationBoundaryDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.SimpleApplicationLocationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.TransportProtocolDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.MPEGExtensionDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.INTDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACPlatformNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACPlatformProviderNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.IPMACStreamLocationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.TargetIPSlashDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoPackageDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoVodDeliveryDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoVodURLDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus.CIProtectionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.GuidanceDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.EACEMStreamIdentifierDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV2;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.opencable.EBPDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.scte.SCTEAdaptationFieldDataDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.AvailDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SCTE35Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SegmentationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.MessageDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUEventNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSULocationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SSUSubgroupAssociationDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.SchedulingDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.TargetSmartcardDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UNTDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.UpdateDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
@@ -607,6 +580,8 @@ public final class DescriptorFactory {
 			return new DVBJApplicationDescriptor(data, offset, tableSection);
 		case 0x04:
 			return new DVBJApplicationLocationDescriptor(data, offset, tableSection);
+		case 0x05:
+			return new ExternalApplicationAuthorizationDescriptor(data, offset, tableSection);
 		case 0x15:
 			return new SimpleApplicationLocationDescriptor(data, offset, tableSection);
 		case 0x16:
