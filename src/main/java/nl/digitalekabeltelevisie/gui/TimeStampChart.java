@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -369,7 +369,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 
 		final XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("<htmL>{0}<br\\>{1}<br\\>value: {2}</html>",
 				packetTimeNumberFormatLabel, timeStampNumberFormat);
-		renderer.setBaseToolTipGenerator(toolTipGenerator);
+		renderer.setDefaultToolTipGenerator(toolTipGenerator);
 
 		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setAutoRange(true);
@@ -399,7 +399,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			useBlackOutlinePaint(temiDataset, renderer2);
 
 			final TEMIToolTipGenerator temiToolTipGenerator = new TEMIToolTipGenerator(	packetTimeNumberFormatLabel, temiNumberFormat);
-			renderer2.setBaseToolTipGenerator(temiToolTipGenerator);
+			renderer2.setDefaultToolTipGenerator(temiToolTipGenerator);
 		    plot.setRenderer(1, renderer2);
 		}
 

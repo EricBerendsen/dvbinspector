@@ -31,7 +31,6 @@ import static java.lang.Byte.toUnsignedInt;
 
 import java.awt.Color;
 import java.awt.Image;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,7 +62,9 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -158,29 +159,7 @@ public final class Utils {
 
 
 	static{
-
-		
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(classL.getResourceAsStream("res/oui_lines_final.txt")))){
-
-			String line;
-			while ((line = in.readLine()) != null) {
-				if((line.length()>6) && (line.charAt(0)!='#')){
-					final int id=Integer.parseInt(line.substring(0,6),16);
-
-					final int start = line.indexOf('"');
-					final int last = line.lastIndexOf('"');
-					if((last>start)&&(start>6)){
-						final String name=line.substring(start+1,last);
-						if(oui.get(id)!=null){
-							logger.warning("duplicate entrie, key="+Integer.toHexString(id)+", old value="+oui.get(id)+", new line="+name);
-						}
-						oui.put(id, name);
-					}
-				}
-			}
-		}catch(final IOException e){
-			logger.severe("There was a problem reading oui table:" + e);
-		}
+		readOIUCsv("res/oui.csv", oui);
 
 		readCSVIdString("res/bouquet_id.csv",bat);
 		readCSVIdString("res/data_broadcast_id.csv",dataBroadcast);
@@ -195,6 +174,25 @@ public final class Utils {
 
 	}
 
+	
+	private static void readOIUCsv(final String fileName, final Map<Integer,String> m) {
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-8")))){
+
+			String [] nextLine;
+			while ((nextLine = reader.readNext()) != null) {
+				// nextLine[] is an array of values from the line
+				// value[0] is MA-L
+				final int key = Integer.parseInt(nextLine[1],16);
+				final String name = nextLine[2]; //Organization Name
+				m.put(key,name);
+
+			}
+
+		}catch(final IOException | CsvValidationException e){
+			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
+		}
+	}
+	
 
 	private static void readCSVIdString(final String fileName, final RangeHashMap<Integer,String> m) {
 		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-16")))){
@@ -209,7 +207,7 @@ public final class Utils {
 
 			}
 
-		}catch(final IOException e){
+		}catch(final IOException | CsvValidationException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
 		}
 	}
@@ -230,7 +228,7 @@ public final class Utils {
 				m.put(lower, upper, nextLine[2]);
 
 			}
-		}catch(final IOException e){
+		}catch(final IOException | NumberFormatException | CsvValidationException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
 		}
 	}

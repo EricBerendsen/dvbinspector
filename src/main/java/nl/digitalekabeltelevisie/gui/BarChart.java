@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,7 +36,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.general.DatasetUtils;
 
 /**
  * @author Eric Berendsen
@@ -136,7 +136,7 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 					}
 				}
 			}
-			final CategoryDataset dataSet = DatasetUtilities.createCategoryDataset(stepLabels, labels, data);
+			final CategoryDataset dataSet = DatasetUtils.createCategoryDataset(stepLabels, labels, data);
 			freeChart = ChartFactory.createBarChart(transportStream.getFile().getName() + " - stream:"
 					+ transportStream.getStreamID(), "PID", "bitrate", dataSet, PlotOrientation.HORIZONTAL, true, true,
 					false);
