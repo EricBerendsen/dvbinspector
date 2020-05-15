@@ -62,7 +62,7 @@ public class ShortEventDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		return super.toString() + "ISO_639_language_code="+getIso639LanguageCode();
+		return super.toString() + ",eventName="+eventName.toString()+",ISO_639_language_code="+getIso639LanguageCode();
 	}
 
 	@Override

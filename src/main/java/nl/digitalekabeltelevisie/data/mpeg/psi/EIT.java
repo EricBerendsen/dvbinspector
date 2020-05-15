@@ -37,6 +37,8 @@ import java.util.stream.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
@@ -252,7 +254,7 @@ public class EIT extends AbstractPSITabel{
 		return getFlatEit(tableId -> tableId < 80);
 	}
 
-	public Map<ServiceIdentification, EITsection[]> getFlatEit(Predicate<Integer> predicate) {
+	public Map<ServiceIdentification, EITsection[]> getFlatEit(Predicate<Integer> scheduleOrPF) {
 		Map<ServiceIdentification, EITsection[]> result = new TreeMap<>();
 
 		for (Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> networkEntry : newEit.entrySet()) {
@@ -269,9 +271,10 @@ public class EIT extends AbstractPSITabel{
 
 					for (Entry<Integer, EITsection[]> tableEntry : service.entrySet()) {
 						int tableId = tableEntry.getKey();
-						if (predicate.test(tableId)) {
-							result.put(new ServiceIdentification(orgNetworkId, streamId, serviceId),
-									tableEntry.getValue());
+						if (scheduleOrPF.test(tableId)) {
+							result.merge(new ServiceIdentification(orgNetworkId, streamId, serviceId),
+									tableEntry.getValue(),
+									ArrayUtils::addAll);
 						}
 					}
 				}

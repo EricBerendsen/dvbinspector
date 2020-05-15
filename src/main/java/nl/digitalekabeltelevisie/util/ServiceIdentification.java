@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.util;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 20020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -110,4 +110,8 @@ public class ServiceIdentification implements Comparable<ServiceIdentification> 
 		return this.serviceId - other.serviceId;
 	}
 	
+	@Override
+	public String toString() {
+		return "onId:"+originalNetworkId+",tsId:"+transportStreamId+",serviceId:"+serviceId;
+	}
 }

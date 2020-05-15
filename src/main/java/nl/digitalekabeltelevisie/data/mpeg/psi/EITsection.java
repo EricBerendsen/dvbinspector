@@ -88,8 +88,12 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 
 		@Override
 		public String toString(){
-			final StringBuilder b = new StringBuilder("Service, transportStreamID=");
-			b.append(getEventID());
+			final StringBuilder b = new StringBuilder("Event, ID=");
+			b.append(getEventID()).
+			append(", start_time:").
+			append(Utils.getEITStartTimeAsString(startTime)).
+			append(", duration:").
+			append(formatDuration(duration));
 			final Iterator<Descriptor> j=descriptorList.iterator();
 			while (j.hasNext()) {
 				final Descriptor d = j.next();
