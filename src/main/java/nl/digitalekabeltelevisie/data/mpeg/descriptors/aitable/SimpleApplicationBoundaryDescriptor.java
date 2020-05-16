@@ -83,13 +83,15 @@ public class SimpleApplicationBoundaryDescriptor extends AITDescriptor {
 
 		boundary_extension_count = getInt(b, offset+2, 1, MASK_8BITS);
 		int t = 0;
-
-		while (t<boundary_extension_count) {
+		int extension = 0;
+		
+		while (extension<boundary_extension_count) {
 
 			final int boundary_extension_length = getInt(b, offset+t+3, 1, MASK_8BITS);
 			final byte[] boundary_extension_bytes =Arrays.copyOfRange(b, offset+t+4, offset+t+4+boundary_extension_length);
 			boundaryExtensions.add(new BoundaryExtension(boundary_extension_length,boundary_extension_bytes));
 			t += boundary_extension_length +1;
+			extension++;
 		}
 
 	}
