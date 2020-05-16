@@ -30,4 +30,5 @@ jobs:
       run: mvn -B package --file pom.xml
     - uses: actions/upload-artifact@v2
       with:
+        name: snapshot
         path: target/*.zip
