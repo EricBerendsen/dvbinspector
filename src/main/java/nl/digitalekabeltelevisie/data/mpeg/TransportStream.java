@@ -66,7 +66,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
 public class TransportStream implements TreeNode{
 	
 	private enum ComponentType{
-		AC3, E_AC3, VBI, TELETEXT, DVB_SUBTITLING, AIT, RCT, ECM, T2MI
+		AC3, E_AC3, VBI, TELETEXT, DVB_SUBTITLING, AIT, RCT, T2MI
 	}
 
 
@@ -470,7 +470,7 @@ public class TransportStream implements TreeNode{
 	
 	
 	
-	private static void setLabel(final int pidNo, final PID[] pids, final String text)
+	private void setLabel(final int pidNo, final String text)
 	{
 		if(pids[pidNo]!=null){
 			pids[pidNo].setLabel(text);
@@ -479,7 +479,7 @@ public class TransportStream implements TreeNode{
 
 	}
 
-	private static void setLabel(final int pidNo, final PID[] pids, final String longText, final String shortText)
+	private void setLabel(final int pidNo, final String longText, final String shortText)
 	{
 		if(pids[pidNo]!=null){
 			pids[pidNo].setLabel(longText);
@@ -544,136 +544,30 @@ public class TransportStream implements TreeNode{
 
 		// first the easy ones, the fixed values
 		for (short i = 0; i <=0x1f; i++) {
-			setLabel(i, pids,getFixedLabel(i));
+			setLabel(i, getFixedLabel(i));
 		}
 
-		setLabel(8191,pids,"NULL Packets (Stuffing)");
+		setLabel(8191,"NULL Packets (Stuffing)");
 
 		// now the streams referenced from the CAT
 		if(pids[1]!=null){
 			for(CADescriptor caDescriptor:findGenericDescriptorsInList(getPsi().getCat().getDescriptorList(), CADescriptor.class)){
-				setLabel(caDescriptor.getCaPID(), pids, "EMM for CA_ID:"+caDescriptor.getCaSystemID()+ " ("+Utils.getCASystemIDString(caDescriptor.getCaSystemID())+")");
+				setLabel(caDescriptor.getCaPID(), "EMM for CA_ID:"+caDescriptor.getCaSystemID()+ " ("+Utils.getCASystemIDString(caDescriptor.getCaSystemID())+")");
 			}
 		}
 
 		// now all services, starting with PMTs themselves, then referenced ES
-		final Iterator<PMTsection[]> it = getPsi().getPmts().iterator();
-		while (it.hasNext()) {
-			final PMTsection[] pmt = it.next();
+		for(final PMTsection[] pmt:getPsi().getPmts()){
 			PMTsection pmtSection = pmt[0];
 			while(pmtSection!=null){
 				final int service_id=pmtSection.getProgramNumber();
 				String service_name = getPsi().getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
-				final int pmt_pid=pmtSection.getParentPID().getPid();
-				setLabel(pmt_pid,pids,"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
 
-				for(CADescriptor caDescriptor:findGenericDescriptorsInList(pmtSection.getDescriptorList(), CADescriptor.class)){
-					setLabel(caDescriptor.getCaPID(),pids,"ECM for CA_ID:"+caDescriptor.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
-				}
+				labelPmtForProgram(pmtSection, service_id, service_name);
+				labelEcmForProgram(pmtSection, service_id, service_name);
+				labelComponentsForProgram(pmtSection, service_id, service_name);
+				labelPcrForProgram(pmtSection, service_id, service_name);
 
-				final Iterator<Component> l = pmtSection.getComponentenList().iterator();
-				while(l.hasNext()){
-					final Component component = l.next();
-					final int streamType = component.getStreamtype();
-					final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
-					final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
-					GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
-
-					ComponentType componentType = determineComponentType(component.getComponentDescriptorList());
-					if(componentType!=null){
-						switch(componentType){
-						case DVB_SUBTITLING:
-								compt_type.append(" DVB subtitling");
-								short_compt_type.append(" DVB subtitling");
-								generalPidHandler = new DVBSubtitleHandler();
-								break;
-						case TELETEXT:
-								compt_type.append(" Teletext");
-								short_compt_type.append(" Teletext");
-								generalPidHandler = new EBUTeletextHandler();
-								break;
-						case VBI:
-								compt_type.append(" VBI Data");
-								short_compt_type.append(" VBI Data");
-								generalPidHandler = new EBUTeletextHandler();
-								break;
-						case AC3:
-								compt_type.append(" Dolby Audio (AC3)");
-								short_compt_type.append(" Dolby Audio (AC3)");
-								generalPidHandler = new AC3Handler();
-								break;
-						case E_AC3:
-								compt_type.append(" Enhanced Dolby Audio (AC3)");
-								short_compt_type.append(" Enhanced Dolby Audio (AC3)");
-								generalPidHandler = new EAC3Handler();
-								break;
-						case AIT:
-								compt_type.append(" Application Information Table (AIT)");
-								short_compt_type.append(" Application Information Table (AIT)");
-								break;
-						case RCT:
-								compt_type.append(" Related Content Table (RCT)");
-								short_compt_type.append(" Related Content Table (RCT)");
-								break;
-						case ECM:
-								final List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
-									if(component.getComponentDescriptorList().size()>0){
-										final CADescriptor cad = caDescriptorList.get(0);
-										setLabel(cad.getCaPID(),pids,"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
-									}
-								break;
-						case T2MI:
-							compt_type.append(" T2-MI");
-							short_compt_type.append(" T2-MI");
-							generalPidHandler = new T2miPidHandler();
-							break;
-							
-						default:
-								logger.warning("no componenttype found for pid "+component.getElementaryPID()+", part of service "+service_id);
-						}
-					}
-
-					final PID pid = pids[component.getElementaryPID()];
-					if(pid!=null){
-						if(pid.getLabel()==null){
-							pid.setLabel(compt_type.toString());
-						}else if(!pid.getLabel().contains(compt_type)){
-							pid.setLabel(pid.getLabel()+ '/'+compt_type);
-						}
-						if(pid.getShortLabel()==null){
-							pid.setShortLabel(short_compt_type.toString());
-						}else if(!pid.getShortLabel().contains(short_compt_type)){
-							pid.setShortLabel(pid.getShortLabel()+'/'+short_compt_type);
-						}
-						if(generalPidHandler!=null){
-							generalPidHandler.setTransportStream(this);
-							generalPidHandler.setPID(pid);
-							pid.setPidHandler(generalPidHandler);
-						}
-					}
-				}
-				final int PCR_pid = pmtSection.getPcrPid();
-				if(PCR_pid!=MPEGConstants.NO_PCR_PID){ // ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
-					final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
-					final String pcrShortLabel = "PCR "+service_name;
-					if(pids[PCR_pid]==null){
-						logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
-					}
-					else if(pids[PCR_pid].getLabel()==null){
-						pids[PCR_pid].setLabel(pcrLabel);
-					}else if(!pids[PCR_pid].getLabel().contains(pcrLabel)){
-						pids[PCR_pid].setLabel(pids[PCR_pid].getLabel()+", "+pcrLabel);
-					}
-					if(pids[PCR_pid]!=null){
-						if(pids[PCR_pid].getShortLabel()==null){
-							pids[PCR_pid].setShortLabel(pcrShortLabel);
-						}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
-							//pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
-						}else{
-							pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
-						}
-					}
-				}
 				pmtSection =(PMTsection)pmtSection.getNextVersion();
 			}
 		}
@@ -688,6 +582,121 @@ public class TransportStream implements TreeNode{
 				if(pid.getShortLabel()==null){
 					pid.setShortLabel("?");
 				}
+			}
+		}
+	}
+
+	public void labelPmtForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+		setLabel(pmtSection.getParentPID().getPid(),"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
+	}
+
+	public void labelEcmForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+		for(CADescriptor caDescriptor:findGenericDescriptorsInList(pmtSection.getDescriptorList(), CADescriptor.class)){
+			setLabel(caDescriptor.getCaPID(),"ECM for CA_ID:"+caDescriptor.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
+		}
+	}
+
+	public void labelPcrForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+		final int PCR_pid = pmtSection.getPcrPid();
+		if(PCR_pid!=MPEGConstants.NO_PCR_PID){ // ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
+			final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
+			final String pcrShortLabel = "PCR "+service_name;
+			if(pids[PCR_pid]==null){
+				logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
+			}
+			else if(pids[PCR_pid].getLabel()==null){
+				pids[PCR_pid].setLabel(pcrLabel);
+			}else if(!pids[PCR_pid].getLabel().contains(pcrLabel)){
+				pids[PCR_pid].setLabel(pids[PCR_pid].getLabel()+", "+pcrLabel);
+			}
+			if(pids[PCR_pid]!=null){
+				if(pids[PCR_pid].getShortLabel()==null){
+					pids[PCR_pid].setShortLabel(pcrShortLabel);
+				}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
+					//pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
+				}else{
+					pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
+				}
+			}
+		}
+	}
+
+	public void labelComponentsForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+		for(Component component:pmtSection.getComponentenList()) {
+			final int streamType = component.getStreamtype();
+			final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
+			final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
+			GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
+
+			ComponentType componentType = determineComponentType(component.getComponentDescriptorList());
+			if (componentType != null) {
+				switch (componentType) {
+				case DVB_SUBTITLING:
+					compt_type.append(" DVB subtitling");
+					short_compt_type.append(" DVB subtitling");
+					generalPidHandler = new DVBSubtitleHandler();
+					break;
+				case TELETEXT:
+					compt_type.append(" Teletext");
+					short_compt_type.append(" Teletext");
+					generalPidHandler = new EBUTeletextHandler();
+					break;
+				case VBI:
+					compt_type.append(" VBI Data");
+					short_compt_type.append(" VBI Data");
+					generalPidHandler = new EBUTeletextHandler();
+					break;
+				case AC3:
+					compt_type.append(" Dolby Audio (AC3)");
+					short_compt_type.append(" Dolby Audio (AC3)");
+					generalPidHandler = new AC3Handler();
+					break;
+				case E_AC3:
+					compt_type.append(" Enhanced Dolby Audio (AC3)");
+					short_compt_type.append(" Enhanced Dolby Audio (AC3)");
+					generalPidHandler = new EAC3Handler();
+					break;
+				case AIT:
+					compt_type.append(" Application Information Table (AIT)");
+					short_compt_type.append(" Application Information Table (AIT)");
+					break;
+				case RCT:
+					compt_type.append(" Related Content Table (RCT)");
+					short_compt_type.append(" Related Content Table (RCT)");
+					break;
+				case T2MI:
+					compt_type.append(" T2-MI");
+					short_compt_type.append(" T2-MI");
+					generalPidHandler = new T2miPidHandler();
+					break;
+				default:
+					logger.warning("no componenttype found for pid " + component.getElementaryPID()
+							+ ", part of service " + service_id);
+				}
+			}
+
+			final PID pid = pids[component.getElementaryPID()];
+			if(pid!=null){
+				if(pid.getLabel()==null){
+					pid.setLabel(compt_type.toString());
+				}else if(!pid.getLabel().contains(compt_type)){
+					pid.setLabel(pid.getLabel()+ '/'+compt_type);
+				}
+				if(pid.getShortLabel()==null){
+					pid.setShortLabel(short_compt_type.toString());
+				}else if(!pid.getShortLabel().contains(short_compt_type)){
+					pid.setShortLabel(pid.getShortLabel()+'/'+short_compt_type);
+				}
+				if(generalPidHandler!=null){
+					generalPidHandler.setTransportStream(this);
+					generalPidHandler.setPID(pid);
+					pid.setPidHandler(generalPidHandler);
+				}
+			}
+			
+			final List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
+			for(CADescriptor cad: caDescriptorList) {
+				setLabel(cad.getCaPID(),"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
 			}
 		}
 	}
@@ -716,8 +725,6 @@ public class TransportStream implements TreeNode{
 				return ComponentType.RCT;
 			}else if(d instanceof T2MIDescriptor){
 				return ComponentType.T2MI;
-			}if(d instanceof CADescriptor) {
-				return ComponentType.ECM;
 			}
 		}
 
