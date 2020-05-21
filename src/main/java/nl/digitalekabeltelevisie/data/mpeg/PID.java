@@ -323,8 +323,12 @@ public class PID implements TreeNode{
 	private void updateMegaFrameInitializationPacket(final TSPacket packet) {
 		// MIP has only TSPackets, no structure with PSISectionData
 		if((packet.getData()!=null)&&(packet.getData().length>=14)){
-			final MegaFrameInitializationPacket mip= new MegaFrameInitializationPacket(packet);
-			parentTransportStream.getPsi().getNetworkSync().update(mip);
+			try {
+				final MegaFrameInitializationPacket mip= new MegaFrameInitializationPacket(packet);
+				parentTransportStream.getPsi().getNetworkSync().update(mip);
+			} catch (Exception exception) {
+				logger.log(Level.WARNING, "Exception trying to create MegaFrameInitializationPacket. ", exception);
+			}
 		}
 	}
 
