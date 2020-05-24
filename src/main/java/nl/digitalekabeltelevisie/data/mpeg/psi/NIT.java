@@ -26,25 +26,49 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.*;
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor.*;
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatCableFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatOrbitualPosition;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSatelliteFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSymbolRate;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatTerrestrialFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.getFEC_innerString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getModulationString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getPolarizationString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getRollOffString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor.getBandwidtString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor.getPriorityString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getBandwidthList;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getGuardIntervalList;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getSisoMisoModeList;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getTransmissionModeList;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.CableDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class NIT extends AbstractPSITabel{
 
