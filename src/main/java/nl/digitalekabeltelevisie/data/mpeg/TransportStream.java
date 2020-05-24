@@ -423,53 +423,31 @@ public class TransportStream implements TreeNode{
 	}
 
 	
-	
-	static TableHeader buildPidTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("pid", "pid", Integer.class).
-				addOptionalColumn("label", "label", String.class).
-				addOptionalColumn("pid type", "type", String.class).
+	static TableHeader<TransportStream,PID> buildPidTableHeader() {
 
-				addOptionalColumn("packets", "packets", Integer.class).
-				addOptionalColumn("duplicate packets", "duplicate_packets", Integer.class).
-				addOptionalColumn("continuity errors", "continuity_errors", Integer.class).
-
-				addOptionalColumn("scrambled", "transport_scrambling_control", Boolean.class).
-
+		TableHeader<TransportStream,PID> tableHeader =  new TableHeaderBuilder<TransportStream,PID>().
+				addOptionalRowColumn("pid", "pid", p ->p.getPid(), Number.class).
+				addOptionalRowColumn("label", "label", p->p.getShortLabel(), String.class).
+				addOptionalRowColumn("pid type", "type", p->p.getTypeString(), String.class).
+				addOptionalRowColumn("packets", "packets", p->p.getPackets(), Number.class).
+				addOptionalRowColumn("duplicate packets", "duplicate_packets", p->p.getDup_packets(), Number.class).
+				addOptionalRowColumn("continuity errors", "continuity_errors", p->p.getContinuity_errors(), Number.class).
+				addOptionalRowColumn("scrambled", "transport_scrambling_control", p->p.isScrambled(), Boolean.class).
 				build();
 		return tableHeader;
 	}
-
-	
-	public TableModel getTableModel() {
-		return TableUtils.getTableModel(TransportStream::buildPidTableHeader,()->getRowDataForPids());
-	}
-
-	
-	List<Map<String, Object>> getRowDataForPids() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
 		
-		for (final PID pid : pids) {
-			if((pid)!=null){
-				Map<String, Object> tableRow = new HashMap<String,Object>();
-				tableRow.put("pid",pid.getPid());
-				
-				tableRow.put("type",pid.getTypeString());
-				tableRow.put("label",pid.getShortLabel());
-				tableRow.put("packets",pid.getPackets());
-				tableRow.put("duplicate_packets",pid.getDup_packets());
-				tableRow.put("continuity_errors",pid.getContinuity_errors());
-				tableRow.put("transport_scrambling_control", pid.isScrambled());
 
-				rowData.add(tableRow);
-			}
-		}
-		return rowData;
+	public TableModel getTableModel() {
+		FlexTableModel<TransportStream,PID> tableModel =  new FlexTableModel<>(buildPidTableHeader());
+		List<PID> pidsList = Arrays.asList(pids);
+		
+		tableModel.addData(this, pidsList);
+
+		tableModel.process();
+		return tableModel;
 	}
 
-	
-	
-	
 	private static void setLabel(final int pidNo, final PID[] pids, final String text)
 	{
 		if(pids[pidNo]!=null){

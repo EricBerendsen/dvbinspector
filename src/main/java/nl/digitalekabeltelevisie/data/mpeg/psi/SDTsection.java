@@ -32,17 +32,14 @@ import java.util.*;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 
-public class SDTsection extends TableSectionExtendedSyntax {
+public class SDTsection extends TableSectionExtendedSyntax{
 
 	private List<Service> serviceList;
 	private int originalNetworkID;
@@ -155,29 +152,6 @@ public class SDTsection extends TableSectionExtendedSyntax {
 			this.reserved = reserved;
 		}
 
-		public Map<String, Object> getTableRowData() {
-			HashMap<String, Object> serviceData = new HashMap<String, Object>();
-
-			// table values
-			serviceData.put("transport_stream_id", getTableIdExtension());
-			serviceData.put("original_network_id", getOriginalNetworkID());
-			
-			// row (service) values
-			serviceData.put("service_id", serviceID);
-			serviceData.put("eit_schedule_flag", eitScheduleFlag);
-			serviceData.put("eit_present_following_flag", eitPresentFollowingFlag);
-			serviceData.put("running_status", runningStatus);
-			serviceData.put("free_ca_mode", freeCAmode);
-			
-			// from Service_descriptor
-			serviceData.putAll(TableUtils.getDescriptorTableData(getDescriptorList()));
-
-			
-			
-
-			return serviceData;
-		}
-
 	}
 
 
@@ -246,7 +220,7 @@ public class SDTsection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		((KVP) t.getUserObject()).setTableSource(() -> getTableModel());
+		((KVP) t.getUserObject()).setTableSource(this::getTableModel);
 
 		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID))));
 
@@ -290,22 +264,13 @@ public class SDTsection extends TableSectionExtendedSyntax {
 		default:
 			return "Illegal value";
 		}
-
 	}
-
+	
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowData()) ;
-	}
-
-
-	public List<Map<String, Object>> getRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
 		
-		for(Service service:serviceList) {
-			rowData.add(service.getTableRowData());
-		}
-		return rowData;
+		tableModel.addData(this,getServiceList());
+		tableModel.process();
+		return tableModel;
 	}
-
-
 }

@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+
 import java.util.*;
 
 import javax.swing.table.TableModel;
@@ -35,8 +37,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
@@ -64,7 +65,6 @@ public class CAsection extends TableSectionExtendedSyntax implements TableSource
 		if(!descriptorList.isEmpty()) {
 			KVP kvp = (KVP) t.getUserObject();
 			kvp.setTableSource(this);
-
 		}
 		Utils.addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
@@ -85,22 +85,32 @@ public class CAsection extends TableSectionExtendedSyntax implements TableSource
 		this.descriptorList = descriptorList;
 	}
 
-	
-
 	@Override
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(CAT::buildCatTableHeader,()->getRowData()) ;
+		FlexTableModel<CAsection,CADescriptor> tableModel =  new FlexTableModel<>(CAT.buildCatTableHeader());
+		tableModel.addData(this, findGenericDescriptorsInList(getDescriptorList(), CADescriptor.class));
+
+		tableModel.process();
+		return tableModel;
 	}
-
-
-	public List<Map<String, Object>> getRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
 		
-		for( Descriptor descriptor:descriptorList) {
-			if(descriptor instanceof TableRowSource)
-			rowData.add(((TableRowSource)descriptor).getTableRowData());
-		}
-		return rowData;
-	}
+
+	
+//
+//	@Override
+//	public TableModel getTableModel() {
+//		return TableUtils.getTableModel(CAT::buildCatTableHeader,()->getRowData()) ;
+//	}
+//
+//
+//	public List<Map<String, Object>> getRowData() {
+//		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+//		
+//		for( Descriptor descriptor:descriptorList) {
+//			if(descriptor instanceof TableRowSource)
+//			rowData.add(((TableRowSource)descriptor).getTableRowData());
+//		}
+//		return rowData;
+//	}
 
 }

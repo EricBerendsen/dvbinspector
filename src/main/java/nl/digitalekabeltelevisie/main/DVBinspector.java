@@ -231,7 +231,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
 		//Create and set up the window.
 		frame = new JFrame("DVB Inspector");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			/* (non-Javadoc)
 			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)

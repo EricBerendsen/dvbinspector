@@ -184,30 +184,28 @@ public class PAT extends AbstractPSITabel{
 
 
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(PAT::buildPatTableHeader,()->getPatRowData());
-	}
-
-	List<Map<String, Object>> getPatRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<PATsection,Program> tableModel =  new FlexTableModel<>(buildPatTableHeader());
 		
 		if (pat != null) {
 			for (PATsection element : pat) {
 				if(element!= null){
-					rowData.addAll(element.getRowData());
+					tableModel.addData(element, element.getPrograms());
 				}
 			}
 		}
-		return rowData;
+		
+		tableModel.process();
+		return tableModel;
+		
 	}
 
-	static TableHeader buildPatTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("program_number", "program_number", Integer.class).
-				addOptionalColumn("program_map_PID", "program_map_PID", Integer.class).
-				addOptionalColumn("name", "name", String.class).
+	static TableHeader<PATsection,Program>  buildPatTableHeader() {
+		TableHeader<PATsection,Program> tableHeader =  new TableHeaderBuilder<PATsection,Program>().
+				addOptionalRowColumn("program_number", "program_number",  p -> p.getProgram_number(), Integer.class).
+				addOptionalRowColumn("program_map_PID", "program_map_PID",  p -> p.getProgram_map_PID(), Integer.class).
+				addOptionalRowColumn("name", "name",  p -> p.getServiceNameOrNit(), String.class).
 				build();
 		return tableHeader;
 	}
-
 
 }

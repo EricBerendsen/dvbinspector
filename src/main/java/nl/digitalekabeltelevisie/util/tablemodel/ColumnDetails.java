@@ -1,5 +1,8 @@
 package nl.digitalekabeltelevisie.util.tablemodel;
 
+import java.util.List;
+import java.util.function.Function;
+
 /**
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
@@ -27,10 +30,12 @@ package nl.digitalekabeltelevisie.util.tablemodel;
  * 
  */
 
-class ColumnDetails{
+class ColumnDetails<E>{
 
 	private String name;
 	private String key;
+	private Function<E, Object> function;
+	private Function<E, List<Object>> listFunction;
 	private Class<?> dataClass;
 	boolean isList;
 	boolean required;
@@ -39,16 +44,21 @@ class ColumnDetails{
 	boolean used;
 	int listMax;
 	
-	public ColumnDetails(String name, String key, Class<?> dataClass, boolean required,boolean isList, String groupId) {
+	private boolean isBaseColumn;
+	
+	public ColumnDetails(String name, String key, Function<E, Object> function, Function<E, List<Object>> listFunction,Class<?> dataClass, boolean required,boolean isList, String groupId, boolean isBaseColumn) {
 		super();
 		this.name = name;
 		this.key = key;
+		this.function = function;
+		this.listFunction = listFunction;
 		this.dataClass = dataClass;
 		this.required = required;
 		this.isList = isList;
 		this.groupId = groupId;
 		this.used = false;
 		this.listMax = 0;
+		this.isBaseColumn = isBaseColumn;
 	}
 	
 
@@ -115,5 +125,20 @@ class ColumnDetails{
 
 	public void setGroupId(String groupId) {
 		this.groupId = groupId;
+	}
+
+
+	public Function<E, Object> getFunction() {
+		return function;
+	}
+
+
+	public boolean isBaseColumn() {
+		return isBaseColumn;
+	}
+
+
+	public Function<E, List<Object>> getListFunction() {
+		return listFunction;
 	}
 }

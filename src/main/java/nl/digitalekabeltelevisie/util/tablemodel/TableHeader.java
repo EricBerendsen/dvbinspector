@@ -29,77 +29,37 @@ package nl.digitalekabeltelevisie.util.tablemodel;
 
 import java.util.*;
 
-public class TableHeader {
+public class TableHeader<E,R> {
 	
-	public static class Builder{
-		private List<ColumnDetails> header;
-		private Map<String, ColumnDetails> map;
-
-		public Builder(){
-			header = new ArrayList<>();
-			map = new HashMap<>();
-		}
-
-		public Builder addRequiredColumn(String name, String key, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, key, type, true, false,null);
-			header.add(cd);
-			map.put(key, cd);
-			return this;
-		}
-
-		public Builder addOptionalColumn(String name, String key, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, key, type, false, false,null);
-			header.add(cd);
-			map.put(key, cd);
-			return this;
-		}
-
-		public Builder addOptionalRepeatingColumn(String name, String keyBase, Class<?> type) {
-			ColumnDetails cd = new ColumnDetails(name, keyBase, type, false, true,null);
-			header.add(cd);
-			map.put(keyBase, cd);
-			return this;
-		}
-
-		public Builder addOptionalRepeatingGroupedColumn(String name, String keyBase, Class<?> type, String groupId) {
-			ColumnDetails cd = new ColumnDetails(name, keyBase, type, false, true,groupId);
-			header.add(cd);
-			map.put(keyBase, cd);
-			return this;
-		}
-
-		public TableHeader build() {
-			return new TableHeader(header, map);
-		}
-	}
+	private List<ColumnDetails<?>> header;
+	private Map<String, ColumnDetails<?>> map;
 	
-	private List<ColumnDetails> header;
-	private Map<String, ColumnDetails> map;
-	
-	public TableHeader(List<ColumnDetails> header, Map<String, ColumnDetails> map) {
+
+	public TableHeader(List<ColumnDetails<?>> header, Map<String, ColumnDetails<?>> map) {
 		super();
 		this.header = header;
 		this.map = map;
 	}
 
+
 	public void flagUsed(String key) {
-		ColumnDetails cd = map.get(key);
+		ColumnDetails<?> cd = map.get(key);
 		if(cd!=null) {
 			cd.setUsed(true);
 		}
 		
 	}
 
-	public List<ColumnDetails> getHeader() {
+	public List<ColumnDetails<?>> getHeader() {
 		return header;
 	}
 
-	public Map<String, ColumnDetails> getMap() {
+	public Map<String, ColumnDetails<?>> getMap() {
 		return map;
 	}
 
 	public boolean isRepeatingColumn(String keyBase) {
-		ColumnDetails cd = map.get(keyBase);
+		ColumnDetails<?> cd = map.get(keyBase);
 		if (cd != null) {
 			return cd.isList();
 		}
@@ -107,7 +67,7 @@ public class TableHeader {
 	}
 
 	public void countOrdinal(String keyBase, int keyOrd) {
-		ColumnDetails cd = map.get(keyBase);
+		ColumnDetails<?> cd = map.get(keyBase);
 		if(cd!=null) {
 			cd.setUsed(true);
 			cd.setListMax(Integer.max(cd.getListMax(), keyOrd));

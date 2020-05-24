@@ -29,15 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.HashMap;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class SatelliteDeliverySystemDescriptor extends Descriptor implements TableRowSource{
+public class SatelliteDeliverySystemDescriptor extends Descriptor{
 
 	private String frequency; // use as bits, BCD coded.
 	private final String orbitalPosition;
@@ -151,12 +148,12 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor implements Tab
 	}
 
 
-	String getModulationSystemString() {
+	public String getModulationSystemString() {
 		return modulationSystem==1?"DVB-S2":"DVB-S";
 	}
 
 
-	String getWestEastFlagString() {
+	public String getWestEastFlagString() {
 		return westEastFlag==1?"east":"west";
 	}
 
@@ -190,23 +187,4 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor implements Tab
 		return modulationType;
 	}
 
-
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		rowData.put("satellite.frequency", Descriptor.formatSatelliteFrequency(frequency));
-		rowData.put("satellite.orbital_position", Descriptor.formatOrbitualPosition(orbitalPosition));
-		rowData.put("satellite.west_east_flag",getWestEastFlagString());
-		rowData.put("satellite.polarization", getPolarizationString(polarization));
-		rowData.put("satellite.modulation_system", getModulationSystemString());
-		if(modulationSystem==1){
-			rowData.put("satellite.roll_off", getRollOffString(rollOff));
-		}
-		rowData.put("satellite.modulation_type", getModulationString(modulationType));
-		rowData.put("satellite.symbol_rate", Descriptor.formatSymbolRate(symbol_rate));
-		rowData.put("satellite.fec_inner", Descriptor.getFEC_innerString(FEC_inner));
-
-		return rowData;
-	}
 }

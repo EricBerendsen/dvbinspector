@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.util.*;
@@ -178,23 +179,6 @@ public class SDT extends AbstractPSITabel{
 	
 	public Optional<DVBString> getServiceNameDVBString(final int original_network_id, final int transport_stream_id, final int serviceID){
 
-//		Optional<List<Descriptor>> descriptorList = getService(original_network_id,transport_stream_id,serviceID)
-//				.map(SDTsection.Service::getDescriptorList);
-//					
-//		if (descriptorList.isPresent()) {
-//			return descriptorList
-//				.get()
-//				.stream()
-//				.filter(d -> d instanceof ServiceDescriptor)
-//				.map(d -> (ServiceDescriptor) d)
-//				.findFirst()
-//				.map(ServiceDescriptor::getServiceName);
-//		}
-//		return Optional.empty();	
-//
-
-
-
 		return getService(original_network_id,transport_stream_id,serviceID)
 				.map(SDTsection.Service::getDescriptorList)
 				.orElseGet(ArrayList<Descriptor>::new)
@@ -203,19 +187,6 @@ public class SDT extends AbstractPSITabel{
 				.map(d -> (ServiceDescriptor)d)
 				.findFirst()
 				.map(ServiceDescriptor::getServiceName);
-
-
-
-//					Optional<List<Descriptor>> r = getService(original_network_id,transport_stream_id,serviceID)
-//							.map(SDTsection.Service::getDescriptorList);
-//							List<Descriptor> t = r.get();
-//			
-//							return t.stream()
-//							.filter(d -> d instanceof ServiceDescriptor)
-//							.map(d -> (ServiceDescriptor)d)
-//							.findFirst()
-//							.map(ServiceDescriptor::getServiceName);
-//
 
 	}
 
@@ -235,9 +206,8 @@ public class SDT extends AbstractPSITabel{
 			}
 			// service found, but no name, give up
 			return r;
-		}else{ // no service found
-			return r;
 		}
+		return r;
 	}
 
 	@Deprecated
@@ -256,14 +226,11 @@ public class SDT extends AbstractPSITabel{
 			}
 			// service found, but no name, give up
 			return r;
-		}else{ // no service found
-			return r;
-
 		}
+		return r;
 	}
 
-
-
+	//TODO remove
 	public Map<Integer, SDTsection[]> getTransportStreams() {
 		return null;
 	}
@@ -390,73 +357,108 @@ public class SDT extends AbstractPSITabel{
 		return -1;
 	}
 	
+	static TableHeader<SDTsection,Service>  buildSdtTableHeader() {
+		TableHeader<SDTsection,Service> tableHeader =  new TableHeaderBuilder<SDTsection,Service>().
+				addRequiredBaseColumn("original_network_id", "original_network_id",  SDTsection::getOriginalNetworkID, Integer.class).
+				addRequiredBaseColumn("transport_stream_id", "transport_stream_id",  SDTsection::getTransportStreamID, Integer.class).
+				
+				addOptionalRowColumn("service_id",
+						"service_id",  
+						service -> service.getServiceID(),
+						Number.class).
+				addOptionalRowColumn("service_name",
+						"service_name",  
+						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceName().toString()), 
+						String.class).
+				addOptionalRowColumn("service_type",
+						"service_type",  
+						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceType()), 
+						Number.class).
+				addOptionalRowColumn("service_type description",
+						"service_type_string",  
+						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> getServiceTypeString(sd.getServiceType())), 
+						String.class).
+				addOptionalRowColumn("service_provider_name",
+						"service_provider_name",  
+						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceProviderName().toString()), 
+						String.class).
+				addOptionalRowColumn("EIT_schedule_flag",
+						"eit_schedule_flag",  
+						service -> service.getEitScheduleFlag(),
+						Number.class).
+				addOptionalRowColumn("EIT_present_following_flag",
+						"eit_present_following_flag",  
+						service -> service.getEitPresentFollowingFlag(),
+						Number.class).
+				addOptionalRowColumn("running_status",
+						"running_status",  
+						service -> service.getRunningStatus(),
+						Number.class).
+				addOptionalRowColumn("free_CA_mode",
+						"free_ca_mode",  
+						service -> service.getFreeCAmode(),
+						Number.class).
+				build();
+		return tableHeader;
+	}
 	
 	private TableModel getTableForTransportStreamID(int orgNetworkId, int tsId) {
-		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowDataForTransportStreamId(orgNetworkId, tsId)) ;
-	}
-
-
-	List<Map<String, Object>> getRowDataForTransportStreamId(int orgNetworkId, int tsId) {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
 		final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
 		
 		for (final SDTsection tsection : sections) {
 			if(tsection!= null){
-				rowData.addAll(tsection.getRowData());
+				tableModel.addData(tsection,tsection.getServiceList());
 			}
 		}
-		return rowData;
+
+		tableModel.process();
+		return tableModel;
 	}
 
 	private TableModel getTableForOriginalNetwork(int orgNetworkId) {
-		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowDataForOriginalNetwork(orgNetworkId)) ;
-	}
-	
-	private List<Map<String, Object>> getRowDataForOriginalNetwork(int orgNetworkId) {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
 		HashMap<Integer, SDTsection[]> tsSections = networks.get(orgNetworkId);
 		
-		for (int ts : tsSections.keySet()) {
-			rowData.addAll(getRowDataForTransportStreamId(orgNetworkId, ts));
+		for (int tsId : tsSections.keySet()) {
+			final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
+			
+			for (final SDTsection tsection : sections) {
+				if(tsection!= null){
+					tableModel.addData(tsection,tsection.getServiceList());
+				}
+			}
 		}
-		return rowData;
+		tableModel.process();
+		return tableModel;
 	}
 
 	private TableModel getTableForSdt() {
-		return TableUtils.getTableModel(SDT::buildSdtTableHeader,()->getRowDataForSdt()) ;
-	}
+		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
 
-	private List<Map<String, Object>> getRowDataForSdt() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
-		
 		for (int orgNetworkId : networks.keySet()) {
-			rowData.addAll(getRowDataForOriginalNetwork(orgNetworkId));
+			HashMap<Integer, SDTsection[]> tsSections = networks.get(orgNetworkId);
+			
+			for (int tsId : tsSections.keySet()) {
+				final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
+				
+				for (final SDTsection tsection : sections) {
+					if(tsection!= null){
+						tableModel.addData(tsection,tsection.getServiceList());
+					}
+				}
+			}
 		}
-		return rowData;
-	}
 
-	static TableHeader buildSdtTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				
-				// table values
-				addOptionalColumn("original_network_id", "original_network_id", Integer.class).
-				addOptionalColumn("transport_stream_id", "transport_stream_id", Integer.class).
-				
-				addOptionalColumn("service_id", "service_id", Integer.class). // row (service) values
-				addOptionalColumn("service_name", "service_name", String.class).// from Service_descriptor
-				addOptionalColumn("service_type", "service_type", Integer.class).// from Service_descriptor
-				addOptionalColumn("service_type description", "service_type_string", String.class).// from Service_descriptor
-				
-				addOptionalColumn("service_provider_name", "service_provider_name", String.class).// from Service_descriptor
-				
-				addOptionalColumn("EIT_schedule_flag", "eit_schedule_flag", Integer.class). // row (service) values
-				addOptionalColumn("EIT_present_following_flag", "eit_present_following_flag", Integer.class). // row (service) values
-				addOptionalColumn("running_status", "running_status", Integer.class).// row (service) values
-				addOptionalColumn("free_CA_mode", "free_ca_mode", Integer.class).// row (service) values
-				
-				build();
-		return tableHeader;
+		tableModel.process();
+		return tableModel;
 	}
-
-	
 }

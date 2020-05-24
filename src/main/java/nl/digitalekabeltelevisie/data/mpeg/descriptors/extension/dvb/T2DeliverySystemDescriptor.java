@@ -37,9 +37,8 @@ import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.*;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor  implements TableRowSource{
+public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 	
 	private class CellInfo implements TreeNode{
 		
@@ -219,18 +218,60 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor  implemen
 		return t;
 	}
 
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		rowData.put("t2.plp_id", plp_id);
-		rowData.put("t2.t2_system_id", t2_system_id);
-		if (descriptorLength > 4) {
-			rowData.put("t2.siso_miso", siso_miso_mode_list.get(siso_miso));
-			rowData.put("t2.bandwidth", bandwidth_list.get(bandwidth));
-			rowData.put("t2.guard_interval", guard_interval_list.get(guard_interval));
-			rowData.put("t2.transmission_mode", transmission_mode_list.get(transmission_mode));
-		}
-		return rowData;
+	public static LookUpList getSisoMisoModeList() {
+		return siso_miso_mode_list;
+	}
+
+	public static LookUpList getBandwidthList() {
+		return bandwidth_list;
+	}
+
+	public static LookUpList getGuardIntervalList() {
+		return guard_interval_list;
+	}
+
+	public static LookUpList getTransmissionModeList() {
+		return transmission_mode_list;
+	}
+
+	public int getPlp_id() {
+		return plp_id;
+	}
+
+	public int getT2_system_id() {
+		return t2_system_id;
+	}
+
+	public int getSiso_miso() {
+		return siso_miso;
+	}
+
+	public int getBandwidth() {
+		return bandwidth;
+	}
+
+	public int getReserved_future_use() {
+		return reserved_future_use;
+	}
+
+	public int getGuard_interval() {
+		return guard_interval;
+	}
+
+	public int getTransmission_mode() {
+		return transmission_mode;
+	}
+
+	public int getOther_frequency_flag() {
+		return other_frequency_flag;
+	}
+
+	public int getTfs_flag() {
+		return tfs_flag;
+	}
+
+	public List<CellInfo> getCellInfoList() {
+		return cellInfoList;
 	}
 
 }

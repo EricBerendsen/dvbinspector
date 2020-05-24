@@ -28,39 +28,68 @@ package nl.digitalekabeltelevisie.util.tablemodel;
  */
 
 import java.util.*;
+import java.util.function.Function;
 
 import javax.swing.table.AbstractTableModel;
 
-public class FlexTableModel extends AbstractTableModel {
+public class FlexTableModel<E,R> extends AbstractTableModel {
 	
 	private static final String REPEATING_KEY_SEPARATOR = ":";
 	private List<Map<String, Object>> model = new ArrayList<>();
-	private TableHeader tableHeader;
+	private TableHeader<E,R> tableHeader;
 	private List<String> displayableColumns = new ArrayList<String>();
 	
-	public FlexTableModel(TableHeader tableHeader) {
+	public FlexTableModel(TableHeader<E,R> tableHeader) {
 		this.tableHeader = tableHeader;
 		
 	}
 	
-	public void addRowData(Map<String, Object> rowData) {
-		model.add(rowData);
+	public void addData(E entity, List<R> rows) {
+		for (R row : rows) {
+			if (row != null) {
+				Map<String, Object> rowData = new HashMap<String, Object>();
+				List<ColumnDetails<?>> columns = tableHeader.getHeader();
+				for (ColumnDetails<?> column : columns) {
+					if (column.isBaseColumn()) {
+						@SuppressWarnings("unchecked")
+						Function<E, Object> fun = (Function<E, Object>) column.getFunction();
+						Object r = fun.apply(entity);
+						rowData.put(column.getKey(), r);
+					} else if (!column.isList()){
+						@SuppressWarnings("unchecked")
+						Function<R, Object> fun = (Function<R, Object>) column.getFunction();
+						Object r = fun.apply(row);
+						rowData.put(column.getKey(), r);
+					} else { // repeating column , maybe grouped
+						@SuppressWarnings("unchecked")
+						Function<R, List<Object>> listFun = (Function<R, List<Object>>) column.getListFunction();
+						List<Object> listValues = listFun.apply(row);
+						if(listValues!=null) {
+							int t=0;
+							for(Object val:listValues) {
+								rowData.put(column.getKey()+REPEATING_KEY_SEPARATOR+t, val);
+								t++;
+							}
+						}
+						
+					}
+
+				}
+				model.add(rowData);
+			}
+		}
 	}
 	
-	public void addRowData(List<Map<String, Object>> rowData) {
-		model.addAll(rowData);
-	}
-
 	public void process() {
 		determineUsedColumns();
 		buildDisplayableColumnsList();
 	}
 
 	void buildDisplayableColumnsList() {
-		List<ColumnDetails> header = tableHeader.getHeader();
+		List<ColumnDetails<?>> header = tableHeader.getHeader();
 		int headerIndex = 0;
 		while (headerIndex < header.size()) {
-			ColumnDetails column = header.get(headerIndex);
+			ColumnDetails<?> column = header.get(headerIndex);
 			if(column.isUsed()||column.isRequired()) {
 				if(column.isList()) {
 					if(column.getGroupId()==null) { //Repeating column
@@ -76,23 +105,23 @@ public class FlexTableModel extends AbstractTableModel {
 		}
 	}
 
-	int addRepeatingColumnGroup(List<ColumnDetails> header, int headerIndexStart, ColumnDetails column) {
+	int addRepeatingColumnGroup(List<ColumnDetails<?>> header, int headerIndexStart, ColumnDetails<?> column) {
 		int headerIndex = headerIndexStart;
-		List<ColumnDetails> groupList = new ArrayList<ColumnDetails>();
+		List<ColumnDetails<?>> groupList = new ArrayList<ColumnDetails<?>>();
 		int iterCount = column.getListMax();
 		groupList.add(column);
 		
 		while(((headerIndex+1) < header.size()) 
 			&& (header.get(headerIndex+1).isList() )
 			&& (column.getGroupId().equals(header.get(headerIndex+1).getGroupId()))){
-			ColumnDetails nextCol = header.get(headerIndex+1);
+			ColumnDetails<?> nextCol = header.get(headerIndex+1);
 			iterCount = Integer.max(iterCount, nextCol.getListMax());
 			groupList.add(nextCol);
 			headerIndex++;
 		}
 		// create columns
 		for (int i = 0; i <= iterCount; i++) {
-			for(ColumnDetails groupedColumn:groupList) {
+			for(ColumnDetails<?> groupedColumn:groupList) {
 				String baseKey = groupedColumn.getKey();
 				displayableColumns.add(baseKey + REPEATING_KEY_SEPARATOR + i);
 			}
@@ -100,11 +129,11 @@ public class FlexTableModel extends AbstractTableModel {
 		return headerIndex;
 	}
 
-	void addSimpleColumn(ColumnDetails column) {
+	void addSimpleColumn(ColumnDetails<?> column) {
 		displayableColumns.add(column.getKey());
 	}
 
-	void addRepeatingColumn(ColumnDetails column) {
+	void addRepeatingColumn(ColumnDetails<?> column) {
 		String baseKey = column.getKey();
 		for (int i = 0; i <= column.getListMax(); i++) {
 			displayableColumns.add(baseKey + REPEATING_KEY_SEPARATOR + i);
@@ -157,7 +186,7 @@ public class FlexTableModel extends AbstractTableModel {
 
     @Override
 	public Class<?> getColumnClass(int columnIndex) {
-        ColumnDetails columnDetails = tableHeader.getMap().get(getBaseKey(columnIndex));
+        ColumnDetails<?> columnDetails = tableHeader.getMap().get(getBaseKey(columnIndex));
 		return columnDetails.getDataClass();
     }
     
@@ -168,7 +197,7 @@ public class FlexTableModel extends AbstractTableModel {
 	@Override
 	public String getColumnName(int columnIndex) {
 		String key = displayableColumns.get(columnIndex);
-		ColumnDetails columnDetails = tableHeader.getMap().get(getBase(key));
+		ColumnDetails<?> columnDetails = tableHeader.getMap().get(getBase(key));
 		if (columnDetails.isList()) {
 			String baseName = columnDetails.getName();
 			return baseName + " " + getOrdinal(key);

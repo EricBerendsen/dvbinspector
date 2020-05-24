@@ -29,15 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.HashMap;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class TerrestrialDeliverySystemDescriptor extends Descriptor implements TableRowSource{
+public class TerrestrialDeliverySystemDescriptor extends Descriptor{
 
 	private long frequency; // 32-bit uimsbf field giving the binary coded frequency value in multiples of 10 Hz.
 	private final int bandwidth;
@@ -154,20 +151,7 @@ public class TerrestrialDeliverySystemDescriptor extends Descriptor implements T
 	}
 
 
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		rowData.put("terrestrial.frequency", Descriptor.formatTerrestrialFrequency(frequency));
-		rowData.put("terrestrial.bandwidth", getBandwidtString(bandwidth));
-		rowData.put("terrestrial.priority", getPriorityString(priority));
-		rowData.put("terrestrial.time_slicing_indicator", getTimeSlicingString());
-		rowData.put("terrestrial.fec_inner", getFEC_innerString());
-
-		return rowData;
-	}
-
-
-	String getTimeSlicingString() {
+	public String getTimeSlicingString() {
 		return time_Slicing_indicator==1?"not used":"at least one elementary stream uses Time Slicing.";
 	}
 }

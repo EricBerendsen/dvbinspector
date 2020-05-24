@@ -33,12 +33,10 @@ import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class ISO639LanguageDescriptor extends Descriptor implements TableRowSource{
+public class ISO639LanguageDescriptor extends Descriptor{
 
 	private final List<Language> languageList = new ArrayList<Language>();
 
@@ -111,7 +109,7 @@ public class ISO639LanguageDescriptor extends Descriptor implements TableRowSour
 
 	public static String getAudioTypeString(final int audio) {
 		switch (audio) {
-		case 0: return "Main Audio";
+		case 0: return "Undefined";
 		case 1: return "Clean effects";
 		case 2: return "Hearing impaired";
 		case 3: return "Visual impaired commentary";
@@ -133,16 +131,5 @@ public class ISO639LanguageDescriptor extends Descriptor implements TableRowSour
 
 	public List<Language> getLanguageList() {
 		return languageList;
-	}
-
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		for (int i = 0; i < languageList.size(); i++) {
-			Language language = languageList.get(i);
-			rowData.put("language.language:" + i, language.getIso639LanguageCode());
-			rowData.put("language.type:" + i, getAudioTypeString(language.getAudioType()));
-		}
-		return rowData;
 	}
 }

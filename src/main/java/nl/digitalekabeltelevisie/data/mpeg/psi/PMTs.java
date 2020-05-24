@@ -26,18 +26,23 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.ISO639LanguageDescriptor.getAudioTypeString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TeletextDescriptor.getTeletextTypeString;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.TableUtils;
+import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
@@ -95,22 +100,121 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		}
 		return t;
 	}
+	
+	static TableHeader<PMTsection, Component> buildPmtTableHeader() {
+		TableHeader<PMTsection,Component> tableHeader =  new TableHeaderBuilder<PMTsection,Component>().
+				addRequiredBaseColumn("program number", "program_number", p->p.getProgramNumber(), Number.class).
 
-	private TableModel getTableForProgram(int programNumber) {
-		return TableUtils.getTableModel(PMTsection::buildPmtTableHeader,()->getRowDataForProgram(programNumber));
+				addOptionalRowColumn("stream type", "stream_type", c -> c.getStreamtype(), Number.class).
+				addOptionalRowColumn("stream type description", "stream_type_string", c -> Utils.getStreamTypeShortString(c.getStreamtype()), String.class).
+				addOptionalRowColumn("elementary PID", "elementary_pid", c -> c.getElementaryPID(), Number.class).
+				
+				addOptionalRowColumn("component tag",
+						"component.tag", 
+						component -> findDescriptorApplyFunc(component.getComponentDescriptorList(), 
+								StreamIdentifierDescriptor.class,  
+								si -> si.getComponentTag()), 
+						Number.class).
+
+				//ISO639
+				
+				addOptionalRepeatingGroupedColumn("iso language",
+						"iso.language",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								ISO639LanguageDescriptor.class,
+								iso -> iso.getLanguageList().
+									stream().
+									map(l->l.getIso639LanguageCode()).
+									collect(Collectors.toList())),
+						String.class,
+						"iso").
+				addOptionalRepeatingGroupedColumn("iso type",
+						"iso.type",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								ISO639LanguageDescriptor.class,
+								iso -> iso.getLanguageList().
+									stream().
+									map(l->getAudioTypeString(l.getAudioType())).
+									collect(Collectors.toList())),
+						String.class,
+						"iso").
+
+				// TTX
+				
+				addOptionalRepeatingGroupedColumn("teletext language",
+						"teletext.language",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								TeletextDescriptor.class,
+								iso -> iso.getTeletextList().
+									stream().
+									map(t->(t.getIso639LanguageCode())).
+									collect(Collectors.toList())),
+						String.class,
+						"ttx").
+				addOptionalRepeatingGroupedColumn("teletext type",
+						"teletext.type",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								TeletextDescriptor.class,
+								iso -> iso.getTeletextList().
+									stream().
+									map(t->getTeletextTypeString(t.getTeletextType())).
+									collect(Collectors.toList())),
+						String.class,
+						"ttx").
+
+				// SUB
+				
+				addOptionalRepeatingGroupedColumn("subtitle language",
+						"subtitle.language",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								SubtitlingDescriptor.class,
+								sub -> sub.getSubtitleList().
+									stream().
+									map(t->(t.getIso639LanguageCode())).
+									collect(Collectors.toList())),
+						String.class,
+						"sub").
+				addOptionalRepeatingGroupedColumn("subtitle type",
+						"subtitle.type",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								SubtitlingDescriptor.class,
+								sub -> sub.getSubtitleList().
+									stream().
+									map(t->getComponentType0x03String(t.getSubtitlingType())).
+									collect(Collectors.toList())),
+						String.class,
+						"sub").
+				
+				//ApplicationSignallingDescriptor
+				
+				addOptionalRepeatingRowColumn("application type",
+						"application.type",
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+								ApplicationSignallingDescriptor.class,
+								app -> app.getApplicationTypeList().
+									stream().
+									map(a->getAppTypeIDString(a.getApplicationType())).
+									collect(Collectors.toList())),
+						String.class).
+				
+				build();
+					
+		return tableHeader;
 	}
 
-	private List<Map<String, Object>>  getRowDataForProgram(int programNumber) {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
 
+	private TableModel getTableForProgram(int programNumber) {
+		FlexTableModel<PMTsection,Component> tableModel =  new FlexTableModel<>(buildPmtTableHeader());
 		PMTsection[] sections = pmts.get(programNumber);
 		
 		for (final PMTsection pmtSection : sections) {
 			if(pmtSection!= null){
-				rowData.addAll(pmtSection.getRowData());
+				tableModel.addData(pmtSection, pmtSection.getComponentenList());
 			}
 		}
-		return rowData;
+
+		tableModel.process();
+		return tableModel;
 	}
 
 	public int getPmtPID(final int programNumber){
