@@ -83,20 +83,13 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 
 			return t;
 		}
-		private String getServiceNameOrNit() {
+
+		public String getServiceNameOrNit() {
 			String serviceName = getParentPID().getParentTransportStream().getPsi().getSdt().getServiceNameForActualTransportStream(program_number);
 			if(serviceName==null && program_map_PID==16) {
 				serviceName = "NIT";
 			}
 			return serviceName;
-		}
-		public Map<String, Object> getTableRowData() {
-			HashMap<String, Object> programData = new HashMap<String, Object>();
-			programData.put("program_number", program_number);
-			programData.put("program_map_PID", program_map_PID);
-			programData.put("name", getServiceNameOrNit());
-
-			return programData;
 		}
 	}
 
@@ -172,16 +165,13 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 	
 	@Override
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(PAT::buildPatTableHeader,()->getRowData());
-	}
-	
-	public List<Map<String, Object>> getRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<PATsection,Program> tableModel =  new FlexTableModel<>(PAT.buildPatTableHeader());
 		
-		for( Program program:programs) {
-			rowData.add(program.getTableRowData());
-		}
-		return rowData;
+		tableModel.addData(this, getPrograms());
+		
+		tableModel.process();
+		return tableModel;
+
 	}
 
 }

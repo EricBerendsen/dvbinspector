@@ -32,17 +32,13 @@ import java.util.*;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
-import nl.digitalekabeltelevisie.gui.TableSource;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
-public class BATsection extends TableSectionExtendedSyntax implements TableSource {
+public class BATsection extends TableSectionExtendedSyntax{
 
 	private List<Descriptor>		networkDescriptorList;
 	private List<TransportStream>	transportStreamList;
@@ -219,12 +215,12 @@ public class BATsection extends TableSectionExtendedSyntax implements TableSourc
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this);
+		if(!transportStreamList.isEmpty()) {
+			kvp.setTableSource(this::getTableModel);
+		}
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_lengt", getNetworkDescriptorsLength(), null)));
 		Utils.addListJTree(t, networkDescriptorList, modus, "network_descriptors");
-		t
-		.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length", getTransportStreamLoopLength(),
-				null)));
+		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length", getTransportStreamLoopLength(), null)));
 		Utils.addListJTree(t, transportStreamList, modus, "transport_stream_loop");
 		return t;
 	}
@@ -235,23 +231,48 @@ public class BATsection extends TableSectionExtendedSyntax implements TableSourc
 	}
 
 
-	
-	@Override
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(BAT::buildBatTableHeader,()->getRowData()) ;	
-	}
-    
-	public List<Map<String, Object>> getRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<BATsection,TransportStream> tableModel =  new FlexTableModel<>(BAT.buildBatTableHeader());
 
-		HashMap<String, Object> networkTableData = TableUtils.getDescriptorTableData(getNetworkDescriptorList());
-		for(TransportStream stream:transportStreamList) {
-			Map<String, Object> transportStreamTableRow = stream.getTableRowData();
-			transportStreamTableRow.putAll(networkTableData);
-			rowData.add(transportStreamTableRow);
-		}
-		return rowData;
+		tableModel.addData(this, getTransportStreamList());
+
+		tableModel.process();
+		return tableModel;
 	}
+//    
+//	public List<Map<String, Object>> getRowData() {
+//		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+//
+//		HashMap<String, Object> networkTableData = TableUtils.getDescriptorTableData(getNetworkDescriptorList());
+//		for(TransportStream stream:transportStreamList) {
+//			Map<String, Object> transportStreamTableRow = stream.getTableRowData();
+//			transportStreamTableRow.putAll(networkTableData);
+//			rowData.add(transportStreamTableRow);
+//		}
+//		return rowData;
+//	}
+
+
+	
+//	static TableHeader<BATsection,List<BATsection.TransportStream>> buildBatTableHeader() {
+//		Function<BATsection, Object> fun = BATsection::getBouqetID;
+//		Function<BATsection, Object> fun2 = (b) -> Utils.getBouquetIDString(b.getBouqetID());
+//		return new TableHeaderBuilder<BATsection,List<BATsection.TransportStream>>().
+//				addBaseColumn("bouquet id",fun, Integer.class).
+//				addBaseColumn("bouquet id",fun2, Integer.class).
+////				addBaseColumn("bouquet id",BATsection::getBouqetID, Integer.class).
+////				addOptionalColumn("bouquet id name", "bouquet_id_name", String.class).
+////				
+////				addOptionalColumn("bouquet name descriptor", "bouquet.name", String.class).
+////				
+////				addOptionalColumn("transport stream id", "transport_stream_id", Integer.class).
+////				addOptionalColumn("original network id", "original_network_id", Integer.class).
+////				addOptionalColumn("original network name", "original_network_name", String.class).
+//				
+//				
+//				
+//				build();
+//	}
 
 
 }

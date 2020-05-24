@@ -27,16 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import java.util.HashMap;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class StreamIdentifierDescriptor extends Descriptor implements TableRowSource{
+public class StreamIdentifierDescriptor extends Descriptor{
 
 
 	private final int  componentTag;
@@ -61,13 +58,4 @@ public class StreamIdentifierDescriptor extends Descriptor implements TableRowSo
 	public int getComponentTag() {
 		return componentTag;
 	}
-
-
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		rowData.put("component.tag",componentTag);
-		return rowData;
-	}
-
 }

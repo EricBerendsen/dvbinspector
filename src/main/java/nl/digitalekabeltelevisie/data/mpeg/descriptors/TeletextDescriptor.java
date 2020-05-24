@@ -33,10 +33,8 @@ import java.util.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
 /**
  * @author Eric Berendsen
@@ -45,7 +43,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
  * (don0t understand the difference, and sometimes both are used. See astra/2010-7-19-13-36-11856-27500-S.ts
  *
  */
-public class TeletextDescriptor extends Descriptor implements TableRowSource{
+public class TeletextDescriptor extends Descriptor{
 
 	private final List<Teletext> teletextList = new ArrayList<Teletext>();
 
@@ -154,16 +152,5 @@ public class TeletextDescriptor extends Descriptor implements TableRowSource{
 
 	public List<Teletext> getTeletextList() {
 		return teletextList;
-	}
-
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		for (int i = 0; i < teletextList.size(); i++) {
-			Teletext txt = teletextList.get(i);
-			rowData.put("teletext.language:"+i, txt.getIso639LanguageCode());
-			rowData.put("teletext.type:"+i, getTeletextTypeString(txt.getTeletextType()));
-		}
-		return rowData;
 	}
 }

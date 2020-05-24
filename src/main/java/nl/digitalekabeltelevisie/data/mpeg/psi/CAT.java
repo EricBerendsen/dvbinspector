@@ -27,6 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+import static nl.digitalekabeltelevisie.util.Utils.getCASystemIDString;
+
 import java.util.*;
 
 import javax.swing.table.TableModel;
@@ -34,7 +37,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class CAT extends AbstractPSITabel {
@@ -92,33 +95,30 @@ public class CAT extends AbstractPSITabel {
 	}
 
 	
-	static TableHeader buildCatTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("ca system id", "ca_system_id", Integer.class).
-				addOptionalColumn("ca pid", "ca_pid", Integer.class).
-				addOptionalColumn("ca system specifier", "ca_system_specifier", String.class).
-
+	static TableHeader<CAsection,CADescriptor>  buildCatTableHeader() {
+		TableHeader<CAsection,CADescriptor> tableHeader =  new TableHeaderBuilder<CAsection,CADescriptor>().
+				addOptionalRowColumn("ca system id", "ca_system_id",  p -> p.getCaSystemID(), Integer.class).
+				addOptionalRowColumn("ca pid", "ca_pid",  p -> p.getCaPID(), Integer.class).
+				addOptionalRowColumn("ca system specifier", "ca_system_specifier",  p -> getCASystemIDString(p.getCaSystemID()), String.class).
 				build();
+		
 		return tableHeader;
 	}
-
+	
 	
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(CAT::buildCatTableHeader,()->getRowDataForCat());
-	}
-
-	
-	List<Map<String, Object>> getRowDataForCat() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<CAsection,CADescriptor> tableModel =  new FlexTableModel<>(buildCatTableHeader());
 		
 		if (cat != null) {
-			for (CAsection caSection : cat) {
-				if (caSection != null) {
-					rowData.addAll(caSection.getRowData());
+			for (CAsection element : cat) {
+				if(element!= null){
+					tableModel.addData(element, findGenericDescriptorsInList(element.getDescriptorList(), CADescriptor.class));
 				}
 			}
 		}
-		return rowData;
+		
+		tableModel.process();
+		return tableModel;
 	}
 	
 	private boolean hasCADescriptors() {

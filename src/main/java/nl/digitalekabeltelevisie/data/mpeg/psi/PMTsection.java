@@ -37,12 +37,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
-import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 
-public class PMTsection extends TableSectionExtendedSyntax  implements TableSource{
+public class PMTsection extends TableSectionExtendedSyntax{
 
 
 	private int pcrPid = 0;
@@ -124,21 +123,6 @@ public class PMTsection extends TableSectionExtendedSyntax  implements TableSour
 
 			return t;
 		}
-
-
-
-
-		public Map<String, Object> getTableRowData() {
-			HashMap<String, Object> componentData = new HashMap<String, Object>();
-			componentData.put("program_number", tableIdExtension);
-			componentData.put("stream_type", streamtype);
-			componentData.put("stream_type_string", Utils.getStreamTypeShortString(streamtype));
-			componentData.put("elementary_pid", elementaryPID);
-			
-			componentData.putAll(TableUtils.getDescriptorTableData(getComponentDescriptorList()));
-			return componentData;
-		}
-
 	}
 
 
@@ -222,7 +206,7 @@ public class PMTsection extends TableSectionExtendedSyntax  implements TableSour
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this);
+		kvp.setTableSource(this::getTableModel);
 
 		t.add(new DefaultMutableTreeNode(new KVP("PMT_PID",getParentPID().getPid(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("PCR_PID",pcrPid,null)));
@@ -238,49 +222,12 @@ public class PMTsection extends TableSectionExtendedSyntax  implements TableSour
 	}
 
 
-	
-	@Override
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(PMTsection::buildPmtTableHeader,()->getRowData());
+		FlexTableModel<PMTsection,Component> tableModel =  new FlexTableModel<>(PMTs.buildPmtTableHeader());
+
+		tableModel.addData(this, getComponentenList());
+
+		tableModel.process();
+		return tableModel;
 	}
-	
-	public List<Map<String, Object>> getRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
-		
-		for(Component component:componentsList) {
-			rowData.add(component.getTableRowData());
-		}
-		return rowData;
-	}
-
-
-	static TableHeader buildPmtTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("program number", "program_number", Integer.class).
-				addOptionalColumn("stream type", "stream_type", Integer.class).
-				addOptionalColumn("stream type description", "stream_type_string", String.class).
-				addOptionalColumn("elementary PID", "elementary_pid", Integer.class).
-				
-				//StreamIdentifierDescriptor
-				addOptionalColumn("component tag", "component.tag", Integer.class).
-
-				//ISO639LanguageDescriptor
-				addOptionalRepeatingGroupedColumn("audio language", "language.language", String.class,"audio").
-				addOptionalRepeatingGroupedColumn("audio type", "language.type", String.class,"audio").
-				
-				//TeletextDescriptor
-				addOptionalRepeatingGroupedColumn("teletext language", "teletext.language", String.class,"ttx").
-				addOptionalRepeatingGroupedColumn("teletext type", "teletext.type", String.class,"ttx").
-	
-				//SubtitlingDescriptor
-				addOptionalRepeatingGroupedColumn("subtitle language", "subtitle.language", String.class,"sub").
-				addOptionalRepeatingGroupedColumn("subtitle type", "subtitle.type", String.class,"sub").
-					
-				//ApplicationSignallingDescriptor
-				addOptionalRepeatingColumn("application type", "application.type", String.class).
-		
-				build();
-		return tableHeader;
-	}
-
 }

@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
@@ -36,6 +37,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.BATsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
 
@@ -64,6 +67,7 @@ public class BAT extends AbstractPSITabel{
 		}
 	}
 
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		KVP kvpBat = new KVP("BAT");
@@ -79,7 +83,9 @@ public class BAT extends AbstractPSITabel{
 
 
 			KVP kvp = new KVP("bouqet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
-			kvp.setTableSource(()->getTableForBouqetID(bouquetNo));
+			if(hasTransportStreams(bouquetNo)) {
+				kvp.setTableSource(()->getTableForBouqetID(bouquetNo));
+			}
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			final BATsection [] sections = networks.get(bouquetNo);
 			for (final BATsection tsection : sections) {
@@ -100,62 +106,78 @@ public class BAT extends AbstractPSITabel{
 	}
 	
 	
-	private TableModel getTableForBouqetID(int bouqetNo) {
-		return TableUtils.getTableModel(BAT::buildBatTableHeader,()->getRowDataForBouqetID(bouqetNo));
+	static TableHeader<BATsection,TransportStream> buildBatTableHeader() {
+
+		TableHeader<BATsection,TransportStream> tableHeader =  new TableHeaderBuilder<BATsection,TransportStream>().
+				addRequiredBaseColumn("bouquet id","bouquet_id", b->b.getBouqetID(), Number.class).
+				addRequiredBaseColumn("bouquet id name", "bouquet_id_name", b -> getBouquetIDString(b.getBouqetID()), String.class).
+				
+				addOptionalBaseColumn("bouquet name descriptor",
+						"bouquet.name",
+						bat -> findDescriptorApplyFunc(bat.getNetworkDescriptorList(), 
+								BouquetNameDescriptor.class,  
+								bnd -> bnd.getBouquetName().toString()), 
+						String.class).
+
+				addOptionalRowColumn("transport stream id",
+						"transport_stream_id",  
+						ts -> ts.getTransportStreamID(),
+						Number.class).
+				addOptionalRowColumn("original network id",
+						"original_network_id",  
+						ts -> ts.getOriginalNetworkID(),
+						Number.class).
+				
+				addOptionalRowColumn("original network name",
+						"original_network_name",  
+						ts ->  Utils.getOriginalNetworkIDString(ts.getOriginalNetworkID()),
+						String.class).
+			
+			build();
+		return tableHeader;
 	}
 
-	List<Map<String, Object>> getRowDataForBouqetID(int bouqetNo) {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
-
+	private boolean hasTransportStreams(int bouqetNo) {
+		final BATsection [] sections = networks.get(bouqetNo);
+		
+		for (final BATsection tsection : sections) {
+			if(tsection!= null && !tsection.getTransportStreamList().isEmpty()){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	private TableModel getTableForBouqetID(int bouqetNo) {
+		FlexTableModel<BATsection,TransportStream> tableModel =  new FlexTableModel<>(buildBatTableHeader());
 		final BATsection [] sections = networks.get(bouqetNo);
 		
 		for (final BATsection tsection : sections) {
 			if(tsection!= null){
-				rowData.addAll(tsection.getRowData());
+				tableModel.addData(tsection, tsection.getTransportStreamList());
 			}
 		}
-		return rowData;
+
+		tableModel.process();
+		return tableModel;
 	}
 
-	
-	
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(BAT::buildBatTableHeader,()->getRowDataForBat());
-	}
-
-	List<Map<String, Object>> getRowDataForBat() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<BATsection,TransportStream> tableModel =  new FlexTableModel<>(buildBatTableHeader());
 		
 		for(BATsection[] batSections:networks.values()) {
 			for (final BATsection tsection : batSections) {
 				if(tsection!= null){
-					rowData.addAll(tsection.getRowData());
+					tableModel.addData(tsection, tsection.getTransportStreamList());
 				}
 			}
 		}
-		return rowData;
+
+		tableModel.process();
+		return tableModel;
 	}
-
 	
-	
-	
-	static TableHeader buildBatTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("bouquet id", "bouquet_id", Integer.class).
-				addOptionalColumn("bouquet id name", "bouquet_id_name", String.class).
-				
-				addOptionalColumn("bouquet name descriptor", "bouquet.name", String.class).
-				
-				addOptionalColumn("transport stream id", "transport_stream_id", Integer.class).
-				addOptionalColumn("original network id", "original_network_id", Integer.class).
-				addOptionalColumn("original network name", "original_network_name", String.class).
-				
-				
-				
-				build();
-		return tableHeader;
-	}
-
-
-
 }
+
+

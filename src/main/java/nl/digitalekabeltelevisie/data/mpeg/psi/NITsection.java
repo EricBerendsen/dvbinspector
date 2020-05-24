@@ -31,15 +31,12 @@ import java.util.*;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 
 public class NITsection extends TableSectionExtendedSyntax implements TableSource{
@@ -50,7 +47,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	private int transportStreamLoopLength;
 
 	
-	public class TransportStream implements TreeNode, TableRowSource{
+	public class TransportStream implements TreeNode{
 		private int transportStreamID;
 		private int originalNetworkID;
 		private int transportDescriptorsLength;
@@ -114,19 +111,6 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 
 			return t;
 		}
-
-		@Override
-		public HashMap<String, Object> getTableRowData() {
-			HashMap<String, Object> streamData = new HashMap<String, Object>();
-			streamData.put("transport_stream_id", getTransportStreamID());
-			streamData.put("original_network_id", getOriginalNetworkID());
-			streamData.put("network_id", getTableIdExtension());
-			
-			streamData.putAll(TableUtils.getDescriptorTableData(getDescriptorList()));
-			return streamData;
-		}
-
-
 	}
 
 
@@ -248,22 +232,15 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	String getTableIdExtensionLabel() {
 		return "network_id";
 	}
-    
 
 	@Override
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(NIT::buildNitTableHeader,()->getRowData()) ;
-	}
-
-
-	public List<Map<String, Object>> getRowData() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<NITsection,TransportStream> tableModel =  new FlexTableModel<>(NIT.buildNitTableHeader());
 		
-		for(TransportStream stream:transportStreamList) {
-			rowData.add(stream.getTableRowData());
-		}
-		return rowData;
-	}
+		tableModel.addData(this, getTransportStreamList());
+		tableModel.process();
+		return tableModel;
 
+	}
 
 }

@@ -36,7 +36,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
 /**
  * Based on ETSI TS 102 809 V1.1.1 (2010-01) "Signalling and carriage of interactive applications and services in Hybrid broadcast/broadband environments"
@@ -44,7 +43,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
  * @author Eric
  *
  */
-public class ApplicationSignallingDescriptor extends Descriptor implements TableRowSource{
+public class ApplicationSignallingDescriptor extends Descriptor{
 
 	private List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
 
@@ -65,9 +64,15 @@ public class ApplicationSignallingDescriptor extends Descriptor implements Table
 			return s;
 		}
 
+		public int getApplicationType() {
+			return applicationType;
+		}
+
+		public int getAitVersionNumber() {
+			return aitVersionNumber;
+		}
+
 	}
-
-
 
 	public ApplicationSignallingDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
@@ -82,11 +87,6 @@ public class ApplicationSignallingDescriptor extends Descriptor implements Table
 		}
 	}
 
-
-
-
-
-
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
@@ -96,16 +96,7 @@ public class ApplicationSignallingDescriptor extends Descriptor implements Table
 		return t;
 	}
 
-
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		
-		for (int i = 0; i < applicationTypeList.size(); i++) {
-			ApplicationType appType = applicationTypeList.get(i);
-			rowData.put("application.type:"+i, getAppTypeIDString(appType.applicationType));
-		}
-
-		return rowData;
+	public List<ApplicationType> getApplicationTypeList() {
+		return applicationTypeList;
 	}
 }

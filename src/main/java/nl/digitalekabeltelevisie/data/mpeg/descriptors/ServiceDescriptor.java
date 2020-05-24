@@ -29,16 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.HashMap;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.DVBString;
-import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.tablemodel.TableRowSource;
 
-public class ServiceDescriptor extends Descriptor implements TableRowSource {
+public class ServiceDescriptor extends Descriptor{
 
 	private final int serviceType;
 	private final DVBString  serviceProviderName;
@@ -90,18 +86,6 @@ public class ServiceDescriptor extends Descriptor implements TableRowSource {
 
 	public int getServiceProviderNameLength() {
 		return serviceProviderName.getLength();
-	}
-
-	@Override
-	public HashMap<String, Object> getTableRowData() {
-
-		HashMap<String, Object> rowData = new HashMap<String, Object>();
-		rowData.put("service_type", serviceType);
-		rowData.put("service_type_string", getServiceTypeString(serviceType));
-		rowData.put("service_provider_name", serviceProviderName.toString());
-		rowData.put("service_name", serviceName.toString());
-
-		return rowData;
 	}
 
 }

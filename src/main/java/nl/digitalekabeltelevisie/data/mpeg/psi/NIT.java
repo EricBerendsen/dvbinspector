@@ -26,20 +26,49 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatCableFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatOrbitualPosition;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSatelliteFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSymbolRate;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatTerrestrialFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.getFEC_innerString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getModulationString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getPolarizationString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getRollOffString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor.getBandwidtString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor.getPriorityString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getBandwidthList;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getGuardIntervalList;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getSisoMisoModeList;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor.getTransmissionModeList;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.CableDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class NIT extends AbstractPSITabel{
 
@@ -245,79 +274,216 @@ public class NIT extends AbstractPSITabel{
 	}
 
 	private TableModel getTableForNetworkID(int networkNo) {
-		return TableUtils.getTableModel(NIT::buildNitTableHeader,()->getRowDataForNetworkId(networkNo));
-	}
-
-	List<Map<String, Object>> getRowDataForNetworkId(int networkNo) {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
+		FlexTableModel<NITsection,TransportStream> tableModel =  new FlexTableModel<>(buildNitTableHeader());
 
 		final NITsection [] sections = networks.get(networkNo);
 		
 		for (final NITsection tsection : sections) {
 			if(tsection!= null){
-				rowData.addAll(tsection.getRowData());
+				tableModel.addData(tsection, tsection.getTransportStreamList());
 			}
 		}
-		return rowData;
+
+		tableModel.process();
+		return tableModel;
 	}
+
 
 	
 	public TableModel getTableModel() {
-		return TableUtils.getTableModel(NIT::buildNitTableHeader,()->getRowDataForNit());
-	}
+		FlexTableModel<NITsection,TransportStream> tableModel =  new FlexTableModel<>(buildNitTableHeader());
 
-	List<Map<String, Object>> getRowDataForNit() {
-		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
-		
 		for(NITsection[] nitSections:networks.values()) {
 			for (final NITsection tsection : nitSections) {
 				if(tsection!= null){
-					rowData.addAll(tsection.getRowData());
+					tableModel.addData(tsection, tsection.getTransportStreamList());
 				}
 			}
 		}
-		return rowData;
+
+		tableModel.process();
+		return tableModel;
 	}
 
-	static TableHeader buildNitTableHeader() {
-		TableHeader tableHeader =  new TableHeader.Builder().
-				addOptionalColumn("network_id", "network_id", Integer.class).
-				addOptionalColumn("transport_stream_id", "transport_stream_id", Integer.class).
-				addOptionalColumn("original_network_id", "original_network_id", Integer.class).
-				
-				// Number.class is abused to force right align of String.  
-				addOptionalColumn("terrestrial frequency", "terrestrial.frequency", Number.class).
-				addOptionalColumn("terrestrial bandwidth", "terrestrial.bandwidth", Number.class).
-				addOptionalColumn("terrestrial priority", "terrestrial.priority", String.class).
-				addOptionalColumn("terrestrial time_slicing_indicator", "terrestrial.time_slicing_indicator", String.class).
-				addOptionalColumn("terrestrial fec_inner", "terrestrial.fec_inner", String.class).
-				
-				addOptionalColumn("T2 plp_id", "t2.plp_id", Integer.class).
-				addOptionalColumn("T2_system_id", "t2.t2_system_id", Integer.class).
+
 	
-				addOptionalColumn("T2 siso_miso", "t2.siso_miso", Number.class).
-				addOptionalColumn("T2 bandwidth", "t2.bandwidth", Number.class).
-				addOptionalColumn("T2 guard_interval", "t2.guard_interval", Number.class).
-				addOptionalColumn("T2 transmission_mode", "t2.transmission_mode", Number.class).
+	static TableHeader<NITsection,TransportStream>  buildNitTableHeader() {
+		TableHeader<NITsection,TransportStream> tableHeader =  new TableHeaderBuilder<NITsection,TransportStream>().
+				addRequiredBaseColumn("network_id", "network_id",  nitSection -> nitSection.getNetworkID(),Integer.class).
+				addRequiredRowColumn("transport_stream_id", "transport_stream_id",  TransportStream::getTransportStreamID, Integer.class).
+				addRequiredRowColumn("original_network_id", "original_network_id",  TransportStream::getOriginalNetworkID, Integer.class).
 				
-				addOptionalColumn("cable frequency", "cable.frequency", Number.class).
-				addOptionalColumn("cable fec_outter", "cable.fec_outter", String.class).
-				addOptionalColumn("cable modulation", "cable.modulation", String.class).
-				addOptionalColumn("cable symbol_rate", "cable.symbol_rate", Number.class).
-				addOptionalColumn("cable fec_inner", "cable.fec_inner", Number.class).
-	
-				addOptionalColumn("satellite frequency", "satellite.frequency", Number.class).
-				addOptionalColumn("satellite orbital_position", "satellite.orbital_position", Number.class).
-				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
-				addOptionalColumn("satellite polarization", "satellite.polarization", String.class).
-				addOptionalColumn("satellite west_east_flag", "satellite.west_east_flag", String.class).
-				addOptionalColumn("satellite modulation_system", "satellite.modulation_system", String.class).
-				addOptionalColumn("satellite roll_off", "satellite.roll_off", Number.class).
-				addOptionalColumn("satellite modulation_type", "satellite.modulation_type", String.class).
-				addOptionalColumn("satellite symbol_rate", "satellite.symbol_rate", Number.class).
-				addOptionalColumn("satellite fec_inner", "satellite.fec_inner", String.class).
+				// terrestrial
 				
+				addOptionalRowColumn("terrestrial frequency", 
+						"terrestrial.frequency", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								TerrestrialDeliverySystemDescriptor.class,  
+								ter -> formatTerrestrialFrequency(ter.getFrequency())), 
+						Number.class).
+
+				addOptionalRowColumn("terrestrial bandwidth",
+						"terrestrial.bandwidth", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								TerrestrialDeliverySystemDescriptor.class,  
+								ter -> getBandwidtString(ter.getBandwidth())), 
+						Number.class).
+
+				addOptionalRowColumn("terrestrial priority",
+						"terrestrial.priority", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								TerrestrialDeliverySystemDescriptor.class,  
+								ter -> getPriorityString(ter.getPriority())), 
+						String.class).
+				addOptionalRowColumn("terrestrial time_slicing_indicator",
+						"terrestrial.time_slicing_indicator", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								TerrestrialDeliverySystemDescriptor.class,  
+								ter -> ter.getTimeSlicingString()), 
+						String.class).
+				addOptionalRowColumn("terrestrial fec_inner",
+						"terrestrial.fec_inner", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								TerrestrialDeliverySystemDescriptor.class,  
+								ter -> ter.getFEC_innerString()), 
+						String.class).
+
+				// DVB-T2
+				
+				addOptionalRowColumn("T2 plp_id",
+						"t2.plp_id", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								T2DeliverySystemDescriptor.class,  
+								t2 -> t2.getPlp_id()), 
+						Number.class).
+				addOptionalRowColumn("T2_system_id", "t2.t2_system_id", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								T2DeliverySystemDescriptor.class,  
+								t2 -> t2.getT2_system_id()), 
+						Number.class).
+
+
+				addOptionalRowColumn("T2 siso_miso",
+						"t2.siso_miso", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								T2DeliverySystemDescriptor.class, 
+								t2 -> (t2.getDescriptorLength()>4? getSisoMisoModeList().get(t2.getSiso_miso()):null)), 
+						String.class).
+				addOptionalRowColumn("T2 bandwidth",
+						"t2.bandwidth", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								T2DeliverySystemDescriptor.class, 
+								t2 -> (t2.getDescriptorLength()>4? getBandwidthList().get(t2.getBandwidth()):null)), 
+						Number.class).
+
+				addOptionalRowColumn("T2 guard_interval",
+						"t2.guard_interval",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								T2DeliverySystemDescriptor.class, 
+								t2 -> (t2.getDescriptorLength()>4? getGuardIntervalList().get(t2.getGuard_interval()):null)), 
+						Number.class).
+				addOptionalRowColumn("T2 transmission_mode",
+						"t2.transmission_mode", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								T2DeliverySystemDescriptor.class, 
+								t2 -> (t2.getDescriptorLength()>4? getTransmissionModeList().get(t2.getTransmission_mode()):null)), 
+						Number.class).
+				
+
+
+				// Cable 
+				
+				addOptionalRowColumn("cable frequency", 
+						"cable.frequency", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								CableDeliverySystemDescriptor.class, 
+								cable -> formatCableFrequency(cable.getFrequency())), 
+						Number.class).
+				addOptionalRowColumn("cable fec_outter",
+						"cable.fec_outter", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								CableDeliverySystemDescriptor.class, 
+								cable -> cable.getFEC_outerString()), 
+						String.class).
+						
+				addOptionalRowColumn("cable modulation",
+						"cable.modulation", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								CableDeliverySystemDescriptor.class, 
+								cable -> CableDeliverySystemDescriptor.getModulationString(cable.getModulation())), 
+						String.class).
+				
+				addOptionalRowColumn("cable symbol_rate",
+						"cable.symbol_rate", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								CableDeliverySystemDescriptor.class, 
+								cable -> formatSymbolRate(cable.getSymbol_rate())), 
+						Number.class).
+				addOptionalRowColumn("cable fec_inner",
+						"cable.fec_inner", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								CableDeliverySystemDescriptor.class, 
+								cable -> Descriptor.getFEC_innerString(cable.getFEC_inner())), 
+						String.class).
+						
+				// Satellite
+				
+				addOptionalRowColumn("satellite frequency", 
+						"satellite.frequency", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> formatSatelliteFrequency(sat.getFrequency())), 
+						Number.class).
+				addOptionalRowColumn("satellite orbital_position", 
+						"satellite.orbital_position", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> formatOrbitualPosition(sat.getOrbitalPosition())),  
+						Number.class).
+				addOptionalRowColumn("satellite west_east_flag", 
+						"satellite.west_east_flag", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> sat.getWestEastFlagString()), 
+						String.class).
+				addOptionalRowColumn("satellite polarization", 
+						"satellite.polarization", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> getPolarizationString(sat.getPolarization())), 
+						String.class).
+				addOptionalRowColumn("satellite modulation_system", 
+						"satellite.modulation_system", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> sat.getModulationSystemString()), 
+						String.class).
+				addOptionalRowColumn("satellite roll_off", 
+						"satellite.roll_off", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> (sat.getModulationSystem()==1? getRollOffString(sat.getRollOff()):null)), 
+						Number.class).
+				addOptionalRowColumn("satellite modulation_type",
+						"satellite.modulation_type", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> getModulationString(sat.getModulationType())), 
+						String.class).
+				addOptionalRowColumn("satellite symbol_rate",
+						"satellite.symbol_rate", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> formatSymbolRate(sat.getSymbol_rate())), 
+						Number.class).
+				addOptionalRowColumn("satellite fec_inner",
+						"satellite.fec_inner", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> getFEC_innerString(sat.getFEC_inner())), 
+						String.class).
 				build();
+		
 		return tableHeader;
 	}
 

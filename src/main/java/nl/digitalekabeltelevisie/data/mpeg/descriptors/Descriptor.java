@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import static java.lang.Byte.toUnsignedInt;
 
 import java.util.*;
+import java.util.function.Function;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -1266,6 +1267,36 @@ public class Descriptor implements TreeNode {
 		return result;
 	}
 
+	/**
+	 * Finds first descriptor of type u in descriptorList, and applies Function fun to it. Returns null when no
+	 * descriptor of type u is found
+	 *  
+	 * @param <U>
+	 * @param descriptorList
+	 * @param u
+	 * @param fun
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <U extends Descriptor> Object findDescriptorApplyFunc(final List<Descriptor> descriptorList, final Class<U> u , Function<U, Object> fun) {
+		for (final Descriptor element : descriptorList) {
+			if (element.getClass().equals(u)) {
+				return fun.apply((U) element);
+			}
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <U extends Descriptor> List<Object> findDescriptorApplyListFunc(final List<Descriptor> descriptorList, final Class<U> u , Function<U, List<Object>> fun) {
+		for (final Descriptor element : descriptorList) {
+			if (element.getClass().equals(u)) {
+				return fun.apply((U) element);
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Get description, as defined in Table 2-71 – MPEG-4_audio_profile_and_level assignment values ISO/IEC 13818-1:2013
 	 *
