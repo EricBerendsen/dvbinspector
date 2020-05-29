@@ -151,7 +151,7 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 	}
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "transport_stream_id";
 	}
 

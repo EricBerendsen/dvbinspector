@@ -226,7 +226,7 @@ public class BATsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "bouquet_id";
 	}
 

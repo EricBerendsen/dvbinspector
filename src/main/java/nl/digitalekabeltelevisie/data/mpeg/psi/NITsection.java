@@ -229,7 +229,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	}
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "network_id";
 	}
 

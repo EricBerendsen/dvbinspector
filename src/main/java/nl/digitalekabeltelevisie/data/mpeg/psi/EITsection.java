@@ -330,7 +330,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	}
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "service_id";
 	}
 

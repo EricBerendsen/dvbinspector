@@ -72,7 +72,7 @@ public class CAsection extends TableSectionExtendedSyntax implements TableSource
 	
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "reserved";
 	}
 

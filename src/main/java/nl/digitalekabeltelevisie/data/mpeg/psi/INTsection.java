@@ -207,7 +207,7 @@ public class INTsection extends TableSectionExtendedSyntax {
 	}
 	
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "action_type (8) / platform_id_hash (8)";
 	}
 

@@ -244,7 +244,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "test_application_flag (1) / application_type (15)";
 	}
 

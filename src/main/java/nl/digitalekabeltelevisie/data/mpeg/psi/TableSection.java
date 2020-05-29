@@ -390,7 +390,7 @@ public class TableSection implements TreeNode{
 	 * the correct specific label can be displayed.
 	 * @return label to be displayed in TreeView
 	 */
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "table_id_extension";
 	}
     

@@ -230,7 +230,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "transport_stream_id";
 	}
     

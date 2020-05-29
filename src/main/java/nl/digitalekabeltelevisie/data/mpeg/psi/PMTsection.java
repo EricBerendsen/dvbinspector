@@ -217,7 +217,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	String getTableIdExtensionLabel() {
+	protected String getTableIdExtensionLabel() {
 		return "program_number";
 	}
 
