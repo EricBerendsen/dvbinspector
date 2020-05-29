@@ -141,15 +141,15 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 	}
 
 	void determineUsedColumns() {
-		for (Map<String, Object> map : model) {
-			for (String key : map.keySet()) {
+		for (Map<String, Object> row : model) {
+			for (String key : row.keySet()) {
 				if(isRepeatingKey(key)) {
 					String keyBase = getBase(key);
 					int keyOrd = getOrdinal(key);
 					if(tableHeader.isRepeatingColumn(keyBase)) {
 						tableHeader.countOrdinal(keyBase,keyOrd);
 					}
-				}else if(map.get(key)!=null) {
+				}else if(row.get(key)!=null) {
 					tableHeader.flagUsed(key);
 				}
 			}
