@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -60,6 +60,26 @@ public class M7OperatorPreferencesDescriptor extends M7Descriptor {
 		t.add(new DefaultMutableTreeNode(new KVP("audio2_ISO_639_language_code",audio2_ISO_639_language_code ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("subs_ISO_639_language_code",subs_ISO_639_language_code ,null)));
 		return t;
+	}
+
+	public String getCountry_code() {
+		return country_code;
+	}
+
+	public String getMenu_ISO_639_language_code() {
+		return menu_ISO_639_language_code;
+	}
+
+	public String getAudio1_ISO_639_language_code() {
+		return audio1_ISO_639_language_code;
+	}
+
+	public String getAudio2_ISO_639_language_code() {
+		return audio2_ISO_639_language_code;
+	}
+
+	public String getSubs_ISO_639_language_code() {
+		return subs_ISO_639_language_code;
 	}
 
 }

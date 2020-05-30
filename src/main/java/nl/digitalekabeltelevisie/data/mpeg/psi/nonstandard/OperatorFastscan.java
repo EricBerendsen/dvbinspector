@@ -1,5 +1,9 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatOrbitualPosition;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSatelliteFrequency;
+
 /**
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
@@ -26,27 +30,35 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 *  than anything and is not required.
 *
 */
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.nio.charset.*;
-import java.util.*;
-import java.util.logging.*;
-
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7LogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7LogicalChannelDescriptor.LogicalChannel;
+import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FNTsection.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FSTsection.Service;
-import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
-public class OperatorFastscan implements TreeNode, HTMLSource {
+public class OperatorFastscan implements TreeNode{
 	
 			
-	// encoding is always ISO-8859-9, ignoring character selection information as defined in Annex A of ETSI EN 300 468
-	private static Charset charset = Charset.forName("ISO-8859-9");
+	// TODO encoding for service name and provider  is always ISO-8859-9, ignoring character selection information as defined in Annex A of ETSI EN 300 468
+	// Should be taken from ONT, depending on operator
+	public static Charset m7FastScanCharset = Charset.forName("ISO-8859-9");
 	
 	private static final Logger	logger	= Logger.getLogger(OperatorFastscan.class.getName());
 
@@ -66,11 +78,20 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		final KVP networkKVP = new KVP("Pid",pid,getOperatorSubListName());
-		networkKVP.setHtmlSource(this);
+		if(fntSections==null){
+			networkKVP.setHtmlSource(() -> "FNT Missing");
+		}else if(fstSections==null){
+			networkKVP.setHtmlSource(() -> "FST Missing");
+		}else {
+			networkKVP.setTableSource(this::getTableModel);
+		}
+		
 		final DefaultMutableTreeNode n = new DefaultMutableTreeNode(networkKVP);
 		
 		if(fstSections!=null) {
-			DefaultMutableTreeNode fst = new DefaultMutableTreeNode(new KVP("FST"));
+			KVP fstKvp = new KVP("FST");
+			DefaultMutableTreeNode fst = new DefaultMutableTreeNode(fstKvp);
+			fstKvp.setTableSource(this::getFstTableModel);
 			for (final FSTsection fstSection : fstSections) {
 				if(fstSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(fst, fstSection, modus);
@@ -81,7 +102,9 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 		}
 
 		if (fntSections != null) {
-			DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(new KVP("FNT"));
+			KVP fntKvp = new KVP("FNT");
+			DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(fntKvp);
+			fntKvp.setTableSource(this::getFntTableModel);
 			for (final FNTsection fntSection : fntSections) {
 				if (fntSection != null) {
 					AbstractPSITabel.addSectionVersionsToJTree(fnt, fntSection, modus);
@@ -138,83 +161,154 @@ public class OperatorFastscan implements TreeNode, HTMLSource {
 		
 	}
 
-	@Override
-	public String getHTML() {
-		// build map<map> of streams, by
-		//   onid        ts_id       
-		Map<Integer,Map<Integer,TransportStream>> fntStreams = new HashMap<>();
 
-		if(fntSections==null){
-			return "FNT Missing";
-		}
-		
-		if(fstSections==null){
-			return "FST Missing";
-		}
+	public TableModel getFntTableModel() {
+		FlexTableModel<FNTsection,TransportStream> tableModel =  new FlexTableModel<>(FNTsection.buildFntTableHeader());
 
-		for (FNTsection fnTsection : fntSections) {
-			for (FNTsection.TransportStream stream : fnTsection.transportStreamList) {
-				final int onid = stream.getOriginalNetworkID();
-				int ts_id = stream.getTransportStreamID();
-
-				Map<Integer, TransportStream> netWorkMap = fntStreams.computeIfAbsent(onid, k -> new HashMap<>());
-				netWorkMap.put(ts_id, stream);
+		for (final FNTsection fntSection : fntSections) {
+			if(fntSection!= null){
+				tableModel.addData(fntSection, fntSection.getTransportStreamList());
 			}
 		}
-		
-		Map<Integer, FSTsection.Service> channelMap = new HashMap<>();
-		for (FSTsection fsTsection : fstSections) {
-			if(fsTsection!=null) {
-				for (FSTsection.Service service : fsTsection.serviceList) {
-					int onid = service.getOriginal_network_id();
-					int ts_id = service.getTransport_stream_id();
+
+		tableModel.process();
+		return tableModel;
+	}
+
+
+	public TableModel getFstTableModel() {
+		FlexTableModel<FSTsection,Service> tableModel =  new FlexTableModel<>(FSTsection.buildFstTableHeader());
+
+		for (final FSTsection fstSection : fstSections) {
+			if(fstSection!= null){
+				tableModel.addData(fstSection, fstSection.getServiceList());
+			}
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
+
+	private TableHeader<TransportStream,Service>  buildFastscanTableHeader() {
+		TableHeader<TransportStream,Service> tableHeader =  new TableHeaderBuilder<TransportStream,Service>().
+				addOptionalRowColumn("lcn", 
+						s -> getLcn(s),
+				Integer.class).
+				addRequiredRowColumn("onid", Service::getOriginalNetworkID, Integer.class).
+				addRequiredRowColumn("tsid", Service::getTransportStreamID, Integer.class).
+				addRequiredRowColumn("sid", Service::getService_id, Integer.class).
+				addOptionalRowColumn("service name", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceName().toString(m7FastScanCharset)), 
+						String.class).
+				addOptionalRowColumn("service type", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> Descriptor.getServiceTypeString(sd.getServiceType())), 
+						String.class).
+				addOptionalRowColumn("service provider", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)), 
+						String.class).
+
+				addOptionalRowColumn("position", 
+						s -> getOrbitualPosition(s),  
+						Number.class).
+
+				addOptionalRowColumn("w/e", 
+						s -> getWestEastFlag(s),
+						String.class).
+
+				addOptionalRowColumn("frequency", 
+						s -> getFrequency(s), 
+						Number.class).
+
+				build();
+		return tableHeader;
+	}
+
+
+	private String getOrbitualPosition(Service s) {
+		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(s);
+		if(sdd!=null) {
+			return formatOrbitualPosition(sdd.getOrbitalPosition());
+		}
+		return null;
+	}
 	
-					TransportStream stream = fntStreams.get(onid).get(ts_id);
-					List<M7LogicalChannelDescriptor> m7LogicalChannelDescriptorList = Descriptor
-							.findGenericDescriptorsInList(stream.descriptorList, M7LogicalChannelDescriptor.class);
-					M7LogicalChannelDescriptor m7LogicalChannelDescriptor = m7LogicalChannelDescriptorList.get(0);
-					for (M7LogicalChannelDescriptor.LogicalChannel channel : m7LogicalChannelDescriptor.getChannelList()) {
-						if (channel.getServiceID() == service.getService_id()) {
-							channelMap.put(channel.getLogicalChannelNumber(), service);
-						}
+	private String getWestEastFlag(Service s) {
+		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(s);
+		if(sdd!=null) {
+			return sdd.getWestEastFlagString();
+		}
+		return null;
+	}
+
+	private String getFrequency(Service s) {
+		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(s);
+		if(sdd!=null) {
+			return formatSatelliteFrequency(sdd.getFrequency());
+		}
+		return null;
+	}
+
+	private SatelliteDeliverySystemDescriptor getSatelliteDeliverySystemDescriptor(Service s) {
+		TransportStream ts = getTransportStreamFromFnt(s);
+		if(ts!=null) {
+			List<SatelliteDeliverySystemDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.getDescriptorList(),SatelliteDeliverySystemDescriptor.class);
+			if(!lcnDescs.isEmpty()) {
+				return lcnDescs.get(0);
+			}
+		}
+		return null;
+	}
+
+	private Integer getLcn(Service s) {
+
+		TransportStream ts = getTransportStreamFromFnt(s);
+		if(ts!=null) {
+			List<M7LogicalChannelDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.getDescriptorList(),M7LogicalChannelDescriptor.class);
+			if(!lcnDescs.isEmpty()) {
+				M7LogicalChannelDescriptor desc = lcnDescs.get(0);
+				for(LogicalChannel channel: desc.getChannelList()) {
+					if(channel.getServiceID() == s.getService_id()) {
+						return channel.getLogicalChannelNumber();
 					}
 				}
 			}
 		}
+		return null;
+	}
+	
+	private TransportStream getTransportStreamFromFnt(Service s) {
+		for( FNTsection f: fntSections){
+			if(f!=null) {
+				for(TransportStream ts : f.getTransportStreamList()) {
+					if(ts.getOriginalNetworkID() == s.getOriginalNetworkID() &&
+						ts.getTransportStreamID() == s.getTransport_stream_id()) {
+						return ts;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public TableModel getTableModel() {
+
+		FlexTableModel<TransportStream,Service> tableModel =  new FlexTableModel<>(buildFastscanTableHeader());
+
+		for (final FSTsection fstSection : fstSections) {
+			if(fstSection!= null){
+				tableModel.addData(null, fstSection.getServiceList());
+			}
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
 		
-		StringBuilder sb = new StringBuilder("<code>");
-		String header = String.format("%5s %5s %5s %5s %-40s %-30s %-40s<br>","LCN","ONID","TS_ID","SID","Service Name","Service Type", "Service Provider");
-		String htmlHeader = header.replace(" ", "&nbsp;");
-		sb.append(htmlHeader);
-		for (Integer lcn : new TreeSet<Integer>(channelMap.keySet())) {
-			Service service = channelMap.get(lcn);
-			List<ServiceDescriptor> sdList = Descriptor.findGenericDescriptorsInList(service.getDescriptorList(),ServiceDescriptor.class);
-			ServiceDescriptor sd = sdList.get(0);
-			String printableServiceName = getDecodedString(sd.getServiceName(), 40,charset);
-			String printableServiceProviderName = getDecodedString(sd.getServiceProviderName(), 40,charset);
-			String line = String.format("%5d %5d %5d %5d %-40s %-30s %-40s<br>", lcn,service.getOriginal_network_id(), service.getTransport_stream_id(),service.getService_id(),printableServiceName,Descriptor.getServiceTypeString(sd.getServiceType()), printableServiceProviderName);
-			String htmlString = line.replace(" ", "&nbsp;");
-			sb.append(htmlString);
-		}
-		sb.append("</code>");
-		return sb.toString();
-	}
-
-	private String getDecodedString(DVBString dvbString, int targetLen, Charset charset) {
-		byte[] data = dvbString.getData();
-		int offset = dvbString.getOffset();
-		int len = dvbString.getLength();
-
-		String s;
-		if (charset != null) {
-			s = new String(data, offset + 1, len, charset);
-		} else {
-			s = Iso6937ToUnicode.convert(data, offset + 1, len);
-		}
-		if (s.length() > targetLen) {
-			s = s.substring(0, targetLen);
-		}
-
-		return s;
-	}
 }

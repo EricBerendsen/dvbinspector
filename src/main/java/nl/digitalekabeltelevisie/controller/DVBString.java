@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,7 +27,10 @@
 package nl.digitalekabeltelevisie.controller;
 
 import static java.lang.Byte.toUnsignedInt;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getString;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -81,6 +84,18 @@ public class DVBString {
 	@Override
 	public String toString(){
 		return getString(data,this.getOffset()+1, this.getLength());
+	}
+	
+	/**
+	 * If DVBString has no explicit charset defined in first byte(s), use parameter charSet as encoding.
+	 * 
+	 * @param defaultCharSet when null use normal "default (ISO 6937, latin)" encoding 
+	 */
+	public String toString(Charset defaultCharSet) {
+		if((getCharSet()!=null) || (defaultCharSet == null)){
+			return toString();
+		}
+		return new String(data, this.getOffset() + 1, this.getLength(), defaultCharSet);
 	}
 
 	public Charset getCharSet(){

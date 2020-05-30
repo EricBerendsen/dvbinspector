@@ -26,10 +26,22 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
  *
  */
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatOrbitualPosition;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSatelliteFrequency;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatSymbolRate;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.getFEC_innerString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getModulationString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getPolarizationString;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor.getRollOffString;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -38,8 +50,15 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceListDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 
 public class FNTsection extends TableSectionExtendedSyntax{
@@ -184,6 +203,9 @@ public class FNTsection extends TableSectionExtendedSyntax{
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this::getTableModel);
+
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_loop_length",network_descriptors_loop_length,null)));
 		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length",getTransportStreamLoopLength(),null)));
@@ -194,5 +216,117 @@ public class FNTsection extends TableSectionExtendedSyntax{
 		return t;
 	}
 
+	
+	public TableModel getTableModel() {
+		FlexTableModel<FNTsection,TransportStream> tableModel =  new FlexTableModel<>(buildFntTableHeader());
+
+		tableModel.addData(this, getTransportStreamList());
+
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<FNTsection,TransportStream>  buildFntTableHeader() {
+		TableHeader<FNTsection,TransportStream> tableHeader =  new TableHeaderBuilder<FNTsection,TransportStream>().
+				addOptionalBaseColumn("network name",
+						network -> findDescriptorApplyFunc(network.getNetworkDescriptorList(), 
+								NetworkNameDescriptor.class,  
+								nnd -> ("".equals(nnd.getNetworkNameAsString())?null:nnd.getNetworkNameAsString())), 
+						String.class).
+				addRequiredRowColumn("onid", TransportStream::getOriginalNetworkID, Integer.class).
+				addRequiredRowColumn("tsid", TransportStream::getTransportStreamID, Integer.class).
+
+				
+				addOptionalRowColumn("sat frequency", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> formatSatelliteFrequency(sat.getFrequency())), 
+						Number.class).
+				addOptionalRowColumn("sat position", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> formatOrbitualPosition(sat.getOrbitalPosition())),  
+						Number.class).
+				addOptionalRowColumn("sat west_east", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> sat.getWestEastFlagString()), 
+						String.class).
+				addOptionalRowColumn("sat polarization", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> getPolarizationString(sat.getPolarization())), 
+						String.class).
+				addOptionalRowColumn("mod system", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> sat.getModulationSystemString()), 
+						String.class).
+				addOptionalRowColumn("roll_off", 
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> (sat.getModulationSystem()==1? getRollOffString(sat.getRollOff()):null)), 
+						Number.class).
+				addOptionalRowColumn("mod type",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> getModulationString(sat.getModulationType())), 
+						String.class).
+				addOptionalRowColumn("sat symbol_rate",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> formatSymbolRate(sat.getSymbol_rate())), 
+						Number.class).
+				addOptionalRowColumn("sat fec_inner",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
+								SatelliteDeliverySystemDescriptor.class, 
+								sat -> getFEC_innerString(sat.getFEC_inner())), 
+						String.class).
+
+				addOptionalRepeatingGroupedColumn("sid", 
+						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(), 
+								ServiceListDescriptor.class,  
+								sld -> sld.getServiceList().
+								stream().
+								map(p ->p.getServiceID()).
+								collect(Collectors.toList())),
+								 
+						Integer.class,
+						"service_list").
+				addOptionalRepeatingGroupedColumn("type", 
+						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(), 
+								ServiceListDescriptor.class,  
+								sld -> sld.getServiceList().
+								stream().
+								map(p ->Descriptor.getServiceTypeString(p.getServiceType())).
+								collect(Collectors.toList())),
+								 
+						String.class,
+						"service_list").
+
+				addOptionalRepeatingGroupedColumn("lcn sid", 
+						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(), 
+								M7LogicalChannelDescriptor.class,  
+								lcd -> lcd.getChannelList().
+								stream().
+								map(p ->p.getServiceID()).
+								collect(Collectors.toList())),
+								 
+						Integer.class,
+						"lcn_list").
+				addOptionalRepeatingGroupedColumn("lcn no", 
+						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(), 
+								M7LogicalChannelDescriptor.class,  
+								lcd -> lcd.getChannelList().
+								stream().
+								map(p ->p.getLogicalChannelNumber()).
+								collect(Collectors.toList())),
+								 
+						Integer.class,
+						"lcn_list").
+				
+				build();
+		return tableHeader;
+	}
 
 }

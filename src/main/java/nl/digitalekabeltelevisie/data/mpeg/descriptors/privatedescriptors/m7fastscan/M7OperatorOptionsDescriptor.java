@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -52,11 +52,22 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("parental_control_rating",parental_control_rating ,"minimum age = "+ (parental_control_rating+3)+" year")));
-		t.add(new DefaultMutableTreeNode(new KVP("default_char_set",default_char_set ,getEncodingType(default_char_set))));
+		t.add(new DefaultMutableTreeNode(new KVP("parental_control_rating",parental_control_rating ,getParentalControlString())));
+		t.add(new DefaultMutableTreeNode(new KVP("default_char_set",default_char_set ,getEncodingTypeString())));
 		t.add(new DefaultMutableTreeNode(new KVP("subtitles_enabled",subtitles_enabled ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("special_regions_setup",special_regions_setup ,null)));
 		return t;
+	}
+
+	public String getEncodingTypeString() {
+		return getEncodingType(default_char_set);
+	}
+
+	public String getParentalControlString() {
+		if(parental_control_rating==0) {
+			return "undefined";
+		}
+		return ""+ (parental_control_rating+3)+" +";
 	}
 	
 	private String getEncodingType(int charSet) {
@@ -99,6 +110,22 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 			return "reserved for future use";
 		}
 
+	}
+
+	public int getParental_control_rating() {
+		return parental_control_rating;
+	}
+
+	public int getDefault_char_set() {
+		return default_char_set;
+	}
+
+	public int getSubtitles_enabled() {
+		return subtitles_enabled;
+	}
+
+	public int getSpecial_regions_setup() {
+		return special_regions_setup;
 	}
 
 }

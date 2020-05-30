@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -50,10 +50,18 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
 			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DiSEqC"));
 			t.add(new DefaultMutableTreeNode(new KVP("orbital_position",orbital_position,Descriptor.formatOrbitualPosition(orbital_position))));
-			t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,westEastFlag==1?"east":"west")));
+			t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,getWestEastString())));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 
 			return t;
+		}
+		
+		public String getTotalPositionString() {
+			return Descriptor.formatOrbitualPosition(orbital_position) + " " + getWestEastString();
+		}
+
+		public String getWestEastString() {
+			return westEastFlag==1?"east":"west";
 		}
 
 		public String getOrbital_position() {
@@ -109,6 +117,11 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		Utils.addListJTree(t,diSEqCList,modus,"DiSEqC_loop");
 		return t;
+	}
+
+
+	public List<DiSEqC> getDiSEqCList() {
+		return diSEqCList;
 	}
 
 }

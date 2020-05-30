@@ -27,16 +27,32 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 
-import java.util.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorDiSEqCTDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorOptionsDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorPreferencesDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorSublistNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class ONTSection extends TableSectionExtendedSyntax {
 	
@@ -150,6 +166,9 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this::getTableModel);
+
 		t.add(new DefaultMutableTreeNode(new KVP("bouquet_descriptors_loop_length",bouquet_descriptors_loop_length,null)));
 		Utils.addListJTree(t,bouquetDescriptorList,modus,"bouquet_descriptors");
 		t.add(new DefaultMutableTreeNode(new KVP("operator_brands_loop_length",operator_brands_loop_length,null)));
@@ -184,6 +203,103 @@ public class ONTSection extends TableSectionExtendedSyntax {
 			}
 		}
 		return null;
+	}
+
+	protected String getTableIdExtensionLabel() {
+		return "bouquet_id";
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<ONTSection,OperatorBrand> tableModel =  new FlexTableModel<>(buildOntTableHeader());
+
+		tableModel.addData(this, getOperatorBrandList());
+
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<ONTSection,OperatorBrand>  buildOntTableHeader() {
+		TableHeader<ONTSection,OperatorBrand> tableHeader =  new TableHeaderBuilder<ONTSection,OperatorBrand>().
+				addRequiredRowColumn("operator network id", OperatorBrand::getOperator_network_id, Integer.class).
+				addRequiredRowColumn("operator_sublist_id", OperatorBrand::getOperator_sublist_id, Integer.class).
+				
+				addOptionalRowColumn("operator name", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorNameDescriptor.class,  
+								ond -> ond.getOperatorName().toString()), 
+						String.class).
+
+				
+				addOptionalRowColumn("operator sublist name", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorSublistNameDescriptor.class,  
+								osnd -> osnd.getOperatorSublistName().toString()), 
+						String.class).
+
+				addOptionalRowColumn("country code", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorPreferencesDescriptor.class,  
+								opd -> opd.getCountry_code()), 
+						String.class).
+				addOptionalRowColumn("menu osd", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorPreferencesDescriptor.class,  
+								opd -> opd.getMenu_ISO_639_language_code()), 
+						String.class).
+				addOptionalRowColumn("audio 1", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorPreferencesDescriptor.class,  
+								opd -> opd.getAudio1_ISO_639_language_code()), 
+						String.class).
+				addOptionalRowColumn("audio 2", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorPreferencesDescriptor.class,  
+								opd -> opd.getAudio2_ISO_639_language_code()), 
+						String.class).
+				addOptionalRowColumn("subs lang", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorPreferencesDescriptor.class,  
+								opd -> opd.getSubs_ISO_639_language_code()), 
+						String.class).
+
+				addOptionalRowColumn("subs usage", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorOptionsDescriptor.class,  
+								ood -> ood.getSubtitles_enabled()), 
+						Integer.class).
+				addOptionalRowColumn("parental control", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorOptionsDescriptor.class,  
+								ood -> ood.getParentalControlString()), 
+						String.class).
+
+				addOptionalRowColumn("FST char set", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorOptionsDescriptor.class,  
+								ood -> ood.getEncodingTypeString()), 
+						String.class).
+				addOptionalRowColumn("region", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								M7OperatorOptionsDescriptor.class,  
+								ood -> ood.getSpecial_regions_setup()), 
+						Integer.class).
+
+				addOptionalRepeatingRowColumn("DiSeq Pos", 
+						operator -> findDescriptorApplyListFunc(operator.getDescriptorList(), 
+								M7OperatorDiSEqCTDescriptor.class,  
+								odd -> odd.getDiSEqCList().
+								stream().
+								map(p ->p.getTotalPositionString()).
+								collect(Collectors.toList())),
+								 
+						String.class).
+				
+				build();
+		return tableHeader;
+	}
+
+	public List<OperatorBrand> getOperatorBrandList() {
+		return operatorBrandList;
 	}
 
 }

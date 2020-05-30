@@ -38,7 +38,6 @@ public class TablePanel extends JScrollPane{
 	public TablePanel(JTable table) {
 		super(table);
 		this.table = table;
-		//table.setDefaultRenderer(StreamType.class, new StreamType.Renderer());
 		
 		table.setAutoCreateRowSorter(true);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -50,6 +49,8 @@ public class TablePanel extends JScrollPane{
 	public void setModel(TableModel tableModel) {
 		table.setModel(tableModel);
 		tca.adjustColumns();
+		table.getRowSorter().toggleSortOrder(0); // sort on first column
+		getVerticalScrollBar().setValue(0); // scroll to top
 	}
 
 }

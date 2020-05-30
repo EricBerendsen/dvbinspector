@@ -26,10 +26,14 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
  *
  */
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.OperatorFastscan.m7FastScanCharset;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -38,8 +42,12 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 
 public class FSTsection extends TableSectionExtendedSyntax{
@@ -263,12 +271,65 @@ public class FSTsection extends TableSectionExtendedSyntax{
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP) t.getUserObject();
+		kvp.setTableSource(this::getTableModel);
+
 
 		Utils.addListJTree(t,serviceList,modus,"service_loop");
-
-
 		return t;
 	}
 
+	
+	protected String getTableIdExtensionLabel() {
+		return "operator_network_id";
+	}
+	
+	
+	public TableModel getTableModel() {
+		FlexTableModel<FSTsection,Service> tableModel =  new FlexTableModel<>(buildFstTableHeader());
+
+		tableModel.addData(this, getServiceList());
+
+		tableModel.process();
+		return tableModel;
+	}
+
+
+	public List<Service> getServiceList() {
+		return serviceList;
+	}
+	
+
+	static TableHeader<FSTsection,Service>  buildFstTableHeader() {
+		TableHeader<FSTsection,Service> tableHeader =  new TableHeaderBuilder<FSTsection,Service>().
+				addRequiredRowColumn("onid", Service::getOriginalNetworkID, Integer.class).
+				addRequiredRowColumn("tsid", Service::getTransportStreamID, Integer.class).
+				addRequiredRowColumn("sid", Service::getService_id, Integer.class).
+				
+				addRequiredRowColumn("default_video_pid", Service::getDefault_video_PID, Integer.class).
+				addRequiredRowColumn("default_audio_pid", Service::getDefault_audio_PID, Integer.class).
+				addRequiredRowColumn("default_pcr_pid", Service::getDefault_PCR_PID, Integer.class).
+
+				addOptionalRowColumn("service name", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceName().toString(m7FastScanCharset)), 
+						String.class).
+				addOptionalRowColumn("service provider", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)), 
+						String.class).
+				addOptionalRowColumn("service type", 
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
+								ServiceDescriptor.class,  
+								sd -> Descriptor.getServiceTypeString(sd.getServiceType())), 
+						String.class).
+				build();
+		
+		return tableHeader;
+	}
 
 }
+
+

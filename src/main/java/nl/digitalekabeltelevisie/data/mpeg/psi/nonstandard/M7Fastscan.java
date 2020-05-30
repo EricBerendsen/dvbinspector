@@ -29,6 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 
 import java.util.*;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
@@ -36,6 +37,8 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.LinkageDescriptor.BrandHomeTransponder;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection.OperatorBrand;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class M7Fastscan implements TreeNode {
 	
@@ -154,7 +157,9 @@ public class M7Fastscan implements TreeNode {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("M7 Fastscan"));
 		
 		if(ontSections!=null) {
-			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(new KVP("ONT"));
+			KVP kvp = new KVP("ONT");
+			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(kvp);
+			kvp.setTableSource(()->getTableModelOnt());
 			for (final ONTSection ontSection : ontSections) {
 				if(ontSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(ont, ontSection, modus);
@@ -177,5 +182,19 @@ public class M7Fastscan implements TreeNode {
 			
 		return t;
 	}
+
+	public TableModel getTableModelOnt() {
+		FlexTableModel<ONTSection,OperatorBrand> tableModel =  new FlexTableModel<>(ONTSection.buildOntTableHeader());
+
+		for (final ONTSection ontSection : ontSections) {
+			if (ontSection != null) {
+				tableModel.addData(ontSection, ontSection.getOperatorBrandList());
+			}
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
+
 
 }
