@@ -349,12 +349,12 @@ public class NIT extends AbstractPSITabel{
 						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
 								T2DeliverySystemDescriptor.class,  
 								t2 -> t2.getPlp_id()), 
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("T2_system_id", 
 						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(), 
 								T2DeliverySystemDescriptor.class,  
 								t2 -> t2.getT2_system_id()), 
-						Number.class).
+						Integer.class).
 
 
 				addOptionalRowColumn("T2 siso_miso",

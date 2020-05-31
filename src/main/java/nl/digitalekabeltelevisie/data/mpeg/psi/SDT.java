@@ -364,7 +364,7 @@ public class SDT extends AbstractPSITabel{
 				
 				addOptionalRowColumn("sid",
 						service -> service.getServiceID(),
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("service_name",
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
@@ -374,7 +374,7 @@ public class SDT extends AbstractPSITabel{
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
 								sd -> sd.getServiceType()), 
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("service_type description",
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
@@ -387,16 +387,16 @@ public class SDT extends AbstractPSITabel{
 						String.class).
 				addOptionalRowColumn("EIT_schedule_flag",
 						service -> service.getEitScheduleFlag(),
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("EIT_present_following_flag",
 						service -> service.getEitPresentFollowingFlag(),
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("running_status",
 						service -> service.getRunningStatus(),
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("free_CA_mode",
 						service -> service.getFreeCAmode(),
-						Number.class).
+						Integer.class).
 				build();
 		return tableHeader;
 	}

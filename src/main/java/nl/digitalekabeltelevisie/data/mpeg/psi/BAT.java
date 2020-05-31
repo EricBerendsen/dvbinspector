@@ -109,7 +109,7 @@ public class BAT extends AbstractPSITabel{
 	static TableHeader<BATsection,TransportStream> buildBatTableHeader() {
 
 		TableHeader<BATsection,TransportStream> tableHeader =  new TableHeaderBuilder<BATsection,TransportStream>().
-				addRequiredBaseColumn("bouquet id",b->b.getBouqetID(), Number.class).
+				addRequiredBaseColumn("bouquet id",b->b.getBouqetID(), Integer.class).
 				addRequiredBaseColumn("bouquet id name", b -> getBouquetIDString(b.getBouqetID()), String.class).
 				
 				addOptionalBaseColumn("bouquet name descriptor",
@@ -120,10 +120,10 @@ public class BAT extends AbstractPSITabel{
 
 				addOptionalRowColumn("tsid",
 						ts -> ts.getTransportStreamID(),
-						Number.class).
+						Integer.class).
 				addOptionalRowColumn("onid",
 						ts -> ts.getOriginalNetworkID(),
-						Number.class).
+						Integer.class).
 				
 				addOptionalRowColumn("original network name",
 						ts ->  Utils.getOriginalNetworkIDString(ts.getOriginalNetworkID()),

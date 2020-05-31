@@ -103,17 +103,17 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	
 	static TableHeader<PMTsection, Component> buildPmtTableHeader() {
 		TableHeader<PMTsection,Component> tableHeader =  new TableHeaderBuilder<PMTsection,Component>().
-				addRequiredBaseColumn("program number", p->p.getProgramNumber(), Number.class).
+				addRequiredBaseColumn("program number", p->p.getProgramNumber(), Integer.class).
 
-				addOptionalRowColumn("stream type", c -> c.getStreamtype(), Number.class).
+				addOptionalRowColumn("stream type", c -> c.getStreamtype(), Integer.class).
 				addOptionalRowColumn("stream type description", c -> Utils.getStreamTypeShortString(c.getStreamtype()), String.class).
-				addOptionalRowColumn("elementary PID", c -> c.getElementaryPID(), Number.class).
+				addOptionalRowColumn("elementary PID", c -> c.getElementaryPID(), Integer.class).
 				
 				addOptionalRowColumn("component tag",
 						component -> findDescriptorApplyFunc(component.getComponentDescriptorList(), 
 								StreamIdentifierDescriptor.class,  
 								si -> si.getComponentTag()), 
-						Number.class).
+						Integer.class).
 
 				//ISO639
 				

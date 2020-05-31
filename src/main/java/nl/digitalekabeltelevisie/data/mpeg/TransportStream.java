@@ -426,12 +426,12 @@ public class TransportStream implements TreeNode{
 	static TableHeader<TransportStream,PID> buildPidTableHeader() {
 
 		TableHeader<TransportStream,PID> tableHeader =  new TableHeaderBuilder<TransportStream,PID>().
-				addOptionalRowColumn("pid", p ->p.getPid(), Number.class).
+				addOptionalRowColumn("pid", p ->p.getPid(), Integer.class).
 				addOptionalRowColumn("label", p->p.getShortLabel(), String.class).
 				addOptionalRowColumn("pid type", p->p.getTypeString(), String.class).
-				addOptionalRowColumn("packets", p->p.getPackets(), Number.class).
-				addOptionalRowColumn("duplicate packets", p->p.getDup_packets(), Number.class).
-				addOptionalRowColumn("continuity errors", p->p.getContinuity_errors(), Number.class).
+				addOptionalRowColumn("packets", p->p.getPackets(), Integer.class).
+				addOptionalRowColumn("duplicate packets", p->p.getDup_packets(), Integer.class).
+				addOptionalRowColumn("continuity errors", p->p.getContinuity_errors(), Integer.class).
 				addOptionalRowColumn("scrambled", p->p.isScrambled(), Boolean.class).
 				build();
 		return tableHeader;
@@ -558,7 +558,7 @@ public class TransportStream implements TreeNode{
 					pid.setLabel("?");
 				}
 				if(pid.getShortLabel()==null){
-					pid.setShortLabel("?");
+					pid.setShortLabel("shrt");
 				}
 			}
 		}
