@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -43,6 +43,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
 
+// See ETSI EN 301 192 V1.6.1 (2015-08) DVB specification for data broadcasting  8.4.4.0 Syntax of the INT
 
 public class INTsection extends TableSectionExtendedSyntax {
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -184,6 +184,10 @@ public class UNTsection extends TableSectionExtendedSyntax {
 		}
 	}
 
+	@Override
+	protected String getTableIdExtensionLabel() {
+		return "action_type (8)/ OUI_hash (8)";
+	}
 
 	@Override
 	public String toString() {
