@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -359,51 +359,42 @@ public class SDT extends AbstractPSITabel{
 	
 	static TableHeader<SDTsection,Service>  buildSdtTableHeader() {
 		TableHeader<SDTsection,Service> tableHeader =  new TableHeaderBuilder<SDTsection,Service>().
-				addRequiredBaseColumn("original_network_id", "original_network_id",  SDTsection::getOriginalNetworkID, Integer.class).
-				addRequiredBaseColumn("transport_stream_id", "transport_stream_id",  SDTsection::getTransportStreamID, Integer.class).
+				addRequiredBaseColumn("onid", SDTsection::getOriginalNetworkID, Integer.class).
+				addRequiredBaseColumn("tsid", SDTsection::getTransportStreamID, Integer.class).
 				
-				addOptionalRowColumn("service_id",
-						"service_id",  
+				addOptionalRowColumn("sid",
 						service -> service.getServiceID(),
 						Number.class).
 				addOptionalRowColumn("service_name",
-						"service_name",  
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
 								sd -> sd.getServiceName().toString()), 
 						String.class).
 				addOptionalRowColumn("service_type",
-						"service_type",  
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
 								sd -> sd.getServiceType()), 
 						Number.class).
 				addOptionalRowColumn("service_type description",
-						"service_type_string",  
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
 								sd -> getServiceTypeString(sd.getServiceType())), 
 						String.class).
 				addOptionalRowColumn("service_provider_name",
-						"service_provider_name",  
 						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
 								ServiceDescriptor.class,  
 								sd -> sd.getServiceProviderName().toString()), 
 						String.class).
 				addOptionalRowColumn("EIT_schedule_flag",
-						"eit_schedule_flag",  
 						service -> service.getEitScheduleFlag(),
 						Number.class).
 				addOptionalRowColumn("EIT_present_following_flag",
-						"eit_present_following_flag",  
 						service -> service.getEitPresentFollowingFlag(),
 						Number.class).
 				addOptionalRowColumn("running_status",
-						"running_status",  
 						service -> service.getRunningStatus(),
 						Number.class).
 				addOptionalRowColumn("free_CA_mode",
-						"free_ca_mode",  
 						service -> service.getFreeCAmode(),
 						Number.class).
 				build();

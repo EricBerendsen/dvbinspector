@@ -103,14 +103,13 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	
 	static TableHeader<PMTsection, Component> buildPmtTableHeader() {
 		TableHeader<PMTsection,Component> tableHeader =  new TableHeaderBuilder<PMTsection,Component>().
-				addRequiredBaseColumn("program number", "program_number", p->p.getProgramNumber(), Number.class).
+				addRequiredBaseColumn("program number", p->p.getProgramNumber(), Number.class).
 
-				addOptionalRowColumn("stream type", "stream_type", c -> c.getStreamtype(), Number.class).
-				addOptionalRowColumn("stream type description", "stream_type_string", c -> Utils.getStreamTypeShortString(c.getStreamtype()), String.class).
-				addOptionalRowColumn("elementary PID", "elementary_pid", c -> c.getElementaryPID(), Number.class).
+				addOptionalRowColumn("stream type", c -> c.getStreamtype(), Number.class).
+				addOptionalRowColumn("stream type description", c -> Utils.getStreamTypeShortString(c.getStreamtype()), String.class).
+				addOptionalRowColumn("elementary PID", c -> c.getElementaryPID(), Number.class).
 				
 				addOptionalRowColumn("component tag",
-						"component.tag", 
 						component -> findDescriptorApplyFunc(component.getComponentDescriptorList(), 
 								StreamIdentifierDescriptor.class,  
 								si -> si.getComponentTag()), 
@@ -119,7 +118,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 				//ISO639
 				
 				addOptionalRepeatingGroupedColumn("iso language",
-						"iso.language",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
@@ -129,7 +127,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 						String.class,
 						"iso").
 				addOptionalRepeatingGroupedColumn("iso type",
-						"iso.type",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
@@ -142,7 +139,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 				// TTX
 				
 				addOptionalRepeatingGroupedColumn("teletext language",
-						"teletext.language",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								TeletextDescriptor.class,
 								iso -> iso.getTeletextList().
@@ -152,7 +148,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 						String.class,
 						"ttx").
 				addOptionalRepeatingGroupedColumn("teletext type",
-						"teletext.type",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								TeletextDescriptor.class,
 								iso -> iso.getTeletextList().
@@ -165,7 +160,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 				// SUB
 				
 				addOptionalRepeatingGroupedColumn("subtitle language",
-						"subtitle.language",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								SubtitlingDescriptor.class,
 								sub -> sub.getSubtitleList().
@@ -175,7 +169,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 						String.class,
 						"sub").
 				addOptionalRepeatingGroupedColumn("subtitle type",
-						"subtitle.type",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								SubtitlingDescriptor.class,
 								sub -> sub.getSubtitleList().
@@ -188,7 +181,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 				//ApplicationSignallingDescriptor
 				
 				addOptionalRepeatingRowColumn("application type",
-						"application.type",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
 								ApplicationSignallingDescriptor.class,
 								app -> app.getApplicationTypeList().

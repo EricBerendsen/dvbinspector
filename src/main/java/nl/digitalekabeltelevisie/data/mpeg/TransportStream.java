@@ -426,13 +426,13 @@ public class TransportStream implements TreeNode{
 	static TableHeader<TransportStream,PID> buildPidTableHeader() {
 
 		TableHeader<TransportStream,PID> tableHeader =  new TableHeaderBuilder<TransportStream,PID>().
-				addOptionalRowColumn("pid", "pid", p ->p.getPid(), Number.class).
-				addOptionalRowColumn("label", "label", p->p.getShortLabel(), String.class).
-				addOptionalRowColumn("pid type", "type", p->p.getTypeString(), String.class).
-				addOptionalRowColumn("packets", "packets", p->p.getPackets(), Number.class).
-				addOptionalRowColumn("duplicate packets", "duplicate_packets", p->p.getDup_packets(), Number.class).
-				addOptionalRowColumn("continuity errors", "continuity_errors", p->p.getContinuity_errors(), Number.class).
-				addOptionalRowColumn("scrambled", "transport_scrambling_control", p->p.isScrambled(), Boolean.class).
+				addOptionalRowColumn("pid", p ->p.getPid(), Number.class).
+				addOptionalRowColumn("label", p->p.getShortLabel(), String.class).
+				addOptionalRowColumn("pid type", p->p.getTypeString(), String.class).
+				addOptionalRowColumn("packets", p->p.getPackets(), Number.class).
+				addOptionalRowColumn("duplicate packets", p->p.getDup_packets(), Number.class).
+				addOptionalRowColumn("continuity errors", p->p.getContinuity_errors(), Number.class).
+				addOptionalRowColumn("scrambled", p->p.isScrambled(), Boolean.class).
 				build();
 		return tableHeader;
 	}

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -109,27 +109,23 @@ public class BAT extends AbstractPSITabel{
 	static TableHeader<BATsection,TransportStream> buildBatTableHeader() {
 
 		TableHeader<BATsection,TransportStream> tableHeader =  new TableHeaderBuilder<BATsection,TransportStream>().
-				addRequiredBaseColumn("bouquet id","bouquet_id", b->b.getBouqetID(), Number.class).
-				addRequiredBaseColumn("bouquet id name", "bouquet_id_name", b -> getBouquetIDString(b.getBouqetID()), String.class).
+				addRequiredBaseColumn("bouquet id",b->b.getBouqetID(), Number.class).
+				addRequiredBaseColumn("bouquet id name", b -> getBouquetIDString(b.getBouqetID()), String.class).
 				
 				addOptionalBaseColumn("bouquet name descriptor",
-						"bouquet.name",
 						bat -> findDescriptorApplyFunc(bat.getNetworkDescriptorList(), 
 								BouquetNameDescriptor.class,  
 								bnd -> bnd.getBouquetName().toString()), 
 						String.class).
 
-				addOptionalRowColumn("transport stream id",
-						"transport_stream_id",  
+				addOptionalRowColumn("tsid",
 						ts -> ts.getTransportStreamID(),
 						Number.class).
-				addOptionalRowColumn("original network id",
-						"original_network_id",  
+				addOptionalRowColumn("onid",
 						ts -> ts.getOriginalNetworkID(),
 						Number.class).
 				
 				addOptionalRowColumn("original network name",
-						"original_network_name",  
 						ts ->  Utils.getOriginalNetworkIDString(ts.getOriginalNetworkID()),
 						String.class).
 			

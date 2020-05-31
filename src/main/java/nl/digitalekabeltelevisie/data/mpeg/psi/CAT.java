@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -97,9 +97,9 @@ public class CAT extends AbstractPSITabel {
 	
 	static TableHeader<CAsection,CADescriptor>  buildCatTableHeader() {
 		TableHeader<CAsection,CADescriptor> tableHeader =  new TableHeaderBuilder<CAsection,CADescriptor>().
-				addOptionalRowColumn("ca system id", "ca_system_id",  p -> p.getCaSystemID(), Integer.class).
-				addOptionalRowColumn("ca pid", "ca_pid",  p -> p.getCaPID(), Integer.class).
-				addOptionalRowColumn("ca system specifier", "ca_system_specifier",  p -> getCASystemIDString(p.getCaSystemID()), String.class).
+				addOptionalRowColumn("ca system id", p -> p.getCaSystemID(), Integer.class).
+				addOptionalRowColumn("ca pid", p -> p.getCaPID(), Integer.class).
+				addOptionalRowColumn("ca system specifier", p -> getCASystemIDString(p.getCaSystemID()), String.class).
 				build();
 		
 		return tableHeader;

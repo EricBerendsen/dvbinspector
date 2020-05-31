@@ -201,9 +201,9 @@ public class PAT extends AbstractPSITabel{
 
 	static TableHeader<PATsection,Program>  buildPatTableHeader() {
 		TableHeader<PATsection,Program> tableHeader =  new TableHeaderBuilder<PATsection,Program>().
-				addOptionalRowColumn("program_number", "program_number",  p -> p.getProgram_number(), Integer.class).
-				addOptionalRowColumn("program_map_PID", "program_map_PID",  p -> p.getProgram_map_PID(), Integer.class).
-				addOptionalRowColumn("name", "name",  p -> p.getServiceNameOrNit(), String.class).
+				addOptionalRowColumn("program_number", p -> p.getProgram_number(), Integer.class).
+				addOptionalRowColumn("program_map_PID", p -> p.getProgram_map_PID(), Integer.class).
+				addOptionalRowColumn("name", p -> p.getServiceNameOrNit(), String.class).
 				build();
 		return tableHeader;
 	}
