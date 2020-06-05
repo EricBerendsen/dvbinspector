@@ -105,7 +105,7 @@ public class PID implements TreeNode{
 	private long pcr_count =-1;
 	protected TransportStream parentTransportStream = null;
 
-	private String label=null;
+	private String longLlabel=null;
 	private String shortLabel=null;
 
 	private final GatherPIDData gatherer = new GatherPIDData();
@@ -430,16 +430,16 @@ public class PID implements TreeNode{
 		this.parentTransportStream = parentTransportStream;
 	}
 
-	public String getLabel() {
-		return label;
+	public String getLongLabel() {
+		return longLlabel;
 	}
 
-	public void setLabel(final String label) {
-		this.label = label;
+	public void setLongLabel(final String label) {
+		this.longLlabel = label;
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp=new KVP("pid",getPid(),getLabel());
+		final KVP kvp=new KVP("pid",getPid(),getLongLabel());
 		if((generalPidHandler!=null)&&(!scrambled)){
 			final JMenuItem pesMenu = new JMenuItem("Parse data");
 			pesMenu.setActionCommand(DVBtree.PARSE);

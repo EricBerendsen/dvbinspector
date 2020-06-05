@@ -349,7 +349,7 @@ public class TransportStream implements TreeNode{
 			final PID pid = pids[i];
 			if(pid!=null)
 			{
-				buf.append("  PID :").append(i).append(", Label:").append(pid.getLabel()).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets()*100)/no_packets).append("%, duplicate packets:"+pid.getDup_packets()+"\n");
+				buf.append("  PID :").append(i).append(", Label:").append(pid.getLongLabel()).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets()*100)/no_packets).append("%, duplicate packets:"+pid.getDup_packets()+"\n");
 			}
 		}
 
@@ -451,7 +451,7 @@ public class TransportStream implements TreeNode{
 	private void setLabel(final int pidNo, final String text)
 	{
 		if(pids[pidNo]!=null){
-			pids[pidNo].setLabel(text);
+			pids[pidNo].setLongLabel(text);
 			pids[pidNo].setShortLabel(text);
 		}
 
@@ -460,7 +460,7 @@ public class TransportStream implements TreeNode{
 	private void setLabel(final int pidNo, final String longText, final String shortText)
 	{
 		if(pids[pidNo]!=null){
-			pids[pidNo].setLabel(longText);
+			pids[pidNo].setLongLabel(longText);
 			pids[pidNo].setShortLabel(shortText);
 		}
 
@@ -554,11 +554,11 @@ public class TransportStream implements TreeNode{
 		for(final PID pid:pids){
 			if(pid!=null){
 				// just label PIDs that have not been labeled yet
-				if(pid.getLabel()==null){
-					pid.setLabel("?");
+				if(pid.getLongLabel()==null){
+					pid.setLongLabel("?");
 				}
 				if(pid.getShortLabel()==null){
-					pid.setShortLabel("shrt");
+					pid.setShortLabel("?");
 				}
 			}
 		}
@@ -582,10 +582,10 @@ public class TransportStream implements TreeNode{
 			if(pids[PCR_pid]==null){
 				logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
 			}
-			else if(pids[PCR_pid].getLabel()==null){
-				pids[PCR_pid].setLabel(pcrLabel);
-			}else if(!pids[PCR_pid].getLabel().contains(pcrLabel)){
-				pids[PCR_pid].setLabel(pids[PCR_pid].getLabel()+", "+pcrLabel);
+			else if(pids[PCR_pid].getLongLabel()==null){
+				pids[PCR_pid].setLongLabel(pcrLabel);
+			}else if(!pids[PCR_pid].getLongLabel().contains(pcrLabel)){
+				pids[PCR_pid].setLongLabel(pids[PCR_pid].getLongLabel()+", "+pcrLabel);
 			}
 			if(pids[PCR_pid]!=null){
 				if(pids[PCR_pid].getShortLabel()==null){
@@ -655,10 +655,10 @@ public class TransportStream implements TreeNode{
 
 			final PID pid = pids[component.getElementaryPID()];
 			if(pid!=null){
-				if(pid.getLabel()==null){
-					pid.setLabel(compt_type.toString());
-				}else if(!pid.getLabel().contains(compt_type)){
-					pid.setLabel(pid.getLabel()+ '/'+compt_type);
+				if(pid.getLongLabel()==null){
+					pid.setLongLabel(compt_type.toString());
+				}else if(!pid.getLongLabel().contains(compt_type)){
+					pid.setLongLabel(pid.getLongLabel()+ '/'+compt_type);
 				}
 				if(pid.getShortLabel()==null){
 					pid.setShortLabel(short_compt_type.toString());
@@ -839,7 +839,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	public String getLabel(final short pid){
-		return pids[pid].getLabel();
+		return pids[pid].getLongLabel();
 	}
 	
 	public String getShortLabel(final short pid){
