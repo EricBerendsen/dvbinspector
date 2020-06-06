@@ -882,7 +882,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	 */
 	public BufferedImage getImage() {
 
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		final Graphics2D gd = img.createGraphics();
 		gd.setColor(Color.BLACK);
 		gd.fillRect(0, 0, width, height);
