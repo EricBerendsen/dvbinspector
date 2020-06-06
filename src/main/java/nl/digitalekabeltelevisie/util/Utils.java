@@ -1049,7 +1049,7 @@ public final class Utils {
 		case 0x03: return"Audio MPEG1";
 		case 0x04: return"Audio MPEG2";
 		case 0x05: return"private_sections MPEG2";
-		case 0x06: return"private data";
+		case 0x06: return"PES packets private data";
 		case 0x07: return"MHEG";
 		case 0x08: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Annex A DSM-CC";
 		case 0x09: return"ITU-T Rec. H.222.1";
