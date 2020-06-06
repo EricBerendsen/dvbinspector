@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -119,7 +119,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		addLegendRadioButtons();
 		add(buttonPanel,BorderLayout.PAGE_START);
 
-		chartPanel = new ChartPanel(null);
+		chartPanel = new ChartPanel(null,false);
 		// see http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=28118
 		// Bug in ChartPanel.setMouseWheelEnabled in jfreechart 1.0.13
 		chartPanel.isMouseWheelEnabled();

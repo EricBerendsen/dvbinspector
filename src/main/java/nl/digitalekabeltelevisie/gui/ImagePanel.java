@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,17 +27,30 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 
 /**
  * @author  Eric
@@ -53,15 +66,22 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		@Override
 		public void paint(Graphics g) {
 			Graphics2D gd = (Graphics2D) g;
-			gd.drawImage(image, 0,0, (int) (scale*image.getWidth()), (int) (scale * image.getHeight()),null);
+
+			final AffineTransform t = gd.getTransform();
+			double translateX = t.getTranslateX();
+			double translateY = t.getTranslateY();
+			
+			AffineTransform idTransForm = new AffineTransform(scale,0,0,scale,translateX,translateY);
+			gd.setTransform(idTransForm);
+
+			gd.drawImage(image, 0,0, null);
 		}
 
 		public Dimension getPreferredSize() {
 			if(image!=null){
 				return new Dimension((int) (scale*image.getWidth()), (int) (scale * image.getHeight()));
-			}else{
-				return new Dimension();
 			}
+			return new Dimension();
 		}
 
 	}
@@ -100,7 +120,7 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		ImageCopyAction copyAction = new ImageCopyAction(this, "Copy", this);
 		JButton copyButton = new JButton(copyAction);
 
-		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_DOWN_MASK);
 		getInputMap().put(copyKey, "copy");
 		getActionMap().put("copy", copyAction);
 
@@ -109,7 +129,7 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		ImageSaveAction saveAction = new ImageSaveAction(this, "Save As...",this);
 		JButton saveButton = new JButton(saveAction);
 
-		KeyStroke saveKey = KeyStroke.getKeyStroke(KeyEvent.VK_S,Event.CTRL_MASK);
+		KeyStroke saveKey = KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.CTRL_DOWN_MASK);
 		getInputMap().put(saveKey, "save");
 		getActionMap().put("save", saveAction);
 

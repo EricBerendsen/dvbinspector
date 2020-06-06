@@ -189,7 +189,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		controls.add(seriesSelectionPanel);
 		add(controls,BorderLayout.PAGE_START);
 
-		chartPanel = new ChartPanel(null);
+		chartPanel = new ChartPanel(null,false);
 		// see http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=28118
 		// Bug in ChartPanel.setMouseWheelEnabled in jfreechart 1.0.13
 		chartPanel.isMouseWheelEnabled();
@@ -284,11 +284,11 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 * @return
 	 */
 	private static String getServiceName(final TransportStream transportStream, int programNumber) {
-		String 	name = transportStream.getPsi().getSdt().getServiceName(programNumber);
-		if(name==null){
-			name= "Service "+ programNumber;
-		}
-		return name;
+		return transportStream.
+				getPsi().
+				getSdt().
+				getServiceNameForActualTransportStreamOptional(programNumber).
+				orElse("Service "+ programNumber);
 	}
 
 	/**

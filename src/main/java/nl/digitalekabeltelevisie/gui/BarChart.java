@@ -58,7 +58,7 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 	 */
 	public BarChart(final TransportStream transportStream, final ViewContext viewContext) {
 
-		super(null);
+		super(null,false);
 		setTransportStream(transportStream, viewContext);
 	}
 
