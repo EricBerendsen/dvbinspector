@@ -34,9 +34,12 @@ import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -105,9 +108,6 @@ public class PID implements TreeNode{
 	private long pcr_count =-1;
 	protected TransportStream parentTransportStream = null;
 
-	private String longLlabel=null;
-	private String shortLabel=null;
-
 	private final GatherPIDData gatherer = new GatherPIDData();
 	
 	private final ArrayList<TimeStamp> pcrList = new ArrayList<>();
@@ -116,6 +116,8 @@ public class PID implements TreeNode{
 	
 	private final HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = new HashMap<Integer, ArrayList<TemiTimeStamp>>();
 
+	private final LabelMaker labelMaker = new LabelMaker();
+	
 	/**
 	 *
 	 * This inner class is a helper that collects and groups TSPackets for the containing PID into PsiSectionData's . If this PID contains PES data, the bytes are ignored.
@@ -220,6 +222,50 @@ public class PID implements TreeNode{
 	}
 
 
+	class LabelMaker{
+		
+		private String base;
+		private LinkedHashMap <String, List<String>> components = new LinkedHashMap<String, List<String>>();
+		
+		void setBase(String base) {
+			this.base = base;
+		}
+		
+		void addComponent(String type, String serviceName) {
+			components.computeIfAbsent(type, k -> new ArrayList<>()).add(serviceName);
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			if(base!=null) {
+				sb.append(base);
+				if(!components.isEmpty()) {
+					sb.append(" / ");
+				}
+			}
+			StringJoiner sj = new StringJoiner(" / ");
+			for(String type:components.keySet()) {
+				sj.add(getTypeServices(type));
+			}
+			sb.append(sj.toString());
+			if(sb.length()==0) {
+				return "?";
+			}
+			return sb.toString();
+		}
+
+		private String getTypeServices(String type) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(type).append(" - ");
+			List<String> servicesList = components.get(type);
+			
+			sb.append(servicesList.
+					stream().
+					collect(Collectors.joining(", ")));
+			return sb.toString();
+		}
+	}
 
 	/**
 	 * @param pid packet_id of packets in this PID
@@ -430,16 +476,8 @@ public class PID implements TreeNode{
 		this.parentTransportStream = parentTransportStream;
 	}
 
-	public String getLongLabel() {
-		return longLlabel;
-	}
-
-	public void setLongLabel(final String label) {
-		this.longLlabel = label;
-	}
-
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp=new KVP("pid",getPid(),getLongLabel());
+		final KVP kvp=new KVP("pid",getPid(),getLabelMaker().toString());
 		if((generalPidHandler!=null)&&(!scrambled)){
 			final JMenuItem pesMenu = new JMenuItem("Parse data");
 			pesMenu.setActionCommand(DVBtree.PARSE);
@@ -502,14 +540,6 @@ public class PID implements TreeNode{
 
 	public void setPsi(final GeneralPSITable psi) {
 		this.psi = psi;
-	}
-
-	public String getShortLabel(){
-		return shortLabel;
-	}
-
-	public void setShortLabel(final String shortLabel) {
-		this.shortLabel = shortLabel;
 	}
 
 	public long getBitRate() {
@@ -589,6 +619,10 @@ public class PID implements TreeNode{
 
 	public HashMap<Integer, ArrayList<TemiTimeStamp>> getTemiList() {
 		return temiList;
+	}
+
+	public LabelMaker getLabelMaker() {
+		return labelMaker;
 	}
 
 }

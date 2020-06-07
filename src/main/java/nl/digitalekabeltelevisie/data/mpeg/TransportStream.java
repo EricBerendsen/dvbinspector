@@ -66,7 +66,24 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
 public class TransportStream implements TreeNode{
 	
 	private enum ComponentType{
-		AC3, E_AC3, VBI, TELETEXT, DVB_SUBTITLING, AIT, RCT, T2MI
+		AC3("Dolby Audio (AC3)"),
+		E_AC3("Enhanced Dolby Audio (AC3)"), 
+		VBI("VBI Data"), 
+		TELETEXT("Teletext"), 
+		DVB_SUBTITLING("DVB subtitling"), 
+		AIT("Application Information Table (AIT)"), 
+		RCT("Related Content Table (RCT)"), 
+		T2MI("T2-MI");
+		
+		private String description;
+		
+		ComponentType(String description){
+			this.description = description;
+		}
+		
+		String getDescription() {
+			return description;
+		}
 	}
 
 
@@ -349,7 +366,7 @@ public class TransportStream implements TreeNode{
 			final PID pid = pids[i];
 			if(pid!=null)
 			{
-				buf.append("  PID :").append(i).append(", Label:").append(pid.getLongLabel()).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets()*100)/no_packets).append("%, duplicate packets:"+pid.getDup_packets()+"\n");
+				buf.append("  PID :").append(i).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets()*100)/no_packets).append("%, duplicate packets:"+pid.getDup_packets()+"\n");
 			}
 		}
 
@@ -427,7 +444,7 @@ public class TransportStream implements TreeNode{
 
 		TableHeader<TransportStream,PID> tableHeader =  new TableHeaderBuilder<TransportStream,PID>().
 				addOptionalRowColumn("pid", p ->p.getPid(), Integer.class).
-				addOptionalRowColumn("label", p->p.getShortLabel(), String.class).
+				addOptionalRowColumn("label", p->p.getLabelMaker(), String.class).
 				addOptionalRowColumn("pid type", p->p.getTypeString(), String.class).
 				addOptionalRowColumn("packets", p->p.getPackets(), Integer.class).
 				addOptionalRowColumn("duplicate packets", p->p.getDup_packets(), Integer.class).
@@ -448,20 +465,18 @@ public class TransportStream implements TreeNode{
 		return tableModel;
 	}
 
-	private void setLabel(final int pidNo, final String text)
+	private void setLabelMakerBase(final int pidNo, final String base)
 	{
 		if(pids[pidNo]!=null){
-			pids[pidNo].setLongLabel(text);
-			pids[pidNo].setShortLabel(text);
+			pids[pidNo].getLabelMaker().setBase(base);
 		}
 
 	}
 
-	private void setLabel(final int pidNo, final String longText, final String shortText)
+	private void addLabelMakerComponent(final int pidNo, final String type, final String serviceName)
 	{
 		if(pids[pidNo]!=null){
-			pids[pidNo].setLongLabel(longText);
-			pids[pidNo].setShortLabel(shortText);
+			pids[pidNo].getLabelMaker().addComponent(type, serviceName);
 		}
 
 	}
@@ -522,15 +537,15 @@ public class TransportStream implements TreeNode{
 
 		// first the easy ones, the fixed values
 		for (short i = 0; i <=0x1f; i++) {
-			setLabel(i, getFixedLabel(i));
+			setLabelMakerBase(i, getFixedLabel(i));
 		}
 
-		setLabel(8191,"NULL Packets (Stuffing)");
+		setLabelMakerBase(8191,"NULL Packets (Stuffing)");
 
 		// now the streams referenced from the CAT
 		if(pids[1]!=null){
 			for(CADescriptor caDescriptor:findGenericDescriptorsInList(getPsi().getCat().getDescriptorList(), CADescriptor.class)){
-				setLabel(caDescriptor.getCaPID(), "EMM for CA_ID:"+caDescriptor.getCaSystemID()+ " ("+Utils.getCASystemIDString(caDescriptor.getCaSystemID())+")");
+				addLabelMakerComponent(caDescriptor.getCaPID(), "EMM", "CA_ID:"+ caDescriptor.getCaSystemID()+ " ("+Utils.getCASystemIDString(caDescriptor.getCaSystemID())+")");
 			}
 		}
 
@@ -541,130 +556,82 @@ public class TransportStream implements TreeNode{
 				final int service_id=pmtSection.getProgramNumber();
 				String service_name = getPsi().getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
 
-				labelPmtForProgram(pmtSection, service_id, service_name);
-				labelEcmForProgram(pmtSection, service_id, service_name);
-				labelComponentsForProgram(pmtSection, service_id, service_name);
-				labelPcrForProgram(pmtSection, service_id, service_name);
+				labelPmtForProgram(pmtSection, service_name);
+				labelEcmForProgram(pmtSection, service_name);
+				labelComponentsForProgram(pmtSection, service_name);
+				labelPcrForProgram(pmtSection, service_name);
 
 				pmtSection =(PMTsection)pmtSection.getNextVersion();
 			}
 		}
-
-
-		for(final PID pid:pids){
-			if(pid!=null){
-				// just label PIDs that have not been labeled yet
-				if(pid.getLongLabel()==null){
-					pid.setLongLabel("?");
-				}
-				if(pid.getShortLabel()==null){
-					pid.setShortLabel("?");
-				}
-			}
-		}
 	}
 
-	public void labelPmtForProgram(PMTsection pmtSection, final int service_id, String service_name) {
-		setLabel(pmtSection.getParentPID().getPid(),"PMT for service:"+service_id+" ("+service_name+")","PMT "+service_name);
+	public void labelPmtForProgram(PMTsection pmtSection, String service_name) {
+		addLabelMakerComponent(pmtSection.getParentPID().getPid(),"PMT",service_name);
 	}
 
-	public void labelEcmForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+	public void labelEcmForProgram(PMTsection pmtSection, String service_name) {
 		for(CADescriptor caDescriptor:findGenericDescriptorsInList(pmtSection.getDescriptorList(), CADescriptor.class)){
-			setLabel(caDescriptor.getCaPID(),"ECM for CA_ID:"+caDescriptor.getCaSystemID()+" for service:"+service_id+", ("+service_name+")","ECM "+service_name);
+			addLabelMakerComponent(caDescriptor.getCaPID(), "ECM", "CA_ID:"+ caDescriptor.getCaSystemID()+ " ("+service_name+")");
+
 		}
 	}
 
-	public void labelPcrForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+	public void labelPcrForProgram(PMTsection pmtSection, String service_name) {
 		final int PCR_pid = pmtSection.getPcrPid();
-		if(PCR_pid!=MPEGConstants.NO_PCR_PID){ // ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
-			final String pcrLabel = "PCR for "+service_id+" ("+service_name+")";
-			final String pcrShortLabel = "PCR "+service_name;
-			if(pids[PCR_pid]==null){
-				logger.warning("PID "+PCR_pid +" does not exist, needed for "+ pcrLabel);
-			}
-			else if(pids[PCR_pid].getLongLabel()==null){
-				pids[PCR_pid].setLongLabel(pcrLabel);
-			}else if(!pids[PCR_pid].getLongLabel().contains(pcrLabel)){
-				pids[PCR_pid].setLongLabel(pids[PCR_pid].getLongLabel()+", "+pcrLabel);
-			}
-			if(pids[PCR_pid]!=null){
-				if(pids[PCR_pid].getShortLabel()==null){
-					pids[PCR_pid].setShortLabel(pcrShortLabel);
-				}else if(pids[PCR_pid].getShortLabel().contains(service_name)){
-					//pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", PCR");
-				}else{
-					pids[PCR_pid].setShortLabel(pids[PCR_pid].getShortLabel()+", "+pcrShortLabel);
-				}
+		boolean pcrInComponent = false;
+		for(Component component:pmtSection.getComponentenList()) {
+			if(PCR_pid == component.getElementaryPID()) {
+				pcrInComponent = true;
 			}
 		}
+		if(!pcrInComponent && PCR_pid!=MPEGConstants.NO_PCR_PID) {// ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
+			addLabelMakerComponent(PCR_pid,"PCR",service_name);
+		}
+
 	}
 
-	public void labelComponentsForProgram(PMTsection pmtSection, final int service_id, String service_name) {
+	public void labelComponentsForProgram(PMTsection pmtSection, String service_name) {
 		for(Component component:pmtSection.getComponentenList()) {
 			final int streamType = component.getStreamtype();
-			final StringBuilder compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeString(streamType));
-			final StringBuilder short_compt_type = new StringBuilder(service_name).append(' ').append(getStreamTypeShortString(streamType));
 			GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
 
 			ComponentType componentType = determineComponentType(component.getComponentDescriptorList());
-			if (componentType != null) {
+			if (componentType == null) {
+				addLabelMakerComponent(component.getElementaryPID(), getStreamTypeShortString(streamType), service_name);
+			}else {
+				addLabelMakerComponent(component.getElementaryPID(), componentType.getDescription(), service_name);
 				switch (componentType) {
 				case DVB_SUBTITLING:
-					compt_type.append(" DVB subtitling");
-					short_compt_type.append(" DVB subtitling");
 					generalPidHandler = new DVBSubtitleHandler();
 					break;
 				case TELETEXT:
-					compt_type.append(" Teletext");
-					short_compt_type.append(" Teletext");
 					generalPidHandler = new EBUTeletextHandler();
 					break;
 				case VBI:
-					compt_type.append(" VBI Data");
-					short_compt_type.append(" VBI Data");
 					generalPidHandler = new EBUTeletextHandler();
 					break;
 				case AC3:
-					compt_type.append(" Dolby Audio (AC3)");
-					short_compt_type.append(" Dolby Audio (AC3)");
 					generalPidHandler = new AC3Handler();
 					break;
 				case E_AC3:
-					compt_type.append(" Enhanced Dolby Audio (AC3)");
-					short_compt_type.append(" Enhanced Dolby Audio (AC3)");
 					generalPidHandler = new EAC3Handler();
 					break;
 				case AIT:
-					compt_type.append(" Application Information Table (AIT)");
-					short_compt_type.append(" Application Information Table (AIT)");
 					break;
 				case RCT:
-					compt_type.append(" Related Content Table (RCT)");
-					short_compt_type.append(" Related Content Table (RCT)");
 					break;
 				case T2MI:
-					compt_type.append(" T2-MI");
-					short_compt_type.append(" T2-MI");
 					generalPidHandler = new T2miPidHandler();
 					break;
 				default:
 					logger.warning("no componenttype found for pid " + component.getElementaryPID()
-							+ ", part of service " + service_id);
+							+ ", part of service " + service_name);
 				}
 			}
 
 			final PID pid = pids[component.getElementaryPID()];
 			if(pid!=null){
-				if(pid.getLongLabel()==null){
-					pid.setLongLabel(compt_type.toString());
-				}else if(!pid.getLongLabel().contains(compt_type)){
-					pid.setLongLabel(pid.getLongLabel()+ '/'+compt_type);
-				}
-				if(pid.getShortLabel()==null){
-					pid.setShortLabel(short_compt_type.toString());
-				}else if(!pid.getShortLabel().contains(short_compt_type)){
-					pid.setShortLabel(pid.getShortLabel()+'/'+short_compt_type);
-				}
 				if(generalPidHandler!=null){
 					generalPidHandler.setTransportStream(this);
 					generalPidHandler.setPID(pid);
@@ -674,7 +641,8 @@ public class TransportStream implements TreeNode{
 			
 			final List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
 			for(CADescriptor cad: caDescriptorList) {
-				setLabel(cad.getCaPID(),"ECM for CA_ID:"+cad.getCaSystemID()+" for component(s) of service:"+service_id+", ("+service_name+")","ECM "+service_name);
+				addLabelMakerComponent(cad.getCaPID(), "ECM", "CA_ID:"+ cad.getCaSystemID()+ " ("+service_name+")");
+
 			}
 		}
 	}
@@ -838,13 +806,10 @@ public class TransportStream implements TreeNode{
 		return  packet_pid[t];
 	}
 
-	public String getLabel(final short pid){
-		return pids[pid].getLongLabel();
-	}
 	
 	public String getShortLabel(final short pid){
 		if(pids[pid]!=null){
-			return pids[pid].getShortLabel();
+			return pids[pid].getLabelMaker().toString();
 		}
 		return null;
 	}

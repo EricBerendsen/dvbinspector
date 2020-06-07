@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -153,7 +153,7 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 		final ValueAxis valueAxis = new NumberAxis("frame size (bytes)");
 
 		final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, renderer);
-		final String title = getPID().getShortLabel()+" (Access Units, Transmission Order)";
+		final String title = getPID().getLabelMaker()+" (Access Units, Transmission Order)";
 		final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, true	);
 
 		return chart.createBufferedImage(( frameSize.size()*18)+100, 640);

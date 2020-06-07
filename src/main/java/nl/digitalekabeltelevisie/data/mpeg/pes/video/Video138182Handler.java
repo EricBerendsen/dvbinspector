@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -272,7 +272,7 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 			final ValueAxis valueAxis = new NumberAxis("frame size (bytes)");
 
 			final CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis,renderer);
-			String title = getPID().getShortLabel()+" (Transmission Order)";
+			String title = getPID().getLabelMaker()+" (Transmission Order)";
 			JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,plot, false);
 
 			return chart.createBufferedImage((displayCount*18)+100, 640);

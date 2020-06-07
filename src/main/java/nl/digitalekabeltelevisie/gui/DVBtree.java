@@ -655,7 +655,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				if(pesH.getClass() != GeneralPesHandler.class){ // only if specialized subclass of GeneralPesHandler
 					logger.log(Level.WARNING,"try again with GeneralPesHandler");
 					JOptionPane.showMessageDialog(this,
-							"Error parsing PID PES Packets for "+p.getShortLabel()+", falling back to general PES packets",
+							"Error parsing PID PES Packets for "+p.getLabelMaker()+", falling back to general PES packets",
 							"DVB Inspector",
 							JOptionPane.WARNING_MESSAGE);
 					p.setPidHandler(new GeneralPesHandler());
