@@ -379,6 +379,8 @@ public final class DescriptorFactory {
 			return new CountryAvailabilityDescriptor(data, offset, tableSection);
 		case 0x4A:
 			return new LinkageDescriptor(data, offset, tableSection);
+		case 0x4B:
+			return new NVODReferenceDescriptor(data, offset, tableSection);
 		case 0x4C:
 			return new TimeShiftedServiceDescriptor(data, offset, tableSection);
 		case 0x4D:
