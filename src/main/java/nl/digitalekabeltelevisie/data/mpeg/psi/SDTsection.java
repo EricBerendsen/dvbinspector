@@ -97,7 +97,10 @@ public class SDTsection extends TableSectionExtendedSyntax{
 		}
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service (" +getPSI().getSdt().getServiceName(originalNetworkID, tableIdExtension, serviceID)+")"));
+			String s = getPSI().
+					getSdt().getServiceNameDVBString(originalNetworkID, tableIdExtension, serviceID).map(DVBString::toString).
+					orElse("Service " + serviceID);
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service (" +s+")"));
 
 			t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved,null)));
