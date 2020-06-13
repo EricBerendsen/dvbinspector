@@ -4,7 +4,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
 /**
 *
@@ -130,7 +129,7 @@ public class ServiceIdentification implements Comparable<ServiceIdentification>,
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Service Identification ("+transportStreamId +","+originalNetworkId+","+serviceId+")"));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Service Identification (onid:"+originalNetworkId +",tsid:"+transportStreamId+",sid:"+serviceId+")"));
 		s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
 		s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
 		s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,null)));
