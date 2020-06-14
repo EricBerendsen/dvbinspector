@@ -807,11 +807,10 @@ public final class Utils {
 	}
 	
 	public static String getEITStartTimeAsString(final byte[] UTC_time) {
-		if(isFFFFFFFF(UTC_time)){
+		if(isUndefined(UTC_time)){
 			return "undefined";
-		}else{
-			return getUTCFormattedString(UTC_time);
 		}
+		return getUTCFormattedString(UTC_time);
 	}
 	
 	/**
@@ -821,7 +820,7 @@ public final class Utils {
 	 * @param uTC_time
 	 * @return true if all elements are 0xFF (unsigned) 
 	 */
-	public static boolean isFFFFFFFF(byte[] uTC_time) {
+	public static boolean isUndefined(byte[] uTC_time) {
 		for (int i = 0; i < uTC_time.length; i++) {
 			if(uTC_time[i]!=-1){
 				return false;

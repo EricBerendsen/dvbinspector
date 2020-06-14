@@ -242,7 +242,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	private void drawEvent(final Graphics2D gd, Date startDate, Event event, int x, int y, int char_descend) {
 		final byte[] startTime = event.getStartTime();
-		if(isFFFFFFFF(startTime)){ // undefined
+		if(isUndefined(startTime)){
 			return;
 		}
 		Date eventStart = getUTCDate( startTime);
@@ -433,7 +433,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 						}else{ // NO event found, just display time
 							String timeString =   tf.format(thisDate);
 							String dateString =   df.format(thisDate);
-							r1.append(dateString).append(" ").append(timeString);
+							r1.append(dateString).append("&nbsp;").append(timeString);
 						}
 					}else { // over service names
 						String name = eit.getParentPSI().
@@ -469,11 +469,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			if(section!=null){
 				List<Event> eventList = section.getEventList();
 				for(Event event: eventList){
-					Date eventStart = getUTCDate( event.getStartTime());
-					if(date.after(eventStart)||date.equals(eventStart)){
-						Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
-						if(eventEnd.after(date)){
-							return event;
+					byte[] startTime = event.getStartTime();
+					if(!isUndefined(startTime)) {
+						Date eventStart = getUTCDate(startTime);
+						if(date.after(eventStart)||date.equals(eventStart)){
+							Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
+							if(eventEnd.after(date)){
+								return event;
+							}
 						}
 					}
 				}
