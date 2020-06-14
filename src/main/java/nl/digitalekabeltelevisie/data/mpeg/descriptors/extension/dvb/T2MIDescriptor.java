@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -45,7 +45,7 @@ public class T2MIDescriptor extends DVBExtensionDescriptor {
 	private final int num_t2mi_streams_minus_one;
 	private final int reserved_zero_future_use3;
 	private final int pcr_iscr_common_clock_flag;
-	private final int reserved_zero_future_use4;
+	private final byte[] reserved_zero_future_use4;
 
 	public T2MIDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
@@ -55,8 +55,7 @@ public class T2MIDescriptor extends DVBExtensionDescriptor {
 		num_t2mi_streams_minus_one = getInt(b, offset+4, 1, MASK_3BITS);
 		reserved_zero_future_use3 = getInt(b, offset+5, 1, 0b1111_1110)>>1;
 		pcr_iscr_common_clock_flag = getInt(b, offset+5, 1, MASK_1BIT);	
-		//TODO real life test data shows this descriptor as having only 3 bytes after the descriptor_tag_extension, so this last reserved byte is missing
-		reserved_zero_future_use4 = getInt(b, offset+6, 1, MASK_8BITS);	
+		reserved_zero_future_use4 =  getBytes(b, offset+6, descriptorLength-4);	
 	}
 
 
