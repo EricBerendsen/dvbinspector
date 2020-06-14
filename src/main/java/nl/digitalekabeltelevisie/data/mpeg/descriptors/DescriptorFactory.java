@@ -387,6 +387,8 @@ public final class DescriptorFactory {
 			return new ShortEventDescriptor(data, offset, tableSection);
 		case 0x4E:
 			return new ExtendedEventDescriptor(data, offset, tableSection);
+		case 0x4F:
+			return new TimeShiftedEventDescriptor(data, offset, tableSection);
 		case 0x50:
 			return new ComponentDescriptor(data, offset, tableSection);
 		case 0x51:
