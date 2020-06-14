@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,13 +27,22 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.LocalTimeOffsetDescriptor;
+import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class TOT extends AbstractPSITabel{
 
@@ -49,7 +58,11 @@ public class TOT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TOT"));
+		KVP kvp = new KVP("TOT");
+		if(!totSectionList.isEmpty()) {
+			kvp.setTableSource(()->getTableModel());
+		}
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		for (TOTsection toTsection : totSectionList) {
 			t.add(toTsection.getJTreeNode(modus));
@@ -61,6 +74,63 @@ public class TOT extends AbstractPSITabel{
 		return totSectionList;
 	}
 
+
+	
+	static TableHeader<TOTsection,LocalTimeOffsetDescriptor>  buildTotTableHeader() {
+		TableHeader<TOTsection,LocalTimeOffsetDescriptor> tableHeader =  new TableHeaderBuilder<TOTsection,LocalTimeOffsetDescriptor>().
+				addRequiredBaseColumn("UTC_time",totSection -> Utils.getUTCFormattedString(totSection.getUTC_time()), Number.class).
+				
+				addOptionalRepeatingGroupedColumn("country_code",
+						ltod -> ltod.getOffsetList(). 
+									stream().
+									map(l->l.getCountryCode()).
+									collect(Collectors.toList()),
+						Number.class,
+						"offset").
+
+				addOptionalRepeatingGroupedColumn("local_time_offset",
+						ltod -> ltod.getOffsetList(). 
+									stream().
+									map(l->l.getLocalOffsetString()).
+									collect(Collectors.toList()),
+						Number.class,
+						"offset").
+
+				addOptionalRepeatingGroupedColumn("time_of_change",
+						ltod -> ltod.getOffsetList(). 
+									stream().
+									map(l->l.getTimeOfChangeString()).
+									collect(Collectors.toList()),
+						Number.class,
+						"offset").
+
+				addOptionalRepeatingGroupedColumn("next_time_offset",
+						ltod -> ltod.getOffsetList(). 
+									stream().
+									map(l->l.getNextTimeOffsetString()).
+									collect(Collectors.toList()),
+						Number.class,
+						"offset").
+				build();
+		
+		return tableHeader;
+	}
+	
+	
+	public TableModel getTableModel() {
+		FlexTableModel<TOTsection,LocalTimeOffsetDescriptor> tableModel =  new FlexTableModel<>(buildTotTableHeader());
+		
+		if (totSectionList != null) {
+			for (TOTsection element : totSectionList) {
+				if(element!= null){
+					tableModel.addData(element, findGenericDescriptorsInList(element.getDescriptorList(), LocalTimeOffsetDescriptor.class));
+				}
+			}
+		}
+		
+		tableModel.process();
+		return tableModel;
+	}
 
 
 }

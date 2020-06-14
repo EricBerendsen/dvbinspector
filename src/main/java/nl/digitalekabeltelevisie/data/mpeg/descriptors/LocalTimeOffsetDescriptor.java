@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,9 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCFormattedString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -99,6 +103,42 @@ public class LocalTimeOffsetDescriptor extends Descriptor {
 			return s;
 		}
 
+		public byte[] getLocalTimeOffset() {
+			return localTimeOffset;
+		}
+
+		public byte[] getNextTimeOffset() {
+			return nextTimeOffset;
+		}
+		
+		public String getLocalOffsetString() {
+			StringBuilder sb = new StringBuilder();
+			if(localTimeOffsetPolarity==0) {
+				sb.append("+");
+			}else {
+				sb.append("-");
+			}
+			sb.append(Utils.getBCD(localTimeOffset, 0, 2)).
+				append(":").
+				append(Utils.getBCD(localTimeOffset, 2, 2));
+			
+			return sb.toString();
+		}
+
+		public String getNextTimeOffsetString() {
+			StringBuilder sb = new StringBuilder();
+			if(localTimeOffsetPolarity==0) {
+				sb.append("+");
+			}else {
+				sb.append("-");
+			}
+			sb.append(Utils.getBCD(nextTimeOffset, 0, 2)).
+				append(":").
+				append(Utils.getBCD(nextTimeOffset, 2, 2));
+			
+			return sb.toString();
+		}
+
 	}
 
 	public LocalTimeOffsetDescriptor(final byte[] b, final int offset, final TableSection parent) {
@@ -108,9 +148,9 @@ public class LocalTimeOffsetDescriptor extends Descriptor {
 			final String countryCode = getISO8859_1String(b,offset+2+t,3);
 			final int countryRegionId = getInt(b, offset+t+5, 1, 0xFC) >>2;
 		final int localTimeOffsetPolarity = getInt(b, offset+t+5, 1, 0x01);
-		final byte[] localTimeOffset = Utils.copyOfRange(b, offset+t+6, offset+t+8);
-		final byte[] timeOfChange = Utils.copyOfRange(b,offset+t+8,offset+t+13 );
-		final byte[] nextTimeOffset = Utils.copyOfRange(b, offset+t+13, offset+t+15);
+		final byte[] localTimeOffset = Arrays.copyOfRange(b, offset+t+6, offset+t+8);
+		final byte[] timeOfChange = Arrays.copyOfRange(b,offset+t+8,offset+t+13 );
+		final byte[] nextTimeOffset = Arrays.copyOfRange(b, offset+t+13, offset+t+15);
 
 		final LocalTimeOffset s = new LocalTimeOffset(countryCode,countryRegionId,localTimeOffsetPolarity,localTimeOffset,timeOfChange,nextTimeOffset);
 		offsetList.add(s);
@@ -141,6 +181,10 @@ public class LocalTimeOffsetDescriptor extends Descriptor {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		addListJTree(t,offsetList,modus,"time_offset");
 		return t;
+	}
+
+	public List<LocalTimeOffset> getOffsetList() {
+		return offsetList;
 	}
 
 

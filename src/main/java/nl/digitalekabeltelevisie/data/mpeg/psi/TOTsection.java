@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,9 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -37,7 +41,9 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.LocalTimeOffsetDescriptor;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 
 public class TOTsection extends TableSection {
@@ -48,7 +54,7 @@ public class TOTsection extends TableSection {
 
 	public TOTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
-		UTC_time= Utils.copyOfRange(raw_data.getData(),3,8 );
+		UTC_time= copyOfRange(raw_data.getData(),3,8 );
 		descriptorsLoopLength = Utils.getInt(raw_data.getData(),8,2,Utils.MASK_12BITS);
 		descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,descriptorsLoopLength-4,this);
 	}
@@ -79,12 +85,32 @@ public class TOTsection extends TableSection {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP)t.getUserObject();
+		kvp.setTableSource(()->getTableModel());
 		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
 		if(!Utils.simpleModus(modus)){
 			t.add(new DefaultMutableTreeNode(new KVP("descriptors_loop_length",descriptorsLoopLength,null)));
 		}
 		Utils.addListJTree(t,descriptorList,modus,"descriptors");
 		return t;
+	}
+
+	public int getDescriptorsLoopLength() {
+		return descriptorsLoopLength;
+	}
+
+	public List<Descriptor> getDescriptorList() {
+		return descriptorList;
+	}
+
+	
+	public TableModel getTableModel() {
+		FlexTableModel<TOTsection,LocalTimeOffsetDescriptor> tableModel =  new FlexTableModel<>(TOT.buildTotTableHeader());
+		
+		tableModel.addData(this, findGenericDescriptorsInList(getDescriptorList(), LocalTimeOffsetDescriptor.class));
+		
+		tableModel.process();
+		return tableModel;
 	}
 
 }
