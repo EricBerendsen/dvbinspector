@@ -40,6 +40,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ComponentDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor.ContentItem;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -48,6 +49,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtendedEventDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor.Rating;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ShortEventDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.TimeShiftedEventDescriptor;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -184,17 +186,32 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		@Override
 		public String getHTML() {
 			final StringBuilder r1 = new StringBuilder();
-			r1.append("Start:&nbsp;").append(Utils.getEITStartTimeAsString(getStartTime())).append("&nbsp;Duration: ");
-			r1.append(formatDuration(getDuration())).append("<br><br>");
+			r1.append("Start:&nbsp;").
+				append(Utils.getEITStartTimeAsString(getStartTime())).
+				append("&nbsp;Duration: ").
+				append(formatDuration(getDuration())).
+				append("<br><br>");
 			final List<Descriptor> descList = getDescriptorList();
+			
+			List<TimeShiftedEventDescriptor> timeShiftedEventDescriptorList = Descriptor.findGenericDescriptorsInList(descList, TimeShiftedEventDescriptor.class);
+			for(TimeShiftedEventDescriptor timeShiftedEventDescriptor:timeShiftedEventDescriptorList) {
+				r1.append("Event is a time shifted copy of other event; service_id:").
+					append(timeShiftedEventDescriptor.getReference_service_id()).
+					append(", event_id:").
+					append(timeShiftedEventDescriptor.getReference_event_id()).
+					append("<br><br>");
+			}
+			
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
 				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
-					r1.append("<b>");
-					r1.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</b><br>");
+					r1.append("<b>").
+						append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).
+						append("</b><br>");
 					final String shortText = shortEventDescriptor.getText().toString();
 					if((shortText!=null)&&!shortText.isEmpty()){
-						r1.append(escapeHtmlBreakLines(shortText)).append("<br>");
+						r1.append(escapeHtmlBreakLines(shortText)).
+							append("<br>");
 					}
 					r1.append("<br>");
 				}
@@ -205,13 +222,11 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 				if(!extEvent.getItemList().isEmpty()){ // this extended Event has items
 					r1.append("<br><table>");
 					for(final ExtendedEventDescriptor.Item item :extEvent.getItemList()){
-						r1.append("<tr><td>");
-						r1.append(Utils.escapeHTML(item.getItemDescription().toString()));
-						r1.append("</td><td>");
-						r1.append(Utils.escapeHTML(item.getItem().toString()));
-
-						r1.append("</td></tr>");
-
+						r1.append("<tr><td>").
+							append(Utils.escapeHTML(item.getItemDescription().toString())).
+							append("</td><td>").
+							append(Utils.escapeHTML(item.getItem().toString())).
+							append("</td></tr>");
 					}
 					r1.append("</table>");
 				}
@@ -225,8 +240,10 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 				for(final ContentDescriptor contentDesc : contentDescList){
 					final List<ContentItem> contentList = contentDesc.getContentList();
 					for(final ContentItem c:contentList){
-						r1.append("Content type: ").append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1()));
-						r1.append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).append("<br>");
+						r1.append("Content type: ").
+							append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1())).
+							append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).
+							append("<br>");
 					}
 				}
 				r1.append("<br>");
@@ -236,9 +253,22 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			for(final ParentalRatingDescriptor ratingDesc :ratingDescList){
 				final List<Rating> ratingList = ratingDesc.getRatingList();
 				for(final Rating c:ratingList){
-					r1.append("Rating: ").append(c.getCountryCode()).append(": ").append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).append("<br>");
+					r1.append("Rating: ").
+						append(c.getCountryCode()).
+						append(": ").
+						append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).
+						append("<br>");
 				}
+				r1.append("<br>");
 			}
+			
+			List<ComponentDescriptor> componentDescriptorList = Descriptor.findGenericDescriptorsInList(descList, ComponentDescriptor.class);
+			for(ComponentDescriptor componentDescriptor:componentDescriptorList) {
+				r1.append("Component: ").
+					append(componentDescriptor.getStreamTypeString()).
+					append("<br>");
+			}
+			
 			return r1.toString();
 		}
 	}

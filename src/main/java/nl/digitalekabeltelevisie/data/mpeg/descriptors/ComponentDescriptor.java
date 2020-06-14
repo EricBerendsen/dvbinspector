@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -75,11 +75,15 @@ public class ComponentDescriptor extends Descriptor {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		t.add(new DefaultMutableTreeNode(new KVP("stream_content_ext", streamContentExt, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("stream_content", streamContent, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("component_type", componentType, getComponentDescriptorString(streamContent, streamContentExt, componentType))));
+		t.add(new DefaultMutableTreeNode(new KVP("component_type", componentType, getStreamTypeString())));
 		t.add(new DefaultMutableTreeNode(new KVP("component_tag", componentTag,	null)));
 		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code", iso639LanguageCode, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("text", text, null)));
 		return t;
+	}
+
+	public String getStreamTypeString() {
+		return getComponentDescriptorString(streamContent, streamContentExt, componentType);
 	}
 
 	public int getStreamContent() {
