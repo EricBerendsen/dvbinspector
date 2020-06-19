@@ -43,7 +43,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 public class M7Fastscan implements TreeNode {
 	
 	Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
-	ONTSection[] ontSections; 
+	ONTSection[] ontSections = new ONTSection[0]; 
 
 	@SuppressWarnings("unused")
 	private PSI parentPSI;
