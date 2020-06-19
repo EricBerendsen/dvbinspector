@@ -43,7 +43,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 public class M7Fastscan implements TreeNode {
 	
 	Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
-	ONTSection[] ontSections = new ONTSection[0]; 
+	ONTSection[] ontSections; 
 
 	@SuppressWarnings("unused")
 	private PSI parentPSI;
@@ -136,11 +136,13 @@ public class M7Fastscan implements TreeNode {
 				BrandHomeTransponder brandHomeTransponder = optionalBrandHomeTransponder.get();
 				int sublist_id = brandHomeTransponder.getOperator_sublist_id();
 				r = "sublist_id: " + sublist_id;
-				for(ONTSection ontSection:ontSections) {
-					if(ontSection!=null) {
-						String sublistNamme = ontSection.getOperatorSublistName(operatorNetworkId,sublist_id);
-						if(sublistNamme != null) {
-							return r+" : "+sublistNamme ;
+				if(ontSections!=null) {
+					for(ONTSection ontSection:ontSections) {
+						if(ontSection!=null) {
+							String sublistNamme = ontSection.getOperatorSublistName(operatorNetworkId,sublist_id);
+							if(sublistNamme != null) {
+								return r+" : "+sublistNamme ;
+							}
 						}
 					}
 				}
