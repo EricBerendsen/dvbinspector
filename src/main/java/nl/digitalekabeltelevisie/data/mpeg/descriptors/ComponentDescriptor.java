@@ -39,7 +39,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  * 
  */
-public class ComponentDescriptor extends Descriptor {
+public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 
 	private int streamContentExt;
 
@@ -62,6 +62,7 @@ public class ComponentDescriptor extends Descriptor {
 		componentType = getInt(b, offset + 3, 1, MASK_8BITS);
 		componentTag = getInt(b, offset + 4, 1, MASK_8BITS);
 		iso639LanguageCode = getISO8859_1String(b, offset + 5, 3);
+		// TODO txt should be a DVBString
 		text = Utils.getString(b, offset + 8, descriptorLength - 6);
 	}
 
@@ -104,6 +105,22 @@ public class ComponentDescriptor extends Descriptor {
 
 	public int getStreamContentExt() {
 		return streamContentExt;
+	}
+
+	public int getComponentType() {
+		return componentType;
+	}
+
+	public int getComponentTag() {
+		return componentTag;
+	}
+
+	public String getIso639LanguageCode() {
+		return iso639LanguageCode;
+	}
+
+	public String getText() {
+		return text;
 	}
 
 }

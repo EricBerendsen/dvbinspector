@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -1256,7 +1256,7 @@ public class Descriptor implements TreeNode {
 	 * @return List off all descriptors matching u
 	 */
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(final List<Descriptor> descriptorList, final Class<U> u ) {
+	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(final List<? extends Descriptor> descriptorList, final Class<U> u ) {
 
 		final List<U> result = new ArrayList<U>();
 		for (final Descriptor element : descriptorList) {
