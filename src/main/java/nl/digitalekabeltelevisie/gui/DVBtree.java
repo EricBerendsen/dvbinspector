@@ -497,7 +497,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				copyItemToClipboard(kvp);
 			}
 			if (ae.getActionCommand().equals(TREE)){
-				copyEntireSubTreeToClipboard(dmtn, kvp);
+				copyEntireSubTreeToClipboard(dmtn);
 			}
 			if (ae.getActionCommand().equals(VIEW)){
 				copyVisibleSubTreeToClipboard(dmtn, path, kvp);
@@ -699,13 +699,15 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param dmtn
 	 * @param kvp
 	 */
-	private void copyEntireSubTreeToClipboard(DefaultMutableTreeNode dmtn, final KVP kvp) {
+	private void copyEntireSubTreeToClipboard(DefaultMutableTreeNode dmtn) {
+		KVP kvp = (KVP)dmtn.getUserObject();
 		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder(kvp.getPlainText());
 		res.append(lineSep);
 
 		res.append(getEntireTree(dmtn,""));
-		final StringSelection stringSelection = new StringSelection( res.toString() );
+		String treeString = res.toString();
+		final StringSelection stringSelection = new StringSelection( treeString );
 		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
 	}
@@ -724,7 +726,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @return
 	 */
 
-	private static StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
+	public static StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
 		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder();
 		@SuppressWarnings("rawtypes")
