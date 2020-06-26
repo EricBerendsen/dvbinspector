@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -53,7 +53,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  *
  */
-public class ObjectDataSegment extends Segment implements TreeNode, ImageSource {
+public class ObjectDataSegment extends Segment implements ImageSource {
 
 	private static final Logger	logger	= Logger.getLogger(ObjectDataSegment.class.getName());
 
@@ -87,7 +87,7 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 		private final int dataType;
 
-		protected byte[] pixels;
+		protected byte[] pixels = new byte[720];
 		protected int no_pixels;
 
 
@@ -130,9 +130,6 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 
 		public void addPixel(final byte p){
-			if(pixels==null){
-				pixels = new byte[720];
-			}
 			if(no_pixels>= pixels.length){
 				pixels = Arrays.copyOf(pixels, no_pixels *2);
 			}
@@ -609,9 +606,8 @@ public class ObjectDataSegment extends Segment implements TreeNode, ImageSource 
 
 			bi = new BufferedImage(cm, wr, false, null);
 			return bi;
-		}else{
-			return null;
 		}
+		return null;
 	}
 
 
