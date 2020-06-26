@@ -27,26 +27,56 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.*;
-import java.awt.datatransfer.*;
-import java.awt.event.*;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
-import nl.digitalekabeltelevisie.data.mpeg.pes.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
  * DVBTree is the container for the JTree (on the left side) and the image and text on the right side.
@@ -443,7 +473,13 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final KVP kvp = (KVP)nodeInfo;
 				if(kvp.getImageSource()!=null){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					final BufferedImage img = kvp.getImageSource().getImage();
+					BufferedImage img = null;
+					try {
+						img = kvp.getImageSource().getImage();
+					} catch (Exception e1) {
+						logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
+						img = getErrorImage();
+					}
 					setCursor(Cursor.getDefaultCursor());
 					if(img != null){
 						imagePanel.setImage(img);
@@ -473,6 +509,52 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			cardLayout.show(detailPanel, EMPTY_PANEL);
 		}
 
+	}
+
+	private BufferedImage getErrorImage() {
+		final int width = 800;
+		final int height = 450;
+		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		final Graphics2D gd = img.createGraphics();
+
+		gd.setColor(Color.GRAY);
+		gd.fillRect(0, 0, width, height);
+
+		Color testBarColors[] = { 
+				Color.WHITE, 
+				Color.YELLOW, 
+				Color.CYAN, 
+				Color.GREEN, 
+				Color.MAGENTA, 
+				Color.RED, 
+				Color.BLUE,
+				Color.BLACK 
+				};
+		
+		int barsHeight = 40;
+
+		for (int i = 0; i < testBarColors.length; i++) {
+			gd.setColor(testBarColors[i]);
+			gd.fillRect(i * width / 8, 0, width / 8, barsHeight);
+			gd.fillRect(i * width / 8, height -barsHeight, width / 8, barsHeight);
+		}		
+
+		gd.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		final Font font = new Font("Arial", Font.BOLD, 20);
+		gd.setFont(font);
+		
+		String str = "Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg();;
+		
+		gd.setColor(Color.WHITE);
+		
+		int x = 20;
+		int y = 100;
+		for (String line : str.split("\n")) {
+	        gd.drawString(line, x, y += gd.getFontMetrics().getHeight());
+		}
+
+		return img;
 	}
 
 	/* (non-Javadoc)

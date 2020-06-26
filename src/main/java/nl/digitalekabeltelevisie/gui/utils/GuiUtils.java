@@ -91,8 +91,8 @@ public final class GuiUtils {
 	public static String getImproveMsg() {
 		final String version = getVersionString();
 
-		final String improveMsg = "You can help to improve DVB Inspector by making this stream available " +
-				"to Eric Berendsen\n(e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
+		final String improveMsg = "You can help to improve DVB Inspector by making this stream available\n" +
+				"to Eric Berendsen (e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
 				"Please include the version of DVB Inspector: "+version;
 		return improveMsg;
 	}
