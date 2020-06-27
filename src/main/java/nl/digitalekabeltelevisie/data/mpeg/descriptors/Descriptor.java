@@ -436,6 +436,10 @@ public class Descriptor implements TreeNode {
 		
 		case 0xA0:
 			return "user defined: NorDig Content Protection Descriptor";
+			
+			// https://professional.dolby.com/siteassets/pdfs/dolby-vision-bitstreams-in-mpeg-2-transport-stream-multiplex-v1.2.pdf
+		case 0xB0:
+			return "user defined: DOVI_video_stream_descriptor";
 
 		case 0xCE:
 			return "user defined: CI Protection Descriptor";
