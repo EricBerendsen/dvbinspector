@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -134,13 +134,17 @@ public class AuxiliaryData implements TreeNode{
 		return t;
 	}
 
-
+	// values found at https://www.atsc.org/documents/code-point-registry/
 	public static String getUserDataTypeString(final int user_data_type_code) {
 		switch (user_data_type_code) {
 		case 0x03:
-			return "cc data";
+			return "CEA-708 captions (cc data)";
+		case 0x04:
+			return "Additional 608 Data";
+		case 0x05:
+			return "Luma PAM";
 		case 0x06:
-			return "bar data";
+			return "AFD (bar data)";
 		case 0x07:
 			return "multi_region_disparity";
 		case 0x09:
@@ -148,9 +152,8 @@ public class AuxiliaryData implements TreeNode{
 		default:
 			if((user_data_type_code >=0)&&(user_data_type_code <=0xff)){
 				return "DVB Reserved";
-			}else{
-				return "unknown/error";
 			}
+			return "unknown/error";
 		}
 	}
 
