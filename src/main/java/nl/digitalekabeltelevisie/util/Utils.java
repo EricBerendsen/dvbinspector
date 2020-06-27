@@ -949,11 +949,40 @@ public final class Utils {
 		case 0x31: return "Substream of a Rec. ITU-T H.265 | ISO/IEC 23008 2 video stream that contains a Motion Constrained Tile Set, parameter sets, slice headers or a combination thereof.";
 		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
 
-		
 		case 0x7f: return"IPMP stream";
-		case 0x81: return"User Private / AC-3 (ATSC)";
-		case 0x86: return"User Private / SCTE-35 splice_info_section";
+
+		// sources https://www.wikiwand.com/en/Program-specific_information
+		// https://fossies.org/linux/MediaInfo_CLI/MediaInfoLib/Source/MediaInfo/Multiple/File_Mpeg_Psi.cpp
+		
+		case 0x80: return"User Private / MPEG Video (ATSC) / PCM (HDMV)";
+		case 0x81: return"User Private / AC-3 (ATSC/HDMV)";
+		case 0x82: return"User Private / SCTE-27 subtitling / DTS 6 ch (HDMV)";
+		case 0x83: return"User Private / Isochronous Data (SCTE) / AC-3 (TrueHD) (HDMV)";
+		case 0x84: return"User Private / E-AC-3 up to 16 ch. (HDMV)";
+		case 0x85: return"User Private / Program Identifier (SCTE) / DTS 8 ch.(HD-HRA) (HDMV)";
+		case 0x86: return"User Private / SCTE-35 splice_info_section / DTS 8 ch. (HD-MA) (HDMV)";
 		case 0x87: return"User Private / E-AC-3 (ATSC)";
+
+		case 0x88: return"User Private / Microsoft Windows Media Video 9 (VC-1) (lower bit-rate video)";
+
+		case 0x90: return"User Private / Time Slicing - MPE-FEC (DVB) / Presentation Graphic Stream (subtitling) (HDMV)";
+		case 0x91: return"User Private / Presentation Graphic Stream (subtitling) (HDMV)";
+		case 0x92: return"User Private / Subtitle text (TEXTST) (HDMV)";
+
+		case 0x95: return"User Private / Data Service Table, Network Resources Table (ATSC)";
+
+		case 0xA1: return"User Private / AC-3 (HDMV)";
+		case 0xA2: return"User Private / DTS (HDMV)";
+		
+		case 0xC0: return"User Private / DigiCipher II text";
+		
+		case 0xC1: return"User Private / Dolby Digital (AC-3) up to six channel audio with AES-128-CBC data encryption";
+		case 0xC2: return"User Private / DSM CC synchronous data (ATSC) / Dolby Digital Plus up to 16 channel audio with AES-128-CBC data encryption";
+		case 0xCF: return"User Private / ISO/IEC 13818-7 ADTS AAC with AES-128-CBC frame encryption";
+		case 0xD1: return"User Private / BBC Dirac (Ultra HD video)";
+		case 0xDB: return"User Private / ITU-T Rec. H.264 and ISO/IEC 14496-10 with AES-128-CBC slice encryption";
+		case 0xEA: return"User Private / Microsoft Windows Media Video 9 (VC-1) (lower bit-rate video)";
+		
 
 		default:
 			if((0x2c<=tag)&&(tag<=0x7e)){
@@ -1087,7 +1116,6 @@ public final class Utils {
 		case 0x24: return"Video HEVC";
 		case 0x25: return"H.265 temporal video subset";
 		case 0x26: return"MVCD video sub-bitstream of an AVC video stream";
-		
 		// ISO/IEC 13818-1:2015/Amd.1:2015 (E) /R ec. ITU-T H.222.0 (2014)/Amd.1 (04/2015)
 		case 0x27: return "TEMI Stream"; 
 		// ISO/IEC 13818-1:2015/Amd.2:2016 (E) / Rec. ITU-T H.222.0 (2014)/Amd.2 (12/2015)
@@ -1110,10 +1138,40 @@ public final class Utils {
 		
 		case 0x7f: return"IPMP stream";
 		
+
+		// sources https://www.wikiwand.com/en/Program-specific_information
+		// https://fossies.org/linux/MediaInfo_CLI/MediaInfoLib/Source/MediaInfo/Multiple/File_Mpeg_Psi.cpp
+		
+		case 0x80: return"MPEG Video / PCM";
 		case 0x81: return"AC-3 (ATSC)";
-		case 0x86: return"SCTE-35";
+		case 0x82: return"SCTE-27 subtitling / DTS 6 ch";
+		case 0x83: return"Isochronous Data (SCTE) / AC-3";
+		case 0x84: return"E-AC-3 up to 16 ch.";
+		case 0x85: return"Program Identifier / DTS 8 ch.";
+		case 0x86: return"SCTE-35 splice_info_section / DTS 8 ch.";
 		case 0x87: return"E-AC-3 (ATSC)";
 
+		case 0x88: return"VC-1";
+
+		case 0x90: return"Time Slicing - MPE-FEC (DVB) / PGS subtitling)";
+		case 0x91: return"PGS subtitling";
+		case 0x92: return"Subtitle text (TEXTST)";
+
+		case 0x95: return"Data Service Table, Network Resources Table";
+
+		case 0xA1: return"AC-3";
+		case 0xA2: return"DTS";
+		
+		case 0xC0: return"DigiCipher II text";
+		
+		case 0xC1: return"AC-3 with AES-128-CBC data encryption";
+		case 0xC2: return"DSM CC synchronous data / Dolby Digital Plus with AES-128-CBC data encryption";
+		case 0xCF: return"ISO/IEC 13818-7 ADTS AAC with AES-128-CBC frame encryption";
+		case 0xD1: return"Dirac video";
+		case 0xDB: return"H.264 and ISO/IEC 14496-10 with AES-128-CBC slice encryption";
+		case 0xEA: return"VC-1";
+		
+		
 
 		default:
 			

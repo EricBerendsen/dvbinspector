@@ -257,7 +257,37 @@ public class TableSection implements TreeNode{
 		case 0xBD: return "user defined / M7 Fastscan Services Table (FST) ";
 		case 0xBE: return "user defined / M7 Operator Network Table (ONT) ";
 
-		case 0xFC: return "splice_info_section";
+
+		// https://fossies.org/linux/MediaInfo_CLI/MediaInfoLib/Source/MediaInfo/Multiple/File_Mpeg_Psi.cpp
+		case 0xC0 : return "user defined / ATSC - Program Information Message";
+        case 0xC1 : return "user defined / ATSC - Program Name Message";
+        case 0xC2 : return "user defined / ATSC/SCTE - Network Information Message";
+        case 0xC3 : return "user defined / ATSC/SCTE - Network Text Table (NTT)";
+        case 0xC4 : return "user defined / ATSC/SCTE - Short Form Virtual Channel Table (S-VCT)";
+        case 0xC5 : return "user defined / ATSC/SCTE - System Time Table (STT)";
+        case 0xC6 : return "user defined / ATSC/SCTE - Subtitle Message (SCTE-27)";
+        case 0xC7 : return "user defined / ATSC - Master Guide Table (MGT)";
+        case 0xC8 : return "user defined / ATSC - Terrestrial Virtual Channel Table (TVCT)";
+        case 0xC9 : return "user defined / ATSC - Cable Virtual Channel Table (CVCT) / Long-form Virtual Channel Table (L-VCT)";
+        case 0xCA : return "user defined / ATSC - Rating Region Table (RRT)";
+        case 0xCB : return "user defined / ATSC - Event Information Table (EIT)";
+        case 0xCC : return "user defined / ATSC - Extended Text Table (ETT)";
+        case 0xCD : return "user defined / ATSC - System Time Table (STT)";
+        case 0xCE : return "user defined / ATSC - Data Event Table (DET)";
+        case 0xCF : return "user defined / ATSC - Data Service Table (DST)";
+        case 0xD0 : return "user defined / ATSC - Program Identifier Table (PIT)";
+        case 0xD1 : return "user defined / ATSC - Network Resource Table (NRT)";
+        case 0xD2 : return "user defined / ATSC - Long-term Service Table (L-TST)";
+        case 0xD3 : return "user defined / ATSC - Directed Channel Change Table (DCCT)";
+        case 0xD4 : return "user defined / ATSC - DCC Selection Code Table (DCCSCT)";
+        case 0xD5 : return "user defined / ATSC - Selection Information Table (SIT)";
+        case 0xD6 : return "user defined / ATSC - Aggregate Event Information Table (AEIT)";
+        case 0xD7 : return "user defined / ATSC - Aggregate Extended Text Table (AETT)";
+        case 0xD8 : return "user defined / ATSC - Cable Emergency Alert";
+        case 0xD9 : return "user defined / ATSC - Aggregate Data Event Table";
+        case 0xDA : return "user defined / ATSC - Satellite VCT (SVCT)";
+        case 0xFC : return "user defined / SCTE3 - Splice_info_section (SCTE-35)";
+
 		case 0xFF: return "not used (illegal)";
 
 		default:
