@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.logging.Level;
@@ -225,14 +226,14 @@ public class PID implements TreeNode{
 	class LabelMaker{
 		
 		private String base;
-		private LinkedHashMap <String, List<String>> components = new LinkedHashMap<String, List<String>>();
+		private LinkedHashMap <String, LinkedHashSet<String>> components = new LinkedHashMap<String, LinkedHashSet<String>>();
 		
 		void setBase(String base) {
 			this.base = base;
 		}
 		
 		void addComponent(String type, String serviceName) {
-			components.computeIfAbsent(type, k -> new ArrayList<>()).add(serviceName);
+			components.computeIfAbsent(type, k -> new LinkedHashSet<>()).add(serviceName);
 		}
 		
 		@Override
@@ -258,7 +259,7 @@ public class PID implements TreeNode{
 		private String getTypeServices(String type) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(type).append(" - ");
-			List<String> servicesList = components.get(type);
+			LinkedHashSet<String> servicesList = components.get(type);
 			
 			sb.append(servicesList.
 					stream().
