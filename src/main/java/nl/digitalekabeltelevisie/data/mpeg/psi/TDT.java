@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,10 +30,14 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class TDT extends AbstractPSITabel{
 
@@ -49,7 +53,11 @@ public class TDT extends AbstractPSITabel{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TDT"));
+		KVP kvp = new KVP("TDT");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
+		if(!tdtSectionList.isEmpty()) {
+			kvp.setTableSource(()->getTableModel());
+		}
 
 		for (TDTsection tdTsection : tdtSectionList) {
 			t.add(tdTsection.getJTreeNode(modus));
@@ -61,6 +69,38 @@ public class TDT extends AbstractPSITabel{
 		return tdtSectionList;
 	}
 
+	/**
+	 * Using TDTsection for base and row type is a hack. Every element needs at least one row to render data.
+	 * See we create an artificial list of one TDTsection.
+	 * 
+	 * @return TableHeader<TDTsection,TDTsection > tableHeader
+	 */
+	static TableHeader<TDTsection,TDTsection>  buildTdtTableHeader() {
+		TableHeader<TDTsection,TDTsection > tableHeader =  new TableHeaderBuilder<TDTsection,TDTsection>().
+				addRequiredRowColumn("UTC_time",tdtSection -> tdtSection.getUTC_timeString(), String.class).
+				build();
+		
+		return tableHeader;
+	}
+
+
+	
+	public TableModel getTableModel() {
+		FlexTableModel<TDTsection,TDTsection> tableModel =  new FlexTableModel<>(buildTdtTableHeader());
+		
+		if (tdtSectionList != null) {
+			for (TDTsection element : tdtSectionList) {
+				if(element!= null){
+					List<TDTsection> lst = new ArrayList<>();
+					lst.add(element);
+					tableModel.addData(element, lst);
+				}
+			}
+		}
+		
+		tableModel.process();
+		return tableModel;
+	}
 
 
 }

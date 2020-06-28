@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,12 +27,19 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static java.util.Arrays.copyOfRange;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 
 public class TDTsection extends TableSection {
@@ -41,7 +48,7 @@ public class TDTsection extends TableSection {
 
 	public TDTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
-		UTC_time= Utils.copyOfRange(raw_data.getData(),3,8 );
+		UTC_time= copyOfRange(raw_data.getData(),3,8);
 	}
 
 
@@ -57,6 +64,8 @@ public class TDTsection extends TableSection {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP kvp = (KVP)t.getUserObject();
+		kvp.setTableSource(()->getTableModel());
 		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
 		return t;
 	}
@@ -70,6 +79,17 @@ public class TDTsection extends TableSection {
 
 	public String getUTC_timeString() {
 		return Utils.getUTCFormattedString(UTC_time);
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<TDTsection,TDTsection> tableModel =  new FlexTableModel<>(TDT.buildTdtTableHeader());
+		
+		List<TDTsection> lst = new ArrayList<>();
+		lst.add(this);
+		tableModel.addData(this, lst);
+		
+		tableModel.process();
+		return tableModel;
 	}
 
 }
