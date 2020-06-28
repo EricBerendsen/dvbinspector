@@ -411,7 +411,7 @@ public class Descriptor implements TreeNode {
 		case 0x87:
 			return "user defined: Ziggo/OpenTV Video On Demand delivery descriptor / NORDIG Logical_channel_descriptor version 2 / DTG short_service_name_descriptor";
 		case 0x88:
-			return "user defined: EACEM private: HD_simulcast_logical_channel_descriptor / YOUSEE Event tag descriptor / DTG HD_simulcast_logical_channel_descriptor";
+			return "user defined: EACEM private: HD_simulcast_logical_channel_descriptor / YOUSEE Event tag descriptor / DTG HD_simulcast_logical_channel_descriptor/ hdmv_copy_control_descriptor";
 			// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
 
