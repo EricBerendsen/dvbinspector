@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -65,18 +63,11 @@ public abstract class AbstractSetPreferenceAction extends AbstractAction {
 			    + "Do you want to reload the stream now?",
 		    "reload stream?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,
 		    options[1]); // default to no
-	    if (n == 0) {
-		try {
-		    // TODO use swingworker to enable progressIndicator (see FileOpenAction)
-		    // ts.parseStream((JRadioButtonMenuItem)e.getSource());
-		    ts.parseStream();
-		    contr.setTransportStream(ts);
-		    contr.resetSearch();
-		} catch (final IOException e1) {
-		    logger.log(Level.SEVERE, "Error (re)reading transport stream: ", e1);
+		    if (n == 0) {
+		    	final TSLoader tsLoader = new TSLoader(ts.getFile(), contr);
+		    	tsLoader.execute();
+		    }
 		}
-	    }
-	}
     }
 
 }

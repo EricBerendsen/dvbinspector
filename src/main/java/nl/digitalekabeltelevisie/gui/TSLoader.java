@@ -63,6 +63,7 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			final TransportStream ts = get();
 			if(ts!=null){
 				control.setTransportStream(get());
+				control.resetSearch();
 			}
 		} catch (final Throwable t) {
 			logger.log(Level.SEVERE, "Error displaying stream", t);
