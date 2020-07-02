@@ -760,6 +760,8 @@ public final class Utils {
 				}
 			}else if((selectorByte==0x11 )){ // ISO/IEC 10646
 				charsetLen = 1;
+			}else if((selectorByte==0x14 )){ // Big5 subset of ISO/IEC 10646
+				charsetLen = 1;
 			}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
 				charsetLen = 1;
 			}else if((selectorByte==0x1F )){ // described by encoding_type_id
