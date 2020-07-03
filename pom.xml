@@ -7,21 +7,39 @@
 	<artifactId>DVBinspector</artifactId>
 	<packaging>jar</packaging>
 	<version>1.14.0-SNAPSHOT</version>
+	<description>DVB Inspector is an open-source DVB analyzer, written in java</description>
 	<name>DVBinspector</name>
-	
-<properties>
-    <maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
-    <buildNumber>${maven.build.timestamp}</buildNumber>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
- </properties>
-	
+
+	<properties>
+		<maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
+		<buildNumber>${maven.build.timestamp}</buildNumber>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<url>http://www.digitalekabeltelevisie.nl/dvb_inspector/</url>
+	<organization>
+		<url>http://www.digitalekabeltelevisie.nl/</url>
+		<name>digitalekabeltelevisie.nl</name>
+	</organization>
+	<issueManagement>
+		<url>https://github.com/EricBerendsen/dvbinspector/issues</url>
+		<system>GitHub</system>
+	</issueManagement>
+	<scm>
+		<url>https://github.com/EricBerendsen/dvbinspector/issues</url>
+		<tag>HEAD</tag>
+		<connection>scm:git:git://github.com/EricBerendsen/dvbinspector.git</connection>
+		<developerConnection>scm:https://github.com/EricBerendsen/dvbinspector.git</developerConnection>
+	</scm>
+
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -31,7 +49,7 @@
 
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.2.0</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -46,7 +64,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>1.4</version>
+				<version>3.2.4</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -76,7 +94,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -97,7 +115,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.17</version>
+				<version>3.0.0-M5</version>
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
 				</configuration>
@@ -167,9 +185,4 @@
 	</repositories>
 
 
-	<url>http://www.digitalekabeltelevisie.nl/dvb_inspector/</url>
-	<organization>
-		<url>http://www.digitalekabeltelevisie.nl/</url>
-		<name>digitalekabeltelevisie.nl</name>
-	</organization>
 </project>
