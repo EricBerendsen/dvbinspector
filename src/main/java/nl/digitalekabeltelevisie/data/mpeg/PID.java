@@ -142,53 +142,10 @@ public class PID implements TreeNode{
 			final int adaptationFieldControl = packet.getAdaptationFieldControl();
 			final boolean packetHasPayload = (adaptationFieldControl==1)||(adaptationFieldControl==3);
 			if((lastPSISection==null)){ // nothing started
-				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
-				if(packet.isPayloadUnitStartIndicator() &&
-						(data.length>1) && packetHasPayload){ //start something
-					// at least one byte plus pointer available
-					int start;
-					int available;
-					if((data[0]!=0)||((getPid() ==0)||(data[1]!=0))){ //starting PSI section after ofset
-						// this is just an educated guess, it might still be private data of unspecified format
-						type = PSI;
-
-						start = 1 + toUnsignedInt(data[0]);
-						available = data.length - start;
-						while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
-							lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
-							final int bytes_read = lastPSISection.readBytes(data, start, available);
-							start += bytes_read;
-							available -= bytes_read;
-						}
-						if (lastPSISection != null && lastPSISection.isComplete()) {
-							lastPSISection = null;
-						}
-						//	 could be starting PES stream, make sure it really is, Should start with packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
-					}else if((data.length>2) && 
-							(data[0]==0) &&
-							(data[1]==0) &&
-							(data[2]==1)){
-						type = PES;
-						
-						if(PreferencesManager.isEnablePcrPtsView()) {
-							try {
-								// insert into PTS /DTS List
-								PesHeader pesHeader = packet.getPesHeader();
-								if((pesHeader!=null)&&(pesHeader.isValidPesHeader()&&pesHeader.hasExtendedHeader())){
-	
-									final int pts_dts_flags = pesHeader.getPts_dts_flags();
-									if ((pts_dts_flags ==2) || (pts_dts_flags ==3)){ // PTS present,
-										ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
-									}
-									if (pts_dts_flags ==3){ // DTS present,
-										dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
-									}
-								}
-							} catch (Exception e) {
-								logger.log(Level.WARNING, "Error getting PTS/DTS from PESHeader in packet:"+packet.getPacketNo() + " from PID:"+parentPID.getPid(), e);
-							}
-						}
-					}
+				// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check
+				// AdaptationFieldControl
+				if (packet.isPayloadUnitStartIndicator() && (data.length > 1) && packetHasPayload) {
+					startNewSection(packet, parentPID, data);
 				}
 				//	something started
 			}else if(packetHasPayload){
@@ -220,6 +177,63 @@ public class PID implements TreeNode{
 				}
 			}
 		}
+
+		private void startNewSection(final TSPacket packet, final PID parentPID, final byte[] data) {
+			{ // start something
+				// at least one byte plus pointer available
+				int start;
+				int available;
+				if ((data[0] != 0) 
+					|| ((getPid() == 0) 
+					|| (data[1] != 0))) { // starting PSI section after offset
+					// this is just an educated guess, it might still be private data of unspecified
+					// format
+					type = PSI;
+
+					start = 1 + toUnsignedInt(data[0]);
+					available = data.length - start;
+					while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
+						lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
+						final int bytes_read = lastPSISection.readBytes(data, start, available);
+						start += bytes_read;
+						available -= bytes_read;
+					}
+					if (lastPSISection != null && lastPSISection.isComplete()) {
+						lastPSISection = null;
+					}
+				// could be starting PES stream, make sure it really is, Should start with
+				// packet_start_code_prefix -'0000 0000 0000 0000 0000 0001' (0x000001)
+				} else if ((data.length > 2) && (data[0] == 0) && (data[1] == 0) && (data[2] == 1)) {
+					startPesPacket(packet, parentPID);
+				}
+			}
+		}
+
+		private void startPesPacket(final TSPacket packet, final PID parentPID) {
+			type = PES;
+
+			if (PreferencesManager.isEnablePcrPtsView()) {
+				try {
+					// insert into PTS /DTS List
+					PesHeader pesHeader = packet.getPesHeader();
+					if ((pesHeader != null)
+							&& (pesHeader.isValidPesHeader() && pesHeader.hasExtendedHeader())) {
+
+						final int pts_dts_flags = pesHeader.getPts_dts_flags();
+						if ((pts_dts_flags == 2) || (pts_dts_flags == 3)) { // PTS present,
+							ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
+						}
+						if (pts_dts_flags == 3) { // DTS present,
+							dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
+						}
+					}
+				} catch (Exception e) {
+					logger.log(Level.WARNING, "Error getting PTS/DTS from PESHeader in packet:"
+							+ packet.getPacketNo() + " from PID:" + parentPID.getPid(), e);
+				}
+			}
+		}
+		
 	}
 
 
@@ -280,7 +294,6 @@ public class PID implements TreeNode{
 	}
 
 	public void updatePacket(final TSPacket packet) {
-		// handle 0x015 Mega-frame Initialization Packet (MIP)
 		
 		if(!packet.isTransportErrorIndicator()){
 			updateNonErrorPacket(packet);
