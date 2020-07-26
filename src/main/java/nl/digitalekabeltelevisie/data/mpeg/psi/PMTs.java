@@ -26,12 +26,22 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
+import static nl.digitalekabeltelevisie.data.mpeg.TransportStream.determineComponentType;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.getComponentType0x03String;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.ISO639LanguageDescriptor.getAudioTypeString;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.TeletextDescriptor.getTeletextTypeString;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getAppTypeIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeShortString;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
@@ -39,10 +49,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream.ComponentType;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ApplicationSignallingDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ISO639LanguageDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.StreamIdentifierDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.SubtitlingDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.TeletextDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
+import nl.digitalekabeltelevisie.util.tablemodel.cellrenderer.StreamTypeTableCellRenderer;
 
 public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
@@ -105,8 +123,12 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		TableHeader<PMTsection,Component> tableHeader =  new TableHeaderBuilder<PMTsection,Component>().
 				addRequiredBaseColumn("program number", p->p.getProgramNumber(), Integer.class).
 
-				addOptionalRowColumn("stream type", c -> c.getStreamtype(), Integer.class).
-				addOptionalRowColumn("stream type description", c -> Utils.getStreamTypeShortString(c.getStreamtype()), String.class).
+				addOptionalRowColumn("stream type", c -> c.getStreamtype(), StreamTypeTableCellRenderer.class).
+				addOptionalRowColumn("usage",
+						c ->  determineComponentType(c.getComponentDescriptorList()).
+							map(ComponentType::getDescription).
+							orElse(getStreamTypeShortString(c.getStreamtype())),
+						String.class).
 				addOptionalRowColumn("elementary PID", c -> c.getElementaryPID(), Integer.class).
 				
 				addOptionalRowColumn("component tag",

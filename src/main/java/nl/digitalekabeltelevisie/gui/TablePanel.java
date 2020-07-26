@@ -30,6 +30,8 @@ package nl.digitalekabeltelevisie.gui;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 
+import nl.digitalekabeltelevisie.util.tablemodel.cellrenderer.StreamTypeTableCellRenderer;
+
 public class TablePanel extends JScrollPane{
 	
 	JTable table;
@@ -41,6 +43,8 @@ public class TablePanel extends JScrollPane{
 		
 		table.setAutoCreateRowSorter(true);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
+		table.setDefaultRenderer(StreamTypeTableCellRenderer.class, new StreamTypeTableCellRenderer());
 		tca = new TableColumnAdjuster(table);
 		tca.adjustColumns();
 	}

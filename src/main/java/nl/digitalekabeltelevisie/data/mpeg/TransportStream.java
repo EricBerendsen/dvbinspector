@@ -65,7 +65,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
  */
 public class TransportStream implements TreeNode{
 	
-	private enum ComponentType{
+	public enum ComponentType{
 		AC3("Dolby Audio (AC3)"),
 		E_AC3("Enhanced Dolby Audio (AC3)"), 
 		VBI("VBI Data"), 
@@ -81,7 +81,7 @@ public class TransportStream implements TreeNode{
 			this.description = description;
 		}
 		
-		String getDescription() {
+		public String getDescription() {
 			return description;
 		}
 	}
@@ -596,12 +596,15 @@ public class TransportStream implements TreeNode{
 			final int streamType = component.getStreamtype();
 			GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
 
-			ComponentType componentType = determineComponentType(component.getComponentDescriptorList());
-			if (componentType == null) {
-				addLabelMakerComponent(component.getElementaryPID(), getStreamTypeShortString(streamType), service_name);
-			}else {
-				addLabelMakerComponent(component.getElementaryPID(), componentType.getDescription(), service_name);
-				switch (componentType) {
+			Optional<ComponentType> componentType = determineComponentType(component.getComponentDescriptorList());
+			
+			addLabelMakerComponent(
+					component.getElementaryPID(), 
+					componentType.map(ComponentType::getDescription).orElse(getStreamTypeShortString(streamType)),
+					service_name
+					);
+			if (componentType.isPresent()) {
+				switch (componentType.get()) {
 				case DVB_SUBTITLING:
 					generalPidHandler = new DVBSubtitleHandler();
 					break;
@@ -647,7 +650,11 @@ public class TransportStream implements TreeNode{
 		}
 	}
 
-	private static ComponentType determineComponentType(List<Descriptor> componentDescriptorList) {
+	public static Optional<ComponentType> determineComponentType(List<Descriptor> componentDescriptorList){
+		return Optional.ofNullable(findComponentType(componentDescriptorList));
+	}
+	
+	private static ComponentType findComponentType(List<Descriptor> componentDescriptorList) {
 		
 		for(Descriptor d:componentDescriptorList){
 			if(d instanceof SubtitlingDescriptor) {
