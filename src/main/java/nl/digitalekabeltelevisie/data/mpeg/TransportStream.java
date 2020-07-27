@@ -41,6 +41,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TtmlSubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
@@ -73,7 +74,8 @@ public class TransportStream implements TreeNode{
 		DVB_SUBTITLING("DVB subtitling"), 
 		AIT("Application Information Table (AIT)"), 
 		RCT("Related Content Table (RCT)"), 
-		T2MI("T2-MI");
+		T2MI("T2-MI"),
+		TTML("TTML");
 		
 		private String description;
 		
@@ -678,6 +680,8 @@ public class TransportStream implements TreeNode{
 				return ComponentType.RCT;
 			}else if(d instanceof T2MIDescriptor){
 				return ComponentType.T2MI;
+			}else if(d instanceof TtmlSubtitlingDescriptor){
+				return ComponentType.TTML;
 			}
 		}
 

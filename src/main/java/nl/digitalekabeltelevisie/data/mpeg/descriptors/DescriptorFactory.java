@@ -513,6 +513,8 @@ public final class DescriptorFactory {
 			return new S2XSatelliteDeliverySystemDescriptor(data, offset, tableSection);
 		case 0x19:
 			return new AudioPreselectionDescriptor(data, offset, tableSection);
+		case 0x20:
+			return new TtmlSubtitlingDescriptor(data, offset, tableSection);
 
 		default:
 			DVBExtensionDescriptor d = new DVBExtensionDescriptor(data, offset, tableSection);
