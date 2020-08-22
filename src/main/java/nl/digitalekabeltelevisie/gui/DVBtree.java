@@ -217,8 +217,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private int mod=0;
 	private TransportStream ts;
 	private DefaultTreeModel model;
-	private ImagePanel imagePanel = new ImagePanel();
-	private TablePanel tablePanel = new TablePanel(new JTable());
+	private final ImagePanel imagePanel = new ImagePanel();
+	private final TablePanel tablePanel = new TablePanel(new JTable());
 
 	/**
 	 *
@@ -343,7 +343,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
 	@Override
-	public void setTransportStream(final TransportStream transportStream, final ViewContext v){
+	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
 		ts=transportStream;
 		if(ts!=null){
 			model=new DefaultTreeModel(ts.getJTreeNode(mod));
@@ -504,10 +504,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				}
 
 			}
-			cardLayout.show(detailPanel, EMPTY_PANEL);
-		}else{ // not DefaultMutableTreeNode
-			cardLayout.show(detailPanel, EMPTY_PANEL);
 		}
+		cardLayout.show(detailPanel, EMPTY_PANEL);
 
 	}
 
@@ -520,7 +518,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		gd.setColor(Color.GRAY);
 		gd.fillRect(0, 0, width, height);
 
-		Color testBarColors[] = { 
+		Color[] testBarColors = {
 				Color.WHITE, 
 				Color.YELLOW, 
 				Color.CYAN, 
@@ -544,8 +542,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final Font font = new Font("Arial", Font.BOLD, 20);
 		gd.setFont(font);
 		
-		String str = "Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg();;
-		
+		String str = "Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg();
+
 		gd.setColor(Color.WHITE);
 		
 		int x = 20;
@@ -752,7 +750,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					}
 				}
 			}
-			final DefaultMutableTreeNode node =((TreeNode)p.getPidHandler()).getJTreeNode(mod);
+			final DefaultMutableTreeNode node = p.getPidHandler().getJTreeNode(mod);
 			// https://www.java-tips.org/java-se-tips-100019/15-javax-swing/2393-have-a-popup-attached-to-a-jtree.html
 			// thanks to Yong Zhang for the tip for refreshing the tree structure.
 			dmtn.add(node);
@@ -779,7 +777,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 	/**
 	 * @param dmtn
-	 * @param kvp
 	 */
 	private void copyEntireSubTreeToClipboard(DefaultMutableTreeNode dmtn) {
 		KVP kvp = (KVP)dmtn.getUserObject();
@@ -876,10 +873,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		
 		
 		 MenuElement[] subs = popup.getSubElements();
-		for (int i = 0; i < subs.length; i++) {
-			JMenuItem menuElement = (JMenuItem)subs[i];
-			menuElement.setEnabled(path!=null);
-			
+		for (MenuElement sub : subs) {
+			JMenuItem menuElement = (JMenuItem) sub;
+			menuElement.setEnabled(path != null);
+
 		}
 		
 		// remove option menu from previous invocation
@@ -921,11 +918,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				}
 			}else{ //not a defaultMutableTreeNode, so it is a mutabletree node. Only used for TS packets lazy tree, so disable menu's
 				 	subs = popup.getSubElements();
-					for (int i = 0; i < subs.length; i++) {
-						JMenuItem menuElement = (JMenuItem)subs[i];
-						menuElement.setEnabled(false);
-						
-					}
+				for (MenuElement sub : subs) {
+					JMenuItem menuElement = (JMenuItem) sub;
+					menuElement.setEnabled(false);
+
+				}
 
 			}
 		}
@@ -962,12 +959,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 	private static DefaultMutableTreeNode searchNode(String targetString, DefaultMutableTreeNodePreorderEnumaration enumeration) {
 		while (enumeration.hasMoreElements()) {
-			Object node = enumeration.nextElement();
-			if (node instanceof DefaultMutableTreeNode){
-				DefaultMutableTreeNode defaultMutableTreeNode = (DefaultMutableTreeNode)node;
-				String nodeString = defaultMutableTreeNode.getUserObject().toString();
+			DefaultMutableTreeNode node = enumeration.nextElement();
+			if (node != null){
+				String nodeString = node.getUserObject().toString();
 				if( nodeString.toLowerCase().contains(targetString)) {
-					return defaultMutableTreeNode;
+					return node;
 				}
 			}
 		}
