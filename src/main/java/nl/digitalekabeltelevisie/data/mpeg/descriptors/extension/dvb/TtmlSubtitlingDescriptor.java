@@ -44,14 +44,14 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 	
-	public class Font implements TreeNode {
+	public static class Font implements TreeNode {
 		
 		public Font(int font) {
 			super();
 			this.font_id = font&0x0111_1111;
 		}
 
-		int font_id;
+		final int font_id;
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
@@ -61,9 +61,9 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 
 	}
 
-	public class Qualifier implements TreeNode{
+	public static class Qualifier implements TreeNode{
 		
-		LookUpList size_lookup_list = new LookUpList.Builder().
+		final LookUpList size_lookup_list = new LookUpList.Builder().
 				add(0x0 ,"broadcaster's default size").
 				add(0x1 ,"small").
 				add(0x2 ,"medium").
@@ -71,7 +71,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 				add(0x4 ,0xF ,"reserved for future use").
 				build();
 
-		LookUpList cadence_lookup_list = new LookUpList.Builder().
+		final LookUpList cadence_lookup_list = new LookUpList.Builder().
 				add(0x0, "broadcaster's default cadence").
 				add(0x1, "slow").
 				add(0x2, "medium").
@@ -79,7 +79,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 				add(0x4, 0xF,"reserved for future use").
 				build();
 
-		LookUpList position_lookup_list = new LookUpList.Builder().
+		final LookUpList position_lookup_list = new LookUpList.Builder().
 				add(0x0, "default").
 				add(0x1, "top").
 				add(0x2, "bottom").
@@ -99,14 +99,14 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 			reserved_zero_future_use = (int) ((qualifier & 0x0003FFFFl)>>18);
 		}
 
-		private long qualifier;
+		private final long qualifier;
 		
-		private int size;
-		private int cadence;
-		private int monochrome_flag ;
-		private int enhanced_accessibility_contrast_flag ;
-		private int position;
-		private int reserved_zero_future_use;
+		private final int size;
+		private final int cadence;
+		private final int monochrome_flag ;
+		private final int enhanced_accessibility_contrast_flag ;
+		private final int position;
+		private final int reserved_zero_future_use;
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
@@ -122,9 +122,9 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 		
 	}
 	
-	public class DvbTtmlProfile implements TreeNode{
+	public static class DvbTtmlProfile implements TreeNode{
 		
-		private LookUpList dvb_ttml_profile_lookup_list = new LookUpList.Builder().
+		private final LookUpList dvb_ttml_profile_lookup_list = new LookUpList.Builder().
 				add(0x00, "etd1†|im1t").
 				add(0x01, "im1t").
 				add(0x02, "etd1").
@@ -137,7 +137,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 			this.dvb_ttml_profile = dvb_ttml_profile;
 		}
 
-		private int dvb_ttml_profile;
+		private final int dvb_ttml_profile;
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
@@ -148,25 +148,25 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 	
 	}
 
-	private String iso639LanguageCode;
-	private int subtitle_purpose;
-	private int tts_suitability;
-	private int essential_font_usage_flag;
-	private int qualifier_present_flag;
-	private int reserved_zero_future_use;
-	private int dvb_ttml_profile_count;
-	private List<DvbTtmlProfile> profileList = new ArrayList<TtmlSubtitlingDescriptor.DvbTtmlProfile>();
+	private final String iso639LanguageCode;
+	private final int subtitle_purpose;
+	private final int tts_suitability;
+	private final int essential_font_usage_flag;
+	private final int qualifier_present_flag;
+	private final int reserved_zero_future_use;
+	private final int dvb_ttml_profile_count;
+	private final List<DvbTtmlProfile> profileList = new ArrayList<>();
 
 	private long qualifier;
 	
 	private int font_count;
-	private List<Font> fontList = new  ArrayList<TtmlSubtitlingDescriptor.Font>();
+	private final List<Font> fontList = new ArrayList<>();
 	
 	
-	private DVBString text;
+	private final DVBString text;
 
 
-	private LookUpList subtitle_purpose_list = new LookUpList.Builder().
+	private final LookUpList subtitle_purpose_list = new LookUpList.Builder().
 			add(0x00, "same-lang-dialogue").
 			add(0x01, "other-lang-dialogue").
 			add(0x02, "all-dialogue").
@@ -180,7 +180,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 			add(0x32 ,0x3F, "reserved for future use ").
 			build();
 					
-	private LookUpList tts_suitability_list  = new LookUpList.Builder().
+	private final LookUpList tts_suitability_list  = new LookUpList.Builder().
 			add(0x0 ,"unknown suitability for TTS").
 			add(0x1 ,"suitable for TTS").
 			add(0x2 ,"not suitable for TTS").

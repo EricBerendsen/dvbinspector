@@ -186,9 +186,9 @@ public class DFITSection extends TableSectionExtendedSyntax {
 		
 	}
 
-	private int font_id_extension;
-	private int font_id;
-	private List<FontInfo> fontInfoList = new ArrayList<>();
+	private final int font_id_extension;
+	private final int font_id;
+	private final List<FontInfo> fontInfoList = new ArrayList<>();
 
 	public DFITSection(PsiSectionData raw_data, PID parent) {
 		super(raw_data, parent);

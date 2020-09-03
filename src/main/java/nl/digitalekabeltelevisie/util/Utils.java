@@ -39,6 +39,7 @@ import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -167,7 +168,7 @@ public final class Utils {
 
 	
 	private static void readOIUCsv(final String fileName, final Map<Integer,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-8")))){
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
 
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
@@ -186,7 +187,7 @@ public final class Utils {
 	
 
 	private static void readCSVIdString(final String fileName, final RangeHashMap<Integer,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-16")))){
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_16))){
 
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
@@ -209,7 +210,7 @@ public final class Utils {
 	}
 
 	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName),Charset.forName("UTF-16")))){
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_16))){
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
@@ -362,9 +363,9 @@ public final class Utils {
 		final int len = block.length;
 		int high = 0;
 		int low = 0;
-		for (int i = 0; i < len; i++) {
-			high = ((block[i] & 0xf0) >> 4);
-			low = (block[i] & 0x0f);
+		for (byte b : block) {
+			high = ((b & 0xf0) >> 4);
+			low = (b & 0x0f);
 			buf.append(hexChars[high]);
 			buf.append(hexChars[low]);
 		}
@@ -716,24 +717,24 @@ public final class Utils {
 						charset = Charset.forName("ISO-8859-"+b[offset+2]);
 					} // else == reserved for future use, so not implemented
 				}else if((selectorByte==0x11 )){ // ISO/IEC 10646
-					charset = Charset.forName("UTF-16");
+					charset = StandardCharsets.UTF_16;
 				}else if((selectorByte==0x14 )){ // Big5 subset of ISO/IEC 10646
 					charset = Charset.forName("Big5");
 				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
-					charset = Charset.forName("UTF-8");
+					charset = StandardCharsets.UTF_8;
 				}
 			} catch (final IllegalCharsetNameException e) {
 				logger.info("IllegalCharsetNameException in getCharSet:"+e);
-				charset = Charset.forName("ISO-8859-1");
+				charset = StandardCharsets.ISO_8859_1;
 			} catch (final UnsupportedCharsetException e) {
-				charset = Charset.forName("ISO-8859-1");
+				charset = StandardCharsets.ISO_8859_1;
 				logger.info("UnsupportedCharsetException in getCharSet:"+e+", String="+new String(b, offset, length, charset));
 			} catch (final IllegalArgumentException e) {
 				logger.info("IllegalArgumentException in getCharSet:"+e);
-				charset = Charset.forName("ISO-8859-1");
+				charset = StandardCharsets.ISO_8859_1;
 			}
 			if(charset==null){
-				charset = Charset.forName("ISO-8859-1");
+				charset = StandardCharsets.ISO_8859_1;
 			}
 		}
 		return charset;
@@ -767,7 +768,7 @@ public final class Utils {
 		if(length<=0){
 			return "";
 		}
-		return new String(b, offset, length, Charset.forName("ISO-8859-1"));
+		return new String(b, offset, length, StandardCharsets.ISO_8859_1);
 	}
 
 
@@ -814,8 +815,8 @@ public final class Utils {
 	 * @return true if all elements are 0xFF (unsigned) 
 	 */
 	public static boolean isUndefined(byte[] uTC_time) {
-		for (int i = 0; i < uTC_time.length; i++) {
-			if(uTC_time[i]!=-1){
+		for (byte b : uTC_time) {
+			if (b != -1) {
 				return false;
 			}
 		}
@@ -1273,10 +1274,10 @@ public final class Utils {
 		}
 
 		final int len = block.length;
-		for (int i = 0; i < len; i++) {
-			if((32<=toUnsignedInt(block[i]))&&(toUnsignedInt(block[i])<=127)){
-				buf.append((char)(block[i]));
-			}else{
+		for (byte b : block) {
+			if ((32 <= toUnsignedInt(b)) && (toUnsignedInt(b) <= 127)) {
+				buf.append((char) b);
+			} else {
 				buf.append('.');
 			}
 		}

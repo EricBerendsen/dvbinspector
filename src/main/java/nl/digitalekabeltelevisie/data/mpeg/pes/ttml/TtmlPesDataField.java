@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,16 +72,16 @@ public class TtmlPesDataField extends PesPacketData {
 	
 	private static final Logger logger = Logger.getLogger(TtmlPesDataField.class.getName());
 	
-	private long segment_mediatime;
-	private int num_of_segments;
-	private List<Segment> segmentList = new ArrayList<>();
+	private final long segment_mediatime;
+	private final int num_of_segments;
+	private final List<Segment> segmentList = new ArrayList<>();
 	
-	private long crc_32;
+	private final long crc_32;
 	private boolean crc32Failed;
 
-	public class Segment implements TreeNode, HTMLSource{
+	public static class Segment implements TreeNode, HTMLSource{
 		
-		LookUpList segmentTypeList = new LookUpList.Builder().
+		final LookUpList segmentTypeList = new LookUpList.Builder().
 				add(0x00,"reserved for future use").
 				add(0x01, "uncompressed TTML document").
 				add(0x02, "gzip compressed TTML document").
@@ -89,9 +90,9 @@ public class TtmlPesDataField extends PesPacketData {
 				
 
 
-		private int segment_type;
-		private int segment_length;
-		private byte[] segment_data_field;
+		private final int segment_type;
+		private final int segment_length;
+		private final byte[] segment_data_field;
 		private String xml;
 
 		public Segment(int segment_type, int segment_length, byte[] segment_data_field) {
@@ -100,7 +101,7 @@ public class TtmlPesDataField extends PesPacketData {
 			this.segment_length = segment_length;
 			this.segment_data_field = segment_data_field;
 			if(segment_type==1) {
-				xml = new String(segment_data_field, Charset.forName("UTF-8"));
+				xml = new String(segment_data_field, StandardCharsets.UTF_8);
 			}else if(segment_type==2) { // compressed 
 				//byte []res = rawData;
 				try {
@@ -116,7 +117,7 @@ public class TtmlPesDataField extends PesPacketData {
 					    }
 					}
 					byte uncompressed[] = byteout.toByteArray();
-					xml = new String(uncompressed, Charset.forName("UTF-8"));
+					xml = new String(uncompressed, StandardCharsets.UTF_8);
 				} catch (IOException e) {
 					xml = "gunzip error";
 					e.printStackTrace();
