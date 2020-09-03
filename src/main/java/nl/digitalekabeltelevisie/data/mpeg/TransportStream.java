@@ -49,6 +49,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
@@ -75,7 +76,7 @@ public class TransportStream implements TreeNode{
 		AIT("Application Information Table (AIT)"), 
 		RCT("Related Content Table (RCT)"), 
 		T2MI("T2-MI"),
-		TTML("TTML");
+		TTML("TTML subtitling");
 		
 		private String description;
 		
@@ -628,6 +629,9 @@ public class TransportStream implements TreeNode{
 					break;
 				case T2MI:
 					generalPidHandler = new T2miPidHandler();
+					break;
+				case TTML:
+					generalPidHandler = new TtmlPesHandler();
 					break;
 				default:
 					logger.warning("no componenttype found for pid " + component.getElementaryPID()
