@@ -76,7 +76,7 @@ public final class Utils {
 	 * Helper int[] to reverse order of bits in a National Option Set 
 	 */
 
-	public static int invNationalOptionSet[] = {
+	public static int[] invNationalOptionSet = {
 			0b000, 
 			0b100,
 			0b010, 
@@ -122,30 +122,30 @@ public final class Utils {
 	public static final int MASK_31BITS=0x7FF_FFFFF;
 
 	public static final int MASK_32BITS=0xFFFF_FFFF;
-	public static final long MASK_33BITS=0x1_FFFF_FFFFl;
-	public static final long MASK_40BITS=0xFF_FFFF_FFFFl;
-	public static final long MASK_48BITS=0xDDFF_FFFF_FFFFl;
-	public static final long MASK_64BITS=0xFFFF_FFFF_FFFF_FFFFl;
+	public static final long MASK_33BITS=0x1_FFFF_FFFFL;
+	public static final long MASK_40BITS=0xFF_FFFF_FFFFL;
+	public static final long MASK_48BITS=0xDDFF_FFFF_FFFFL;
+	public static final long MASK_64BITS=0xFFFF_FFFF_FFFF_FFFFL;
 
-	private static Map<Integer, String>oui = new HashMap<Integer, String>();
-	private static RangeHashMap<Integer,String> bat = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Integer,String> dataBroadcast = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Integer,String> ca_system_id = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Integer,String> original_network_id = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Integer,String> platform_id = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Integer,String> cni = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Integer,String> app_type_id = new RangeHashMap<Integer,String>();
-	private static RangeHashMap<Long,String> mhp_organisation_id = new RangeHashMap<Long,String>();
-	private static RangeHashMap<Integer,String> itu35_country_code = new RangeHashMap<Integer,String>();
+	private static final Map<Integer, String>oui = new HashMap<>();
+	private static final RangeHashMap<Integer,String> bat = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> dataBroadcast = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> ca_system_id = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> original_network_id = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> platform_id = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> cni = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> app_type_id = new RangeHashMap<>();
+	private static final RangeHashMap<Long,String> mhp_organisation_id = new RangeHashMap<>();
+	private static final RangeHashMap<Integer,String> itu35_country_code = new RangeHashMap<>();
 
-	private static RangeHashMap<Long,String> private_data_spec_id = new RangeHashMap<Long,String>();
+	private static final RangeHashMap<Long,String> private_data_spec_id = new RangeHashMap<>();
 
-	private static 	DecimalFormat f2 = new DecimalFormat("00");
-	private static 	DecimalFormat f4 = new DecimalFormat("0000");
-	private static 	DecimalFormat f6 = new DecimalFormat("000000");
+	private static final DecimalFormat f2 = new DecimalFormat("00");
+	private static final DecimalFormat f4 = new DecimalFormat("0000");
+	private static final DecimalFormat f6 = new DecimalFormat("000000");
 
 
-	private static char[] hexChars = {
+	private static final char[] hexChars = {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'A', 'B', 'C', 'D', 'E', 'F' };
 
@@ -596,7 +596,7 @@ public final class Utils {
 	}
 
 	/**
-	 * @param charset
+	 * @param charSet1
 	 * @param charSet2
 	 * @return
 	 */
@@ -674,7 +674,7 @@ public final class Utils {
 	 * @param len number of bytes to be parsed
 	 * @return a java String, according to ETSI EN 300 468 V1.11.1 Annex A,
 	 */
-	public static String getString(final byte b[], final int off, final int len) {
+	public static String getString(final byte[] b, final int off, final int len) {
 		int length = len;
 		int offset = off;
 		if(length<=0){
@@ -705,7 +705,7 @@ public final class Utils {
 		}
 	}
 
-	public static Charset getCharSet(final byte b[], final int offset, final int length){
+	public static Charset getCharSet(final byte[] b, final int offset, final int length){
 		Charset charset = null;
 		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
 			final int selectorByte=b[offset];
@@ -740,7 +740,7 @@ public final class Utils {
 		return charset;
 	}
 
-	private static int getCharSetLen(final byte b[], final int offset){
+	private static int getCharSetLen(final byte[] b, final int offset){
 		int charsetLen = 0;
 		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
 			final int selectorByte=b[offset];
@@ -764,7 +764,7 @@ public final class Utils {
 	}
 
 
-	public static String getISO8859_1String(final byte b[], final int offset, final int length) {
+	public static String getISO8859_1String(final byte[] b, final int offset, final int length) {
 		if(length<=0){
 			return "";
 		}
@@ -797,7 +797,7 @@ public final class Utils {
 		m = m - 1 - (k*12);
 
 
-		return Long.toString(y)+"/"+df2pos.format(m)+"/"+df2pos.format(d)+" "+hours+":"+minutes+":"+secs;
+		return y +"/"+df2pos.format(m)+"/"+df2pos.format(d)+" "+hours+":"+minutes+":"+secs;
 	}
 	
 	public static String getEITStartTimeAsString(final byte[] UTC_time) {
@@ -1250,7 +1250,7 @@ public final class Utils {
 				final Object userObject = node.getUserObject();
 				if (userObject instanceof KVP) {
 					final KVP kvp = (KVP)userObject;
-					kvp.appendLabel(" ["+Integer.toString(count)+"]");
+					kvp.appendLabel(" ["+ count +"]");
 					count++;
 				}
 				parent.add(node);
@@ -1806,7 +1806,7 @@ public final class Utils {
 	/**
 	 * Helper byte[] to reverse order of bits in a byte
 	 */
-	public static int invtab[] = {
+	public static final int[] invtab = {
 		0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
 		0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
 		0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
@@ -1860,6 +1860,7 @@ public final class Utils {
 		for (int i = fromIndex; i < max; i++) {
 			/* Look for first byte. */
 			if (source[i] != first) {
+				//noinspection StatementWithEmptyBody
 				while ((++i <= max) && (source[i] != first)){ // NOPMD by Eric on 22-5-12 14:46
 					// EMPTY body
 				}
@@ -1886,7 +1887,7 @@ public final class Utils {
 	}
 
 
-	public static DecimalFormat df2pos = new DecimalFormat("00");
+	public static final DecimalFormat df2pos = new DecimalFormat("00");
 
 
 	public static DecimalFormat df3pos = new DecimalFormat("000");
@@ -1958,7 +1959,7 @@ public final class Utils {
 		final int lines=1+((len-1)/16);
 		for (int l = 0; l < lines; l++) {
 			final int start=l*16;
-			b.append("").append(Utils.toHexString(start,6));
+			b.append(Utils.toHexString(start,6));
 			b.append("&nbsp;");
 			b.append("<span>");
 			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
@@ -2137,7 +2138,7 @@ public final class Utils {
 		final int lines=1+((len-1)/16);
 		for (int l = 0; l < lines; l++) {
 			final int start=l*16;
-			b.append("").append(Utils.toHexString(start,6));
+			b.append(Utils.toHexString(start,6));
 			b.append("&nbsp;");
 			b.append("<span style=\"background-color: white\">");
 			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
@@ -2200,7 +2201,7 @@ public final class Utils {
 			return duration;
 		}
 		StringBuilder res= new StringBuilder(duration.substring(0, 2)).append('h');
-		res.append(duration.substring(2, 4)).append('m').append(duration.substring(4, 6));
+		res.append(duration, 2, 4).append('m').append(duration, 4, 6);
 		return res.toString();
 	}
 
@@ -2211,7 +2212,7 @@ public final class Utils {
 	 */
 	public static String extractTextFromHTML(String htmlString) {
 		Reader reader = new StringReader(htmlString);
-	    final ArrayList<String> list = new ArrayList<String>();
+	    final ArrayList<String> list = new ArrayList<>();
 	
 	    HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
 	        public void handleText(final char[] data, final int pos) {

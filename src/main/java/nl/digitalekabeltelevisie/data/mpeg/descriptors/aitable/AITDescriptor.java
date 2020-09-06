@@ -72,10 +72,13 @@ public class AITDescriptor extends Descriptor {
 		case 0x0F: return "Plug-in descriptor";
 		case 0x10: return "Application storage descriptor";
 		case 0x11: return "ip_signalling_descriptor";//
+		case 0x12: return "provider_export_descriptor";// ETSI TS 101 162 V1.9.1 (2020-07)
+		case 0x13: return "provider_usage_descriptor";//ETSI TS 101 162 V1.9.1 (2020-07)
 		case 0x14: return "graphics_constraints_descriptor"; //ETSI TS 102 809 V1.1.1
 		case 0x15: return "simple_application_location_descriptor"; //ETSI TS 102 809 V1.1.1
 		case 0x16: return "application_usage_descriptor"; //ETSI TS 102 809 V1.1.1
 		case 0x17: return "simple_application_boundary_descriptor"; //ETSI TS 102 809 V1.1.1
+		case 0x5F: return "private_data_specifier_descriptor"; //ETSI TS 101 162 V1.9.1 (2020-07)
 		default:
 
 			return "reserved to MHP";
