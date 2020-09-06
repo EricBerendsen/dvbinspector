@@ -55,6 +55,29 @@ public class DFITSection extends TableSectionExtendedSyntax {
 				add(0x04 , 0xFF, "reserved").
 				build();
 
+		LookUpList fontStyleList = new LookUpList.Builder().
+				add(0x00, "undefined").
+				add(0x01, "normal").
+				add(0x02, "italic").
+				add(0x03, "oblique").
+				add(0x04,0x07, "reserved for future use").
+				build();
+
+		LookUpList fontWeightList = new LookUpList.Builder().
+				add(0x00, "undefined").
+				add(0x01, "normal").
+				add(0x02, "bold").
+				add(0x03,0x0F, "reserved for future use").
+				build();
+		
+		LookUpList fontFileFormatList = new LookUpList.Builder().
+				add(0x00, "Open Font Format").
+				add(0x01, "Web Open Font Format").
+				add(0x02,0x0F, "reserved for future use").
+				build();
+		
+		
+
 		private int font_info_type;
 		private int font_style;
 		private int font_weight;
@@ -85,12 +108,12 @@ public class DFITSection extends TableSectionExtendedSyntax {
 			
 			
 			if(font_info_type==0) {
-				t.add(new DefaultMutableTreeNode(new KVP("font_style",font_style,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("font_weight",font_weight,null)));
+				t.add(new DefaultMutableTreeNode(new KVP("font_style",font_style,fontStyleList.get(font_style))));
+				t.add(new DefaultMutableTreeNode(new KVP("font_weight",font_weight,fontWeightList.get(font_weight))));
 				t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use,null)));
 			}else if(font_info_type==1) {
 				t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("font_file_format",font_file_format,null)));
+				t.add(new DefaultMutableTreeNode(new KVP("font_file_format",font_file_format,fontFileFormatList.get(font_file_format))));
 				t.add(new DefaultMutableTreeNode(new KVP("uri_length",uri_length,null)));
 				t.add(new DefaultMutableTreeNode(new KVP("uri_char",uri_char,null)));
 				
