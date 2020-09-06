@@ -40,6 +40,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.AC4Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TtmlSubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
@@ -47,6 +48,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4.AC4Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
@@ -76,7 +78,8 @@ public class TransportStream implements TreeNode{
 		AIT("Application Information Table (AIT)"), 
 		RCT("Related Content Table (RCT)"), 
 		T2MI("T2-MI"),
-		TTML("TTML subtitling");
+		TTML("TTML subtitling"),
+		AC4("Dolby AC-4 Audio");
 		
 		private String description;
 		
@@ -620,6 +623,9 @@ public class TransportStream implements TreeNode{
 				case AC3:
 					generalPidHandler = new AC3Handler();
 					break;
+				case AC4:
+					generalPidHandler = new AC4Handler();
+					break;
 				case E_AC3:
 					generalPidHandler = new EAC3Handler();
 					break;
@@ -671,6 +677,8 @@ public class TransportStream implements TreeNode{
 				return ComponentType.VBI;
 			}else if(d instanceof AC3Descriptor){
 				return ComponentType.AC3;
+			}else if(d instanceof AC4Descriptor){
+				return ComponentType.AC4;
 			}else if(d instanceof RegistrationDescriptor){
 				byte[] formatIdentifier = ((RegistrationDescriptor)d).getFormatIdentifier();
 				if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.AC_3,0,RegistrationDescriptor.AC_3.length)){
