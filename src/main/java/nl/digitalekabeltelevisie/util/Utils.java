@@ -42,17 +42,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -132,9 +122,10 @@ public final class Utils {
 	public static final int MASK_31BITS=0x7FF_FFFFF;
 
 	public static final int MASK_32BITS=0xFFFF_FFFF;
-	public static final long MASK_33BITS= 0x1_FFFF_FFFFL;
-	public static final long MASK_40BITS= 0xFF_FFFF_FFFFL;
-	public static final long MASK_64BITS= 0xFFFF_FFFF_FFFF_FFFFL;
+	public static final long MASK_33BITS=0x1_FFFF_FFFFL;
+	public static final long MASK_40BITS=0xFF_FFFF_FFFFL;
+	public static final long MASK_48BITS=0xDDFF_FFFF_FFFFL;
+	public static final long MASK_64BITS=0xFFFF_FFFF_FFFF_FFFFL;
 
 	private static final Map<Integer, String>oui = new HashMap<>();
 	private static final RangeHashMap<Integer,String> bat = new RangeHashMap<>();
@@ -1336,6 +1327,31 @@ public final class Utils {
 		return copy;
 	}
 
+
+	/**
+	 * replace 'html'characters in the string with their html-entity
+	 * Output is now safe for use in HTML fragments
+	 *
+	 * @param s
+	 * @return
+	 */
+	public static String escapeSimpleHTML(final String s){
+		final StringBuilder sb = new StringBuilder();
+		if(s==null){
+			return "";
+		}
+		final int n = s.length();
+		for (int i = 0; i < n; i++) {
+			final char c = s.charAt(i);
+			switch (c) {
+			case '<': sb.append("&lt;"); break;
+			case '>': sb.append("&gt;"); break;
+			case '&': sb.append("&amp;"); break;
+			default:  sb.append(c); break;
+			}
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * replace all 'html'characters in the string with their html-entity

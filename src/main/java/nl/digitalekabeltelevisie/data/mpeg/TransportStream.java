@@ -41,6 +41,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TtmlSubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
@@ -48,6 +49,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
@@ -73,7 +75,8 @@ public class TransportStream implements TreeNode{
 		DVB_SUBTITLING("DVB subtitling"), 
 		AIT("Application Information Table (AIT)"), 
 		RCT("Related Content Table (RCT)"), 
-		T2MI("T2-MI");
+		T2MI("T2-MI"),
+		TTML("TTML subtitling");
 		
 		private String description;
 		
@@ -627,6 +630,9 @@ public class TransportStream implements TreeNode{
 				case T2MI:
 					generalPidHandler = new T2miPidHandler();
 					break;
+				case TTML:
+					generalPidHandler = new TtmlPesHandler();
+					break;
 				default:
 					logger.warning("no componenttype found for pid " + component.getElementaryPID()
 							+ ", part of service " + service_name);
@@ -678,6 +684,8 @@ public class TransportStream implements TreeNode{
 				return ComponentType.RCT;
 			}else if(d instanceof T2MIDescriptor){
 				return ComponentType.T2MI;
+			}else if(d instanceof TtmlSubtitlingDescriptor){
+				return ComponentType.TTML;
 			}
 		}
 

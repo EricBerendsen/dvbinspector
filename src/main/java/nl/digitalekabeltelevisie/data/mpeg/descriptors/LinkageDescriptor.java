@@ -151,8 +151,30 @@ public class LinkageDescriptor extends Descriptor {
 		}
 	}
 	
-	public class BrandHomeTransponder implements TreeNode{
+	//EN 303 560 V1.1.1 (2018-05) 5.3.2.2.2
+	
+	public class FontInfo implements TreeNode{
+		
+		private int essential_font_download_flag;
+		private int font_id;
+		
+		private FontInfo(int fontInfo) {
+			essential_font_download_flag = (fontInfo & 0b1000_0000) >>7;
+			font_id = fontInfo & 0b0111_1111;
+		}
+		
 
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Donwloadable Font"));
+			s.add(new DefaultMutableTreeNode(new KVP("essential_font_download_flag",essential_font_download_flag,essential_font_download_flag==1?"font is required to present these subtitles":"font is a supplementary font")));
+			s.add(new DefaultMutableTreeNode(new KVP("font_id",font_id,null)));
+			return s;
+		}
+		
+	}
+	
+	public class BrandHomeTransponder implements TreeNode{
 		
 		public BrandHomeTransponder(int operator_network_id, int operator_sublist_id, int home_transport_stream_id,
 				int home_original_network_id, int homebckp_transport_stream_id, int homebckp_original_network_id,
@@ -273,7 +295,13 @@ public class LinkageDescriptor extends Descriptor {
 	private int event_simulcast;
 	private int reserved;
 
+	// linkage type 0x20 downloadable font info 
+	// EN 303 560 V1.1.1 5.3.2.2 Linkage descriptor with linkage type 0x20
+	private int font_count;
+	private List<FontInfo> fontList = new ArrayList<>();
+	
 	private int m7_code;
+
 
 	// TODO handle linkage_type ==0x05
 	// linkage type=09 is software update, oui = http://standards.ieee.org/regauth/oui/oui.txt
@@ -350,6 +378,14 @@ public class LinkageDescriptor extends Descriptor {
 			event_simulcast= getInt(b,offset+11,1,0x40)>>6;
 			reserved = getInt(b,offset+11,1,MASK_6BITS);
 			privateDataByte = copyOfRange(b, offset+12, offset+descriptorLength+2);
+
+		}else if(linkageType==0x20){ // downloadable font info linkage
+			font_count = getInt(b,offset+9,1,MASK_8BITS);
+			for (int i = 0; i < font_count; i++) {
+				FontInfo font = new FontInfo(getInt(b,offset+10+i,1,MASK_8BITS));
+				fontList.add(font);
+			}
+			privateDataByte = copyOfRange(b, offset + 10 + font_count, offset + descriptorLength + 2);
 
 		}else if(linkageType==0x81){ // 13.2.6 NorDig linkage for bootloader
 			// TODO, this is a private usage, but not indicated by a private_data_specifier_descriptor: 0x5F
@@ -447,6 +483,12 @@ public class LinkageDescriptor extends Descriptor {
 			t.add(new DefaultMutableTreeNode(new KVP("event_simulcast",event_simulcast ,event_simulcast==1?"target and source are being simulcast":"events are offset in time")));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
 
+		}else if(linkageType==0x20){ // downloadable font info linkage
+			
+			t.add(new DefaultMutableTreeNode(new KVP("font_count",font_count ,null)));
+			addListJTree(t,fontList,modus,"(downloadable fonts");
+			t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",privateDataByte ,null)));
+			
 		}else if(linkageType==0x81){
 			addListJTree(t,bootLoaderList,modus,"Nordig BootLoader");
 
@@ -459,9 +501,9 @@ public class LinkageDescriptor extends Descriptor {
 		} else if ((linkageType == 0x8D)&& PreferencesManager.isEnableM7Fastscan()){ // ONT LOCATION DESCRIPTOR
 			t.add(new DefaultMutableTreeNode(new KVP("m7_code",m7_code ,"should contain values from 0x7701 to 0x77FF (service_id == ONT_PID)")));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
+		}else {
+			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,"unimplmented linkage type")));
 		}
-
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
 		return t;
 	}
 

@@ -164,8 +164,10 @@ public class PsiSectionData {
 					transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
 				}else if((tableId==0x76)&&isRCTSection(pid)){
 					transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
-				}else if((tableId==0xFC)&&isSpliceInfoSection(pid)){ // 0xFC
+				}else if((tableId==0xFC)&&isSpliceInfoSection(pid)){
 					transportStream.getPsi().getScte35_table().update(new SpliceInfoSection(this,parentPID));
+				}else if(isDIFTSection(pid)) { // no check for table ID, as this might change 
+					transportStream.getPsi().getDfit_table().update(new DFITSection(this, parentPID));
 				}else if((tableId>=0x37)&&(tableId<=0x3F)){
 					// also include all PES streams component (ISO/IEC 13818-6 type B) which
 					// do not have a data_broadcast_id_descriptor associated with it,
@@ -343,6 +345,38 @@ public class PsiSectionData {
 		}
 		return false;
 	}
+	
+	
+	/**
+	 *
+	 *  is this PID a candidate to contain a DFIT ( Downloadable Font Information Table)
+	 *  the tabletype is not  checked by caller  because it might change
+	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: application_signalling_descriptor: 0x6F (111)
+
+	 * @param pid
+	 * @return true if this PID contains a AIT
+	 */
+	public boolean isDIFTSection(final int pid){
+		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
+
+		for (final PMTsection[] pmt : pmtList.values()){
+			final PMTsection p=pmt[0]; // PMT always one section
+			for(final Component component : p.getComponentenList() ){
+				if(component.getElementaryPID()==pid){
+					final List<DataBroadcastIDDescriptor> databroadcatsid_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), DataBroadcastIDDescriptor.class);
+					if(databroadcatsid_descriptors.size()>0){
+						for(DataBroadcastIDDescriptor dataBroadcastIDDescriptor:databroadcatsid_descriptors) {
+							if(dataBroadcastIDDescriptor.getDataBroadcastId()== 0x0D) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 *

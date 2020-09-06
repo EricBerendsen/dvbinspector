@@ -228,7 +228,7 @@ public class TableSection implements TreeNode{
 
 		case 0x4A: return "bouquet_association_section";
 		case 0x4B: return "SSU Update Notification Table (UNT)";
-		case 0x4C: return "IP/MAC Notification Table (INT)"; // EN 301 192
+		case 0x4C: return "IP/MAC Notification Table (INT) / Downloadable Font Information Table (DFIT)"; // EN 301 192  / EN 303 560 
 
 		case 0x4E: return "event_information_section - actual_transport_stream, present/following";
 		case 0x4F: return "event_information_section - other_transport_stream, present/following";
