@@ -30,7 +30,9 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 
@@ -41,11 +43,48 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 public class AC4SyncFrame implements TreeNode {
 
 	private int sync_word;
+	private int frame_size;
+	private int frame_size2;
+	RawAC4Frame raw_ac4_frame;
 	
+	/**
+	 * @param data
+	 * @param offset
+	 */
+	public AC4SyncFrame(byte[] data, int offset) {
+		int offset1 = offset;
+		sync_word = Utils.getInt(data, offset1, 2, Utils.MASK_16BITS);
+		offset1 +=2;
+		frame_size  = Utils.getInt(data, offset1, 2, Utils.MASK_16BITS);
+		offset1 +=2;
+		if(frame_size==0xFFFF) {
+			frame_size2  = Utils.getInt(data, offset1, 3, Utils.MASK_24BITS);
+			offset1 +=3;
+		}
+		raw_ac4_frame = new RawAC4Frame(data, offset1);
+	}
+
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		// TODO Auto-generated method stub
-		return null;
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AC4SyncFrame"));
+		t.add(new DefaultMutableTreeNode(new KVP("sync_word",sync_word,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("frame_size",frame_size,null)));
+		if(frame_size==0xFFFF) {
+			t.add(new DefaultMutableTreeNode(new KVP("frame_size2",frame_size2,null)));
+		}
+		t.add(raw_ac4_frame.getJTreeNode(modus));
+		
+		return t;
+	}
+
+	/**
+	 * @return
+	 */
+	public int getSize() {
+		if(frame_size==0xFFFF) {
+			return frame_size2;
+		}
+		return frame_size;
 	}
 
 }

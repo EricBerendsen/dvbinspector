@@ -216,6 +216,16 @@ public class BitSource implements HTMLSource{
 		return result;
 	}
 
+
+	public byte[] readUnalignedBytes(final int noBytes) {
+		byte[] result = new byte[noBytes];
+		for (int i = 0; i < noBytes; i++) {
+			result[i] = (byte) readBits(8);
+		}
+		
+		return result;
+	}
+
 	public void advanceBytes(int number) {
 		skiptoByteBoundary();
 		byteOffset += number;
@@ -423,5 +433,24 @@ public class BitSource implements HTMLSource{
 
 		return b.toString();
 	}
-
+	
+	
+	// based on ETSI TS 103 190-1 V1.3.1 (2018-02)
+	// 4.2.2 variable_bits - Variable bits
+	// used for AC-4 PES
+	
+	public int variable_bits(int n_bits)
+	{
+		int b_read_more;
+		int value = 0;
+		do {
+			value += readBits(n_bits) ; 
+			b_read_more = readBits(1) ; 
+			if (b_read_more==1) { 
+				value <<= n_bits;
+				value += (1<<n_bits);
+			}
+		} while(b_read_more==1);
+		return value;
+		}
 }

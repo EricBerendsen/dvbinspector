@@ -51,6 +51,14 @@ public class AC4PesDataField extends PesPacketData {
 	
 	protected AC4PesDataField(PesPacketData pesPacket) {
 		super(pesPacket);
+		int offset = pesDataStart;
+		//while(offset < pesDataLen) { // TODO support multiple syncFrames, need to understand getSize() first
+			AC4SyncFrame syncFrame = new AC4SyncFrame(data, offset);
+			
+			offset+= syncFrame.getSize();
+			
+			ac4SyncFrames.add(syncFrame);
+		//}
 		// TODO Auto-generated constructor stub
 	}
 	

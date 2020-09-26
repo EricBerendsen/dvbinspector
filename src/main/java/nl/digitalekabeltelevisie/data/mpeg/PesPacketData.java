@@ -261,6 +261,7 @@ public class PesPacketData  implements TreeNode{
 				t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("data",data,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("payload",data,pesDataStart,pesDataLen,null)));
 		}
 
 		return t;
