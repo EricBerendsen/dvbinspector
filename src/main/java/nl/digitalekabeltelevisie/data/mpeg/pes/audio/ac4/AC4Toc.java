@@ -87,6 +87,9 @@ public class AC4Toc implements TreeNode {
 	private List<AC4SubstreamGroupInfo> ac4_substream_group_info_list = new ArrayList<>();
 
 
+	private SubstreamIndexTable substream_index_table;
+
+
 	/**
 	 * @param bs
 	 */
@@ -162,6 +165,8 @@ public class AC4Toc implements TreeNode {
 				ac4_substream_group_info_list.add(ac4_substream_group_info);
 			}
 		}
+		
+		substream_index_table = new SubstreamIndexTable(bs);
 
 	}
 
@@ -232,6 +237,8 @@ public class AC4Toc implements TreeNode {
 			addListJTree(t, ac4_presentation_v1_infoList, modus, "ac4_presentation_v1_info(s)");
 			addListJTree(t, ac4_substream_group_info_list, modus, "ac4_substream_group_info(s)");
 			
+			
+			t.add(substream_index_table.getJTreeNode(modus));
 			
 //			for (int i = 0; i < n_presentations; i++) {
 //			 AC4PresentationV1Info ac4_presentation_v1_info = new AC4PresentationV1Info(bs);
