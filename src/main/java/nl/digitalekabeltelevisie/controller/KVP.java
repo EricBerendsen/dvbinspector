@@ -132,6 +132,7 @@ public class KVP{
 	 * if htmlSource is set, means there is a html fragment to display with this KVP. In DVB Inspector is will be shown in the right panel. (example, hex dump of byte[]. or EPG)
 	 */
 	private HTMLSource 	htmlSource;
+	private XMLSource 	xmlSource;
 
 	private TableSource tableSource;
 
@@ -500,6 +501,14 @@ public class KVP{
 
 	public void setTableSource(TableSource tableSource) {
 		this.tableSource = tableSource;
+	}
+
+	public XMLSource getXmlSource() {
+		return xmlSource;
+	}
+
+	public void setXmlSource(XMLSource xmlSource) {
+		this.xmlSource = xmlSource;
 	}
 
 }
