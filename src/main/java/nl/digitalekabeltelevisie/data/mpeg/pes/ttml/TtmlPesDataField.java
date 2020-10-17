@@ -167,7 +167,7 @@ public class TtmlPesDataField extends PesPacketData {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Ttml Subtitling PES Packet"));
-		s.add(new DefaultMutableTreeNode(new KVP("segment_mediatime",segment_mediatime,"(* 100 microseconds")));
+		s.add(new DefaultMutableTreeNode(new KVP("segment_mediatime",segment_mediatime,"(* 100 microseconds)")));
 		s.add(new DefaultMutableTreeNode(new KVP("num_of_segments",num_of_segments,null)));
 		addListJTree(s,segmentList,modus,"Segments");
 		s.add(new DefaultMutableTreeNode(new KVP("crc_32",crc_32,crc32Failed?"error in CRC Check":null)));
