@@ -33,8 +33,29 @@ Changelog
 
 List of the most important changes between releases
 
+Release 1.14.0
+Release date: 11/10/2020
+
+fixed: scaling for HiDPI displays
+improved: labeling PIDs shared between services
+fixed: (null) in SDT when service has no service_descriptor
+added: NVOD_reference_descriptor
+added: time_shifted_event_descriptor
+added: more detail for EIT Events
+added: TableView for TOT(sections)
+improved: EIT event HTMLView to group by language
+fixed: labeling PIDs whem multiple versions PMTSection present
+added: some UserDataTypes from ATSC
+added: several (private) stream_type and table_type descriptions
+fixed: reload stream shows progress indicator and can be interrupted
+added: support for TTML, including TtmlSubtitlingDescriptor, Downloadable Font Information Table and XMLView
+fixed: url_extension_byte off by one in TransportProtocolDescriptor (Thanks to Tomi Sarparanta)
+added: .trp to supported file extensions
+
+
 Release 1.13.0
 Release date: 31/05/2020
+
 added: Tableview for several PSI tables
 updated: lookup files for DVB identifiers, like original_network_id, ca_system_id, etc.
 updated: oui list
