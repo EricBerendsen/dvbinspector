@@ -72,6 +72,7 @@ public class AuxiliaryData implements TreeNode{
 	private byte[] user_data_type_structure;
 	private BarData barData;
 	private CCData ccData;
+	private ST2094_10_Data st2094_10_data;
 
 
 
@@ -100,6 +101,8 @@ public class AuxiliaryData implements TreeNode{
 				barData = new BarData(user_data_type_structure, 0, len-5);
 			}else if(user_data_type_code==0x03){
 				ccData = new CCData(user_data_type_structure, 0, len-5);
+			}else if(user_data_type_code==0x09){
+				st2094_10_data = new ST2094_10_Data(user_data_type_structure, 0, len-5);
 			}else {
 				logger.warning("Unsupported user_data_type_code:"+ user_data_type_code + " (" +  getUserDataTypeString(user_data_type_code) +")");
 			}
@@ -129,6 +132,8 @@ public class AuxiliaryData implements TreeNode{
 				t.add(barData.getJTreeNode(modus));
 			}else if(user_data_type_code==0x03){
 				t.add(ccData.getJTreeNode(modus));
+			}else if(user_data_type_code==0x09){
+				t.add(st2094_10_data.getJTreeNode(modus));
 			}
 		}
 		return t;
