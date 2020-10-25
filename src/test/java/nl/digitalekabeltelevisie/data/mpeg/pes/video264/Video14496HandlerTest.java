@@ -38,6 +38,8 @@ import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.Sei_message;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.UserDataRegisteredItuT35Sei_message;
 
 /**
  * @author Eric
