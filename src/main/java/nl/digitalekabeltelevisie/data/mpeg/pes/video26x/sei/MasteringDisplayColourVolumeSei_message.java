@@ -37,6 +37,9 @@ import nl.digitalekabeltelevisie.util.BitSource;
  * based on Rec. ITU-T H.265 v7 (11/2019) D.2.28 Mastering display colour volume SEI message syntax 
  * and D.3.28 Mastering display colour volume SEI message semantics
  * 
+ * TODO implement  TS 103 433-1 V1.2.1 (2017-08) A.3.2 HDR picture characteristics 
+ * to detect Recommendation ITU-R BT.709-6 or ITU-R BT.2020-2  or SMPTE RP 431-2 (DCI P3) 
+ * 
  * @author Eric
  *
  */
@@ -73,7 +76,7 @@ public class MasteringDisplayColourVolumeSei_message extends Sei_message {
 		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
 		for(int c = 0; c < 3; c++ ) {
 			s.add(new DefaultMutableTreeNode(new KVP("display_primaries_x["+c+"]",display_primaries_x[c],getCdm2x(display_primaries_x[c]))));
-			s.add(new DefaultMutableTreeNode(new KVP("display_primaries_y["+c+"]",display_primaries_x[c],getCdm2y(display_primaries_y[c]))));
+			s.add(new DefaultMutableTreeNode(new KVP("display_primaries_y["+c+"]",display_primaries_y[c],getCdm2y(display_primaries_y[c]))));
 		}
 		s.add(new DefaultMutableTreeNode(new KVP("white_point_x",white_point_x,getCdm2x(white_point_x))));
 		s.add(new DefaultMutableTreeNode(new KVP("white_point_y",white_point_y,getCdm2y(white_point_y))));
