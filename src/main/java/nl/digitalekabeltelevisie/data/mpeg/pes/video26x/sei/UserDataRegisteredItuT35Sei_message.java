@@ -33,6 +33,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.SlHdrInfo;
 import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -46,27 +47,31 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 	int itu_t_t35_country_code_extension_byte;
 	int Itu_t_t35_provider_code = 0;
 	AuxiliaryData auxData = null;
+	SlHdrInfo sl_hdr_info = null;
 
 	/**
 	 * @param bitSource
 	 */
 	public UserDataRegisteredItuT35Sei_message(final BitSource bitSource) {
 		super(bitSource);
-		int i=0;
+		int offset=0;
 
 		itu_t_t35_country_code = getInt(payload, 0,1,Utils.MASK_8BITS);
 		if(itu_t_t35_country_code != 0xFF){
-			i = 1;
+			offset = 1;
 		}else{
 			itu_t_t35_country_code_extension_byte = getInt(payload, 1,1,Utils.MASK_8BITS);
-			i = 2;
+			offset = 2;
 		}
-		Itu_t_t35_provider_code = getInt(payload, i,2,Utils.MASK_16BITS);
-		i += 2;
+		Itu_t_t35_provider_code = getInt(payload, offset,2,Utils.MASK_16BITS);
+		offset += 2;
 		if((itu_t_t35_country_code==0xB5)
 				&& (Itu_t_t35_provider_code==0x31)){
-			auxData = new AuxiliaryData(payload, i, payloadSize-i);
+			auxData = new AuxiliaryData(payload, offset, payloadSize-offset);
 
+		}else if((itu_t_t35_country_code==0xB5)
+				&& (Itu_t_t35_provider_code==0x3a)){
+			sl_hdr_info = new SlHdrInfo(payload, offset, payloadSize-offset);
 		}
 
 	}
@@ -88,6 +93,7 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 		if((itu_t_t35_country_code==0xB5)
 				&& (Itu_t_t35_provider_code==0x3a)){
 			s.add(new DefaultMutableTreeNode(new KVP("SL-HDR data (Annex A of TS 103 433-1)")));
+			s.add(sl_hdr_info.getJTreeNode(modus));
 			System.out.println("TODO SL-HDR data found");
 		}
 		return s;
