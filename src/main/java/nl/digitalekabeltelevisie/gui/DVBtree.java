@@ -31,10 +31,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -495,7 +492,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						img = kvp.getImageSource().getImage();
 					} catch (Exception e1) {
 						logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
-						img = getErrorImage();
+						img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
 					}
 					setCursor(Cursor.getDefaultCursor());
 					if(img != null){
@@ -534,52 +531,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		}
 		cardLayout.show(detailPanel, EMPTY_PANEL);
 
-	}
-
-	private BufferedImage getErrorImage() {
-		final int width = 800;
-		final int height = 450;
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		final Graphics2D gd = img.createGraphics();
-
-		gd.setColor(Color.GRAY);
-		gd.fillRect(0, 0, width, height);
-
-		Color[] testBarColors = {
-				Color.WHITE, 
-				Color.YELLOW, 
-				Color.CYAN, 
-				Color.GREEN, 
-				Color.MAGENTA, 
-				Color.RED, 
-				Color.BLUE,
-				Color.BLACK 
-				};
-		
-		int barsHeight = 40;
-
-		for (int i = 0; i < testBarColors.length; i++) {
-			gd.setColor(testBarColors[i]);
-			gd.fillRect(i * width / 8, 0, width / 8, barsHeight);
-			gd.fillRect(i * width / 8, height -barsHeight, width / 8, barsHeight);
-		}		
-
-		gd.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-		final Font font = new Font("Arial", Font.BOLD, 20);
-		gd.setFont(font);
-		
-		String str = "Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg();
-
-		gd.setColor(Color.WHITE);
-		
-		int x = 20;
-		int y = 100;
-		for (String line : str.split("\n")) {
-	        gd.drawString(line, x, y += gd.getFontMetrics().getHeight());
-		}
-
-		return img;
 	}
 
 	/* (non-Javadoc)

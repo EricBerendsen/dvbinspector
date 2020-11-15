@@ -56,6 +56,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.*;
 
 /**
@@ -169,6 +170,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		int height = (serviceOrder.size()*LINE_HEIGHT)+1 + LEGEND_HEIGHT;
 		int legendWidth = (int)((endDate.getTime() - startDate.getTime())/milliSecsPerPixel);
 		int width = 1+SERVICE_NAME_WIDTH + legendWidth;
+		
+		long size = (long)width * height;
+		if (size > Integer.MAX_VALUE) {
+			return GuiUtils.getErrorImage("The combination of number of services and time interval\n"+
+										"is too large to display.");
+		}
+		
+		
 		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		final Graphics2D gd = img.createGraphics();
 		gd.setColor(Color.BLUE);
