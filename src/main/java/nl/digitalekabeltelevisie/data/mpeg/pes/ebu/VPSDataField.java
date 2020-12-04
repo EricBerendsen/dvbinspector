@@ -93,7 +93,7 @@ public class VPSDataField extends EBUDataField {
 	 * @return
 	 */
 	public int getCountry() {
-		return getInt(data_block, offset+13, 2, 0x03E0)>>6;
+		return getInt(data_block, offset+13, 2, 0x03C0)>>6;
 	}
 	/**
 	 * @return
@@ -117,7 +117,7 @@ public class VPSDataField extends EBUDataField {
 	 * @return
 	 */
 	public int getDay() {
-		return getInt(data_block, offset+11, 1, 0x36)>>1;
+		return getInt(data_block, offset+11, 1, 0x3E)>>1;
 	}
 
 	public int getNotRelevant3_4() {
