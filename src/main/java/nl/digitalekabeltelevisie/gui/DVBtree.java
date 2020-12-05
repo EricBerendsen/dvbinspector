@@ -55,6 +55,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -521,8 +522,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				} else {
 					TableSource tableSource = kvp.getTableSource();
 					if(tableSource!=null) {
-						tablePanel.setModel(tableSource.getTableModel());
-						cardLayout.show(detailPanel, TABLE_PANEL);
+						TableModel tableModel = tableSource.getTableModel();
+						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+							tablePanel.setModel(tableModel);
+							cardLayout.show(detailPanel, TABLE_PANEL);
+						}
 						return;
 					}
 				}
