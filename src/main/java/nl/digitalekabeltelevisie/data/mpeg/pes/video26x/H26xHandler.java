@@ -23,13 +23,16 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.*;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.Sei_message;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.UserDataRegisteredItuT35Sei_message;
 
 /**
  * @author Eric

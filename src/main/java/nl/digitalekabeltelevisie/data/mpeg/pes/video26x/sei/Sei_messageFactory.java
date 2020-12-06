@@ -25,10 +25,11 @@
  *
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
+package nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -37,6 +38,8 @@ import nl.digitalekabeltelevisie.util.BitSource;
  *
  */
 public class Sei_messageFactory {
+
+	private static final Logger	logger	= Logger.getLogger(Sei_messageFactory.class.getName());
 
 	private static List<Sei_message> sei_messages;
 
@@ -48,14 +51,36 @@ public class Sei_messageFactory {
 			// in case there is an error in our code (constructor of a Sei_message), OR the stream is invalid.
 			// fall back to a standard Sei_message (this is highly unlikely to fail), so processing can continue
 			// requires a unread in BitSource
-
-			if(bitSource.nextBits(8)== 0x4){
-				UserDataRegisteredItuT35Sei_message sei_message = new UserDataRegisteredItuT35Sei_message(bitSource);
-				sei_messages.add(sei_message);
-			}else{
-				Sei_message sei_message = new Sei_message(bitSource);
-				sei_messages.add(sei_message);
+			Sei_message sei_message;
+			int nextPayloadType = bitSource.nextBits(8);
+			try {
+			switch (nextPayloadType) {
+				case 0x4:
+					sei_message = new UserDataRegisteredItuT35Sei_message(bitSource);
+					break;
+				case 0x89:
+					sei_message = new MasteringDisplayColourVolumeSei_message(bitSource);
+					break;
+				case 0x90:
+					sei_message = new ContentLightLevelInformationSei_message(bitSource);
+					break;
+				default:
+					sei_message = new Sei_message(bitSource);
+					break;
+				}
+			sei_messages.add(sei_message);
+			
+			} catch (final RuntimeException iae) {
+				// this can happen because there is an error in our code (constructor of a sei_message), OR the stream is invalid.
+				// No point in using default constructo, bitSource has already been read. 
+				// TODO add mark/reset to BitSource.
+				
+				logger.warning("Fall back for sei_message:" + nextPayloadType + " ("
+						+ Sei_message.getPayloadTypeString(nextPayloadType)
+						+ "), RuntimeException:"+iae);
 			}
+
+
 		}
 
 		return sei_messages;

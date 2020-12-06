@@ -29,12 +29,14 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.Sei_message;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.Sei_messageFactory;
 
 /**
  * @author Eric
@@ -42,7 +44,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
  */
 public class Sei_rbsp extends RBSP {
 
-	private List<Sei_message> sei_messages= new ArrayList<Sei_message>();
+	private List<Sei_message> sei_messages = new ArrayList<>();
 
 	public Sei_rbsp(final byte[] rbsp_bytes, final int numBytesInRBSP) {
 		super(rbsp_bytes, numBytesInRBSP);

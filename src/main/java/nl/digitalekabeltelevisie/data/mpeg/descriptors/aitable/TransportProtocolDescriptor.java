@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
@@ -57,6 +58,8 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 	private int component_tag;
 
 
+	// TS 102 809 V1.3.1 (2017-06) 5.3.6.2 Syntax of selector bytes for interaction channel transport
+	
 	// HTTP over back channel only
 	private int url_base_length;
 	private byte[] url_base_byte;
@@ -102,8 +105,9 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 			int t=offset + 7 + url_base_length;
 			for (int i = 0; i < url_extension_count; i++) {
 				final int url_extension_length = getInt(b, t, 1, MASK_8BITS);
+				t++;
 				url_extension_byte.add(copyOfRange(b, t,t + url_extension_length));
-				t += url_extension_length+1;
+				t += url_extension_length;
 			}
 		}
 
@@ -153,7 +157,7 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 			return "MHP Object Carousel";
 		case 0x02:
 			return "IP via DVB multiprotocol encapsulation as defined in ETSI EN 301 192 [5], ETSI TR 101 202";
-		case 0x03:
+		case 0x03:  // ETSI TS 102 809 V1.3.1 (2017-06) Table 29: Protocol_id
 			return "HTTP over back channel (i.e. broadband connection).";
 		case 0x0100:
 			return "OpenTV";

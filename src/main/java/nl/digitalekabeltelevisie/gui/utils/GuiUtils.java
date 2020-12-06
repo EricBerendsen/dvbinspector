@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,8 +27,12 @@
 
 package nl.digitalekabeltelevisie.gui.utils;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 
@@ -108,6 +112,52 @@ public final class GuiUtils {
 			version="development version (unreleased)";
 		}
 		return version;
+	}
+
+	public static BufferedImage getErrorImage(String str) {
+		final int width = 800;
+		final int height = 450;
+		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		final Graphics2D gd = img.createGraphics();
+	
+		gd.setColor(Color.GRAY);
+		gd.fillRect(0, 0, width, height);
+	
+		Color[] testBarColors = {
+				Color.WHITE, 
+				Color.YELLOW, 
+				Color.CYAN, 
+				Color.GREEN, 
+				Color.MAGENTA, 
+				Color.RED, 
+				Color.BLUE,
+				Color.BLACK 
+				};
+		
+		int barsHeight = 40;
+	
+		for (int i = 0; i < testBarColors.length; i++) {
+			gd.setColor(testBarColors[i]);
+			gd.fillRect(i * width / 8, 0, width / 8, barsHeight);
+			gd.fillRect(i * width / 8, height -barsHeight, width / 8, barsHeight);
+		}		
+	
+		gd.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	
+		final Font font = new Font("Arial", Font.BOLD, 20);
+		gd.setFont(font);
+		
+		
+	
+		gd.setColor(Color.WHITE);
+		
+		int x = 20;
+		int y = 100;
+		for (String line : str.split("\n")) {
+	        gd.drawString(line, x, y += gd.getFontMetrics().getHeight());
+		}
+	
+		return img;
 	}
 
 }

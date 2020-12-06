@@ -31,10 +31,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -58,6 +55,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -65,7 +63,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -75,6 +72,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+import nl.digitalekabeltelevisie.gui.xmleditorkit.XMLEditorKit;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
@@ -188,6 +186,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	private static final String TABLE_PANEL = "table";
 
+	/**
+	 * key for cardlayout
+	 */
+	private static final String XML_PANEL = "xml";
+	
 	private static final long serialVersionUID = 9200238343077897328L;
 	private static final Logger logger = Logger.getLogger(DVBtree.class.getName());
 
@@ -199,6 +202,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	final JTree tree;
 	private final JPanel detailPanel;
 	private final JEditorPane editorPane;
+	private final JEditorPane xmlPane;
 	private final JSplitPane splitPane;
 	private final JPopupMenu popup;
 	private final JMenuItem expandMenuItem;
@@ -309,12 +313,21 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 		editorPane.setTransferHandler(new EditorTextHTMLTransferHandler());
 
+
+		xmlPane = new JEditorPane();
+		xmlPane.setEditorKit(new XMLEditorKit());
+		xmlPane.setText(null);
+		xmlPane.setEditable(false);
+		xmlPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+
+		
 		detailPanel = new JPanel(new CardLayout());
 		JPanel empty = new JPanel();
 		detailPanel.add(empty,EMPTY_PANEL);
 		detailPanel.add(imagePanel,IMAGE_PANEL);
 		detailPanel.add(editorPane,HTML_PANEL);
 		detailPanel.add(tablePanel,TABLE_PANEL);
+		detailPanel.add(xmlPane,XML_PANEL);
 
 
 		final JScrollPane detailView = new JScrollPane(detailPanel);
@@ -457,6 +470,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
 		imagePanel.setImage(null);
 		editorPane.setText(null);
+		xmlPane.setText(null);
+		
 		CardLayout cardLayout = (CardLayout)(detailPanel.getLayout());
 
 		if (node1 == null){
@@ -478,7 +493,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						img = kvp.getImageSource().getImage();
 					} catch (Exception e1) {
 						logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
-						img = getErrorImage();
+						img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
 					}
 					setCursor(Cursor.getDefaultCursor());
 					if(img != null){
@@ -487,18 +502,31 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						return;
 					}
 				} else if(kvp.getHTMLSource()!=null){
-						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
-						editorPane.setText(html.toString());
-						editorPane.setCaretPosition(0);
-						setCursor(Cursor.getDefaultCursor());
-						cardLayout.show(detailPanel, HTML_PANEL);
-						return;
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
+					editorPane.setText(html.toString());
+					editorPane.setCaretPosition(0);
+					setCursor(Cursor.getDefaultCursor());
+					cardLayout.show(detailPanel, HTML_PANEL);
+					return;
+				} else if(kvp.getXmlSource()!=null){
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					// hack to reset
+					xmlPane.setDocument(xmlPane.getEditorKit().createDefaultDocument());
+					final String xml = kvp.getXmlSource().getXML();
+					xmlPane.setText(xml);
+					xmlPane.setCaretPosition(0);
+					setCursor(Cursor.getDefaultCursor());
+					cardLayout.show(detailPanel, XML_PANEL);
+					return;
 				} else {
 					TableSource tableSource = kvp.getTableSource();
 					if(tableSource!=null) {
-						tablePanel.setModel(tableSource.getTableModel());
-						cardLayout.show(detailPanel, TABLE_PANEL);
+						TableModel tableModel = tableSource.getTableModel();
+						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+							tablePanel.setModel(tableModel);
+							cardLayout.show(detailPanel, TABLE_PANEL);
+						}
 						return;
 					}
 				}
@@ -507,52 +535,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		}
 		cardLayout.show(detailPanel, EMPTY_PANEL);
 
-	}
-
-	private BufferedImage getErrorImage() {
-		final int width = 800;
-		final int height = 450;
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		final Graphics2D gd = img.createGraphics();
-
-		gd.setColor(Color.GRAY);
-		gd.fillRect(0, 0, width, height);
-
-		Color[] testBarColors = {
-				Color.WHITE, 
-				Color.YELLOW, 
-				Color.CYAN, 
-				Color.GREEN, 
-				Color.MAGENTA, 
-				Color.RED, 
-				Color.BLUE,
-				Color.BLACK 
-				};
-		
-		int barsHeight = 40;
-
-		for (int i = 0; i < testBarColors.length; i++) {
-			gd.setColor(testBarColors[i]);
-			gd.fillRect(i * width / 8, 0, width / 8, barsHeight);
-			gd.fillRect(i * width / 8, height -barsHeight, width / 8, barsHeight);
-		}		
-
-		gd.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-		final Font font = new Font("Arial", Font.BOLD, 20);
-		gd.setFont(font);
-		
-		String str = "Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg();
-
-		gd.setColor(Color.WHITE);
-		
-		int x = 20;
-		int y = 100;
-		for (String line : str.split("\n")) {
-	        gd.drawString(line, x, y += gd.getFontMetrics().getHeight());
-		}
-
-		return img;
 	}
 
 	/* (non-Javadoc)
