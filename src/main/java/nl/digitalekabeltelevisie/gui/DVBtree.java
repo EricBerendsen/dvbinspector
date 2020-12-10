@@ -522,10 +522,17 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				} else {
 					TableSource tableSource = kvp.getTableSource();
 					if(tableSource!=null) {
-						TableModel tableModel = tableSource.getTableModel();
-						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
-							tablePanel.setModel(tableModel);
-							cardLayout.show(detailPanel, TABLE_PANEL);
+						try {
+							TableModel tableModel = tableSource.getTableModel();
+							if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+								tablePanel.setModel(tableModel);
+								cardLayout.show(detailPanel, TABLE_PANEL);
+							}else{
+								cardLayout.show(detailPanel, EMPTY_PANEL);
+							}
+						}catch (RuntimeException e2) {
+							cardLayout.show(detailPanel, EMPTY_PANEL);
+							logger.log(Level.WARNING, "could not create table:", e2);
 						}
 						return;
 					}
