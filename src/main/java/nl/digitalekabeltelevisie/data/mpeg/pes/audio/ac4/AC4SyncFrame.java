@@ -46,6 +46,7 @@ public class AC4SyncFrame implements TreeNode {
 	private int frame_size;
 	private int frame_size2;
 	RawAC4Frame raw_ac4_frame;
+	private int crc_word;
 	
 	/**
 	 * @param data
@@ -62,29 +63,83 @@ public class AC4SyncFrame implements TreeNode {
 			offset1 +=3;
 		}
 		raw_ac4_frame = new RawAC4Frame(data, offset1);
+		offset1 += getAC4FrameSize();
+		if (sync_word == 0xAC41) {
+			crc_word = Utils.getInt(data, offset1, 2, Utils.MASK_16BITS);
+		}
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AC4SyncFrame"));
-		t.add(new DefaultMutableTreeNode(new KVP("sync_word",sync_word,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("sync_word",sync_word,getSyncWordString(sync_word))));
 		t.add(new DefaultMutableTreeNode(new KVP("frame_size",frame_size,null)));
 		if(frame_size==0xFFFF) {
 			t.add(new DefaultMutableTreeNode(new KVP("frame_size2",frame_size2,null)));
 		}
 		t.add(raw_ac4_frame.getJTreeNode(modus));
+		if (sync_word == 0xAC41) {
+			t.add(new DefaultMutableTreeNode(new KVP("crc_word",crc_word,null)));
+		}
 		
 		return t;
 	}
 
 	/**
+	 * @param sync_word
 	 * @return
 	 */
-	public int getSize() {
+	private static String getSyncWordString(int sync_word) {
+		if(sync_word == 0xAC41){
+			return "CRC word is present";
+		}
+		if(sync_word == 0xAC40 ){
+			return "CRC word is not present";
+		}
+		return "SyncWord not legal (should be 0xAC41 or 0xAC40)";
+	}
+
+	/**
+	 * @return
+	 */
+	public int getAC4FrameSize() {
 		if(frame_size==0xFFFF) {
 			return frame_size2;
 		}
 		return frame_size;
+	}
+	
+	public int getSyncFrameSize() {
+		int s = getAC4FrameSize() 
+				+ 2 // syncWord
+				+ 2; // frame_size
+		if(frame_size==0xFFFF) {
+			s += 3; //  frame_size2
+		}
+		if (sync_word == 0xAC41) {
+			s += 2; // crc_word
+		}
+		return s;
+	}
+
+	public int getSync_word() {
+		return sync_word;
+	}
+
+	public int getFrame_size() {
+		return frame_size;
+	}
+
+	public int getFrame_size2() {
+		return frame_size2;
+	}
+
+	public RawAC4Frame getRaw_ac4_frame() {
+		return raw_ac4_frame;
+	}
+
+	public int getCrc_word() {
+		return crc_word;
 	}
 
 }

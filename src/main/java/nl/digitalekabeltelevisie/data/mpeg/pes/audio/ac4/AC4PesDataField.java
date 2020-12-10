@@ -38,7 +38,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
 
-// based on TS 103 190(-1,2,3) and TS 101 154 V2.6.1 vh 6.6 AC-4 channel-based audio
+// based on TS 103 190(-1,2) and TS 101 154 V2.6.1 vh 6.6 AC-4 channel-based audio
 
 // The number of AC-4 frames per PES packet may
 // vary between PES packets, but each PES packet shall contain an integer number of AC-4 frames only. AC-4 frames
@@ -52,14 +52,12 @@ public class AC4PesDataField extends PesPacketData {
 	protected AC4PesDataField(PesPacketData pesPacket) {
 		super(pesPacket);
 		int offset = pesDataStart;
-		//while(offset < pesDataLen) { // TODO support multiple syncFrames, need to understand getSize() first
+		while(offset < (pesDataLen+pesDataStart)) {
 			AC4SyncFrame syncFrame = new AC4SyncFrame(data, offset);
-			
-			offset+= syncFrame.getSize();
-			
+			offset += syncFrame.getSyncFrameSize();
 			ac4SyncFrames.add(syncFrame);
-		//}
-		// TODO Auto-generated constructor stub
+		}
+
 	}
 	
 	
