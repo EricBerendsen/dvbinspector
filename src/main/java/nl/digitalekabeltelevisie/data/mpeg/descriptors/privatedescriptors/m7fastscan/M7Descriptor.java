@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -40,6 +40,7 @@ public class M7Descriptor extends Descriptor {
 			add(0x86, "M7 operator_preferences_descriptor").
 			add(0x87, "M7 operator_DiSEqC_descriptor").
 			add(0x88, "M7 operator_options_descriptor").
+			add(0x89, "M7 Nagra_brandID_descriptor").
 			build();
 			
 	public M7Descriptor(byte[] b, int offset, TableSection parent) {

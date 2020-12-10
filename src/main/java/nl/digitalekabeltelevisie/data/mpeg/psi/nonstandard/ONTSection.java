@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDes
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
@@ -56,6 +57,8 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class ONTSection extends TableSectionExtendedSyntax {
 	
+	private static final Logger	logger	= Logger.getLogger(ONTSection.class.getName());
+
 	public class OperatorBrand implements TreeNode{
 
 		
@@ -123,10 +126,12 @@ public class ONTSection extends TableSectionExtendedSyntax {
 		
 	}
 
+	@SuppressWarnings("unused")
 	private int reserved;
 	private int bouquet_descriptors_loop_length;
 	
 	private List<Descriptor> bouquetDescriptorList;
+	@SuppressWarnings("unused")
 	private int reserved2;
 	private int operator_brands_loop_length;
 	
@@ -146,17 +151,20 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	private List<OperatorBrand> buildOperatorBrandList(byte[] data, int i, int operator_brands_loop_length2) {
 		final ArrayList<OperatorBrand> r = new ArrayList<>();
 		int t =0;
-		while(t<operator_brands_loop_length2){
-			final OperatorBrand c = new OperatorBrand();
-			c.setOperator_network_id(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-			c.setOperator_sublist_id(Utils.getInt(data, i+t+2, 1, Utils.MASK_8BITS));
-			c.setReserved_future_use(Utils.getInt(data, i+t+3, 1, 0xF0)>>>4);
-			final int operator_descriptors_length = Utils.getInt(data, i+t+3, 2, Utils.MASK_12BITS);
-			c.setOperator_descriptors_length(operator_descriptors_length);
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,operator_descriptors_length,this));
-			t+=5+operator_descriptors_length;
-			r.add(c);
-
+		try {
+			while(t<operator_brands_loop_length2){
+				final OperatorBrand c = new OperatorBrand();
+				r.add(c);
+				c.setOperator_network_id(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
+				c.setOperator_sublist_id(Utils.getInt(data, i+t+2, 1, Utils.MASK_8BITS));
+				c.setReserved_future_use(Utils.getInt(data, i+t+3, 1, 0xF0)>>>4);
+				final int operator_descriptors_length = Utils.getInt(data, i+t+3, 2, Utils.MASK_12BITS);
+				c.setOperator_descriptors_length(operator_descriptors_length);
+				c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,operator_descriptors_length,this));
+				t+=5+operator_descriptors_length;
+			}
+		} catch (final RuntimeException re) {
+			logger.info("RuntimeException in buildOperatorBrandList;"+re);
 		}
 
 		return r;

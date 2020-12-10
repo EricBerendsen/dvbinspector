@@ -180,7 +180,8 @@ public final class DescriptorFactory {
 	 * @return
 	 */
 	static Descriptor getM7Descriptor(final byte[] data, final int offset, final TableSection tableSection) {
-		switch (toUnsignedInt(data[offset])) {
+		int descriptorTag = toUnsignedInt(data[offset]);
+		switch (descriptorTag) {
 		case 0x83:
 			return new M7LogicalChannelDescriptor(data, offset, tableSection);
 		case 0x84:
@@ -193,10 +194,12 @@ public final class DescriptorFactory {
 			return new M7OperatorDiSEqCTDescriptor(data, offset, tableSection);
 		case 0x88:
 			return new M7OperatorOptionsDescriptor(data, offset, tableSection);
+		case 0x89:
+			return new M7NagraBrandIdDescriptor(data, offset, tableSection);
 		default:
 			Descriptor d = new M7Descriptor(data, offset, tableSection);
-			logger.info("Not implemented M7Descriptor:" + toUnsignedInt(data[offset]) + " ("
-					+ M7Descriptor.getDescriptorname(toUnsignedInt(data[offset])) + ")in section "
+			logger.info("Not implemented M7Descriptor:" + descriptorTag + " ("
+					+ M7Descriptor.getDescriptorname(descriptorTag) + ")in section "
 					+ TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data="
 					+ d.getRawDataString());
 			return d;
