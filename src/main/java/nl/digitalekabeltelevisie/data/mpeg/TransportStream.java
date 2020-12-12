@@ -447,7 +447,7 @@ public class TransportStream implements TreeNode{
 
 		TableHeader<TransportStream,PID> tableHeader =  new TableHeaderBuilder<TransportStream,PID>().
 				addOptionalRowColumn("pid", p ->p.getPid(), Integer.class).
-				addOptionalRowColumn("label", p->p.getLabelMaker(), String.class).
+				addOptionalRowColumn("label", p->p.getLabelMaker().toString(), String.class).
 				addOptionalRowColumn("pid type", p->p.getTypeString(), String.class).
 				addOptionalRowColumn("packets", p->p.getPackets(), Integer.class).
 				addOptionalRowColumn("duplicate packets", p->p.getDup_packets(), Integer.class).
