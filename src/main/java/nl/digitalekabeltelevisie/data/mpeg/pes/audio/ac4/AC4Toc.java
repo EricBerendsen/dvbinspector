@@ -31,19 +31,24 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
 /**
+ * Based 0n ETSI TS 103 190-2 V1.1.1 (2015-09) 6.2.1.1 ac4_toc
  * @author Eric
  *
  */
 public class AC4Toc implements TreeNode {
+	
+	private static final Logger	logger	= Logger.getLogger(AC4Toc.class.getName());
 	
 	LookUpList frame_rate_index_list = new LookUpList.Builder().
 			add(0,"23,976 fps").
@@ -82,6 +87,7 @@ public class AC4Toc implements TreeNode {
 	private int b_program_id;
 	private int short_program_id;
 	private int b_program_uuid_present;
+	private byte[] program_uuid = new byte[0];
 
 	private List<AC4PresentationV1Info> ac4_presentation_v1_infoList = new ArrayList<>();
 	private List<AC4SubstreamGroupInfo> ac4_substream_group_info_list = new ArrayList<>();
@@ -136,9 +142,7 @@ public class AC4Toc implements TreeNode {
 		}
 		
 		if (bitstream_version <= 1) {
-			System.err.println("if (bitstream_version <= 1) { not implemented");
-			// TODO log not implemented
-			// return;
+			logger.warning("if (bitstream_version <= 1) { not implemented");
 //			for (int i = 0; i < n_presentations; i++) {
 //				// ac4_presentation_info(bs);
 //			}
@@ -148,7 +152,7 @@ public class AC4Toc implements TreeNode {
 				short_program_id = bs.readBits(16);
 				b_program_uuid_present = bs.readBits(1);
 				if (b_program_uuid_present == 1) {
-					//program_uuid; ..................................................................... 16 * 8
+					program_uuid = bs.readUnalignedBytes(16);
 				}
 			}
 			for (int i = 0; i < n_presentations; i++) {
@@ -217,11 +221,11 @@ public class AC4Toc implements TreeNode {
 		
 		t.add(new DefaultMutableTreeNode(new KVP("b_payload_base",b_payload_base,null)));
 		if (b_payload_base==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("payload_base_minus1",payload_base_minus1,null)));
-			// TODO display helper payload_base
+			t.add(new DefaultMutableTreeNode(new KVP("payload_base_minus1",payload_base_minus1,"payload_base="+payload_base)));
 		}
 		
 		if (bitstream_version <= 1) {
+			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("bitstream_version <= 1")));
 //			for (int i = 0; i < n_presentations; i++) {
 //				// ac4_presentation_info(bs);
 //			}
@@ -231,24 +235,14 @@ public class AC4Toc implements TreeNode {
 				t.add(new DefaultMutableTreeNode(new KVP("short_program_id",short_program_id,null)));
 				t.add(new DefaultMutableTreeNode(new KVP("b_program_uuid_present",b_program_uuid_present,null)));
 				if (b_program_uuid_present == 1) {
-					//program_uuid; ..................................................................... 16 * 8
+					t.add(new DefaultMutableTreeNode(new KVP("program_uuid",program_uuid,null)));
 				}
 			}
 			addListJTree(t, ac4_presentation_v1_infoList, modus, "ac4_presentation_v1_info(s)");
 			addListJTree(t, ac4_substream_group_info_list, modus, "ac4_substream_group_info(s)");
 			
-			
 			t.add(substream_index_table.getJTreeNode(modus));
-			
-//			for (int i = 0; i < n_presentations; i++) {
-//			 AC4PresentationV1Info ac4_presentation_v1_info = new AC4PresentationV1Info(bs);
-//			}
-//			for (int j = 0; j < total_n_substream_groups; j++) {
-//			// ac4_substream_group_info();
-//			}
 		}
-
-
 		return t;
 	}
 
