@@ -41,6 +41,7 @@ import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
 /**
+ * Based on ETSI TS 103 190-2 V1.2.1 (2018-02) ch. 6.2.1.3 ac4_presentation_v1_info
  * @author Eric
  *
  */
@@ -105,7 +106,7 @@ public class AC4PresentationV1Info implements TreeNode {
 			presentation_version = getPresentationVersion(bs);
 		}
 		if (b_single_substream_group != 1 && presentation_config == 6) {
-			b_add_emdf_substreams = 1;
+			b_add_emdf_substreams = 1; // implied
 		} else {
 			if (parentAc4Toc.getBitstream_version() != 1) {
 				mdcompat = bs.readBits(3);
@@ -267,10 +268,11 @@ public class AC4PresentationV1Info implements TreeNode {
 	}
 
 	/**
+	 * Based on ETSI TS 103 190-1 V1.3.1 (2018-02) ch 4.2.3.3 presentation_version - Presentation version information
 	 * @param bs
 	 * @return
 	 */
-	private int getPresentationVersion(BitSource bs) {
+	private static int getPresentationVersion(BitSource bs) {
 		int val = 0;
 		int b_tmp; 
 		while ((b_tmp = bs.readBits(1)) == 1) {
@@ -291,7 +293,7 @@ public class AC4PresentationV1Info implements TreeNode {
 		}
 		
 		if (b_single_substream_group != 1 && presentation_config == 6) {
-			//b_add_emdf_substreams = 1;
+			t.add(new DefaultMutableTreeNode(new KVP("b_add_emdf_substreams",b_add_emdf_substreams,"(implied)")));
 		} else {
 			if (parentAc4Toc.getBitstream_version() != 1) {
 				t.add(new DefaultMutableTreeNode(new KVP("mdcompat",mdcompat,null)));
