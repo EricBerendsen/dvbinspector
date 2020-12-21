@@ -463,5 +463,24 @@ public class NIT extends AbstractPSITabel{
 		return tableHeader;
 	}
 
+	/**
+	 * @param networkID
+	 * @param streamID
+	 * @return OriginalNetworkID for streamID, or -1 if stream not found in network with ID networkID
+	 */
+	public int getOriginalNetworkID(int networkID, int streamID) {
+		final NITsection[] sections = networks.get(networkID);
+		if (sections != null) {
+			for (final NITsection tsection : sections) {
+				if (tsection != null) {
+					TransportStream ts = tsection.getTransportStream(streamID);
+					if (ts != null) {
+						return ts.getOriginalNetworkID();
+					}
+				}
+			}
+		}
+		return -1;
+	}
 
 }

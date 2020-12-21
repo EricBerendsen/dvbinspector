@@ -194,17 +194,23 @@ public class PsiSectionData {
 	}
 
 	private boolean isONTSection(int pid) {
-		final List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptors();
-		
-		final int actualNetworkID = transportStream.getPsi().getNit().getActualNetworkID();
+		final NIT nit = transportStream.getPsi().getNit();
+		final int actualNetworkID = nit.getActualNetworkID();
+		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
+		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors,
+				LinkageDescriptor.class);
+
+		int streamID = transportStream.getStreamID();
+
+		final int originalNetworkID = nit.getOriginalNetworkID(actualNetworkID, streamID);
 
 		for (final LinkageDescriptor ld : linkageDescriptors) {
-			if(ld.getLinkageType()==0x8D &&
-				ld.getTransportStreamId()==transportStream.getStreamID() &&
-				ld.getOriginalNetworkId() == actualNetworkID &&
-				ld.getServiceId() == pid &&
-				M7Fastscan.isValidM7Code(ld.getM7_code())){
-						return true;
+			if (ld.getLinkageType() == 0x8D 
+					&& ld.getTransportStreamId() == streamID
+					&& ld.getOriginalNetworkId() == originalNetworkID 
+					&& ld.getServiceId() == pid
+					&& M7Fastscan.isValidM7Code(ld.getM7_code())) {
+				return true;
 			}
 		}
 		return false;
