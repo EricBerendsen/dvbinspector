@@ -57,4 +57,8 @@ public class TablePanel extends JScrollPane{
 		getVerticalScrollBar().setValue(0); // scroll to top
 	}
 
+	public TableModel getModel() {
+		return table.getModel();
+	}
+
 }

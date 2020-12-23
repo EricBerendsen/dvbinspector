@@ -222,7 +222,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private TransportStream ts;
 	private DefaultTreeModel model;
 	private final ImagePanel imagePanel = new ImagePanel();
-	private final TablePanel tablePanel = new TablePanel(new JTable());
+	private final TableExtPanel tablePanel = new TableExtPanel();
 
 	/**
 	 *
