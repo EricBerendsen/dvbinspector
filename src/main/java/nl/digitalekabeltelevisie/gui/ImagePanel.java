@@ -29,9 +29,9 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -49,15 +49,21 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
 /**
  * @author  Eric
  */
-public class ImagePanel extends JPanel implements FocusListener, MouseListener, ImageSource{
+public class ImagePanel extends JPanel implements ImageSource{
 
-	private class ImageCanvas extends JPanel {
+	private class ImageCanvas extends JPanel implements  MouseListener, FocusListener {
+		
+		public ImageCanvas() {
+			setFocusable(true);
+		    addMouseListener(this);
+		}
 
 
 		/* (non-Javadoc)
@@ -65,24 +71,83 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		 */
 		@Override
 		public void paint(Graphics g) {
-			Graphics2D gd = (Graphics2D) g;
-
-			final AffineTransform t = gd.getTransform();
-			double translateX = t.getTranslateX();
-			double translateY = t.getTranslateY();
+			Graphics2D gd2 = (Graphics2D) g;
+			final AffineTransform originalTransform = gd2.getTransform();
 			
-			AffineTransform idTransForm = new AffineTransform(scale,0,0,scale,translateX,translateY);
-			gd.setTransform(idTransForm);
+			//create a new transform that paints pixel for pixel, not scaling for HiRes displays
+			AffineTransform idTransForm = new AffineTransform(scale,0,0,scale,originalTransform.getTranslateX(),originalTransform.getTranslateY());
+			gd2.setTransform(idTransForm);
 
-			gd.drawImage(image, 0,0, null);
+			gd2.drawImage(image, 0,0, null);
 		}
 
+		@Override
 		public Dimension getPreferredSize() {
 			if(image!=null){
-				return new Dimension((int) (scale*image.getWidth()), (int) (scale * image.getHeight()));
+				final AffineTransform t = ((Graphics2D) this.getGraphics()).getTransform();
+				return new Dimension((int) (scale*image.getWidth()/t.getScaleX()+1), (int) (scale * image.getHeight()/t.getScaleY()+1));
 			}
 			return new Dimension();
 		}
+		
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			 //Since the user clicked on us, let us get focus!
+			System.err.println("mouseClicked canves");
+		    requestFocusInWindow();
+			imageCanvas.requestFocusInWindow();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// ignore
+		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// ignore
+		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// ignore
+		}
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+		 */
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// ignore
+		}
+
+
+		@Override
+		public void focusGained(FocusEvent e) {
+			System.out.println("got Foxus");
+			
+		}
+
+
+		@Override
+		public void focusLost(FocusEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		
 
 	}
 
@@ -94,6 +159,7 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 	 * Something that draws the actual image, this already exists.
 	 */
 	private ImageCanvas imageCanvas;
+	private JScrollPane imageScrollPane;
 
 
 	private BufferedImage image;
@@ -107,10 +173,9 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		super(new BorderLayout());
 
 		setFocusable(true);
-	    addMouseListener(this);
-	    addFocusListener(this);
 
 		imageCanvas = new ImageCanvas();
+		imageScrollPane = new JScrollPane(imageCanvas);
 
 		buttonToolbar = new JToolBar();
 		buttonToolbar.setFloatable(false);
@@ -121,8 +186,8 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		JButton copyButton = new JButton(copyAction);
 
 		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_DOWN_MASK);
-		getInputMap().put(copyKey, "copy");
-		getActionMap().put("copy", copyAction);
+		imageCanvas.getInputMap().put(copyKey, "copy");
+		imageCanvas.getActionMap().put("copy", copyAction);
 
 		buttonToolbar.add(copyButton);
 
@@ -136,7 +201,9 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 		buttonToolbar.add(saveButton);
 		add(buttonToolbar,BorderLayout.PAGE_START);
 
-		add(imageCanvas,BorderLayout.CENTER);
+		
+		add(imageScrollPane,BorderLayout.CENTER);
+		//add(imageCanvas,BorderLayout.CENTER);
 	}
 
 	/**
@@ -208,65 +275,10 @@ public class ImagePanel extends JPanel implements FocusListener, MouseListener, 
 	 * @param image
 	 */
 	private void showImage()  {
-		revalidate();
+		imageCanvas.revalidate();
+		imageCanvas.scrollRectToVisible(new Rectangle(0,0,1,1));
 		repaint();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.FocusListener#focusGained(java.awt.event.FocusEvent)
-	 */
-	@Override
-	public void focusGained(FocusEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.FocusListener#focusLost(java.awt.event.FocusEvent)
-	 */
-	@Override
-	public void focusLost(FocusEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		 //Since the user clicked on us, let us get focus!
-	    requestFocusInWindow();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// ignore
-	}
 
 }

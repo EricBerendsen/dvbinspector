@@ -323,19 +323,18 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		
 		detailPanel = new JPanel(new CardLayout());
 		JPanel empty = new JPanel();
+		//each panel should handle own scrolling
 		detailPanel.add(empty,EMPTY_PANEL);
 		detailPanel.add(imagePanel,IMAGE_PANEL);
-		detailPanel.add(editorPane,HTML_PANEL);
+		detailPanel.add(new JScrollPane(editorPane),HTML_PANEL);
 		detailPanel.add(tablePanel,TABLE_PANEL);
-		detailPanel.add(xmlPane,XML_PANEL);
+		detailPanel.add(new JScrollPane(xmlPane),XML_PANEL);
 
-
-		final JScrollPane detailView = new JScrollPane(detailPanel);
 
 		//Add the scroll panes to a split pane.
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(treeView);
-		splitPane.setRightComponent(detailView);
+		splitPane.setRightComponent(detailPanel);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerSize(12);
 
