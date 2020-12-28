@@ -32,8 +32,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
@@ -96,7 +94,6 @@ public class ImagePanel extends JPanel implements ImageSource{
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			 //Since the user clicked on us, let us get focus!
-			System.err.println("mouseClicked canves");
 		    requestFocusInWindow();
 			imageCanvas.requestFocusInWindow();
 		}
@@ -133,33 +130,26 @@ public class ImagePanel extends JPanel implements ImageSource{
 			// ignore
 		}
 
-
 		@Override
 		public void focusGained(FocusEvent e) {
-			System.out.println("got Foxus");
-			
+			// ignore
 		}
-
 
 		@Override
 		public void focusLost(FocusEvent e) {
-			// TODO Auto-generated method stub
-			
+			// ignore
 		}
-
-		
 
 	}
 
 	/**
 	 *
 	 */
-	private JToolBar buttonToolbar;
+	private final JToolBar buttonToolbar;
 	/**
 	 * Something that draws the actual image, this already exists.
 	 */
-	private ImageCanvas imageCanvas;
-	private JScrollPane imageScrollPane;
+	private final ImageCanvas imageCanvas;
 
 
 	private BufferedImage image;
@@ -175,7 +165,7 @@ public class ImagePanel extends JPanel implements ImageSource{
 		setFocusable(true);
 
 		imageCanvas = new ImageCanvas();
-		imageScrollPane = new JScrollPane(imageCanvas);
+		JScrollPane imageScrollPane = new JScrollPane(imageCanvas);
 
 		buttonToolbar = new JToolBar();
 		buttonToolbar.setFloatable(false);
@@ -200,24 +190,7 @@ public class ImagePanel extends JPanel implements ImageSource{
 
 		buttonToolbar.add(saveButton);
 		add(buttonToolbar,BorderLayout.PAGE_START);
-
-		
 		add(imageScrollPane,BorderLayout.CENTER);
-		//add(imageCanvas,BorderLayout.CENTER);
-	}
-
-	/**
-	 * @return the buttonToolbar
-	 */
-	public JToolBar getButtonToolbar() {
-		return buttonToolbar;
-	}
-
-	/**
-	 * @param buttonToolbar the buttonToolbar to set
-	 */
-	public void setButtonToolbar(JToolBar buttonToolbar) {
-		this.buttonToolbar = buttonToolbar;
 	}
 
 
@@ -225,30 +198,11 @@ public class ImagePanel extends JPanel implements ImageSource{
 		JLabel typeLabel = new JLabel("Zoom:");
 		buttonToolbar.add(typeLabel);
 		JRadioButton zoom1Button = new JRadioButton("½");
-		zoom1Button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				scale = 0.5;
-				showImage();
-
-			}
-		});
+		zoom1Button.addActionListener(e -> rescale(0.5));
 		JRadioButton zoom2Button = new JRadioButton("1");
-		zoom2Button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				scale=1;
-				showImage();
-			}
-		});
+		zoom2Button.addActionListener(e -> rescale(1));
 		JRadioButton zoom3Button = new JRadioButton("2x");
-		zoom3Button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				scale=2;
-				showImage();
-			}
-		});
+		zoom3Button.addActionListener(e -> rescale(2));
 		zoom2Button.setSelected(true);
 		ButtonGroup group = new ButtonGroup();
 		group.add(zoom1Button);
@@ -258,6 +212,11 @@ public class ImagePanel extends JPanel implements ImageSource{
 		buttonToolbar.add(zoom1Button);
 		buttonToolbar.add(zoom2Button);
 		buttonToolbar.add(zoom3Button);
+	}
+
+	private void rescale(double newScale) {
+		scale = newScale;
+		showImage();
 	}
 
 	public BufferedImage getImage() {
@@ -272,7 +231,6 @@ public class ImagePanel extends JPanel implements ImageSource{
 
 	/**
 	 * Call when new image is set, or scale changed.
-	 * @param image
 	 */
 	private void showImage()  {
 		imageCanvas.revalidate();
