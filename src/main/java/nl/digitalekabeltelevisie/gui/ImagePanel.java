@@ -29,6 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -48,8 +49,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+
+import nl.digitalekabeltelevisie.gui.utils.WrapLayout;
 
 /**
  * @author  Eric
@@ -93,8 +95,6 @@ public class ImagePanel extends JPanel implements ImageSource{
 		 */
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			 //Since the user clicked on us, let us get focus!
-		    requestFocusInWindow();
 			imageCanvas.requestFocusInWindow();
 		}
 
@@ -145,7 +145,7 @@ public class ImagePanel extends JPanel implements ImageSource{
 	/**
 	 *
 	 */
-	private final JToolBar buttonToolbar;
+	private final JPanel buttonPanel;
 	/**
 	 * Something that draws the actual image, this already exists.
 	 */
@@ -167,11 +167,10 @@ public class ImagePanel extends JPanel implements ImageSource{
 		imageCanvas = new ImageCanvas();
 		JScrollPane imageScrollPane = new JScrollPane(imageCanvas);
 
-		buttonToolbar = new JToolBar();
-		buttonToolbar.setFloatable(false);
+		buttonPanel = new JPanel(new WrapLayout(FlowLayout.LEFT));
 		addZoomRadioButtons();
 
-		buttonToolbar.add(Box.createHorizontalStrut(10)); // spacer
+		buttonPanel.add(Box.createHorizontalStrut(10)); // spacer
 		ImageCopyAction copyAction = new ImageCopyAction(this, "Copy", this);
 		JButton copyButton = new JButton(copyAction);
 
@@ -179,7 +178,7 @@ public class ImagePanel extends JPanel implements ImageSource{
 		imageCanvas.getInputMap().put(copyKey, "copy");
 		imageCanvas.getActionMap().put("copy", copyAction);
 
-		buttonToolbar.add(copyButton);
+		buttonPanel.add(copyButton);
 
 		ImageSaveAction saveAction = new ImageSaveAction(this, "Save As...",this);
 		JButton saveButton = new JButton(saveAction);
@@ -188,15 +187,15 @@ public class ImagePanel extends JPanel implements ImageSource{
 		getInputMap().put(saveKey, "save");
 		getActionMap().put("save", saveAction);
 
-		buttonToolbar.add(saveButton);
-		add(buttonToolbar,BorderLayout.PAGE_START);
+		buttonPanel.add(saveButton);
+		add(buttonPanel,BorderLayout.PAGE_START);
 		add(imageScrollPane,BorderLayout.CENTER);
 	}
 
 
 	private void addZoomRadioButtons() {
 		JLabel typeLabel = new JLabel("Zoom:");
-		buttonToolbar.add(typeLabel);
+		buttonPanel.add(typeLabel);
 		JRadioButton zoom1Button = new JRadioButton("½");
 		zoom1Button.addActionListener(e -> rescale(0.5));
 		JRadioButton zoom2Button = new JRadioButton("1");
@@ -209,9 +208,9 @@ public class ImagePanel extends JPanel implements ImageSource{
 		group.add(zoom2Button);
 		group.add(zoom3Button);
 
-		buttonToolbar.add(zoom1Button);
-		buttonToolbar.add(zoom2Button);
-		buttonToolbar.add(zoom3Button);
+		buttonPanel.add(zoom1Button);
+		buttonPanel.add(zoom2Button);
+		buttonPanel.add(zoom3Button);
 	}
 
 	private void rescale(double newScale) {
