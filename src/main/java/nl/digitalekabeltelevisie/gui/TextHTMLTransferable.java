@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -42,7 +40,7 @@ import java.io.IOException;
  * @author Steve McLeod
  *
  */
-public class TextHTMLTransferable implements Transferable, ClipboardOwner {
+public class TextHTMLTransferable implements Transferable{
 
     private static final DataFlavor[] supportedFlavors;
 
@@ -65,11 +63,13 @@ public class TextHTMLTransferable implements Transferable, ClipboardOwner {
         this.htmlData = htmlData;
     }
 
-    public DataFlavor[] getTransferDataFlavors() {
+    @Override
+	public DataFlavor[] getTransferDataFlavors() {
         return supportedFlavors;
     }
 
-    public boolean isDataFlavorSupported(DataFlavor flavor) {
+    @Override
+	public boolean isDataFlavorSupported(DataFlavor flavor) {
         for (DataFlavor supportedFlavor : supportedFlavors) {
             if (supportedFlavor == flavor) {
                 return true;
@@ -78,7 +78,8 @@ public class TextHTMLTransferable implements Transferable, ClipboardOwner {
         return false;
     }
 
-    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+    @Override
+	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
         if (flavor.equals(supportedFlavors[0])) {
             return htmlData;
         }
@@ -88,9 +89,4 @@ public class TextHTMLTransferable implements Transferable, ClipboardOwner {
         throw new UnsupportedFlavorException(flavor);
     }
 
-	@Override
-	public void lostOwnership(Clipboard clipboard, Transferable contents) {
-		// Empty
-		
-	}
 }

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,23 +29,14 @@ package nl.digitalekabeltelevisie.gui;
 
 import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.MouseInfo;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -91,7 +82,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 					String plainData = Utils.extractTextFromHTML(htmlString);
 					TextHTMLTransferable transferable = new TextHTMLTransferable(plainData, htmlString);
 					final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-					clipboard.setContents( transferable, transferable );
+					clipboard.setContents(transferable, null);
 				}
 			}
 		}
@@ -166,7 +157,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 		setToolTipText("Test");
 		GridCopyAction copyAction = new GridCopyAction();
 
-		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_DOWN_MASK);
 		getInputMap().put(copyKey, "copy");
 		getActionMap().put("copy", copyAction);
 
