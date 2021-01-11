@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,116 +28,96 @@
 package nl.digitalekabeltelevisie.gui;
 
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.text.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.prefs.Preferences;
+import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.TableModel;
-
-import com.opencsv.CSVWriter;
 
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
- * Start dialog to save image as PNG or JPG.
- *
  * @author Eric
  *
  */
 public class TableSaveAction extends AbstractAction {
+	
+	private static final Logger	logger	= Logger.getLogger(TableSaveAction.class.getName());
+
+	
+	private static final String TEXT = "TEXT";
+	private static final String HTML = "HTML";
+	
+	TablePanel tablePanel;
 
 	/**
-	 * 
+	 * @param tablePanel
+	 * @param string
 	 */
-	private final JPanel panel;
-	private TableSource tableSource;
-
-	/**
-	 *
-	 */
-	public TableSaveAction(JPanel panel, String name, TableSource tableModel) {
-		super(name);
-		this.panel = panel;
-		this.tableSource = tableModel;
+	public TableSaveAction(TablePanel tablePanel, String label) {
+		super(label);
+		this.tablePanel = tablePanel;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		JFileChooser chooser = createFileChooser();
 
-		final TableModel model = tableSource.getTableModel();
-		if (model != null) {
-			final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-			JFileChooser chooser = createFileChooser(prefs);
+		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+		File saveFile = new File("dvb_inspector_table_" + df.format(new Date()));
+		chooser.setSelectedFile(saveFile);
 
-			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-			File saveFile = new File("dvb_inspector_tree_" + df.format(new Date()));
-			chooser.setSelectedFile(saveFile);
+		int rval = chooser.showSaveDialog(tablePanel);
+		if (rval == JFileChooser.APPROVE_OPTION) {
+			saveFile = chooser.getSelectedFile();
+			PreferencesManager.setSaveDir(saveFile.getParent());
 
-			int rval = chooser.showSaveDialog(panel);
-			if (rval == JFileChooser.APPROVE_OPTION) {
-				saveFile = chooser.getSelectedFile();
-				PreferencesManager.setSaveDir(saveFile.getParent());
-
-				FileNameExtensionFilter filter = (FileNameExtensionFilter) chooser.getFileFilter();
-				String extension = filter.getExtensions()[0];
-				if (!saveFile.getName().endsWith('.' + extension)) {
-					saveFile = new File(saveFile.getPath() + "." + extension);
+			FileNameExtensionFilter filter = (FileNameExtensionFilter) chooser.getFileFilter();
+			String extension = filter.getExtensions()[0];
+			if (!saveFile.getName().endsWith('.' + extension)) {
+				saveFile = new File(saveFile.getPath() + "." + extension);
+			}
+			boolean write = true;
+			if (saveFile.exists()) {
+				final int n = JOptionPane.showConfirmDialog(tablePanel,
+						"File " + saveFile + " already exists, want to overwrite?",
+						"File already exists",
+						JOptionPane.YES_NO_OPTION);
+				if (n == JOptionPane.NO_OPTION) {
+					write = false;
 				}
-				boolean write = true;
-				if (saveFile.exists()) {
-					final int n = JOptionPane.showConfirmDialog(panel,
-							"File " + saveFile + " already exists, want to overwrite?", "File already exists",
-							JOptionPane.YES_NO_OPTION);
-					if (n == JOptionPane.NO_OPTION) {
-						write = false;
-					}
+			}
+			if (write) {
+				String content;
+				if(HTML.equals(filter.getDescription())){
+					content = tablePanel.getTableAsHtml();
+				}else {
+					content = tablePanel.getTableAsText();
 				}
-				if (write) {
-					saveToCsv(model, saveFile);
+				try {
+					Files.writeString(saveFile.toPath(), content);
+				} catch (IOException e1) {
+					logger.warning(()->"IOException while saving; "+e1);
 				}
 			}
 		}
 	}
-
-	private void saveToCsv(TableModel model, File file) {
-		String[] headers = new String[model.getColumnCount()];
-		for (int i = 0; i < model.getColumnCount(); i++) {
-			headers[i] = model.getColumnName(i);
-		}
-		try {
-			CSVWriter writer = new CSVWriter(new FileWriter(file));
-			writer.writeNext(headers);
-			for (int row = 0; row < model.getRowCount(); row++) {
-				String[] line = new String[model.getColumnCount()];
-				for (int col = 0; col < model.getColumnCount(); col++) {
-					String cell = model.getValueAt(row, col).toString();
-					line[col] = cell;
-				}
-				writer.writeNext(line);
-			}
-			writer.close();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	private static JFileChooser createFileChooser(final Preferences prefs) {
+        
+	
+	private static JFileChooser createFileChooser() {
 		JFileChooser chooser = new JFileChooser();
-		FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("csv", "CSV");
-		chooser.addChoosableFileFilter(fileFilter);
+		FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter(HTML, "html", "htm");
+		chooser.addChoosableFileFilter(jpgFilter);
+		FileNameExtensionFilter pngFilter = new FileNameExtensionFilter(TEXT, "txt", "text");
+		chooser.addChoosableFileFilter(pngFilter);
 		chooser.setAcceptAllFileFilterUsed(false);
 		final String defaultDir = PreferencesManager.getSaveDir();
 		if (defaultDir != null) {
@@ -146,4 +126,6 @@ public class TableSaveAction extends AbstractAction {
 		}
 		return chooser;
 	}
+
+
 }
