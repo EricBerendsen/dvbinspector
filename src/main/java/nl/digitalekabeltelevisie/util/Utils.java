@@ -695,6 +695,9 @@ public final class Utils {
 			if ((c > -97) && // bytes are signed, what we really mean is (b[i]<0x80)||(b[i]>0x9f)
 					(c != 0)) { 
 				filteredBytes[filteredLength++] = c;
+			} else if (b[off] == 0x11 || b[off] == 0x15) {
+				// ISO 10646
+				filteredBytes[filteredLength++] = c;
 			}
 		}
 
