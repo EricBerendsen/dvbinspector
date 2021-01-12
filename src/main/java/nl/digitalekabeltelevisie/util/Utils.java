@@ -685,24 +685,29 @@ public final class Utils {
 
 		length -= charSetLen;
 		offset += charSetLen;
-
-		final byte[] filteredBytes = new byte[length];  // length is enough, might need less
-		int filteredLength=0;
-
-		// this is where we loose formatting, like newlines and character emphasis
-		for (int i = offset; i < (offset + length); i++) {
-			final byte c = b[i];
-			if ((c > -97) && // bytes are signed, what we really mean is (b[i]<0x80)||(b[i]>0x9f)
-					(c != 0)) { 
-				filteredBytes[filteredLength++] = c;
-			}
-		}
+		
+		String decoded;
 
 		if(charset==null){
-			return Iso6937ToUnicode.convert(filteredBytes, 0, filteredLength); //default for DVB
+			decoded =  Iso6937ToUnicode.convert(b, offset, length); //default for DVB
 		}else{
-			return new String(filteredBytes, 0, filteredLength,charset);
+			decoded = new String(b, offset, length,charset);
 		}
+
+		// this is where we loose formatting, like newlines and character emphasis 
+		// see table A.1 ETSI EN 300 468 V1.16.1 (2019-08)
+		
+		StringBuilder result = new StringBuilder();
+		
+		for (int i = 0; i < decoded.length(); i++) {
+			final char c = decoded.charAt(i);
+			if((c<0x80)||(c>0x9f)) {
+				result.append(c);
+			}
+		}
+		
+		return result.toString();
+
 	}
 
 	public static Charset getCharSet(final byte[] b, final int offset, final int length){
