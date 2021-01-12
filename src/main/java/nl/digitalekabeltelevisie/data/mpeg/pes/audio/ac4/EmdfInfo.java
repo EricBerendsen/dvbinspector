@@ -94,7 +94,7 @@ public class EmdfInfo implements TreeNode {
 	}
 	
 	//4.3.15.3 emdf_protection - EMDF protection data TS 103 190-1 V1.3.1 (2018-02)
-	private int noPretectionBytes(int protection_length) {
+	private static int noPretectionBytes(int protection_length) {
 		switch (protection_length) {
 		case 0:
 			return 0;

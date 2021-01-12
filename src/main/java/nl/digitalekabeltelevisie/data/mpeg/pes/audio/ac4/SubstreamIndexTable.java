@@ -70,7 +70,7 @@ public class SubstreamIndexTable implements TreeNode {
 	 */
 	public SubstreamIndexTable(BitSource bs) {
 		n_substreams = bs.readBits(2);
-		if (n_substreams == 0) { 
+		if (n_substreams == 0) {
 			n_substreams = bs.variable_bits(2) + 4;
 		}
 		if (n_substreams == 1) {
@@ -82,7 +82,7 @@ public class SubstreamIndexTable implements TreeNode {
 			for (int s = 0; s < n_substreams; s++) {
 				int b_more_bits = bs.readBits(1);
 				int substream_size = bs.readBits(10);
-				if (b_more_bits==1) {
+				if (b_more_bits == 1) {
 					substream_size += (bs.variable_bits(2) << 10);
 				}
 				subStreamSizes.add(new SubStreamSize(substream_size));
@@ -93,8 +93,8 @@ public class SubstreamIndexTable implements TreeNode {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("substream_index_table"));
-		t.add(new DefaultMutableTreeNode(new KVP("n_substreams",n_substreams,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("b_size_present",b_size_present,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("n_substreams", n_substreams, null)));
+		t.add(new DefaultMutableTreeNode(new KVP("b_size_present", b_size_present, (n_substreams != 1) ? "implied" : null)));
 		addListJTree(t, subStreamSizes, modus, "subStreamSizes");
 
 		return t;

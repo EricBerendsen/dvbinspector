@@ -34,7 +34,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4.AC4SubstreamInfo.BAudioNdot;
 import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.LookUpList;
 

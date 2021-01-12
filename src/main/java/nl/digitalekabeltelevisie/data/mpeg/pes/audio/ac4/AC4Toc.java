@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
 /**
- * Based 0n ETSI TS 103 190-2 V1.1.1 (2015-09) 6.2.1.1 ac4_toc
+ * Based on ETSI TS 103 190-2 V1.2.1 (2018-02) 6.2.1.1 ac4_toc
  * @author Eric
  *
  */
@@ -179,7 +179,7 @@ public class AC4Toc implements TreeNode {
 	 * @param ac4_presentation_v1_infoList2
 	 * @return
 	 */
-	private int getMaxGroupIndex(List<AC4PresentationV1Info> ac4_presentation_v1_infoList2) {
+	private static int getMaxGroupIndex(List<AC4PresentationV1Info> ac4_presentation_v1_infoList2) {
 		
 		int max = 0;
 		for (AC4PresentationV1Info ac4PresentationV1Info : ac4_presentation_v1_infoList2) {
