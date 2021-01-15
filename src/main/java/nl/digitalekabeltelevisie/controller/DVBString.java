@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,11 +29,13 @@ package nl.digitalekabeltelevisie.controller;
 import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
 import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
+import static nl.digitalekabeltelevisie.util.Utils.getCharDecodedStringWithControls;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import static nl.digitalekabeltelevisie.util.Utils.getString;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -76,14 +78,24 @@ public class DVBString {
 	 * @return HTML representation of this string, including linefeeds  (0x8A) and emphasis (0x86/0x87). Line length max
 	 */
 	public String toEscapedHTML(final int maxWidth){
-		ArrayList<DVBString> array = new ArrayList<DVBString>();
-		array.add(this);
+		ArrayList<DVBString> array = new ArrayList<>(Arrays.asList(this));
 		return getEscapedHTML(array, maxWidth);
 	}
 
+	/**
+	 * return plain text string representation where control chars have been removed
+	 */
 	@Override
 	public String toString(){
 		return getString(data,this.getOffset()+1, this.getLength());
+	}
+	
+	
+	/**
+	 * @return tring representation where control chars are present
+	 */
+	public String toRawString() {
+		return getCharDecodedStringWithControls(data,this.getOffset()+1, this.getLength());
 	}
 	
 	/**
@@ -141,9 +153,8 @@ public class DVBString {
 				if(data[offset+2]==0x0){
 					return "ISO/IEC 8859-"+data[offset+3];
 
-				}else{
-					return "Illegal value";
 				}
+				return "Illegal value";
 			case 0x11:
 				return "ISO/IEC 10646-1";
 			case 0x12:

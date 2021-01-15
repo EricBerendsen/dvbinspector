@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,7 +27,12 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getDurationMillis;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCCalender;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCDate;
+import static nl.digitalekabeltelevisie.util.Utils.isUndefined;
+import static nl.digitalekabeltelevisie.util.Utils.roundHourDown;
+import static nl.digitalekabeltelevisie.util.Utils.roundHourUp;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -41,7 +46,12 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,7 +67,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.Interval;
+import nl.digitalekabeltelevisie.util.ServiceIdentification;
 
 /**
  * Class to create a grid image of EIT information, like the EPG in decoders.
@@ -103,7 +114,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	public EITableImage(EIT eit, Map<ServiceIdentification, EITsection[]> table){
 		this.eit = eit;
 		this.servicesTable = table;
-		serviceOrder = new TreeSet<ServiceIdentification>(table.keySet());
+		serviceOrder = new TreeSet<>(table.keySet());
 		this.interval = EIT.getSpanningInterval(serviceOrder, table);
 		this.milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
 	}
@@ -141,7 +152,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 				servicesTable = eit.getCombinedPresentFollowing();
 			}
 
-			this.serviceOrder = new TreeSet<ServiceIdentification>(servicesTable.keySet());
+			this.serviceOrder = new TreeSet<>(servicesTable.keySet());
 			this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
 		} else {
 			eit = null;
@@ -394,10 +405,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			int height = (serviceOrder.size()*LINE_HEIGHT)+1 + legendHeight;
 			int width = 1+SERVICE_NAME_WIDTH + (int)((endDate.getTime() - startDate.getTime())/milliSecsPerPixel);
 			return new Dimension(width,height);
-		}else{
-			return new Dimension(0,0);
 		}
-
+		return new Dimension(0,0);
 	}
 
 
@@ -432,8 +441,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 								getSdt().
 								getServiceNameDVBString(serviceIdent).
 								map(DVBString::toEscapedHTML).
-								orElse("Service "+serviceIdent.getServiceId()+"<br><br>");
-						r1.append(name).append("</b>");
+								orElse("Service "+serviceIdent.getServiceId());
+						r1.append(name).append("</b><br><br>");
 	
 						Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
 						Event event = findEvent(serviceIdent, thisDate);
@@ -451,7 +460,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 								map(DVBString::toEscapedHTML).
 								orElse("[Name not in SDT]<br><br>");
 						r1.append(name).
-						append("</b>original_network_id:").
+						append("</b><br><br>original_network_id:").
 						append(serviceIdent.getOriginalNetworkId()).
 						append("<br>transport_stream_id:").
 						append(serviceIdent.getTransportStreamId()).
@@ -609,7 +618,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		selectedSchedule = false;
 		if(eit!=null){
 			servicesTable = eit.getCombinedPresentFollowing();
-			serviceOrder = new TreeSet<ServiceIdentification>(servicesTable.keySet());
+			serviceOrder = new TreeSet<>(servicesTable.keySet());
 			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
 			setSize(getDimension());
 			repaint();
@@ -627,7 +636,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		selectedSchedule = true;
 		if(eit!=null){
 			servicesTable = eit.getCombinedSchedule();
-			serviceOrder = new TreeSet<ServiceIdentification>(servicesTable.keySet());
+			serviceOrder = new TreeSet<>(servicesTable.keySet());
 			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
 			setSize(getDimension());
 			repaint();
@@ -668,10 +677,9 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		if (orientation == SwingConstants.HORIZONTAL){
 			// 1 hour
 			return (int) ((60 * 60 * 1000) / milliSecsPerPixel);
-		}else{
-			// single line
-			return LINE_HEIGHT;
 		}
+		// single line
+		return LINE_HEIGHT;
 	}
 
 
@@ -686,11 +694,10 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			// round down to integer number of hours, at least 1 hour
 			int pixelsHour = (int) ((60 * 60 * 1000) / milliSecsPerPixel);
 			return Math.max(pixelsHour, w-(w%pixelsHour));
-		}else{
-			final int h = (int)getVisibleRect().getHeight()-LEGEND_HEIGHT;
-			// round down to integer number of services
-			return h-(h%LINE_HEIGHT);
 		}
+		final int h = (int)getVisibleRect().getHeight()-LEGEND_HEIGHT;
+		// round down to integer number of services
+		return h-(h%LINE_HEIGHT);
 	}
 
 

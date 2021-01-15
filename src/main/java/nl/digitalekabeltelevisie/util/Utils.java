@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,9 +38,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnsupportedCharsetException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -227,8 +225,7 @@ public final class Utils {
 
 	public static Image readIconImage(final String fileName) {
 		Image image = null;
-		try {
-			final InputStream fileInputStream = classL.getResourceAsStream(fileName);
+		try(InputStream fileInputStream = classL.getResourceAsStream(fileName)){
 			image = ImageIO.read(fileInputStream);
 		} catch (final Exception e) {
 			logger.log(Level.WARNING, "Error reading icon image: exception:{0}", e);
@@ -360,7 +357,6 @@ public final class Utils {
 		if(block==null){
 			return buf.toString();
 		}
-		final int len = block.length;
 		int high = 0;
 		int low = 0;
 		for (byte b : block) {
@@ -553,91 +549,25 @@ public final class Utils {
 	}
 
 
-
-	/**
-	 * Return a HTML fragment with concatenated text of DVBStrings. control code 0x8A is replaced with &lt;br&gt;,
-	 * 0x86 with &lt;em&gt;, 0x87 with &lt;/em&gt;
-	 *
-	 * Assumes all DVBStrings use same charset as defined in first element.
-	 *
-	 * @param dvbStrings
-	 * @param maxWidth (0 = unlimited)
-	 * @return
-	 */
 	public static String getEscapedHTML(final List<DVBString> dvbStrings, final int maxWidth){
-		final StringBuilder sb = new StringBuilder();
-		int stringIndex=0;
-		while(stringIndex<dvbStrings.size()){
-			final byte[]rawData = new byte[dvbStrings.size()*255]; // max space needed as DVBString as maximum 255 chars
-			int rawDataLen = 0;
-			final Charset charset = dvbStrings.get(stringIndex).getCharSet();
-			int sameCharSetIndex = stringIndex;
-			while((sameCharSetIndex < dvbStrings.size()) &&
-					isIdenticalCharSets(charset,dvbStrings.get(sameCharSetIndex).getCharSet())){
-				final DVBString dvbString = dvbStrings.get(sameCharSetIndex);
-				final byte[] b = dvbString.getData();
-				int offset = 1 + dvbString.getOffset(); // offset starts at the len byte, actual data +1
-				int length = dvbString.getLength();
-				final int charSetLen = getCharSetLen(b, offset);
-
-				length -= charSetLen;
-				offset += charSetLen;
-
-				for (int i = offset; i < (offset+length); i++) {
-					rawData[rawDataLen++]=b[i];
-				}
-				sameCharSetIndex++;
-			}
-			formatRawData(maxWidth, sb, rawData, rawDataLen, charset);
-			stringIndex += sameCharSetIndex;
-			sb.append("<br><br>");
+		StringBuilder raw = new StringBuilder();
+		for(DVBString str:dvbStrings) {
+			raw.append(str.toRawString());
 		}
-		return sb.toString();
-	}
-
-	/**
-	 * @param charSet1
-	 * @param charSet2
-	 * @return
-	 */
-	private static boolean isIdenticalCharSets(final Charset charSet1, final Charset charSet2) {
-		if((charSet1 == null)&&(charSet2 == null)){
-			return true;
-		}else{
-			if(charSet1!=null){
-				return charSet1.equals(charSet2);
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * @param maxWidth
-	 * @param sb
-	 * @param rawData
-	 * @param rawDataLen
-	 * @param charset
-	 */
-	private static void formatRawData(final int maxWidth, final StringBuilder sb, final byte[] rawData, final int rawDataLen,
-			final Charset charset) {
-		int i=0;
+		String rawString = raw.toString();
+		
+		StringBuilder sb = new StringBuilder();
+		
+		int i = 0;
 		int currentLineLength = 0;
-		while(i<rawDataLen){
-			final byte[]filteredBytes=new byte[rawDataLen];
-			int filteredLength=0;
-			// find 'regular' chars
-			while((i<rawDataLen)&&(rawData[i]>-97)){  // bytes are signed, what we really mean is if((b[i]<0x80)||(b[i]>0x9f))
-				filteredBytes[filteredLength++]=rawData[i++];
+		int rawLength = raw.length();
+		while(i < rawLength) {
+			StringBuilder plainSection = new StringBuilder();
+			while (i < rawLength && !isControlCharacter(rawString.charAt(i))) {
+				plainSection.append(rawString.charAt(i));
+				i++;
 			}
-			// found all reg chars. process them
-			String decodedString = null;
-			if(charset==null){
-				decodedString = Iso6937ToUnicode.convert(filteredBytes, 0, filteredLength); //default for DVB
-			}else{
-				decodedString = new String(filteredBytes, 0, filteredLength,charset);
-			}
-			// now split  decodedString into words
-			final StringTokenizer st = new StringTokenizer(decodedString);
+			final StringTokenizer st = new StringTokenizer(plainSection.toString());
 
 			// append words to sb as long as lineLen < max
 			while (st.hasMoreTokens()) {
@@ -651,23 +581,28 @@ public final class Utils {
 				}
 			}
 			// now the special chars 0x80 - 0x97 (or EOF)
-			while((i<rawDataLen)&&(rawData[i]<=-97)){  // bytes are signed, what we really mean is if((b[i]>=0x80)&&(b[i]<=0x9f))
-				if(rawData[i]==-118){ // 0x8A, CR/LF
+			while ((i < rawLength) && (isControlCharacter(rawString.charAt(i)))) { 
+				if(rawString.charAt(i)==0x8A){ // 0x8A, CR/LF
 					sb.append("<br>");
 					currentLineLength=0;
-				}else if(rawData[i]==-122){ // 0x86, character emphasis on
+				}else if(rawString.charAt(i) == 0x86){ // 0x86, character emphasis on
 					sb.append("<em>");
-				}else if(rawData[i]==-121){ // 0x87, character emphasis off
+				}else if(rawString.charAt(i) == 0x87){ // 0x87, character emphasis off
 					sb.append("</em>");
 				}
 				i++;
 			}
+
+
 		}
+		return sb.toString();
 	}
+
 
 	/**
 	 *
 	 * Parse an array of bytes into a java String, according to ETSI EN 300 468 V1.11.1 Annex A (normative): Coding of text characters
+	 * Control chars (0x80.. 0x9f) are removed
 	 *
 	 * @param b array of source bytes
 	 * @param off offset where relevant data starts in array b
@@ -675,6 +610,38 @@ public final class Utils {
 	 * @return a java String, according to ETSI EN 300 468 V1.11.1 Annex A,
 	 */
 	public static String getString(final byte[] b, final int off, final int len) {
+		String decoded = getCharDecodedStringWithControls(b, off, len);
+		return removeControlChars(decoded);
+
+	}
+
+
+	/**
+	 * remove formatting, like newlines and character emphasis 
+	 * see table A.1 ETSI EN 300 468 V1.16.1 (2019-08)
+	 * @param decoded
+	 * @return
+	 */
+	private static String removeControlChars(String decoded) {
+		StringBuilder result = new StringBuilder();
+		
+		for (int i = 0; i < decoded.length(); i++) {
+			final char c = decoded.charAt(i);
+			if(!isControlCharacter(c)) {
+				result.append(c);
+			}
+		}
+		
+		return result.toString();
+	}
+
+
+	private static boolean isControlCharacter(final char c) {
+		return (c >= 0x80) && (c <= 0x9f);
+	}
+
+
+	public static String getCharDecodedStringWithControls(final byte[] b, final int off, final int len) {
 		int length = len;
 		int offset = off;
 		if(length<=0){
@@ -689,26 +656,13 @@ public final class Utils {
 		String decoded;
 
 		if(charset==null){
-			decoded =  Iso6937ToUnicode.convert(b, offset, length); //default for DVB
+			decoded = Iso6937ToUnicode.convert(b, offset, length); //default for DVB
 		}else{
 			decoded = new String(b, offset, length,charset);
 		}
-
-		// this is where we loose formatting, like newlines and character emphasis 
-		// see table A.1 ETSI EN 300 468 V1.16.1 (2019-08)
-		
-		StringBuilder result = new StringBuilder();
-		
-		for (int i = 0; i < decoded.length(); i++) {
-			final char c = decoded.charAt(i);
-			if((c<0x80)||(c>0x9f)) {
-				result.append(c);
-			}
-		}
-		
-		return result.toString();
-
+		return decoded;
 	}
+
 
 	public static Charset getCharSet(final byte[] b, final int offset, final int length){
 		Charset charset = null;
@@ -728,13 +682,7 @@ public final class Utils {
 				}else if((selectorByte==0x15 )){ // UTF-8 encoding of ISO/IEC 10646
 					charset = StandardCharsets.UTF_8;
 				}
-			} catch (final IllegalCharsetNameException e) {
-				logger.info("IllegalCharsetNameException in getCharSet:"+e);
-				charset = StandardCharsets.ISO_8859_1;
-			} catch (final UnsupportedCharsetException e) {
-				charset = StandardCharsets.ISO_8859_1;
-				logger.info("UnsupportedCharsetException in getCharSet:"+e+", String="+new String(b, offset, length, charset));
-			} catch (final IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				logger.info("IllegalArgumentException in getCharSet:"+e);
 				charset = StandardCharsets.ISO_8859_1;
 			}
@@ -834,9 +782,8 @@ public final class Utils {
 		final Calendar t = getUTCCalender(UTC_time);
 		if(t!=null){
 			return t.getTime();
-		}else{
-			return null;
 		}
+		return null;
 	}
 
 	public static long getDurationMillis(final String eventDuration){
@@ -1278,7 +1225,6 @@ public final class Utils {
 			return buf.toString();
 		}
 
-		final int len = block.length;
 		for (byte b : block) {
 			if ((32 <= toUnsignedInt(b)) && (toUnsignedInt(b) <= 127)) {
 				buf.append((char) b);

@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,12 +26,14 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+import static nl.digitalekabeltelevisie.util.Utils.formatDuration;
 import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
 
-import java.util.*;
-
-import static nl.digitalekabeltelevisie.util.Utils.formatDuration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -207,6 +209,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			
 				addShortEventDetails(r1, languageList);
 				addExtendedEventDetails(r1, languageList);
+				
 				addComponentDetails(r1, languageList);
 				
 				r1.append("<hr><br>");
@@ -220,8 +223,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			return r1.toString();
 		}
 
-		private void addTimeShiftDetails(final StringBuilder r1,
-				List<TimeShiftedEventDescriptor> timeShiftedEventDescriptorList) {
+		private static void addTimeShiftDetails(final StringBuilder r1, List<TimeShiftedEventDescriptor> timeShiftedEventDescriptorList) {
 			for(TimeShiftedEventDescriptor timeShiftedEventDescriptor:timeShiftedEventDescriptorList) {
 				r1.append("Event is a time shifted copy of other event; service_id:").
 					append(timeShiftedEventDescriptor.getReference_service_id()).
@@ -231,8 +233,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			}
 		}
 
-		private void addParentalRatingDetails(final StringBuilder r1,
-				final List<ParentalRatingDescriptor> ratingDescList) {
+		private static void addParentalRatingDetails(final StringBuilder r1, final List<ParentalRatingDescriptor> ratingDescList) {
 			for(final ParentalRatingDescriptor ratingDesc :ratingDescList){
 				final List<Rating> ratingList = ratingDesc.getRatingList();
 				for(final Rating c:ratingList){
@@ -246,7 +247,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			}
 		}
 
-		private void addContentDetails(final StringBuilder r1, final List<ContentDescriptor> contentDescList) {
+		private static void addContentDetails(final StringBuilder r1, final List<ContentDescriptor> contentDescList) {
 			if(!contentDescList.isEmpty()){
 				for(final ContentDescriptor contentDesc : contentDescList){
 					final List<ContentItem> contentList = contentDesc.getContentList();
@@ -262,8 +263,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			}
 		}
 
-		private void addComponentDetails(final StringBuilder r1,
-				ArrayList<LanguageDependentEitDescriptor> languageList) {
+		private static void addComponentDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
 			List<ComponentDescriptor> componentDescriptorList = Descriptor.findGenericDescriptorsInList(languageList, ComponentDescriptor.class);
 			for(ComponentDescriptor componentDescriptor:componentDescriptorList) {
 				r1.append("Component: ").
@@ -272,21 +272,18 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			}
 		}
 
-		private void addShortEventDetails(final StringBuilder r1,
-				ArrayList<LanguageDependentEitDescriptor> languageList) {
+		private static void addShortEventDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(languageList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
 				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
 					
-					// StringBuilder languageBuilder = languageDependentDescriptor.computeIfAbsent(shortEventDescriptor.getIso639LanguageCode(), StringBuilder::new);
-					
 					r1.append("Event name: <b>").
-						append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).
+						append(shortEventDescriptor.getEventName().toEscapedHTML()).
 						append("</b><br>");
-					final String shortText = shortEventDescriptor.getText().toString();
+					final String shortText = shortEventDescriptor.getText().toEscapedHTML();
 					if((shortText!=null)&&!shortText.isEmpty()){
 						r1.append("Short description: ").
-							append(escapeHtmlBreakLines(shortText)).
+							append(shortText).
 							append("<br>");
 					}
 					r1.append("<br>");
@@ -294,21 +291,18 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			}
 		}
 
-		private void addExtendedEventDetails(final StringBuilder r1,
-				ArrayList<LanguageDependentEitDescriptor> languageList) {
+		private static void addExtendedEventDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(languageList, ExtendedEventDescriptor.class);
-			final ArrayList<DVBString> extendedEventStrings = new ArrayList<DVBString>();
+			final ArrayList<DVBString> extendedEventStrings = new ArrayList<>();
 			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
-				
-				//StringBuilder languageBuilder = languageEventText.computeIfAbsent(extEvent.getIso639LanguageCode(), StringBuilder::new);
 
 				if(!extEvent.getItemList().isEmpty()){ // this extended Event has items
 					r1.append("<br><table>");
 					for(final ExtendedEventDescriptor.Item item :extEvent.getItemList()){
 						r1.append("<tr><td>").
-							append(Utils.escapeHTML(item.getItemDescription().toString())).
+							append(item.getItemDescription().toEscapedHTML()).
 							append("</td><td>").
-							append(Utils.escapeHTML(item.getItem().toString())).
+							append(item.getItem().toEscapedHTML()).
 							append("</td></tr>");
 					}
 					r1.append("</table>");
@@ -318,18 +312,18 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			
 			if(!extendedEventStrings.isEmpty()){
 				r1.append("<br>Extended description:<br><br>").append(getEscapedHTML(extendedEventStrings,80));
+				r1.append("<br><br>");
 			}
 		}
 
-		private LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> mapDescriptorsByLanguage(
-				final List<Descriptor> descList) {
-			LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> languageDependentDescriptorsMap = new LinkedHashMap<String,ArrayList<LanguageDependentEitDescriptor>>();
+		private static LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> mapDescriptorsByLanguage(final List<Descriptor> descList) {
+			LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> languageDependentDescriptorsMap = new LinkedHashMap<>();
 			
 			for(Descriptor d:descList) {
 				if(d instanceof LanguageDependentEitDescriptor) {
 					LanguageDependentEitDescriptor languageDependentEitDescriptor = (LanguageDependentEitDescriptor) d;
 					String iso639LanguageCode = languageDependentEitDescriptor.getIso639LanguageCode();
-					List<LanguageDependentEitDescriptor> lst = languageDependentDescriptorsMap.computeIfAbsent(iso639LanguageCode, s -> new ArrayList<LanguageDependentEitDescriptor>());
+					List<LanguageDependentEitDescriptor> lst = languageDependentDescriptorsMap.computeIfAbsent(iso639LanguageCode, s -> new ArrayList<>());
 					
 					lst.add(languageDependentEitDescriptor);
 				}
@@ -389,7 +383,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 
 
 	private final List<Event> buildEventList(final byte[] data, final int i, final int programInfoLength) {
-		final List<Event> r = new ArrayList<Event>();
+		final List<Event> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
 			final Event c = new Event();
