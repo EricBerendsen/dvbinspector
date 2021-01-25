@@ -64,6 +64,7 @@ public class AudioPreselectionDescriptor extends DVBExtensionDescriptor {
 		private int future_extension;
 		
 		private String iso639LanguageCode;
+		private int message_id;
 		private int num_aux_components;
 		private int reserved_zero_future_use2;
 		private int[]component_tag;
@@ -85,6 +86,10 @@ public class AudioPreselectionDescriptor extends DVBExtensionDescriptor {
 			if (language_code_present == 1) {
 				byte[] iso_639_language_code_bytes = bs.readBytes(3);
 				iso639LanguageCode = getISO8859_1String(iso_639_language_code_bytes, 0, 3);
+			}
+			
+			if (text_label_present == 1) {
+				message_id = bs.readBits(8);
 			}
 			
 			if (multi_stream_info_present == 1) {
@@ -119,6 +124,10 @@ public class AudioPreselectionDescriptor extends DVBExtensionDescriptor {
 			if (language_code_present == 1) {
 				s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
 			}
+			if (text_label_present == 1) {
+				s.add(new DefaultMutableTreeNode(new KVP("message_id",message_id,null)));
+			}
+
 			if (multi_stream_info_present == 1) {
 				s.add(new DefaultMutableTreeNode(new KVP("num_aux_components",num_aux_components,null)));
 				s.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use2,null)));
