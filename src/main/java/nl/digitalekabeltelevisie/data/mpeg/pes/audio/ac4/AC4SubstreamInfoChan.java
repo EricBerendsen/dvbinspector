@@ -123,7 +123,9 @@ public class AC4SubstreamInfoChan extends AC4SubstreamInfo implements TreeNode {
 			add_ch_base = bs.readBits(1);
 		}
 		
-		//parentAc4Toc.get
+		// TODO find ac4_presentation_v1_info that uses this substream 
+		// use that frame_rate_factor
+
 		//for (int i = 0; i <  frame_rate_factor; i++) {
 		for (int i = 0; i <  1; i++) { // TODO get frame_rate_factor
 			int b_audio_ndot = bs.readBits(1);

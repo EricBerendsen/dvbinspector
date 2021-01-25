@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,6 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -47,11 +48,13 @@ import nl.digitalekabeltelevisie.util.BitSource;
  */
 public class AC4SubstreamGroupInfo implements TreeNode {
 	
+	private static final Logger	logger	= Logger.getLogger(AC4SubstreamGroupInfo.class.getName());
 	
 	public class ChannelCodedSubstream  implements TreeNode {
 		
 		private int sus_ver;
 		private AC4SubstreamInfoChan ac4_substream_info_chan;
+		private Ac4HsfExtSubstreamInfo ac4HsfExtSubstreamInfo;
 		/**
 		 * @param sus_ver
 		 */
@@ -74,8 +77,18 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("channel__coded_substream"));
 			t.add(new DefaultMutableTreeNode(new KVP("sus_ver",sus_ver,null)));
 			t.add(ac4_substream_info_chan.getJTreeNode(modus));
+			if (b_hsf_ext == 1) {
+				t.add(ac4HsfExtSubstreamInfo.getJTreeNode(modus));				
+			}
 
 			return t;
+		}
+
+		/**
+		 * @param ac4HsfExtSubstreamInfo
+		 */
+		public void setAc4HsfExtSubstreamInfo(Ac4HsfExtSubstreamInfo ac4HsfExtSubstreamInfo) {
+			this.ac4HsfExtSubstreamInfo = ac4HsfExtSubstreamInfo;
 		}
 	}
 		
@@ -83,6 +96,7 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 		
 		private int b_ajoc;
 		private AC4SubstreamInfoObj ac4_substream_info_obj;
+		private Ac4HsfExtSubstreamInfo ac4HsfExtSubstreamInfo;
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
@@ -92,6 +106,9 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("ac4_substream_info_ajoc")));
 			}else {
 				t.add(ac4_substream_info_obj.getJTreeNode(modus));
+			}
+			if (b_hsf_ext == 1) {
+				t.add(ac4HsfExtSubstreamInfo.getJTreeNode(modus));				
 			}
 
 			return t;
@@ -111,6 +128,13 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 
 		public void setAc4_substream_info_obj(AC4SubstreamInfoObj ac4_substream_info_obj) {
 			this.ac4_substream_info_obj = ac4_substream_info_obj;
+		}
+
+		/**
+		 * @param ac4HsfExtSubstreamInfo
+		 */
+		public void setAc4HsfExtSubstreamInfo(Ac4HsfExtSubstreamInfo ac4HsfExtSubstreamInfo) {
+			this.ac4HsfExtSubstreamInfo = ac4HsfExtSubstreamInfo;
 		}
 
 	}
@@ -171,8 +195,8 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 				channel_coded_substream.setAC4SubstreamInfoChan(ac4_substream_info_chan);
 				
 				if (b_hsf_ext == 1) {
-	//				ac4_hsf_ext_substream_info(b_substreams_present);
-					System.err.println("if (b_hsf_ext1 == 1) { { not implemented");
+					Ac4HsfExtSubstreamInfo ac4_hsf_ext_substream_info = new  Ac4HsfExtSubstreamInfo(bs, b_substreams_present); // 6.2.1.14
+					channel_coded_substream.setAc4HsfExtSubstreamInfo((ac4_hsf_ext_substream_info));
 				}
 			}
 		}else{
@@ -181,7 +205,7 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 				oamd_substream_info = new OamdSubstreamInfo(bs, b_substreams_present);
 			}
 			
-			//for (int sus = 0; sus < 1; sus++) {
+
 			for (int sus = 0; sus < n_lf_substreams; sus++) {
 				Substream substream = new Substream();
 				substreams.add(substream);
@@ -189,21 +213,19 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 				substream.setB_ajoc(b_ajoc);
 
 				if (b_ajoc == 1) {
-					
-					System.err.println("if (b_ajoc == 1) { not implmented");
-//			ac4_substream_info_ajoc(b_substreams_present);
-//			if (b_hsf_ext) {
-//			ac4_hsf_ext_substream_info(b_substreams_present);
-//			}
+					logger.warning("if (b_ajoc == 1) { not implmented");
+		//			ac4_substream_info_ajoc(b_substreams_present);
+		//			if (b_hsf_ext) {
+		//			ac4_hsf_ext_substream_info(b_substreams_present);
 				} else {
-					//AC4SubstreamInfoObj ac4_substream_info_obj = new AC4SubstreamInfoObj(b_substreams_present);
 					AC4SubstreamInfoObj ac4_substream_info_obj = new AC4SubstreamInfoObj(bs, parentAc4Toc, b_substreams_present);
 					substream.setAc4_substream_info_obj(ac4_substream_info_obj);
-					
+
 					if (b_hsf_ext == 1) {
-						System.err.println("if (b_hsf_ext2 == 1) { ac4_hsf_ext_substream_info not implemented");
-//						ac4_hsf_ext_substream_info(b_substreams_present);
+						Ac4HsfExtSubstreamInfo ac4_hsf_ext_substream_info = new  Ac4HsfExtSubstreamInfo(bs, b_substreams_present); // 6.2.1.14
+						substream.setAc4HsfExtSubstreamInfo(ac4_hsf_ext_substream_info);
 					}
+
 				}
 			}
 		}
@@ -225,8 +247,10 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("b_channel_coded",b_channel_coded,b_channel_coded==1?"substreams contain channel-based audio":null)));
 		if (b_channel_coded == 1) {
-			//System.err.println("if (b_channel_coded == 1) { not implemented");
 			addListJTree(t, channel_coded_substreams, modus, "channel coded substreams");
+			// TODO if (b_hsf_ext) {
+			// ac4_hsf_ext_substream_info(b_substreams_present); not implemented
+			// }
 		}else {
 			t.add(new DefaultMutableTreeNode(new KVP("b_oamd_substream",b_oamd_substream,null)));
 			if (b_oamd_substream ==1 ) {

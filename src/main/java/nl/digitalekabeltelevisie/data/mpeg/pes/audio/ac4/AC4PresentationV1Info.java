@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,11 +32,13 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
@@ -46,6 +48,8 @@ import nl.digitalekabeltelevisie.util.LookUpList;
  *
  */
 public class AC4PresentationV1Info implements TreeNode {
+	
+	private static final Logger	logger	= Logger.getLogger(AC4PresentationV1Info.class.getName());
 	
 	LookUpList presentation_config_list = new LookUpList.Builder().
 		add(0 ,"music and effects + dialogue").
@@ -67,14 +71,12 @@ public class AC4PresentationV1Info implements TreeNode {
 	private int mdcompat;
 	private int b_presentation_id;
 	private int presentation_id;
-	private int frame_rate_multiply_info;
 	private int multiplier_bit;
 	private int b_multiplier ;
 	private int frame_rate_fraction;
 	private int frame_rate_factor;
 	private int b_frame_rate_fraction;
 	private int b_frame_rate_fraction_is_4;
-	private int b_emdf_payloads_substream_info;
 	private int b_presentation_filter ;
 	private int b_enable_presentation;
 	
@@ -176,7 +178,7 @@ public class AC4PresentationV1Info implements TreeNode {
 					default:
 						/* EMDF and other data */
 						//presentation_config_ext_info();
-						System.err.println("presentation_config_ext_info not implemented");
+						logger.warning("presentation_config_ext_info not implemented");
 						break;
 				}
 			}
@@ -185,8 +187,6 @@ public class AC4PresentationV1Info implements TreeNode {
 			ac4_presentation_substream_info = new AC4PresentationSubstreamInfo(bs);
 		}
 		if (b_add_emdf_substreams==1) {
-			
-			System.err.println("if (b_add_emdf_substreams==1) { not implemented");
 			n_add_emdf_substreams= bs.readBits(2);
 			if (n_add_emdf_substreams == 0) {
 				n_add_emdf_substreams = bs.variable_bits(2) + 4;
@@ -274,6 +274,7 @@ public class AC4PresentationV1Info implements TreeNode {
 	 */
 	private static int getPresentationVersion(BitSource bs) {
 		int val = 0;
+		@SuppressWarnings("unused")
 		int b_tmp; 
 		while ((b_tmp = bs.readBits(1)) == 1) {
 			val++;
@@ -314,18 +315,31 @@ public class AC4PresentationV1Info implements TreeNode {
 			}
 			if (b_single_substream_group == 1) {
 				t.add(ac4_sgi_specifier_list.get(0).getJTreeNode(modus) );
+				t.add(new DefaultMutableTreeNode(new KVP("n_substream_groups",n_substream_groups,null)));
 			}else {
 				t.add(new DefaultMutableTreeNode(new KVP("b_multi_pid",b_multi_pid,null)));
 				t.add(new DefaultMutableTreeNode(new KVP("presentation_config",presentation_config,presentation_config_list.get(presentation_config, "Reserved"))));
-				addListJTree(t, ac4_sgi_specifier_list, modus, "ac4_sgi_specifier(s)");
+				if(presentation_config==5) {
+					t.add(new DefaultMutableTreeNode(new KVP("n_substream_groups_minus2",n_substream_groups_minus2,null)));
+				}
 				
+				addListJTree(t, ac4_sgi_specifier_list, modus, "ac4_sgi_specifier(s)");
+				t.add(new DefaultMutableTreeNode(new KVP("n_substream_groups",n_substream_groups,null)));
+				if(presentation_config>5) {
+					t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("presentation_config>5, /* EMDF and other data */, presentation_config_ext_info()")));
+					return t;
+				}
 			}
 			t.add(new DefaultMutableTreeNode(new KVP("b_pre_virtualized",b_pre_virtualized,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("b_add_emdf_substreams",b_add_emdf_substreams,null)));
 			t.add(ac4_presentation_substream_info.getJTreeNode(modus));
 			
 		}
-		
+		if (b_add_emdf_substreams==1) {
+			t.add(new DefaultMutableTreeNode(new KVP("n_add_emdf_substreams",n_add_emdf_substreams,null)));
+			addListJTree(t, substreamsEmdfInfo, modus, "emdf_info(s)");
+		}
+
 		return t;
 	}
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -71,12 +71,13 @@ public class EmdfInfo implements TreeNode {
 			key_id += bs.variable_bits(3);
 		}
 		if ((b_emdf_payloads_substream_info= bs.readBits(1)) ==1) { 
-			//emdf_payloads_substream_info();
+			// 4.2.3.10 emdf_payloads_substream_info;
 			if ((substream_index= bs.readBits(2)) ==3) {
 				substream_index += bs.variable_bits(2);
 				
 			}
 		}
+		// 4.2.14.15 emdf_protection - EMDF protection data
 		emdf_protection(bs);
 
 	}

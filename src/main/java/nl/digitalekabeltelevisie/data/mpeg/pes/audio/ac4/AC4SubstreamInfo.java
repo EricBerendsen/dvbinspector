@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -39,9 +39,12 @@ import nl.digitalekabeltelevisie.util.LookUpList;
 
 /**
  * @author Eric
+ * 
+ * does not correspond to structure in standard, but is common parent for AC4SubstreamInfoChan 
+ * and AC4SubstreamInfoObj (and maybe ac4_substream_info_ajoc which is not implmented yet)
  *
  */
-public class AC4SubstreamInfo {
+public abstract class AC4SubstreamInfo {
 	
 	public class BAudioNdot implements TreeNode{
 		

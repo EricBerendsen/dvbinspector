@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -35,6 +35,7 @@ import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
  * @author Eric
+ * Based on ETSI TS 103 190-1 V1.3.1 (2018-02)  4.2.1 raw_ac4_frame - Raw AC-4 frame
  *
  */
 public class RawAC4Frame implements TreeNode {

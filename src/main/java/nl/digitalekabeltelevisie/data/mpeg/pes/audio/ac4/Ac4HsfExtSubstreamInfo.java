@@ -36,33 +36,34 @@ import nl.digitalekabeltelevisie.util.BitSource;
 /**
  * @author Eric
  *
- * Based on ETSI TS 103 190-2 V1.2.1 (2018-02) 6.2.1.12 ac4_presentation_substream_info
  */
-public class AC4PresentationSubstreamInfo implements TreeNode {
-
-	private int b_alternative;
-	private int b_pres_ndot;
-	private int substream_index;
+public class Ac4HsfExtSubstreamInfo implements TreeNode {
+	
+	int b_substreams_present;
+	int substream_index;
+	
 
 	/**
 	 * @param bs
+	 * @param b_substreams_present
 	 */
-	public AC4PresentationSubstreamInfo(BitSource bs) {
-		b_alternative = bs.readBits(1);
-		b_pres_ndot = bs.readBits(1);
-		substream_index = bs.readBits(2);
-		if (substream_index == 3) {
-			substream_index += bs.variable_bits(2);
+	public Ac4HsfExtSubstreamInfo(BitSource bs, int b_substreams_present) {
+		this.b_substreams_present = b_substreams_present;
+		if (b_substreams_present == 1) {
+			substream_index = bs.readBits(2);
+			if (substream_index == 3) {
+				substream_index += bs.variable_bits(2);
+			}
 		}
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode ac4_presentation_substream_info_node = new DefaultMutableTreeNode(new KVP("ac4_presentation_substream_info"));
-		ac4_presentation_substream_info_node.add(new DefaultMutableTreeNode(new KVP("b_alternative",b_alternative,null)));
-		ac4_presentation_substream_info_node.add(new DefaultMutableTreeNode(new KVP("b_pres_ndot",b_pres_ndot,null)));
-		ac4_presentation_substream_info_node.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
-		return ac4_presentation_substream_info_node;
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_hsf_ext_substream_info(b_substreams_present="+b_substreams_present));
+		if (b_substreams_present == 1) {
+			t.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
+		}
+		return t;
 	}
 
 }

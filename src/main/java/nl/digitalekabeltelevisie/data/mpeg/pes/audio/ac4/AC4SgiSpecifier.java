@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
+import java.util.logging.Logger;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -36,9 +38,14 @@ import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
  * @author Eric
+ * 
+ * Based on ETSI TS 103 190-2 V1.2.1 (2018-02) 6.2.1.7 ac4_sgi_specifier
  *
  */
 public class AC4SgiSpecifier implements TreeNode {
+	
+	private static final Logger	logger	= Logger.getLogger(AC4SgiSpecifier.class.getName());
+
 
 	private int group_index;
 	private int bitstream_version;
@@ -51,7 +58,7 @@ public class AC4SgiSpecifier implements TreeNode {
 		this.bitstream_version = bitstream_version;
 		if (bitstream_version == 1) {
 			//ac4_substream_group_info();
-			System.err.print("ac4_substream_group_info not implemented");
+			logger.warning("ac4_substream_group_info not implemented");
 		}else {
 			group_index= bs.readBits(3);
 			if (group_index == 7) {
@@ -67,7 +74,6 @@ public class AC4SgiSpecifier implements TreeNode {
 		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_sgi_specifier"));
 		if (bitstream_version == 1) {
 			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("ac4_substream_group_info")));
-			System.err.print("ac4_substream_group_info not implemented");
 		}else {
 			t.add(new DefaultMutableTreeNode(new KVP("group_index",group_index,null)));
 		}
