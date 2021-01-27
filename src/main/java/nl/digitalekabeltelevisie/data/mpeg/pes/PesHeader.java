@@ -30,9 +30,11 @@ package nl.digitalekabeltelevisie.data.mpeg.pes;
 import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
 import static nl.digitalekabeltelevisie.util.Utils.MASK_1BIT;
 import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
 import static nl.digitalekabeltelevisie.util.Utils.getBytes;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import static nl.digitalekabeltelevisie.util.Utils.getLong;
+import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -49,6 +51,56 @@ import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
  *
  */
 public class PesHeader implements TreeNode {
+
+
+	class AdDescriptor implements TreeNode{
+		
+		// based on TS 101 154 V2.6.1 (2019-09) Table E.1: AD_descriptor
+		
+		private int ad_descriptor_length;
+		private byte[] ad_text_tag;
+		private int version_text_tag;
+		private int ad_fade_byte;
+		private int ad_pan_byte;
+		private int ad_gain_byte_center;
+		private int ad_gain_byte_front;
+		private int ad_gain_byte_surround;
+
+
+		AdDescriptor(byte[] data){
+			ad_descriptor_length = getInt(data, 0, 1, MASK_4BITS);
+			ad_text_tag = getBytes(data, 1, 5);
+			version_text_tag = getInt(data, 6, 1, MASK_8BITS);
+			ad_fade_byte = getInt(data, 7, 1, MASK_8BITS);
+			ad_pan_byte = getInt(data, 8, 1, MASK_8BITS);
+			if (version_text_tag == 0x32) {
+				ad_gain_byte_center  = getInt(data, 9, 1, MASK_8BITS);
+				ad_gain_byte_front  = getInt(data, 10, 1, MASK_8BITS);
+				ad_gain_byte_surround = getInt(data, 11, 1,MASK_8BITS);
+			}
+		}
+		
+
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			
+			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AD_descriptor"));
+			t.add(new DefaultMutableTreeNode(new KVP("AD_descriptor_length", ad_descriptor_length, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("AD_text_tag", ad_text_tag, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("version_text_tag", version_text_tag, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("AD_fade_byte", ad_fade_byte, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("AD_pan_byte", ad_pan_byte, null)));
+			if (version_text_tag == 0x32) {
+				t.add(new DefaultMutableTreeNode(new KVP("AD_gain_byte center", ad_gain_byte_center, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("AD_gain_byte front", ad_gain_byte_front, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("AD_gain_byte surround", ad_gain_byte_surround, null)));
+			}
+
+			return t;
+		}
+		
+		
+	}
 
 	private final byte[] data;
 	private final int offset;
@@ -85,6 +137,7 @@ public class PesHeader implements TreeNode {
 	private byte[] pes_private_data;
 	private int pack_field_length;
 	private byte[] pack_header;
+	private AdDescriptor adDescriptor;
 
 	/**
 	 * @param data
@@ -159,6 +212,10 @@ public class PesHeader implements TreeNode {
 				if (pes_private_data_flag == 1) {
 					pes_private_data = getBytes(data, off, 16);
 					off += 16;
+
+					if(indexOf(pes_private_data, new byte[]{0x44,0x54,0x47,0x41,0x44}, 0)==1) { // DTGAD  // AD_descriptor TS 101 154 V2.6.1 (2019-09) Table E.1
+						adDescriptor = new AdDescriptor(pes_private_data);
+					}
 				}
 				if (pack_header_field_flag == 1) {
 					pack_field_length = getInt(data, off, 1, MASK_8BITS);
@@ -258,7 +315,11 @@ public class PesHeader implements TreeNode {
 					t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
 					t.add(new DefaultMutableTreeNode(new KVP("PES_extension_flag_2", pes_extension_flag_2, null)));
 					if ( pes_private_data_flag == 1) {
-						t.add(new DefaultMutableTreeNode(new KVP("PES_private_data", pes_private_data, null)));
+						DefaultMutableTreeNode privateDataNode = new DefaultMutableTreeNode(new KVP("PES_private_data", pes_private_data, null));
+						t.add(privateDataNode);
+						if(adDescriptor != null) {
+							privateDataNode.add(adDescriptor.getJTreeNode(modus));
+						}
 					}
 					
 					if (pack_header_field_flag == 1) {
