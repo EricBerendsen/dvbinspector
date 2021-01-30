@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -252,47 +252,48 @@ public class TransportStream implements TreeNode{
 	 * @throws IOException
 	 */
 	public void parsePSITables(final java.awt.Component component) throws IOException {
-		final PositionPushbackInputStream fileStream = getInputStream(component);
-		final byte [] buf = new byte[packetLength];
-		int count=0;
-		no_packets = 0;
+		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
+			final byte[] buf = new byte[packetLength];
+			int count = 0;
+			no_packets = 0;
 
-		pids = new PID [8192];
-		psi = new PSI();
-		error_packets = 0;
-		bitRate = -1;
-		bitRateTDT = -1;
+			pids = new PID[8192];
+			psi = new PSI();
+			error_packets = 0;
+			bitRate = -1;
+			bitRateTDT = -1;
 
-		int bytes_read =0;
-		int lastHandledSyncErrorPacket = -1;
-		do {
-			final long offset = fileStream.getPosition();
-			bytes_read = fileStream.read(buf, 0, packetLength);
-			final int next = fileStream.read();
-			if((bytes_read==packetLength)&&
-					(buf[0]==MPEGConstants.sync_byte) &&
-					((next==-1)||(next==MPEGConstants.sync_byte))) {
-				//always push back first byte of next packet
-				if((next!=-1)) {
-					fileStream.unread(next);
-				}
-				offsetHelper.addPacket(no_packets,offset);
-				processPacket(new TSPacket(buf, count,this));
-				count++;
-			}else{ // something wrong, find next syncbyte. First push back the lot
-				if((next!=-1)) {
-					if(lastHandledSyncErrorPacket != no_packets){
-						sync_errors++;
-						logger.severe("Did not find sync byte, resyncing at offset:"+offset+", packet_no:"+no_packets);
-						lastHandledSyncErrorPacket = no_packets;
+			int bytes_read = 0;
+			int lastHandledSyncErrorPacket = -1;
+			do {
+				final long offset = fileStream.getPosition();
+				bytes_read = fileStream.read(buf, 0, packetLength);
+				final int next = fileStream.read();
+				if ((bytes_read == packetLength) && (buf[0] == MPEGConstants.sync_byte)
+						&& ((next == -1) || (next == MPEGConstants.sync_byte))) {
+					// always push back first byte of next packet
+					if ((next != -1)) {
+						fileStream.unread(next);
 					}
-					fileStream.unread(next);
-					fileStream.unread(buf, 0, bytes_read);
-					// now read 1 byte and restart all
-					fileStream.read(); //ignore result
+					offsetHelper.addPacket(no_packets, offset);
+					processPacket(new TSPacket(buf, count, this));
+					count++;
+				} else { // something wrong, find next syncbyte. First push back the lot
+					if ((next != -1)) {
+						if (lastHandledSyncErrorPacket != no_packets) {
+							sync_errors++;
+							logger.severe("Did not find sync byte, resyncing at offset:" + offset + ", packet_no:"
+									+ no_packets);
+							lastHandledSyncErrorPacket = no_packets;
+						}
+						fileStream.unread(next);
+						fileStream.unread(buf, 0, bytes_read);
+						// now read 1 byte and restart all
+						fileStream.read(); // ignore result
+					}
 				}
-			}
-		} while (bytes_read==packetLength);
+			} while (bytes_read == packetLength);
+		}
 		namePIDs();
 		calculateBitRate();
 	}
@@ -971,51 +972,6 @@ public class TransportStream implements TreeNode{
 		return packet;
 	}
 
-
-	public Iterator<TSPacket> getTSPacketsIterator(final int pid, final int flags){
-		return  getTSPacketsIterator(pid, flags, 0, getNo_packets());
-	}
-
-	public Iterator<TSPacket> getTSPacketsIterator(final int pid, final int flags, final int start, final int end){
-
-		final Iterator<TSPacket> iter = new Iterator<TSPacket>(){
-
-			int pos = findNext(start-1);
-
-			private int findNext(final int pos){
-				int p = pos+1;
-				while((p<end)&&(!match(p))){
-					p++;
-				}
-				return p;
-
-			}
-
-			private boolean match(final int p) {
-				return (packet_pid[p]&(0x1fff | flags))==( pid | flags) ;
-			}
-
-			@Override
-			public boolean hasNext() {
-				return pos<end;
-			}
-
-			@Override
-			public TSPacket next() {
-				final TSPacket packet = getTSPacket(pos);
-				pos = findNext(pos);
-				return packet;
-			}
-
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-
-		};
-		return iter;
-
-	}
 
 	public PID getPID(final int p){
 		return pids[p];
