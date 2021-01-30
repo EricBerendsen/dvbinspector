@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 
 import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
@@ -162,7 +163,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	private final ChartPanel chartPanel;
 	private boolean legendVisible = true;
 
-	JComboBox<String> serviceChooser = new JComboBox<String>() ;
+	JComboBox<String> serviceChooser = new JComboBox<>() ;
 	private ViewContext viewContext;
 	
 	static DecimalFormat df = new DecimalFormat("#0.00");
@@ -182,7 +183,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		super(new BorderLayout());
 		this.transportStream = transportStream;
 		topRowbuttonPanel = createTopRowButtonPanel();
-		seriesSelectionPanel = new JPanel(new WrapLayout());;
+		seriesSelectionPanel = new JPanel(new WrapLayout());
 		controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 		controls.add(topRowbuttonPanel);
@@ -366,6 +367,10 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 
 		useBlackOutlinePaint(categoryTableXYDataset, renderer);
+		
+		// workaround for https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8213535
+		// JDK-8213535 : Windows HiDPI html lightweight tooltips are truncated
+		UIManager.put("ToolTip.font",  new FontUIResource("SansSerif", Font.PLAIN, 12));
 
 		final XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("<htmL>{0}<br\\>{1}<br\\>value: {2}</html>",
 				packetTimeNumberFormatLabel, timeStampNumberFormat);
@@ -410,7 +415,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		int seriesCount = categoryTableXYDataset.getSeriesCount();
 		for (int i = 0; i < seriesCount; i++) {
 			renderer.setSeriesOutlinePaint(i, Color.black);
-		};
+		}
 		renderer.setUseOutlinePaint(true);
 	}
 
