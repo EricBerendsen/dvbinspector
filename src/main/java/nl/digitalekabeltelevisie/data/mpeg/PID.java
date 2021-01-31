@@ -115,7 +115,7 @@ public class PID implements TreeNode{
 	private final ArrayList<TimeStamp> ptsList = new ArrayList<>();
 	private final ArrayList<TimeStamp> dtsList = new ArrayList<>();
 	
-	private final HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = new HashMap<Integer, ArrayList<TemiTimeStamp>>();
+	private final HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = new HashMap<>();
 
 	private final LabelMaker labelMaker = new LabelMaker();
 	
@@ -240,7 +240,7 @@ public class PID implements TreeNode{
 	class LabelMaker{
 		
 		private String base;
-		private LinkedHashMap <String, LinkedHashSet<String>> components = new LinkedHashMap<String, LinkedHashSet<String>>();
+		private LinkedHashMap <String, LinkedHashSet<String>> components = new LinkedHashMap<>();
 		
 		void setBase(String base) {
 			this.base = base;
@@ -301,6 +301,29 @@ public class PID implements TreeNode{
 		packets++;
 	}
 
+	
+	/**
+	 * calculate value of pcr based on this pid for packet packetNo
+	 * @param packetNo
+	 * @return pcr based on 27 Mhz clock
+	 */
+	public Long getPacketPcrTime(long packetNo) {
+		
+		if((firstPCR != null) && 
+			(lastPCR != null) && 
+			!firstPCR.equals(lastPCR)){
+			
+			long diffPCR = lastPCR.getProgram_clock_reference() - firstPCR.getProgram_clock_reference();
+			long diffPackets = lastPCRpacketNo - firstPCRpacketNo;
+			
+			return firstPCR.getProgram_clock_reference() + (packetNo - firstPCRpacketNo) * diffPCR /  diffPackets;
+				
+		}
+		
+		return null;
+		
+	}
+	
 	private void updateNonErrorPacket(final TSPacket packet) {
 		if (pid == 0x015) {
 			updateMegaFrameInitializationPacket(packet);

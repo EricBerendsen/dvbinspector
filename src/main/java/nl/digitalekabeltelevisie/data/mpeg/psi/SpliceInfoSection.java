@@ -37,6 +37,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -87,12 +88,38 @@ public class SpliceInfoSection extends TableSection {
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("splice_time"));
+
+			String preRoolTime = getPreRollTimeString();
+			
+			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("splice_time"+preRoolTime));
 			t.add(new DefaultMutableTreeNode(new KVP("time_specified_flag",time_specified_flag,null)));
 			if(time_specified_flag==1){
 				t.add(new DefaultMutableTreeNode(new KVP("pts_time",pts_time,Utils.printTimebase90kHz(pts_time))));
 			}
 			return t;
+		}
+
+		private String getPreRollTimeString() {
+			String preRollTime = "";
+			if (time_specified_flag == 1) {
+				PID parentPid = getParentPID();
+				TransportStream ts = parentPid.getParentTransportStream();
+				PMTs pmts = ts.getPsi().getPmts();
+
+				List<PMTsection> pmtList = pmts.findPMTsFromComponentPID(parentPid.getPid());
+				if (pmtList.size() >= 1) {
+					PMTsection pmt = pmtList.get(0);
+					PID pcrPid = ts.getPID(pmt.getPcrPid());
+
+					Long packetPcrTime = pcrPid.getPacketPcrTime(getFirst_packet_no()); // 27 Mhz
+					if (packetPcrTime != null) {
+						// ptsTime = 90 kHz clock
+						double preRollSecs = ((double) (getSpliceTimeAdjusted() - (packetPcrTime / 300))) / 90_000L;
+						preRollTime = String.format(" (preroll time = %3.3f secs)", preRollSecs);
+					}
+				}
+			}
+			return preRollTime;
 		}
 
 		public int getTime_specified_flag() {
@@ -102,6 +129,12 @@ public class SpliceInfoSection extends TableSection {
 		public long getPts_time() {
 			return pts_time;
 		}
+		
+		public long getSpliceTimeAdjusted() {
+			long time = (pts_time + pts_adjustment) & Utils.MASK_33BITS;
+			return time;
+		}
+
 	}
 	
 	

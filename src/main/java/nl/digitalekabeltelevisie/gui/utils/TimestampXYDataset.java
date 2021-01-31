@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -37,7 +37,6 @@ import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.util.Utils;
 
 public class TimestampXYDataset implements XYDataset {
 	
@@ -83,9 +82,9 @@ public class TimestampXYDataset implements XYDataset {
 
 	private void findSCTE35Points(TransportStream transportStream, boolean hasSCTE35, Component component) {
 		if(hasSCTE35 && component.getStreamtype()==0x86){
-			List<TimeStamp> exitPoints = new ArrayList<TimeStamp>();
-			List<TimeStamp> returnPoints = new ArrayList<TimeStamp>();
-			List<TimeStamp> timeSignalPoints = new ArrayList<TimeStamp>();
+			List<TimeStamp> exitPoints = new ArrayList<>();
+			List<TimeStamp> returnPoints = new ArrayList<>();
+			List<TimeStamp> timeSignalPoints = new ArrayList<>();
 			SpliceInfoSections spliceSections = transportStream.getPsi().getScte35_table().getSpliceInfoSections((short) component.getElementaryPID());
 			if(spliceSections!=null){
 				findSpliceInserts(exitPoints, returnPoints, timeSignalPoints,spliceSections);
@@ -115,9 +114,7 @@ public class TimestampXYDataset implements XYDataset {
 						.getSplice_command();
 				SpliceInfoSection.SpliceTime spliceTime = timeSignal.getSplice_time();
 				if ((spliceTime != null) && (spliceTime.getTime_specified_flag() == 1)) {
-					long time = getSpliceTimeAdjusted(spliceSection, spliceTime);
-					int packetNo = spliceSection.getPacket_no();
-					TimeStamp ts = new TimeStamp(packetNo, time);
+					TimeStamp ts = new TimeStamp(spliceSection.getPacket_no(), spliceTime.getSpliceTimeAdjusted());
 					timeSignalPoints.add(ts);
 				}
 			}
@@ -128,9 +125,7 @@ public class TimestampXYDataset implements XYDataset {
 			SpliceInfoSection spliceSection, SpliceInfoSection.SpliceInsert spliceInsert) {
 		SpliceInfoSection.SpliceTime spliceTime = spliceInsert.getSplice_time();
 		if ((spliceTime != null) && (spliceTime.getTime_specified_flag() == 1)) {
-			long time = getSpliceTimeAdjusted(spliceSection, spliceTime);
-			int packetNo = spliceSection.getPacket_no();
-			TimeStamp ts = new TimeStamp(packetNo, time);
+			TimeStamp ts = new TimeStamp(spliceSection.getPacket_no(), spliceTime.getSpliceTimeAdjusted());
 			if (spliceInsert.getOut_of_network_indicator() == 1) {
 				exitPoints.add(ts);
 			} else {
@@ -139,17 +134,6 @@ public class TimestampXYDataset implements XYDataset {
 		}
 	}
 
-	/**
-	 * @param spliceSection
-	 * @param spliceTime
-	 * @return
-	 */
-	static long getSpliceTimeAdjusted(SpliceInfoSection spliceSection, SpliceInfoSection.SpliceTime spliceTime) {
-		long ptsTime = spliceTime.getPts_time();
-		long ptsAdjust = spliceSection.getPts_adjustment();
-		long time = (ptsTime + ptsAdjust) & Utils.MASK_33BITS;
-		return time;
-	}
 
 	private static String getComponentLabel(TransportStream transportStream, Component component) {
 		return (short) component.getElementaryPID()+" - "+transportStream.getShortLabel((short) component.getElementaryPID());
@@ -161,7 +145,7 @@ public class TimestampXYDataset implements XYDataset {
 			seriesKeys.add(componentLabel);
 			TimeStamp startKey = new TimeStamp(startPacket, 0);
 			TimeStamp endKey = new TimeStamp(endPacket, Long.MAX_VALUE);
-			Comparator<TimeStamp> comperator = new Comparator<TimeStamp>() {
+			Comparator<TimeStamp> comperator = new Comparator<>() {
 				
 				@Override
 				public int compare(TimeStamp o1, TimeStamp o2) {
