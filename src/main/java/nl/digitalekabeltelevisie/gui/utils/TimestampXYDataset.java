@@ -145,23 +145,10 @@ public class TimestampXYDataset implements XYDataset {
 			seriesKeys.add(componentLabel);
 			TimeStamp startKey = new TimeStamp(startPacket, 0);
 			TimeStamp endKey = new TimeStamp(endPacket, Long.MAX_VALUE);
-			Comparator<TimeStamp> comperator = new Comparator<>() {
-				
-				@Override
-				public int compare(TimeStamp o1, TimeStamp o2) {
-					if (o1.getPacketNo() < o2.getPacketNo()) {
-						return -1;
-					} else if (o1.getPacketNo() > o2.getPacketNo()) {
-						return 1;
-					} else if (o1.getTime() < o2.getTime()) {
-						return -1;
-					} else if (o1.getTime() > o2.getTime()) {
-						return 1;
-					} else {
-						return 0;
-					}
-				}
-			};
+			Comparator<TimeStamp> comperator = Comparator
+											.comparingInt(TimeStamp::getPacketNo)
+											.thenComparingLong(TimeStamp::getTime);
+			
 			int startOffset = Collections.binarySearch(list, startKey, comperator);
 			if(startOffset<0){ 
 				startOffset = (-startOffset)-1;
