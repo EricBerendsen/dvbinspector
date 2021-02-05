@@ -31,9 +31,9 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen
@@ -51,9 +51,7 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 
 	private final String iso639LanguageCode;
 
-	// TODO this should be a DVBString, but then it has to follow a length byte. That is not there....
-
-	private final String text;
+	private final DVBString text;
 
 	public ComponentDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
@@ -62,8 +60,7 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 		componentType = getInt(b, offset + 3, 1, MASK_8BITS);
 		componentTag = getInt(b, offset + 4, 1, MASK_8BITS);
 		iso639LanguageCode = getISO8859_1String(b, offset + 5, 3);
-		// TODO txt should be a DVBString
-		text = Utils.getString(b, offset + 8, descriptorLength - 6);
+		text =  new DVBString(b, offset + 8, descriptorLength - 6);
 	}
 
 	@Override
@@ -115,11 +112,12 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 		return componentTag;
 	}
 
+	@Override
 	public String getIso639LanguageCode() {
 		return iso639LanguageCode;
 	}
 
-	public String getText() {
+	public DVBString getText() {
 		return text;
 	}
 

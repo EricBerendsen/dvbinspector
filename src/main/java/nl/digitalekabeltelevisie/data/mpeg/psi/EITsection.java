@@ -268,6 +268,10 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			for(ComponentDescriptor componentDescriptor:componentDescriptorList) {
 				r1.append("Component: ").
 					append(componentDescriptor.getStreamTypeString()).
+					append(", component_tag: ").
+					append(componentDescriptor.getComponentTag()).
+					append(", text: ").
+					append(componentDescriptor.getText().toEscapedHTML()).
 					append("<br>");
 			}
 		}
