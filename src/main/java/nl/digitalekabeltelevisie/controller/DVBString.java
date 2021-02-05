@@ -64,7 +64,26 @@ public class DVBString {
 		this.offset = offset;
 	}
 
-
+	/**
+	 * Create a DVBString where the length is explicitly specified. Most of the usage first byte of data array islength, 
+	 * but sometimes (at end of descriptor) this is not needed because it can be infered differently. 
+	 * In those cases use this constructor
+	 * 
+	 * @param dataIn
+	 * @param offset
+	 * @param len
+	 */
+	public DVBString(final byte[] dataIn, final int offset, int len) {
+		super();
+		if(len>255) {
+			throw new RuntimeException("DVB String can not be longer than 255 chars:" + len); 
+		}
+		
+		this.data = new byte[len+1];
+		this.data[0] = (byte) len;
+		this.offset = 0;
+		System.arraycopy(dataIn, offset, this.data, 1, len);
+	}
 	/**
 	 * @return HTML representation of this string, including linefeeds  (0x8A) and emphasis (0x86/0x87). Line length not limited
 	 *
