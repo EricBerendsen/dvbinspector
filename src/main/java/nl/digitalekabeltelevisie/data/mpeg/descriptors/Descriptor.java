@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -798,9 +798,8 @@ public class Descriptor implements TreeNode {
 		case 0x04:
 			if (component_type < 0x7F) {
 				return "reserved for AC-3 audio modes: " + AC3Descriptor.getComponentTypeString(component_type);
-			} else {
-				return "reserved for enhanced AC-3 audio modes: " + AC3Descriptor.getComponentTypeString(component_type);
 			}
+			return "reserved for enhanced AC-3 audio modes: " + AC3Descriptor.getComponentTypeString(component_type);
 		case 0x05:
 			return getComponentType0x05String(component_type);
 		case 0x06:
@@ -808,9 +807,8 @@ public class Descriptor implements TreeNode {
 		case 0x07:
 			if (component_type < 0x7F) {
 				return "reserved for DTS audio modes"; // TODO
-			} else {
-				return "reserved for future use";
 			}
+			return "reserved for future use";
 		case 0x08:
 			if (component_type == 0x00) {
 				return "reserved for future use";
@@ -823,7 +821,7 @@ public class Descriptor implements TreeNode {
 			return getComponentType0x09String(stream_content_ext,component_type);
 		case 0x0b:
 			if(stream_content_ext==0xE){
-				return "NGA component type feature flags, NOT implemented in DVB Inspector, please report!";
+				return getNextGenerationAudioComponentTypeString(component_type);
 			}
 			else if(stream_content_ext==0xf){
 				if (component_type == 0x00) {
@@ -854,9 +852,8 @@ public class Descriptor implements TreeNode {
 		default:
 			if (stream_content < 0x0B) {
 				return "reserved for future use";
-			} else {
-				return "user defined";
 			}
+			return "user defined";
 		}
 	}
 
@@ -963,6 +960,51 @@ public class Descriptor implements TreeNode {
 
 		}
 		return "reserved for future use";
+	}
+	
+	/**
+	 * based on Table 27: Next generation audio component_type value assignments
+	 * ETSI EN 300 468 V1.16.1 (2019-08) p.53
+	 * @param component_type
+	 * @return
+	 */
+	public static String getNextGenerationAudioComponentTypeString(final int component_type) {
+		StringBuilder res = new StringBuilder();
+		if((component_type & 0b0100_0000) != 0) {
+			res.append("content is pre-rendered for consumption with headphones, ");
+		}
+		if((component_type & 0b0010_0000) != 0) {
+			res.append("content enables interactivity, ");
+		}
+		if((component_type & 0b0001_0000) != 0) {
+			res.append("content enables dialogue enhancement, ");
+		}
+		if((component_type & 0b0000_1000) != 0) {
+			res.append("content contains spoken subtitles, ");
+		}
+		if((component_type & 0b0000_0100) != 0) {
+			res.append("ccontent contains audio description, ");
+		}
+		res.append("preferred reproduction channel layout: ");
+		switch (component_type & 0b0000_0011) {
+		case 0b00:
+			res.append("no preference");
+			break;
+		case 0b01:
+			res.append("stereo");
+			break;
+		case 0b10:
+			res.append("two-dimensional");
+			break;
+		case 0b11:
+			res.append("three-dimensional");
+			break;
+
+		default:
+			res.append("Illegal value");
+			break;
+		}
+		return res.toString();
 	}
 
 	public static String getComponentType0x01String(final int component_type) {
@@ -1262,7 +1304,7 @@ public class Descriptor implements TreeNode {
 	@SuppressWarnings("unchecked")
 	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(final List<? extends Descriptor> descriptorList, final Class<U> u ) {
 
-		final List<U> result = new ArrayList<U>();
+		final List<U> result = new ArrayList<>();
 		for (final Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				result.add((U) element);
