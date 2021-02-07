@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -31,6 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -44,10 +45,7 @@ public class MessageDescriptor extends UNTDescriptor {
 	private final int descriptorNumber;
 	private final int lastDescriptorNumber;
 	private final String iso639LanguageCode;
-
-	// TODO this should be a DVBString, but then it has to follow a length byte. That is not there....
-
-	private final String text;
+	private final DVBString text;
 
 	/**
 	 * @param b
@@ -60,8 +58,7 @@ public class MessageDescriptor extends UNTDescriptor {
 		descriptorNumber = Utils.getInt(b, offset + 2, 1, 0xF0)>>4;
 		lastDescriptorNumber = Utils.getInt(b, offset + 2, 1, Utils.MASK_4BITS);
 		iso639LanguageCode = getISO8859_1String(b, offset + 3, 3);
-
-		text = Utils.getString(b, offset + 6, descriptorLength - 4);
+		text = new DVBString(b, offset + 6, descriptorLength - 4);
 
 	}
 
@@ -87,7 +84,7 @@ public class MessageDescriptor extends UNTDescriptor {
 		return lastDescriptorNumber;
 	}
 
-	public String getText() {
+	public DVBString getText() {
 		return text;
 	}
 

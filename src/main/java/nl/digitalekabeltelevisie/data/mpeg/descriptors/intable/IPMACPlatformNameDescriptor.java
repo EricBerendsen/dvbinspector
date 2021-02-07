@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -31,9 +31,9 @@ import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen
@@ -42,10 +42,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class IPMACPlatformNameDescriptor extends INTDescriptor {
 
 	private final String iso639LanguageCode;
-
-	// TODO this should be a DVBString, but then it has to follow a length byte. That is not there....
-
-	private final String text;
+	private final DVBString text;
 
 	/**
 	 * @param b
@@ -55,8 +52,7 @@ public class IPMACPlatformNameDescriptor extends INTDescriptor {
 	public IPMACPlatformNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
 		iso639LanguageCode = getISO8859_1String(b, offset + 2, 3);
-
-		text = Utils.getString(b, offset + 5, descriptorLength - 3);
+		text = new DVBString(b, offset + 5, descriptorLength - 3);
 
 	}
 

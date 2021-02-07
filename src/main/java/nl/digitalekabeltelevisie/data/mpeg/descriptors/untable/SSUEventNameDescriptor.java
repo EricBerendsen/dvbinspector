@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -31,10 +31,12 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 /**
+ * based on ETSI TS 102 006 V1.4.1 9.5.2.11 SSU_event_name_descriptor
  * @author Eric Berendsen
  *
  */
@@ -44,13 +46,11 @@ public class SSUEventNameDescriptor extends UNTDescriptor {
 
 	private final int nameLength;
 
-	private final String name;
+	private final DVBString name;
 
 	private final int textLength;
 
-	// TODO this should be a DVBString, but then it has to follow a length byte. That is not there....
-
-	private final String text;
+	private final DVBString text;
 
 	/**
 	 * @param b
@@ -61,11 +61,11 @@ public class SSUEventNameDescriptor extends UNTDescriptor {
 		super(b, offset, parent);
 		iso639LanguageCode = getISO8859_1String(b, offset + 2, 3);
 		nameLength = getInt(b, offset + 5, 1, MASK_8BITS);
-		name = getString(b, offset + 6, nameLength);
+		// TS 102 006 V1.4.1 does not explicitly say this field uses coding as described in ETSI EN 300 468 [4], annex A. 
+		name = new DVBString(b, offset + 5);
 
 		textLength = getInt(b, offset + 6+nameLength, 1, MASK_8BITS);
-
-		text = getString(b, offset + 7+nameLength, textLength);
+		text = new DVBString(b, offset + 6+nameLength);
 
 	}
 

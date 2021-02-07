@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,17 +31,20 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class GuidanceDescriptor extends Descriptor  {
+	
+	// based on  D-Book 7 Part A v 1 March 2011 ch 8.5.3.20 Guidance Descriptor
 
 
 	int reserved;
 	int guidance_type;
 	String iso_639_language_code;
-	String guidance_char; // TODO should be DVBString
+	DVBString guidance_char;
 	int guidance_mode;
 	int reserved2;
 	byte[] reserved_for_future_use;
@@ -53,12 +56,12 @@ public class GuidanceDescriptor extends Descriptor  {
 		guidance_type = getInt(b, offset+2, 1, MASK_2BITS);
 		if(guidance_type==0){
 			iso_639_language_code=getISO8859_1String(b, offset+3, 3);
-			guidance_char = getString(b, offset+6, descriptorLength-4);
+			guidance_char = new DVBString(b, offset+6, descriptorLength-4);
 		}else if(guidance_type==1){
 			reserved2 = getInt(b, offset+3, 1, 0xFE)>>1;
 			guidance_mode = getInt(b, offset+3, 1, MASK_1BIT);
 			iso_639_language_code=getISO8859_1String(b, offset+4, 3);
-			guidance_char = getString(b, offset+7, descriptorLength-5);
+			guidance_char = new DVBString(b, offset+7, descriptorLength-5);
 		}else{
 			reserved_for_future_use = getBytes(b, offset+3, descriptorLength-3);
 		}
