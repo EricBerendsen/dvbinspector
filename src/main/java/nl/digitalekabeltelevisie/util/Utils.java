@@ -1691,12 +1691,17 @@ public final class Utils {
 		final long  p = program_clock_reference/27;
 		final long  fa = 1000000;
 
+		final long allSecs = p / fa;
+
 		//  following lines basically taken from "dvbtextsubs  Dave Chapman"
 		h=(p/(fa*60*60));
 		m=(p/(fa*60))-(h*60);
 		s=(p/fa)-(h*3600)-(m*60);
 		u=p-(h*fa*60*60)-(m*fa*60)-(s*fa);
 
+		if(PreferencesManager.isEnableSecondsTimestamp()) {
+			return allSecs+"."+f6.format(u);
+		}
 		return h+":"+f2.format(m)+":"+f2.format(s)+"."+f6.format(u);
 	}
 
@@ -1713,11 +1718,17 @@ public final class Utils {
 		long  u;
 		final long  p = ts/9;
 
+		final long allSecs = ts / 90_000L;
+		
 		//  following lines basically taken from "dvbtextsubs  Dave Chapman"
 		h=(p/(10000L*60*60));
 		m=(p/(10000L*60))-(h*60);
 		s=(p/10000L)-(h*3600)-(m*60);
 		u=p-(h*10000L*60*60)-(m*10000L*60)-(s*10000L);
+
+		if(PreferencesManager.isEnableSecondsTimestamp()) {
+			return allSecs+"."+f6.format(u);
+		}
 
 		return h+":"+f2.format(m)+":"+f2.format(s)+"."+f4.format(u);
 	}

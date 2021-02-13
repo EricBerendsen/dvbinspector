@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -58,6 +58,8 @@ public class PreferencesManager {
 	private static final String ENABLE_M7_FASTSCAN = "enable_m7_fastscan";
 
 	private static final String SELECT_MPEG_FILE_FILTER = "select_mpeg_file_filter";
+	
+	private static final String ENABLE_SECONDS_TIMESTAMP_FORMAT = "enable_seconds_timestamp_format";
 
 	// private constructor to avoid client applications to use constructor
 	private PreferencesManager() {
@@ -196,6 +198,19 @@ public class PreferencesManager {
 	public static boolean isSelectMpegFileFilter() {
 		return getSelectMpegFileFilter();
 	}
+
+	public static void setEnableSecondsTimestamp(boolean enabled) {
+		prefs.putBoolean(ENABLE_SECONDS_TIMESTAMP_FORMAT, enabled);
+	}
+
+	public static boolean getEnableSecondsTimestamp() {
+		return prefs.getBoolean(ENABLE_SECONDS_TIMESTAMP_FORMAT, false);
+	}
+
+	public static boolean isEnableSecondsTimestamp() {
+		return getEnableSecondsTimestamp();
+	}
+
 
 
 }
