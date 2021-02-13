@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -286,7 +286,7 @@ public class TableSection implements TreeNode{
         case 0xD8 : return "user defined / ATSC - Cable Emergency Alert";
         case 0xD9 : return "user defined / ATSC - Aggregate Data Event Table";
         case 0xDA : return "user defined / ATSC - Satellite VCT (SVCT)";
-        case 0xFC : return "user defined / SCTE3 - Splice_info_section (SCTE-35)";
+        case 0xFC : return "user defined / SCTE - Splice_info_section (SCTE-35)";
 
 		case 0xFF: return "not used (illegal)";
 
