@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -393,8 +393,24 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		enablePcrPtsView.setSelected(PreferencesManager.isEnablePcrPtsView());
 		settingsMenu.add(enablePcrPtsView);
 		
-
+		final JMenu timestampPresentationMenu = new JMenu("Timestamp format");
+		privateDataSubMenu.setMnemonic(KeyEvent.VK_T);
+		boolean showSeconds = PreferencesManager.getEnableSecondsTimestamp();
+		final ButtonGroup tsFormatGroup = new ButtonGroup();
 		
+		final JMenuItem hhmmssItem = new JRadioButtonMenuItem("hh:mm:ss.SSS");
+		tsFormatGroup.add(hhmmssItem);
+		hhmmssItem.addActionListener(new TimestampFormatAction(this,false));
+		hhmmssItem.setSelected(!showSeconds);
+		timestampPresentationMenu.add(hhmmssItem);
+
+		final JMenuItem secondsItem = new JRadioButtonMenuItem("seconds.SSS");
+		tsFormatGroup.add(secondsItem);
+		secondsItem.addActionListener(new TimestampFormatAction(this,true));
+		secondsItem.setSelected(showSeconds);
+		timestampPresentationMenu.add(secondsItem);
+		
+		settingsMenu.add(timestampPresentationMenu);
 		return settingsMenu;
 	}
 
@@ -694,6 +710,20 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		searchEnummeration = null;
 		searchString = null;
 		findNextAction.setEnabled(false);
+	}
+
+	/**
+	 * 
+	 */
+	public void refreshViews() {
+		
+		for(final TransportStreamView v: views) {
+			v.refreshView();
+		}
+
+		
+		// TODO Auto-generated method stub
+		
 	}
 
 

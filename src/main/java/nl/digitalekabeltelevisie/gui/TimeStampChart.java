@@ -521,4 +521,10 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 
+	
+	@Override
+	public void refreshView() {
+		repaint();
+		
+	}
 }

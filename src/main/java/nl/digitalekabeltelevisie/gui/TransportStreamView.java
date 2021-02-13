@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,8 +34,18 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 public interface TransportStreamView {
 
 	/**
-	 * @param transportStream
+	 * Called on views when transportstream changed, or viewcontext changed. Most of time means need to recalculate view
+	 * @param transportStream can be null
 	 * @param viewContext
 	 */
 	void setTransportStream(TransportStream transportStream,  ViewContext viewContext);
+	
+	/**
+	 * To be implemented by views that are depended on Preferences to change their representation.
+	 * Like when timestamp format changes from secs to hh:mm:ss, timestamp view needs to repaint.
+	 * DVBTree needs to rebuild entire tree.  
+	 */
+	default void refreshView() {
+		
+	}
 }

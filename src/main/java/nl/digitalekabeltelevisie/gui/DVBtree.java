@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -383,20 +383,26 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @return true if bit(s) was set as result of this operation
 	 */
 	public boolean toggleMod(final int modus) {
-		this.mod = this.mod ^ modus;
-		
-		String state = "";
-		if(isNotStructuralChange(modus)) {
-			state = getExpansionState();
-		}
+
+		mod = mod ^ modus;
 
 		PreferencesManager.setDefaultViewModus(mod);
 
 		refreshView();
-		if(isNotStructuralChange(modus)) {
+		return (this.mod&modus)!=0;
+	}
+
+	
+	@Override
+	public void refreshView() {
+		String state = "";
+		if(isNotStructuralChange(mod)) {
+			state = getExpansionState();
+		}
+		rebuildTree();
+		if(isNotStructuralChange(mod)) {
 			setExpansionState(state);
 		}
-		return (this.mod&modus)!=0;
 	}
 
 	/**
@@ -408,7 +414,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		return (modus != SIMPLE_MODUS) && (modus != PSI_ONLY_MODUS) && (modus != PACKET_MODUS);
 	}
 
-	private void refreshView(){
+	private void rebuildTree(){
 		if(ts!=null){
 			model = new DefaultTreeModel(ts.getJTreeNode(this.mod));
 			tree.setModel(model);
@@ -680,7 +686,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		}
 	}
 
-	private JFileChooser createFileChooserDefaultSaveDir() {
+	private static JFileChooser createFileChooserDefaultSaveDir() {
 		final String defaultDir = PreferencesManager.getSaveDir();
 		final JFileChooser chooser = new JFileChooser();
 		if(defaultDir!=null){
