@@ -57,7 +57,7 @@ public class PsiSectionData {
 	private byte [] data ;
 	private int noBytes=0;
 	private int packet_no=0;
-	private final TransportStream transportStream;
+	final TransportStream transportStream;
 	private final PID parentPID;
 
 	private boolean complete = false;
@@ -183,7 +183,7 @@ public class PsiSectionData {
 						transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
 					}else if(tableId== 0xBD) {
 						transportStream.getPsi().getM7fastscan().update(new FSTsection(this, parentPID));
-					}else if((tableId== 0xBE) && isONTSection(pid)) {
+					}else if((tableId== 0xBE) && transportStream.isONTSection(pid)) {
 						transportStream.getPsi().getM7fastscan().update(new ONTSection(this, parentPID));
 					}
 				}
@@ -191,29 +191,6 @@ public class PsiSectionData {
 		} catch (final RuntimeException re) {
 			logger.log(Level.WARNING, "RuntimeException in updatePSI PSI data: pid="+pid, re);
 		}
-	}
-
-	private boolean isONTSection(int pid) {
-		final NIT nit = transportStream.getPsi().getNit();
-		final int actualNetworkID = nit.getActualNetworkID();
-		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
-		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors,
-				LinkageDescriptor.class);
-
-		int streamID = transportStream.getStreamID();
-
-		final int originalNetworkID = nit.getOriginalNetworkID(actualNetworkID, streamID);
-
-		for (final LinkageDescriptor ld : linkageDescriptors) {
-			if (ld.getLinkageType() == 0x8D 
-					&& ld.getTransportStreamId() == streamID
-					&& ld.getOriginalNetworkId() == originalNetworkID 
-					&& ld.getServiceId() == pid
-					&& M7Fastscan.isValidM7Code(ld.getM7_code())) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean isSpliceInfoSection(int pid) {
@@ -252,8 +229,9 @@ public class PsiSectionData {
 	public int getPacket_no() {
 		return packet_no;
 	}
+	
 	private boolean isINTSection(final int pid){
-		final List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptors();
+		final List<LinkageDescriptor> linkageDescriptors = transportStream.getLinkageDescriptorsFromNitNetworkLoop();
 
 		for (final LinkageDescriptor ld : linkageDescriptors) {
 			if(ld.getLinkageType()==0x0B){
@@ -277,18 +255,6 @@ public class PsiSectionData {
 		}
 		return false;
 	}
-
-	/**
-	 * @return
-	 */
-	private List<LinkageDescriptor> getLinkageDescriptors() {
-		final NIT nit = transportStream.getPsi().getNit();
-		final int actualNetworkID = nit.getActualNetworkID();
-		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
-		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
-		return linkageDescriptors;
-	}
-
 
 	/**
 	 *

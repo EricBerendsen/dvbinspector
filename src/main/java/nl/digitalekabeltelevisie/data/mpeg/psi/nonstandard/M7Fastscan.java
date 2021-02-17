@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -171,11 +171,11 @@ public class M7Fastscan implements TreeNode {
 			t.add(ont);
 		}
 
-		for (Integer operatorId : new TreeSet<Integer>(operators.keySet())) {
+		for (Integer operatorId : new TreeSet<>(operators.keySet())) {
 			Map<Integer, OperatorFastscan> operatorsInPid = operators.get(operatorId);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("operator_network_id",operatorId,getOperatorName(operatorId)));
 			t.add(n);
-			for (Integer pid : new TreeSet<Integer>(operatorsInPid.keySet())) {
+			for (Integer pid : new TreeSet<>(operatorsInPid.keySet())) {
 				OperatorFastscan operatorFastscan = operatorsInPid.get(pid);
 				n.add(operatorFastscan.getJTreeNode(modus));
 			}
@@ -196,6 +196,14 @@ public class M7Fastscan implements TreeNode {
 
 		tableModel.process();
 		return tableModel;
+	}
+
+	public Map<Integer, Map<Integer, OperatorFastscan>> getOperators() {
+		return operators;
+	}
+
+	public ONTSection[] getOntSections() {
+		return ontSections;
 	}
 
 

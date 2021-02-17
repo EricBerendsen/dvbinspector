@@ -8,7 +8,7 @@ import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.formatS
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -116,7 +116,7 @@ public class OperatorFastscan implements TreeNode{
 		return n;
 	}
 
-	private String getOperatorSubListName() {
+	public String getOperatorSubListName() {
 		return m7Fastscan.getOperatorSubListName(operatorNetworkId,pid);
 	}
 
@@ -309,6 +309,26 @@ public class OperatorFastscan implements TreeNode{
 
 		tableModel.process();
 		return tableModel;
+	}
+
+	public static Charset getM7FastScanCharset() {
+		return m7FastScanCharset;
+	}
+
+	public int getPid() {
+		return pid;
+	}
+
+	public int getOperatorNetworkId() {
+		return operatorNetworkId;
+	}
+
+	public FNTsection[] getFntSections() {
+		return fntSections;
+	}
+
+	public FSTsection[] getFstSections() {
+		return fstSections;
 	}
 		
 }

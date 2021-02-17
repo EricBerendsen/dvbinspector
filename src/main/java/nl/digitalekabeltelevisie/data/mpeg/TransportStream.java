@@ -58,6 +58,9 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
+import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.OperatorFastscan;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.util.*;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
@@ -571,20 +574,72 @@ public class TransportStream implements TreeNode{
 				pmtSection =(PMTsection)pmtSection.getNextVersion();
 			}
 		}
+		
+		// Tables like AIT, DSM-CC, UNT, INT< etc, are all referenced from at least one PMT, so have been given a label
+		// ALL??  no, there is an exception;
+		if(PreferencesManager.isEnableM7Fastscan()) {
+			labelM7FastscanTables();
+		}
 	}
 
-	public void labelPmtForProgram(PMTsection pmtSection, String service_name) {
+	/**
+	 * 
+	 */
+	private void labelM7FastscanTables() {
+		
+		M7Fastscan fastScan = getPsi().getM7fastscan();
+		labelM7FastscanONT(fastScan);
+		labelM7FastscanFstFnt(fastScan);
+	}
+
+	private void labelM7FastscanFstFnt(M7Fastscan fastScan) {
+		Map<Integer, Map<Integer, OperatorFastscan>> operators = fastScan.getOperators();
+		for (Integer operatorId : new TreeSet<>(operators.keySet())) {
+			Map<Integer, OperatorFastscan> operatorsInPid = operators.get(operatorId);
+			for (Integer pid : new TreeSet<>(operatorsInPid.keySet())) {
+				String name = "M7 FastScan operator "+fastScan.getOperatorName(operatorId);
+				
+				OperatorFastscan operatorFastscan = operatorsInPid.get(pid);
+				if(operatorFastscan.getOperatorSubListName()!=null) {
+					name += " " + operatorFastscan.getOperatorSubListName();
+				}
+				if(operatorFastscan.getFntSections() != null){
+					name += " FNT";
+				}
+				if(operatorFastscan.getFstSections() != null){
+					name += " FST";
+				}
+				if(pids[pid]!=null){
+					pids[pid].getLabelMaker().setBase(name);
+				}
+			}
+		}
+	}
+
+	private static void labelM7FastscanONT(M7Fastscan fastScan) {
+		ONTSection[] sections = fastScan.getOntSections();
+		if((sections != null) && (sections.length >0)) {
+			for(ONTSection section:sections) {
+				if(section != null) {
+					section.getParentPID().getLabelMaker().setBase("M7 FastScan ONT");
+					return;
+				}
+			}
+		}
+	}
+
+	private void labelPmtForProgram(PMTsection pmtSection, String service_name) {
 		addLabelMakerComponent(pmtSection.getParentPID().getPid(),"PMT",service_name);
 	}
 
-	public void labelEcmForProgram(PMTsection pmtSection, String service_name) {
+	private void labelEcmForProgram(PMTsection pmtSection, String service_name) {
 		for(CADescriptor caDescriptor:findGenericDescriptorsInList(pmtSection.getDescriptorList(), CADescriptor.class)){
 			addLabelMakerComponent(caDescriptor.getCaPID(), "ECM", "CA_ID:"+ caDescriptor.getCaSystemID()+ " ("+service_name+")");
 
 		}
 	}
 
-	public void labelPcrForProgram(PMTsection pmtSection, String service_name) {
+	private void labelPcrForProgram(PMTsection pmtSection, String service_name) {
 		final int PCR_pid = pmtSection.getPcrPid();
 		boolean pcrInComponent = false;
 		for(Component component:pmtSection.getComponentenList()) {
@@ -598,7 +653,7 @@ public class TransportStream implements TreeNode{
 
 	}
 
-	public void labelComponentsForProgram(PMTsection pmtSection, String service_name) {
+	private void labelComponentsForProgram(PMTsection pmtSection, String service_name) {
 		for(Component component:pmtSection.getComponentenList()) {
 			final int streamType = component.getStreamtype();
 			GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
@@ -999,6 +1054,38 @@ public class TransportStream implements TreeNode{
 
 	public void setError_packets(int error_packets) {
 		this.error_packets = error_packets;
+	}
+
+	/**
+	 * @return
+	 */
+	List<LinkageDescriptor> getLinkageDescriptorsFromNitNetworkLoop() {
+		final NIT nit = getPsi().getNit();
+		final int actualNetworkID = nit.getActualNetworkID();
+		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
+		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
+		return linkageDescriptors;
+	}
+
+	public boolean isONTSection(int pid) {
+		final NIT nit = getPsi().getNit();
+		final int actualNetworkID = nit.getActualNetworkID();
+		final List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptorsFromNitNetworkLoop();
+	
+		int streamID = getStreamID();
+	
+		final int originalNetworkID = nit.getOriginalNetworkID(actualNetworkID, streamID);
+	
+		for (final LinkageDescriptor ld : linkageDescriptors) {
+			if (ld.getLinkageType() == 0x8D 
+					&& ld.getTransportStreamId() == streamID
+					&& ld.getOriginalNetworkId() == originalNetworkID 
+					&& ld.getServiceId() == pid
+					&& M7Fastscan.isValidM7Code(ld.getM7_code())) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
