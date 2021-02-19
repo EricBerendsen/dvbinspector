@@ -56,11 +56,9 @@ public class GeneralPesHandler extends GeneralPidHandler{
 	private static final Logger logger = Logger.getLogger(GeneralPesHandler.class.getName());
 
 	private PesPacketData pesData= null;
-	private int pesStreamID =-1;
-	private int pesLength =-1;
 
-	protected final List<PesPacketData>	pesPackets	= new ArrayList<PesPacketData>();
-	protected int DEFAULT_BUF_LEN = 10;
+	protected final List<PesPacketData>	pesPackets	= new ArrayList<>();
+	protected static final int DEFAULT_BUF_LEN = 10;
 	protected byte[] pesDataBuffer = new byte[DEFAULT_BUF_LEN];
 	protected int bufStart = 0;
 	protected int bufEnd = 0;
@@ -81,6 +79,8 @@ public class GeneralPesHandler extends GeneralPidHandler{
 	{
 		initialized = true;
 		final byte []data = packet.getData();
+		int pesLength = -1;
+		int pesStreamID = -1;
 		if((pesData==null)){ // nothing started
 			// sometimes PayloadUnitStartIndicator is 1, and there is no payload, so check AdaptationFieldControl
 			if(packet.isPayloadUnitStartIndicator() &&
@@ -94,9 +94,9 @@ public class GeneralPesHandler extends GeneralPidHandler{
 				}else if((data[0]==0)&&(data[1]==0)&&(data[2]==1)){
 					//type = PES;
 					pesStreamID = getInt(data, 3, 1, MASK_8BITS);
-					pesLength=getInt(data,4,2, 0xFFFF);
+					pesLength =getInt(data,4,2, 0xFFFF);
 					//for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-					pesData = new PesPacketData(pesStreamID,pesLength,this,packet.getPacketNo());
+					pesData = new PesPacketData(pesStreamID, pesLength,this,packet.getPacketNo());
 					pesData.readBytes(data, 0, data.length);
 					handlePesPacketIfComplete();
 
@@ -115,9 +115,9 @@ public class GeneralPesHandler extends GeneralPidHandler{
 				// This is legal, but we can not handle it
 				if(data.length>=6){
 					pesStreamID = getInt(data, 3, 1, MASK_8BITS);
-					pesLength=getInt(data,4,2, 0xFFFF);
+					pesLength =getInt(data,4,2, 0xFFFF);
 					// for PES there can be only one pesPacket per TSpacket, and it always starts on first byte of payload.
-					pesData = new PesPacketData(pesStreamID,pesLength,this,packet.getPacketNo());
+					pesData = new PesPacketData(pesStreamID, pesLength,this,packet.getPacketNo());
 					pesData.readBytes(data, 0, data.length);
 					handlePesPacketIfComplete();
 				}else{
