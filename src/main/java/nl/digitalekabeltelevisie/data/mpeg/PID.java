@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -237,10 +236,10 @@ public class PID implements TreeNode{
 	}
 
 
-	class LabelMaker{
+	static class LabelMaker{
 		
 		private String base;
-		private LinkedHashMap <String, LinkedHashSet<String>> components = new LinkedHashMap<>();
+		private final LinkedHashMap <String, LinkedHashSet<String>> components = new LinkedHashMap<>();
 		
 		void setBase(String base) {
 			this.base = base;
@@ -275,9 +274,7 @@ public class PID implements TreeNode{
 			sb.append(type).append(" - ");
 			LinkedHashSet<String> servicesList = components.get(type);
 			
-			sb.append(servicesList.
-					stream().
-					collect(Collectors.joining(", ")));
+			sb.append(String.join(", ", servicesList));
 			return sb.toString();
 		}
 	}
@@ -456,11 +453,7 @@ public class PID implements TreeNode{
 						TimelineDescriptor timelineDescriptor = (TimelineDescriptor) descriptor;
 						if((timelineDescriptor.getHas_timestamp()==1)||
 							(timelineDescriptor.getHas_timestamp()==2)){
-							ArrayList<TemiTimeStamp> tl = temiList.get(timelineDescriptor.getTimeline_id());
-							if(tl==null){
-								tl = new ArrayList<>();
-								temiList.put(timelineDescriptor.getTimeline_id(), tl);
-							}
+							ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
 							tl.add(new TemiTimeStamp(packetNo, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
 						}
 					}
@@ -550,7 +543,7 @@ public class PID implements TreeNode{
 		t.add(list.getJTreeNode(modus, "Transport packets "));
 
 		if((generalPidHandler!=null)&&(generalPidHandler.isInitialized())) {
-			t.add(((TreeNode)generalPidHandler).getJTreeNode(modus));
+			t.add(generalPidHandler.getJTreeNode(modus));
 		}
 
 		return t;
@@ -632,14 +625,6 @@ public class PID implements TreeNode{
 
 	public GatherPIDData getGatherer() {
 		return gatherer;
-	}
-
-	public static Logger getLogger() {
-		return logger;
-	}
-
-	public static int getPes() {
-		return PES;
 	}
 
 	public ArrayList<TimeStamp> getPcrList() {

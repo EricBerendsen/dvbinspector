@@ -496,13 +496,8 @@ public class PsiSectionData {
 			return false;
 		}
 		if (transportStream == null) {
-			if (other.transportStream != null) {
-				return false;
-			}
-		} else if (!transportStream.equals(other.transportStream)) {
-			return false;
-		}
-		return true;
+			return other.transportStream == null;
+		} else return transportStream.equals(other.transportStream);
 	}
 
 }
