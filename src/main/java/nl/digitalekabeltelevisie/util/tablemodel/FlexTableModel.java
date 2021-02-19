@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.util.tablemodel;
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -35,9 +35,9 @@ import javax.swing.table.AbstractTableModel;
 public class FlexTableModel<E,R> extends AbstractTableModel {
 	
 	private static final String REPEATING_KEY_SEPARATOR = ":";
-	private List<Map<String, Object>> model = new ArrayList<>();
-	private TableHeader<E,R> tableHeader;
-	private List<String> displayableColumns = new ArrayList<String>();
+	private final List<Map<String, Object>> model = new ArrayList<>();
+	private final TableHeader<E,R> tableHeader;
+	private final List<String> displayableColumns = new ArrayList<>();
 	
 	public FlexTableModel(TableHeader<E,R> tableHeader) {
 		this.tableHeader = tableHeader;
@@ -47,7 +47,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 	public void addData(E entity, List<R> rows) {
 		for (R row : rows) {
 			if (row != null) {
-				Map<String, Object> rowData = new HashMap<String, Object>();
+				Map<String, Object> rowData = new HashMap<>();
 				List<ColumnDetails<?>> columns = tableHeader.getHeader();
 				for (ColumnDetails<?> column : columns) {
 					if (column.isBaseColumn()) {
@@ -107,7 +107,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 
 	int addRepeatingColumnGroup(List<ColumnDetails<?>> header, int headerIndexStart, ColumnDetails<?> column) {
 		int headerIndex = headerIndexStart;
-		List<ColumnDetails<?>> groupList = new ArrayList<ColumnDetails<?>>();
+		List<ColumnDetails<?>> groupList = new ArrayList<>();
 		int iterCount = column.getListMax();
 		groupList.add(column);
 		
@@ -190,7 +190,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 		return columnDetails.getDataClass();
     }
     
-	private Object getBaseKey(int columnIndex) {
+	private String getBaseKey(int columnIndex) {
 		return getBase(displayableColumns.get(columnIndex));
 	}
 

@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.util.tablemodel.cellrenderer;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -52,7 +52,7 @@ public class StreamTypeTableCellRenderer extends DefaultTableCellRenderer {
 	protected void setValue(Object value) {
     	
     	super.setValue(value);
-    	if((value != null) && (value instanceof Integer)) {
+    	if((value instanceof Integer)) {
     		int streamType = (Integer) value;
     		toolTip = Utils.getStreamTypeShortString(streamType);
     	}else {

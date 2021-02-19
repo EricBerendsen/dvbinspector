@@ -7,7 +7,7 @@ import java.util.function.Function;
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -34,8 +34,8 @@ class ColumnDetails<E>{
 
 	private String name;
 	private String key;
-	private Function<E, Object> function;
-	private Function<E, List<Object>> listFunction;
+	private final Function<E, Object> function;
+	private final Function<E, List<Object>> listFunction;
 	private Class<?> dataClass;
 	boolean isList;
 	boolean required;
@@ -44,7 +44,7 @@ class ColumnDetails<E>{
 	boolean used;
 	int listMax;
 	
-	private boolean isBaseColumn;
+	private final boolean isBaseColumn;
 	
 	public ColumnDetails(String name, String key, Function<E, Object> function, Function<E, List<Object>> listFunction,Class<?> dataClass, boolean required,boolean isList, String groupId, boolean isBaseColumn) {
 		super();

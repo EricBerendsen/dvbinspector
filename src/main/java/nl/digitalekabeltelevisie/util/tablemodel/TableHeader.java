@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.util.tablemodel;
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -31,8 +31,8 @@ import java.util.*;
 
 public class TableHeader<E,R> {
 	
-	private List<ColumnDetails<?>> header;
-	private Map<String, ColumnDetails<?>> map;
+	private final List<ColumnDetails<?>> header;
+	private final Map<String, ColumnDetails<?>> map;
 	
 
 	public TableHeader(List<ColumnDetails<?>> header, Map<String, ColumnDetails<?>> map) {
