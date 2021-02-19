@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -133,25 +133,16 @@ public final class Iso6937ToUnicode {
 	}
 
 	private static boolean hasNext(final int pos, final int len) {
-		if (pos < (len - 1)){
-			return true;
-		}
-		return false;
-	}
+        return pos < (len - 1);
+    }
 
 	private static boolean isAscii(final int i) {
-		if ((i >= 0x00) && (i <= 0x7F)){
-			return true;
-		}
-		return false;
-	}
+        return (i >= 0x00) && (i <= 0x7F);
+    }
 
 	private static boolean isCombining(final int i) {
-		if ((i >= 0xC0) && (i <= 0xDF)){
-			return true;
-		}
-		return false;
-	}
+        return (i >= 0xC0) && (i <= 0xDF);
+    }
 
 	// Source : http://anubis.dkuug.dk/JTC1/SC2/WG3/docs/6937cd.pdf
 	private  static char getChar(final int i) {

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -57,13 +57,19 @@ import javax.swing.tree.MutableTreeNode;
 public class JTreeLazyList{
 
 
-	private static int stepSize = 100;
+	private static final int STEP_SIZE = 100;
 	private MutableTreeNode mutableTreeNode = null;
 
 	LazyListItemGetter itemGetter =null;
 
 
 	public class RangeNode implements MutableTreeNode {
+
+		int level;
+		int start;
+		int end;
+		private MutableTreeNode[] children=null;
+		private String label="";
 
 		/**
 		 * @param level
@@ -85,23 +91,15 @@ public class JTreeLazyList{
 			this.label = label;
 		}
 
-		int level;
-		int start;
-		int end;
-		private MutableTreeNode[] children=null;
-		private String label="";
-
-
-
 		public String toString(){
 			StringBuilder b = new StringBuilder();
-			b.append(label).append('[').append(Integer.toString(start)).append("..").append(Integer.toString(end)).append(']');
+			b.append(label).append('[').append(start).append("..").append(end).append(']');
 			return b.toString();
 		}
 
 		private RangeNode getChild(int level, int currentStart, int index){
-			int start = currentStart+(ipower(stepSize,level)*index);
-			int end = (currentStart+(ipower(stepSize,level)*(index+1)))-1;
+			int start = currentStart+(ipower(STEP_SIZE,level)*index);
+			int end = (currentStart+(ipower(STEP_SIZE,level)*(index+1)))-1;
 			end = Math.min(itemGetter.getNoItems()-1, end);
 			return new RangeNode(level-1,start,end);
 		}
@@ -116,7 +114,7 @@ public class JTreeLazyList{
 						children[childIndex]=t;
 					}
 				}else{
-					children = new MutableTreeNode[stepSize];
+					children = new MutableTreeNode[STEP_SIZE];
 					t=getChild(level, start, childIndex);
 					children[childIndex]=t;
 				}
@@ -130,7 +128,7 @@ public class JTreeLazyList{
 						children[childIndex]=t;
 					}
 				}else{
-					children = new MutableTreeNode[stepSize];
+					children = new MutableTreeNode[STEP_SIZE];
 					t= itemGetter.getTreeNode(childIndex+start);
 					children[childIndex]=t;
 				}
@@ -143,13 +141,13 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public int getChildCount() {
-			if((start+ipower(stepSize, level+1))<=itemGetter.getNoItems() ){
-				return stepSize;
+			if((start+ipower(STEP_SIZE, level+1))<=itemGetter.getNoItems() ){
+				return STEP_SIZE;
 			}else{
 				if(level==0){
 					return (end-start)+1;
 				}else{
-					return divideRoundUp((end-start),ipower(stepSize,level));
+					return divideRoundUp((end-start),ipower(STEP_SIZE,level));
 				}
 
 			}
@@ -286,7 +284,7 @@ public class JTreeLazyList{
 	 */
 	private static int determineLevel(int noPackets2) {
 		int l=0;
-		while(ipower(stepSize,l+1)<noPackets2){
+		while(ipower(STEP_SIZE,l+1)<noPackets2){
 			l++;
 		}
 		return l;

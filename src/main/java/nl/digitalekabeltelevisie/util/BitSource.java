@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -118,7 +118,7 @@ public class BitSource implements HTMLSource{
 		// First, read remainder from current byte
 		if (bitOffset > 0) {
 			final int bitsLeft = 8 - bitOffset;
-			final int toRead = numBits < bitsLeft ? numBits : bitsLeft;
+			final int toRead = Math.min(numBits, bitsLeft);
 			final int bitsToNotRead = bitsLeft - toRead;
 			final int mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
 			result = (bytes[byteOffset] & mask) >> bitsToNotRead;
@@ -164,7 +164,7 @@ public class BitSource implements HTMLSource{
 		// First, read remainder from current byte
 		if (bitOffset > 0) {
 			final int bitsLeft = 8 - bitOffset;
-			final int toRead = numBits < bitsLeft ? numBits : bitsLeft;
+			final int toRead = Math.min(numBits, bitsLeft);
 			final int bitsToNotRead = bitsLeft - toRead;
 			final int mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
 			result = (bytes[byteOffset] & mask) >> bitsToNotRead;
@@ -198,7 +198,7 @@ public class BitSource implements HTMLSource{
 	 * read entire bytes from source, starting at new byte, consuming them (no longer available)
 	 * if not at start of new byte (offset <>0) remainder bits are discarded without warning.
 	 *
-	 * @param bytes
+	 * @param noBytes
 	 * @return
 	 */
 	public byte[] readBytes(final int noBytes) {
@@ -292,7 +292,7 @@ public class BitSource implements HTMLSource{
 		// First, read remainder from current byte
 		if (localBitOffset > 0) {
 			final int bitsLeft = 8 - localBitOffset;
-			final int toRead = numBits < bitsLeft ? numBits : bitsLeft;
+			final int toRead = Math.min(numBits, bitsLeft);
 			final int bitsToNotRead = bitsLeft - toRead;
 			final int mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
 			result = (bytes[localByteOffset] & mask) >> bitsToNotRead;
@@ -412,15 +412,14 @@ public class BitSource implements HTMLSource{
 	
 	@Override
 	public String getHTML() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		int localByteOffset = byteOffset;
 		if (bitOffset != 0) {
 			int bitsLeft = 8 - bitOffset;
 			int intValueWholeByte = Byte.toUnsignedInt(bytes[localByteOffset]);
 			String binaryString = Integer.toBinaryString(intValueWholeByte);
 			String binaryStringPadded = ("0000000"+binaryString).substring(binaryString.length()- bitsLeft+7);
-			b.append(bitsLeft + " bits left of " + intValueWholeByte + " ( 0b"
-					+ binaryStringPadded + ")");
+			b.append(bitsLeft).append(" bits left of ").append(intValueWholeByte).append(" ( 0b").append(binaryStringPadded).append(")");
 			b.append("<br><br>");
 			localByteOffset++;
 

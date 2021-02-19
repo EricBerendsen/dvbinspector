@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -99,9 +99,7 @@ public class BitString {
 			throw new IllegalArgumentException("data "+data+" does not fit in "+numberOfbits+" bits");
 		}
 		final int s = numberOfbits - t.length();
-		for (int i = 0; i < s; i++) {
-			bits.append('0');
-		}
+		bits.append("0".repeat(Math.max(0, s)));
 		bits.append(t);
 	}
 
@@ -120,9 +118,7 @@ public class BitString {
 		}
 		final int s = numberOfbits - t.length();
 		bits.append(t.reverse());
-		for (int i = 0; i < s; i++) {
-			bits.append('0');
-		}
+		bits.append("0".repeat(Math.max(0, s)));
 
 	}
 
