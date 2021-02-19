@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -77,7 +77,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 			StringBuilder label = new StringBuilder("application");
 
 			final List<ApplicationNameDescriptor> applicationNameDescriptors = Descriptor.findGenericDescriptorsInList(applicationDescriptors, ApplicationNameDescriptor.class); //0x01 = applicationNameDescriptor
-			if((applicationNameDescriptors!=null)&&(applicationNameDescriptors.size()>0)){
+			if(applicationNameDescriptors.size()>0){
 				final ApplicationNameDescriptor appNameDesc = applicationNameDescriptors.get(0);
 				final List<ApplicationName> appNames = appNameDesc.getApplicationNames();
 				if((appNames!=null)&&(appNames.size()>0)){
@@ -196,8 +196,8 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 	}
 
-	private final List<Application> buildApplicationList(final byte[] data, final int i, final int length) {
-		final ArrayList<Application> r = new ArrayList<Application>();
+	private List<Application> buildApplicationList(final byte[] data, final int i, final int length) {
+		final ArrayList<Application> r = new ArrayList<>();
 		int t =0;
 		while(t<length){
 			final Application a = new Application();

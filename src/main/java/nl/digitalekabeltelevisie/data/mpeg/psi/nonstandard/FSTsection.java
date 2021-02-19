@@ -30,7 +30,6 @@ import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDes
 import static nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.OperatorFastscan.m7FastScanCharset;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.table.TableModel;
@@ -52,7 +51,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class FSTsection extends TableSectionExtendedSyntax{
 
-	public List<Service> serviceList;
+	public final List<Service> serviceList;
 
 	public static class Service implements TreeNode{
 		
@@ -114,9 +113,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 		public String toString(){
 			final StringBuilder b = new StringBuilder("Service, transportStreamID=");
 			b.append(getTransportStreamID()).append(", originalNetworkID=").append(getOriginalNetworkID()).append(", ");
-			final Iterator<Descriptor> j=descriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
 
 			}
@@ -239,26 +236,26 @@ public class FSTsection extends TableSectionExtendedSyntax{
 
 
 
-	private final List<Service> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<Service> r = new ArrayList<Service>();
+	private List<Service> buildTransportStreamList(final byte[] data, final int offset, final int programInfoLength) {
+		final ArrayList<Service> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
 			final Service c = new Service();
-			c.setOriginalNetworkID(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-			c.setTransportStreamID(Utils.getInt(data, i+t+2, 2, Utils.MASK_16BITS));
-			c.setService_id(Utils.getInt(data, i+t+4, 2, Utils.MASK_16BITS));
-			c.setDefault_video_PID(Utils.getInt(data, i+t+6, 2, Utils.MASK_16BITS));
-			c.setDefault_audio_PID(Utils.getInt(data, i+t+8, 2, Utils.MASK_16BITS));
+			c.setOriginalNetworkID(Utils.getInt(data, offset+t, 2, Utils.MASK_16BITS));
+			c.setTransportStreamID(Utils.getInt(data, offset+t+2, 2, Utils.MASK_16BITS));
+			c.setService_id(Utils.getInt(data, offset+t+4, 2, Utils.MASK_16BITS));
+			c.setDefault_video_PID(Utils.getInt(data, offset+t+6, 2, Utils.MASK_16BITS));
+			c.setDefault_audio_PID(Utils.getInt(data, offset+t+8, 2, Utils.MASK_16BITS));
 			
-			c.setDefault_video_ECM_PID(Utils.getInt(data, i+t+10, 2, Utils.MASK_16BITS));
+			c.setDefault_video_ECM_PID(Utils.getInt(data, offset+t+10, 2, Utils.MASK_16BITS));
 			
-			c.setDefault_audio_ECM_PID(Utils.getInt(data, i+t+12, 2, Utils.MASK_16BITS));
+			c.setDefault_audio_ECM_PID(Utils.getInt(data, offset+t+12, 2, Utils.MASK_16BITS));
 
-			c.setDefault_PCR_PID(Utils.getInt(data, i+t+14, 2, Utils.MASK_16BITS));
+			c.setDefault_PCR_PID(Utils.getInt(data, offset+t+14, 2, Utils.MASK_16BITS));
 			
 			
-			c.setTransportDescriptorsLength(Utils.getInt(data, i+t+16, 2, Utils.MASK_12BITS));
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+18,c.getTransportDescriptorsLength(),this));
+			c.setTransportDescriptorsLength(Utils.getInt(data, offset+t+16, 2, Utils.MASK_12BITS));
+			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,offset+t+18,c.getTransportDescriptorsLength(),this));
 			t+=18+c.getTransportDescriptorsLength();
 			r.add(c);
 
@@ -301,33 +298,32 @@ public class FSTsection extends TableSectionExtendedSyntax{
 	
 
 	static TableHeader<FSTsection,Service>  buildFstTableHeader() {
-		TableHeader<FSTsection,Service> tableHeader =  new TableHeaderBuilder<FSTsection,Service>().
+
+		return new TableHeaderBuilder<FSTsection,Service>().
 				addRequiredRowColumn("onid", Service::getOriginalNetworkID, Integer.class).
 				addRequiredRowColumn("tsid", Service::getTransportStreamID, Integer.class).
 				addRequiredRowColumn("sid", Service::getService_id, Integer.class).
-				
+
 				addRequiredRowColumn("default_video_pid", Service::getDefault_video_PID, Integer.class).
 				addRequiredRowColumn("default_audio_pid", Service::getDefault_audio_PID, Integer.class).
 				addRequiredRowColumn("default_pcr_pid", Service::getDefault_PCR_PID, Integer.class).
 
-				addOptionalRowColumn("service name", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceName().toString(m7FastScanCharset)), 
+				addOptionalRowColumn("service name",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> sd.getServiceName().toString(m7FastScanCharset)),
 						String.class).
-				addOptionalRowColumn("service provider", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)), 
+				addOptionalRowColumn("service provider",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)),
 						String.class).
-				addOptionalRowColumn("service type", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> Descriptor.getServiceTypeString(sd.getServiceType())), 
+				addOptionalRowColumn("service type",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> Descriptor.getServiceTypeString(sd.getServiceType())),
 						String.class).
 				build();
-		
-		return tableHeader;
 	}
 
 }

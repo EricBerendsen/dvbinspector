@@ -45,9 +45,9 @@ import java.util.List;
 
 public class DFITSection extends TableSectionExtendedSyntax {
 	
-	public class FontInfo implements TreeNode{
+	public static class FontInfo implements TreeNode{
 		
-		LookUpList fontInfoTypeList = new LookUpList.Builder().
+		final LookUpList fontInfoTypeList = new LookUpList.Builder().
 				add(0x00, "font_style_weight").
 				add(0x01, "font file URI").
 				add(0x02, "font_size").
@@ -55,7 +55,7 @@ public class DFITSection extends TableSectionExtendedSyntax {
 				add(0x04 , 0xFF, "reserved").
 				build();
 
-		LookUpList fontStyleList = new LookUpList.Builder().
+		final LookUpList fontStyleList = new LookUpList.Builder().
 				add(0x00, "undefined").
 				add(0x01, "normal").
 				add(0x02, "italic").
@@ -63,14 +63,14 @@ public class DFITSection extends TableSectionExtendedSyntax {
 				add(0x04,0x07, "reserved for future use").
 				build();
 
-		LookUpList fontWeightList = new LookUpList.Builder().
+		final LookUpList fontWeightList = new LookUpList.Builder().
 				add(0x00, "undefined").
 				add(0x01, "normal").
 				add(0x02, "bold").
 				add(0x03,0x0F, "reserved for future use").
 				build();
 		
-		LookUpList fontFileFormatList = new LookUpList.Builder().
+		final LookUpList fontFileFormatList = new LookUpList.Builder().
 				add(0x00, "Open Font Format").
 				add(0x01, "Web Open Font Format").
 				add(0x02,0x0F, "reserved for future use").

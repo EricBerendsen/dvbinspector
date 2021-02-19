@@ -44,7 +44,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class BAT extends AbstractPSITabel{
 
-	private Map<Integer, BATsection []> networks = new HashMap<Integer, BATsection []>();
+	private final Map<Integer, BATsection []> networks = new HashMap<Integer, BATsection []>();
 
 	public BAT(final PSI parent){
 		super(parent);

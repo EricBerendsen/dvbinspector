@@ -58,14 +58,14 @@ public class OperatorFastscan implements TreeNode{
 			
 	// TODO encoding for service name and provider  is always ISO-8859-9, ignoring character selection information as defined in Annex A of ETSI EN 300 468
 	// Should be taken from ONT, depending on operator
-	public static Charset m7FastScanCharset = Charset.forName("ISO-8859-9");
+	public static final Charset m7FastScanCharset = Charset.forName("ISO-8859-9");
 	
 	private static final Logger	logger	= Logger.getLogger(OperatorFastscan.class.getName());
 
 	
-	private int pid;
+	private final int pid;
 	private int operatorNetworkId = -1;
-	private M7Fastscan m7Fastscan;
+	private final M7Fastscan m7Fastscan;
 	
 	FNTsection[] fntSections;
 	FSTsection[] fstSections;
@@ -190,43 +190,42 @@ public class OperatorFastscan implements TreeNode{
 	}
 
 	private TableHeader<TransportStream,Service>  buildFastscanTableHeader() {
-		TableHeader<TransportStream,Service> tableHeader =  new TableHeaderBuilder<TransportStream,Service>().
-				addOptionalRowColumn("lcn", 
-						s -> getLcn(s),
+		return new TableHeaderBuilder<TransportStream,Service>().
+				addOptionalRowColumn("lcn",
+						this::getLcn,
 				Integer.class).
 				addRequiredRowColumn("onid", Service::getOriginalNetworkID, Integer.class).
 				addRequiredRowColumn("tsid", Service::getTransportStreamID, Integer.class).
 				addRequiredRowColumn("sid", Service::getService_id, Integer.class).
-				addOptionalRowColumn("service name", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceName().toString(m7FastScanCharset)), 
+				addOptionalRowColumn("service name",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> sd.getServiceName().toString(m7FastScanCharset)),
 						String.class).
-				addOptionalRowColumn("service type", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> Descriptor.getServiceTypeString(sd.getServiceType())), 
+				addOptionalRowColumn("service type",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> Descriptor.getServiceTypeString(sd.getServiceType())),
 						String.class).
-				addOptionalRowColumn("service provider", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)), 
+				addOptionalRowColumn("service provider",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)),
 						String.class).
 
-				addOptionalRowColumn("position", 
-						s -> getOrbitualPosition(s),  
+				addOptionalRowColumn("position",
+						this::getOrbitualPosition,
 						Number.class).
 
-				addOptionalRowColumn("w/e", 
-						s -> getWestEastFlag(s),
+				addOptionalRowColumn("w/e",
+						this::getWestEastFlag,
 						String.class).
 
-				addOptionalRowColumn("frequency", 
-						s -> getFrequency(s), 
+				addOptionalRowColumn("frequency",
+						this::getFrequency,
 						Number.class).
 
 				build();
-		return tableHeader;
 	}
 
 

@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
 public class RCT extends AbstractPSITabel{
 
-	private final Map<Integer, RCTsection []> rcts = new HashMap<Integer, RCTsection []>();
+	private final Map<Integer, RCTsection []> rcts = new HashMap<>();
 	private int pid = 0;
 
 	public RCT(final PSI parent){
@@ -52,12 +51,8 @@ public class RCT extends AbstractPSITabel{
 		pid=section.getParentPID().getPid();
 
 		final int key = section.getTableIdExtension();
-		RCTsection [] sections= rcts.get(key);
+		RCTsection[] sections = rcts.computeIfAbsent(key, k -> new RCTsection[section.getSectionLastNumber() + 1]);
 
-		if(sections==null){
-			sections = new RCTsection[section.getSectionLastNumber()+1];
-			rcts.put(key, sections);
-		}
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
@@ -69,15 +64,13 @@ public class RCT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("RCT (Related Content Table) PID="+pid ));
-		final TreeSet<Integer> s = new TreeSet<Integer>(rcts.keySet());
+		final TreeSet<Integer> s = new TreeSet<>(rcts.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer type=i.next();
-			final RCTsection [] sections = rcts.get(type);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("RCT",type, getAppTypeIDString(type)));
+		for (Integer type : s) {
+			final RCTsection[] sections = rcts.get(type);
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("RCT", type, getAppTypeIDString(type)));
 			for (final RCTsection tsection : sections) {
-				if(tsection!= null){
+				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
 			}

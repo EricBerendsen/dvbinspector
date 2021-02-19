@@ -59,7 +59,7 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	
 	private static final Logger	logger	= Logger.getLogger(ONTSection.class.getName());
 
-	public class OperatorBrand implements TreeNode{
+	public static class OperatorBrand implements TreeNode{
 
 		
 		private int operator_network_id;
@@ -126,24 +126,20 @@ public class ONTSection extends TableSectionExtendedSyntax {
 		
 	}
 
-	@SuppressWarnings("unused")
-	private int reserved;
-	private int bouquet_descriptors_loop_length;
+	private final int bouquet_descriptors_loop_length;
 	
-	private List<Descriptor> bouquetDescriptorList;
-	@SuppressWarnings("unused")
-	private int reserved2;
-	private int operator_brands_loop_length;
+	private final List<Descriptor> bouquetDescriptorList;
+	private final int operator_brands_loop_length;
 	
-	private List<OperatorBrand> operatorBrandList;
+	private final List<OperatorBrand> operatorBrandList;
 
 
 	public ONTSection(PsiSectionData raw_data, PID parent) {
 		super(raw_data, parent);
-		reserved = Utils.getInt(raw_data.getData(), 8, 2, 0xF000)>>>12;
+		int reserved = Utils.getInt(raw_data.getData(), 8, 2, 0xF000) >>> 12;
 		bouquet_descriptors_loop_length = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
 		bouquetDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,bouquet_descriptors_loop_length,this);
-		reserved2 = Utils.getInt(raw_data.getData(), 10 +bouquet_descriptors_loop_length , 2, 0xF000)>>>12;
+		int reserved2 = Utils.getInt(raw_data.getData(), 10 + bouquet_descriptors_loop_length, 2, 0xF000) >>> 12;
 		operator_brands_loop_length = Utils.getInt(raw_data.getData(), 10 +bouquet_descriptors_loop_length , 2, Utils.MASK_12BITS);
 		operatorBrandList = buildOperatorBrandList(raw_data.getData(), 12+bouquet_descriptors_loop_length, operator_brands_loop_length);
 	}
@@ -227,83 +223,82 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	}
 
 	static TableHeader<ONTSection,OperatorBrand>  buildOntTableHeader() {
-		TableHeader<ONTSection,OperatorBrand> tableHeader =  new TableHeaderBuilder<ONTSection,OperatorBrand>().
+		return new TableHeaderBuilder<ONTSection,OperatorBrand>().
 				addRequiredRowColumn("operator network id", OperatorBrand::getOperator_network_id, Integer.class).
 				addRequiredRowColumn("operator_sublist_id", OperatorBrand::getOperator_sublist_id, Integer.class).
-				
-				addOptionalRowColumn("operator name", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorNameDescriptor.class,  
-								ond -> ond.getOperatorName().toString()), 
+
+				addOptionalRowColumn("operator name",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorNameDescriptor.class,
+								ond -> ond.getOperatorName().toString()),
 						String.class).
 
-				
-				addOptionalRowColumn("operator sublist name", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorSublistNameDescriptor.class,  
-								osnd -> osnd.getOperatorSublistName().toString()), 
+
+				addOptionalRowColumn("operator sublist name",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorSublistNameDescriptor.class,
+								osnd -> osnd.getOperatorSublistName().toString()),
 						String.class).
 
-				addOptionalRowColumn("country code", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorPreferencesDescriptor.class,  
-								opd -> opd.getCountry_code()), 
+				addOptionalRowColumn("country code",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorPreferencesDescriptor.class,
+								M7OperatorPreferencesDescriptor::getCountry_code),
 						String.class).
-				addOptionalRowColumn("menu osd", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorPreferencesDescriptor.class,  
-								opd -> opd.getMenu_ISO_639_language_code()), 
+				addOptionalRowColumn("menu osd",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorPreferencesDescriptor.class,
+								M7OperatorPreferencesDescriptor::getMenu_ISO_639_language_code),
 						String.class).
-				addOptionalRowColumn("audio 1", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorPreferencesDescriptor.class,  
-								opd -> opd.getAudio1_ISO_639_language_code()), 
+				addOptionalRowColumn("audio 1",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorPreferencesDescriptor.class,
+								M7OperatorPreferencesDescriptor::getAudio1_ISO_639_language_code),
 						String.class).
-				addOptionalRowColumn("audio 2", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorPreferencesDescriptor.class,  
-								opd -> opd.getAudio2_ISO_639_language_code()), 
+				addOptionalRowColumn("audio 2",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorPreferencesDescriptor.class,
+								M7OperatorPreferencesDescriptor::getAudio2_ISO_639_language_code),
 						String.class).
-				addOptionalRowColumn("subs lang", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorPreferencesDescriptor.class,  
-								opd -> opd.getSubs_ISO_639_language_code()), 
+				addOptionalRowColumn("subs lang",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorPreferencesDescriptor.class,
+								M7OperatorPreferencesDescriptor::getSubs_ISO_639_language_code),
 						String.class).
 
-				addOptionalRowColumn("subs usage", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorOptionsDescriptor.class,  
-								ood -> ood.getSubtitles_enabled()), 
+				addOptionalRowColumn("subs usage",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorOptionsDescriptor.class,
+								M7OperatorOptionsDescriptor::getSubtitles_enabled),
 						Integer.class).
-				addOptionalRowColumn("parental control", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorOptionsDescriptor.class,  
-								ood -> ood.getParentalControlString()), 
+				addOptionalRowColumn("parental control",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorOptionsDescriptor.class,
+								M7OperatorOptionsDescriptor::getParentalControlString),
 						String.class).
 
-				addOptionalRowColumn("FST char set", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorOptionsDescriptor.class,  
-								ood -> ood.getEncodingTypeString()), 
+				addOptionalRowColumn("FST char set",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorOptionsDescriptor.class,
+								M7OperatorOptionsDescriptor::getEncodingTypeString),
 						String.class).
-				addOptionalRowColumn("region", 
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(), 
-								M7OperatorOptionsDescriptor.class,  
-								ood -> ood.getSpecial_regions_setup()), 
+				addOptionalRowColumn("region",
+						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+								M7OperatorOptionsDescriptor.class,
+								M7OperatorOptionsDescriptor::getSpecial_regions_setup),
 						Integer.class).
 
-				addOptionalRepeatingRowColumn("DiSeq Pos", 
-						operator -> findDescriptorApplyListFunc(operator.getDescriptorList(), 
-								M7OperatorDiSEqCTDescriptor.class,  
+				addOptionalRepeatingRowColumn("DiSeq Pos",
+						operator -> findDescriptorApplyListFunc(operator.getDescriptorList(),
+								M7OperatorDiSEqCTDescriptor.class,
 								odd -> odd.getDiSEqCList().
 								stream().
-								map(p ->p.getTotalPositionString()).
+								map(M7OperatorDiSEqCTDescriptor.DiSEqC::getTotalPositionString).
 								collect(Collectors.toList())),
-								 
+
 						String.class).
-				
+
 				build();
-		return tableHeader;
 	}
 
 	public List<OperatorBrand> getOperatorBrandList() {

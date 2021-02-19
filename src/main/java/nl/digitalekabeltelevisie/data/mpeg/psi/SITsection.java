@@ -27,7 +27,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -67,9 +66,7 @@ public class SITsection extends TableSectionExtendedSyntax{
 		public String toString(){
 			final StringBuilder b = new StringBuilder("Service, serviceID=");
 			b.append(serviceID).append(", reservedFutureUse=").append(reservedFutureUse).append(", ");
-			final Iterator<Descriptor> j=descriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
 			}
 			return b.toString();
@@ -138,8 +135,8 @@ public class SITsection extends TableSectionExtendedSyntax{
 	}
 
 
-	private final List<Service> buildServiceList(final byte[] data, final int start, final int len ) {
-		final ArrayList<Service> r = new ArrayList<Service>();
+	private List<Service> buildServiceList(final byte[] data, final int start, final int len ) {
+		final ArrayList<Service> r = new ArrayList<>();
 		int t =0;
 		while(t<len){
 			final int serviceId = Utils.getInt(data, start+t, 2, Utils.MASK_16BITS);

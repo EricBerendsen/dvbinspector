@@ -29,7 +29,6 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -45,7 +44,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class INT extends AbstractPSITabel{
 
-	private final Map<Integer, INTsection []> networks = new HashMap<Integer, INTsection []>();
+	private final Map<Integer, INTsection []> networks = new HashMap<>();
 
 	public INT(final PSI parent){
 		super(parent);
@@ -54,12 +53,8 @@ public class INT extends AbstractPSITabel{
 	public void update(final INTsection section){
 
 		final int key = section.getPlatformID();
-		INTsection [] sections= networks.get(key);
+		INTsection[] sections = networks.computeIfAbsent(key, k -> new INTsection[section.getSectionLastNumber() + 1]);
 
-		if(sections==null){
-			sections = new INTsection[section.getSectionLastNumber()+1];
-			networks.put(key, sections);
-		}
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
@@ -74,15 +69,13 @@ public class INT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("INT (IP/MAC Notification Table)"));
-		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
+		final TreeSet<Integer> s = new TreeSet<>(networks.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer platformID=i.next();
-			final INTsection [] sections = networks.get(platformID);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("platform_id",platformID, Utils.getPlatformIDString(platformID)));
+		for (Integer platformID : s) {
+			final INTsection[] sections = networks.get(platformID);
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("platform_id", platformID, Utils.getPlatformIDString(platformID)));
 			for (final INTsection tsection : sections) {
-				if(tsection!= null){
+				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
 			}

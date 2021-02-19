@@ -31,7 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -99,9 +98,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			append(Utils.getEITStartTimeAsString(startTime)).
 			append(", duration:").
 			append(formatDuration(duration));
-			final Iterator<Descriptor> j=descriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
 
 			}
@@ -112,11 +109,9 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		public String getEventName(){
 
 
-			final Iterator<Descriptor> descs=descriptorList.iterator();
-			while(descs.hasNext()){
-				final Descriptor d=descs.next();
-				if(d instanceof ShortEventDescriptor) {
-					return ((ShortEventDescriptor)d).getEventName().toString();
+			for (Descriptor d : descriptorList) {
+				if (d instanceof ShortEventDescriptor) {
+					return ((ShortEventDescriptor) d).getEventName().toString();
 				}
 			}
 			//  no ShortEventDescriptor, give up
@@ -386,18 +381,18 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	}
 
 
-	private final List<Event> buildEventList(final byte[] data, final int i, final int programInfoLength) {
+	private List<Event> buildEventList(final byte[] data, final int offset, final int programInfoLength) {
 		final List<Event> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
 			final Event c = new Event();
-			c.setEventID(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-			c.setStartTime(Arrays.copyOfRange(data,i+t+2,i+t+7));
-			c.setDuration(Utils.getBCD(data, (i+t+7)*2,6));
-			c.setRunningStatus(Utils.getInt(data, i+t+10, 1, 0xE0)>>5);
-			c.setFreeCAMode(Utils.getInt(data, i+t+10, 1, 0x10)>>4);
-			c.setDescriptorsLoopLength(Utils.getInt(data, i+t+10, 2, Utils.MASK_12BITS));
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+12,c.getDescriptorsLoopLength(),this));
+			c.setEventID(Utils.getInt(data, offset+t, 2, Utils.MASK_16BITS));
+			c.setStartTime(Arrays.copyOfRange(data,offset+t+2,offset+t+7));
+			c.setDuration(Utils.getBCD(data, (offset+t+7)*2,6));
+			c.setRunningStatus(Utils.getInt(data, offset+t+10, 1, 0xE0)>>5);
+			c.setFreeCAMode(Utils.getInt(data, offset+t+10, 1, 0x10)>>4);
+			c.setDescriptorsLoopLength(Utils.getInt(data, offset+t+10, 2, Utils.MASK_12BITS));
+			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,offset+t+12,c.getDescriptorsLoopLength(),this));
 			t+=12+c.getDescriptorsLoopLength();
 			r.add(c);
 

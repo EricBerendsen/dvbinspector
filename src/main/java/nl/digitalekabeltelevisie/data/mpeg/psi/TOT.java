@@ -46,7 +46,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class TOT extends AbstractPSITabel{
 
-	private final List<TOTsection> totSectionList = new ArrayList<TOTsection>();
+	private final List<TOTsection> totSectionList = new ArrayList<>();
 
 	public TOT(final PSI parent){
 		super(parent);
@@ -60,7 +60,7 @@ public class TOT extends AbstractPSITabel{
 
 		KVP kvp = new KVP("TOT");
 		if(!totSectionList.isEmpty()) {
-			kvp.setTableSource(()->getTableModel());
+			kvp.setTableSource(this::getTableModel);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
@@ -77,57 +77,54 @@ public class TOT extends AbstractPSITabel{
 
 	
 	static TableHeader<TOTsection,LocalTimeOffsetDescriptor>  buildTotTableHeader() {
-		TableHeader<TOTsection,LocalTimeOffsetDescriptor> tableHeader =  new TableHeaderBuilder<TOTsection,LocalTimeOffsetDescriptor>().
+
+		return new TableHeaderBuilder<TOTsection,LocalTimeOffsetDescriptor>().
 				addRequiredBaseColumn("UTC_time",totSection -> Utils.getUTCFormattedString(totSection.getUTC_time()), Number.class).
-				
+
 				addOptionalRepeatingGroupedColumn("country_code",
-						ltod -> ltod.getOffsetList(). 
+						ltod -> ltod.getOffsetList().
 									stream().
-									map(l->l.getCountryCode()).
+									map(LocalTimeOffsetDescriptor.LocalTimeOffset::getCountryCode).
 									collect(Collectors.toList()),
 						Number.class,
 						"offset").
 
 				addOptionalRepeatingGroupedColumn("local_time_offset",
-						ltod -> ltod.getOffsetList(). 
+						ltod -> ltod.getOffsetList().
 									stream().
-									map(l->l.getLocalOffsetString()).
+									map(LocalTimeOffsetDescriptor.LocalTimeOffset::getLocalOffsetString).
 									collect(Collectors.toList()),
 						Number.class,
 						"offset").
 
 				addOptionalRepeatingGroupedColumn("time_of_change",
-						ltod -> ltod.getOffsetList(). 
+						ltod -> ltod.getOffsetList().
 									stream().
-									map(l->l.getTimeOfChangeString()).
+									map(LocalTimeOffsetDescriptor.LocalTimeOffset::getTimeOfChangeString).
 									collect(Collectors.toList()),
 						Number.class,
 						"offset").
 
 				addOptionalRepeatingGroupedColumn("next_time_offset",
-						ltod -> ltod.getOffsetList(). 
+						ltod -> ltod.getOffsetList().
 									stream().
-									map(l->l.getNextTimeOffsetString()).
+									map(LocalTimeOffsetDescriptor.LocalTimeOffset::getNextTimeOffsetString).
 									collect(Collectors.toList()),
 						Number.class,
 						"offset").
 				build();
-		
-		return tableHeader;
 	}
 	
 	
 	public TableModel getTableModel() {
 		FlexTableModel<TOTsection,LocalTimeOffsetDescriptor> tableModel =  new FlexTableModel<>(buildTotTableHeader());
-		
-		if (totSectionList != null) {
-			for (TOTsection element : totSectionList) {
-				if(element!= null){
-					tableModel.addData(element, findGenericDescriptorsInList(element.getDescriptorList(), LocalTimeOffsetDescriptor.class));
-				}
+
+		for (TOTsection element : totSectionList) {
+			if(element!= null){
+				tableModel.addData(element, findGenericDescriptorsInList(element.getDescriptorList(), LocalTimeOffsetDescriptor.class));
 			}
 		}
-		
+
 		tableModel.process();
 		return tableModel;
 	}

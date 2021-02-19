@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -45,7 +45,7 @@ public class CAT extends AbstractPSITabel {
 	private CAsection[]	cat	= null;
 
 	public List<Descriptor> getDescriptorList() {
-		final ArrayList<Descriptor> l = new ArrayList<Descriptor>();
+		final ArrayList<Descriptor> l = new ArrayList<>();
 		if(cat!=null){
 			for (CAsection element : cat) {
 				if (element != null) {
@@ -80,7 +80,7 @@ public class CAT extends AbstractPSITabel {
 
 		KVP kvp = new KVP("CAT");
 		if(hasCADescriptors()) {
-			kvp.setTableSource(()->getTableModel());
+			kvp.setTableSource(this::getTableModel);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
@@ -96,13 +96,12 @@ public class CAT extends AbstractPSITabel {
 
 	
 	static TableHeader<CAsection,CADescriptor>  buildCatTableHeader() {
-		TableHeader<CAsection,CADescriptor> tableHeader =  new TableHeaderBuilder<CAsection,CADescriptor>().
-				addOptionalRowColumn("ca system id", p -> p.getCaSystemID(), Integer.class).
-				addOptionalRowColumn("ca pid", p -> p.getCaPID(), Integer.class).
+
+		return new TableHeaderBuilder<CAsection,CADescriptor>().
+				addOptionalRowColumn("ca system id", CADescriptor::getCaSystemID, Integer.class).
+				addOptionalRowColumn("ca pid", CADescriptor::getCaPID, Integer.class).
 				addOptionalRowColumn("ca system specifier", p -> getCASystemIDString(p.getCaSystemID()), String.class).
 				build();
-		
-		return tableHeader;
 	}
 	
 	

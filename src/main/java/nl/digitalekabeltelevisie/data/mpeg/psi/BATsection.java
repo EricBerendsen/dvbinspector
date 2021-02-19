@@ -89,9 +89,7 @@ public class BATsection extends TableSectionExtendedSyntax{
 		public String toString() {
 			final StringBuilder b = new StringBuilder("Service, transportStreamID=");
 			b.append(getTransportStreamID()).append(", originalNetworkID=").append(getOriginalNetworkID()).append(", ");
-			final Iterator<Descriptor> j = descriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
 
 			}
@@ -115,7 +113,7 @@ public class BATsection extends TableSectionExtendedSyntax{
 		}
 
 		public Map<String, Object> getTableRowData() {
-			HashMap<String, Object> streamData = new HashMap<String, Object>();
+			HashMap<String, Object> streamData = new HashMap<>();
 
 			streamData.put("bouquet_id",getTableIdExtension());
 			streamData.put("bouquet_id_name",Utils.getBouquetIDString(getTableIdExtension()));
@@ -192,8 +190,8 @@ public class BATsection extends TableSectionExtendedSyntax{
 		this.transportStreamLoopLength = transportStreamLoopLength;
 	}
 
-	private final List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
-		final List<TransportStream> r = new ArrayList<TransportStream>();
+	private List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
+		final List<TransportStream> r = new ArrayList<>();
 		int t = 0;
 		while (t < programInfoLength) {
 			final TransportStream c = new TransportStream();

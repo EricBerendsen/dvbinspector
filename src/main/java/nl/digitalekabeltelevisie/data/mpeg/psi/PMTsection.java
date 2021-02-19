@@ -50,7 +50,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 	private List<Descriptor> descriptorList;
 	private final List<Component> componentsList ;
 
-	public class Component implements TreeNode{
+	public static class Component implements TreeNode{
 
 		private int streamtype;
 		private int elementaryPID;
@@ -100,9 +100,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 		public String toString(){
 			final StringBuilder b = new StringBuilder("Component stream type=");
 			b.append(getStreamtype()).append(" (").append(getStreamTypeString()).append("), ElementaryPID=").append(getElementaryPID()).append(", ");
-			final Iterator<Descriptor> j=componentDescriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : componentDescriptorList) {
 				b.append(d).append(", ");
 
 			}
@@ -126,8 +124,8 @@ public class PMTsection extends TableSectionExtendedSyntax{
 	}
 
 
-	private final List<Component> buildComponentList(final byte[] data, final int i, final int length) {
-		final ArrayList<Component> r = new ArrayList<Component>();
+	private List<Component> buildComponentList(final byte[] data, final int i, final int length) {
+		final ArrayList<Component> r = new ArrayList<>();
 		int t =0;
 		while(t<length){
 			final Component c = new Component();

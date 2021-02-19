@@ -42,11 +42,11 @@ import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class M7Fastscan implements TreeNode {
 	
-	Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
+	final Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
 	ONTSection[] ontSections; 
 
 	@SuppressWarnings("unused")
-	private PSI parentPSI;
+	private final PSI parentPSI;
 
 	public static boolean isValidM7Code(int code) {
 		return (code>= 0x7701) && (code<= 0x77FF);
@@ -79,8 +79,7 @@ public class M7Fastscan implements TreeNode {
 	
 	private OperatorFastscan findOrCreateOperatorFastscan(int operator, int pid) {
 		Map<Integer, OperatorFastscan> p = operators.computeIfAbsent(operator, k -> new HashMap<>());
-		OperatorFastscan o = p.computeIfAbsent(pid, k -> new OperatorFastscan(pid,this));
-		return o;
+		return p.computeIfAbsent(pid, k -> new OperatorFastscan(pid, this));
 	}
 
 
@@ -161,7 +160,7 @@ public class M7Fastscan implements TreeNode {
 		if(ontSections!=null) {
 			KVP kvp = new KVP("ONT");
 			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(kvp);
-			kvp.setTableSource(()->getTableModelOnt());
+			kvp.setTableSource(this::getTableModelOnt);
 			for (final ONTSection ontSection : ontSections) {
 				if(ontSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(ont, ontSection, modus);

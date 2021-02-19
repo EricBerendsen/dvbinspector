@@ -44,7 +44,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class TDTsection extends TableSection {
 
-	private byte[] UTC_time;
+	private final byte[] UTC_time;
 
 	public TDTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
@@ -65,7 +65,7 @@ public class TDTsection extends TableSection {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP)t.getUserObject();
-		kvp.setTableSource(()->getTableModel());
+		kvp.setTableSource(this::getTableModel);
 		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
 		return t;
 	}

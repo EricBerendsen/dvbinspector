@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
 public class AIT extends AbstractPSITabel{
 
-	private final Map<Integer, AITsection []> aits = new HashMap<Integer, AITsection []>();
+	private final Map<Integer, AITsection []> aits = new HashMap<>();
 	private int pid = 0;
 
 	public AIT(final PSI parent){
@@ -52,12 +51,8 @@ public class AIT extends AbstractPSITabel{
 		pid=section.getParentPID().getPid();
 
 		final int key = section.getApplication_type();
-		AITsection [] sections= aits.get(key);
+		AITsection[] sections = aits.computeIfAbsent(key, k -> new AITsection[section.getSectionLastNumber() + 1]);
 
-		if(sections==null){
-			sections = new AITsection[section.getSectionLastNumber()+1];
-			aits.put(key, sections);
-		}
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
@@ -69,15 +64,11 @@ public class AIT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AIT (Application Information Table) PID="+pid ));
-		final TreeSet<Integer> s = new TreeSet<Integer>(aits.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer type=i.next();
-			final AITsection [] sections = aits.get(type);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("AIT",type, getAppTypeIDString(type)));
-			for (final AITsection tsection : sections) {
-				if(tsection!= null){
+		for (Integer type : new TreeSet<>(aits.keySet())) {
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("AIT", type, getAppTypeIDString(type)));
+			for (final AITsection tsection : aits.get(type)) {
+				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
 			}

@@ -41,8 +41,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
 public class PAT extends AbstractPSITabel{
 
 	private PATsection []pat = null;
-	private List<PATsection []> patVersions = new ArrayList<PATsection[]>();
-	private PATsection [] actualPAT = null;
+	private final List<PATsection []> patVersions = new ArrayList<>();
 	private PATsection [] newPAT = null;
 	private int actualVersionNo = -1;
 
@@ -87,7 +86,7 @@ public class PAT extends AbstractPSITabel{
 				allFilled &= (element!=null);
 			}
 			if(allFilled){
-				actualPAT = newPAT;
+				PATsection[] actualPAT = newPAT;
 				patVersions.add(actualPAT);
 				actualVersionNo = section.getVersion();
 				newPAT = null;
@@ -101,7 +100,7 @@ public class PAT extends AbstractPSITabel{
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		if (pat != null) {
-			kvp.setTableSource(() -> getTableModel());
+			kvp.setTableSource(this::getTableModel);
 			for (PATsection element : pat) {
 				if(element!= null){
 					if(!Utils.simpleModus(modus)){ // show all versions
@@ -200,12 +199,11 @@ public class PAT extends AbstractPSITabel{
 	}
 
 	static TableHeader<PATsection,Program>  buildPatTableHeader() {
-		TableHeader<PATsection,Program> tableHeader =  new TableHeaderBuilder<PATsection,Program>().
-				addOptionalRowColumn("program_number", p -> p.getProgram_number(), Integer.class).
-				addOptionalRowColumn("program_map_PID", p -> p.getProgram_map_PID(), Integer.class).
-				addOptionalRowColumn("name", p -> p.getServiceNameOrNit(), String.class).
+		return new TableHeaderBuilder<PATsection,Program>().
+				addOptionalRowColumn("program_number", Program::getProgram_number, Integer.class).
+				addOptionalRowColumn("program_map_PID", Program::getProgram_map_PID, Integer.class).
+				addOptionalRowColumn("name", Program::getServiceNameOrNit, String.class).
 				build();
-		return tableHeader;
 	}
 
 }

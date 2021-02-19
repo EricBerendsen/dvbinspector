@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.table.TableModel;
@@ -48,9 +47,9 @@ import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class TOTsection extends TableSection {
 
-	private byte[] UTC_time;
-	private int descriptorsLoopLength;
-	private List<Descriptor> descriptorList;
+	private final byte[] UTC_time;
+	private final int descriptorsLoopLength;
+	private final List<Descriptor> descriptorList;
 
 	public TOTsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data,parent);
@@ -63,9 +62,7 @@ public class TOTsection extends TableSection {
 	public String toString(){
 		final StringBuilder b = new StringBuilder("TOTsection UTC_Time=");
 		b.append(Utils.toHexString(UTC_time)).append(", UTC_timeString=").append(Utils.getUTCFormattedString(UTC_time)).append(", length=").append(getSectionLength()).append(", ");
-		final Iterator<Descriptor> j=descriptorList.iterator();
-		while (j.hasNext()) {
-			final Descriptor d = j.next();
+		for (Descriptor d : descriptorList) {
 			b.append(d).append(", ");
 
 		}
@@ -86,7 +83,7 @@ public class TOTsection extends TableSection {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP)t.getUserObject();
-		kvp.setTableSource(()->getTableModel());
+		kvp.setTableSource(this::getTableModel);
 		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
 		if(!Utils.simpleModus(modus)){
 			t.add(new DefaultMutableTreeNode(new KVP("descriptors_loop_length",descriptorsLoopLength,null)));

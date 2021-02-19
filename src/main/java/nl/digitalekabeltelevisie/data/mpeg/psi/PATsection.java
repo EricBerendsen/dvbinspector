@@ -100,11 +100,11 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 		programs = buildProgramList(raw_data.getData(),8,programsLength);
 	}
 
-	private final List<Program> buildProgramList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<Program> r = new ArrayList<Program>();
+	private List<Program> buildProgramList(final byte[] data, final int offset, final int programInfoLength) {
+		final ArrayList<Program> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
-			final Program c = new Program(Utils.getInt(data, i+t, 2, 0xFFFF),Utils.getInt(data, i+t+2, 2, 0x1FFF));
+			final Program c = new Program(Utils.getInt(data, offset+t, 2, 0xFFFF),Utils.getInt(data, offset+t+2, 2, 0x1FFF));
 			t+=4;
 			r.add(c);
 

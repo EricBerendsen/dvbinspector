@@ -29,7 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -48,7 +47,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class GeneralPSITable extends AbstractPSITabel{
 
-	private Map<Integer, HashMap<Integer,TableSection []>> data = new HashMap<Integer, HashMap<Integer, TableSection []>>();
+	private final Map<Integer, HashMap<Integer,TableSection []>> data = new HashMap<>();
 	private List<TableSection> simpleSectionsd;
 
 
@@ -61,18 +60,9 @@ public class GeneralPSITable extends AbstractPSITabel{
 		if(section.sectionSyntaxIndicator==0x01){
 
 			final int tableId = section.getTableId();
-			HashMap<Integer, TableSection []>  table= data.get(tableId);
+			HashMap<Integer, TableSection[]> table = data.computeIfAbsent(tableId, k -> new HashMap<>());
 
-			if(table==null){
-				table = new HashMap<Integer, TableSection []>();
-				data.put(tableId, table);
-			}
-
-			TableSection [] sections = table.get(section.getTableIdExtension());
-			if(sections==null){
-				sections = new TableSection [section.getSectionLastNumber()+1];
-				table.put(section.getTableIdExtension(),sections);
-			}
+			TableSection[] sections = table.computeIfAbsent(section.getTableIdExtension(), k -> new TableSection[section.getSectionLastNumber() + 1]);
 			if(sections.length<=section.getSectionNumber()){ //resize if needed
 				sections = Arrays.copyOf(sections, section.getSectionNumber()+1);
 				table.put(section.getTableIdExtension(),sections);
@@ -85,7 +75,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 			}
 		}else{
 			if(simpleSectionsd==null){
-				simpleSectionsd=new ArrayList<TableSection>();
+				simpleSectionsd= new ArrayList<>();
 			}
 			// look for duplicates, if so update counters on existing on
 
@@ -119,25 +109,21 @@ public class GeneralPSITable extends AbstractPSITabel{
 		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable ")));
 		    return t;
 		}
-		final TreeSet<Integer> tableSet = new TreeSet<Integer>(data.keySet());
+		final TreeSet<Integer> tableSet = new TreeSet<>(data.keySet());
 
-		final Iterator<Integer> i = tableSet.iterator();
-		while(i.hasNext()){
-			final Integer tableID=i.next();
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id",tableID, TableSection.getTableType(tableID)));
-			final HashMap<Integer, TableSection []> table= data.get(tableID);
+		for (Integer tableID : tableSet) {
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id", tableID, TableSection.getTableType(tableID)));
+			final HashMap<Integer, TableSection[]> table = data.get(tableID);
 
-			final TreeSet<Integer> serviceSet = new TreeSet<Integer>(table.keySet());
-			final Iterator<Integer> j = serviceSet.iterator();
-			while (j.hasNext()) {
-				final Integer tableIdExt = j.next();
-				final DefaultMutableTreeNode o = new DefaultMutableTreeNode(new KVP("table_id_extension",tableIdExt, null));
-				final TableSection [] sections= table.get(tableIdExt);
+			final TreeSet<Integer> serviceSet = new TreeSet<>(table.keySet());
+			for (Integer tableIdExt : serviceSet) {
+				final DefaultMutableTreeNode o = new DefaultMutableTreeNode(new KVP("table_id_extension", tableIdExt, null));
+				final TableSection[] sections = table.get(tableIdExt);
 				for (TableSection section : sections) {
-					if(section!= null){
-						if(!Utils.simpleModus(modus)){ // show all versions
-							addSectionVersionsToJTree(o,section, modus);
-						}else{ // keep it simple
+					if (section != null) {
+						if (!Utils.simpleModus(modus)) { // show all versions
+							addSectionVersionsToJTree(o, section, modus);
+						} else { // keep it simple
 							o.add(section.getJTreeNode(modus));
 						}
 					}
@@ -165,7 +151,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 		final int PRIME = 31;
 		int result = 1;
 		result = (PRIME * result) + ((simpleSectionsd == null) ? 0 : simpleSectionsd.hashCode());
-		result = (PRIME * result) + ((data == null) ? 0 : data.hashCode());
+		result = PRIME * result + data.hashCode();
 		return result;
 	}
 
@@ -188,14 +174,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 		} else if (!simpleSectionsd.equals(other.simpleSectionsd)){
 			return false;
 		}
-		if (data == null) {
-			if (other.data != null){
-				return false;
-			}
-		} else if (!data.equals(other.data)){
-			return false;
-		}
-		return true;
+		return data.equals(other.data);
 	}
 
 }

@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class TDT extends AbstractPSITabel{
 
-	private final List<TDTsection> tdtSectionList = new ArrayList<TDTsection>();
+	private final List<TDTsection> tdtSectionList = new ArrayList<>();
 
 	public TDT(final PSI parent){
 		super(parent);
@@ -56,7 +56,7 @@ public class TDT extends AbstractPSITabel{
 		KVP kvp = new KVP("TDT");
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		if(!tdtSectionList.isEmpty()) {
-			kvp.setTableSource(()->getTableModel());
+			kvp.setTableSource(this::getTableModel);
 		}
 
 		for (TDTsection tdTsection : tdtSectionList) {
@@ -76,28 +76,25 @@ public class TDT extends AbstractPSITabel{
 	 * @return TableHeader<TDTsection,TDTsection > tableHeader
 	 */
 	static TableHeader<TDTsection,TDTsection>  buildTdtTableHeader() {
-		TableHeader<TDTsection,TDTsection > tableHeader =  new TableHeaderBuilder<TDTsection,TDTsection>().
-				addRequiredRowColumn("UTC_time",tdtSection -> tdtSection.getUTC_timeString(), String.class).
+
+		return new TableHeaderBuilder<TDTsection,TDTsection>().
+				addRequiredRowColumn("UTC_time", TDTsection::getUTC_timeString, String.class).
 				build();
-		
-		return tableHeader;
 	}
 
 
 	
 	public TableModel getTableModel() {
 		FlexTableModel<TDTsection,TDTsection> tableModel =  new FlexTableModel<>(buildTdtTableHeader());
-		
-		if (tdtSectionList != null) {
-			for (TDTsection element : tdtSectionList) {
-				if(element!= null){
-					List<TDTsection> lst = new ArrayList<>();
-					lst.add(element);
-					tableModel.addData(element, lst);
-				}
+
+		for (TDTsection element : tdtSectionList) {
+			if(element!= null){
+				List<TDTsection> lst = new ArrayList<>();
+				lst.add(element);
+				tableModel.addData(element, lst);
 			}
 		}
-		
+
 		tableModel.process();
 		return tableModel;
 	}

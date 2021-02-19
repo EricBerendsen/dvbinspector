@@ -70,17 +70,13 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
 	}
 
-	private Map<Integer, PMTsection []> pmts = new HashMap<Integer, PMTsection []>();
+	private Map<Integer, PMTsection []> pmts = new HashMap<>();
 
 	public void update(final PMTsection section){
 
 		final int programNumber = section.getProgramNumber();
-		PMTsection [] sections= pmts.get(programNumber);
+		PMTsection[] sections = pmts.computeIfAbsent(programNumber, k -> new PMTsection[section.getSectionLastNumber() + 1]);
 
-		if(sections==null){
-			sections = new PMTsection[section.getSectionLastNumber()+1];
-			pmts.put(programNumber, sections);
-		}
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
@@ -92,23 +88,21 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PMTs"));
-		final TreeSet<Integer> s = new TreeSet<Integer>(pmts.keySet());
+		final TreeSet<Integer> s = new TreeSet<>(pmts.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer programNumber=i.next();
+		for (Integer programNumber : s) {
 			final PMTsection[] sections = pmts.get(programNumber);
-			KVP kvp = new KVP("program",programNumber,getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber));
-			kvp.setTableSource(()->getTableForProgram(programNumber));
+			KVP kvp = new KVP("program", programNumber, getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber));
+			kvp.setTableSource(() -> getTableForProgram(programNumber));
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			for (final PMTsection pmtSection : sections) {
-				if(pmtSection!= null){
-					if(Utils.simpleModus(modus)){
+				if (pmtSection != null) {
+					if (Utils.simpleModus(modus)) {
 						// keep it simple
-						n.add(new DefaultMutableTreeNode(new KVP("PCR_PID",pmtSection.getPcrPid(),null)));
-						addListJTree(n,pmtSection.getDescriptorList(),modus,"program_info");
-						addListJTree(n,pmtSection.getComponentenList(),modus,"components");
-					}else{ // show all details
+						n.add(new DefaultMutableTreeNode(new KVP("PCR_PID", pmtSection.getPcrPid(), null)));
+						addListJTree(n, pmtSection.getDescriptorList(), modus, "program_info");
+						addListJTree(n, pmtSection.getComponentenList(), modus, "components");
+					} else { // show all details
 						addSectionVersionsToJTree(n, pmtSection, modus);
 					}
 				}
@@ -120,36 +114,37 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	}
 	
 	static TableHeader<PMTsection, Component> buildPmtTableHeader() {
-		TableHeader<PMTsection,Component> tableHeader =  new TableHeaderBuilder<PMTsection,Component>().
-				addRequiredBaseColumn("program number", p->p.getProgramNumber(), Integer.class).
 
-				addOptionalRowColumn("stream type", c -> c.getStreamtype(), StreamTypeTableCellRenderer.class).
+		return new TableHeaderBuilder<PMTsection,Component>().
+				addRequiredBaseColumn("program number", PMTsection::getProgramNumber, Integer.class).
+
+				addOptionalRowColumn("stream type", Component::getStreamtype, StreamTypeTableCellRenderer.class).
 				addOptionalRowColumn("usage",
 						c ->  determineComponentType(c.getComponentDescriptorList()).
 							map(ComponentType::getDescription).
 							orElse(getStreamTypeShortString(c.getStreamtype())),
 						String.class).
-				addOptionalRowColumn("elementary PID", c -> c.getElementaryPID(), Integer.class).
-				
+				addOptionalRowColumn("elementary PID", Component::getElementaryPID, Integer.class).
+
 				addOptionalRowColumn("component tag",
-						component -> findDescriptorApplyFunc(component.getComponentDescriptorList(), 
-								StreamIdentifierDescriptor.class,  
-								si -> si.getComponentTag()), 
+						component -> findDescriptorApplyFunc(component.getComponentDescriptorList(),
+								StreamIdentifierDescriptor.class,
+								StreamIdentifierDescriptor::getComponentTag),
 						Integer.class).
 
 				//ISO639
-				
+
 				addOptionalRepeatingGroupedColumn("iso language",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
 									stream().
-									map(l->l.getIso639LanguageCode()).
+									map(ISO639LanguageDescriptor.Language::getIso639LanguageCode).
 									collect(Collectors.toList())),
 						String.class,
 						"iso").
 				addOptionalRepeatingGroupedColumn("iso type",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
 									stream().
@@ -159,18 +154,18 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 						"iso").
 
 				// TTX
-				
+
 				addOptionalRepeatingGroupedColumn("teletext language",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								TeletextDescriptor.class,
 								iso -> iso.getTeletextList().
 									stream().
-									map(t->(t.getIso639LanguageCode())).
+									map(TeletextDescriptor.Teletext::getIso639LanguageCode).
 									collect(Collectors.toList())),
 						String.class,
 						"ttx").
 				addOptionalRepeatingGroupedColumn("teletext type",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								TeletextDescriptor.class,
 								iso -> iso.getTeletextList().
 									stream().
@@ -180,18 +175,18 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 						"ttx").
 
 				// SUB
-				
+
 				addOptionalRepeatingGroupedColumn("subtitle language",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								SubtitlingDescriptor.class,
 								sub -> sub.getSubtitleList().
 									stream().
-									map(t->(t.getIso639LanguageCode())).
+									map(SubtitlingDescriptor.Subtitle::getIso639LanguageCode).
 									collect(Collectors.toList())),
 						String.class,
 						"sub").
 				addOptionalRepeatingGroupedColumn("subtitle type",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								SubtitlingDescriptor.class,
 								sub -> sub.getSubtitleList().
 									stream().
@@ -199,21 +194,19 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 									collect(Collectors.toList())),
 						String.class,
 						"sub").
-				
+
 				//ApplicationSignallingDescriptor
-				
+
 				addOptionalRepeatingRowColumn("application type",
-						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(), 
+						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								ApplicationSignallingDescriptor.class,
 								app -> app.getApplicationTypeList().
 									stream().
 									map(a->getAppTypeIDString(a.getApplicationType())).
 									collect(Collectors.toList())),
 						String.class).
-				
+
 				build();
-					
-		return tableHeader;
 	}
 
 
@@ -242,7 +235,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	}
 	
 	public List<PMTsection>findPMTsFromComponentPID(int pid){
-		ArrayList<PMTsection> result = new ArrayList<PMTsection>();
+		ArrayList<PMTsection> result = new ArrayList<>();
 		for(PMTsection[] pmtArray: pmts.values()){
 			PMTsection p = pmtArray[0];
 			for(Component component:p.getComponentenList()){

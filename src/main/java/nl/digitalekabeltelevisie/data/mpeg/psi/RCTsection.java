@@ -56,7 +56,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class RCTsection extends TableSectionExtendedSyntax {
 
-	private static LookUpList link_type_list = new LookUpList.Builder().
+	private static final LookUpList link_type_list = new LookUpList.Builder().
 			add(0x0,"Link information is a URI string only").
 			add(0x1,"Link information is a binary locator only").
 			add(0x2,"Link information is both a binary locator and a URI string").
@@ -64,7 +64,7 @@ public class RCTsection extends TableSectionExtendedSyntax {
 			add(0x4 ,0xF,"DVB reserved").
 			build();
 
-	private static LookUpList how_related_classification_scheme_id_list = new LookUpList.Builder().
+	private static final LookUpList how_related_classification_scheme_id_list = new LookUpList.Builder().
 			add(0x00,"urn:tva:metadata:HowRelatedCS:2004 [25], clause A.3.").
 			add(0x01,"urn:tva:metadata:HowRelatedCS:2005 [26], clause A.3.").
 			add(0x02,"urn:tva:metadata:HowRelatedCS:2007 [4], clause A.3.").
@@ -72,11 +72,11 @@ public class RCTsection extends TableSectionExtendedSyntax {
 			add(0x30,0x3F,"User Private").
 			build();
 
-	private int year_offset;
-	private int link_count;
-	private int descriptor_loop_length;
-	private List<Descriptor>descriptor_loop;
-	private List<LinkInfo>	links = new ArrayList<>();
+	private final int year_offset;
+	private final int link_count;
+	private final int descriptor_loop_length;
+	private final List<Descriptor>descriptor_loop;
+	private final List<LinkInfo>	links = new ArrayList<>();
 
 	public class LinkInfo implements TreeNode {
 
@@ -111,9 +111,7 @@ public class RCTsection extends TableSectionExtendedSyntax {
 			}
 		}
 
-		private byte[] data;
-		private int offset;
-		private int len;
+        private final int len;
 
 		private final int link_type;
 		private final int how_related_classification_scheme_id;
@@ -125,19 +123,17 @@ public class RCTsection extends TableSectionExtendedSyntax {
 		private int media_uri_length;
 		private byte[] media_uri_byte;
 
-		private int number_items;
-		private List<PromotionalText> promotional_items = new ArrayList<>();
+		private final int number_items;
+		private final List<PromotionalText> promotional_items = new ArrayList<>();
 
-		private int default_icon_flag;
-		private int icon_id;
-		private int descriptor_loop_length;
-		private List<Descriptor>descriptor_loop;
+		private final int default_icon_flag;
+		private final int icon_id;
+		private final int descriptor_loop_length;
+		private final List<Descriptor>descriptor_loop;
 
 		protected LinkInfo(byte[] data, int offset, int len){
-			this.data = data;
-			this.len = len;
-			this.offset = offset;
-			final BitSource bs =new BitSource(this.data,offset,len);
+            this.len = len;
+            final BitSource bs =new BitSource(data,offset,len);
 			link_type = bs.readBits(4);
 			bs.readBits(2); // reserved_future_use
 			how_related_classification_scheme_id = bs.readBits(6);

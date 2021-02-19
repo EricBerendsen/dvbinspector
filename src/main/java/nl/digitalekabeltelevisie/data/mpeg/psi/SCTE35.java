@@ -27,7 +27,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -49,7 +48,7 @@ public class SCTE35 extends AbstractPSITabel{
 
 	}
 
-	private final Map<Integer, SpliceInfoSections> spliceSections = new HashMap<Integer, SpliceInfoSections>();
+	private final Map<Integer, SpliceInfoSections> spliceSections = new HashMap<>();
 
 	public void update(final SpliceInfoSection section){
 
@@ -66,11 +65,9 @@ public class SCTE35 extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SCTE-35"));
-		final SortedSet<Integer> s = new TreeSet<Integer>(spliceSections.keySet());
+		final SortedSet<Integer> s = new TreeSet<>(spliceSections.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer pid=i.next();
+		for (Integer pid : s) {
 			final SpliceInfoSections sections = spliceSections.get(pid);
 			t.add(sections.getJTreeNode(modus));
 

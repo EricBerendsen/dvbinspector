@@ -27,7 +27,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -53,7 +52,7 @@ public class RCTs extends AbstractPSITabel{
 
 	}
 
-	private final Map<Integer, RCT> rcts = new HashMap<Integer, RCT>();
+	private final Map<Integer, RCT> rcts = new HashMap<>();
 
 	public void update(final RCTsection section){
 
@@ -70,11 +69,9 @@ public class RCTs extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("RCTs"));
-		final SortedSet<Integer> s = new TreeSet<Integer>(rcts.keySet());
+		final SortedSet<Integer> s = new TreeSet<>(rcts.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer pid=i.next();
+		for (Integer pid : s) {
 			final RCT rct = rcts.get(pid);
 			t.add(rct.getJTreeNode(modus));
 

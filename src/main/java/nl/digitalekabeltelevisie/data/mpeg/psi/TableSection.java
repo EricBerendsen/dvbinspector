@@ -441,8 +441,7 @@ public class TableSection implements TreeNode{
 		if((bitrate>0)&&(count>=2)){
 			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
 			try (Formatter formatter = new Formatter()){
-				String r = "repetition rate: "+formatter.format("%3.3f seconds",repRate);
-				return r;
+				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 			}
 		}
 		return null;
@@ -454,8 +453,7 @@ public class TableSection implements TreeNode{
 		if(bitrate>0){
 			final float repRate=((float)(last)*parentTransportStream.getPacketLenghth()*8)/(bitrate);
 			try (Formatter formatter = new Formatter()){
-				String r = "interval: "+formatter.format("%3.3f seconds",repRate);
-				return r;
+				return "interval: "+formatter.format("%3.3f seconds",repRate);
 			}
 		}
 		return null;
@@ -575,13 +573,8 @@ public class TableSection implements TreeNode{
 		}
 		final TableSection other = (TableSection) obj;
 		if (raw_data == null) {
-			if (other.raw_data != null) {
-				return false;
-			}
-		} else if (!raw_data.equals(other.raw_data)) {
-			return false;
-		}
-		return true;
+			return other.raw_data == null;
+		} else return raw_data.equals(other.raw_data);
 	}
 
 	public int getMinPacketDistance() {

@@ -86,9 +86,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			b.append(getServiceID()).append(", reserved_future_use=").append(getReserved()).append(", EIT_schedule_flag=");
 			b.append(getEitScheduleFlag()).append(", EIT_present_following_flag=").append(getEitPresentFollowingFlag()).append(", running_status=");
 			b.append(getRunningStatus()).append(", free_CA_mode=").append(getFreeCAmode()).append(", descriptors_loop_length=").append(getServiceDescriptorsLength()).append(",descriptors=");
-			final Iterator<Descriptor> j=descriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
 
 			}
@@ -197,20 +195,20 @@ public class SDTsection extends TableSectionExtendedSyntax{
 		return serviceList.size();
 	}
 
-	private final List<Service> buildServicesList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<Service> r = new ArrayList<Service>();
+	private List<Service> buildServicesList(final byte[] data, final int offset, final int programInfoLength) {
+		final ArrayList<Service> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
 			final Service c = new Service();
-			c.setServiceID(Utils.getInt(data, i+t, 2, 0xFFFF));
-			c.setReserved(Utils.getInt(data, i+t+2, 1, 0xFC)>>2);
-			c.setEitScheduleFlag(Utils.getInt(data, i+t+2, 1, 0x02)>>1);
-			c.setEitPresentFollowingFlag(Utils.getInt(data, i+t+2, 1, 0x01));
-			c.setRunningStatus(Utils.getInt(data, i+t+3, 1, 0xE0)>>5);
-			c.setFreeCAmode(Utils.getInt(data, i+t+3, 1, 0x10)>>4);
-			c.setServiceDescriptorsLength(Utils.getInt(data, i+t+3, 2, 0x0FFF));
+			c.setServiceID(Utils.getInt(data, offset+t, 2, 0xFFFF));
+			c.setReserved(Utils.getInt(data, offset+t+2, 1, 0xFC)>>2);
+			c.setEitScheduleFlag(Utils.getInt(data, offset+t+2, 1, 0x02)>>1);
+			c.setEitPresentFollowingFlag(Utils.getInt(data, offset+t+2, 1, 0x01));
+			c.setRunningStatus(Utils.getInt(data, offset+t+3, 1, 0xE0)>>5);
+			c.setFreeCAmode(Utils.getInt(data, offset+t+3, 1, 0x10)>>4);
+			c.setServiceDescriptorsLength(Utils.getInt(data, offset+t+3, 2, 0x0FFF));
 
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,c.getServiceDescriptorsLength(),this));
+			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,offset+t+5,c.getServiceDescriptorsLength(),this));
 			t+=5+c.getServiceDescriptorsLength();
 			r.add(c);
 

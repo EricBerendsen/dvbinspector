@@ -55,7 +55,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class SpliceInfoSection extends TableSection {
 	
-	public class BandwidthReservation implements TreeNode {
+	public static class BandwidthReservation implements TreeNode {
 		
 		private BandwidthReservation(BitSource bs){
 			super();
@@ -131,14 +131,13 @@ public class SpliceInfoSection extends TableSection {
 		}
 		
 		public long getSpliceTimeAdjusted() {
-			long time = (pts_time + pts_adjustment) & Utils.MASK_33BITS;
-			return time;
+			return (pts_time + pts_adjustment) & Utils.MASK_33BITS;
 		}
 
 	}
 	
 	
-	private class BreakDuration implements TreeNode {
+	private static class BreakDuration implements TreeNode {
 
 		private int auto_return;
 		private int reserved;
@@ -325,7 +324,7 @@ public class SpliceInfoSection extends TableSection {
 		
 	}
 	
-	private class SpliceNull implements TreeNode{
+	private static class SpliceNull implements TreeNode{
 
 		private SpliceNull(BitSource bs){
 			super();

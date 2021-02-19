@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
 public class UNT extends AbstractPSITabel{
 
-	private Map<Integer, UNTsection []> ssu = new HashMap<Integer, UNTsection []>();
+	private final Map<Integer, UNTsection []> ssu = new HashMap<>();
 	private int pid = 0;
 
 	public UNT(final PSI parent){
@@ -52,12 +51,8 @@ public class UNT extends AbstractPSITabel{
 		pid=section.getParentPID().getPid();
 
 		final int key = section.getOui();
-		UNTsection [] sections= ssu.get(key);
+		UNTsection[] sections = ssu.computeIfAbsent(key, k -> new UNTsection[section.getSectionLastNumber() + 1]);
 
-		if(sections==null){
-			sections = new UNTsection[section.getSectionLastNumber()+1];
-			ssu.put(key, sections);
-		}
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
@@ -69,15 +64,13 @@ public class UNT extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("UNT (Update Notification Table) PID="+pid));
-		final TreeSet<Integer> s = new TreeSet<Integer>(ssu.keySet());
+		final TreeSet<Integer> s = new TreeSet<>(ssu.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer oui=i.next();
-			final UNTsection [] sections = ssu.get(oui);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("oui",oui, getOUIString(oui)));
+		for (Integer oui : s) {
+			final UNTsection[] sections = ssu.get(oui);
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("oui", oui, getOUIString(oui)));
 			for (final UNTsection tsection : sections) {
-				if(tsection!= null){
+				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
 			}

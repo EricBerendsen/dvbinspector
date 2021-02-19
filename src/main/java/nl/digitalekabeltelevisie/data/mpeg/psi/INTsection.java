@@ -47,13 +47,13 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class INTsection extends TableSectionExtendedSyntax {
 
-	private List<Descriptor> platformdescriptorList;
-	private List<TargetLoop> targetLoopList;
-	private int action_type;
-	private int platform_id_hash;
-	private int platformID;
-	private int processing_order;
-	private int platform_descriptor_loop_length;
+	private final List<Descriptor> platformdescriptorList;
+	private final List<TargetLoop> targetLoopList;
+	private final int action_type;
+	private final int platform_id_hash;
+	private final int platformID;
+	private final int processing_order;
+	private final int platform_descriptor_loop_length;
 
 	public static class TargetLoop implements TreeNode{
 		private int target_descriptor_loop_length;
@@ -167,7 +167,7 @@ public class INTsection extends TableSectionExtendedSyntax {
 
 
 	private List<TargetLoop> buildTargetLoopList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<TargetLoop> r = new ArrayList<TargetLoop>();
+		final ArrayList<TargetLoop> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
 			final TargetLoop c = new TargetLoop();

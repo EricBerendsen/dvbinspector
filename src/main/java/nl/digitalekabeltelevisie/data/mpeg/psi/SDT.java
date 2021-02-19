@@ -50,7 +50,7 @@ public class SDT extends AbstractPSITabel{
 	}
 	
 	// map<orgNetworkId,TransportStreamId>
-	private Map<Integer,HashMap<Integer, SDTsection []>> networks = new HashMap<Integer, HashMap<Integer, SDTsection []>>();
+	private final Map<Integer,HashMap<Integer, SDTsection []>> networks = new HashMap<>();
 	private SDTsection [] actualTransportStreamSDT;
 
 	public void update(final SDTsection section){
@@ -89,39 +89,35 @@ public class SDT extends AbstractPSITabel{
 
 		KVP sdtKvp = new KVP("SDT");
 		if(!networks.isEmpty()) {
-			sdtKvp.setTableSource(()->getTableForSdt());
+			sdtKvp.setTableSource(this::getTableForSdt);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(sdtKvp);
 
-		final TreeSet<Integer> networksTreeSet = new TreeSet<Integer>(networks.keySet());
-		final Iterator<Integer> i = networksTreeSet.iterator();
-		while(i.hasNext()){
-			final Integer orgNetworkId=i.next();
-			final Map<Integer, SDTsection []> networkSections = networks.get(orgNetworkId);
-			
-			KVP kvpOrgNetwork = new KVP("original_network_id", orgNetworkId,Utils.getOriginalNetworkIDString(orgNetworkId));
-			kvpOrgNetwork.setTableSource(()->getTableForOriginalNetwork(orgNetworkId));
+		final TreeSet<Integer> networksTreeSet = new TreeSet<>(networks.keySet());
+		for (Integer orgNetworkId : networksTreeSet) {
+			final Map<Integer, SDTsection[]> networkSections = networks.get(orgNetworkId);
+
+			KVP kvpOrgNetwork = new KVP("original_network_id", orgNetworkId, Utils.getOriginalNetworkIDString(orgNetworkId));
+			kvpOrgNetwork.setTableSource(() -> getTableForOriginalNetwork(orgNetworkId));
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvpOrgNetwork);
-			t.add(n);			
-			
-			final TreeSet<Integer> streamsTreeSet = new TreeSet<Integer>(networkSections.keySet());
-			final Iterator<Integer> j = streamsTreeSet.iterator();
-			while(j.hasNext()){
-				final Integer transport_stream_id = j.next();
+			t.add(n);
+
+			final TreeSet<Integer> streamsTreeSet = new TreeSet<>(networkSections.keySet());
+			for (Integer transport_stream_id : streamsTreeSet) {
 				SDTsection[] sections = networkSections.get(transport_stream_id);
 
-				KVP kvpTsId = new KVP("transport_stream_id", transport_stream_id,null);
-				kvpTsId.setTableSource(()->getTableForTransportStreamID(orgNetworkId,transport_stream_id));
+				KVP kvpTsId = new KVP("transport_stream_id", transport_stream_id, null);
+				kvpTsId.setTableSource(() -> getTableForTransportStreamID(orgNetworkId, transport_stream_id));
 
 				final DefaultMutableTreeNode m = new DefaultMutableTreeNode(kvpTsId);
 				n.add(m);
 
 				for (SDTsection section : sections) {
-					if(section!= null){
-						if(!Utils.simpleModus(modus)){
+					if (section != null) {
+						if (!Utils.simpleModus(modus)) {
 							addSectionVersionsToJTree(m, section, modus);
-						}else{
-							addListJTree(m,section.getServiceList(),modus,"services");
+						} else {
+							addListJTree(m, section.getServiceList(), modus, "services");
 						}
 					}
 				}
@@ -155,7 +151,7 @@ public class SDT extends AbstractPSITabel{
 	public Optional<DVBString> getServiceNameForActualTransportStreamDVBString(int serviceID){
 		return getServiceForActualTransportStream(serviceID)
 				.map(SDTsection.Service::getDescriptorList)
-				.orElseGet(ArrayList<Descriptor>::new)
+				.orElseGet(ArrayList::new)
 				.stream()
 				.filter(d -> d instanceof ServiceDescriptor)
 				.map(d -> (ServiceDescriptor)d)
@@ -181,7 +177,7 @@ public class SDT extends AbstractPSITabel{
 
 		return getService(original_network_id,transport_stream_id,serviceID)
 				.map(SDTsection.Service::getDescriptorList)
-				.orElseGet(ArrayList<Descriptor>::new)
+				.orElseGet(ArrayList::new)
 				.stream()
 				.filter(d -> d instanceof ServiceDescriptor)
 				.map(d -> (ServiceDescriptor)d)
@@ -192,22 +188,18 @@ public class SDT extends AbstractPSITabel{
 
 	@Deprecated
 	public DVBString getServiceNameDVBString(final int serviceID){
-		DVBString r = null;
 
 		final SDTsection.Service service=getService(serviceID);
 		if(service!=null) {
-			final Iterator<Descriptor> descs=service.getDescriptorList().iterator();
-			while(descs.hasNext()){
-				final Descriptor d=descs.next();
-				if(d instanceof ServiceDescriptor) {
-					r = ((ServiceDescriptor)d).getServiceName();
-					return r;
+			for (Descriptor d : service.getDescriptorList()) {
+				if (d instanceof ServiceDescriptor) {
+					return ((ServiceDescriptor) d).getServiceName();
 				}
 			}
 			// service found, but no name, give up
-			return r;
+			return null;
 		}
-		return r;
+		return null;
 	}
 
 	@Deprecated
@@ -216,11 +208,9 @@ public class SDT extends AbstractPSITabel{
 
 		final SDTsection.Service service=getService(serviceID);
 		if(service!=null) {
-			final Iterator<Descriptor> descs=service.getDescriptorList().iterator();
-			while(descs.hasNext()){
-				final Descriptor d=descs.next();
-				if(d instanceof ServiceDescriptor) {
-					r = ((ServiceDescriptor)d).getServiceType();
+			for (Descriptor d : service.getDescriptorList()) {
+				if (d instanceof ServiceDescriptor) {
+					r = ((ServiceDescriptor) d).getServiceType();
 					return r;
 				}
 			}
@@ -266,13 +256,11 @@ public class SDT extends AbstractPSITabel{
 		if(actualTransportStreamSDT !=null) {
 		
 			final SDTsection [] sections = actualTransportStreamSDT;
-			if(sections!=null){
-				for (SDTsection section : sections) {
-					if(section!= null)  {
-						for(Service service: section.getServiceList()) {
-							if(service.getServiceID() == serviceID) {
-								return Optional.of(service);
-							}
+			for (SDTsection section : sections) {
+				if(section!= null)  {
+					for(Service service: section.getServiceList()) {
+						if(service.getServiceID() == serviceID) {
+							return Optional.of(service);
 						}
 					}
 				}
@@ -288,27 +276,21 @@ public class SDT extends AbstractPSITabel{
 	public SDTsection.Service getService(final int serviceID){
 
 		
-		final TreeSet<Integer> t = new TreeSet<Integer>(networks.keySet());
-		final Iterator<Integer> j = t.iterator();
-		
-		while(j.hasNext()) {
-			
-			int orgNetworkId = j.next();
+		final TreeSet<Integer> t = new TreeSet<>(networks.keySet());
+
+		for (int orgNetworkId : t) {
+
 			HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
-	
-			final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
-	
-			final Iterator<Integer> i = s.iterator();
-			while(i.hasNext()){
-				final Integer transportStreamID=i.next();
-				final SDTsection [] sections = transportStreams.get(transportStreamID);
-				if(sections!=null){
+
+			final TreeSet<Integer> s = new TreeSet<>(transportStreams.keySet());
+
+			for (Integer transportStreamID : s) {
+				final SDTsection[] sections = transportStreams.get(transportStreamID);
+				if (sections != null) {
 					for (SDTsection section : sections) {
-						if(section!= null){
-							final Iterator<SDTsection.Service> serviceIter=section.getServiceList().iterator();
-							while(serviceIter.hasNext()){
-								final SDTsection.Service service=serviceIter.next();
-								if(serviceID== service.getServiceID()) {
+						if (section != null) {
+							for (Service service : section.getServiceList()) {
+								if (serviceID == service.getServiceID()) {
 									return service;
 								}
 							}
@@ -324,27 +306,20 @@ public class SDT extends AbstractPSITabel{
 	public int getTransportStreamID(final int serviceID){
 
 
-		final TreeSet<Integer> t = new TreeSet<Integer>(networks.keySet());
-		final Iterator<Integer> j = t.iterator();
-		
-		while(j.hasNext()) {
-			
-			int orgNetworkId = j.next();
-		
+		final TreeSet<Integer> t = new TreeSet<>(networks.keySet());
+
+		for (int orgNetworkId : t) {
+
 			HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
-			final TreeSet<Integer> s = new TreeSet<Integer>(transportStreams.keySet());
-	
-			final Iterator<Integer> i = s.iterator();
-			while(i.hasNext()){
-				final Integer transportStreamID=i.next();
-				final SDTsection [] sections = transportStreams.get(transportStreamID);
-				if(sections!=null){
+			final TreeSet<Integer> s = new TreeSet<>(transportStreams.keySet());
+
+			for (Integer transportStreamID : s) {
+				final SDTsection[] sections = transportStreams.get(transportStreamID);
+				if (sections != null) {
 					for (SDTsection section : sections) {
-						if(section!= null){
-							final Iterator<SDTsection.Service> serviceIter=section.getServiceList().iterator();
-							while(serviceIter.hasNext()){
-								final SDTsection.Service service=serviceIter.next();
-								if(serviceID== service.getServiceID()) {
+						if (section != null) {
+							for (Service service : section.getServiceList()) {
+								if (serviceID == service.getServiceID()) {
 									return transportStreamID;
 								}
 							}
@@ -358,47 +333,46 @@ public class SDT extends AbstractPSITabel{
 	}
 	
 	static TableHeader<SDTsection,Service>  buildSdtTableHeader() {
-		TableHeader<SDTsection,Service> tableHeader =  new TableHeaderBuilder<SDTsection,Service>().
+		return new TableHeaderBuilder<SDTsection,Service>().
 				addRequiredBaseColumn("onid", SDTsection::getOriginalNetworkID, Integer.class).
 				addRequiredBaseColumn("tsid", SDTsection::getTransportStreamID, Integer.class).
-				
+
 				addOptionalRowColumn("sid",
-						service -> service.getServiceID(),
+						Service::getServiceID,
 						Integer.class).
 				addOptionalRowColumn("service_name",
-						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceName().toString()), 
+						service -> findDescriptorApplyFunc(service.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> sd.getServiceName().toString()),
 						String.class).
 				addOptionalRowColumn("service_type",
-						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceType()), 
+						service -> findDescriptorApplyFunc(service.getDescriptorList(),
+								ServiceDescriptor.class,
+								ServiceDescriptor::getServiceType),
 						Integer.class).
 				addOptionalRowColumn("service_type description",
-						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> getServiceTypeString(sd.getServiceType())), 
+						service -> findDescriptorApplyFunc(service.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> getServiceTypeString(sd.getServiceType())),
 						String.class).
 				addOptionalRowColumn("service_provider_name",
-						service -> findDescriptorApplyFunc(service.getDescriptorList(), 
-								ServiceDescriptor.class,  
-								sd -> sd.getServiceProviderName().toString()), 
+						service -> findDescriptorApplyFunc(service.getDescriptorList(),
+								ServiceDescriptor.class,
+								sd -> sd.getServiceProviderName().toString()),
 						String.class).
 				addOptionalRowColumn("EIT_schedule_flag",
-						service -> service.getEitScheduleFlag(),
+						Service::getEitScheduleFlag,
 						Integer.class).
 				addOptionalRowColumn("EIT_present_following_flag",
-						service -> service.getEitPresentFollowingFlag(),
+						Service::getEitPresentFollowingFlag,
 						Integer.class).
 				addOptionalRowColumn("running_status",
-						service -> service.getRunningStatus(),
+						Service::getRunningStatus,
 						Integer.class).
 				addOptionalRowColumn("free_CA_mode",
-						service -> service.getFreeCAmode(),
+						Service::getFreeCAmode,
 						Integer.class).
 				build();
-		return tableHeader;
 	}
 	
 	private TableModel getTableForTransportStreamID(int orgNetworkId, int tsId) {

@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,9 +27,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -52,12 +50,12 @@ public class AITs extends AbstractPSITabel{
 
 	}
 
-	private final Map<Integer, AIT> aits = new HashMap<Integer, AIT>();
+	private final Map<Integer, AIT> aits = new HashMap<>();
 
 	public void update(final AITsection section){
 
 		final int pid = section.getParentPID().getPid();
-		AIT  ait= aits.get(pid);
+		AIT ait = aits.get(pid);
 
 		if(ait==null){
 			ait = new AIT(parentPSI);
@@ -69,11 +67,8 @@ public class AITs extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AITs"));
-		final SortedSet<Integer> s = new TreeSet<Integer>(aits.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer pid=i.next();
+		for (Integer pid : new TreeSet<>(aits.keySet())) {
 			final AIT ait = aits.get(pid);
 			t.add(ait.getJTreeNode(modus));
 

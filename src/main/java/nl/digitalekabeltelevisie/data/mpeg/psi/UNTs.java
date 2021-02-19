@@ -28,7 +28,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  */
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -46,7 +45,7 @@ public class UNTs extends AbstractPSITabel{
 
 	}
 
-	private Map<Integer, UNT> unts = new HashMap<Integer, UNT>();
+	private final Map<Integer, UNT> unts = new HashMap<>();
 
 	public void update(final UNTsection section){
 
@@ -65,11 +64,9 @@ public class UNTs extends AbstractPSITabel{
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("UNTs"));
 
 
-		final SortedSet<Integer> s = new TreeSet<Integer>(unts.keySet());
+		final SortedSet<Integer> s = new TreeSet<>(unts.keySet());
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer pid=i.next();
+		for (Integer pid : s) {
 			final UNT unt = unts.get(pid);
 			t.add(unt.getJTreeNode(modus));
 

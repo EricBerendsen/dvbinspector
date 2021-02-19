@@ -47,7 +47,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	private int transportStreamLoopLength;
 
 	
-	public class TransportStream implements TreeNode{
+	public static class TransportStream implements TreeNode{
 		private int transportStreamID;
 		private int originalNetworkID;
 		private int transportDescriptorsLength;
@@ -90,9 +90,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 		public String toString(){
 			final StringBuilder b = new StringBuilder("Service, transportStreamID=");
 			b.append(getTransportStreamID()).append(", originalNetworkID=").append(getOriginalNetworkID()).append(", ");
-			final Iterator<Descriptor> j=descriptorList.iterator();
-			while (j.hasNext()) {
-				final Descriptor d = j.next();
+			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
 
 			}
@@ -195,8 +193,8 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 		this.transportStreamLoopLength = transportStreamLoopLength;
 	}
 
-	private final List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<TransportStream> r = new ArrayList<TransportStream>();
+	private List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
+		final ArrayList<TransportStream> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
 			final TransportStream c = new TransportStream();
