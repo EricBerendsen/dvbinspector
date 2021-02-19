@@ -56,9 +56,9 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
  */
 public class DSMCC extends AbstractPSITabel{
 
-	private Map<Integer, DSMCC_UNMessageSection []> unMessages = new HashMap<Integer, DSMCC_UNMessageSection []>();
-	private Map<Integer, DSMCC_DownLoadDataMessageSection []> downloadMessages = new HashMap<Integer, DSMCC_DownLoadDataMessageSection []>();
-	private Map<Integer, DSMCC_StreamDescriptorList[]> eventStreams = new HashMap<Integer, DSMCC_StreamDescriptorList[]>();
+	private final Map<Integer, DSMCC_UNMessageSection []> unMessages = new HashMap<>();
+	private final Map<Integer, DSMCC_DownLoadDataMessageSection []> downloadMessages = new HashMap<>();
+	private final Map<Integer, DSMCC_StreamDescriptorList[]> eventStreams = new HashMap<>();
 	private int pid = 0;
 	private boolean isObjectCarousel = true; // set to false for SSU
 
@@ -94,12 +94,8 @@ public class DSMCC extends AbstractPSITabel{
 
 			final int moduleID = section.getTableIdExtension();
 			final DSMCC_DownLoadDataMessageSection downloadMessage = new DSMCC_DownLoadDataMessageSection(section.getRaw_data(), section.getParentPID());
-			DSMCC_DownLoadDataMessageSection [] sections= downloadMessages.get(moduleID);
+			DSMCC_DownLoadDataMessageSection[] sections = downloadMessages.computeIfAbsent(moduleID, k -> new DSMCC_DownLoadDataMessageSection[section.getSectionLastNumber() + 1]);
 
-			if(sections==null){
-				sections = new DSMCC_DownLoadDataMessageSection[section.getSectionLastNumber()+1];
-				downloadMessages.put(moduleID, sections);
-			}
 			if(section.getSectionNumber()<=section.getSectionLastNumber()){ // this should always be the case, but Ziggo managed to break this rule...
 				if(section.getSectionLastNumber()>=sections.length){ //new version has getSectionLastNumber > previous version, resize
 					sections = Arrays.copyOf(sections, section.getSectionLastNumber()+1);
@@ -118,12 +114,8 @@ public class DSMCC extends AbstractPSITabel{
 
 			final int eventID = section.getTableIdExtension();
 			final DSMCC_StreamDescriptorList streamDescriptorListSection = new DSMCC_StreamDescriptorList(section.getRaw_data(), section.getParentPID());
-			DSMCC_StreamDescriptorList [] sections= eventStreams.get(eventID);
+			DSMCC_StreamDescriptorList[] sections = eventStreams.computeIfAbsent(eventID, k -> new DSMCC_StreamDescriptorList[section.getSectionLastNumber() + 1]);
 
-			if(sections==null){
-				sections = new DSMCC_StreamDescriptorList[section.getSectionLastNumber()+1];
-				eventStreams.put(eventID, sections);
-			}
 			if(sections[section.getSectionNumber()]==null){
 				sections[section.getSectionNumber()] = streamDescriptorListSection;
 			}else{
@@ -141,7 +133,7 @@ public class DSMCC extends AbstractPSITabel{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC PID",pid,null ));
-		TreeSet<Integer> s = new TreeSet<Integer>(unMessages.keySet());
+		TreeSet<Integer> s = new TreeSet<>(unMessages.keySet());
 
 		Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
@@ -157,7 +149,7 @@ public class DSMCC extends AbstractPSITabel{
 
 		}
 		// TODO extract general method to add both DSMCC_DownLoadDataMessageSection and DSMCC_UNMessageSection to JTree
-		s = new TreeSet<Integer>(downloadMessages.keySet());
+		s = new TreeSet<>(downloadMessages.keySet());
 
 		i = s.iterator();
 		while(i.hasNext()){
@@ -174,7 +166,7 @@ public class DSMCC extends AbstractPSITabel{
 		}
 
 
-		s = new TreeSet<Integer>(eventStreams.keySet());
+		s = new TreeSet<>(eventStreams.keySet());
 
 		i = s.iterator();
 		while(i.hasNext()){

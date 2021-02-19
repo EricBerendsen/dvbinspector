@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -334,8 +333,8 @@ public class ServiceDSMCC implements TreeNode {
 		return res;
 	}
 
-	private Map<Integer, DSMCC> dsmccs = new HashMap<Integer, DSMCC>();
-	private Map<Integer,ObjectCarousel> bootList = new HashMap<Integer,ObjectCarousel>();
+	private Map<Integer, DSMCC> dsmccs = new HashMap<>();
+	private Map<Integer,ObjectCarousel> bootList = new HashMap<>();
 
 
 	private final int programNumber; // service id
@@ -357,13 +356,11 @@ public class ServiceDSMCC implements TreeNode {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC ObjectCarousel components for program",programNumber,psi.getSdt().getServiceNameForActualTransportStream(programNumber)));
 
-		final TreeSet<Integer> s = new TreeSet<Integer>(dsmccs.keySet());
-		final Iterator<Integer> iter = s.iterator();
-		while (iter.hasNext()) {
-			final int associationTag =  iter.next();
-			final DefaultMutableTreeNode association=new DefaultMutableTreeNode(new KVP("Association: "+associationTag));
+		final TreeSet<Integer> s = new TreeSet<>(dsmccs.keySet());
+		for (int associationTag : s) {
+			final DefaultMutableTreeNode association = new DefaultMutableTreeNode(new KVP("Association: " + associationTag));
 			final DSMCC dsmcc = dsmccs.get(associationTag);
-			association.add(new DefaultMutableTreeNode(new KVP("PID",dsmcc.getPid(),null)));
+			association.add(new DefaultMutableTreeNode(new KVP("PID", dsmcc.getPid(), null)));
 			t.add(association);
 		}
 		Utils.addListJTree(t, bootList.values(), modus, "ObjectCarousels");
@@ -413,8 +410,8 @@ public class ServiceDSMCC implements TreeNode {
 				if((components!=null)&&(components.size()>1)){
 					final LiteComponent objectLocation = components.get(0);
 					final LiteComponent connBinder = components.get(1);
-					if((objectLocation!=null)&&(objectLocation instanceof BIOPObjectLocation)&&
-							(connBinder!=null)&&(connBinder instanceof DSMConnBinder)){
+					if((objectLocation instanceof BIOPObjectLocation) &&
+							(connBinder instanceof DSMConnBinder)){
 						final DSMConnBinder connBind =(DSMConnBinder)connBinder;
 						final BIOPObjectLocation biopObjectLocation = (BIOPObjectLocation) objectLocation;
 						final List<Tap> taps = connBind.getTaps();
