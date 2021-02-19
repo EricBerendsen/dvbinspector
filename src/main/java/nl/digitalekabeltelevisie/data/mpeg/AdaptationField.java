@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  * 
@@ -48,7 +48,7 @@ import nl.digitalekabeltelevisie.util.NtpTimeStamp;
 
 public class AdaptationField implements HTMLSource, TreeNode{
 
-	private static LookUpList data_field_tag_list = new LookUpList.Builder().
+	private static final LookUpList data_field_tag_list = new LookUpList.Builder().
 			add(0x00,"Reserved").
 			add(0x01,"Announcement switching data field").
 			add(0x02,"AU_information data field").
@@ -62,7 +62,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 
 
 
-	private static LookUpList AU_coding_format_list = new LookUpList.Builder().
+	private static final LookUpList AU_coding_format_list = new LookUpList.Builder().
 			add(0,"Undefined").
 			add(1,"ITU-T Recommendation H.262 / ISO/IEC 13818-2 Video or ISO/IEC 11172-1 constrained parameter video stream").
 			add(2,"H.264/AVC video stream as defined in ITU-T Recommendation H.264 / ISO/IEC 14496-10 Video").
@@ -70,7 +70,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			add(4,0xF,"Reserved").
 			build();
 
-	private static LookUpList AU_frame_rate_code_list = new LookUpList.Builder().
+	private static final LookUpList AU_frame_rate_code_list = new LookUpList.Builder().
 			add(0, "Forbidden").
 			add(1, "23,976").
 			add(2, "24").
@@ -94,12 +94,12 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	 * @author Eric
 	 *
 	 */
-	public class PrivateDataField implements TreeNode{
+	public static class PrivateDataField implements TreeNode{
 
 		private int data_field_tag;
 		private int data_field_length;
 
-		private byte[] data_byte;
+		private final byte[] data_byte;
 		// Announcement Switching Data
 		private int announcement_switching_flag_field;
 		//AU_information
@@ -152,7 +152,6 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		private List<Integer> groupingList = new  ArrayList<>();
 		private long EBP_acquisition_time;
 		private int EBP_ext_partitions;
-		private int EBP_grouping_id;
 
 		PrivateDataField(byte [] private_data_byte, int offset){
 
@@ -376,7 +375,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 					DefaultMutableTreeNode list = new DefaultMutableTreeNode(new KVP("GroupingList"));
 					for(Integer grouping:groupingList) {
 						EBP_grouping_ext_flag = (grouping & 0b1000_0000) >> 7;
-						EBP_grouping_id = (grouping & 0b0111_1111);
+						int EBP_grouping_id = (grouping & 0b0111_1111);
 						list.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_ext_flag", EBP_grouping_ext_flag, null)));
 						list.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_id", EBP_grouping_id, null)));
 					}
@@ -557,11 +556,9 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	private PCR original_program_clock_reference = null;
 	private int splice_countdown = 0;
 
-	private int offset = 2;
-
 	private int transport_private_data_length = 0;
 	private byte[] private_data_byte;
-	private List<PrivateDataField> privatedataFields = new ArrayList<PrivateDataField>();
+	private List<PrivateDataField> privatedataFields = new ArrayList<>();
 
 	private int adaptation_field_extension_length;
 
@@ -591,31 +588,32 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			splicing_point_flag = getBitAsBoolean(data[1],6);
 			transport_private_data_flag = getBitAsBoolean(data[1],7);
 			adaptation_field_extension_flag = getBitAsBoolean(data[1],8);
+			int offset = 2;
 			if(PCR_flag){
 				program_clock_reference = getPCRfromBytes(data, offset);
-				offset+=6; //33+6+9 bits = 6 bytes
+				offset +=6; //33+6+9 bits = 6 bytes
 			}
 			if(OPCR_flag){
 				original_program_clock_reference = getPCRfromBytes(data, offset);
-				offset+=6; //33+6+9 bits = 6 bytes
+				offset +=6; //33+6+9 bits = 6 bytes
 			}
 			if(splicing_point_flag){
-				splice_countdown =  getInt(data,offset,1,MASK_8BITS);
+				splice_countdown =  getInt(data, offset,1,MASK_8BITS);
 				logger.info("splicing_point_flag is set, splice_countdown="+splice_countdown);
-				offset+=1;
+				offset +=1;
 			}
 			if(transport_private_data_flag){
-				transport_private_data_length = getInt(data,offset,1,MASK_8BITS);
-				offset+= 1;
+				transport_private_data_length = getInt(data, offset,1,MASK_8BITS);
+				offset += 1;
 				private_data_byte = getBytes(data, offset, Math.min(transport_private_data_length, adaptation_field_length+ 1 - offset));
 				if(private_data_byte.length>0){
 					privatedataFields = buildPrivatedataFieldsList(private_data_byte);
 				}
-				offset+= transport_private_data_length ;
+				offset += transport_private_data_length ;
 			}
-			if(adaptation_field_extension_flag&& data.length>offset+2){ //extension is at least 2 bytes
-				adaptation_field_extension_length =  getInt(data,offset,1,MASK_8BITS);
-				offset+=1;
+			if(adaptation_field_extension_flag&& data.length> offset +2){ //extension is at least 2 bytes
+				adaptation_field_extension_length =  getInt(data, offset,1,MASK_8BITS);
+				offset +=1;
 				adaptation_field_extension_byte = getBytes(data, offset, Math.min(adaptation_field_extension_length, adaptation_field_length+ 1 - offset));
 				int adaptation_field_extension_offset = 0;
 				ltw_flag = getBitAsBoolean(adaptation_field_extension_byte[adaptation_field_extension_offset],1);
@@ -827,7 +825,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 					toSafeString(private_data_byte)).append("\"");
 			for (PrivateDataField privatedataField : privatedataFields) {
 				final DefaultMutableTreeNode treeNode = privatedataField.getJTreeNode(0);
-				s.append("<br><br><b>"+ getDataFieldTagString(privatedataField.getData_field_tag()) +"</b>");
+				s.append("<br><br><b>").append(getDataFieldTagString(privatedataField.getData_field_tag())).append("</b>");
 				s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 				
 			}
@@ -856,7 +854,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			if(!af_descriptor_not_present_flag){
 				for (Descriptor afDescriptor : afDescriptorList) {
 					final DefaultMutableTreeNode treeNode = afDescriptor.getJTreeNode(0);
-					s.append("<br><br><b>"+afDescriptor.getDescriptorname()+"</b>");
+					s.append("<br><br><b>").append(afDescriptor.getDescriptorname()).append("</b>");
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					
 				}
