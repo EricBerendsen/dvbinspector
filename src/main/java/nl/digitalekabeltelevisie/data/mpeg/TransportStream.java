@@ -84,7 +84,7 @@ public class TransportStream implements TreeNode{
 		TTML("TTML subtitling"),
 		AC4("Dolby AC-4 Audio");
 		
-		private String description;
+		private final String description;
 		
 		ComponentType(String description){
 			this.description = description;
@@ -157,8 +157,6 @@ public class TransportStream implements TreeNode{
 	 */
 	private int sync_errors = 0;
 
-	private final int max_packets;
-
 	private int packetLength = 188;
 
 	private static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
@@ -183,7 +181,7 @@ public class TransportStream implements TreeNode{
 		this.file = file;
 		len = file.length();
 		packetLength = determineActualPacketLength(file);
-		max_packets = (int)(len / packetLength);
+		int max_packets = (int) (len / packetLength);
 		packet_pid = new short [max_packets];
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
 
@@ -376,7 +374,7 @@ public class TransportStream implements TreeNode{
 			final PID pid = pids[i];
 			if(pid!=null)
 			{
-				buf.append("  PID :").append(i).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets()*100)/no_packets).append("%, duplicate packets:"+pid.getDup_packets()+"\n");
+				buf.append("  PID :").append(i).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets() * 100) / no_packets).append("%, duplicate packets:").append(pid.getDup_packets()).append("\n");
 			}
 		}
 
@@ -430,7 +428,7 @@ public class TransportStream implements TreeNode{
 		t.add(psi.getJTreeNode(modus));
 		if(!psiOnlyModus(modus)){
 			KVP kvp = new KVP("PIDs");
-			kvp.setTableSource(() -> getTableModel());
+			kvp.setTableSource(this::getTableModel);
 			final DefaultMutableTreeNode pidTreeNode = new DefaultMutableTreeNode(kvp);
 			t.add(pidTreeNode);
 			for (final PID pid : pids) {
@@ -452,16 +450,15 @@ public class TransportStream implements TreeNode{
 	
 	static TableHeader<TransportStream,PID> buildPidTableHeader() {
 
-		TableHeader<TransportStream,PID> tableHeader =  new TableHeaderBuilder<TransportStream,PID>().
-				addOptionalRowColumn("pid", p ->p.getPid(), Integer.class).
+		return new TableHeaderBuilder<TransportStream,PID>().
+				addOptionalRowColumn("pid", PID::getPid, Integer.class).
 				addOptionalRowColumn("label", p->p.getLabelMaker().toString(), String.class).
-				addOptionalRowColumn("pid type", p->p.getTypeString(), String.class).
-				addOptionalRowColumn("packets", p->p.getPackets(), Integer.class).
-				addOptionalRowColumn("duplicate packets", p->p.getDup_packets(), Integer.class).
-				addOptionalRowColumn("continuity errors", p->p.getContinuity_errors(), Integer.class).
-				addOptionalRowColumn("scrambled", p->p.isScrambled(), Boolean.class).
+				addOptionalRowColumn("pid type", PID::getTypeString, String.class).
+				addOptionalRowColumn("packets", PID::getPackets, Integer.class).
+				addOptionalRowColumn("duplicate packets", PID::getDup_packets, Integer.class).
+				addOptionalRowColumn("continuity errors", PID::getContinuity_errors, Integer.class).
+				addOptionalRowColumn("scrambled", PID::isScrambled, Boolean.class).
 				build();
-		return tableHeader;
 	}
 		
 
@@ -643,8 +640,9 @@ public class TransportStream implements TreeNode{
 		final int PCR_pid = pmtSection.getPcrPid();
 		boolean pcrInComponent = false;
 		for(Component component:pmtSection.getComponentenList()) {
-			if(PCR_pid == component.getElementaryPID()) {
+			if (PCR_pid == component.getElementaryPID()) {
 				pcrInComponent = true;
+				break;
 			}
 		}
 		if(!pcrInComponent && PCR_pid!=MPEGConstants.NO_PCR_PID) {// ISO/IEC 13818-1:2013, 2.4.4.9; If no PCR is associated with a program definition for private streams, then this field shall take the value of 0x1FFF.
@@ -799,7 +797,7 @@ public class TransportStream implements TreeNode{
 		// now calculate bitrate of stream by averaging bitrates of PIDS with PCR
 
 		int teller=0;
-		long totBitrate=0l;
+		long totBitrate= 0L;
 		for(final PID pid:pids){
 			if((pid!=null)&&(pid.getBitRate()!=-1)){
 				teller++;
@@ -937,7 +935,7 @@ public class TransportStream implements TreeNode{
 				r = getFormattedDate(now)+ " "+getFormattedTime(now);
 			}
 		}else{ // no bitrate, return packet number
-			r = Long.toString(packetNo)+" (packetNo)";
+			r = packetNo +" (packetNo)";
 		}
 		return r;
 	}
@@ -979,7 +977,7 @@ public class TransportStream implements TreeNode{
 				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 			}
 		}else{ // no bitrate
-			r = Long.toString(packetNo)+" (packetNo)";
+			r = packetNo +" (packetNo)";
 		}
 		return r;
 	}
@@ -1063,8 +1061,7 @@ public class TransportStream implements TreeNode{
 		final NIT nit = getPsi().getNit();
 		final int actualNetworkID = nit.getActualNetworkID();
 		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
-		final List<LinkageDescriptor> linkageDescriptors = Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
-		return linkageDescriptors;
+		return Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
 	}
 
 	public boolean isONTSection(int pid) {
