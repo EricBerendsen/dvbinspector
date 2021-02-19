@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -136,8 +136,8 @@ public class EIT extends AbstractPSITabel{
 					serviceNodeKVP.setHtmlSource(() -> service.entrySet().
 							stream().
 							filter(s -> s.getKey()>=80).
-							map(s -> s.getValue()). 
-							flatMap((EITsection[] s) -> Arrays.stream(s)).
+							map(Entry::getValue).
+							flatMap(Arrays::stream).
 							filter(Objects::nonNull).
 							map(HTMLSource::getHTML).
 							collect(Collectors.joining("","<b>Schedule</b><br><br>","")));
