@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -42,7 +42,9 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 
 	private static final Logger logger = Logger.getLogger(TSLoader.class.getName());
 	
-	DVBinspector control = null;
+	private final DVBinspector control;
+	private final File file;
+	
 	/**
 	 * @param file
 	 */
@@ -53,8 +55,6 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 		this.control.setTransportStream(null);
 		this.control.getFrame().repaint();
 	}
-
-	File file = null;
 
 	@Override
 	protected void done() {
@@ -99,8 +99,10 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			logger.log(Level.INFO, "Interrupted while loading stream", t);
 			final String msg ="Loading file was interrupted.";
 			showMessage(msg);
-			transportStream.namePIDs();
-			transportStream.calculateBitRate();
+			if (transportStream != null) {
+				transportStream.namePIDs();
+				transportStream.calculateBitRate();
+			}
 			
 		} catch (final Throwable t) {
 			transportStream = null;
