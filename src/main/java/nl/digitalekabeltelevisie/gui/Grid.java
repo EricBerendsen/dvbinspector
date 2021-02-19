@@ -111,7 +111,6 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	private TransportStream stream;
 	private Map<Short, Paint> colors;
 	private int startPacket;
-	private int endPacket;
 	private int noPacketsInView;
 	private boolean showAdaptationField = false;
 	private boolean showPayloadStart = false;
@@ -136,11 +135,11 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 
 	public final void setTransportStream(final TransportStream stream, final ViewContext viewContext) {
 		this.stream = stream;
-		this.colors=new HashMap<Short, Paint>();
+		this.colors= new HashMap<>();
 
 		if(stream!=null){
 			startPacket = viewContext.getStartPacket();
-			endPacket = viewContext.getEndPacket();
+			int endPacket = viewContext.getEndPacket();
 			noPacketsInView = endPacket - startPacket;
 
 			lines = (noPacketsInView/blocksPerRow);
@@ -208,7 +207,6 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	}
 
 	/**
-	 * @param g
 	 * @param g2
 	 * @param row
 	 * @param column
@@ -230,7 +228,6 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	}
 
 	/**
-	 * @param g
 	 * @param g2
 	 * @param row
 	 * @param column
@@ -250,7 +247,6 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	}
 
 	/**
-	 * @param g
 	 * @param g2
 	 * @param row
 	 * @param column
@@ -323,8 +319,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 			if(realPacketNo>=0) {
 				final short pid = stream.getPacket_pid(realPacketNo);
 				if(colors.containsKey(pid)){ // don't care about actual color, just want to know is this pid shown
-					String htmlString = getPacketHTML(realPacketNo);
-					return htmlString;
+					return getPacketHTML(realPacketNo);
 				}
 			}
 		}
@@ -337,8 +332,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 			if((x/blockW)<blocksPerRow){ // empty space to the right
 				final int packetNo = ((y/blockH)*blocksPerRow)+(x/blockW);
 				if(packetNo<noPacketsInView){
-					final int realPacketNo = packetNo +startPacket;
-					return realPacketNo;
+					return packetNo +startPacket;
 				}
 			}
 		}
@@ -363,8 +357,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 			r.append(packet.getHTML());
 		}
 		r.append("</html>");
-		String htmlString = r.toString();
-		return htmlString;
+		return r.toString();
 	}
 
 

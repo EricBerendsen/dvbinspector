@@ -62,7 +62,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 * @author Eric
 	 *
 	 */
-	private final class TimeStampNumberFormat extends NumberFormat {
+	private static final class TimeStampNumberFormat extends NumberFormat {
 		@Override
 		public Number parse(String source, ParsePosition parsePosition) {
 			// not used
@@ -80,7 +80,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		}
 	}
 
-	private final class TEMIMediaTimeStampNumberFormat extends NumberFormat {
+	private static final class TEMIMediaTimeStampNumberFormat extends NumberFormat {
 
 		@Override
 		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
@@ -168,9 +168,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	
 	static DecimalFormat df = new DecimalFormat("#0.00");
 	private JCheckBox temiOptionCheckBox = new JCheckBox("enable");
-	private JPanel topRowbuttonPanel;
 	private JPanel seriesSelectionPanel;
-	private JPanel controls;
 
 
 	/**
@@ -182,9 +180,9 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	public TimeStampChart(final TransportStream transportStream, final ViewContext viewContext){
 		super(new BorderLayout());
 		this.transportStream = transportStream;
-		topRowbuttonPanel = createTopRowButtonPanel();
+		JPanel topRowbuttonPanel = createTopRowButtonPanel();
 		seriesSelectionPanel = new JPanel(new WrapLayout());
-		controls = new JPanel();
+		JPanel controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 		controls.add(topRowbuttonPanel);
 		controls.add(seriesSelectionPanel);
@@ -218,8 +216,6 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	}
 
 	/**
-	 * @param transportStream
-	 * @param buttonPanel2
 	 */
 	private void addServicesSelect(JPanel buttonPanel) {
 
@@ -438,26 +434,20 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		final JLabel typeLabel = new JLabel("Legend:");
 		buttonPanel.add(typeLabel);
 		final JRadioButton onButton = new JRadioButton("On");
-		onButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if(!legendVisible){
-					legendVisible = true;
-					if(freeChart!=null){
-						freeChart.getLegend().setVisible(legendVisible);
-					}
+		onButton.addActionListener(e -> {
+			if(!legendVisible){
+				legendVisible = true;
+				if(freeChart!=null){
+					freeChart.getLegend().setVisible(legendVisible);
 				}
 			}
 		});
 		final JRadioButton offButton = new JRadioButton("Off");
-		offButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if(legendVisible){
-					legendVisible = false;
-					if(freeChart!=null){
-						freeChart.getLegend().setVisible(legendVisible);
-					}
+		offButton.addActionListener(e -> {
+			if(legendVisible){
+				legendVisible = false;
+				if(freeChart!=null){
+					freeChart.getLegend().setVisible(legendVisible);
 				}
 			}
 		});
@@ -481,26 +471,20 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		final JLabel typeLabel = new JLabel("X-Axis:");
 		buttonPanel.add(typeLabel);
 		final JRadioButton timeButton = new JRadioButton("Time");
-		timeButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if(!usepacketTime){
-					usepacketTime = true;
-					if(freeChart!=null){
-						freeChart.fireChartChanged();
-					}
+		timeButton.addActionListener(e -> {
+			if(!usepacketTime){
+				usepacketTime = true;
+				if(freeChart!=null){
+					freeChart.fireChartChanged();
 				}
 			}
 		});
 		final JRadioButton packetNoButton = new JRadioButton("Packet No.");
-		packetNoButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if(usepacketTime){
-					usepacketTime = false;
-					if(freeChart!=null){
-						freeChart.fireChartChanged();
-					}
+		packetNoButton.addActionListener(e -> {
+			if(usepacketTime){
+				usepacketTime = false;
+				if(freeChart!=null){
+					freeChart.fireChartChanged();
 				}
 			}
 		});

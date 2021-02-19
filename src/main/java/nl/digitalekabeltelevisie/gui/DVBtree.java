@@ -203,13 +203,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private final JPanel detailPanel;
 	private final JEditorPane editorPane;
 	private final JEditorPane xmlPane;
-	private final JSplitPane splitPane;
 	private final JPopupMenu popup;
-	private final JMenuItem expandMenuItem;
-	private final JMenuItem expandAllMenuItem;
-	private final JMenuItem copyMenuItem;
-	private final JMenuItem treeMenuItem;
-	private final JMenuItem viewMenuItem;
 
 	public static final int SIMPLE_MODUS=0x1;
 	public static final int PSI_ONLY_MODUS=0x2;
@@ -249,28 +243,28 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		tree.addTreeSelectionListener(this);
 
 		popup = new JPopupMenu();
-		
-		expandMenuItem = new JMenuItem("Expand");
+
+		JMenuItem expandMenuItem = new JMenuItem("Expand");
 		expandMenuItem.addActionListener(this);
 		expandMenuItem.setActionCommand(EXPAND);
 		popup.add(expandMenuItem);
-		
-		expandAllMenuItem = new JMenuItem("Expand All");
+
+		JMenuItem expandAllMenuItem = new JMenuItem("Expand All");
 		expandAllMenuItem.addActionListener(this);
 		expandAllMenuItem.setActionCommand(EXPAND_ALL);
 		popup.add(expandAllMenuItem);
-		
-		copyMenuItem = new JMenuItem("Copy Item to clipboard");
+
+		JMenuItem copyMenuItem = new JMenuItem("Copy Item to clipboard");
 		copyMenuItem.addActionListener(this);
 		copyMenuItem.setActionCommand(COPY);
 		popup.add(copyMenuItem);
 
-		treeMenuItem = new JMenuItem("Copy Entire Sub Tree to clipboard");
+		JMenuItem treeMenuItem = new JMenuItem("Copy Entire Sub Tree to clipboard");
 		treeMenuItem.addActionListener(this);
 		treeMenuItem.setActionCommand(TREE);
 		popup.add(treeMenuItem);
 
-		viewMenuItem = new JMenuItem("Copy Visible Sub Tree to clipboard");
+		JMenuItem viewMenuItem = new JMenuItem("Copy Visible Sub Tree to clipboard");
 		viewMenuItem.addActionListener(this);
 		viewMenuItem.setActionCommand(VIEW);
 		popup.add(viewMenuItem);
@@ -332,7 +326,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 
 		//Add the scroll panes to a split pane.
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setLeftComponent(treeView);
 		splitPane.setRightComponent(detailPanel);
 		splitPane.setOneTouchExpandable(true);
@@ -883,7 +877,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 		if(path!=null){
 			MutableTreeNode node= (MutableTreeNode)path.getLastPathComponent();
-			if((node!=null)&&(node instanceof DefaultMutableTreeNode)){
+			if((node instanceof DefaultMutableTreeNode)){
 				dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 				final KVP kvp=(KVP)dmtn.getUserObject();
 				JMenuItem subMenu = kvp.getSubMenu();

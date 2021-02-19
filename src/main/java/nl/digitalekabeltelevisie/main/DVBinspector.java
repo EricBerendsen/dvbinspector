@@ -85,10 +85,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 	private int modus;
 
-	private PIDDialogOpenAction pidOpenAction;
-	private AboutAction aboutAction;
-	private FindAction findAction;
-	private Action fileOpenAction;
 	private FindNextAction findNextAction;
 
 
@@ -119,7 +115,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			pidHandler = a;
 		}
 
-		private Class<? extends GeneralPidHandler> pidHandler;
+		private final Class<? extends GeneralPidHandler> pidHandler;
 
 		Class<? extends GeneralPidHandler> getPidHandler() {
 			return pidHandler;
@@ -150,10 +146,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 				}
 			} catch (final NotAnMPEGFileException e) {
 				LOGGER.log(Level.WARNING, "error determining packetsize transportStream", e);
-			} catch (final IOException e) {
+			} catch (final Throwable e) {
 				LOGGER.log(Level.WARNING, "error parsing transportStream", e);
-			} catch (final Throwable t) {
-				LOGGER.log(Level.WARNING, "error parsing transportStream", t);
 			}
 		}
 		inspector.run();
@@ -200,12 +194,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
 		KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				createAndShowGUI(transportStream);
-			}
-		});
+		javax.swing.SwingUtilities.invokeLater(() -> createAndShowGUI(transportStream));
 
 	}
 
@@ -215,7 +204,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * event dispatch thread.
 	 *
 	 * @param tStream Transport stream (can be <code>null</code>)
-	 * @param modus display Modus
 	 */
 	private void createAndShowGUI(final TransportStream tStream) {
 		try
@@ -308,7 +296,6 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	}
 
 	/**
-	 * @param prefs
 	 * @return
 	 */
 	private static Rectangle calculateBounds() {
@@ -421,7 +408,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final JMenu viewMenu =new JMenu("View");
 		viewMenu.setMnemonic(KeyEvent.VK_V);
 
-		pidOpenAction = new PIDDialogOpenAction(pidDialog,frame,this);
+		PIDDialogOpenAction pidOpenAction = new PIDDialogOpenAction(pidDialog, frame, this);
 		final JMenuItem filterItem = new JMenuItem(pidOpenAction);
 		filterItem.setMnemonic(KeyEvent.VK_F);
 		viewMenu.add(filterItem);
@@ -436,7 +423,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private JMenu createHelpMenu() {
 		final JMenu helpMenu =new JMenu("Help");
 		helpMenu.setMnemonic(KeyEvent.VK_H);
-		aboutAction = new AboutAction(new JDialog(), frame,this);
+		AboutAction aboutAction = new AboutAction(frame);
 		JMenuItem aboutMenuItem = new JMenuItem(aboutAction);
 		aboutMenuItem.setMnemonic(KeyEvent.VK_A);
 		helpMenu.add(aboutMenuItem);
@@ -457,7 +444,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show PTS on PES Packets",DVBtree.SHOW_PTS_MODUS,KeyEvent.VK_T));
 		viewTreeMenu.add(createCheckBoxMenuItem(modus, "Show version_number on Table Sections",DVBtree.SHOW_VERSION_MODUS,KeyEvent.VK_V));
 
-		findAction = new FindAction(this);
+		FindAction findAction = new FindAction(this);
 		
 		JMenuItem findMenuItem = new JMenuItem(findAction);
 		findMenuItem.setMnemonic(KeyEvent.VK_F);
@@ -497,8 +484,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private JMenu createFileMenu() {
 		final JMenu fileMenu =new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
-		
-		fileOpenAction = new FileOpenAction(this);
+
+		Action fileOpenAction = new FileOpenAction(this);
 		final JMenuItem openMenuItem = new JMenuItem(fileOpenAction);
 		openMenuItem.setMnemonic(KeyEvent.VK_O);
 		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
@@ -717,13 +704,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 */
 	public void refreshViews() {
 		
-		for(final TransportStreamView v: views) {
-			v.refreshView();
+		for(final TransportStreamView view: views) {
+			view.refreshView();
 		}
-
-		
-		// TODO Auto-generated method stub
-		
 	}
 
 

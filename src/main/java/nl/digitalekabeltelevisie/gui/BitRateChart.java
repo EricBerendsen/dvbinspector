@@ -207,7 +207,6 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			used_pids[i]=viewContext.getShown().get(i).getPid();
 		}
 		final int numberOfSteps=viewContext.getGraphSteps();
-		final ChartLabel[] stepLabels= new ChartLabel[numberOfSteps];
 
 		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
 
@@ -216,7 +215,6 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 				final int startPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step);
 				final int endPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step+1);
-				stepLabels[step]=new ChartLabel(transportStream.getShortPacketTime(startPacketStep), (short)step);
 				final int[] pidcount = countPidOccurrencesInStep(transportStream, startPacketStep, endPacketStep);
 
 				if(transportStream.getBitRate()==-1){
@@ -260,26 +258,20 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		final JLabel typeLabel = new JLabel("Legend:");
 		buttonPanel.add(typeLabel);
 		final JRadioButton onButton = new JRadioButton("On");
-		onButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if(!legendVisible){
-					legendVisible = true;
-					if(freeChart!=null){
-						freeChart.getLegend().setVisible(legendVisible);
-					}
+		onButton.addActionListener(e -> {
+			if(!legendVisible){
+				legendVisible = true;
+				if(freeChart!=null){
+					freeChart.getLegend().setVisible(legendVisible);
 				}
 			}
 		});
 		final JRadioButton offButton = new JRadioButton("Off");
-		offButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if(legendVisible){
-					legendVisible = false;
-					if(freeChart!=null){
-						freeChart.getLegend().setVisible(legendVisible);
-					}
+		offButton.addActionListener(e -> {
+			if(legendVisible){
+				legendVisible = false;
+				if(freeChart!=null){
+					freeChart.getLegend().setVisible(legendVisible);
 				}
 			}
 		});

@@ -29,10 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -58,9 +55,8 @@ public class GridView extends JPanel implements TransportStreamView{
 	/**
 	 *
 	 */
-	private Grid grid;
-	private JScrollPane scrollGrid;
-	private JPanel buttonPanel;
+	private final Grid grid;
+	private final JPanel buttonPanel;
 
 	/**
 	 * @param transportStream
@@ -84,7 +80,7 @@ public class GridView extends JPanel implements TransportStreamView{
 		add(buttonPanel,BorderLayout.PAGE_START);
 
 		grid = new Grid(transportStream,viewContext);
-		scrollGrid = new JScrollPane(grid);
+		JScrollPane scrollGrid = new JScrollPane(grid);
 		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -106,12 +102,7 @@ public class GridView extends JPanel implements TransportStreamView{
 		JLabel adaptationLabel = new JLabel(adaptationIcon);
 		buttonPanel.add(adaptationLabel);
 		JCheckBox adaptationFieldButton = new JCheckBox("Show Adaptation Field");
-		adaptationFieldButton.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				grid.setShowAdaptationField(e.getStateChange()==ItemEvent.SELECTED);
-			}
-		});
+		adaptationFieldButton.addItemListener(e -> grid.setShowAdaptationField(e.getStateChange()==ItemEvent.SELECTED));
 		buttonPanel.add(adaptationFieldButton);
 
 		buttonPanel.add(Box.createHorizontalStrut(10)); // spacer
@@ -120,13 +111,7 @@ public class GridView extends JPanel implements TransportStreamView{
 		buttonPanel.add(payLoadStartLabel);
 
 		JCheckBox payLoadStartButton = new JCheckBox("Show Payload Start");
-		payLoadStartButton.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				grid.setShowPayloadStart(e.getStateChange()==ItemEvent.SELECTED);
-
-			}
-		});
+		payLoadStartButton.addItemListener(e -> grid.setShowPayloadStart(e.getStateChange()==ItemEvent.SELECTED));
 
 		buttonPanel.add(payLoadStartButton);
 
@@ -134,13 +119,7 @@ public class GridView extends JPanel implements TransportStreamView{
 		buttonPanel.add(errorLabel);
 
 		JCheckBox errorButton = new JCheckBox("Show Error Indicator");
-		errorButton.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				grid.setShowErrorIndicator(e.getStateChange()==ItemEvent.SELECTED);
-
-			}
-		});
+		errorButton.addItemListener(e -> grid.setShowErrorIndicator(e.getStateChange()==ItemEvent.SELECTED));
 
 		buttonPanel.add(errorButton);
 	}
@@ -165,12 +144,7 @@ public class GridView extends JPanel implements TransportStreamView{
 		for (int i = 0; i < zoomButtons.length; i++) {
 			final int s = size;
 			zoomButtons[i] = new JRadioButton(""+(i+1));
-			zoomButtons[i].addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					grid.setBlockSize(s);
-				}
-			});
+			zoomButtons[i].addActionListener(e -> grid.setBlockSize(s));
 			size *=2;
 			group.add(zoomButtons[i]);
 			buttonPanel.add(zoomButtons[i]);
@@ -195,13 +169,8 @@ public class GridView extends JPanel implements TransportStreamView{
 	 * @param group
 	 */
 	private void addGridRadioButton(ButtonGroup group, String label, final int value, boolean selected) {
-		JRadioButton button = new JRadioButton(label);;
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				grid.setGridLines(value);
-			}
-		});
+		JRadioButton button = new JRadioButton(label);
+		button.addActionListener(e -> grid.setGridLines(value));
 		group.add(button);
 		buttonPanel.add(button);
 		button.setSelected(selected);

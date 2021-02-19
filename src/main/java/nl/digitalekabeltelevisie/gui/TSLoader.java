@@ -81,7 +81,7 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 	 * @see javax.swing.SwingWorker#doInBackground()
 	 */
 	@Override
-	protected TransportStream doInBackground() throws Exception {
+	protected TransportStream doInBackground() {
 		TransportStream transportStream = null;
 		try {
 			transportStream = new TransportStream(file);

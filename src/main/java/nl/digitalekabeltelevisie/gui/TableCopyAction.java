@@ -39,7 +39,7 @@ import javax.swing.AbstractAction;
  */
 public class TableCopyAction extends AbstractAction {
 	
-	TablePanel tablePanel;
+	final TablePanel tablePanel;
 
 	/**
 	 * @param tablePanel

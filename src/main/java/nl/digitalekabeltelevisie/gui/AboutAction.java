@@ -33,7 +33,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class AboutAction extends AbstractAction {
@@ -43,7 +42,7 @@ public class AboutAction extends AbstractAction {
 	private static final long serialVersionUID = -6710642864878320650L;
 	private final JFrame frame;
 
-	public AboutAction(final JDialog jf, final JFrame fr, final DVBinspector controller) {
+	public AboutAction(final JFrame fr) {
 		super("About...");
 		frame = fr;
 	}

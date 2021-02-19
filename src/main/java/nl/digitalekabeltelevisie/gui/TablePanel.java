@@ -50,8 +50,7 @@ public class TablePanel extends JPanel implements MouseListener {
 	
 	private final JTable table;
 	private final TableColumnAdjuster tca;
-	
-	private final JPanel buttonToolbar;
+
 	private final JScrollPane tableScrollPane;
 	private final JCheckBox includeHeadersCheckBox;
 
@@ -66,7 +65,7 @@ public class TablePanel extends JPanel implements MouseListener {
 		this.table = table;
 		table.setFocusable(true);
 
-		buttonToolbar = new JPanel(new WrapLayout(FlowLayout.LEFT));
+		JPanel buttonToolbar = new JPanel(new WrapLayout(FlowLayout.LEFT));
 		buttonToolbar.addMouseListener(this);
 
 		TableCopyAction copyAction = new TableCopyAction(this, "Copy");
@@ -136,15 +135,15 @@ public class TablePanel extends JPanel implements MouseListener {
 			}
 			htmlStr.append("</tr>\n");
 		}
-        for (int row = 0; row < rows.length; row++) {
-            htmlStr.append("<tr>\n");
-            for (int col = 0; col < cols.length; col++) {
-                Object obj = table.getValueAt(rows[row], cols[col]);
-                String val = ((obj == null) ? "" : obj.toString());
-                htmlStr.append("  <td>").append(val).append("</td>\n");
-            }
-            htmlStr.append("</tr>\n");
-        }
+		for (int i : rows) {
+			htmlStr.append("<tr>\n");
+			for (int j : cols) {
+				Object obj = table.getValueAt(i, j);
+				String val = ((obj == null) ? "" : obj.toString());
+				htmlStr.append("  <td>").append(val).append("</td>\n");
+			}
+			htmlStr.append("</tr>\n");
+		}
 
         htmlStr.append("</table>\n</body>\n</html>");
         return htmlStr.toString();
@@ -239,15 +238,15 @@ public class TablePanel extends JPanel implements MouseListener {
 			// we want a newline at the end of each line and not a tab
 			plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
 		}
-	    for (int row = 0; row < rows.length; row++) {
-	        for (int col = 0; col < cols.length; col++) {
-	            Object obj = table.getValueAt(rows[row], cols[col]);
-	            String val = ((obj == null) ? "" : obj.toString());
-	            plainStr.append(val).append('\t');
-	        }
-	        // we want a newline at the end of each line and not a tab
-	        plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
-	    }
+		for (int i : rows) {
+			for (int j : cols) {
+				Object obj = table.getValueAt(i, j);
+				String val = ((obj == null) ? "" : obj.toString());
+				plainStr.append(val).append('\t');
+			}
+			// we want a newline at the end of each line and not a tab
+			plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
+		}
 	
 	    // remove the last newline
 	    plainStr.deleteCharAt(plainStr.length() - 1);

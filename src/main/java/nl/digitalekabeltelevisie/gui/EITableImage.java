@@ -95,14 +95,11 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	private Interval interval;
 	private boolean selectedSchedule = true;
 
-	private SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-	private SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+	private final SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
+	private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
 	private int translatedX;
 	private int translatedY;
-	private int viewWidth;
-	private int viewHeight;
-
 
 
 	/**
@@ -550,8 +547,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		Rectangle rect = getVisibleRect();
 		translatedX = rect.x;
 		translatedY = rect.y;
-		viewWidth = rect.width;
-		viewHeight = rect.height;
+		int viewWidth = rect.width;
+		int viewHeight = rect.height;
 
 		if((eit!=null)&&(interval!=null)){ // there are services in the EIT
 			Date startDate = roundHourDown(interval.getStart());
@@ -586,7 +583,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			Graphics2D gd2 = (Graphics2D)gd.create();
 
 			gd2.setFont(font);
-			gd2.clipRect(translatedX+SERVICE_NAME_WIDTH, translatedY+LEGEND_HEIGHT, viewWidth-SERVICE_NAME_WIDTH, viewHeight- LEGEND_HEIGHT);
+			gd2.clipRect(translatedX+SERVICE_NAME_WIDTH, translatedY+LEGEND_HEIGHT, viewWidth -SERVICE_NAME_WIDTH, viewHeight - LEGEND_HEIGHT);
 
 			SortedSet<ServiceIdentification> order = serviceOrder;
 			for(final ServiceIdentification serviceNo : order){

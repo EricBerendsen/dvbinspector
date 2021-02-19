@@ -35,13 +35,12 @@ import nl.digitalekabeltelevisie.main.DVBinspector;
 
 public class FindAction extends AbstractAction {
 
+	final DVBinspector controller;
+
 	public FindAction(DVBinspector controller) {
 		super("Find...");
 		this.controller = controller;
 	}
-
-
-	DVBinspector controller;
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

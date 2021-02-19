@@ -42,12 +42,8 @@ import nl.digitalekabeltelevisie.gui.utils.WrapLayout;
  */
 public class EITView extends JPanel implements TransportStreamView{
 
-	/**
-	 *
-	 */
-	private JScrollPane scrollGrid;
-	EITableImage eitPanel;
-	private JPanel toolbar = new JPanel(new WrapLayout(FlowLayout.LEFT));
+	final EITableImage eitPanel;
+	private final JPanel toolbar = new JPanel(new WrapLayout(FlowLayout.LEFT));
 
 	/**
 	 * @param transportStream
@@ -56,7 +52,10 @@ public class EITView extends JPanel implements TransportStreamView{
 	public EITView(final TransportStream transportStream, final ViewContext viewContext) {
 		super(new BorderLayout());
 		eitPanel = new EITableImage(transportStream,viewContext);
-		scrollGrid = new JScrollPane(eitPanel);
+		/**
+		 *
+		 */
+		JScrollPane scrollGrid = new JScrollPane(eitPanel);
 		scrollGrid.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollGrid.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
@@ -96,19 +95,9 @@ public class EITView extends JPanel implements TransportStreamView{
 		toolbar.add(typeLabel);
 
 		JRadioButton pfButton = new JRadioButton("Present/Following");
-		pfButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				eitPanel.selectPresentFollowing();
-			}
-		});
+		pfButton.addActionListener(e -> eitPanel.selectPresentFollowing());
 		JRadioButton scheduleButton = new JRadioButton("Schedule");
-		scheduleButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				eitPanel.selectSchedule();
-			}
-		});
+		scheduleButton.addActionListener(e -> eitPanel.selectSchedule());
 		scheduleButton.setSelected(true);
 		ButtonGroup group = new ButtonGroup();
 		group.add(pfButton);
@@ -122,26 +111,11 @@ public class EITView extends JPanel implements TransportStreamView{
 		JLabel typeLabel = new JLabel("Zoom:");
 		toolbar.add(typeLabel);
 		JRadioButton zoom1Button = new JRadioButton("1");
-		zoom1Button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				eitPanel.setZoom(30*1000L);
-			}
-		});
+		zoom1Button.addActionListener(e -> eitPanel.setZoom(30*1000L));
 		JRadioButton zoom2Button = new JRadioButton("2");
-		zoom2Button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				eitPanel.setZoom(15*1000L);
-			}
-		});
+		zoom2Button.addActionListener(e -> eitPanel.setZoom(15*1000L));
 		JRadioButton zoom3Button = new JRadioButton("3");
-		zoom3Button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				eitPanel.setZoom(7500L);
-			}
-		});
+		zoom3Button.addActionListener(e -> eitPanel.setZoom(7500L));
 		zoom2Button.setSelected(true);
 		ButtonGroup group = new ButtonGroup();
 		group.add(zoom1Button);

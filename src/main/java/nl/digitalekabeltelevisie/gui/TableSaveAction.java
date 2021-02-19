@@ -55,7 +55,7 @@ public class TableSaveAction extends AbstractAction {
 	private static final String TEXT = "TEXT";
 	private static final String HTML = "HTML";
 	
-	TablePanel tablePanel;
+	final TablePanel tablePanel;
 
 	/**
 	 * @param tablePanel

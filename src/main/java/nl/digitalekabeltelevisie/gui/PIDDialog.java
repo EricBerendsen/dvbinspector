@@ -78,22 +78,6 @@ PropertyChangeListener, ListSelectionListener {
 
 	private final DVBinspector controller;
 
-	private final JButton addAllButton;
-	private final JButton addButton;
-	private final JButton switchButton;
-	private final JButton removeButton;
-	private final JButton removeAllButton;
-
-	private final JButton topButton;
-	private final JButton upButton;
-	private final JButton reverseButton;
-	private final JButton downButton;
-	private final JButton bottomButton;
-
-	private final JButton okButton;
-	private final JButton applyButton;
-	private final JButton cancelButton;
-
 	private final AddAllAction addAllAction;
 	private final AddAction addAction;
 	private final SwitchAction switchAction;
@@ -106,18 +90,11 @@ PropertyChangeListener, ListSelectionListener {
 	private final DownAction downAction;
 	private final BottomAction bottomAction;
 
-	private final OKAction okAction;
-	private final ApplyAction applyAction;
-	private final CancelAction cancelAction;
-
 	private ViewContext orgView;
 
 	private final PacketSelectionPanel packetSelectionStart;
 	private final PacketSelectionPanel packetSelectionEnd;
 	private final JComboBox<Integer> stepsChooser;
-
-	private final JScrollPane leftListScroller;
-	private final JScrollPane rightlistScroller;
 
 
 	public  void enableButtons(){
@@ -381,14 +358,14 @@ PropertyChangeListener, ListSelectionListener {
 
 		}
 		public void actionPerformed(final ActionEvent e) {
-			final List<ChartLabel> shown = new ArrayList<ChartLabel>();
+			final List<ChartLabel> shown = new ArrayList<>();
 
 			final Enumeration<?> el = rightListModel.elements();
 			while(el.hasMoreElements()){
 				shown.add((ChartLabel)el.nextElement());
 			}
 
-			final List<ChartLabel> notShown = new ArrayList<ChartLabel>();
+			final List<ChartLabel> notShown = new ArrayList<>();
 
 			final Enumeration<ChartLabel> el2 = leftListModel.elements();
 			while(el2.hasMoreElements()){
@@ -458,21 +435,21 @@ PropertyChangeListener, ListSelectionListener {
 		final JPanel packetPanel = new JPanel();
 		pidPanel.setLayout(new BoxLayout(pidPanel,BoxLayout.X_AXIS));
 
-		leftListModel = new DefaultListModel<ChartLabel>();
+		leftListModel = new DefaultListModel<>();
 		for (final ChartLabel label : viewContext.getNotShown()) {
 			leftListModel.addElement(label);
 
 		}
-		leftList = new JList<ChartLabel>(leftListModel);
+		leftList = new JList<>(leftListModel);
 		leftList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		rightListModel = new DefaultListModel<ChartLabel>();
+		rightListModel = new DefaultListModel<>();
 
 		for (final ChartLabel label : viewContext.getShown()) {
 			rightListModel.addElement(label);
 
 		}
-		rightList = new JList<ChartLabel>(rightListModel);
+		rightList = new JList<>(rightListModel);
 
 
 		final JPanel buttonPanel = new JPanel();
@@ -483,30 +460,30 @@ PropertyChangeListener, ListSelectionListener {
 		setLayout(new FlowLayout());
 
 		addAllAction =new AddAllAction("add all >>");
-		addAllButton = new JButton(addAllAction);
+		JButton addAllButton = new JButton(addAllAction);
 		addAllButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(addAllButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 
 		addAction = new AddAction("add >");
-		addButton = new JButton(addAction);
+		JButton addButton = new JButton(addAction);
 		addButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(addButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 
 		switchAction = new SwitchAction("< swap >");
-		switchButton = new JButton(switchAction);
+		JButton switchButton = new JButton(switchAction);
 		switchButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(switchButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 
 		removeAction = new RemoveAction("< remove");
-		removeButton = new JButton(removeAction);
+		JButton removeButton = new JButton(removeAction);
 		removeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(removeButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 		removeAllAction =new RemoveAllAction("<< remove all");
-		removeAllButton = new JButton(removeAllAction);
+		JButton removeAllButton = new JButton(removeAllAction);
 		removeAllButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(removeAllButton);
 
@@ -514,23 +491,23 @@ PropertyChangeListener, ListSelectionListener {
 		rightList.addListSelectionListener(this);
 
 		topAction =new TopAction("Top");
-		topButton = new JButton(topAction);
+		JButton topButton = new JButton(topAction);
 		topButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		upAction =new UpAction("Up");
-		upButton = new JButton(upAction);
+		JButton upButton = new JButton(upAction);
 		upButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		reverseAction =new ReverseAction("Reverse");
-		reverseButton = new JButton(reverseAction);
+		JButton reverseButton = new JButton(reverseAction);
 		reverseButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		downAction =new DownAction("Down");
-		downButton = new JButton(downAction);
+		JButton downButton = new JButton(downAction);
 		downButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		bottomAction =new BottomAction("Bottom");
-		bottomButton = new JButton(bottomAction);
+		JButton bottomButton = new JButton(bottomAction);
 		bottomButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		sortButtonPanel.setLayout(new BoxLayout(sortButtonPanel, BoxLayout.Y_AXIS));
@@ -545,16 +522,16 @@ PropertyChangeListener, ListSelectionListener {
 		sortButtonPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 		sortButtonPanel.add(bottomButton);
 
-		okAction =new OKAction("OK");
-		okButton = new JButton(okAction);
+		OKAction okAction = new OKAction("OK");
+		JButton okButton = new JButton(okAction);
 		okButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-		applyAction =new ApplyAction("Apply");
-		applyButton = new JButton(applyAction);
+		ApplyAction applyAction = new ApplyAction("Apply");
+		JButton applyButton = new JButton(applyAction);
 		applyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-		cancelAction =new CancelAction("Cancel");
-		cancelButton = new JButton(cancelAction);
+		CancelAction cancelAction = new CancelAction("Cancel");
+		JButton cancelButton = new JButton(cancelAction);
 		cancelButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		okCancelPanel.add(okButton);
@@ -562,13 +539,12 @@ PropertyChangeListener, ListSelectionListener {
 		okCancelPanel.add(cancelButton);
 
 
-
-		leftListScroller = new JScrollPane(leftList);
+		JScrollPane leftListScroller = new JScrollPane(leftList);
 		final int h = (int)Math.max(leftList.getPreferredSize().getHeight(),rightList.getPreferredSize().getHeight());
 		final int w = (int)Math.max(leftList.getPreferredSize().getWidth(),rightList.getPreferredSize().getWidth());
 		leftListScroller.setSize(new Dimension(w, h));
 
-		rightlistScroller = new JScrollPane(rightList);
+		JScrollPane rightlistScroller = new JScrollPane(rightList);
 		rightlistScroller.setSize(new Dimension(w, h));
 
 		pidPanel.add(Box.createRigidArea(new Dimension(10, 10)));
@@ -596,7 +572,7 @@ PropertyChangeListener, ListSelectionListener {
 
 
 		final Integer [] stepOptions = {1,2,5,10,20,50,100,200,500};
-		stepsChooser = new JComboBox<Integer>(stepOptions);
+		stepsChooser = new JComboBox<>(stepOptions);
 		stepsChooser.addActionListener(this);
 		stepsChooserPanel.add(stepsChooser);
 
