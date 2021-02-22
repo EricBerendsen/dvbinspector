@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -95,6 +95,7 @@ PropertyChangeListener, ListSelectionListener {
 	private final PacketSelectionPanel packetSelectionStart;
 	private final PacketSelectionPanel packetSelectionEnd;
 	private final JComboBox<Integer> stepsChooser;
+	public static final Integer[] STEP_OPTIONS = {1,2,5,10,20,50,100,200,500};
 
 
 	public  void enableButtons(){
@@ -571,8 +572,8 @@ PropertyChangeListener, ListSelectionListener {
 				BorderFactory.createEmptyBorder(5,5,5,5)));
 
 
-		final Integer [] stepOptions = {1,2,5,10,20,50,100,200,500};
-		stepsChooser = new JComboBox<>(stepOptions);
+		
+		stepsChooser = new JComboBox<>(STEP_OPTIONS);
 		stepsChooser.addActionListener(this);
 		stepsChooserPanel.add(stepsChooser);
 

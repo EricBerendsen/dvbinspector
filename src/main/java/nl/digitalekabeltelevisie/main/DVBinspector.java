@@ -26,35 +26,51 @@
  */
 package nl.digitalekabeltelevisie.main;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.IOException;
-import java.util.*;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.*;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.controller.ChartLabel;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.AC3Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.EAC3Handler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
-
+import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Main class for DVB Inspector, creates and holds all GUI elements.
@@ -322,26 +338,40 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		final JMenu settingsMenu =new JMenu("Settings");
 		settingsMenu.setMnemonic(KeyEvent.VK_S);
 
+		final JMenu packetLengthSubMenu = new JMenu("Packet Size");
+		packetLengthSubMenu.setMnemonic(KeyEvent.VK_I);
+		final ButtonGroup packetLengthMenuGroup = new ButtonGroup();
+		
+		
+		addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, "auto (Recommended)", 0);
+		 
+		for(int i: TransportStream.ALLOWED_PACKET_LENGTHS) {
+			addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, ""+i, i);
+		}
+		settingsMenu.add(packetLengthSubMenu);
+
+
 		final JMenu privateDataSubMenu = new JMenu("Private Data Specifier Default");
-		privateDataSubMenu.setMnemonic(KeyEvent.VK_P);
-		final ButtonGroup group = new ButtonGroup();
+		privateDataSubMenu.setMnemonic(KeyEvent.VK_S);
+		
+		final ButtonGroup privateDataSpecifierMenuGroup = new ButtonGroup();
 		
 		long defaultPrivateDataSpecifier = PreferencesManager.getDefaultPrivateDataSpecifier();
 
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x00, "none",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x16, "Casema",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x28, "EACEM",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x29, "Nordig",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x40, "CI Plus LLP",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x600, "UPC",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, group, 0x0000233A, "Independent Television Commission (DTG)",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x00, "none",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x16, "Casema",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x28, "EACEM",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x29, "Nordig",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x40, "CI Plus LLP",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x600, "UPC",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x0000233A, "Independent Television Commission (DTG)",defaultPrivateDataSpecifier);
 
 		settingsMenu.add(privateDataSubMenu);
 		
 		
 		
 		final JMenu defaultG0andG2CharacterSetDesignationMenu = new JMenu("Teletext Default G0 and G2 Character Set Designation");
-		privateDataSubMenu.setMnemonic(KeyEvent.VK_G);
+		defaultG0andG2CharacterSetDesignationMenu.setMnemonic(KeyEvent.VK_T);
 		final ButtonGroup g0Group = new ButtonGroup();
 
 		addG0CharacterSet(defaultG0andG2CharacterSetDesignationMenu, g0Group, 0x00, "0 0 0 0 x x x");
@@ -381,7 +411,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		settingsMenu.add(enablePcrPtsView);
 		
 		final JMenu timestampPresentationMenu = new JMenu("Timestamp format");
-		privateDataSubMenu.setMnemonic(KeyEvent.VK_T);
+		timestampPresentationMenu.setMnemonic(KeyEvent.VK_T);
 		boolean showSeconds = PreferencesManager.getEnableSecondsTimestamp();
 		final ButtonGroup tsFormatGroup = new ButtonGroup();
 		
@@ -399,6 +429,16 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		
 		settingsMenu.add(timestampPresentationMenu);
 		return settingsMenu;
+	}
+
+	private void addPacketLengthMenuItem(final JMenu packetLengthSubMenu, final ButtonGroup packetLengthMenuGroup,
+			String description, int length) {
+		final JMenuItem packetLengthItem = new JRadioButtonMenuItem(description);
+		packetLengthMenuGroup.add(packetLengthItem);
+		packetLengthItem.addActionListener(new SetPacketLengthAction(this,length));
+
+		packetLengthItem.setSelected(PreferencesManager.getPacketLengthModus()==length);
+		packetLengthSubMenu.add(packetLengthItem);
 	}
 
 	/**
@@ -581,8 +621,19 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			viewConfig.setStartPacket(0);
 			viewConfig.setEndPacket(tStream.getNo_packets());
 			viewConfig.setMaxPacket(tStream.getNo_packets());
+			
+			if(used_pids.length>0) {
+				int graphSteps = 20_000 / used_pids.length;
+				int stepsIndex =  Arrays.binarySearch(PIDDialog.STEP_OPTIONS, graphSteps);
+				if(stepsIndex<0) {
+					stepsIndex = -(stepsIndex+1);
+					stepsIndex = Math.min(6, stepsIndex); //  6 == 100 steps, nice default
+				}
+				viewConfig.setGraphSteps(PIDDialog.STEP_OPTIONS[stepsIndex]);
+			}
 		}
 
+		
 		viewConfig.setShown(used);
 		viewConfig.setNotShown(notUsed);
 		viewConfig.setTransportStream(tStream);

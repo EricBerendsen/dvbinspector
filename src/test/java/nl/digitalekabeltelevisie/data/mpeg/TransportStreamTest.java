@@ -8,6 +8,7 @@ import java.net.*;
 import org.junit.*;
 
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public class TransportStreamTest {
 
@@ -16,7 +17,7 @@ public class TransportStreamTest {
 	@BeforeClass
 	public static void setUp() throws NotAnMPEGFileException, IOException, URISyntaxException{
 
-		//
+		PreferencesManager.setPacketLengthModus(0);
 		final URL resource = TransportStreamTest.class.getResource("/digitenne 482000 06-30 19-43-54.ts");
 		// spaces in dirname...
 		final File ts =  new File(resource.toURI());

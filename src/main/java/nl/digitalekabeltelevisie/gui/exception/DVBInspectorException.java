@@ -33,4 +33,11 @@ package nl.digitalekabeltelevisie.gui.exception;
  */
 public class DVBInspectorException extends Exception {
 
+	/**
+	 * @param msg
+	 */
+	public DVBInspectorException(String msg) {
+		super(msg);
+	}
+
 }

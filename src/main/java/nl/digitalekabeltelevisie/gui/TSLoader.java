@@ -87,17 +87,15 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			transportStream = new TransportStream(file);
 			transportStream.parsePSITables(control.getFrame());
 
-		} catch (@SuppressWarnings("unused") final NotAnMPEGFileException e) {
-			logger.log(Level.WARNING, "could not determine packet size stream");
-			final String msg =
-					"DVB Inspector could not determine packetsize for this file. \n" +
-							"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
-					"Are you sure this file contains a valid MPEG Transport Stream?\n\n ";
+		} catch (final NotAnMPEGFileException e) {
+			String msg = e.getMessage();
+			logger.log(Level.WARNING, "could not determine packet size stream",e);
 			showMessage(msg);
 			
 		} catch (final InterruptedIOException t) {
 			logger.log(Level.INFO, "Interrupted while loading stream", t);
-			final String msg ="Loading file was interrupted.";
+			final String msg ="Loading file was interrupted.\n\n"
+					+ "DVB Inspector will show only part of stream.";
 			showMessage(msg);
 			if (transportStream != null) {
 				transportStream.namePIDs();

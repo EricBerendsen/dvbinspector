@@ -61,6 +61,8 @@ public class PreferencesManager {
 	
 	private static final String ENABLE_SECONDS_TIMESTAMP_FORMAT = "enable_seconds_timestamp_format";
 
+	private static final String PACKET_LENGTH_MODUS = "packet_length_modus";
+
 	// private constructor to avoid client applications to use constructor
 	private PreferencesManager() {
 	}
@@ -212,5 +214,12 @@ public class PreferencesManager {
 	}
 
 
+	public static int getPacketLengthModus() {
+		return prefs.getInt(PACKET_LENGTH_MODUS, 0);
+	}
+
+	public static void setPacketLengthModus(int mod) {
+		prefs.putInt(PACKET_LENGTH_MODUS, mod);
+	}
 
 }

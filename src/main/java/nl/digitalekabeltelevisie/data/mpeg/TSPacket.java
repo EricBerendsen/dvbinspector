@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,17 +30,26 @@ package nl.digitalekabeltelevisie.data.mpeg;
 import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.PAYLOAD_PACKET_LENGTH;
 import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.getErrorKVP;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_13BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
+import static nl.digitalekabeltelevisie.util.Utils.getHTMLHexviewColored;
+import static nl.digitalekabeltelevisie.util.Utils.getHexAndDecimalFormattedString;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.toHexString;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.RangeHashMap;
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 /**
@@ -55,6 +64,8 @@ import nl.digitalekabeltelevisie.util.*;
  *
  */
 public class TSPacket implements HTMLSource, TreeNode{
+	
+	private static final Logger	logger	= Logger.getLogger(TSPacket.class.getName());
 	private static final String ERROR_PARSING_ADAPTATION_FIELD = "Error parsing AdaptationField";
 	final private byte[] buffer ;
 
@@ -74,9 +85,17 @@ public class TSPacket implements HTMLSource, TreeNode{
 			if(hasPayload()&&isPayloadUnitStartIndicator()){
 				int payloadStart = 4;
 				if(hasAdaptationField()){
-					payloadStart = 5+getAdaptationField().getAdaptation_field_length();
+					AdaptationField adaptationField = getAdaptationField();
+					if(adaptationField==null) { // something wrong with adaptationField, don't even bother with PesHeader
+						return null;
+					}
+					payloadStart = 5+adaptationField.getAdaptation_field_length();
 				}
-				pesHeader = new PesHeader(buffer, payloadStart);
+				try {
+					pesHeader = new PesHeader(buffer, payloadStart);
+				} catch (Exception e) {
+					logger.info("Exception getting PesHeader");
+				}
 			}
 		}
 		return pesHeader;
@@ -183,7 +202,13 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public AdaptationField getAdaptationField(){
 		final int adaptationFieldControl = getAdaptationFieldControl();
 		if((adaptationFieldControl==2)||(adaptationFieldControl==3)) { //Adaptation field present
-			return new AdaptationField(Arrays.copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1));
+			AdaptationField adaptationField;
+			try {
+				adaptationField =  new AdaptationField(Arrays.copyOfRange(buffer,4, 4+toUnsignedInt(buffer[4])+1));
+				return adaptationField;
+			} catch (Exception e) {
+				logger.info("Exception creating AdaptationField");
+			}
 		}
 		return null;
 	}
@@ -248,7 +273,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 		}
 
 		appendHeader(s, "Header:", HEADER_COLOR);
-		final RangeHashMap<Integer, Color> coloring = new RangeHashMap<Integer, Color>();
+		final RangeHashMap<Integer, Color> coloring = new RangeHashMap<>();
 		coloring.put(0, 3, HEADER_COLOR);
 
 		s.append("<br>sync_byte: ").append(getHexAndDecimalFormattedString(getSyncByte()));
@@ -283,7 +308,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			}
 			if((getPayloadUnitStartIndicator()==1)&&(getTransportScramblingControl()==0)){
 				final PesHeader pesHeaderView = getPesHeader();
-				if(pesHeaderView.isValidPesHeader()){
+				if((pesHeaderView!=null)&&(pesHeaderView.isValidPesHeader())){
 					final DefaultMutableTreeNode treeNode = pesHeaderView.getJTreeNode(0);
 					appendHeader(s, "Pes Header:", PES_HEADER_COLOR);
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
@@ -299,7 +324,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 
 		// FEC / timestamp
 		if(buffer.length>PAYLOAD_PACKET_LENGTH){
-			final RangeHashMap<Integer, Color> localColoring = new RangeHashMap<Integer, Color>();
+			final RangeHashMap<Integer, Color> localColoring = new RangeHashMap<>();
 			//for some reason using getHTMLHexview resets color, so we use getHTMLHexviewColored with only one color.
 			localColoring.put(0, buffer.length-PAYLOAD_PACKET_LENGTH, FEC_COLOR);
 			appendHeader(s, "FEC/timestamp:", FEC_COLOR);
@@ -383,7 +408,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			t.add(new DefaultMutableTreeNode(new KVP("data_byte",buffer,payloadStart ,PAYLOAD_PACKET_LENGTH - payloadStart, null)));
 			if((getPayloadUnitStartIndicator()==1)&&(getTransportScramblingControl()==0)){
 				final PesHeader pesHeaderView = getPesHeader();
-				if(pesHeaderView.isValidPesHeader()){
+				if((pesHeaderView !=null)&&(pesHeaderView.isValidPesHeader())){
 					t.add(pesHeaderView.getJTreeNode(modus));
 				}
 			}

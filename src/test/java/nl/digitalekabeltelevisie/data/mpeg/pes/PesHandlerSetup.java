@@ -42,6 +42,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public class PesHandlerSetup {
 
@@ -59,7 +60,7 @@ public class PesHandlerSetup {
 	@BeforeClass
 	public static void setUp() throws NotAnMPEGFileException, IOException, URISyntaxException {
 	
-		//
+		PreferencesManager.setPacketLengthModus(0);
 		final URL resource = PesHandlerSetup.class.getResource("/NPO12HD.ts");
 		// spaces in dirname...
 		final File ts =  new File(resource.toURI());

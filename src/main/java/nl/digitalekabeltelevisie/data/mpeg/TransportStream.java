@@ -159,8 +159,8 @@ public class TransportStream implements TreeNode{
 
 	private int packetLength = 188;
 
-	private static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
-
+	public static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
+	
 
 	/**
 	 *
@@ -180,11 +180,19 @@ public class TransportStream implements TreeNode{
 	public TransportStream(final File file) throws NotAnMPEGFileException,IOException{
 		this.file = file;
 		len = file.length();
-		packetLength = determineActualPacketLength(file);
+		packetLength = determinePacketLengthToUse(file);
 		int max_packets = (int) (len / packetLength);
 		packet_pid = new short [max_packets];
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
 
+	}
+	
+	private static int determinePacketLengthToUse(final File file) throws NotAnMPEGFileException, IOException {
+		int packetLengthModus = PreferencesManager.getPacketLengthModus();
+		if(packetLengthModus == 0) { // auto
+			return determineActualPacketLength(file);
+		}
+		return packetLengthModus;
 	}
 
 	/**
@@ -193,6 +201,10 @@ public class TransportStream implements TreeNode{
 	 * @return
 	 */
 	private static int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
+		if(file.length()< 752) {
+			throw new NotAnMPEGFileException("File too short to determine packet length automatic. File should have at least 5 consecutive packets.\n\n"
+					+ "Try setting packet length manual.");
+		}
 		try(final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
 			for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
 				logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
@@ -204,7 +216,9 @@ public class TransportStream implements TreeNode{
 				}
 			}
 		}
-		throw new NotAnMPEGFileException();
+		throw new NotAnMPEGFileException("DVB Inspector could not determine packetsize for this file. \n" +
+				"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
+		"Are you sure this file contains a valid MPEG Transport Stream?\n\n ");
 	}
 
 	/**
@@ -358,10 +372,10 @@ public class TransportStream implements TreeNode{
 		final InputStream is = new FileInputStream(file);
 		final long expectedSize=file.length();
 		if(component==null){
-			return new PositionPushbackInputStream(new BufferedInputStream(is),200);
+			return new PositionPushbackInputStream(new BufferedInputStream(is),300);
 		}
 		return new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
-				"Reading file \"" + file.getPath() +"\"",is, expectedSize)),200);
+				"Reading file \"" + file.getPath() +"\"",is, expectedSize)),300);
 	}
 
 
@@ -413,7 +427,7 @@ public class TransportStream implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("size",file.length(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("modified",new Date(file.lastModified()).toString(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("TS packets",no_packets,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLength,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLength,PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)")));
 		t.add(new DefaultMutableTreeNode(new KVP("Error packets",error_packets,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("Sync Errors",sync_errors,null)));
 		if(bitRate!=-1){
@@ -437,11 +451,13 @@ public class TransportStream implements TreeNode{
 				}
 
 			}
-		}
-
-		if(!psiOnlyModus(modus)){
-			final JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
-			t.add(list.getJTreeNode(modus, "Transport packets "));
+			// TSPackets
+			if(getNo_packets()!=0) {
+				final JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
+				t.add(list.getJTreeNode(modus, "Transport packets "));
+			}else {
+				t.add(new DefaultMutableTreeNode(new KVP("Transport packets ")));
+			}
 		}
 
 		return t;

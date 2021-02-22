@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,5 +32,12 @@ package nl.digitalekabeltelevisie.gui.exception;
  *
  */
 public class NotAnMPEGFileException extends DVBInspectorException {
+
+	/**
+	 * @param string
+	 */
+	public NotAnMPEGFileException(String msg) {
+		super(msg);
+	}
 
 }
