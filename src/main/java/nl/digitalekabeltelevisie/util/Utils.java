@@ -666,7 +666,7 @@ public final class Utils {
 
 	public static Charset getCharSet(final byte[] b, final int offset, final int length){
 		Charset charset = null;
-		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
+		if((length>0)&&(b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
 			final int selectorByte=b[offset];
 			try {
 				if((selectorByte>0)&&(selectorByte<=0x0b)){
