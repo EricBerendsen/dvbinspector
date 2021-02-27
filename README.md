@@ -1,20 +1,20 @@
-#DVB Inspector 
+# DVB Inspector 
 
 [DVB Inspector](http://www.digitalekabeltelevisie.nl/dvb_inspector/) is an open-source DVB analyzer, written in java. It can show the logical structure of the DVB SI and PSI data. It also shows bit rate usage data. DVB Inspector can be used to analyse contents; MPEG Video structure, teletext, DVB subtitles, DSM-CC Object carousels, SCTE-35 signaling, etc.
 
 ![DVB Inspector example screen](http://www.digitalekabeltelevisie.nl/dvb_inspector/img/details_panel_table.png)
 
-##Prerequisites
+## Prerequisites
 
 DVB inspector requires java 11 or higher.
 
-##Installation
+## Installation
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
 Unzip DVBinspector-1.15.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
-###Directory structure
+### Directory structure
 
 *    lib directory, contains external libraries that are required.
 *    src/main/java, this directory contains sources for the java program.
@@ -26,29 +26,29 @@ Unzip DVBinspector-1.15.0-dist.zip to a directory of your choice. It will create
 *    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
 *    DVBinspector-1.15.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
-##Usage
+## Usage
 
-###DVBinspector-1.15.0.jar
+### DVBinspector-1.15.0.jar
 
 There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.15.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.15.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.15.0.jar".
 
-###dvb.bat 
+### dvb.bat 
 
 This small windows batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path. 
 
-###dvb.sh
+### dvb.sh
 
 The linux/unix/mac version of dvb.bat. This small batch file sets up the environment to start DVB Inspector. It includes the needed libraries in the class path.
 
-##Manual
+## Manual
 
 See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.shtml) for more information on available views and options of the program.
 
-##Changelog
+## Changelog
 
 List of the most important changes between releases.
 
-###Release 1.15.0 (10th anniversary release)
+### Release 1.15.0 (10th anniversary release)
 Release date: 31/01/2021
 
 This release requires Java 11 or newer!
@@ -66,7 +66,7 @@ This release requires Java 11 or newer!
 * extended: implementation of PES Header, including support for AD_descriptor in PES_private_data
 
 
-###Release 1.14.0
+### Release 1.14.0
 Release date: 17/10/2020
 
 * fixed: scaling for HiDPI displays
@@ -86,7 +86,7 @@ Release date: 17/10/2020
 * added: .trp to supported file extensions
 
 
-###Release 1.13.0
+### Release 1.13.0
 Release date: 31/05/2020
 
 * added: Tableview for several PSI tables
@@ -98,7 +98,7 @@ Release date: 31/05/2020
 * improved: show table specific labels in treeview instead of table_id_extension
 
 
-###Release 1.12.0
+### Release 1.12.0
 Release date: 13/04/2020
 
 * updated: stream_type descriptions and MPEG Extension descriptor names based on H.222.0 (2018) Amendment 1
@@ -116,7 +116,7 @@ Release date: 13/04/2020
 * updated: several descriptions to match DVB BlueBook A038 June 2019
 
 
-###Release 1.11.0
+### Release 1.11.0
 Release date: 13/04/2019
 
 * improved: make generic PSI tables, DSM-CC parsing and PCR/PTS view switchable, this will reduce memory usage and processing time.
@@ -138,13 +138,13 @@ Release date: 13/04/2019
 * added: support for M7 Fastscan Tables
 
 
-###Release 1.10.1 (bug fix release)
+### Release 1.10.1 (bug fix release)
 Release date: 09/09/2018
 
 * fixed: parsing of 138181 Audio. This bug resulted in looping (when playing and in the graph) of the audio in a single PES Packet. 
 
 
-###Release 1.10.0
+### Release 1.10.0
 Release date: 12/08/2018
 
 * fixed: IPMACStreamLocationDescriptor componentTag was read wrong
@@ -163,7 +163,7 @@ Release date: 12/08/2018
 Thanks to every one that has reported bugs in DVB Inspector! This helps to make the program better and more robust. Please contact me if you think there is an error or option for improvement in the program. I really do appreciate it!
 
 
-###Release 1.9.0
+### Release 1.9.0
 Release date: 27/10/2017
 
 * added: NetworkChangeNotifyDescriptor
@@ -188,7 +188,7 @@ Release date: 27/10/2017
 Thanks to Michael Cullen for contributing the NetworkChangeNotifyDescriptor.
 
 
-###Release 1.8.0
+### Release 1.8.0
 Release date: 07/01/2017
 
 * removed: option to enable/disable TS packets (now it is always enabled)
@@ -202,7 +202,7 @@ Release date: 07/01/2017
 * added: display minimum and maximum distance between repeating table sections
 
 
-###Release 1.7.0
+### Release 1.7.0
 Release date: 23/09/2016
 
 * added: option to select default Teletext G0 and G2 Character Set Designation
@@ -213,7 +213,7 @@ Release date: 23/09/2016
 * fixed: some bugs
 
 
-###Release 1.6.0
+### Release 1.6.0
 Release date: 17/01/2016
 
 * added: support for SCTE-35 (Digital Program Insertion Cueing Message for Cable)
@@ -230,7 +230,7 @@ Release date: 17/01/2016
 Thanks to Richard Mars for fixing the TxtDataField and EBUPESDataField
 
 
-###Release 1.5.0
+### Release 1.5.0
 Release date: 07/08/2015
 
 * added: Support for h.265 (HEVC) parsing
@@ -246,7 +246,7 @@ Release date: 07/08/2015
 Thanks to Daniel Kamil Kozar for adding MPEG Extension descriptor, HEVC video descriptor and HEVC_timing_and_HRD_descriptor
 
 
-###Release 1.4.0
+### Release 1.4.0
 Release date: 18/01/2015
 
 * added: PCR/PTS/DTS Chart
@@ -258,7 +258,7 @@ Release date: 18/01/2015
 Thanks to Daniel Kamil Kozar for the fix for improved support for national characters in teletext!
 
 
-###Release 1.3.0
+### Release 1.3.0
 Release date: 25/08/2014
 
 * added: support for Related Content Tables (RCT)
@@ -272,7 +272,7 @@ Release date: 25/08/2014
 * fixed: some bugs
 
 
-###Release 1.2.0
+### Release 1.2.0
 Release date: 14/01/2014
 
 * fixed: Audio access units were not handled right when not aligned with PESPackets
@@ -285,7 +285,7 @@ Release date: 14/01/2014
 * fixed: some bugs
 
 
-###Release 1.1.0
+### Release 1.1.0
 Release date: 11/10/2013
 
 * added: Show contents of TS packets per PID
@@ -298,7 +298,7 @@ Release date: 11/10/2013
 * fixed: some bugs
 
 
-###Release 1.0.0
+### Release 1.0.0
 Release date: 21/06/2013
 
 * added: Show contents of TS packets, both in Tree and Grid View
@@ -315,7 +315,7 @@ Release date: 21/06/2013
 * added: DSM-CC Stream descriptor
 
 
-###Release 0.0.10
+### Release 0.0.10
 Release date: 28/04/2013
 
 * added: graph to show frame order (IBP) and size in MPEG2 Video
@@ -332,20 +332,20 @@ Release date: 28/04/2013
 Thanks to Dave Evans for the fixes for getDisplayWindowFlag, frame_packing_SEI_not_present_flag and missing object_data_segments!
 
 
-###Release 0.0.9
+### Release 0.0.9
 Release date: 06/02/2013
 
 * added: EIT grid view
 
 
-###Release 0.0.8
+### Release 0.0.8
 Release date: 27/01/2013
 
 * fixed: MPEG2 Video preview did not work on PES packets, because of adding PTS labels.
 * added: some detail to PDC TxtTriplets for teletext
 
 
-###Release 0.0.7
+### Release 0.0.7
 Release date: 20/01/2013
 
 * added: descriptors: S2SatelliteDeliverySystemDescriptor, AACMpeg2Descriptor, JPEG2000VideoDescriptor
@@ -356,14 +356,14 @@ Release date: 20/01/2013
 Thanks to Asif Raza for the contribution of the AACMpeg2Descriptor and JPEG2000VideoDescriptor.
 
 
-###Release 0.0.6
+### Release 0.0.6
 Release date: 23/08/2012
 
 * added: preview for MPEG2 Video (based on MPVDecoder from ProjectX)
 * updated DVB subtitles (now show complete Display Sets), and show Video background
 
 
-###Release 0.0.5
+### Release 0.0.5
 Release date: 06/08/2012
 
 * added: Support for h.264
@@ -375,7 +375,7 @@ Release date: 06/08/2012
 * new: put sources on sourceforge
 
 
-###Release 0.0.4
+### Release 0.0.4
 Release date: 15/05/2012
 
 * added: Support for DSM-CC Object carousels (HbbTV, MHP, MHEG5)
@@ -387,7 +387,7 @@ Release date: 15/05/2012
 * added: descriptors: TargetBackGroundDescriptor, VideoWindowDescriptor and ApplicationUsageDescriptor (AIT)
 
 
-###Release 0.0.3
+### Release 0.0.3
 Release date: 23/08/2011
 
 * added: Support for AIT
@@ -397,7 +397,7 @@ Release date: 23/08/2011
 * changed: maven enabled (if you want to build it yourself)
 
 
-###Release 0.0.2
+### Release 0.0.2
 Release date: 26/02/2011
 
 * changed: the way PES data is processed, less memory use and higher processing speed
@@ -408,7 +408,7 @@ Release date: 26/02/2011
 * changed: when changing the order of PIDs in the bitrate view, they keep their original color
 
 
-###Release 0.0.1
+### Release 0.0.1
 Release date: 31/01/2011
 
 * Initial release. 
