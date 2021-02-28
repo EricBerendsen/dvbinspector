@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -74,7 +74,7 @@ public final class DescriptorFactory {
 	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len,
 			final TableSection tableSection) {
 		long private_data_specifier = PreferencesManager.getDefaultPrivateDataSpecifier();
-		final List<Descriptor> r = new ArrayList<Descriptor>();
+		final List<Descriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
@@ -446,6 +446,8 @@ public final class DescriptorFactory {
 			return new AdaptationFieldDataDescriptor(data, offset, tableSection);
 		case 0x71:
 			return new ServiceIdentifierDescriptor(data, offset, tableSection);
+		case 0x72:
+			return new ServiceAvailabilityDescriptor(data, offset, tableSection);
 		case 0x73:
 			return new DefaultAuthorityDescriptor(data, offset, tableSection);
 		case 0x74:
