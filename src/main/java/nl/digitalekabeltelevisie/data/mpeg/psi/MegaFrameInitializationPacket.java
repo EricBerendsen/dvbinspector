@@ -63,13 +63,17 @@ public class MegaFrameInitializationPacket implements TreeNode{
 			private int cell_id;
 			private int wait_for_enable_flag;
 			private int reserved_future_use;
+			private short time_offset;
 			private byte[] function_data;
 
 			public Function(byte[] d, int st) {
 				function_tag = getInt(d, st, 1, MASK_8BITS);
 				function_length = getInt(d, st + 1, 1, MASK_8BITS);
 				function_data = Arrays.copyOfRange(d, st + 2, st + function_length); // also used for 0 Transmitter time offset function
-				if (function_tag == 4) { // Cell id function
+				if (function_tag == 0) { // Transmitter time offset function
+				        time_offset = ByteBuffer.wrap(function_data).getShort();
+				}
+				else if (function_tag == 4) { // Cell id function
 					cell_id = getInt(d, st + 2, 2, MASK_16BITS);
 					wait_for_enable_flag = getInt(d, st + 4, 1, 0b1000_0000) >>> 7;
 					reserved_future_use = getInt(d, st + 4, 1, MASK_7BITS);
@@ -84,7 +88,7 @@ public class MegaFrameInitializationPacket implements TreeNode{
 				t.add(new DefaultMutableTreeNode(new KVP("function_length", function_length, null)));
 				if (function_tag == 0) { // Transmitter time offset function
 					t.add(new DefaultMutableTreeNode(new KVP("time_offset", function_data,
-							"" + ByteBuffer.wrap(function_data).getShort() + " * 100 ns")));
+							time_offset + " * 100 ns")));
 
 				} else if (function_tag == 4) { // Cell id function
 					t.add(new DefaultMutableTreeNode(new KVP("cell_id", cell_id, null)));
