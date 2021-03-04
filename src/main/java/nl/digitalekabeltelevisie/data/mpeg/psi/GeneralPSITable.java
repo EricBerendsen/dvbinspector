@@ -109,9 +109,9 @@ public class GeneralPSITable extends AbstractPSITabel{
 		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable ")));
 		    return t;
 		}
-		final TreeSet<Integer> tableSet = new TreeSet<>(data.keySet());
+		final TreeSet<Integer> tableIDs = new TreeSet<>(data.keySet());
 
-		for (Integer tableID : tableSet) {
+		for (Integer tableID : tableIDs) {
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id", tableID, TableSection.getTableType(tableID)));
 			final HashMap<Integer, TableSection[]> table = data.get(tableID);
 
@@ -175,6 +175,14 @@ public class GeneralPSITable extends AbstractPSITabel{
 			return false;
 		}
 		return data.equals(other.data);
+	}
+
+	public Map<Integer, HashMap<Integer, TableSection[]>> getData() {
+		return data;
+	}
+
+	public List<TableSection> getSimpleSectionsd() {
+		return simpleSectionsd;
 	}
 
 }

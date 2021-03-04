@@ -58,6 +58,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.OperatorFastscan;
@@ -592,6 +593,24 @@ public class TransportStream implements TreeNode{
 		// ALL??  no, there is an exception;
 		if(PreferencesManager.isEnableM7Fastscan()) {
 			labelM7FastscanTables();
+		}
+		
+		if(PreferencesManager.isEnableGenericPSI()) {
+			for (final PID pid : pids) {
+				if((pid)!=null){
+					if(pid.getType()==PID.PSI) {
+						if(!pid.getPsi().getData().isEmpty()) {
+							if(pid.getPidHandler()==null) {
+								GeneralPsiTableHandler generalPsiTableHandler = new GeneralPsiTableHandler();
+								generalPsiTableHandler.setPID(pid);
+								generalPsiTableHandler.setTransportStream(this);
+								pid.setPidHandler(generalPsiTableHandler);
+							}
+						}
+					}
+				}
+			}
+
 		}
 	}
 

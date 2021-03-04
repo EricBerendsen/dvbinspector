@@ -515,7 +515,7 @@ public class TableSection implements TreeNode{
 		this.nextVersion = next;
 	}
 
-	public long getFirst_packet_no() {
+	public int getFirst_packet_no() {
 		return firstPacketNo;
 	}
 
