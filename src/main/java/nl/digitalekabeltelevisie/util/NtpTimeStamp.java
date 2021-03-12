@@ -375,9 +375,7 @@ public class NtpTimeStamp implements java.io.Serializable, Comparable<NtpTimeSta
     private static void appendHexString(StringBuilder buf, long l)
     {
         String s = Long.toHexString(l);
-        for (int i = s.length(); i < 8; i++) {
-            buf.append('0');
-        }
+        buf.append("0".repeat(Math.max(0, 8 - s.length())));
         buf.append(s);
     }
 
@@ -459,7 +457,7 @@ public class NtpTimeStamp implements java.io.Serializable, Comparable<NtpTimeSta
     {
         long thisVal = this.ntpTime;
         long anotherVal = anotherTimeStamp.ntpTime;
-        return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+        return (Long.compare(thisVal, anotherVal));
     }
 
 }

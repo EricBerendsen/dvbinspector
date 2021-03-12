@@ -402,9 +402,8 @@ public class Cea608 {
 		for( Entry<Integer, Map<Long, List<Construct>>> typeEntry:allCcData.entrySet()) {
 			final Map<Long, List<Construct>> typeEntryValue = typeEntry.getValue();
 			final KVP typeNodeKvp = new KVP("type",typeEntry.getKey(),Construct.cc_type_list.get(typeEntry.getKey()));
-			typeNodeKvp.setHtmlSource(() -> typeEntryValue.entrySet().
+			typeNodeKvp.setHtmlSource(() -> typeEntryValue.values().
 					stream().
-					map((Entry<Long, List<Construct>> x) -> x.getValue()).
 					flatMap(Collection::stream).
 					map(HTMLSource::getHTML).
 					collect(Collectors.joining("<br>"))
