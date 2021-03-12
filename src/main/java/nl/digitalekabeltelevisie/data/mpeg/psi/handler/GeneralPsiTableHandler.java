@@ -28,17 +28,14 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi.handler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
@@ -47,14 +44,15 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FNTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FSTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
-import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
  * @author Eric
  *
  */
 public class GeneralPsiTableHandler extends GeneralPidHandler {
-
+	
+	private static final Logger logger = Logger.getLogger(GeneralPsiTableHandler.class.getName());
+	
 	
 	private PAT pat;
 	private CAT cat;
@@ -64,16 +62,16 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 	private PMTs pmts;
 	private EIT eit;
 	private TDT tdt;
-	private TOT to;
+	private TOT tot;
 	private SIT sit;
 	
-	private INT int_table;
+	// private INT int_table; // INT and DFIT use same tableID, both not supported here
 	private UNTs unt_table;
 	private AITs ait_table;
 	private RCTs rct_table;
 	private DSMCCs dsm_table;
 	private SCTE35 scte35_table;
-	private DFITs dfit_table;
+	// private DFITs dfit_table;// INT and DFIT use same tableID, both not supported here
 	
 	private M7Fastscan m7fastscan;
 	
@@ -81,27 +79,32 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		var node = new DefaultMutableTreeNode(new KVP("GeneralPsiTableHandler"));
+		var node = new DefaultMutableTreeNode(new KVP("Interpreted PSI"));
 		addToNodeIfNotNull(node, pat, modus);
+		addToNodeIfNotNull(node, cat, modus);
+		addToNodeIfNotNull(node, bat, modus);
 		addToNodeIfNotNull(node, pmts, modus);
 		addToNodeIfNotNull(node, nit, modus);
-		addToNodeIfNotNull(node, bat, modus);
-		addToNodeIfNotNull(node, eit, modus);
-		addToNodeIfNotNull(node, cat, modus);
 		addToNodeIfNotNull(node, sdt, modus);
+		addToNodeIfNotNull(node, eit, modus);
+		addToNodeIfNotNull(node, tdt, modus);
+		addToNodeIfNotNull(node, tot, modus);
+		addToNodeIfNotNull(node, sit, modus);
 		addToNodeIfNotNull(node, ait_table, modus);
+		addToNodeIfNotNull(node, unt_table, modus);
+		addToNodeIfNotNull(node, rct_table, modus);
+		addToNodeIfNotNull(node, scte35_table, modus);
+		addToNodeIfNotNull(node, dsm_table, modus);
+		addToNodeIfNotNull(node, m7fastscan, modus);
 		return node;
 	}
 
-
-
-	private static void addToNodeIfNotNull(DefaultMutableTreeNode node,  AbstractPSITabel abstractPSITabel, int modus) {
-		if(abstractPSITabel!=null) {
-			node.add(abstractPSITabel.getJTreeNode(modus));
-		}
+	@Override
+	public String getMenuDescription() {
+		return "Interpret as PSI";
 	}
 
-	
+
 	
 	@Override
 	public void processTSPacket(TSPacket packet) {
@@ -110,195 +113,232 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 
 	@Override
 	public void postProcess() {
-		// EMPTY default
 		initialized = true;
-		
+
 		GeneralPSITable psi = pid.getPsi();
 		Map<Integer, HashMap<Integer, TableSection[]>> typeSections = psi.getData();
 		
-		final TreeSet<Integer> tableIDs = new TreeSet<>(typeSections.keySet());
-
-		for (Integer tableID : tableIDs) {
-
-			final HashMap<Integer, TableSection[]> table = typeSections.get(tableID);
-
-			final TreeSet<Integer> serviceSet = new TreeSet<>(table.keySet());
-			for (Integer tableIdExt : serviceSet) {
-				final TableSection[] sections = table.get(tableIdExt);
-				if (tableID == 0x00) {
-					handlePAT(sections);
-					
-				}else if (tableID == 0x02) {
-					handlePMT(sections);
-				}else if ((tableID==0x40)||(tableID==0x41)) {
-					handleNIT(sections);
-				}else if (tableID == 0x4A) {
-					handleBAT(sections);
-				}else if((0x4E<=tableID)&&(tableID<=0x6F)){
-					handleEIT(sections);
-				}else if(tableID==0x01){
-					handleCAT(sections);
-				}else if((tableID==0x42)||(tableID==0x46)){
-					handleSDT(sections);
-				}else if(tableID==0x74){
-					handleAIT(sections);
+		for(HashMap<Integer, TableSection[]> sectionsByTableId: typeSections.values()) {
+			for(TableSection[] sectionsByTableIdExt:sectionsByTableId.values()) {
+				for (TableSection section : sectionsByTableIdExt) {
+					interpretSectionByTableId(section);
 				}
-
-				
-				
-//				
-//				
-//				
-//			}else if((pid==0x14) &&(tableId==0x70)){
-//				transportStream.getPsi().getTdt().update(new TDTsection(this,parentPID));
-//			}else if((pid==0x14) &&(tableId==0x73)){
-//				transportStream.getPsi().getTot().update(new TOTsection(this,parentPID));
-//			}else if((pid==0x1F) &&(tableId==0x7F)){
-//				transportStream.getPsi().getSit().update(new SITsection(this,parentPID));
-//			}else if((tableId==0x4c)&&isINTSection(pid)){ // check for linkage descriptors 0x0B located in the NIT  //ETSI EN 301 192 V1.4.2
-//				transportStream.getPsi().getInt().update(new INTsection(this,parentPID));
-//			}else if((tableId==0x4b)&&isUNTSection(pid)){
-//				transportStream.getPsi().getUnts().update(new UNTsection(this,parentPID));
-//			}else if((tableId==0x76)&&isRCTSection(pid)){
-//				transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
-//			}else if((tableId==0xFC)&&isSpliceInfoSection(pid)){
-//				transportStream.getPsi().getScte35_table().update(new SpliceInfoSection(this,parentPID));
-//			}else if(isDIFTSection(pid)) { // no check for table ID, as this might change 
-//				transportStream.getPsi().getDfit_table().update(new DFITSection(this, parentPID));
-//			}else if((tableId>=0x37)&&(tableId<=0x3F)){
-//				// also include all PES streams component (ISO/IEC 13818-6 type B) which
-//				// do not have a data_broadcast_id_descriptor associated with it,
-//				// but do have a Association_tag_descriptor (or a stream_identifier_descriptor)
-//				// These might be referenced from DSI in other stream (or even from multiple)
-//				// Also, include PMTs to store the stream_identifier_descriptor
-//				// all handled in DSMCCs.
-//				if(PreferencesManager.isEnableDSMCC()) {
-//					transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
-//				}
-//			}else if(PreferencesManager.isEnableM7Fastscan()) {
-//				if(tableId== 0xBC){
-//					transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
-//				}else if(tableId== 0xBD) {
-//					transportStream.getPsi().getM7fastscan().update(new FSTsection(this, parentPID));
-//				}else if((tableId== 0xBE) && transportStream.isONTSection(pid)) {
-//					transportStream.getPsi().getM7fastscan().update(new ONTSection(this, parentPID));
-//				}
-//			}
-
 			}
 		}
 
+		List<TableSection> lst = psi.getSimpleSectionsd();
+		for (TableSection section : lst) {
+			interpretSectionByTableId(section);
+		}
 	}
 	
-	private void handlePAT(final TableSection[] sections) {
+	/**
+	 * @param section
+	 */
+	private void interpretSectionByTableId(TableSection section) {
+		if (section == null) {
+			return;
+		}
+		try {
+			int tableID = section.getTableId();
+
+			if (tableID == 0x00) {
+				handlePAT(section);
+			} else if (tableID == 0x01) { // conditional_access_section
+				handleCAT(section);
+			} else if (tableID == 0x02) { // program_map_section
+				handlePMT(section);
+			} else if ((tableID >= 0x37) && (tableID <= 0x3F)) { // DSM-CC
+				handleDSMCC(section);
+			} else if ((tableID == 0x40) || (tableID == 0x41)) { // network_information_section
+				handleNIT(section);
+			} else if (tableID == 0x4A) { // bouquet_association_section
+				handleBAT(section);
+			} else if ((tableID == 0x42) || (tableID == 0x46)) { // service_description_section
+				handleSDT(section);
+			} else if ((0x4E <= tableID) && (tableID <= 0x6F)) { // event_information_section
+				handleEIT(section);
+			} else if (tableID == 0x4b) { // update notification table section
+				handleUNT(section);
+				// TODO FONT/|INT section tableId conflict
+			} else if (tableID == 0x70) { // TDT
+				handleTDT(section);
+			} else if (tableID == 0x73) { // TOT
+				handleTOT(section);
+			} else if (tableID == 0x74) { // application information section
+				handleAIT(section);
+			} else if (tableID == 0x76) { // related content section
+				handleRCT(section);
+			} else if (tableID == 0x7F) { // selection_information_section
+				handleSIT(section);
+
+			} else if ((tableID >= 0xBC) && (tableID <= 0xBE)) {
+				handleFastScan(section);
+
+			} else if (tableID == 0xFC) { // SCTE-35
+				handleSCTE35(section);
+			}
+		} catch (RuntimeException rte) {
+			logger.info(("Ignoring section with tableId:" + section.getTableId() + ", exception:" + rte.getMessage()));
+		}
+
+	}
+
+	private void handlePAT(final TableSection section) {
 		if (pat == null) {
 			pat = new PAT(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				PATsection pmt = new PATsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, pmt);
-				pat.update(pmt);
-			}
-		}
+		PATsection pmt = new PATsection(section.getRaw_data(), pid);
+		copyMetaData(section, pmt);
+		pat.update(pmt);
 	}
 
-
-	private void handlePMT(final TableSection[] sections) {
+	private void handlePMT(final TableSection section) {
 		if (pmts == null) {
 			pmts = new PMTs(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				PMTsection pmt = new PMTsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, pmt);
-				pmts.update(pmt);
-			}
-		}
+		PMTsection pmt = new PMTsection(section.getRaw_data(), pid);
+		copyMetaData(section, pmt);
+		pmts.update(pmt);
 	}
 
-
-	private void handleNIT(final TableSection[] sections) {
+	private void handleNIT(final TableSection section) {
 		if (nit == null) {
 			nit = new NIT(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				NITsection s = new NITsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, s);
-				nit.update(s);
-			}
-		}
+		NITsection s = new NITsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		nit.update(s);
 	}
 
-
-	private void handleBAT(final TableSection[] sections) {
+	private void handleBAT(final TableSection section) {
 		if (bat == null) {
 			bat = new BAT(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				BATsection s = new BATsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, s);
-				bat.update(s);
-			}
-		}
+		BATsection s = new BATsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		bat.update(s);
 	}
-	
-	private void handleEIT(final TableSection[] sections) {
+
+	private void handleEIT(final TableSection section) {
 		if (eit == null) {
 			eit = new EIT(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				EITsection s = new EITsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, s);
-				eit.update(s);
-			}
-		}
+		EITsection s = new EITsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		eit.update(s);
 	}
 
-	private void handleCAT(final TableSection[] sections) {
+	private void handleCAT(final TableSection section) {
 		if (cat == null) {
 			cat = new CAT(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				CAsection s = new CAsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, s);
-				cat.update(s);
-			}
-		}
+		CAsection s = new CAsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		cat.update(s);
 	}
 
-	private void handleSDT(final TableSection[] sections) {
+	private void handleSDT(final TableSection section) {
 		if (sdt == null) {
 			sdt = new SDT(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				SDTsection s = new SDTsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, s);
-				sdt.update(s);
-			}
-		}
+		SDTsection s = new SDTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		sdt.update(s);
 	}
 
-	private void handleAIT(final TableSection[] sections) {
+	private void handleAIT(final TableSection section) {
 		if (ait_table == null) {
 			ait_table = new AITs(getTransportStream().getPsi());
 		}
-		for (TableSection tableSection : sections) {
-			if (tableSection != null) {
-				AITsection s = new AITsection(tableSection.getRaw_data(), pid);
-				copyMetaData(tableSection, s);
-				ait_table.update(s);
-			}
-		}
+		AITsection s = new AITsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		ait_table.update(s);
 	}
 
+	private void handleSIT(final TableSection section) {
+		if (sit == null) {
+			sit = new SIT(getTransportStream().getPsi());
+		}
+		SITsection s = new SITsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		sit.update(s);
+	}
 
+	private void handleUNT(final TableSection section) {
+		if (unt_table == null) {
+			unt_table = new UNTs(getTransportStream().getPsi());
+		}
+		UNTsection s = new UNTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		unt_table.update(s);
+	}
 
+	private void handleRCT(final TableSection section) {
+		if (rct_table == null) {
+			rct_table = new RCTs(getTransportStream().getPsi());
+		}
+		RCTsection s = new RCTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		rct_table.update(s);
+	}
+
+	private void handleSCTE35(final TableSection section) {
+		if (scte35_table == null) {
+			scte35_table = new SCTE35(getTransportStream().getPsi());
+		}
+		SpliceInfoSection s = new SpliceInfoSection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		scte35_table.update(s);
+	}
+
+	private void handleDSMCC(final TableSection section) {
+		if (dsm_table == null) {
+			dsm_table = new DSMCCs(getTransportStream().getPsi());
+		}
+		TableSectionExtendedSyntax s = new TableSectionExtendedSyntax(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		dsm_table.update(s);
+	}
+
+	private void handleTDT(final TableSection section) {
+		if (tdt == null) {
+			tdt = new TDT(getTransportStream().getPsi());
+		}
+		TDTsection s = new TDTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		tdt.update(s);
+	}
+
+	private void handleTOT(final TableSection section) {
+		if (tot == null) {
+			tot = new TOT(getTransportStream().getPsi());
+		}
+		TOTsection s = new TOTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		tot.update(s);
+	}
+
+	private void handleFastScan(final TableSection section) {
+		if (m7fastscan == null) {
+			m7fastscan = new M7Fastscan(getTransportStream().getPsi());
+		}
+		int tableId = section.getTableId();
+		if (tableId == 0xBC) {
+			FNTsection s = new FNTsection(section.getRaw_data(), pid);
+			copyMetaData(section, s);
+			m7fastscan.update(s);
+		} else if (tableId == 0xBD) {
+			FSTsection s = new FSTsection(section.getRaw_data(), pid);
+			copyMetaData(section, s);
+			m7fastscan.update(s);
+		} else if (tableId == 0xBE) {
+			ONTSection s = new ONTSection(section.getRaw_data(), pid);
+			copyMetaData(section, s);
+			m7fastscan.update(s);
+		}
+	}	
+	
 	private static void copyMetaData(TableSection source, TableSection dest) {
 		dest.setFirst_packet_no(source.getFirst_packet_no());
 		dest.setLast_packet_no(source.getLast_packet_no());
@@ -307,5 +347,12 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		dest.setOccurrence_count(source.getOccurrence_count());
 	}
 
+
+	private static void addToNodeIfNotNull(DefaultMutableTreeNode node,  TreeNode treeNode, int modus) {
+		if(treeNode!=null) {
+			node.add(treeNode.getJTreeNode(modus));
+		}
+	}
+	
 
 }

@@ -597,9 +597,10 @@ public class TransportStream implements TreeNode{
 		
 		if(PreferencesManager.isEnableGenericPSI()) {
 			for (final PID pid : pids) {
-				if((pid)!=null){
-					if(pid.getType()==PID.PSI) {
-						if(!pid.getPsi().getData().isEmpty()) {
+				if((pid!=null)&&(pid.getType()==PID.PSI)) {
+						final GeneralPSITable psiData = pid.getPsi();
+						if((!psiData.getData().isEmpty())|| 
+								(!psiData.getSimpleSectionsd().isEmpty())) {
 							if(pid.getPidHandler()==null) {
 								GeneralPsiTableHandler generalPsiTableHandler = new GeneralPsiTableHandler();
 								generalPsiTableHandler.setPID(pid);
@@ -611,7 +612,6 @@ public class TransportStream implements TreeNode{
 				}
 			}
 
-		}
 	}
 
 	/**
