@@ -194,7 +194,6 @@ public class TablePanel extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		System.err.println("mouseClicked");
 	    table.requestFocusInWindow();
 	}
 

@@ -82,9 +82,6 @@ public final class AFDescriptorFactory {
 			break;
 
 		default:
-			System.err.println("Not implemented AFDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
-					+ AFDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
-					+ ",) ");
 			d = new AFDescriptor(data, t + offset);
 			logger.info("Not implemented AFDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
 					+ AFDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
