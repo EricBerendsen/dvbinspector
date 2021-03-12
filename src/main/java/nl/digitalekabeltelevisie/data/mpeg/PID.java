@@ -509,7 +509,7 @@ public class PID implements TreeNode{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final KVP kvp=new KVP("pid",getPid(),getLabelMaker().toString());
 		if((generalPidHandler!=null)&&(!scrambled)){
-			final JMenuItem pesMenu = new JMenuItem("Parse data");
+			final JMenuItem pesMenu = new JMenuItem(generalPidHandler.getMenuDescription());
 			pesMenu.setActionCommand(DVBtree.PARSE);
 			kvp.setSubMenuAndOwner(pesMenu,this);
 		}

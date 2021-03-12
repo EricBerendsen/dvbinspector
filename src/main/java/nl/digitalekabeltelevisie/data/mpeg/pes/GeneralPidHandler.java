@@ -75,5 +75,9 @@ public abstract class GeneralPidHandler implements TreeNode{
 	public boolean isInitialized() {
 		return initialized;
 	}
+	
+	public String getMenuDescription() {
+		return "Parse data";
+	}
 
 }

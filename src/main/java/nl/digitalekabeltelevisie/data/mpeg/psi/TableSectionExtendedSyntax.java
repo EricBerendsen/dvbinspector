@@ -51,7 +51,7 @@ public class TableSectionExtendedSyntax extends TableSection {
 
 		if(sectionSyntaxIndicator==0){ // not long format, but we are expecting it.. So error
 			// if sectionSyntaxIndicator==1 CRC checking was already done in super()
-			throw new RuntimeException("sectionSyntaxIndicator==0 for pid:"+parent.getPid());
+			throw new RuntimeException("TableSectionExtendedSyntax(): sectionSyntaxIndicator==0 for pid:"+parent.getPid());
 
 		}
 

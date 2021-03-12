@@ -48,7 +48,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class GeneralPSITable extends AbstractPSITabel{
 
 	private final Map<Integer, HashMap<Integer,TableSection []>> data = new HashMap<>();
-	private List<TableSection> simpleSectionsd;
+	private List<TableSection> simpleSectionsd = new ArrayList<>();
 
 
 	public GeneralPSITable(final PSI parent){
@@ -74,9 +74,6 @@ public class GeneralPSITable extends AbstractPSITabel{
 				updateSectionVersion(section, last);
 			}
 		}else{
-			if(simpleSectionsd==null){
-				simpleSectionsd= new ArrayList<>();
-			}
 			// look for duplicates, if so update counters on existing on
 
 			for (final TableSection existingSection : simpleSectionsd) {
@@ -109,9 +106,9 @@ public class GeneralPSITable extends AbstractPSITabel{
 		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable ")));
 		    return t;
 		}
-		final TreeSet<Integer> tableSet = new TreeSet<>(data.keySet());
+		final TreeSet<Integer> tableIDs = new TreeSet<>(data.keySet());
 
-		for (Integer tableID : tableSet) {
+		for (Integer tableID : tableIDs) {
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id", tableID, TableSection.getTableType(tableID)));
 			final HashMap<Integer, TableSection[]> table = data.get(tableID);
 
@@ -132,7 +129,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 			}
 			t.add(n);
 		}
-		if(simpleSectionsd!=null){
+		if(!simpleSectionsd.isEmpty()){
 			Utils.addListJTree(t, simpleSectionsd, modus, "syntax0");
 		}
 		return t;
@@ -175,6 +172,14 @@ public class GeneralPSITable extends AbstractPSITabel{
 			return false;
 		}
 		return data.equals(other.data);
+	}
+
+	public Map<Integer, HashMap<Integer, TableSection[]>> getData() {
+		return data;
+	}
+
+	public List<TableSection> getSimpleSectionsd() {
+		return simpleSectionsd;
 	}
 
 }
