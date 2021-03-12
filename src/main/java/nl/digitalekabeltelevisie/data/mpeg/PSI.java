@@ -46,6 +46,7 @@ public class PSI {
 
 	private final PAT pat = new PAT(this);
 	private final CAT cat = new CAT(this);
+	private final TSDT tsdt = new TSDT(this);
 	private final BAT bat = new BAT(this);
 	private final NIT nit = new NIT(this);
 	private final SDT sdt = new SDT(this);
@@ -72,6 +73,7 @@ public class PSI {
 		t.add(pat.getJTreeNode(modus));
 		t.add(cat.getJTreeNode(modus));
 		t.add(bat.getJTreeNode(modus));
+		t.add(tsdt.getJTreeNode(modus));
 		t.add(pmts.getJTreeNode(modus));
 		t.add(nit.getJTreeNode(modus));
 		t.add(sdt.getJTreeNode(modus));
@@ -177,5 +179,8 @@ public class PSI {
 	}
 	public DFITs getDfit_table() {
 		return dfit_table;
+	}
+	public TSDT getTsdt() {
+		return tsdt;
 	}
 }

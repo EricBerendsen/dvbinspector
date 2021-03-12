@@ -142,6 +142,8 @@ public class PsiSectionData {
 					transportStream.getPsi().getPmts().update(new PMTsection(this,parentPID));
 				}else if((tableId==0x01)&&(pid==0x01)){
 					transportStream.getPsi().getCat().update(new CAsection(this,parentPID));
+				}else if((tableId==0x03)&&(pid==0x02)){
+					transportStream.getPsi().getTsdt().update(new TSDTsection(this,parentPID));
 				}else if(pid==0x10){  // NIT
 					transportStream.getPsi().getNit().update(new NITsection(this,parentPID));
 				}else if((tableId==0x4A)&&(pid==0x11)){
@@ -497,7 +499,8 @@ public class PsiSectionData {
 		}
 		if (transportStream == null) {
 			return other.transportStream == null;
-		} else return transportStream.equals(other.transportStream);
+		}
+		return transportStream.equals(other.transportStream);
 	}
 
 }
