@@ -39,6 +39,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus.CIProtectionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.GuidanceDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.ServiceAttributeDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.*;
@@ -218,15 +219,16 @@ public final class DescriptorFactory {
 	private static Descriptor getPrivateDVBSIDescriptor(final byte[] data, final int offset, final TableSection tableSection,
 			final long private_data_specifier) {
 
+		final int descriptor_tag =  toUnsignedInt(data[offset]);
 		if (private_data_specifier == 0x600) { // UPC1
-			switch (toUnsignedInt(data[offset])) {
+			switch (descriptor_tag) {
 			case 0x81:
 				return new UPCLogicalChannelDescriptor(data, offset, tableSection);
 			case 0x87:
 				return new ZiggoVodDeliveryDescriptor(data, offset, tableSection);
 			}
 		} else if (private_data_specifier == 0x16) { // Casema / Ziggo
-			switch (toUnsignedInt(data[offset])) {
+			switch (descriptor_tag) {
 			case 0x87:
 				return new ZiggoVodDeliveryDescriptor(data, offset, tableSection);
 			case 0x93:
@@ -235,7 +237,7 @@ public final class DescriptorFactory {
 				return new ZiggoPackageDescriptor(data, offset, tableSection);
 			}
 		} else if (private_data_specifier == 0x28) { // EACEM
-			switch (toUnsignedInt(data[offset])) {
+			switch (descriptor_tag) {
 			case 0x83:
 				return new LogicalChannelDescriptor(data, offset, tableSection);
 			case 0x86:
@@ -244,7 +246,7 @@ public final class DescriptorFactory {
 				return new HDSimulcastLogicalChannelDescriptor(data, offset, tableSection);
 			}
 		} else if (private_data_specifier == 0x29) { // Nordig
-			switch (toUnsignedInt(data[offset])) {
+			switch (descriptor_tag) {
 			case 0x83:
 				return new NordigLogicalChannelDescriptorV1(data, offset, tableSection);
 			case 0x87:
@@ -253,20 +255,22 @@ public final class DescriptorFactory {
 
 
 		} else if (private_data_specifier == 0x40) { // CI Plus LLP
-			switch (toUnsignedInt(data[offset])) {
+			switch (descriptor_tag) {
 			case 0xCE:
 				return new CIProtectionDescriptor(data, offset, tableSection);
 			}
 		} else if (private_data_specifier == 0x233a) { // DTG
-			switch (toUnsignedInt(data[offset])) {
+			switch (descriptor_tag) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
 				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, offset, tableSection);
+			case 0x86:
+				return new ServiceAttributeDescriptor(data, offset, tableSection);
 			case 0x89:
 				return new GuidanceDescriptor(data, offset, tableSection);
 			}
 		}
 		logger.info("Unimplemented private descriptor, private_data_specifier=" + private_data_specifier
-					+ ", descriptortag=" + toUnsignedInt(data[offset]) + ", tableSection=" + tableSection);
+					+ ", descriptortag=" + descriptor_tag + ", tableSection=" + tableSection);
 		return new Descriptor(data, offset, tableSection);
 	}
 
