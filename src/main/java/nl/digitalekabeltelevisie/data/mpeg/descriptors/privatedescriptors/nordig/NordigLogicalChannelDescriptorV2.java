@@ -45,7 +45,7 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 
 
 
-	private List<ChannelList> channelLists = new ArrayList<NordigLogicalChannelDescriptorV2.ChannelList>();
+	private List<ChannelList> channelLists = new ArrayList<>();
 	public static class ChannelList implements TreeNode{
 		/**
 		 * @param channel_list_id
@@ -68,7 +68,7 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 		private DVBString channel_list_name;
 		private final String country_code;
 		private int service_loop_length;
-		private List<LogicalChannel> logicalChannelList = new ArrayList<LogicalChannel>();
+		private List<LogicalChannel> logicalChannelList = new ArrayList<>();
 
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
@@ -148,7 +148,7 @@ public class NordigLogicalChannelDescriptorV2 extends Descriptor {
 			t+=3;
 			int service_loop_length=getInt(b, offset+2+t,1,MASK_8BITS);
 			t+=1;
-			List<LogicalChannel> channelList = new ArrayList<NordigLogicalChannelDescriptorV2.LogicalChannel>();
+			List<LogicalChannel> channelList = new ArrayList<>();
 			int s=0;
 			while (s<service_loop_length) {
 				final int serviceId=getInt(b, offset+2+t+s,2,MASK_16BITS);

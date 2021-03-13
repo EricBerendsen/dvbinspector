@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class LogicalChannelDescriptor extends Descriptor {
 
-	private List<LogicalChannel> channelList = new ArrayList<LogicalChannel>();
+	private List<LogicalChannel> channelList = new ArrayList<>();
 
 
 	public class LogicalChannel implements TreeNode{
@@ -131,7 +131,7 @@ public class LogicalChannelDescriptor extends Descriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channel_descriptor");
+		addListJTree(t,channelList,modus,"logical_channels");
 		return t;
 	}
 

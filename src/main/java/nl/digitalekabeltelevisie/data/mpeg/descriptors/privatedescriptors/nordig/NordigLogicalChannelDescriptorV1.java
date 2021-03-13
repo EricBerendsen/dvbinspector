@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 //based on NorDig Unified ver 2.3 12.2.9.2 NorDig private; Logical Channel Descriptor (version 1)
 public class NordigLogicalChannelDescriptorV1 extends Descriptor {
 
-	private List<LogicalChannel> channelList = new ArrayList<LogicalChannel>();
+	private List<LogicalChannel> channelList = new ArrayList<>();
 
 
 	public class LogicalChannel implements TreeNode{
@@ -133,7 +133,7 @@ public class NordigLogicalChannelDescriptorV1 extends Descriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channel_descriptor");
+		addListJTree(t,channelList,modus,"logical_channels");
 		return t;
 	}
 

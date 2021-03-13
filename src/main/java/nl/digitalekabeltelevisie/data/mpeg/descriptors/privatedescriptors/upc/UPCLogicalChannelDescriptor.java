@@ -27,12 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -44,7 +45,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class UPCLogicalChannelDescriptor extends Descriptor {
 
 
-	private List<LogicalChannel> channelList = new ArrayList<LogicalChannel>();
+	private List<LogicalChannel> channelList = new ArrayList<>();
 
 	public static class LogicalChannel implements TreeNode{
 		private final int city_code;
@@ -83,7 +84,7 @@ public class UPCLogicalChannelDescriptor extends Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channel_descriptor");
+		addListJTree(t,channelList,modus,"logical_channels");
 		return t;
 	}
 
@@ -113,29 +114,8 @@ public class UPCLogicalChannelDescriptor extends Descriptor {
 	public int getLogicalChannelNumber() {
 		if ((channelList!=null)&&(channelList.size()>0)) {
 			return channelList.get(0).getLogicalChannelNumber();
-		}else{
-			return -1;
 		}
-	}
-
-
-	public String getLogicalChannelNumbers() {
-		if ((channelList!=null)&&(channelList.size()>0)) {
-			final TreeSet<Integer> numbers=new TreeSet<Integer>();
-			for(final LogicalChannel ch: channelList){
-				numbers.add(ch.getLogicalChannelNumber());
-			}
-			final StringBuilder buf = new StringBuilder();
-			final Iterator<Integer> iter = numbers.iterator();
-			buf.append(iter.next());
-			while (iter.hasNext()) {
-				buf.append(" / ").append(iter.next());
-
-			}
-			return buf.toString();
-		}else{
-			return "";
-		}
+		return -1;
 	}
 
 
