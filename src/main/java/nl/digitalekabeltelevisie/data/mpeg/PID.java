@@ -138,6 +138,10 @@ public class PID implements TreeNode{
 		{
 			parentTransportStream = ts;
 			final byte []data = packet.getData();
+			if(data.length==0) {
+				logger.info("packet pretends to have payload, but data is empty, packetNo;"+packet.getPacketNo());
+				return;
+			}
 			final int adaptationFieldControl = packet.getAdaptationFieldControl();
 			final boolean packetHasPayload = (adaptationFieldControl==1)||(adaptationFieldControl==3);
 			if((lastPSISection==null)){ // nothing started
