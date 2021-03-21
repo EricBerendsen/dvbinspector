@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.util.Arrays.copyOfRange;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -35,7 +37,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class CarouselIdentifierDescriptor extends Descriptor {
 
-	// http://www.dvb.org/technology/standards/a137r1_hybrid_application_signalling.pdf
+	// TS 102 809 V1.1.1 Ch.  B.2.8.1 carousel_identifier_descriptor
 
 	private final long carouselId;
 	private final int formatId;
@@ -47,7 +49,7 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 	private int blockSize;
 	private long moduleSize;
 	private int compressionMethod;
-	private long  originalSize;
+	private long originalSize;
 	private int timeOut;
 	private int objectKeyLength;
 
@@ -58,7 +60,7 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 		carouselId = Utils.getLong(b, offset+2, 4, Utils.MASK_32BITS);
 		formatId = Utils.getInt(b, offset+6, 1, Utils.MASK_8BITS);
 		if(formatId==0x00){
-			privateDataByte = Utils.copyOfRange(b, offset+7, offset+descriptorLength+2);
+			privateDataByte = copyOfRange(b, offset+7, offset+descriptorLength+2);
 		}
 		if(formatId==0x01){
 			moduleVersion=Utils.getInt(b, offset+7, 1, Utils.MASK_8BITS);
@@ -69,8 +71,8 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 			originalSize = Utils.getLong(b, offset+17, 4, Utils.MASK_32BITS);
 			timeOut = Utils.getInt(b, offset+21, 1, Utils.MASK_8BITS);
 			objectKeyLength = Utils.getInt(b, offset+22, 1, Utils.MASK_8BITS);
-			objectKeyData = Utils.copyOfRange(b, offset+23, offset+23+objectKeyLength);
-			privateDataByte = Utils.copyOfRange(b, offset+23+objectKeyLength, offset+descriptorLength+2);
+			objectKeyData = copyOfRange(b, offset+23, offset+23+objectKeyLength);
+			privateDataByte = copyOfRange(b, offset+23+objectKeyLength, offset+descriptorLength+2);
 		}
 
 	}
