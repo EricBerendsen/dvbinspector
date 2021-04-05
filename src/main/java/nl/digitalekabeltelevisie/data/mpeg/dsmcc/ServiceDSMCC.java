@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
+import static nl.digitalekabeltelevisie.util.Utils.getHTMLHexview;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -99,7 +101,8 @@ public class ServiceDSMCC implements TreeNode {
 				b.append("Type: File<br>Size:");
 				final BIOPFileMessage fileMes= (BIOPFileMessage) biopMessage;
 				b.append(fileMes.getContent_length());
-
+				b.append("<br>Data:<br>");
+				b.append(getHTMLHexview(fileMes.getData(), fileMes.getContentStartOffset(),(int)fileMes.getContent_length()));
 			}else if(biopMessage instanceof BIOPDirectoryMessage){
 				b.append("Type: Directory<br>Descendants:<br>");
 				final BIOPDirectoryMessage dirMes= (BIOPDirectoryMessage) biopMessage;
