@@ -30,7 +30,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getAppTypeIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getMHPOrganistionIdString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -233,8 +234,6 @@ public class AITsection extends TableSectionExtendedSyntax {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("test_application_flag", test_application_flag, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("application_type", application_type, getAppTypeIDString(application_type))));
 		t.add(new DefaultMutableTreeNode(new KVP("common_descriptors_length", common_descriptors_length, null)));
 		Utils.addListJTree(t,common_descriptor_loop,modus,"common_descriptor_loop");
 
@@ -245,7 +244,13 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 	@Override
 	protected String getTableIdExtensionLabel() {
-		return "test_application_flag (1) / application_type (15)";
+		return "test_application_flag (1 bit) / application_type (15 bits)";
+	}
+
+	protected String getTableIdExtensionDescription(int tableIdExtension) {
+		int test_application_flag = (tableIdExtension & 0b1000_0000_0000_0000)>>15;
+		int application_type = tableIdExtension & 0b0111_1111_1111_1111;
+		return "test_application_flag="+test_application_flag+", application_type="+application_type + " ("+getAppTypeIDString(application_type)+")";
 	}
 
 	/**
@@ -367,6 +372,10 @@ public class AITsection extends TableSectionExtendedSyntax {
 		}
 		return "unknown";
 
+	}
+
+	public int getTest_application_flag() {
+		return test_application_flag;
 	}
 
 

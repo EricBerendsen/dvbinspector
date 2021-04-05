@@ -403,7 +403,7 @@ public class TableSection implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("private_indicator", privateIndicator, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("section_length", sectionLength, null)));
 		if (sectionSyntaxIndicator == 1) { // long format
-			t.add(new DefaultMutableTreeNode(new KVP(getTableIdExtensionLabel(), tableIdExtension, null)));
+			t.add(new DefaultMutableTreeNode(new KVP(getTableIdExtensionLabel(), tableIdExtension, getTableIdExtensionDescription(tableIdExtension))));
 			t.add(new DefaultMutableTreeNode(new KVP("version", version, null)));
 			t.add(new DefaultMutableTreeNode(
 					new KVP("current_next_indicator", currentNext, (currentNext == 1) ? "current" : "next")));
@@ -423,7 +423,17 @@ public class TableSection implements TreeNode{
 	protected String getTableIdExtensionLabel() {
 		return "table_id_extension";
 	}
-    
+
+	/**
+	 * The field table_id_extension has different meaning for different sub classes. By overriding this method
+	 * the correct specific description (value dependend) can be displayed.
+	 * @return description to be displayed in TreeView
+	 */
+	protected String getTableIdExtensionDescription(int tableIdExtension) {
+		return null;
+	}
+
+	
 	public DefaultMutableTreeNode getJTreeNode(final int modus,final HTMLSource htmlSource){
 		KVP kvp = getSectionKVP(modus);
 		kvp.setHtmlSource(htmlSource);

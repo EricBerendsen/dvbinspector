@@ -67,6 +67,27 @@ public class DSMCC_StreamDescriptorList extends TableSectionExtendedSyntax {
 		Utils.addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
 	}
+	
+	// B.2.4.3.5 Encoding of table id extension, TS 102 809 V1.3.1 (2017-06)
+	@Override
+	protected String getTableIdExtensionDescription(int tableIdExtension) {
+		int type = (tableIdExtension & 0b1100_0000_0000_0000) >>14;
+		switch (type) {
+		case 0:
+			int eventID =tableIdExtension & 0b0011_1111_1111_1111;
+			return "Section carries a single \"do it now\" event, eventID="+eventID;
+		case 1:
+			return "Section carries NPT reference descriptors";
+		case 2:
+			return "Section carries one or more other stream descriptors";
+		case 3:
+			return "reserved for future use";
+		default:
+			return "Illegal value";
+		}
+
+	}
+
 
 	public List<Descriptor> getDescriptorList() {
 		return descriptorList;
