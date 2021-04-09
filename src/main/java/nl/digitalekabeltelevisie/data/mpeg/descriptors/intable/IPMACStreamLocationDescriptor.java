@@ -27,7 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.intable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -63,13 +65,14 @@ public class IPMACStreamLocationDescriptor extends INTDescriptor {
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("network_id",networkId ,Utils.getOriginalNetworkIDString(networkId))));
-		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId ,Utils.getOriginalNetworkIDString(originalNetworkId))));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId ,parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId, transportStreamId, serviceId))));
-		t.add(new DefaultMutableTreeNode(new KVP("component_tag",componentTag ,null)));
-		return t;
+		final var treeNode = super.getJTreeNode(modus);
+		final var psi = parentTableSection.getParentPID().getParentTransportStream().getPsi();
+		treeNode.add(new DefaultMutableTreeNode(new KVP("network_id",networkId ,psi.getNit().getNetworkName(networkId))));
+		treeNode.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId ,Utils.getOriginalNetworkIDString(originalNetworkId))));
+		treeNode.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId ,null)));
+		treeNode.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId ,psi.getSdt().getServiceName(originalNetworkId, transportStreamId, serviceId))));
+		treeNode.add(new DefaultMutableTreeNode(new KVP("component_tag",componentTag ,null)));
+		return treeNode;
 	}
 
 	public int getOriginalNetworkId() {
