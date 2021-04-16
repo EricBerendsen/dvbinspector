@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class FrequencyListDescriptor extends Descriptor {
 
 
-	private List<CentreFrequency> frequencyList = new ArrayList<CentreFrequency>();
+	private List<CentreFrequency> frequencyList = new ArrayList<>();
 	private int codingType = 0;
 
 
@@ -54,30 +54,19 @@ public class FrequencyListDescriptor extends Descriptor {
 		}
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			DefaultMutableTreeNode s=null;
+		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+			final String frequencyAsBcd = getBCD(privateData, freqOffset * 2, 8);
+			final long frequencyAsLong = getLong(privateData, freqOffset, 4, MASK_32BITS);
 			switch (codingType) {
 			case 1: // satellite
-				final String frequency = getBCD(privateData, freqOffset*2, 8);
-				s=new DefaultMutableTreeNode(new KVP("centre_frequency",frequency,formatSatelliteFrequency(frequency)));
-
-				break;
-
+				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(frequencyAsBcd)));
 			case 2: // cable
-				final String frequency2 = getBCD(privateData, freqOffset*2, 8);
-				s=new DefaultMutableTreeNode(new KVP("centre_frequency",frequency2,formatCableFrequency(frequency2)));
-
-				break;
-
+				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(frequencyAsBcd)));
 			case 3: // terrestrial
-				final long frequencyT = getLong(privateData, freqOffset, 4, MASK_32BITS);
-				s=new DefaultMutableTreeNode(new KVP("centre_frequency",frequencyT,Descriptor.formatTerrestrialFrequency(frequencyT)));
-
-				break;
+				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, Descriptor.formatTerrestrialFrequency(frequencyAsLong)));
 			default:
-				break;
+				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, null));
 			}
-			return s;
 		}
 
 	}
