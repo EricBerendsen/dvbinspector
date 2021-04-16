@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -161,9 +161,6 @@ public class PMTsection extends TableSectionExtendedSyntax{
 		return componentsList.size();
 	}
 
-	public int getElementaryPID(final int i){
-		return ((toUnsignedInt(raw_data.getData()[10+programInfoLength+(i*4)])& 0x1F )*256) + toUnsignedInt(raw_data.getData()[11+programInfoLength+(i*4)]);
-	}
 	@Override
 	public String toString(){
 		final StringBuilder b = new StringBuilder("PMTsection section=");
