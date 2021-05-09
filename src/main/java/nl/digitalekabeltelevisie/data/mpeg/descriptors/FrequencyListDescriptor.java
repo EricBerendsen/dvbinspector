@@ -55,13 +55,12 @@ public class FrequencyListDescriptor extends Descriptor {
 
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final String frequencyAsBcd = getBCD(privateData, freqOffset * 2, 8);
 			final long frequencyAsLong = getLong(privateData, freqOffset, 4, MASK_32BITS);
 			switch (codingType) {
 			case 1: // satellite
-				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(frequencyAsBcd)));
+				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(getBCD(privateData, freqOffset * 2, 8))));
 			case 2: // cable
-				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(frequencyAsBcd)));
+				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(getBCD(privateData, freqOffset * 2, 8))));
 			case 3: // terrestrial
 				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, Descriptor.formatTerrestrialFrequency(frequencyAsLong)));
 			default:
