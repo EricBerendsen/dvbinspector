@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -323,12 +323,50 @@ public class NIT extends AbstractPSITabel{
 								TerrestrialDeliverySystemDescriptor.class,
 								TerrestrialDeliverySystemDescriptor::getTimeSlicingString),
 						String.class).
-				addOptionalRowColumn("terrestrial fec_inner",
+				addOptionalRowColumn("terrestrial MPE-FEC_indicator",
 						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
-								TerrestrialDeliverySystemDescriptor::getFEC_innerString),
+								TerrestrialDeliverySystemDescriptor::getMpeFecString),
 						String.class).
 
+				addOptionalRowColumn("terrestrial constellation",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+								TerrestrialDeliverySystemDescriptor.class,
+								t -> TerrestrialDeliverySystemDescriptor.getConstellationString(t.getConstellation())),
+						String.class).
+
+				
+				addOptionalRowColumn("terrestrial hierarchy_information",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+								TerrestrialDeliverySystemDescriptor.class,
+								t -> TerrestrialDeliverySystemDescriptor.getHierarchyInformationString(t.getHierarchy_information())),
+						String.class).
+				
+				
+				addOptionalRowColumn("terrestrial code_rate-HP_stream",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+								TerrestrialDeliverySystemDescriptor.class,
+								t -> TerrestrialDeliverySystemDescriptor.getCodeRateString(t.getCode_rate_HP_stream())),
+						String.class).
+				
+				addOptionalRowColumn("terrestrial code_rate-LP_stream",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+								TerrestrialDeliverySystemDescriptor.class,
+								t -> TerrestrialDeliverySystemDescriptor.getCodeRateString(t.getCode_rate_LP_stream())),
+						String.class).
+
+				addOptionalRowColumn("terrestrial guard_interval",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+								TerrestrialDeliverySystemDescriptor.class,
+								t -> TerrestrialDeliverySystemDescriptor.getGuardIntervalString(t.getGuard_interval())),
+						String.class).
+
+				addOptionalRowColumn("terrestrial transmission_mode",
+						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+								TerrestrialDeliverySystemDescriptor.class,
+								t -> TerrestrialDeliverySystemDescriptor.getTransmissionModeString(t.getTransmission_mode())),
+						String.class).
+				
 				// DVB-T2
 
 				addOptionalRowColumn("T2 plp_id",
