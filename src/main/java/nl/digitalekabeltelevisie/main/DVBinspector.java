@@ -143,7 +143,9 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * Starting point for DVB Inspector
 	 *
 	 * @param args String[] all optional, if used; arg[0] is absolute filename of transport stream to be loaded on startup.
-	 *  args[1...n] pids with PES data that should be parsed on startup (equivalent to "Parse PES data" menu in Tree View)
+	 *  args[1...n] if nummerical pids with PES data that should be parsed on startup (equivalent to "Parse PES data" menu in Tree View)
+	 *  type determined by PSI data
+	 *  if -alphanummeric (like -h264) interpret rest of PIDs as specific type.
 	 *  These args are mainly intended for debugging, where you want to use the same stream and PES data over and over again.
 	 *
 	 */
