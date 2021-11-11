@@ -86,11 +86,11 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 			reserved_future_use = getInt(b, offset + 5, 1, MASK_7BITS);
 			int t=offset + 6;
 			if(remote_connection == 1) {
-				original_network_id = getInt(b, t, 1, MASK_16BITS);
+				original_network_id = getInt(b, t, 2, MASK_16BITS);
 				t+=2;
-				transport_stream_id = getInt(b, t, 1, MASK_16BITS);
+				transport_stream_id = getInt(b, t, 2, MASK_16BITS);
 				t+=2;
-				service_id = getInt(b, t, 1, MASK_16BITS);
+				service_id = getInt(b, t, 2, MASK_16BITS);
 				t+=2;
 			}
 			component_tag = getInt(b, t, 1, MASK_8BITS);
