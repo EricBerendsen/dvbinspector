@@ -88,7 +88,7 @@ public class BIOPFileMessage extends BIOPMessage {
 		}
 
 		if(objectInfo_length>8){
-			objectInfo_data_byte = Utils.copyOfRange(data,byte_counter+8,byte_counter+(objectInfo_length-8));
+			objectInfo_data_byte = Utils.copyOfRange(data,byte_counter+8,byte_counter+objectInfo_length);
 		}
 		byte_counter += objectInfo_length;
 
