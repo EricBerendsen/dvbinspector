@@ -106,7 +106,7 @@ public final class DescriptorFactory {
 	 * @param localOffset
 	 * @return
 	 */
-	static Descriptor getDescriptor(final byte[] data, final int offset, final TableSection tableSection,
+	private static Descriptor getDescriptor(final byte[] data, final int offset, final TableSection tableSection,
 			long private_data_specifier) {
 		final int descriptorTag = toUnsignedInt(data[offset]);
 		try {
@@ -534,6 +534,10 @@ public final class DescriptorFactory {
 		}
 
 	}
+	
+	// TODO combine with getUNTDescriptor, see EN 301 192 V1.6.1  8.4.5.1 Descriptor identification and location
+	// Note that descriptor tags from 0x00 to 0x3F share a common descriptor name space with UNT descriptors
+	// (see ETSI TS 102 006 [18]).
 
 	private static Descriptor getINTDescriptor(final byte[] data, final int offset, final TableSection tableSection) {
 
