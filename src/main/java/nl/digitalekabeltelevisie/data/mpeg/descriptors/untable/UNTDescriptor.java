@@ -34,6 +34,11 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  * @author Eric Berendsen
  *
  */
+
+// TODO combine with INTDescriptor, see EN 301 192 V1.6.1  8.4.5.1 Descriptor identification and location
+// Note that descriptor tags from 0x00 to 0x3F share a common descriptor name space with UNT descriptors
+// (see ETSI TS 102 006 [18]).
+
 public class UNTDescriptor extends Descriptor {
 
 

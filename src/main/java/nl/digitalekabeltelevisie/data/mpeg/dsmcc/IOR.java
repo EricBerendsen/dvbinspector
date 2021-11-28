@@ -40,7 +40,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
- * @author Eric
+ * See ETSI TS 102 809 V1.3.1 (2017-06) Table B.21: IOP::IOR syntax
  * 
  */
 public class IOR implements TreeNode {

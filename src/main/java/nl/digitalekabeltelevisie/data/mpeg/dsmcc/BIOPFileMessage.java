@@ -38,6 +38,10 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
 
+/**
+ * see ETSI TS 102 809 V1.3.1 (2017-06) Table B.16: BIOP::FileMessage syntax
+ *
+ */
 public class BIOPFileMessage extends BIOPMessage {
 
 	public static class ServiceContext implements TreeNode{

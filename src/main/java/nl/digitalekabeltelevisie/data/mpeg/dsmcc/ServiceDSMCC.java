@@ -341,7 +341,7 @@ public class ServiceDSMCC implements TreeNode {
 
 
 	private final int programNumber; // service id
-	private PSI psi; // reference to parentPSI, to get service nmaes etc...
+	private PSI psi; // reference to parentPSI, to get service names etc...
 
 
 	public ServiceDSMCC(final int programNum) {
