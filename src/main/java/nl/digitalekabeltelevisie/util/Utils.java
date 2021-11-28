@@ -1260,7 +1260,8 @@ public final class Utils {
 	}
 
 	/**
-	 * create a copy of a part of a byte[], use Arrays.copyOfRange instead
+	 * create a copy of a part of a byte[], use Arrays.copyOfRange instead 
+	 * (So just inline)
 	 * @param original
 	 * @param from
 	 * @param to
@@ -1268,14 +1269,7 @@ public final class Utils {
 	 */
 	@Deprecated
 	public static byte[] copyOfRange(final byte[] original, final int from, final int to) {
-		final int newLength = to - from;
-		if (newLength < 0) {
-			throw new IllegalArgumentException(from + " > " + to);
-		}
-		final byte[] copy = new byte[newLength];
-		System.arraycopy(original, from, copy, 0,
-				Math.min(original.length - from, newLength));
-		return copy;
+		return Arrays.copyOfRange(original, from, to);
 	}
 
 
@@ -2238,6 +2232,18 @@ public final class Utils {
 			res[i] = payLoad.get(i);
 		}
 		return res;
+	}
+
+
+	/**
+	 * @param s
+	 * @param headerString
+	 * @param color
+	 */
+	public static void appendHeader(final StringBuilder s, final String headerString, final Color color) {
+		s.append("<br><span style=\"color:").append(toHexString(color)).append("\"><b>");
+		s.append(headerString);
+		s.append("</b><br>");
 	}
 	
 	
