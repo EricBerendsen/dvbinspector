@@ -272,7 +272,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			s.append("<br>").append(escapeHtmlBreakLines(transportStream.getShortLabel(pid))).append("<br>");
 		}
 
-		appendHeader(s, "Header:", HEADER_COLOR);
+		Utils.appendHeader(s, "Header:", HEADER_COLOR);
 		final RangeHashMap<Integer, Color> coloring = new RangeHashMap<>();
 		coloring.put(0, 3, HEADER_COLOR);
 
@@ -291,11 +291,11 @@ public class TSPacket implements HTMLSource, TreeNode{
 			adaptationField = getAdaptationField();
 		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			adaptationField = null;
-			appendHeader(s,ERROR_PARSING_ADAPTATION_FIELD,ERROR_COLOR);
+			Utils.appendHeader(s,ERROR_PARSING_ADAPTATION_FIELD,ERROR_COLOR);
 			s.append("<br></span>");
 		}
 		if(adaptationField!=null){
-			appendHeader(s, "adaptation_field:", ADAPTATION_FIELD_COLOR);
+			Utils.appendHeader(s, "adaptation_field:", ADAPTATION_FIELD_COLOR);
 			s.append(adaptationField.getHTML()).append("<br></span>");
 			coloring.put(4, 4+adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
 		}
@@ -310,7 +310,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 				final PesHeader pesHeaderView = getPesHeader();
 				if((pesHeaderView!=null)&&(pesHeaderView.isValidPesHeader())){
 					final DefaultMutableTreeNode treeNode = pesHeaderView.getJTreeNode(0);
-					appendHeader(s, "Pes Header:", PES_HEADER_COLOR);
+					Utils.appendHeader(s, "Pes Header:", PES_HEADER_COLOR);
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					s.append("</span>");
 					if(pesHeaderView.hasExtendedHeader()){
@@ -327,23 +327,12 @@ public class TSPacket implements HTMLSource, TreeNode{
 			final RangeHashMap<Integer, Color> localColoring = new RangeHashMap<>();
 			//for some reason using getHTMLHexview resets color, so we use getHTMLHexviewColored with only one color.
 			localColoring.put(0, buffer.length-PAYLOAD_PACKET_LENGTH, FEC_COLOR);
-			appendHeader(s, "FEC/timestamp:", FEC_COLOR);
+			Utils.appendHeader(s, "FEC/timestamp:", FEC_COLOR);
 			s.append(getHTMLHexviewColored(buffer,PAYLOAD_PACKET_LENGTH,buffer.length-PAYLOAD_PACKET_LENGTH,localColoring)).append("</span>");
 			coloring.put(PAYLOAD_PACKET_LENGTH, buffer.length, FEC_COLOR);
 		}
 		s.append("<br><b>Data:</b><br>").append(getHTMLHexviewColored(buffer,0,buffer.length,coloring));
 		return s.toString();
-	}
-
-	/**
-	 * @param s
-	 * @param headerString
-	 * @param color
-	 */
-	private static void appendHeader(final StringBuilder s, final String headerString, final Color color) {
-		s.append("<br><span style=\"color:").append(Utils.toHexString(color)).append("\"><b>");
-		s.append(headerString);
-		s.append("</b><br>");
 	}
 
 	/**
