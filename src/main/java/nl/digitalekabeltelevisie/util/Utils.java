@@ -895,6 +895,11 @@ public final class Utils {
 		case 0x31: return "Substream of a Rec. ITU-T H.265 | ISO/IEC 23008 2 video stream that contains a Motion Constrained Tile Set, parameter sets, slice headers or a combination thereof.";
 		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
 
+
+		case 0x33: return "VVC video stream or a VVC temporal video sub-bitstream";
+		case 0x34: return "VVC temporal video subset of a VVC video stream";
+		case 0x35: return "EVC video stream or an EVC temporal video sub-bitstream";
+
 		case 0x7f: return"IPMP stream";
 
 		// sources https://www.wikiwand.com/en/Program-specific_information
