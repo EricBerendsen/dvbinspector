@@ -79,8 +79,18 @@ public final class DescriptorFactory {
 		int t = 0;
 
 		while (t < len) {
+			
+			// make a copy of the just the bytes for the descriptor. 
+			// If the descriptor constructor reads further then descriptorLen it will cause a ArrayIndexOutOfBoundsException, 
+			// which will result in fall back to a standard Descriptor.
+			// Reasoning: better not to interpret the data, than to show it wrong without warning. 
+			//
+			// see https://github.com/EricBerendsen/dvbinspector/issues/22
+			
+			int descriptorLen = Byte.toUnsignedInt(data[offset + t+ 1]);
+			byte[] descriptorData = Arrays.copyOfRange(data, offset + t, offset + t + descriptorLen + 2);
 
-			Descriptor d = getDescriptor(data, offset + t, tableSection, private_data_specifier);
+			Descriptor d = getDescriptor(descriptorData, 0, tableSection, private_data_specifier);
 
 			t += d.getDescriptorLength() + 2;
 			r.add(d);
