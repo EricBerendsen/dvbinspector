@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -81,6 +81,10 @@ public class MPEGExtensionDescriptor extends ExtensionDescriptor {
 			return "HEVC_subregion_descriptor";
 		case 0x14:
 			return "JXS_video_descriptor";
+		case 0x15:
+			return "VVC_timing_and_HRD_descripto";
+		case 0x16:
+			return "EVC_timing_and_HRD_descriptor";
 		default:
 			return "ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}

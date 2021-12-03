@@ -261,6 +261,14 @@ public class Descriptor implements TreeNode {
 			return "Transport_profile_descriptor";
 		case 56:
 			return "HEVC video descriptor";
+
+			// Rec. ITU-T H.222.0 (06/2021)
+		case 57:
+			return "VVC video descriptor";
+		case 58:
+			return "EVC video descriptor";
+			
+			
 		case 63:
 			return "Extension_descriptor";
 
