@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -76,6 +76,7 @@ public class AFDescriptor extends Descriptor {
 		case 0x0a: return "AF_MPEG-H_3dAudio_command_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
 		case 0x0b: return "Boundary Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
 		case 0x0c: return "Labeling Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+		case 0x0d: return "HEVC_tile_substream_ af_descriptor"; //ISO/IEC 13818-1:2021 - Rec. ITU-T H.222.0 (06/2021)
 		default:
 
 			return "User Private";
