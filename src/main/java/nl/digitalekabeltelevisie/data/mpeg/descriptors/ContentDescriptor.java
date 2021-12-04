@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -39,7 +39,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class ContentDescriptor extends Descriptor {
 
-	private List<ContentItem> contentList = new ArrayList<ContentItem>();
+	private List<ContentItem> contentList = new ArrayList<>();
 
 
 	public static class ContentItem implements TreeNode{
@@ -48,17 +48,15 @@ public class ContentDescriptor extends Descriptor {
 		 */
 		private final int contentNibbleLevel1 ;
 		private final int contentNibbleLevel2 ;
-		private final int userNibble1 ;
-		private final int userNibble2;
+		private final int user_byte ;
 
 
 
-		public ContentItem(final int contentNibbleLevel1, final int contentNibbleLevel2, final int userNibble1, final int userNibble2) {
+		public ContentItem(final int contentNibbleLevel1, final int contentNibbleLevel2, final int user_byte) {
 			super();
 			this.contentNibbleLevel1 = contentNibbleLevel1;
 			this.contentNibbleLevel2 = contentNibbleLevel2;
-			this.userNibble1 = userNibble1;
-			this.userNibble2 = userNibble2;
+			this.user_byte = user_byte;
 		}
 
 
@@ -67,8 +65,7 @@ public class ContentDescriptor extends Descriptor {
 			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("content type"));
 			s.add(new DefaultMutableTreeNode(new KVP("content_nibble_level_1",contentNibbleLevel1,getContentNibbleLevel1String(contentNibbleLevel1))));
 			s.add(new DefaultMutableTreeNode(new KVP("content_nibble_level_2",contentNibbleLevel2,getContentNibbleLevel2String(contentNibbleLevel1, contentNibbleLevel2))));
-			s.add(new DefaultMutableTreeNode(new KVP("user_nibble1",userNibble1,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("user_nibble2",userNibble2,null)));
+			s.add(new DefaultMutableTreeNode(new KVP("user_byte",user_byte,null)));
 			return s;
 		}
 
@@ -93,30 +90,24 @@ public class ContentDescriptor extends Descriptor {
 
 
 
-		public int getUserNibble1() {
-			return userNibble1;
+		public int getUserByte() {
+			return user_byte;
 		}
 
-
-
-		public int getUserNibble2() {
-			return userNibble2;
-		}
 
 
 	}
 
 	public ContentDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final int cNibble1 = Utils.getInt(b, offset+t+2, 1, 0xF0)>>4;
-		final int cNnibble2 = Utils.getInt(b, offset+t+2, 1, Utils.MASK_4BITS);
-		final int uNibble1 = Utils.getInt(b, offset+t+3, 1, 0xF0)>>4;
-		final int uNnibble2 = Utils.getInt(b, offset+t+3, 1, Utils.MASK_4BITS);
-		final ContentItem s = new ContentItem(cNibble1,cNnibble2,uNibble1,uNnibble2);
-		contentList.add(s);
-		t+=5;
+		super(b, offset, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			final int cNibble1 = Utils.getInt(b, offset + t + 2, 1, 0xF0) >> 4;
+			final int cNnibble2 = Utils.getInt(b, offset + t + 2, 1, Utils.MASK_4BITS);
+			final int user_byte = Utils.getInt(b, offset + t + 3, 1, Utils.MASK_8BITS);
+			final ContentItem s = new ContentItem(cNibble1, cNnibble2, user_byte);
+			contentList.add(s);
+			t += 2;
 		}
 	}
 
@@ -140,7 +131,7 @@ public class ContentDescriptor extends Descriptor {
 		case 0x4: return "Sports:";
 		case 0x5: return "Children's/Youth programmes:";
 		case 0x6: return "Music/Ballet/Dance:";
-		case 0x7: return "Arts/Culture (without music)::";
+		case 0x7: return "Arts/Culture (without music):";
 		case 0x8: return "Social/Political issues/Economics:";
 		case 0x9: return "Education/Science/Factual topics:";
 		case 0xA: return "Leisure hobbies:";
