@@ -653,14 +653,14 @@ public final class Utils {
 		length -= charSetLen;
 		offset += charSetLen;
 		
-		String decoded;
-
-		if(charset==null){
-			decoded = Iso6937ToUnicode.convert(b, offset, length); //default for DVB
-		}else{
-			decoded = new String(b, offset, length,charset);
+		if (offset < 0 || length < 0 || offset > b.length - length) {
+			return "";
 		}
-		return decoded;
+		if(charset==null){
+			return Iso6937ToUnicode.convert(b, offset, length); //default for DVB
+		}
+		
+		return new String(b, offset, length,charset);
 	}
 
 
@@ -671,7 +671,7 @@ public final class Utils {
 			try {
 				if((selectorByte>0)&&(selectorByte<=0x0b)){
 					charset = Charset.forName("ISO-8859-"+(selectorByte+4));
-				}else if((selectorByte==0x10)){
+				}else if((selectorByte==0x10)&&(b.length>offset+2)){
 					if(b[offset+1]==0x0){
 						charset = Charset.forName("ISO-8859-"+b[offset+2]);
 					} // else == reserved for future use, so not implemented

@@ -169,9 +169,8 @@ public class DVBString {
 			case 0x0B:
 				return "ISO/IEC 8859-15";
 			case 0x10:
-				if(data[offset+2]==0x0){
+				if((data[offset+2]==0x0)&&(data.length > offset+3)){
 					return "ISO/IEC 8859-"+data[offset+3];
-
 				}
 				return "Illegal value";
 			case 0x11:
