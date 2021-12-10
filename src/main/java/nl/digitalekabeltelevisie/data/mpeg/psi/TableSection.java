@@ -116,10 +116,15 @@ public class TableSection implements TreeNode{
 					(((long)toUnsignedInt(bytes[startCRC+2]))<<8) |
 					(toUnsignedInt(bytes[startCRC+3]));
 
-			final long res = CRCcheck.crc32(bytes,sectionLength+3);
-			if(res!=0){
-				crc_error=true;
-				throw new RuntimeException("CRC Error in packet for pid:"+parent.getPid()+",tableID:"+tableId+",tableIdExtension:"+tableIdExtension+",CRC="+crc+", packetNo="+packetNo + ", privateIndicator="+privateIndicator+", sectionSyntaxIndicator:"+sectionSyntaxIndicator);
+			if (tableId != 0x72) {  //stuffing_section 
+				final long res = CRCcheck.crc32(bytes, sectionLength + 3);
+				if (res != 0) {
+					crc_error = true;
+					throw new RuntimeException("CRC Error in packet for pid:" + parent.getPid() + ",tableID:" + tableId
+							+ ",tableIdExtension:" + tableIdExtension + ",CRC=" + crc + ", packetNo=" + packetNo
+							+ ", privateIndicator=" + privateIndicator + ", sectionSyntaxIndicator:"
+							+ sectionSyntaxIndicator);
+				}
 			}
 		}
 	}
@@ -402,7 +407,7 @@ public class TableSection implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("section_syntax_indicator", sectionSyntaxIndicator, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("private_indicator", privateIndicator, null)));
 		t.add(new DefaultMutableTreeNode(new KVP("section_length", sectionLength, null)));
-		if (sectionSyntaxIndicator == 1) { // long format
+		if ((sectionSyntaxIndicator == 1)&&(tableId!=0x72)) { // long format, but not stuffing
 			t.add(new DefaultMutableTreeNode(new KVP(getTableIdExtensionLabel(), tableIdExtension, getTableIdExtensionDescription(tableIdExtension))));
 			t.add(new DefaultMutableTreeNode(new KVP("version", version, null)));
 			t.add(new DefaultMutableTreeNode(
@@ -551,10 +556,6 @@ public class TableSection implements TreeNode{
 
 	public int getPacket_no() {
 		return packetNo;
-	}
-
-	public void setPacket_no(final int packet_no) {
-		this.packetNo = packet_no;
 	}
 
 	@Override
