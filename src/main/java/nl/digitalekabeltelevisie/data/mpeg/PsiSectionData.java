@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -92,7 +92,6 @@ public class PsiSectionData {
 				byte[] tmp = new byte[section_length+3];
 				System.arraycopy(data,0,tmp,0,3);
 				data=tmp;
-				tmp=null;
 			}
 		}
 		if(noBytes>=3){
@@ -144,7 +143,7 @@ public class PsiSectionData {
 					transportStream.getPsi().getCat().update(new CAsection(this,parentPID));
 				}else if((tableId==0x03)&&(pid==0x02)){
 					transportStream.getPsi().getTsdt().update(new TSDTsection(this,parentPID));
-				}else if(pid==0x10){  // NIT
+				}else if((pid==0x10)&&((tableId==0x40)||(tableId==0x41))){  // NIT
 					transportStream.getPsi().getNit().update(new NITsection(this,parentPID));
 				}else if((tableId==0x4A)&&(pid==0x11)){
 					transportStream.getPsi().getBat().update(new BATsection(this,parentPID));
@@ -311,7 +310,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<ApplicationSignallingDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), ApplicationSignallingDescriptor.class);
-					if(application_signalling_descriptors.size()>0){
+					if(!application_signalling_descriptors.isEmpty()){
 						return true;
 					}
 				}
@@ -338,7 +337,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<DataBroadcastIDDescriptor> databroadcatsid_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), DataBroadcastIDDescriptor.class);
-					if(databroadcatsid_descriptors.size()>0){
+					if(!databroadcatsid_descriptors.isEmpty()){
 						for(DataBroadcastIDDescriptor dataBroadcastIDDescriptor:databroadcatsid_descriptors) {
 							if(dataBroadcastIDDescriptor.getDataBroadcastId()== 0x0D) {
 								return true;
@@ -369,7 +368,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<RelatedContentDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RelatedContentDescriptor.class);
-					if(application_signalling_descriptors.size()>0){
+					if(!application_signalling_descriptors.isEmpty()){
 						return true;
 					}
 				}
@@ -404,7 +403,7 @@ public class PsiSectionData {
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
 					final List<DataBroadcastIDDescriptor> data_broadcast_id_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), DataBroadcastIDDescriptor.class);
-					if(data_broadcast_id_descriptors.size()>0){
+					if(!data_broadcast_id_descriptors.isEmpty()){
 						// assume there is only one (should be!)
 						final DataBroadcastIDDescriptor dataBroadcastIDDescriptor = data_broadcast_id_descriptors.get(0);
 						// is the dataBroadcastId in this descriptor in the list of id that represent object carousels?
