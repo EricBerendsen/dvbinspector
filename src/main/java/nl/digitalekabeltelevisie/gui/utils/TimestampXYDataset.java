@@ -103,12 +103,14 @@ public class TimestampXYDataset implements XYDataset {
 				SpliceInfoSection.SpliceInsert spliceInsert = (SpliceInfoSection.SpliceInsert) spliceSection
 						.getSplice_command();
 				// handle Program Splice Point whereby all PIDs/components of the program are to be spliced.
-				if ((spliceInsert.getProgram_splice_flag() == 1) && (spliceInsert.getSplice_immediate_flag() == 0)) {
-					handleProgramSplicePoint(exitPoints, returnPoints, spliceSection, spliceInsert);
-				}else{
-					// TODO handle Component Splice Mode whereby each component that is intended to be spliced will be listed separately
-					logger.warning("SCTE35 Component Splice Mode not yet supported, please report");
-				}
+				if (spliceInsert.getSplice_immediate_flag() == 0) {
+					if(spliceInsert.getProgram_splice_flag() == 1) {
+						handleProgramSplicePoint(exitPoints, returnPoints, spliceSection, spliceInsert);
+					}else{
+						// TODO handle Component Splice Mode whereby each component that is intended to be spliced will be listed separately
+						logger.warning("SCTE35 Component Splice Mode not yet supported, please report");
+					}
+				} // TODO handle immediate Splice
 			} else if (spliceSection.getSplice_command_type() == 6) {
 				SpliceInfoSection.TimeSignal timeSignal = (SpliceInfoSection.TimeSignal) spliceSection
 						.getSplice_command();
@@ -140,7 +142,7 @@ public class TimestampXYDataset implements XYDataset {
 	}
 
 	private void addToSeriesList(final List<TimeStamp> list, String componentLabel) {
-		if((list!=null)&&(list.size()>0)){
+		if((list!=null)&&(!list.isEmpty())){
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);
 			TimeStamp startKey = new TimeStamp(startPacket, 0);
