@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -113,7 +113,7 @@ public class AbstractAC3SyncFrame {
 			t = "AC3 backward compatible";
 		}else if((bsid==9)||(bsid==10)){
 			t = "AC3 newer version";
-		}else if((bsid>10)||(bsid<16)){
+		}else if((bsid>10)&&(bsid<16)){
 			t = "E-AC-3 backward compatible";
 		}else{
 			t = "E-AC-3 newer version";
