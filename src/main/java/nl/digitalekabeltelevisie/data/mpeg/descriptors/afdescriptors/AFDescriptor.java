@@ -62,7 +62,7 @@ public class AFDescriptor extends Descriptor {
 		if((tag>=0x00)&&(tag<=0x03)){
 			return "Rec. ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
-		if((tag>=0x0d)&&(tag<=0x7f)){
+		if((tag>=0x0e)&&(tag<=0x7f)){
 			return "Rec. ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
 
@@ -76,7 +76,7 @@ public class AFDescriptor extends Descriptor {
 		case 0x0a: return "AF_MPEG-H_3dAudio_command_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
 		case 0x0b: return "Boundary Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
 		case 0x0c: return "Labeling Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
-		case 0x0d: return "HEVC_tile_substream_ af_descriptor"; //ISO/IEC 13818-1:2021 - Rec. ITU-T H.222.0 (06/2021)
+		case 0x0d: return "HEVC_tile_substream_af_descriptor"; //ISO/IEC 13818-1:2021 - Rec. ITU-T H.222.0 (06/2021)
 		default:
 
 			return "User Private";
