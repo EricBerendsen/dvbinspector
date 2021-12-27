@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,20 +27,29 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.getServiceTypeString;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeSet;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SDTsection.Service;
-import nl.digitalekabeltelevisie.util.*;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.ServiceIdentification;
+import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class SDT extends AbstractPSITabel{
 
@@ -48,33 +57,29 @@ public class SDT extends AbstractPSITabel{
 		super(parentPSI);
 
 	}
-	
-	// map<orgNetworkId,TransportStreamId>
+
+	// map           <orgNetworkId,   TransportStreamId>
 	private final Map<Integer,HashMap<Integer, SDTsection []>> networks = new HashMap<>();
+
+	// used for easy lookup of service names for current TS
 	private SDTsection [] actualTransportStreamSDT;
 
-	public void update(final SDTsection section){
+	public void update(final SDTsection section) {
 
 		final int original_network_id = section.getOriginalNetworkID();
 		final int streamId = section.getTransportStreamID();
-		
-		Map<Integer, SDTsection []> networkSections = networks.computeIfAbsent(original_network_id, HashMap::new);
-		SDTsection [] tsSections = networkSections.computeIfAbsent(streamId, k -> new SDTsection[section.getSectionLastNumber()+1]);
+
+		Map<Integer, SDTsection[]> networkSections = networks.computeIfAbsent(original_network_id, HashMap::new);
+		SDTsection[] tsSections = networkSections.computeIfAbsent(streamId,
+				k -> new SDTsection[section.getSectionLastNumber() + 1]);
 
 		addSectionToArray(section, tsSections);
-		
-		if(section.getTableId()==0x42) { 
-			if(actualTransportStreamSDT == null) {
-				actualTransportStreamSDT = new SDTsection[section.getSectionLastNumber()+1];
-			}
-			addSectionToArray(section, actualTransportStreamSDT);
+
+		if (section.getTableId() == 0x42) {
+			actualTransportStreamSDT = tsSections;
 		}
 	}
 
-	/**
-	 * @param section
-	 * @param tsSections
-	 */
 	private static void addSectionToArray(final SDTsection section, SDTsection[] tsSections) {
 		if(tsSections[section.getSectionNumber()]==null){
 			tsSections[section.getSectionNumber()] = section;
@@ -125,17 +130,7 @@ public class SDT extends AbstractPSITabel{
 		}
 		return t;
 	}
-	
 
-	@Deprecated
-	public String getServiceName(final int serviceID){
-		DVBString dvbString = getServiceNameDVBString(serviceID);
-		if(dvbString!=null){
-			return dvbString.toString();
-		}else{
-			return null;
-		}
-	}
 
 
 	public Optional<String> getServiceNameForActualTransportStreamOptional(final int serviceID){
@@ -147,91 +142,45 @@ public class SDT extends AbstractPSITabel{
 		return  getServiceNameForActualTransportStreamOptional(serviceID).orElse(null);
 
 	}
-	
+
 	public Optional<DVBString> getServiceNameForActualTransportStreamDVBString(int serviceID){
 		return getServiceForActualTransportStream(serviceID)
 				.map(SDTsection.Service::getDescriptorList)
 				.orElseGet(ArrayList::new)
 				.stream()
-				.filter(d -> d instanceof ServiceDescriptor)
-				.map(d -> (ServiceDescriptor)d)
+				.filter(ServiceDescriptor.class::isInstance)
+				.map(ServiceDescriptor.class::cast)
 				.findFirst()
 				.map(ServiceDescriptor::getServiceName);
 	}
-	
+
 	public String getServiceName(final int original_network_id, final int transport_stream_id, final int serviceID){
 		return getServiceNameDVBString(original_network_id,transport_stream_id,serviceID).map(DVBString::toString).orElse(null);
 	}
-	
-	public String getServiceName(final ServiceIdentification serviceIdentification){
-		return getServiceNameDVBString(serviceIdentification.getOriginalNetworkId(),serviceIdentification.getTransportStreamId(),serviceIdentification.getServiceId()).
-				map(DVBString::toString).
-				orElse(null);
-	}
-	
+
 	public Optional<DVBString> getServiceNameDVBString(final ServiceIdentification serviceIdentification){
 		return getServiceNameDVBString(serviceIdentification.getOriginalNetworkId(),serviceIdentification.getTransportStreamId(),serviceIdentification.getServiceId());
 	}
-	
+
 	public Optional<DVBString> getServiceNameDVBString(final int original_network_id, final int transport_stream_id, final int serviceID){
 
 		return getService(original_network_id,transport_stream_id,serviceID)
 				.map(SDTsection.Service::getDescriptorList)
 				.orElseGet(ArrayList::new)
 				.stream()
-				.filter(d -> d instanceof ServiceDescriptor)
-				.map(d -> (ServiceDescriptor)d)
+				.filter(ServiceDescriptor.class::isInstance)
+				.map(ServiceDescriptor.class::cast)
 				.findFirst()
 				.map(ServiceDescriptor::getServiceName);
 
 	}
 
-	@Deprecated
-	public DVBString getServiceNameDVBString(final int serviceID){
-
-		final SDTsection.Service service=getService(serviceID);
-		if(service!=null) {
-			for (Descriptor d : service.getDescriptorList()) {
-				if (d instanceof ServiceDescriptor) {
-					return ((ServiceDescriptor) d).getServiceName();
-				}
-			}
-			// service found, but no name, give up
-			return null;
-		}
-		return null;
-	}
-
-	@Deprecated
-	public int getServiceType(final int serviceID){
-		int r = 0;
-
-		final SDTsection.Service service=getService(serviceID);
-		if(service!=null) {
-			for (Descriptor d : service.getDescriptorList()) {
-				if (d instanceof ServiceDescriptor) {
-					r = ((ServiceDescriptor) d).getServiceType();
-					return r;
-				}
-			}
-			// service found, but no name, give up
-			return r;
-		}
-		return r;
-	}
-
-	//TODO remove
-	public Map<Integer, SDTsection[]> getTransportStreams() {
-		return null;
-	}
-
-
 	public Optional<SDTsection.Service> getService(final int orgNetworkId, final int transportStreamID, final int serviceID){
 
 		HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
-		
+
 		if(transportStreams !=null) {
-		
+
 			final SDTsection [] sections = transportStreams.get(transportStreamID);
 			if(sections!=null){
 				for (SDTsection section : sections) {
@@ -248,13 +197,13 @@ public class SDT extends AbstractPSITabel{
 		// no service found, give up
 		return Optional.empty();
 	}
-	
-	
+
+
 	public Optional<SDTsection.Service> getServiceForActualTransportStream(final int serviceID){
 
-			
+
 		if(actualTransportStreamSDT !=null) {
-		
+
 			final SDTsection [] sections = actualTransportStreamSDT;
 			for (SDTsection section : sections) {
 				if(section!= null)  {
@@ -268,39 +217,6 @@ public class SDT extends AbstractPSITabel{
 		}
 		// no service found, give up
 		return Optional.empty();
-	}
-	
-	
-
-	@Deprecated
-	public SDTsection.Service getService(final int serviceID){
-
-		
-		final TreeSet<Integer> t = new TreeSet<>(networks.keySet());
-
-		for (int orgNetworkId : t) {
-
-			HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
-
-			final TreeSet<Integer> s = new TreeSet<>(transportStreams.keySet());
-
-			for (Integer transportStreamID : s) {
-				final SDTsection[] sections = transportStreams.get(transportStreamID);
-				if (sections != null) {
-					for (SDTsection section : sections) {
-						if (section != null) {
-							for (Service service : section.getServiceList()) {
-								if (serviceID == service.getServiceID()) {
-									return service;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		// no service found, give up
-		return null;
 	}
 
 	public int getTransportStreamID(final int serviceID){
@@ -331,7 +247,7 @@ public class SDT extends AbstractPSITabel{
 		// no service found, give up
 		return -1;
 	}
-	
+
 	static TableHeader<SDTsection,Service>  buildSdtTableHeader() {
 		return new TableHeaderBuilder<SDTsection,Service>().
 				addRequiredBaseColumn("onid", SDTsection::getOriginalNetworkID, Integer.class).
@@ -374,16 +290,12 @@ public class SDT extends AbstractPSITabel{
 						Integer.class).
 				build();
 	}
-	
+
 	private TableModel getTableForTransportStreamID(int orgNetworkId, int tsId) {
 		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
 		final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
-		
-		for (final SDTsection tsection : sections) {
-			if(tsection!= null){
-				tableModel.addData(tsection,tsection.getServiceList());
-			}
-		}
+
+		fillTableForTsSDT(tableModel, sections);
 
 		tableModel.process();
 		return tableModel;
@@ -391,39 +303,33 @@ public class SDT extends AbstractPSITabel{
 
 	private TableModel getTableForOriginalNetwork(int orgNetworkId) {
 		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
-		HashMap<Integer, SDTsection[]> tsSections = networks.get(orgNetworkId);
+		HashMap<Integer, SDTsection[]> networkSDT = networks.get(orgNetworkId);
+
+		fillTableForNetworkSDT(tableModel, networkSDT);
 		
-		for (int tsId : tsSections.keySet()) {
-			final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
-			
-			for (final SDTsection tsection : sections) {
-				if(tsection!= null){
-					tableModel.addData(tsection,tsection.getServiceList());
-				}
-			}
-		}
 		tableModel.process();
 		return tableModel;
 	}
 
 	private TableModel getTableForSdt() {
-		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
+		FlexTableModel<SDTsection, Service> tableModel = new FlexTableModel<>(SDT.buildSdtTableHeader());
 
-		for (int orgNetworkId : networks.keySet()) {
-			HashMap<Integer, SDTsection[]> tsSections = networks.get(orgNetworkId);
-			
-			for (int tsId : tsSections.keySet()) {
-				final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
-				
-				for (final SDTsection tsection : sections) {
-					if(tsection!= null){
-						tableModel.addData(tsection,tsection.getServiceList());
-					}
-				}
-			}
-		}
+		networks.values().forEach(s -> fillTableForNetworkSDT(tableModel,s));
 
 		tableModel.process();
 		return tableModel;
 	}
+
+	private static void fillTableForNetworkSDT(FlexTableModel<SDTsection, Service> tableModel,final HashMap<Integer, SDTsection[]> networkSDT) {
+		networkSDT.values().forEach(s-> fillTableForTsSDT(tableModel,s));
+	}
+
+	private static void fillTableForTsSDT(FlexTableModel<SDTsection, Service> tableModel, final SDTsection[] tsSDT) {
+		for (final SDTsection tsection : tsSDT) {
+			if (tsection != null) {
+				tableModel.addData(tsection, tsection.getServiceList());
+			}
+		}
+	}
+
 }
