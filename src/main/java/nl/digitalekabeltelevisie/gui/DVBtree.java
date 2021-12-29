@@ -71,6 +71,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
+import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.gui.xmleditorkit.XMLEditorKit;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
@@ -158,11 +159,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				Object comp = path.getLastPathComponent();
 				if(comp instanceof DefaultMutableTreeNode) {
 					DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) comp;
-					Object userObject = dmtn.getUserObject();
-					if (userObject instanceof KVP) {
-						final KVP kvp = (KVP) userObject;
-						expandAllItems(dmtn, kvp);
-					}
+					expandAllItems(dmtn);
 				}
 			}
 		}
@@ -502,8 +499,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					}
 				} else if(kvp.getHTMLSource()!=null){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					final StringBuilder html = new StringBuilder("<html>").append(kvp.getHTMLSource().getHTML()).append("</html>");
-					editorPane.setText(html.toString());
+					editorPane.setText("<html>" + kvp.getHTMLSource().getHTML() + "</html>");
 					editorPane.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
 					cardLayout.show(detailPanel, HTML_PANEL);
@@ -512,8 +508,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					// hack to reset
 					xmlPane.setDocument(xmlPane.getEditorKit().createDefaultDocument());
-					final String xml = kvp.getXmlSource().getXML();
-					xmlPane.setText(xml);
+					xmlPane.setText(kvp.getXmlSource().getXML());
 					xmlPane.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
 					cardLayout.show(detailPanel, XML_PANEL);
@@ -556,10 +551,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 			final KVP kvp = (KVP)dmtn.getUserObject();
 			if (ae.getActionCommand().equals(EXPAND)) {
-				expandItem(dmtn,kvp);
+				expandItem();
 			}
 			if (ae.getActionCommand().equals(EXPAND_ALL)) {
-				expandAllItems(dmtn, kvp);
+				expandAllItems(dmtn);
 			}
 			if (ae.getActionCommand().equals(COPY)) {
 				copyItemToClipboard(kvp);
@@ -595,10 +590,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	}
 	/**
 	 * @param dmtn start node from where to expand
-	 * @param kvp 
 	 */
-	void expandAllItems(DefaultMutableTreeNode dmtn, final KVP kvp) {
-		expandItem(dmtn,kvp);
+	void expandAllItems(DefaultMutableTreeNode dmtn) {
+		expandItem();
 		long end = System.currentTimeMillis() + MAX_EXPAND_ALL_TIME_MILLISECS;
 		expandAllItemsRecursive(dmtn,end);
 	}
@@ -627,7 +621,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	}
 	
 
-	void expandItem(DefaultMutableTreeNode dmtn, KVP kvp) {
+	void expandItem() {
 		TreePath selectedPath = tree.getSelectionPath();
 		tree.expandPath(selectedPath);
 	}
@@ -720,8 +714,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				setCursor(Cursor.getDefaultCursor());
 			}catch (Exception e) {
 				logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+pesH.getClass().getName(),e);
-				if(pesH.getClass() != GeneralPesHandler.class){ // only if specialized subclass of GeneralPesHandler
-					logger.log(Level.WARNING,"try again with GeneralPesHandler");
+				if((pesH.getClass() != GeneralPesHandler.class) &&
+					(pesH.getClass() != GeneralPsiTableHandler.class)){ // only if specialized subclass of GeneralPesHandler
+					logger.log(Level.WARNING,"trying again with GeneralPesHandler");
 					JOptionPane.showMessageDialog(this,
 							"Error parsing PID PES Packets for "+p.getLabelMaker()+", falling back to general PES packets",
 							"DVB Inspector",
@@ -734,8 +729,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						ts.parsePidStreams(handlerMap);
 					} catch (IOException e1) {
 						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
-						setCursor(Cursor.getDefaultCursor());
 					}
+					setCursor(Cursor.getDefaultCursor());
 				}
 			}
 			final DefaultMutableTreeNode node = p.getPidHandler().getJTreeNode(mod);
@@ -753,9 +748,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param kvp
 	 */
 	private void copyVisibleSubTreeToClipboard(DefaultMutableTreeNode dmtn, final TreePath path, final KVP kvp) {
-		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder(kvp.getPlainText());
-		res.append(lineSep);
+		res.append(System.lineSeparator());
 
 		res.append(getViewTree(dmtn,"",path));
 		final StringSelection stringSelection = new StringSelection( res.toString() );
@@ -768,12 +762,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	private void copyEntireSubTreeToClipboard(DefaultMutableTreeNode dmtn) {
 		KVP kvp = (KVP)dmtn.getUserObject();
-		final String lineSep = System.getProperty("line.separator");
-		final StringBuilder res = new StringBuilder(kvp.getPlainText());
-		res.append(lineSep);
+		String treeString = kvp.getPlainText() + System.lineSeparator() +
+				getEntireTree(dmtn, "");
 
-		res.append(getEntireTree(dmtn,""));
-		String treeString = res.toString();
 		final StringSelection stringSelection = new StringSelection( treeString );
 		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
@@ -794,7 +785,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 
 	public static StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
-		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder();
 		@SuppressWarnings("rawtypes")
 		final Enumeration children = dmtn.children();
@@ -805,7 +795,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				Object userObject = child.getUserObject();
 				if( userObject instanceof KVP) {
 					final KVP chKVP = (KVP)userObject;
-					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
+					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(System.lineSeparator());
 					if(!child.isLeaf()){
 						if(child!=dmtn.getLastChild()){
 							res.append(getEntireTree(child,preFix+"| ")); // more children follow, so start with "| "
@@ -814,7 +804,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						}
 					}
 				}else {
-					logger.severe("Not an KVP:"+ userObject);
+					logger.log(Level.SEVERE, "Not an KVP: {}",  userObject);
 				}
 			}
 		}
@@ -827,7 +817,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 
 	private StringBuilder getViewTree(final DefaultMutableTreeNode dmtn,final String preFix,final TreePath path) {
-		final String lineSep = System.getProperty("line.separator");
 		final StringBuilder res = new StringBuilder();
 		@SuppressWarnings("rawtypes")
 		final Enumeration children = dmtn.children();
@@ -839,7 +828,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				final TreePath childPath = path.pathByAddingChild(child);
 				if(tree.isVisible(childPath)){
 					final KVP chKVP = (KVP)child.getUserObject();
-					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(lineSep);
+					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(System.lineSeparator());
 					if(!child.isLeaf()){
 						if(child!=dmtn.getLastChild()){
 							res.append(getViewTree(child,preFix+"| ",childPath)); // more children follow, so start with "| "
@@ -1005,7 +994,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	protected void confirmOverwriteIfExisting(final File file, SaveAble saveAble) {
 		boolean write=true;
 		if(file.exists()){
-			logger.info("file "+file+" already exists.");
+			logger.log(Level.INFO, "file {} already exists.", file);
 			final int n = JOptionPane.showConfirmDialog(
 					this, "File "+file+" already exists, want to overwrite?",
 					"File already exists",
