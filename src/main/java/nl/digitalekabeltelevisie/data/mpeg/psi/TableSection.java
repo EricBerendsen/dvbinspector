@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -561,6 +561,12 @@ public class TableSection implements TreeNode{
 	public int getPacket_no() {
 		return packetNo;
 	}
+	
+	public void setPacket_no(int packetNo) {
+		this.packetNo = packetNo;
+		raw_data.setPacket_no(packetNo);
+	}
+
 
 	@Override
 	public String toString(){

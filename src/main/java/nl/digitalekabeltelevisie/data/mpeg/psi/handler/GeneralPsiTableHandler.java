@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,19 +27,19 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.handler;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable.TableSectionOccurrence;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FNTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FSTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
@@ -118,20 +118,18 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		initialized = true;
 
 		GeneralPSITable psi = pid.getPsi();
-		Map<Integer, HashMap<Integer, TableSection[]>> typeSections = psi.getData();
 		
-		for(HashMap<Integer, TableSection[]> sectionsByTableId: typeSections.values()) {
-			for(TableSection[] sectionsByTableIdExt:sectionsByTableId.values()) {
-				for (TableSection section : sectionsByTableIdExt) {
-					interpretSectionByTableId(section);
-				}
-			}
-		}
-
-		List<TableSection> lst = psi.getSimpleSectionsd();
-		for (TableSection section : lst) {
+		List<TableSectionOccurrence> tableSectionOccurrences = psi.getTableSectionOccurrences();
+		
+		for(TableSectionOccurrence tableSectionOccurrence:tableSectionOccurrences) {
+			int packetNo = tableSectionOccurrence.getPacketNo();
+			
+			TableSection section = new TableSection(new PsiSectionData(tableSectionOccurrence.getTableSection().getRaw_data()), pid);
+			section.setPacket_no(packetNo);
 			interpretSectionByTableId(section);
+			
 		}
+		
 	}
 	
 	/**
@@ -357,11 +355,13 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 	}	
 	
 	private static void copyMetaData(TableSection source, TableSection dest) {
-		dest.setFirst_packet_no(source.getFirst_packet_no());
-		dest.setLast_packet_no(source.getLast_packet_no());
-		dest.setMaxPacketDistance(source.getMaxPacketDistance());
-		dest.setMinPacketDistance(source.getMinPacketDistance());
-		dest.setOccurrence_count(source.getOccurrence_count());
+
+		dest.setFirst_packet_no(source.getPacket_no());
+		dest.setLast_packet_no(source.getPacket_no());
+		dest.setMaxPacketDistance(0);
+		dest.setMinPacketDistance(Integer.MAX_VALUE);
+		dest.setOccurrence_count(1);
+	
 	}
 
 

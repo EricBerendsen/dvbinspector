@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -66,12 +66,18 @@ public class PsiSectionData {
 
 	private static final Logger logger = Logger.getLogger(PsiSectionData.class.getName());
 
-
-	public PsiSectionData(final PID parent, final int packetNo,final TransportStream transportStream) {
+	public PsiSectionData(final PID parent, final int packetNo, final TransportStream transportStream) {
 		this.parentPID = parent;
-		this.packet_no=packetNo;
-		this.transportStream=transportStream;
-		this.data= new byte[3];
+		this.packet_no = packetNo;
+		this.transportStream = transportStream;
+		this.data = new byte[3];
+	}
+
+	public PsiSectionData(PsiSectionData src) {
+		this.parentPID = src.parentPID;
+		this.packet_no = src.packet_no;
+		this.transportStream = src.transportStream;
+		this.data = src.data;
 	}
 
 	public int readBytes(final byte [] payload, final int offset, final int len){
@@ -501,5 +507,7 @@ public class PsiSectionData {
 		}
 		return transportStream.equals(other.transportStream);
 	}
+
+	
 
 }

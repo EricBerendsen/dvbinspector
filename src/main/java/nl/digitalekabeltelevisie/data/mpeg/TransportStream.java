@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -599,7 +599,7 @@ public class TransportStream implements TreeNode{
 			for (final PID pid : pids) {
 				if((pid!=null)&&(pid.getType()==PID.PSI)) {
 						final GeneralPSITable psiData = pid.getPsi();
-						if((!psiData.getData().isEmpty())|| 
+						if((!psiData.getLongSections().isEmpty())|| 
 								(!psiData.getSimpleSectionsd().isEmpty())) {
 							if(pid.getPidHandler()==null) {
 								GeneralPsiTableHandler generalPsiTableHandler = new GeneralPsiTableHandler();

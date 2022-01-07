@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,10 +28,10 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -46,9 +46,45 @@ import nl.digitalekabeltelevisie.util.Utils;
  *
  */
 public class GeneralPSITable extends AbstractPSITabel{
+	
+	public class TableSectionOccurrence{
 
-	private final Map<Integer, HashMap<Integer,TableSection []>> data = new HashMap<>();
+		private final int packetNo;
+		private final TableSection tableSection;
+
+		public TableSectionOccurrence(int packetNo, TableSection tableSection) {
+			super();
+			this.packetNo = packetNo;
+			this.tableSection = tableSection;
+		}
+
+		public int getPacketNo() {
+			return packetNo;
+		}
+
+		public TableSection getTableSection() {
+			return tableSection;
+		}
+
+		@Override
+		public String toString() {
+			return "TableSectionOccurrence [packetNo=" + packetNo + ", tableSection=" + tableSection + "]";
+		}
+
+	}
+
+	// Contains only unique table section (long syntax. ie section_syntax_indicator==1)
+	// Each section keeps track of count, first and last occurrence, min/max time between occurrences
+	//
+	//                   tableId    tableIdExtension       sectionNumber
+	private final TreeMap<Integer, TreeMap<Integer,TableSection []>> longSections = new TreeMap<>();
+	// Contains only unique table section (short syntax. ie section_syntax_indicator==0)
 	private List<TableSection> simpleSectionsd = new ArrayList<>();
+	
+	// contains entry for each occurrence of a TableSection, with packetNo at which it really started 
+	// (The packetyNo in the referenced  TableSection is the first occurence
+	private List<TableSectionOccurrence> tableSectionOccurrences = new ArrayList<>();
+	
 
 
 	public GeneralPSITable(final PSI parent){
@@ -57,23 +93,27 @@ public class GeneralPSITable extends AbstractPSITabel{
 
 	public void update(final TableSection section){
 
-		if(section.sectionSyntaxIndicator==0x01){
+		int startPacket = section.getPacket_no();
+
+		if(section.sectionSyntaxIndicator==0x01){ // long suntax, section_syntax_indicator==1
 
 			final int tableId = section.getTableId();
-			HashMap<Integer, TableSection[]> table = data.computeIfAbsent(tableId, k -> new HashMap<>());
-
+			TreeMap<Integer, TableSection[]> table = longSections.computeIfAbsent(tableId, k -> new TreeMap<>());
 			TableSection[] sections = table.computeIfAbsent(section.getTableIdExtension(), k -> new TableSection[section.getSectionLastNumber() + 1]);
+
 			if(sections.length<=section.getSectionNumber()){ //resize if needed
 				sections = Arrays.copyOf(sections, section.getSectionNumber()+1);
 				table.put(section.getTableIdExtension(),sections);
 			}
 			if(sections[section.getSectionNumber()]==null){
 				sections[section.getSectionNumber()] = section;
+				tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, section));
 			}else{
 				final TableSection last = sections[section.getSectionNumber()];
-				updateSectionVersion(section, last);
+				TableSection refSection = updateSectionVersion(section, last);
+				tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, refSection));
 			}
-		}else{
+		}else{ // short syntax, section_syntax_indicator==0
 			// look for duplicates, if so update counters on existing on
 
 			for (final TableSection existingSection : simpleSectionsd) {
@@ -89,10 +129,12 @@ public class GeneralPSITable extends AbstractPSITabel{
 
 					existingSection.setLast_packet_no(section.getPacket_no());
 					existingSection.setOccurrence_count(existingSection.getOccurrence_count()+1);
+					tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, existingSection));
 					return;
 				}
 			}
 			simpleSectionsd.add(section);
+			tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, section));
 		}
 	}
 
@@ -106,16 +148,16 @@ public class GeneralPSITable extends AbstractPSITabel{
 		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable ")));
 		    return t;
 		}
-		final TreeSet<Integer> tableIDs = new TreeSet<>(data.keySet());
+		
+		for (Entry<Integer, TreeMap<Integer, TableSection[]>> tableIDSections : longSections.entrySet()) {
+			int tableId = tableIDSections.getKey();
+			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id", tableId, TableSection.getTableType(tableId)));
+			final TreeMap<Integer, TableSection[]> tableIdExtensionSections = tableIDSections.getValue();
 
-		for (Integer tableID : tableIDs) {
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id", tableID, TableSection.getTableType(tableID)));
-			final HashMap<Integer, TableSection[]> table = data.get(tableID);
-
-			final TreeSet<Integer> serviceSet = new TreeSet<>(table.keySet());
-			for (Integer tableIdExt : serviceSet) {
+			for ( Entry<Integer, TableSection[]> tableIdExtensionSection : tableIdExtensionSections.entrySet()) {
+				int tableIdExt = tableIdExtensionSection.getKey();
 				final DefaultMutableTreeNode o = new DefaultMutableTreeNode(new KVP("table_id_extension", tableIdExt, null));
-				final TableSection[] sections = table.get(tableIdExt);
+				final TableSection[] sections = tableIdExtensionSection.getValue();
 				for (TableSection section : sections) {
 					if (section != null) {
 						if (!Utils.simpleModus(modus)) { // show all versions
@@ -137,10 +179,10 @@ public class GeneralPSITable extends AbstractPSITabel{
 
 
 	public boolean exists(final int tableId, final int tableIdExtension, final int section){
-		return ((data.get(tableId)!=null) &&
-				(data.get(tableId).get(tableIdExtension)!=null) &&
-				(data.get(tableId).get(tableIdExtension).length >section) &&
-				(data.get(tableId).get(tableIdExtension)[section]!=null));
+		return ((longSections.get(tableId)!=null) &&
+				(longSections.get(tableId).get(tableIdExtension)!=null) &&
+				(longSections.get(tableId).get(tableIdExtension).length >section) &&
+				(longSections.get(tableId).get(tableIdExtension)[section]!=null));
 	}
 
 	@Override
@@ -148,7 +190,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 		final int PRIME = 31;
 		int result = 1;
 		result = (PRIME * result) + ((simpleSectionsd == null) ? 0 : simpleSectionsd.hashCode());
-		result = PRIME * result + data.hashCode();
+		result = PRIME * result + longSections.hashCode();
 		return result;
 	}
 
@@ -171,15 +213,19 @@ public class GeneralPSITable extends AbstractPSITabel{
 		} else if (!simpleSectionsd.equals(other.simpleSectionsd)){
 			return false;
 		}
-		return data.equals(other.data);
+		return longSections.equals(other.longSections);
 	}
 
-	public Map<Integer, HashMap<Integer, TableSection[]>> getData() {
-		return data;
+	public Map<Integer,TreeMap<Integer,TableSection[]>> getLongSections() {
+		return longSections;
 	}
 
 	public List<TableSection> getSimpleSectionsd() {
 		return simpleSectionsd;
+	}
+
+	public List<TableSectionOccurrence> getTableSectionOccurrences() {
+		return tableSectionOccurrences;
 	}
 
 }
