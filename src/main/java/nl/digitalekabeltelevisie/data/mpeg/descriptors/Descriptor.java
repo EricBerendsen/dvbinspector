@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -684,7 +684,7 @@ public class Descriptor implements TreeNode {
 		case 0x1F:
 			return "HEVC digital television service";
 		case 0x20:
-			return "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a any combination of HDR and these frame rates"; 
+			return "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a resolution greater than 3840x2160, SDR or HDR, with a frame rate up to 60Hz"; 
 
 		case 0x84:
 			return "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
@@ -890,6 +890,8 @@ public class Descriptor implements TreeNode {
 				return "HEVC ultra high definition video, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bitstream";
 			case 0x07:
 				return "HEVC ultra high definition video with PQ10 HDR, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bit-stream";
+			case 0x08:
+				return "HEVC ultra high definition video with a resolution up to 7680x4320";
 			default:
 				return "reserved for future use";
 			}

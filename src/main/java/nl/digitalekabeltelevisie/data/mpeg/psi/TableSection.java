@@ -237,7 +237,7 @@ public class TableSection implements TreeNode{
 
 		case 0x4A: return "bouquet_association_section";
 		case 0x4B: return "SSU Update Notification Table (UNT)";
-		case 0x4C: return "IP/MAC Notification Table (INT) / Downloadable Font Information Table (DFIT)"; // EN 301 192  / EN 303 560 
+		case 0x4C: return "IP/MAC Notification Table (INT)"; // EN 301 192
 
 		case 0x4E: return "event_information_section - actual_transport_stream, present/following";
 		case 0x4F: return "event_information_section - other_transport_stream, present/following";
@@ -255,6 +255,7 @@ public class TableSection implements TreeNode{
 		case 0x7A: return "MPE-IFEC section"; //  (TS 102 772 [51])
 		
 		case 0x7B: return "protection message section"; // (TS 102 809 [56])
+		case 0x7C: return "Downloadable Font Information Table (DFIT)"; // DVB BlueBook A038r14 (December 2021)
 
 		case 0x7E: return "discontinuity_information_section";
 		case 0x7F: return "selection_information_section";
