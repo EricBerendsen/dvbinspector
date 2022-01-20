@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
@@ -42,11 +43,11 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class DataBroadcastIDDescriptor extends Descriptor {
 	// TODO refactor, common code DataBroadcastIDDescriptor and DataBroadcastDescriptor should not be duplicated
 
-	private final List<OUIEntry> ouiList = new ArrayList<OUIEntry>();
-	private final List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
-	private final List<MHEG5ApplicationType> mheg5ApplicationTypeList = new ArrayList<MHEG5ApplicationType>();
+	private final List<OUIEntry> ouiList = new ArrayList<>();
+	private final List<ApplicationType> applicationTypeList = new ArrayList<>();
+	private final List<MHEG5ApplicationType> mheg5ApplicationTypeList = new ArrayList<>();
 
-	private final List<Platform> platformList = new ArrayList<Platform>();
+	private final List<Platform> platformList = new ArrayList<>();
 
 	/**
 	 * broadcast IDs that will be interpreted as indicating an object carousel.
@@ -226,7 +227,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 			MAC_IP_mapping_flag = Utils.getInt(b, offset+4, 1, 0x10)>>>4;
 			alignment_indicator = Utils.getInt(b, offset+4, 1, 0x08)>>>3;
 			max_sections_per_datagram =Utils.getInt(b, offset+5, 1, Utils.MASK_8BITS);
-		}else if(dataBroadcastId==0x000a){
+		}else if(dataBroadcastId==0x000a){ // system software update service, TS 102 006 V1.4.1 Ch 7.1
 			OUI_data_length = getInt(b,offset+4,1,MASK_8BITS);
 			int r =0;
 			while (r<OUI_data_length) {
@@ -240,7 +241,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 				ouiList.add(ouiEntry);
 				r=r+6+selectorLength;
 			}
-			privateDataByte = Utils.copyOfRange(b, offset+5+r, offset+descriptorLength+2);
+			privateDataByte = copyOfRange(b, offset+5+r, offset+descriptorLength+2);
 		}else if(dataBroadcastId==0x000b){ //IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
 			platform_id_data_length = getInt(b,offset+4,1,MASK_8BITS);
 			int r =0;
@@ -255,7 +256,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 				platformList.add(p);
 				r=r+5;
 			}
-			privateDataByte = Utils.copyOfRange(b, offset+5+r, offset+descriptorLength+2);
+			privateDataByte = copyOfRange(b, offset+5+r, offset+descriptorLength+2);
 
 
 		}else if((dataBroadcastId==0x00f0)||(dataBroadcastId==0x00f1)){ // MHP
@@ -280,7 +281,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 
 			}
 		}else{
-			selectorByte = Utils.copyOfRange(b, offset+4, offset+descriptorLength+2);
+			selectorByte = copyOfRange(b, offset+4, offset+descriptorLength+2);
 		}
 
 	}
