@@ -78,6 +78,8 @@ public class PsiSectionData {
 		this.packet_no = src.packet_no;
 		this.transportStream = src.transportStream;
 		this.data = src.data;
+		this.noBytes = src.noBytes;
+		this.complete = src.complete;
 	}
 
 	public int readBytes(final byte [] payload, final int offset, final int len){
