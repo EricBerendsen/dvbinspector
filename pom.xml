@@ -6,7 +6,7 @@
 	<groupId>nl.digitalekabeltelevisie</groupId>
 	<artifactId>DVBinspector</artifactId>
 	<packaging>jar</packaging>
-	<version>1.16.0</version>
+	<version>1.16.1-SNAPSHOT</version>
 	<description>DVB Inspector is an open-source DVB analyzer, written in java</description>
 	<name>DVBinspector</name>
 
