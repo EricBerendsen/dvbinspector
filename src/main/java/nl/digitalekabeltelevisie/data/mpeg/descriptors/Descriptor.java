@@ -28,6 +28,7 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static java.lang.Byte.toUnsignedInt;
+import static nl.digitalekabeltelevisie.util.Utils.stripLeadingZeros;
 
 import java.util.*;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ import nl.digitalekabeltelevisie.util.*;
  */
 public class Descriptor implements TreeNode {
 
-	private static LookUpList metadata_application_format_list = new LookUpList.Builder().
+	private static final LookUpList metadata_application_format_list = new LookUpList.Builder().
 			add(0x0000,0x000F,"Reserved").
 			add(0x0010,"ISO 15706 (ISAN) encoded in its binary form").
 			add(0x0011, "ISO 15706-2 (V-ISAN) encoded in its binary form").
@@ -55,13 +56,13 @@ public class Descriptor implements TreeNode {
 			add(0x0102,0xFFFE,"User defined").
 			add(0xFFFF,"Defined by the metadata_application_format_identifier field").
 			build();
-	private static LookUpList mpeg_carriage_flags_list = new LookUpList.Builder().
+	private static final LookUpList mpeg_carriage_flags_list = new LookUpList.Builder().
 			add(0,"Carriage in the same transport stream where this metadata pointer descriptor is carried.").
 			add(1,"Carriage in a different transport stream from where this metadata pointer descriptor is carried.").
 			add(2,"Carriage in a program stream. This may or may not be the same program stream in which this metadata pointer descriptor is carried.").
 			add(3,"may be used if there is no relevant metadata carried on the DVB network. In this case the metadata locator record shall be present").
 			build();
-	private static LookUpList metadata_format_list = new LookUpList.Builder().
+	private static final LookUpList metadata_format_list = new LookUpList.Builder().
 			add(0,0x0f,"Reserved").
 			add(0x10,"ISO/IEC 15938-1 TeM").
 			add(0x11,"ISO/IEC 15938-1 BiM").
@@ -73,14 +74,14 @@ public class Descriptor implements TreeNode {
 			add(0xf8,0xfe,"User Defined").
 			add(0xff,"Defined by metadata_format_identifier field").
 			build();
-	protected int			descriptorTag		= 0;
-	protected int			descriptorLength	= 0;
+	protected final int			descriptorTag;
+	protected final int			descriptorLength;
 
 	protected final byte[]	privateData;
 	private final int		descriptorOffset;
 	protected int			privateDataOffset;
 
-	protected TableSection	parentTableSection;
+	protected final TableSection	parentTableSection;
 
 
 	/**
@@ -93,8 +94,8 @@ public class Descriptor implements TreeNode {
 		descriptorOffset = offset;
 		privateDataOffset = offset + 2;
 
-		this.descriptorTag = toUnsignedInt(b[offset]);
-		this.descriptorLength = toUnsignedInt(b[offset + 1]);
+		descriptorTag = toUnsignedInt(b[offset]);
+		descriptorLength = toUnsignedInt(b[offset + 1]);
 		parentTableSection = parent;
 	}
 
@@ -102,16 +103,8 @@ public class Descriptor implements TreeNode {
 		return descriptorLength;
 	}
 
-	public void setDescriptorLength(final int descriptorLength) {
-		this.descriptorLength = descriptorLength;
-	}
-
 	public int getDescriptorTag() {
 		return descriptorTag;
-	}
-
-	public void setDescriptorTag(final int descriptorTag) {
-		this.descriptorTag = descriptorTag;
 	}
 
 	/**
@@ -124,372 +117,216 @@ public class Descriptor implements TreeNode {
 
 	public static String getDescriptorname(final int tag, final TableSection tableSection) {
 
-		switch (tag) {
-		case 0:
-			return "Reserved";
-		case 1:
-			return "Reserved";
-		case 2:
-			return "video_stream_descriptor";
-		case 3:
-			return "audio_stream_descriptor";
-		case 4:
-			return "hierarchy_descriptor";
-		case 5:
-			return "registration_descriptor";
-		case 6:
-			return "data_stream_alignment_descriptor";
-		case 7:
-			return "target_background_grid_descriptor";
-		case 8:
-			return "Video_window_descriptor";
-		case 9:
-			return "CA_descriptor";
-		case 10:
-			return "ISO_639_language_descriptor";
-		case 11:
-			return "System_clock_descriptor";
-		case 12:
-			return "Multiplex_buffer_utilization_descriptor";
-		case 13:
-			return "Copyright_descriptor";
-		case 14:
-			return "Maximum_bitrate_descriptor";
-		case 15:
-			return "Private_data_indicator_descriptor";
-		case 16:
-			return "Smoothing_buffer_descriptor";
-		case 17:
-			return "STD_descriptor";
-		case 18:
-			return "IBP_descriptor";
+		return switch (tag) {
+			case 0 -> "Reserved";
+			case 1 -> "Reserved";
+			case 2 -> "video_stream_descriptor";
+			case 3 -> "audio_stream_descriptor";
+			case 4 -> "hierarchy_descriptor";
+			case 5 -> "registration_descriptor";
+			case 6 -> "data_stream_alignment_descriptor";
+			case 7 -> "target_background_grid_descriptor";
+			case 8 -> "Video_window_descriptor";
+			case 9 -> "CA_descriptor";
+			case 10 -> "ISO_639_language_descriptor";
+			case 11 -> "System_clock_descriptor";
+			case 12 -> "Multiplex_buffer_utilization_descriptor";
+			case 13 -> "Copyright_descriptor";
+			case 14 -> "Maximum_bitrate_descriptor";
+			case 15 -> "Private_data_indicator_descriptor";
+			case 16 -> "Smoothing_buffer_descriptor";
+			case 17 -> "STD_descriptor";
+			case 18 -> "IBP_descriptor";
 
 			// From DVBSnoop mpeg_descriptor.c 1.4.50
 
 			/* 0x13 - 0x1A DSM-CC ISO13818-6, TR 102 006 */
-		case 0x13:
-			return "DSM-CC Carousel_Identifier_descriptor";
-		case 0x14:
-			return "DSM-CC Association_tag_descriptor";
-		case 0x15:
-			return "DSM-CC Deferred_Association_tags_descriptor";
+			case 0x13 -> "DSM-CC Carousel_Identifier_descriptor";
+			case 0x14 -> "DSM-CC Association_tag_descriptor";
+			case 0x15 -> "DSM-CC Deferred_Association_tags_descriptor";
 
 			/* DSM-CC stream descriptors */
 			// case 0x16: reserved....
-		case 0x17:
-			return "NPT_reference_descriptor";
-		case 0x18:
-			return "NPT_endpoint_descriptor";
-		case 0x19:
-			return "stream_mode_descriptor";
-		case 0x1A:
-			return "stream_event_descriptor";
+			case 0x17 -> "NPT_reference_descriptor";
+			case 0x18 -> "NPT_endpoint_descriptor";
+			case 0x19 -> "stream_mode_descriptor";
+			case 0x1A -> "stream_event_descriptor";
 
 			/* MPEG 4 */
-		case 0x1B:
-			return "MPEG4_video_descriptor";
-		case 0x1C:
-			return "MPEG4_audio_descriptor";
-		case 0x1D:
-			return "IOD_descriptor";
-		case 0x1E:
-			return "SL_descriptor";
-		case 0x1F:
-			return "FMC_descriptor";
-		case 0x20:
-			return "External_ES_ID_descriptor";
-		case 0x21:
-			return "MuxCode_descriptor";
-		case 0x22:
-			return "FMXBufferSize_descriptor";
-		case 0x23:
-			return "MultiplexBuffer_descriptor";
-		case 0x24:
-			return "ContentLabeling_descriptor";
+			case 0x1B -> "MPEG4_video_descriptor";
+			case 0x1C -> "MPEG4_audio_descriptor";
+			case 0x1D -> "IOD_descriptor";
+			case 0x1E -> "SL_descriptor";
+			case 0x1F -> "FMC_descriptor";
+			case 0x20 -> "External_ES_ID_descriptor";
+			case 0x21 -> "MuxCode_descriptor";
+			case 0x22 -> "FMXBufferSize_descriptor";
+			case 0x23 -> "MultiplexBuffer_descriptor";
+			case 0x24 -> "ContentLabeling_descriptor";
 
 			/* TV ANYTIME, TS 102 323 */
-		case 0x25:
-			return "metadata_pointer_descriptor";
-		case 0x26:
-			return "metadata_descriptor";
-		case 0x27:
-			return "metadata_STD_descriptor";
+			case 0x25 -> "metadata_pointer_descriptor";
+			case 0x26 -> "metadata_descriptor";
+			case 0x27 -> "metadata_STD_descriptor";
 
 			/* H.222.0 AMD 3 */
 			/* http://neuron2.net/library/avc/T-REC-H%5B1%5D.222.0-200403-I!Amd3!PDF-E.pdf */
-		case 0x28:
-			return "AVC_video_descriptor";
-		case 0x29:
-			return "IPMP_descriptor";
-		case 0x2A:
-			return "AVC_timing_and_HRD_descriptor";
+			case 0x28 -> "AVC_video_descriptor";
+			case 0x29 -> "IPMP_descriptor";
+			case 0x2A -> "AVC_timing_and_HRD_descriptor";
 
 			/* H.222.0 Corr 4 */
-		case 0x2B:
-			return "MPEG2_AAC_audio_descriptor";
-		case 0x2C:
-			return "FlexMuxTiming_descriptor";
+			case 0x2B -> "MPEG2_AAC_audio_descriptor";
+			case 0x2C -> "FlexMuxTiming_descriptor";
 
 			/* ISO/IEC 13818-1:2007/FPDAM5 */
-		case 0x2D:
-			return "MPEG-4_text_descriptor";
-		case 0x2E:
-			return "MPEG-4_audio_extension_descriptor";
-		case 0x2F:
-			return "Auxiliary_video_stream_descriptor";
-		case 0x30:
-			return "SVC extension descriptor";
-		case 0x31:
-			return "MVC extension descriptor";
+			case 0x2D -> "MPEG-4_text_descriptor";
+			case 0x2E -> "MPEG-4_audio_extension_descriptor";
+			case 0x2F -> "Auxiliary_video_stream_descriptor";
+			case 0x30 -> "SVC extension descriptor";
+			case 0x31 -> "MVC extension descriptor";
 
 			/* ISO/IEC 13818-1:2007/FPDAM5 - Transport of JPEG 2000 part 1 video */
-		case 0x32:
-			return "J2K video descriptor";
+			case 0x32 -> "J2K video descriptor";
 
 			/* Rec. ITU-T H.222.0 (06/2012) */
-		case 51:
-			return "MVC operation point descriptor";
-		case 52:
-			return "MPEG2_stereoscopic_video_format_descriptor";
-		case 53:
-			return "Stereoscopic_program_info_descriptor";
-		case 54:
-			return "Stereoscopic_video_info_descriptor";
+			case 51 -> "MVC operation point descriptor";
+			case 52 -> "MPEG2_stereoscopic_video_format_descriptor";
+			case 53 -> "Stereoscopic_program_info_descriptor";
+			case 54 -> "Stereoscopic_video_info_descriptor";
 
 			/* Rec. ITU-T H.222.0 (10/2014) */
-		case 55:
-			return "Transport_profile_descriptor";
-		case 56:
-			return "HEVC video descriptor";
+			case 55 -> "Transport_profile_descriptor";
+			case 56 -> "HEVC video descriptor";
 
 			// Rec. ITU-T H.222.0 (06/2021)
-		case 57:
-			return "VVC video descriptor";
-		case 58:
-			return "EVC video descriptor";
-			
-			
-		case 63:
-			return "Extension_descriptor";
+			case 57 -> "VVC video descriptor";
+			case 58 -> "EVC video descriptor";
+			case 63 -> "Extension_descriptor";
 
 			// DVB
 
-		case 0x40:
-			return "network_name_descriptor";
-		case 0x41:
-			return "service_list_descriptor";
-		case 0x42:
-			return "stuffing_descriptor";
-		case 0x43:
-			return "satellite_delivery_system_descriptor";
-		case 0x44:
-			return "cable_delivery_system_descriptor";
-		case 0x45:
-			return "VBI_data_descriptor";
-		case 0x46:
-			return "VBI_teletext_descriptor";
-		case 0x47:
-			return "bouquet_name_descriptor";
-		case 0x48:
-			return "service_descriptor";
-		case 0x49:
-			return "country_availability_descriptor";
-		case 0x4A:
-			return "linkage_descriptor";
-		case 0x4B:
-			return "NVOD_reference_descriptor";
-		case 0x4C:
-			return "time_shifted_service_descriptor";
-		case 0x4D:
-			return "short_event_descriptor";
-		case 0x4E:
-			return "extended_event_descriptor";
-		case 0x4F:
-			return "time_shifted_event_descriptor";
-		case 0x50:
-			return "component_descriptor";
-		case 0x51:
-			return "mosaic_descriptor";
-		case 0x52:
-			return "stream_identifier_descriptor";
-		case 0x53:
-			return "CA_identifier_descriptor";
-		case 0x54:
-			return "content_descriptor";
-		case 0x55:
-			return "parental_rating_descriptor";
-		case 0x56:
-			return "teletext_descriptor";
-		case 0x57:
-			return "telephone_descriptor";
-		case 0x58:
-			return "local_time_offset_descriptor";
-		case 0x59:
-			return "subtitling_descriptor";
-		case 0x5A:
-			return "terrestrial_delivery_system_descriptor";
-		case 0x5B:
-			return "multilingual_network_name_descriptor";
-		case 0x5C:
-			return "multilingual_bouquet_name_descriptor";
-		case 0x5D:
-			return "multilingual_service_name_descriptor";
-		case 0x5E:
-			return "multilingual_component_descriptor";
-		case 0x5F:
-			return "private_data_specifier_descriptor";
-		case 0x60:
-			return "service_move_descriptor";
-		case 0x61:
-			return "short_smoothing_buffer_descriptor";
-		case 0x62:
-			return "frequency_list_descriptor";
-		case 0x63:
-			return "partial_transport_stream_descriptor";
-		case 0x64:
-			return "data_broadcast_descriptor";
-		case 0x65:
-			return "scrambling_descriptor";
-		case 0x66:
-			return "data_broadcast_id_descriptor";
-		case 0x67:
-			return "transport_stream_descriptor";
-		case 0x68:
-			return "DSNG_descriptor";
-		case 0x69:
-			return "PDC_descriptor";
-		case 0x6A:
-			return "AC-3_descriptor";
-		case 0x6B:
-			return "ancillary_data_descriptor";
-		case 0x6C:
-			return "cell_list_descriptor";
-		case 0x6D:
-			return "cell_frequency_link_descriptor";
-		case 0x6E:
-			return "announcement_support_descriptor";
-		case 0x6F:
-			return "application_signalling_descriptor";
-		case 0x70:
-			return "adaptation_field_data_descriptor";
-		case 0x71:
-			return "service_identifier_descriptor";
-		case 0x72:
-			return "service_availability_descriptor";
-		case 0x73:
-			return "default_authority_descriptor";
-		case 0x74:
-			return "related_content_descriptor";
-		case 0x75:
-			return "TVA_id_descriptor";
-		case 0x76:
-			return "content_identifier_descriptor/TV-Anytime serial recordings descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-		case 0x77:
-			return "time_slice_fec_identifier_descriptor";
-		case 0x78:
-			return "ECM_repetition_rate_descriptor";
-		case 0x79:
-			return "S2_satellite_delivery_system_descriptor";
-		case 0x7A:
-			return "enhanced_AC-3_descriptor";
-		case 0x7B:
-			return "DTS descriptor";
-		case 0x7C:
-			return "AAC descriptor";
-		case 0x7D:
-			return "XAIT location descriptor";
-		case 0x7E:
-			return "FTA_content_management_descriptor";
-		case 0x7F:
-			return "extension descriptor";
-
-		case 0x81:
-			return "user defined: UPC logic_channel_descriptor/ATSC AC-3 audio descriptor";
+			case 0x40 -> "network_name_descriptor";
+			case 0x41 -> "service_list_descriptor";
+			case 0x42 -> "stuffing_descriptor";
+			case 0x43 -> "satellite_delivery_system_descriptor";
+			case 0x44 -> "cable_delivery_system_descriptor";
+			case 0x45 -> "VBI_data_descriptor";
+			case 0x46 -> "VBI_teletext_descriptor";
+			case 0x47 -> "bouquet_name_descriptor";
+			case 0x48 -> "service_descriptor";
+			case 0x49 -> "country_availability_descriptor";
+			case 0x4A -> "linkage_descriptor";
+			case 0x4B -> "NVOD_reference_descriptor";
+			case 0x4C -> "time_shifted_service_descriptor";
+			case 0x4D -> "short_event_descriptor";
+			case 0x4E -> "extended_event_descriptor";
+			case 0x4F -> "time_shifted_event_descriptor";
+			case 0x50 -> "component_descriptor";
+			case 0x51 -> "mosaic_descriptor";
+			case 0x52 -> "stream_identifier_descriptor";
+			case 0x53 -> "CA_identifier_descriptor";
+			case 0x54 -> "content_descriptor";
+			case 0x55 -> "parental_rating_descriptor";
+			case 0x56 -> "teletext_descriptor";
+			case 0x57 -> "telephone_descriptor";
+			case 0x58 -> "local_time_offset_descriptor";
+			case 0x59 -> "subtitling_descriptor";
+			case 0x5A -> "terrestrial_delivery_system_descriptor";
+			case 0x5B -> "multilingual_network_name_descriptor";
+			case 0x5C -> "multilingual_bouquet_name_descriptor";
+			case 0x5D -> "multilingual_service_name_descriptor";
+			case 0x5E -> "multilingual_component_descriptor";
+			case 0x5F -> "private_data_specifier_descriptor";
+			case 0x60 -> "service_move_descriptor";
+			case 0x61 -> "short_smoothing_buffer_descriptor";
+			case 0x62 -> "frequency_list_descriptor";
+			case 0x63 -> "partial_transport_stream_descriptor";
+			case 0x64 -> "data_broadcast_descriptor";
+			case 0x65 -> "scrambling_descriptor";
+			case 0x66 -> "data_broadcast_id_descriptor";
+			case 0x67 -> "transport_stream_descriptor";
+			case 0x68 -> "DSNG_descriptor";
+			case 0x69 -> "PDC_descriptor";
+			case 0x6A -> "AC-3_descriptor";
+			case 0x6B -> "ancillary_data_descriptor";
+			case 0x6C -> "cell_list_descriptor";
+			case 0x6D -> "cell_frequency_link_descriptor";
+			case 0x6E -> "announcement_support_descriptor";
+			case 0x6F -> "application_signalling_descriptor";
+			case 0x70 -> "adaptation_field_data_descriptor";
+			case 0x71 -> "service_identifier_descriptor";
+			case 0x72 -> "service_availability_descriptor";
+			case 0x73 -> "default_authority_descriptor";
+			case 0x74 -> "related_content_descriptor";
+			case 0x75 -> "TVA_id_descriptor";
+			case 0x76 -> "content_identifier_descriptor/TV-Anytime serial recordings descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+			case 0x77 -> "time_slice_fec_identifier_descriptor";
+			case 0x78 -> "ECM_repetition_rate_descriptor";
+			case 0x79 -> "S2_satellite_delivery_system_descriptor";
+			case 0x7A -> "enhanced_AC-3_descriptor";
+			case 0x7B -> "DTS descriptor";
+			case 0x7C -> "AAC descriptor";
+			case 0x7D -> "XAIT location descriptor";
+			case 0x7E -> "FTA_content_management_descriptor";
+			case 0x7F -> "extension descriptor";
+			case 0x81 -> "user defined: UPC logic_channel_descriptor/ATSC AC-3 audio descriptor";
 			/* http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf */
-		case 0x82:
-			return "user defined: Viasat private: Logic_channel_dscriptor";
-		case 0x83:
-			return "user defined: EACEM Logic_channel_descriptor / NorDig private: Logic_channel_descriptor version 1 / DTG logical_channel_descriptor";
-		case 0x84:
-			return "user defined: EACEM Preferred_name_list_descriptor / DTG preferred_name_list_descriptor";
-		case 0x85:
-			return "user defined: EACEM Preferred_name_identifier_descriptor / DTG preferred_name_identifier_descriptor";
-		case 0x86:
-			return "user defined: EACEM stream_identifier_descriptor / DTG service_attribute_descriptor";
-		case 0x87:
-			return "user defined: Ziggo/OpenTV Video On Demand delivery descriptor / NORDIG Logical_channel_descriptor version 2 / DTG short_service_name_descriptor";
-		case 0x88:
-			return "user defined: EACEM private: HD_simulcast_logical_channel_descriptor / YOUSEE Event tag descriptor / DTG HD_simulcast_logical_channel_descriptor/ hdmv_copy_control_descriptor";
+			case 0x82 -> "user defined: Viasat private: Logic_channel_dscriptor";
+			case 0x83 -> "user defined: EACEM Logic_channel_descriptor / NorDig private: Logic_channel_descriptor version 1 / DTG logical_channel_descriptor";
+			case 0x84 -> "user defined: EACEM Preferred_name_list_descriptor / DTG preferred_name_list_descriptor";
+			case 0x85 -> "user defined: EACEM Preferred_name_identifier_descriptor / DTG preferred_name_identifier_descriptor";
+			case 0x86 -> "user defined: EACEM stream_identifier_descriptor / DTG service_attribute_descriptor";
+			case 0x87 -> "user defined: Ziggo/OpenTV Video On Demand delivery descriptor / NORDIG Logical_channel_descriptor version 2 / DTG short_service_name_descriptor";
+			case 0x88 -> "user defined: EACEM private: HD_simulcast_logical_channel_descriptor / YOUSEE Event tag descriptor / DTG HD_simulcast_logical_channel_descriptor/ hdmv_copy_control_descriptor";
 			// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
 
-		case 0x89:
-			return "user defined: OpenTV private descriptor / DTG guidance_descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-		case 0x8A:
-			return "user defined: SCTE-35 Cue Identifier Descriptor "; //http://www.scte.org/documents/pdf/Standards/ANSI_SCTE%2035%202014.pdf
-		case 0x8C:
-			return "user defined: VodaphoneZiggo / UPC blackout_descriptor"; // Wholesale kabel toegang Referentieaanbod VodafoneZiggo PSI/SI overview Annex behorende bij Bijlage 1: Technische specificaties
-		case 0x90:
-			return "user defined: OpenTV module_track_descriptor";// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-		case 0x92:
-			return "user defined: Extended location ID (YOUSEE)";// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-		case 0x93:
-			return "user defined: Ziggo/OpenTV Video On Demand URL";
+			case 0x89 -> "user defined: OpenTV private descriptor / DTG guidance_descriptor"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+			case 0x8A -> "user defined: SCTE-35 Cue Identifier Descriptor "; //http://www.scte.org/documents/pdf/Standards/ANSI_SCTE%2035%202014.pdf
+			case 0x8C -> "user defined: VodaphoneZiggo / UPC blackout_descriptor"; // Wholesale kabel toegang Referentieaanbod VodafoneZiggo PSI/SI overview Annex behorende bij Bijlage 1: Technische specificaties
+			case 0x90 -> "user defined: OpenTV module_track_descriptor";// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+			case 0x92 -> "user defined: Extended location ID (YOUSEE)";// http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+			case 0x93 -> "user defined: Ziggo/OpenTV Video On Demand URL";
 
-		// ANSI/SCTE 128 2010-a AVC Video Systems and Transport Constraints for Cable Television
-		// https://www.scte.org/documents/pdf/Standards/ANSI_SCTE%20128%202010-a.pdf
-		// 6.3.2.3 SCTE Adaptation field data descriptor 
-		case 0x97:
-			return "user defined: SCTE adaptation field data descriptor";
-		
-		case 0xA0:
-			return "user defined: NorDig Content Protection Descriptor";
-			
+			// ANSI/SCTE 128 2010-a AVC Video Systems and Transport Constraints for Cable Television
+			// https://www.scte.org/documents/pdf/Standards/ANSI_SCTE%20128%202010-a.pdf
+			// 6.3.2.3 SCTE Adaptation field data descriptor
+			case 0x97 -> "user defined: SCTE adaptation field data descriptor";
+			case 0xA0 -> "user defined: NorDig Content Protection Descriptor";
+
 			// https://professional.dolby.com/siteassets/pdfs/dolby-vision-bitstreams-in-mpeg-2-transport-stream-multiplex-v1.2.pdf
-		case 0xB0:
-			return "user defined: DOVI_video_stream_descriptor";
+			case 0xB0 -> "user defined: DOVI_video_stream_descriptor";
+			case 0xCE -> "user defined: CI Protection Descriptor";
+			case 0xD4 -> "user defined: Ziggo Package Descriptor";
 
-		case 0xCE:
-			return "user defined: CI Protection Descriptor";
 
-		case 0xD4:
-			return "user defined: Ziggo Package Descriptor";
-
-			
 			// OpenCable™ Specifications Encoder Boundary Point Specification 			OC-SP-EBP-I01-130118
 			// https://specification-search.cablelabs.com/encoder-boundary-point-specification
-			
-		case 0xE9:
-			return "user defined: SCTE EBP_descriptor";
+
+			case 0xE9 -> "user defined: SCTE EBP_descriptor";
 
 			/* http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf */
-		case 0xF1:
-			return "user defined: Senda private: Channel_list_descriptor";
-		case 0xFE:
-			return "user defined: OpenTV track_tag_descriptor"; //
-		case 0xFF:
-			return "forbidden";
-
-		default:
-			if ((19 <= tag) && (tag <= 26)) {
-				return "Defined in ISO/IEC 13818-6";
+			case 0xF1 -> "user defined: Senda private: Channel_list_descriptor";
+			case 0xFE -> "user defined: OpenTV track_tag_descriptor"; //
+			case 0xFF -> "forbidden";
+			default -> {
+				if ((19 <= tag) && (tag <= 26)) {
+					yield "Defined in ISO/IEC 13818-6";
+				}
+				if (tag <= 63) {
+					yield "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
+				}
+				if (tag <= 0xFE) {
+					yield "user defined";
+				}
+				yield "illegal descriptor tag value";
 			}
-
-			if (tag <= 63) {
-				return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
-			}
-
-			if ((0x80 <= tag) && (tag <= 0xFE)) {
-				return "user defined";
-			}
-
-			return "illegal descriptor tag value";
-
-		}
+		};
 	}
 
 	public PID getParentPID() {
-		return getParentTableSection().getParentPID();
+		return parentTableSection.getParentPID();
 	}
 
 	public TransportStream getParentTransportStream() {
@@ -500,16 +337,9 @@ public class Descriptor implements TreeNode {
 		return getParentTransportStream().getPsi();
 	}
 
-	@Override
-	public String toString() {
-		return getDescriptorname() + ", (data)";
-	}
-
 	public String getRawDataString() {
-		final StringBuilder b = new StringBuilder();
-		b.append("0x").append(Utils.toHexString(privateData, privateDataOffset, descriptorLength)).append(" \"")
-		.append(Utils.toSafeString(privateData, privateDataOffset, descriptorLength)).append("\"");
-		return b.toString();
+		return "0x" + Utils.toHexString(privateData, privateDataOffset, descriptorLength) + " \"" +
+				Utils.toSafeString(privateData, privateDataOffset, descriptorLength) + "\"";
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
@@ -531,72 +361,43 @@ public class Descriptor implements TreeNode {
 			t.add(new DefaultMutableTreeNode(new KVP("descriptor_tag", descriptorTag, getDescriptorname())));
 			t.add(new DefaultMutableTreeNode(new KVP("descriptor_length", descriptorLength, null)));
 		}
-		if ((this.getClass().equals(Descriptor.class)) || (!Utils.simpleModus(modus))) { // not simple layout, so show details
+		if ((getClass().equals(Descriptor.class)) || (!Utils.simpleModus(modus))) { // not simple layout, so show details
 			t.add(new DefaultMutableTreeNode(new KVP("descriptor_data", privateData, descriptorOffset + 2,
 					descriptorLength, null)));
 		}
 	}
 
-	public TableSection getParentTableSection() {
-		return parentTableSection;
-	}
-
-	public void setParentTableSection(final TableSection parentTableSection) {
-		this.parentTableSection = parentTableSection;
-	}
-
-
 	public static String getFEC_innerString(final int fecInner) {
-		switch (fecInner) {
-		case 0:
-			return "not defined";
-		case 1:
-			return "1/2 conv. code rate";
-		case 2:
-			return "2/3 conv. code rate";
-		case 3:
-			return "3/4 conv. code rate";
-		case 4:
-			return "5/6 conv. code rate";
-		case 5:
-			return "7/8 conv. code rate";
-		case 6:
-			return "8/9 conv. code rate";
-		case 7:
-			return "3/5 conv. code rate";
-		case 8:
-			return "4/5 conv. code rate";
-		case 9:
-			return "9/10 conv. code rate";
-		case 15:
-			return "no conv. Coding";
-		default:
-			return "reserved for future use";
-		}
+		return switch (fecInner) {
+			case 0 -> "not defined";
+			case 1 -> "1/2 conv. code rate";
+			case 2 -> "2/3 conv. code rate";
+			case 3 -> "3/4 conv. code rate";
+			case 4 -> "5/6 conv. code rate";
+			case 5 -> "7/8 conv. code rate";
+			case 6 -> "8/9 conv. code rate";
+			case 7 -> "3/5 conv. code rate";
+			case 8 -> "4/5 conv. code rate";
+			case 9 -> "9/10 conv. code rate";
+			case 15 -> "no conv. Coding";
+			default -> "reserved for future use";
+		};
 	}
 
 	public static String formatCableFrequency(final String f) {
-		final StringBuilder s = new StringBuilder();
-		s.append(f.substring(0, 4)).append('.').append(f.substring(4, 8)).append(" MHz");
-		return Utils.stripLeadingZeros(s.toString());
+		return stripLeadingZeros(f.substring(0, 4) + '.' + f.substring(4, 8) + " MHz");
 	}
 
 	public static String formatCableFrequencyList(final String f) {
-		final StringBuilder s = new StringBuilder();
-		s.append(f.substring(1, 4)).append('.').append(f.substring(4, 8));
-		return Utils.stripLeadingZeros(s.toString());
+		return stripLeadingZeros(f.substring(1, 4) + '.' + f.substring(4, 8));
 	}
 
 	public static String formatSatelliteFrequency(final String f) {
-		final StringBuilder s = new StringBuilder();
-		s.append(f.substring(0, 3)).append('.').append(f.substring(3, 8)).append(" GHz");
-		return Utils.stripLeadingZeros(s.toString());
+		return stripLeadingZeros(f.substring(0, 3) + '.' + f.substring(3, 8) + " GHz");
 	}
 
 	public static String formatOrbitualPosition(final String f) {
-		final StringBuilder s = new StringBuilder();
-		s.append(f.substring(0, 3)).append('.').append(f.substring(3, 4)).append("°");
-		return Utils.stripLeadingZeros(s.toString());
+		return stripLeadingZeros(f.substring(0, 3) + '.' + f.charAt(3) + "°");
 	}
 
 	public static String formatTerrestrialFrequency(final long f) {
@@ -605,191 +406,109 @@ public class Descriptor implements TreeNode {
 		if (freq.length() < 7) {
 			freq = "0000000".substring(freq.length()) + freq;
 		}
-		s.append(freq.substring(0, freq.length() - 6)).append('.').append(
-				freq.substring(freq.length() - 6, freq.length())).append(" MHz");
-		return Utils.stripLeadingZeros(s.toString());
+		s.append(freq, 0, freq.length() - 6).append('.').append(
+				freq.substring(freq.length() - 6)).append(" MHz");
+		return stripLeadingZeros(s.toString());
 	}
 
 	public static String formatSymbolRate(final String f) {
-		final StringBuilder s = new StringBuilder();
-		s.append(f.substring(0, 3)).append('.').append(f.substring(3, 7)).append(" Msymbol/s");
-		return Utils.stripLeadingZeros(s.toString());
+		return stripLeadingZeros(f.substring(0, 3) + '.' + f.substring(3, 7) + " Msymbol/s");
 	}
 
 	public static String getServiceTypeString(final int serviceType) {
 
-		switch (serviceType) {
-		case 0x00:
-			return "reserved for future use";
-		case 0x01:
-			return "digital television service";
-		case 0x02:
-			return "digital radio sound service";
-		case 0x03:
-			return "Teletext service";
-		case 0x04:
-			return "NVOD reference service";
-		case 0x05:
-			return "NVOD time-shifted service";
-		case 0x06:
-			return "mosaic service";
-		case 0x07:
-			return "FM radio service"; 
-		case 0x08:
-			return "DVB SRM service";
-		case 0x09:
-			return "reserved for future use";
-		case 0x0A:
-			return "advanced codec digital radio sound service";
-		case 0x0B:
-			return "advanced codec mosaic service";
-		case 0x0C:
-			return "data broadcast service";
-		case 0x0D:
-			return "reserved for Common Interface Usage (EN 50221)";
-		case 0x0E:
-			return "RCS Map (see EN 301 790)";
-		case 0x0F:
-			return "RCS FLS (see EN 301 790)";
-		case 0x10:
-			return "DVB MHP service";
-		case 0x11:
-			return "MPEG-2 HD digital television service";
-		case 0x12:
-			return "reserved for future use";
-		case 0x13:
-			return "reserved for future use";
-		case 0x14:
-			return "reserved for future use";
-		case 0x15:
-			return "reserved for future use";
-		case 0x16:
-			return "H.264/AVC SD digital television service";
-		case 0x17:
-			return "H.264/AVC SD NVOD time-shifted service";
-		case 0x18:
-			return "H.264/AVC SD NVOD reference service";
-		case 0x19:
-			return "H.264/AVC HD digital television service";
-		case 0x1A:
-			return "H.264/AVC HD NVOD time-shifted service";
-		case 0x1B:
-			return "H.264/AVC HD NVOD reference service";
-		case 0x1C:
-			return "H.264/AVC frame compatible plano-stereoscopic HD digital television service";
-		case 0x1D:
-			return "H.264/AVC frame compatible plano-stereoscopic HD NVOD time-shifted service";
-		case 0x1E:
-			return "H.264/AVC frame compatible plano-stereoscopic HD NVOD reference service";
-		case 0x1F:
-			return "HEVC digital television service";
-		case 0x20:
-			return "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a resolution greater than 3840x2160, SDR or HDR, with a frame rate up to 60Hz"; 
+		return switch (serviceType) {
+			case 0x00 -> "reserved for future use";
+			case 0x01 -> "digital television service";
+			case 0x02 -> "digital radio sound service";
+			case 0x03 -> "Teletext service";
+			case 0x04 -> "NVOD reference service";
+			case 0x05 -> "NVOD time-shifted service";
+			case 0x06 -> "mosaic service";
+			case 0x07 -> "FM radio service";
+			case 0x08 -> "DVB SRM service";
+			case 0x09 -> "reserved for future use";
+			case 0x0A -> "advanced codec digital radio sound service";
+			case 0x0B -> "advanced codec mosaic service";
+			case 0x0C -> "data broadcast service";
+			case 0x0D -> "reserved for Common Interface Usage (EN 50221)";
+			case 0x0E -> "RCS Map (see EN 301 790)";
+			case 0x0F -> "RCS FLS (see EN 301 790)";
+			case 0x10 -> "DVB MHP service";
+			case 0x11 -> "MPEG-2 HD digital television service";
+			case 0x12 -> "reserved for future use";
+			case 0x13 -> "reserved for future use";
+			case 0x14 -> "reserved for future use";
+			case 0x15 -> "reserved for future use";
+			case 0x16 -> "H.264/AVC SD digital television service";
+			case 0x17 -> "H.264/AVC SD NVOD time-shifted service";
+			case 0x18 -> "H.264/AVC SD NVOD reference service";
+			case 0x19 -> "H.264/AVC HD digital television service";
+			case 0x1A -> "H.264/AVC HD NVOD time-shifted service";
+			case 0x1B -> "H.264/AVC HD NVOD reference service";
+			case 0x1C -> "H.264/AVC frame compatible plano-stereoscopic HD digital television service";
+			case 0x1D -> "H.264/AVC frame compatible plano-stereoscopic HD NVOD time-shifted service";
+			case 0x1E -> "H.264/AVC frame compatible plano-stereoscopic HD NVOD reference service";
+			case 0x1F -> "HEVC digital television service";
+			case 0x20 -> "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a resolution greater than 3840x2160, SDR or HDR, with a frame rate up to 60Hz";
+			case 0x84 -> "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf -- Mandatory for legacy STB (ICD3000, ICD4000 and ICD60)
+			case 0x87 -> "Sagem OpenTV out_of_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf  -- Mandatory for legacy STB (ICD3000, ICD4000 and ICD60)
+			case 0x88 -> "Sagem OpenTV in_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
-		case 0x84:
-			return "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-			// -- Mandatory for
-			// legacy STB (ICD3000,
-			// ICD4000 and ICD60)
-		case 0x87:
-			return "Sagem OpenTV out_of_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-			// -- Mandatory for
-			// legacy STB (ICD3000,
-			// ICD4000 and ICD60)
-			// Service type for VOD
-			// services. Mandatory
-			// for STB supporting
-			// VOD.
-		case 0x88:
-			return "Sagem OpenTV in_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
-			// -- Mandatory for legacy
-			// STB (ICD3000, ICD4000 and
-			// ICD60).
-
-		default:
-			if ((0x21 <= serviceType) && (serviceType <= 0x7F)) {
-				return "reserved for future use";
+			default -> {
+				if ((0x21 <= serviceType) && (serviceType <= 0x7F)) {
+					yield "reserved for future use";
+				}
+				if ((0x80 <= serviceType) && (serviceType <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-
-			if ((0x80 <= serviceType) && (serviceType <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-		}
+		};
 
 	}
 
 	public static String getServiceTypeStringShort(final int serviceType) {
 
-		switch (serviceType) {
-		case 0x00:
-			return "reserved";
-		case 0x01:
-			return "TV (SD)";
-		case 0x02:
-			return "Radio";
-		case 0x03:
-			return "Teletext";
-		case 0x04:
-			return "NVOD reference";
-		case 0x05:
-			return "NVOD time-shifted";
-		case 0x06:
-			return "mosaic";
-		case 0x07:
-			return "PAL coded signal"; // http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf,
-			// p.14
-		case 0x08:
-			return "reserved";
-		case 0x09:
-			return "reserved";
-		case 0x0A:
-			return "radio (advanced)";
-		case 0x0B:
-			return "mosaic advanced)";
-		case 0x0C:
-			return "data broadcast";
-		case 0x0D:
-			return "Common Interface Usage";
-		case 0x0E:
-			return "RCS Map";
-		case 0x0F:
-			return "RCS FLS";
-		case 0x10:
-			return "DVB MHP service";
-		case 0x11:
-			return "TV (HD-MPEG2)";
-		case 0x12:
-			return "reserved";
-		case 0x13:
-			return "reserved";
-		case 0x14:
-			return "reserved";
-		case 0x15:
-			return "reserved";
-		case 0x16:
-			return "TV (SD-MPEG4)";
-		case 0x17:
-			return "advanced codec SD NVOD time-shifted ";
-		case 0x18:
-			return "advanced codec SD NVOD reference";
-		case 0x19:
-			return "TV (HD-MPEG4)";
-		case 0x1A:
-			return "advanced codec HD NVOD time-shifted";
-		case 0x1B:
-			return "advanced codec HD NVOD reference";
-
-		default:
-			if ((0x1C <= serviceType) && (serviceType <= 0x7F)) {
-				return "reserved";
+		return switch (serviceType) {
+			case 0x00 -> "reserved";
+			case 0x01 -> "TV (SD)";
+			case 0x02 -> "Radio";
+			case 0x03 -> "Teletext";
+			case 0x04 -> "NVOD reference";
+			case 0x05 -> "NVOD time-shifted";
+			case 0x06 -> "mosaic";
+			case 0x07 -> "PAL coded signal"; // http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf, p.14
+			case 0x08 -> "reserved";
+			case 0x09 -> "reserved";
+			case 0x0A -> "radio (advanced)";
+			case 0x0B -> "mosaic advanced)";
+			case 0x0C -> "data broadcast";
+			case 0x0D -> "Common Interface Usage";
+			case 0x0E -> "RCS Map";
+			case 0x0F -> "RCS FLS";
+			case 0x10 -> "DVB MHP service";
+			case 0x11 -> "TV (HD-MPEG2)";
+			case 0x12 -> "reserved";
+			case 0x13 -> "reserved";
+			case 0x14 -> "reserved";
+			case 0x15 -> "reserved";
+			case 0x16 -> "TV (SD-MPEG4)";
+			case 0x17 -> "advanced codec SD NVOD time-shifted ";
+			case 0x18 -> "advanced codec SD NVOD reference";
+			case 0x19 -> "TV (HD-MPEG4)";
+			case 0x1A -> "advanced codec HD NVOD time-shifted";
+			case 0x1B -> "advanced codec HD NVOD reference";
+			default -> {
+				if ((0x1C <= serviceType) && (serviceType <= 0x7F)) {
+					yield "reserved";
+				}
+				if ((0x80 <= serviceType) && (serviceType <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-
-			if ((0x80 <= serviceType) && (serviceType <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-		}
+		};
 
 	}
 
@@ -818,42 +537,31 @@ public class Descriptor implements TreeNode {
 			}
 			return "reserved for future use";
 		case 0x08:
-			if (component_type == 0x00) {
-				return "reserved for future use";
-			} else if (component_type == 0x01) {
-				return "DVB SRM data";
-			}{
-				return "reserved for DVB CPCM modes";
-			}
-		case 0x09:
+			return switch (component_type) {
+				case 0x00 -> "reserved for future use";
+				case 0x01 -> "DVB SRM data";
+				default -> "reserved for DVB CPCM modes";
+			};
+			case 0x09:
 			return getComponentType0x09String(stream_content_ext,component_type);
 		case 0x0b:
 			if(stream_content_ext==0xE){
 				return getNextGenerationAudioComponentTypeString(component_type);
 			}
 			else if(stream_content_ext==0xf){
-				if (component_type == 0x00) {
-					return "less than 16:9 aspect ratio";
-				} else if (component_type == 0x01) {
-					return "16:9 aspect ratio";
-				} else if (component_type == 0x02) {
-					return "greater than 16:9 aspect ratio";
-				} else if (component_type == 0x03) {
-					return "plano-stereoscopic top and\r\n" +
+				return switch (component_type) {
+					case 0x00 -> "less than 16:9 aspect ratio";
+					case 0x01 -> "16:9 aspect ratio";
+					case 0x02 -> "greater than 16:9 aspect ratio";
+					case 0x03 -> "plano-stereoscopic top and\r\n" +
 							"bottom (TaB) frame-packing";
-				} else if (component_type == 0x04) {
-					return "HLG10 HDR";
-				} else if (component_type == 0x05) {
-					return "HEVC temporal video subset for a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz";
-				} else if (component_type == 0x06) {
-					return "SMPTE ST 2094-10 DMI format";
-				} else if (component_type == 0x07) {
-					return "SL-HDR2 DMI format";
-				} else if (component_type == 0x08) {
-					return "SMPTE ST 2094-40 DMI format";
-			}else{
-					return "reserved for future use";
-				}
+					case 0x04 -> "HLG10 HDR";
+					case 0x05 -> "HEVC temporal video subset for a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz";
+					case 0x06 -> "SMPTE ST 2094-10 DMI format";
+					case 0x07 -> "SL-HDR2 DMI format";
+					case 0x08 -> "SMPTE ST 2094-40 DMI format";
+					default -> "reserved for future use";
+				};
 			}else{
 				return "reserved for future use";
 			}
@@ -871,105 +579,59 @@ public class Descriptor implements TreeNode {
 	 * @return
 	 */
 	public static String getComponentType0x09String(final int stream_content_ext, final int component_type) {
-		switch(stream_content_ext){
-		case 0x00:
-			switch(component_type){
-			case 0x00:
-				return "HEVC Main Profile high definition video, 50 Hz";
-			case 0x01:
-				return "HEVC Main 10 Profile high definition video, 50 Hz";
-			case 0x02:
-				return "HEVC Main Profile high definition video, 60 Hz";
-			case 0x03:
-				return "HEVC Main 10 Profile high definition video, 60 Hz";
-			case 0x04:
-				return "HEVC ultra high definition video";
-			case 0x05:
-				return "HEVC ultra high definition video with PQ10 HDR with a frame rate lower than or equal to 60 Hz";
-			case 0x06:
-				return "HEVC ultra high definition video, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bitstream";
-			case 0x07:
-				return "HEVC ultra high definition video with PQ10 HDR, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bit-stream";
-			case 0x08:
-				return "HEVC ultra high definition video with a resolution up to 7680x4320";
-			default:
-				return "reserved for future use";
-			}
-		case 0x01:
-			switch(component_type){
-			case 0x00:
-				return "AC-4 main audio, mono";
-			case 0x01:
-				return "AC-4 main audio, mono, dialogue enhancement enabled";
-			case 0x02:
-				return "AC-4 main audio, stereo";
-			case 0x03:
-				return "AC-4 main audio, stereo, dialogue enhancement enabled";
-			case 0x04:
-				return "AC-4 main audio, multichannel";
-			case 0x05:
-				return "AC-4 main audio, multichannel, dialogue enhancement enabled";
-			case 0x06:
-				return "AC-4 broadcast-mix audio description, mono, for the visually impaired";
-			case 0x07:
-				return "AC-4 broadcast-mix audio description, mono, for the visually impaired, dialogue enhancement enabled";
-			case 0x08:
-				return "AC-4 broadcast-mix audio description, stereo, for the visually impaired";
-			case 0x09:
-				return "AC-4 broadcast-mix audio description, stereo, for the visually impaired, dialogue enhancement enabled";
-			case 0x0a:
-				return "AC-4 broadcast-mix audio description, multichannel, for the visually impaired";
-			case 0x0b:
-				return "AC-4 broadcast-mix audio description, multichannel, for the visually impaired, dialogue enhancement enabled";
-			case 0x0c:
-				return "AC-4 receiver-mix audio description, mono, for the visually impaired";
-			case 0x0d:
-				return "AC-4 receiver-mix audio description, stereo, for the visually impaired";
+		return switch (stream_content_ext) {
+			case 0x00 -> switch (component_type) {
+				case 0x00 -> "HEVC Main Profile high definition video, 50 Hz";
+				case 0x01 -> "HEVC Main 10 Profile high definition video, 50 Hz";
+				case 0x02 -> "HEVC Main Profile high definition video, 60 Hz";
+				case 0x03 -> "HEVC Main 10 Profile high definition video, 60 Hz";
+				case 0x04 -> "HEVC ultra high definition video";
+				case 0x05 -> "HEVC ultra high definition video with PQ10 HDR with a frame rate lower than or equal to 60 Hz";
+				case 0x06 -> "HEVC ultra high definition video, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bitstream";
+				case 0x07 -> "HEVC ultra high definition video with PQ10 HDR, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bit-stream";
+				case 0x08 -> "HEVC ultra high definition video with a resolution up to 7680x4320";
+				default -> "reserved for future use";
+			};
+			case 0x01 -> switch (component_type) {
+				case 0x00 -> "AC-4 main audio, mono";
+				case 0x01 -> "AC-4 main audio, mono, dialogue enhancement enabled";
+				case 0x02 -> "AC-4 main audio, stereo";
+				case 0x03 -> "AC-4 main audio, stereo, dialogue enhancement enabled";
+				case 0x04 -> "AC-4 main audio, multichannel";
+				case 0x05 -> "AC-4 main audio, multichannel, dialogue enhancement enabled";
+				case 0x06 -> "AC-4 broadcast-mix audio description, mono, for the visually impaired";
+				case 0x07 -> "AC-4 broadcast-mix audio description, mono, for the visually impaired, dialogue enhancement enabled";
+				case 0x08 -> "AC-4 broadcast-mix audio description, stereo, for the visually impaired";
+				case 0x09 -> "AC-4 broadcast-mix audio description, stereo, for the visually impaired, dialogue enhancement enabled";
+				case 0x0a -> "AC-4 broadcast-mix audio description, multichannel, for the visually impaired";
+				case 0x0b -> "AC-4 broadcast-mix audio description, multichannel, for the visually impaired, dialogue enhancement enabled";
+				case 0x0c -> "AC-4 receiver-mix audio description, mono, for the visually impaired";
+				case 0x0d -> "AC-4 receiver-mix audio description, stereo, for the visually impaired";
 				// see a038_dvb_spec_december_2017_pdf.pdf
-			case 0x0E: 
-				return "AC-4 Part-2";
-			case 0x0F: 
-				return "MPEG-H Audio LC Profile";
-			case 0x10:
-				return "DTS-UHD main audio, mono";
-			case 0x11:
-				return "DTS-UHD main audio, mono, dialogue enhancement enabled ";
-			case 0x12:
-				return "DTS-UHD main audio, stereo";
-			case 0x13:
-				return "DTS-UHD main audio, stereo, dialogue enhancement enabled";
-			case 0x14:
-				return "DTS-UHD main audio, multichannel";
-			case 0x15:
-				return "DTS-UHD main audio, multichannel, dialogue enhancement enabled";
-			case 0x16:
-				return "DTS-UHD broadcast-mix audio description, mono, for the visually impaired ";
-			case 0x17:
-				return "DTS-UHD broadcast-mix audio description, mono, for the visually impaired, dialogue enhancement enabled";
-			case 0x18:
-				return "DTS-UHD broadcast-mix audio description, stereo, for the visually impaired";
-			case 0x19:
-				return "DTS-UHD broadcast-mix audio description, stereo, for the visually impaired, dialogue enhancement enabled";
-			case 0x1a:
-				return "DTS-UHD broadcast-mix audio description, multichannel, for the visually impaired";
-			case 0x1b:
-				return "DTS-UHD broadcast-mix audio description, multichannel, for the visually impaired, dialogue enhancement enabled ";
-			case 0x1c:
-				return "DTS-UHD receiver-mix audio description, mono, for the visually impaired ";
-			case 0x1d:
-				return "DTS-UHD receiver-mix audio description, stereo, for the visually impaired ";
-			case 0x1e:
-				return "DTS-UHD NGA Audio";
-			default:
-				return "reserved for future use";
-			}
-		case 0x02:
-			// see a038_dvb_spec_december_2017_pdf.pdf
-			return "TTML subtitles";
-			
-
-		}
-		return "reserved for future use";
+				case 0x0E -> "AC-4 Part-2";
+				case 0x0F -> "MPEG-H Audio LC Profile";
+				case 0x10 -> "DTS-UHD main audio, mono";
+				case 0x11 -> "DTS-UHD main audio, mono, dialogue enhancement enabled ";
+				case 0x12 -> "DTS-UHD main audio, stereo";
+				case 0x13 -> "DTS-UHD main audio, stereo, dialogue enhancement enabled";
+				case 0x14 -> "DTS-UHD main audio, multichannel";
+				case 0x15 -> "DTS-UHD main audio, multichannel, dialogue enhancement enabled";
+				case 0x16 -> "DTS-UHD broadcast-mix audio description, mono, for the visually impaired ";
+				case 0x17 -> "DTS-UHD broadcast-mix audio description, mono, for the visually impaired, dialogue enhancement enabled";
+				case 0x18 -> "DTS-UHD broadcast-mix audio description, stereo, for the visually impaired";
+				case 0x19 -> "DTS-UHD broadcast-mix audio description, stereo, for the visually impaired, dialogue enhancement enabled";
+				case 0x1a -> "DTS-UHD broadcast-mix audio description, multichannel, for the visually impaired";
+				case 0x1b -> "DTS-UHD broadcast-mix audio description, multichannel, for the visually impaired, dialogue enhancement enabled ";
+				case 0x1c -> "DTS-UHD receiver-mix audio description, mono, for the visually impaired ";
+				case 0x1d -> "DTS-UHD receiver-mix audio description, stereo, for the visually impaired ";
+				case 0x1e -> "DTS-UHD NGA Audio";
+				default -> "reserved for future use";
+			};
+			case 0x02 ->
+					// see a038_dvb_spec_december_2017_pdf.pdf
+					"TTML subtitles";
+			default -> "reserved for future use";
+		};
 	}
 	
 	/**
@@ -979,7 +641,7 @@ public class Descriptor implements TreeNode {
 	 * @return
 	 */
 	public static String getNextGenerationAudioComponentTypeString(final int component_type) {
-		StringBuilder res = new StringBuilder();
+		final StringBuilder res = new StringBuilder();
 		if((component_type & 0b0100_0000) != 0) {
 			res.append("content is pre-rendered for consumption with headphones, ");
 		}
@@ -997,312 +659,200 @@ public class Descriptor implements TreeNode {
 		}
 		res.append("preferred reproduction channel layout: ");
 		switch (component_type & 0b0000_0011) {
-		case 0b00:
-			res.append("no preference");
-			break;
-		case 0b01:
-			res.append("stereo");
-			break;
-		case 0b10:
-			res.append("two-dimensional");
-			break;
-		case 0b11:
-			res.append("three-dimensional");
-			break;
-
-		default:
-			res.append("Illegal value");
-			break;
+			case 0b00 -> res.append("no preference");
+			case 0b01 -> res.append("stereo");
+			case 0b10 -> res.append("two-dimensional");
+			case 0b11 -> res.append("three-dimensional");
+			default -> res.append("Illegal value");
 		}
 		return res.toString();
 	}
 
 	public static String getComponentType0x01String(final int component_type) {
-		switch (component_type) {
-		case 0x00:
-			return "reserved for future use";
-		case 0x01:
-			return "MPEG-2 video, 4:3 aspect ratio, 25 Hz";
-		case 0x02:
-			return "MPEG-2 video, 16:9 aspect ratio with pan vectors, 25 Hz";
-		case 0x03:
-			return "MPEG-2 video, 16:9 aspect ratio without pan vectors, 25 Hz";
-		case 0x04:
-			return "MPEG-2 video, > 16:9 aspect ratio, 25 Hz";
-		case 0x05:
-			return "MPEG-2 video, 4:3 aspect ratio, 30 Hz";
-		case 0x06:
-			return "MPEG-2 video, 16:9 aspect ratio with pan vectors, 30 Hz";
-		case 0x07:
-			return "MPEG-2 video, 16:9 aspect ratio without pan vectors, 30 Hz";
-		case 0x08:
-			return "MPEG-2 video, > 16:9 aspect ratio, 30 Hz";
-		case 0x09:
-			return "MPEG-2 high definition video, 4:3 aspect ratio, 25 Hz";
-		case 0x0A:
-			return "MPEG-2 high definition video, 16:9 aspect ratio with pan vectors, 25 Hz";
-		case 0x0B:
-			return "MPEG-2 high definition video, 16:9 aspect ratio without pan vectors, 25 Hz";
-		case 0x0C:
-			return "MPEG-2 high definition video, > 16:9 aspect ratio, 25 Hz";
-		case 0x0D:
-			return "MPEG-2 high definition video, 4:3 aspect ratio, 30 Hz";
-		case 0x0E:
-			return "MPEG-2 high definition video, 16:9 aspect ratio with pan vectors, 30 Hz";
-		case 0x0F:
-			return "MPEG-2 high definition video, 16:9 aspect ratio without pan vectors, 30 Hz";
-		case 0x10:
-			return "MPEG-2 high definition video, > 16:9 aspect ratio, 30 Hz";
-		case 0xFF:
-			return "reserved for future use";
-
-		default:
-			if ((0x11 <= component_type) && (component_type <= 0xAF)) {
-				return "reserved for future use";
+		return switch (component_type) {
+			case 0x00 -> "reserved for future use";
+			case 0x01 -> "MPEG-2 video, 4:3 aspect ratio, 25 Hz";
+			case 0x02 -> "MPEG-2 video, 16:9 aspect ratio with pan vectors, 25 Hz";
+			case 0x03 -> "MPEG-2 video, 16:9 aspect ratio without pan vectors, 25 Hz";
+			case 0x04 -> "MPEG-2 video, > 16:9 aspect ratio, 25 Hz";
+			case 0x05 -> "MPEG-2 video, 4:3 aspect ratio, 30 Hz";
+			case 0x06 -> "MPEG-2 video, 16:9 aspect ratio with pan vectors, 30 Hz";
+			case 0x07 -> "MPEG-2 video, 16:9 aspect ratio without pan vectors, 30 Hz";
+			case 0x08 -> "MPEG-2 video, > 16:9 aspect ratio, 30 Hz";
+			case 0x09 -> "MPEG-2 high definition video, 4:3 aspect ratio, 25 Hz";
+			case 0x0A -> "MPEG-2 high definition video, 16:9 aspect ratio with pan vectors, 25 Hz";
+			case 0x0B -> "MPEG-2 high definition video, 16:9 aspect ratio without pan vectors, 25 Hz";
+			case 0x0C -> "MPEG-2 high definition video, > 16:9 aspect ratio, 25 Hz";
+			case 0x0D -> "MPEG-2 high definition video, 4:3 aspect ratio, 30 Hz";
+			case 0x0E -> "MPEG-2 high definition video, 16:9 aspect ratio with pan vectors, 30 Hz";
+			case 0x0F -> "MPEG-2 high definition video, 16:9 aspect ratio without pan vectors, 30 Hz";
+			case 0x10 -> "MPEG-2 high definition video, > 16:9 aspect ratio, 30 Hz";
+			case 0xFF -> "reserved for future use";
+			default -> {
+				if ((0x11 <= component_type) && (component_type <= 0xAF)) {
+					yield "reserved for future use";
+				}
+				if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-			if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-
-		}
+		};
 	}
 
 	public static String getComponentType0x02String(final int component_type) {
-		switch (component_type) {
-		case 0x00:
-			return "reserved for future use";
-		case 0x01:
-			return "MPEG-1 Layer 2 audio, single mono channel";
-		case 0x02:
-			return "MPEG-1 Layer 2 audio, dual mono channel";
-		case 0x03:
-			return "MPEG-1 Layer 2 audio, stereo (2 channel)";
-		case 0x04:
-			return "MPEG-1 Layer 2 audio, multi-lingual, multi-channel";
-		case 0x05:
-			return "MPEG-1 Layer 2 audio, surround sound";
-		case 0x40:
-			return "MPEG-1 Layer 2 audio description for the visually impaired";
-		case 0x41:
-			return "MPEG-1 Layer 2 audio for the hard of hearing";
-		case 0x42:
-			return "receiver-mixed supplementary audio as per annex E of TS 101 154";
-		case 0x47:
-			return "MPEG-1 Layer 2 audio, receiver-mix audio description";
-		case 0x48:
-			return "MPEG-1 Layer 2 audio, broadcast-mix audio description";
-		case 0xFF:
-			return "reserved for future use";
-
-		default:
-			if ((0x06 <= component_type) && (component_type <= 0x3F)) {
-				return "reserved for future use";
+		return switch (component_type) {
+			case 0x00 -> "reserved for future use";
+			case 0x01 -> "MPEG-1 Layer 2 audio, single mono channel";
+			case 0x02 -> "MPEG-1 Layer 2 audio, dual mono channel";
+			case 0x03 -> "MPEG-1 Layer 2 audio, stereo (2 channel)";
+			case 0x04 -> "MPEG-1 Layer 2 audio, multi-lingual, multi-channel";
+			case 0x05 -> "MPEG-1 Layer 2 audio, surround sound";
+			case 0x40 -> "MPEG-1 Layer 2 audio description for the visually impaired";
+			case 0x41 -> "MPEG-1 Layer 2 audio for the hard of hearing";
+			case 0x42 -> "receiver-mixed supplementary audio as per annex E of TS 101 154";
+			case 0x47 -> "MPEG-1 Layer 2 audio, receiver-mix audio description";
+			case 0x48 -> "MPEG-1 Layer 2 audio, broadcast-mix audio description";
+			case 0xFF -> "reserved for future use";
+			default -> {
+				if ((0x06 <= component_type) && (component_type <= 0x3F)) {
+					yield "reserved for future use";
+				}
+				if ((0x43 <= component_type) && (component_type <= 0xAF)) {
+					yield "reserved for future use";
+				}
+				if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-			if ((0x43 <= component_type) && (component_type <= 0xAF)) {
-				return "reserved for future use";
-			}
-			if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-
-		}
+		};
 	}
 
 	public static String getComponentType0x03String(final int component_type) {
-		switch (component_type) {
-		case 0x00:
-			return "reserved for future use";
-		case 0x01:
-			return "EBU Teletext subtitles";
-		case 0x02:
-			return "associated EBU Teletext";
-		case 0x03:
-			return "VBI data";
-		case 0x10:
-			return "DVB subtitles (normal) with no monitor aspect ratio criticality";
-		case 0x11:
-			return "DVB subtitles (normal) for display on 4:3 aspect ratio monitor";
-		case 0x12:
-			return "DVB subtitles (normal) for display on 16:9 aspect ratio monitor";
-		case 0x13:
-			return "DVB subtitles (normal) for display on 2.21:1 aspect ratio monitor";
-		case 0x14:
-			return "DVB subtitles (normal) for display on a high definition monitor";
-		case 0x15:
-			return "DVB subtitles (normal) with plano-stereoscopic disparity for display on a high definition monitor";
-		case 0x16:
-			return "DVB subtitles (normal) for display on an ultra high definition monitor";
-		case 0x20:
-			return "DVB subtitles (for the hard of hearing) with no monitor aspect ratio criticality";
-		case 0x21:
-			return "DVB subtitles (for the hard of hearing) for display on 4:3 aspect ratio monitor";
-		case 0x22:
-			return "DVB subtitles (for the hard of hearing) for display on 16:9 aspect ratio monitor";
-		case 0x23:
-			return "DVB subtitles (for the hard of hearing) for display on 2.21:1 aspect ratio monitor";
-		case 0x24:
-			return "DVB subtitles (for the hard of hearing) for display on a high definition monitor";
-		case 0x25:
-			return "DVB subtitles (for the hard of hearing) with planostereoscopic disparity for display on a high definition monitor";
-		case 0x26:
-			return "DVB subtitles (for the hard of hearing) for display on an ultra high definition monitor";
-		case 0x30:
-			return "Open (in-vision) sign language interpretation for the deaf";
-		case 0x31:
-			return "Closed sign language interpretation for the deaf";
-		case 0x40:
-			return "video up-sampled from standard definition source material";
-		case 0x41:
-			return "Video is standard dynamic range (SDR)";
-		case 0x42:
-			return "Video is high dynamic range (HDR) remapped from standard dynamic range (SDR) source material";
-		case 0x43:
-			return "Video is high dynamic range (HDR) up-converted from standard dynamic range (SDR) source material";
-		case 0x44:
-			return "Video is standard frame rate, less than or equal to 60 Hz"; 
-		case 0x45:
-			return "High frame rate video generated from lower frame rate source material";
-		case 0x80:
-			return "dependent SAOC-DE data stream";
-		case 0xFF:
-			return "reserved for future use";
-
-		default:
-			if ((0x04 <= component_type) && (component_type <= 0x0F)) {
-				return "reserved for future use";
+		return switch (component_type) {
+			case 0x00 -> "reserved for future use";
+			case 0x01 -> "EBU Teletext subtitles";
+			case 0x02 -> "associated EBU Teletext";
+			case 0x03 -> "VBI data";
+			case 0x10 -> "DVB subtitles (normal) with no monitor aspect ratio criticality";
+			case 0x11 -> "DVB subtitles (normal) for display on 4:3 aspect ratio monitor";
+			case 0x12 -> "DVB subtitles (normal) for display on 16:9 aspect ratio monitor";
+			case 0x13 -> "DVB subtitles (normal) for display on 2.21:1 aspect ratio monitor";
+			case 0x14 -> "DVB subtitles (normal) for display on a high definition monitor";
+			case 0x15 -> "DVB subtitles (normal) with plano-stereoscopic disparity for display on a high definition monitor";
+			case 0x16 -> "DVB subtitles (normal) for display on an ultra high definition monitor";
+			case 0x20 -> "DVB subtitles (for the hard of hearing) with no monitor aspect ratio criticality";
+			case 0x21 -> "DVB subtitles (for the hard of hearing) for display on 4:3 aspect ratio monitor";
+			case 0x22 -> "DVB subtitles (for the hard of hearing) for display on 16:9 aspect ratio monitor";
+			case 0x23 -> "DVB subtitles (for the hard of hearing) for display on 2.21:1 aspect ratio monitor";
+			case 0x24 -> "DVB subtitles (for the hard of hearing) for display on a high definition monitor";
+			case 0x25 -> "DVB subtitles (for the hard of hearing) with planostereoscopic disparity for display on a high definition monitor";
+			case 0x26 -> "DVB subtitles (for the hard of hearing) for display on an ultra high definition monitor";
+			case 0x30 -> "Open (in-vision) sign language interpretation for the deaf";
+			case 0x31 -> "Closed sign language interpretation for the deaf";
+			case 0x40 -> "video up-sampled from standard definition source material";
+			case 0x41 -> "Video is standard dynamic range (SDR)";
+			case 0x42 -> "Video is high dynamic range (HDR) remapped from standard dynamic range (SDR) source material";
+			case 0x43 -> "Video is high dynamic range (HDR) up-converted from standard dynamic range (SDR) source material";
+			case 0x44 -> "Video is standard frame rate, less than or equal to 60 Hz";
+			case 0x45 -> "High frame rate video generated from lower frame rate source material";
+			case 0x80 -> "dependent SAOC-DE data stream";
+			case 0xFF -> "reserved for future use";
+			default -> {
+				if ((0x04 <= component_type) && (component_type <= 0x0F)) {
+					yield "reserved for future use";
+				}
+				if ((0x15 <= component_type) && (component_type <= 0x1F)) {
+					yield "reserved for future use";
+				}
+				if ((0x25 <= component_type) && (component_type <= 0x2F)) {
+					yield "reserved for future use";
+				}
+				if ((0x32 <= component_type) && (component_type <= 0xAF)) {
+					yield "reserved for future use";
+				}
+				if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-			if ((0x15 <= component_type) && (component_type <= 0x1F)) {
-				return "reserved for future use";
-			}
-			if ((0x25 <= component_type) && (component_type <= 0x2F)) {
-				return "reserved for future use";
-			}
-			if ((0x32 <= component_type) && (component_type <= 0xAF)) {
-				return "reserved for future use";
-			}
-			if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-
-		}
+		};
 	}
 
 	public static String getComponentType0x05String(final int component_type) {
-		switch (component_type) {
-		case 0x00:
-			return "reserved for future use";
-		case 0x01:
-			return "H.264/AVC standard definition video, 4:3 aspect ratio, 25 Hz";
-		case 0x02:
-			return "reserved for future use";
-		case 0x03:
-			return "H.264/AVC standard definition video, 16:9 aspect ratio, 25 Hz";
-		case 0x04:
-			return "H.264/AVC standard definition video, > 16:9 aspect ratio, 25 Hz";
-		case 0x05:
-			return "H.264/AVC standard definition video, 4:3 aspect ratio, 30 Hz";
-		case 0x06:
-			return "reserved for future use";
-		case 0x07:
-			return "H.264/AVC standard definition video, 16:9 aspect ratio, 30 Hz";
-		case 0x08:
-			return "H.264/AVC standard definition video, > 16:9 aspect ratio, 30 Hz";
-		case 0x0B:
-			return "H.264/AVC high definition video, 16:9 aspect ratio, 25 Hz";
-		case 0x0C:
-			return "H.264/AVC high definition video, > 16:9 aspect ratio, 25 Hz";
-		case 0x0F:
-			return "H.264/AVC high definition video, 16:9 aspect ratio, 30 Hz";
-		case 0x10:
-			return "H.264/AVC high definition video, > 16:9 aspect ratio, 30 Hz";
-		case 0x80:
-			return "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 25 Hz, Side-by-Side";
-		case 0x81:
-			return "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 25 Hz, Top-and-Bottom";
-		case 0x82:
-			return "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 30 Hz, Side-by-Side";
-		case 0x83:
-			return "H.264/AVC stereoscopic frame compatible high definition video, 16:9 aspect ratio, 30 Hz, Top-and-Bottom";
-		case 0x84:
-			return "H.264/MVC dependent view, plano-stereoscopic service compatible video";
-		case 0xFF:
-			return "reserved for future use";
-
-		default:
-			if ((0x09 <= component_type) && (component_type <= 0x0A)) {
-				return "reserved for future use";
+		return switch (component_type) {
+			case 0x00 -> "reserved for future use";
+			case 0x01 -> "H.264/AVC standard definition video, 4:3 aspect ratio, 25 Hz";
+			case 0x02 -> "reserved for future use";
+			case 0x03 -> "H.264/AVC standard definition video, 16:9 aspect ratio, 25 Hz";
+			case 0x04 -> "H.264/AVC standard definition video, > 16:9 aspect ratio, 25 Hz";
+			case 0x05 -> "H.264/AVC standard definition video, 4:3 aspect ratio, 30 Hz";
+			case 0x06 -> "reserved for future use";
+			case 0x07 -> "H.264/AVC standard definition video, 16:9 aspect ratio, 30 Hz";
+			case 0x08 -> "H.264/AVC standard definition video, > 16:9 aspect ratio, 30 Hz";
+			case 0x0B -> "H.264/AVC high definition video, 16:9 aspect ratio, 25 Hz";
+			case 0x0C -> "H.264/AVC high definition video, > 16:9 aspect ratio, 25 Hz";
+			case 0x0F -> "H.264/AVC high definition video, 16:9 aspect ratio, 30 Hz";
+			case 0x10 -> "H.264/AVC high definition video, > 16:9 aspect ratio, 30 Hz";
+			case 0x80 -> "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 25 Hz, Side-by-Side";
+			case 0x81 -> "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 25 Hz, Top-and-Bottom";
+			case 0x82 -> "H.264/AVC planostereoscopic frame compatible high definition video, 16:9 aspect ratio, 30 Hz, Side-by-Side";
+			case 0x83 -> "H.264/AVC stereoscopic frame compatible high definition video, 16:9 aspect ratio, 30 Hz, Top-and-Bottom";
+			case 0x84 -> "H.264/MVC dependent view, plano-stereoscopic service compatible video";
+			case 0xFF -> "reserved for future use";
+			default -> {
+				if ((0x09 <= component_type) && (component_type <= 0x0A)) {
+					yield "reserved for future use";
+				}
+				if ((0x0D <= component_type) && (component_type <= 0x0E)) {
+					yield "reserved for future use";
+				}
+				if ((0x11 <= component_type) && (component_type <= 0xAF)) {
+					yield "reserved for future use";
+				}
+				if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-			if ((0x0D <= component_type) && (component_type <= 0x0E)) {
-				return "reserved for future use";
-			}
-			if ((0x11 <= component_type) && (component_type <= 0xAF)) {
-				return "reserved for future use";
-			}
-			if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-
-		}
+		};
 	}
 
 	public static String getComponentType0x06String(final int component_type) {
-		switch (component_type) {
-		case 0x00:
-			return "reserved for future use";
-		case 0x01:
-			return "HE-AAC audio, single mono channel";
-		case 0x02:
-			return "reserved for future use";
-		case 0x03:
-			return "HE-AAC audio, stereo";
-		case 0x04:
-			return "reserved for future use";
-		case 0x05:
-			return "HE-AAC audio, surround sound";
-		case 0x40:
-			return "HE-AAC audio description for the visually impaired";
-		case 0x41:
-			return "HE-AAC audio for the hard of hearing";
-		case 0x42:
-			return "HE-AAC receiver-mixed supplementary audio as per annex E of TS 101 154 [10]";
-		case 0x43:
-			return "HE-AAC v2 audio, stereo";
-		case 0x44:
-			return "HE-AAC v2 audio description for the visually impaired";
-		case 0x45:
-			return "HE-AAC v2 audio for the hard of hearing";
-		case 0x46:
-			return "HE-AAC v2 receiver-mixed supplementary audio as per annex E of TS 101 154 [10]";
-		case 0x47:
-			return "HE-AAC receiver mix audio description for the visually impaired";
-		case 0x48:
-			return "HE-AAC broadcaster mix audio description for the visually impaired";
-		case 0x49:
-			return "HE-AAC v2 receiver mix audio description for the visually impaired";
-		case 0x4A:
-			return "HE-AAC v2 broadcaster mix audio description for the visually impaired";
-		case 0xA0:
-			return "HE AAC, or HE AAC v2 with SAOC-DE ancillary data";
-		case 0xFF:
-			return "reserved for future use";
-
-		default:
-			if ((0x06 <= component_type) && (component_type <= 0x3F)) {
-				return "reserved for future use";
+		return switch (component_type) {
+			case 0x00 -> "reserved for future use";
+			case 0x01 -> "HE-AAC audio, single mono channel";
+			case 0x02 -> "reserved for future use";
+			case 0x03 -> "HE-AAC audio, stereo";
+			case 0x04 -> "reserved for future use";
+			case 0x05 -> "HE-AAC audio, surround sound";
+			case 0x40 -> "HE-AAC audio description for the visually impaired";
+			case 0x41 -> "HE-AAC audio for the hard of hearing";
+			case 0x42 -> "HE-AAC receiver-mixed supplementary audio as per annex E of TS 101 154 [10]";
+			case 0x43 -> "HE-AAC v2 audio, stereo";
+			case 0x44 -> "HE-AAC v2 audio description for the visually impaired";
+			case 0x45 -> "HE-AAC v2 audio for the hard of hearing";
+			case 0x46 -> "HE-AAC v2 receiver-mixed supplementary audio as per annex E of TS 101 154 [10]";
+			case 0x47 -> "HE-AAC receiver mix audio description for the visually impaired";
+			case 0x48 -> "HE-AAC broadcaster mix audio description for the visually impaired";
+			case 0x49 -> "HE-AAC v2 receiver mix audio description for the visually impaired";
+			case 0x4A -> "HE-AAC v2 broadcaster mix audio description for the visually impaired";
+			case 0xA0 -> "HE AAC, or HE AAC v2 with SAOC-DE ancillary data";
+			case 0xFF -> "reserved for future use";
+			default -> {
+				if ((0x06 <= component_type) && (component_type <= 0x3F)) {
+					yield "reserved for future use";
+				}
+				if ((0x4B <= component_type) && (component_type <= 0xAF)) {
+					yield "reserved for future use";
+				}
+				if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
+					yield "user defined";
+				}
+				yield "Illegal value";
 			}
-			if ((0x4B <= component_type) && (component_type <= 0xAF)) {
-				return "reserved for future use";
-			}
-			if ((0xB0 <= component_type) && (component_type <= 0xFE)) {
-				return "user defined";
-			}
-			return "Illegal value";
-
-		}
+		};
 	}
 
 
@@ -1312,7 +862,7 @@ public class Descriptor implements TreeNode {
 	 * @return List off all descriptors matching u
 	 */
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(final List<? extends Descriptor> descriptorList, final Class<U> u ) {
+	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(final Iterable<? extends Descriptor> descriptorList, final Class<U> u ) {
 
 		final List<U> result = new ArrayList<>();
 		for (final Descriptor element : descriptorList) {
@@ -1334,7 +884,7 @@ public class Descriptor implements TreeNode {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> Object findDescriptorApplyFunc(final List<Descriptor> descriptorList, final Class<U> u , Function<U, Object> fun) {
+	public static <U extends Descriptor> Object findDescriptorApplyFunc(final Iterable<Descriptor> descriptorList, final Class<U> u , final Function<U, Object> fun) {
 		for (final Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				return fun.apply((U) element);
@@ -1344,7 +894,7 @@ public class Descriptor implements TreeNode {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> List<Object> findDescriptorApplyListFunc(final List<Descriptor> descriptorList, final Class<U> u , Function<U, List<Object>> fun) {
+	public static <U extends Descriptor> List<Object> findDescriptorApplyListFunc(final Iterable<Descriptor> descriptorList, final Class<U> u , final Function<U, List<Object>> fun) {
 		for (final Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				return fun.apply((U) element);
@@ -1362,118 +912,61 @@ public class Descriptor implements TreeNode {
 	 * @return
 	 */
 	public static String getProfileLevelString(final int profile_and_level) {
-		switch (profile_and_level) {
-
-		case 0x10:
-			return "Main profile, level 1";
-		case 0x11:
-			return "Main profile, level 2";
-		case 0x12:
-			return "Main profile, level 3";
-		case 0x13:
-			return "Main profile, level 4";
-		case 0x18:
-			return "Scalable Profile, level 1";
-		case 0x19:
-			return "Scalable Profile, level 2";
-		case 0x1A:
-			return "Scalable Profile, level 3";
-		case 0x1B:
-			return "Scalable Profile, level 4";
-		case 0x20:
-			return "Speech profile, level 1";
-		case 0x21:
-			return "Speech profile, level 2";
-		case 0x28:
-			return "Synthesis profile, level 1";
-		case 0x29:
-			return "Synthesis profile, level 2";
-		case 0x2A:
-			return "Synthesis profile, level 3";
-		case 0x30:
-			return "High quality audio profile, level 1";
-		case 0x31:
-			return "High quality audio profile, level 2";
-		case 0x32:
-			return "High quality audio profile, level 3";
-		case 0x33:
-			return "High quality audio profile, level 4";
-		case 0x34:
-			return "High quality audio profile, level 5";
-		case 0x35:
-			return "High quality audio profile, level 6";
-		case 0x36:
-			return "High quality audio profile, level 7";
-		case 0x37:
-			return "High quality audio profile, level 8";
-		case 0x38:
-			return "Low delay audio profile, level 1";
-		case 0x39:
-			return "Low delay audio profile, level 2";
-		case 0x3A:
-			return "Low delay audio profile, level 3";
-		case 0x3B:
-			return "Low delay audio profile, level 4";
-		case 0x3C:
-			return "Low delay audio profile, level 5";
-		case 0x3D:
-			return "Low delay audio profile, level 6";
-		case 0x3E:
-			return "Low delay audio profile, level 7";
-		case 0x3F:
-			return "Low delay audio profile, level 8";
-		case 0x40:
-			return "Natural audio profile, level 1";
-		case 0x41:
-			return "Natural audio profile, level 2";
-		case 0x42:
-			return "Natural audio profile, level 3";
-		case 0x43:
-			return "Natural audio profile, level 4";
-		case 0x48:
-			return "Mobile audio internetworking profile, level 1";
-		case 0x49:
-			return "Mobile audio internetworking profile, level 2";
-		case 0x4A:
-			return "Mobile audio internetworking profile, level 3";
-		case 0x4B:
-			return "Mobile audio internetworking profile, level 4";
-		case 0x4C:
-			return "Mobile audio internetworking profile, level 5";
-		case 0x4D:
-			return "Mobile audio internetworking profile, level 6";
-		case 0x50:
-			return "AAC profile, level 1";
-		case 0x51:
-			return "AAC profile, level 2";
-		case 0x52:
-			return "AAC profile, level 4";
-		case 0x53:
-			return "AAC profile, level 5";
-		case 0x58:
-			return "High efficiency AAC profile, level 2";
-		case 0x59:
-			return "High efficiency AAC profile, level 3";
-		case 0x5A:
-			return "High efficiency AAC profile, level 4";
-		case 0x5B:
-			return "High efficiency AAC profile, level 5";
-		case 0x60:
-			return "High efficiency AAC v2 profile, level 2";
-		case 0x61:
-			return "High efficiency AAC v2 profile, level 3";
-		case 0x62:
-			return "High efficiency AAC v2 profile, level 4";
-		case 0x63:
-			return "High efficiency AAC v2 profile, level 5";
-
-		case 0xFF:
-			return "Audio profile and level not specified by the MPEG-4_audio_profile_and_level " +
-			"field in this descriptor";
-		default:
-			return "Reserved";
-
-		}
+		return switch (profile_and_level) {
+			case 0x10 -> "Main profile, level 1";
+			case 0x11 -> "Main profile, level 2";
+			case 0x12 -> "Main profile, level 3";
+			case 0x13 -> "Main profile, level 4";
+			case 0x18 -> "Scalable Profile, level 1";
+			case 0x19 -> "Scalable Profile, level 2";
+			case 0x1A -> "Scalable Profile, level 3";
+			case 0x1B -> "Scalable Profile, level 4";
+			case 0x20 -> "Speech profile, level 1";
+			case 0x21 -> "Speech profile, level 2";
+			case 0x28 -> "Synthesis profile, level 1";
+			case 0x29 -> "Synthesis profile, level 2";
+			case 0x2A -> "Synthesis profile, level 3";
+			case 0x30 -> "High quality audio profile, level 1";
+			case 0x31 -> "High quality audio profile, level 2";
+			case 0x32 -> "High quality audio profile, level 3";
+			case 0x33 -> "High quality audio profile, level 4";
+			case 0x34 -> "High quality audio profile, level 5";
+			case 0x35 -> "High quality audio profile, level 6";
+			case 0x36 -> "High quality audio profile, level 7";
+			case 0x37 -> "High quality audio profile, level 8";
+			case 0x38 -> "Low delay audio profile, level 1";
+			case 0x39 -> "Low delay audio profile, level 2";
+			case 0x3A -> "Low delay audio profile, level 3";
+			case 0x3B -> "Low delay audio profile, level 4";
+			case 0x3C -> "Low delay audio profile, level 5";
+			case 0x3D -> "Low delay audio profile, level 6";
+			case 0x3E -> "Low delay audio profile, level 7";
+			case 0x3F -> "Low delay audio profile, level 8";
+			case 0x40 -> "Natural audio profile, level 1";
+			case 0x41 -> "Natural audio profile, level 2";
+			case 0x42 -> "Natural audio profile, level 3";
+			case 0x43 -> "Natural audio profile, level 4";
+			case 0x48 -> "Mobile audio internetworking profile, level 1";
+			case 0x49 -> "Mobile audio internetworking profile, level 2";
+			case 0x4A -> "Mobile audio internetworking profile, level 3";
+			case 0x4B -> "Mobile audio internetworking profile, level 4";
+			case 0x4C -> "Mobile audio internetworking profile, level 5";
+			case 0x4D -> "Mobile audio internetworking profile, level 6";
+			case 0x50 -> "AAC profile, level 1";
+			case 0x51 -> "AAC profile, level 2";
+			case 0x52 -> "AAC profile, level 4";
+			case 0x53 -> "AAC profile, level 5";
+			case 0x58 -> "High efficiency AAC profile, level 2";
+			case 0x59 -> "High efficiency AAC profile, level 3";
+			case 0x5A -> "High efficiency AAC profile, level 4";
+			case 0x5B -> "High efficiency AAC profile, level 5";
+			case 0x60 -> "High efficiency AAC v2 profile, level 2";
+			case 0x61 -> "High efficiency AAC v2 profile, level 3";
+			case 0x62 -> "High efficiency AAC v2 profile, level 4";
+			case 0x63 -> "High efficiency AAC v2 profile, level 5";
+			case 0xFF -> "Audio profile and level not specified by the MPEG-4_audio_profile_and_level field in this descriptor";
+			default -> "Reserved";
+		};
 	}
 
 	protected static String getMPEGCarriageFlagsString(final int mPEG_carriage_flags) {
@@ -1486,5 +979,17 @@ public class Descriptor implements TreeNode {
 
 	public static String getMetaDataFormatString(final int metadata_format) {
 		return metadata_format_list.get(metadata_format);
+	}
+
+	@Override
+	public String toString() {
+		return "Descriptor{" +
+				"descriptorTag=" + descriptorTag +
+				", descriptorLength=" + descriptorLength +
+				", privateData=" + Arrays.toString(privateData) +
+				", descriptorOffset=" + descriptorOffset +
+				", privateDataOffset=" + privateDataOffset +
+				", parentTableSection=" + parentTableSection +
+				'}';
 	}
 }

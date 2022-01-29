@@ -49,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,12 +119,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		public void actionPerformed(ActionEvent e) {
 			final TreePath path = tree.getSelectionPath();
 			if (path != null) {
-				Object comp = path.getLastPathComponent();
-				if(comp instanceof DefaultMutableTreeNode) {
-					DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) comp;
-					Object userObject = dmtn.getUserObject();
-					if (userObject instanceof KVP) {
-						final KVP kvp = (KVP) userObject;
+				if(path.getLastPathComponent() instanceof DefaultMutableTreeNode dmtn) {
+					if (dmtn.getUserObject() instanceof final KVP kvp) {
 						copyItemToClipboard(kvp);
 					}
 				}
@@ -156,9 +153,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		public void actionPerformed(ActionEvent e) {
 			final TreePath path = tree.getSelectionPath();
 			if (path != null) {
-				Object comp = path.getLastPathComponent();
-				if(comp instanceof DefaultMutableTreeNode) {
-					DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) comp;
+				if(path.getLastPathComponent() instanceof DefaultMutableTreeNode dmtn) {
 					expandAllItems(dmtn);
 				}
 			}
@@ -196,7 +191,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	//public static final String SAVE_DIR = "save_directory";
 
-	final JTree tree;
+	private final JTree tree;
 	private final JPanel detailPanel;
 	private final JEditorPane editorPane;
 	private final JEditorPane xmlPane;
@@ -209,7 +204,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public static final int SHOW_PTS_MODUS=0x10;
 	public static final int SHOW_VERSION_MODUS=0x20;
 
-	private int mod=0;
+	private int mod;
 	private TransportStream ts;
 	private DefaultTreeModel model;
 	private final ImagePanel imagePanel = new ImagePanel();
@@ -219,7 +214,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 *
 	 * Creates a new DVBTree
 	 *
-	 * @param transportStream stream to be displayed (can be <code>null</code>)
+	 * @param transportStream stream to be displayed (can be {@code null})
 	 * @param modus determines options of JTree, (like simple view, number list items, etc.)
 	 */
 	public DVBtree(final TransportStream transportStream, final int modus) {
@@ -340,7 +335,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * Update existing DVBTree to display a new {@link TransportStream}
 	 *
-	 * @param transportStream stream to be displayed (can be <code>null</code>)
+	 * @param transportStream stream to be displayed (can be {@code null})
 	 * @param viewContext ignored, required by {@link TransportStreamView}
 
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
@@ -401,7 +396,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param modus
 	 * @return true when toggling this modus will not change the number of nodes in the tree, or the structure of it
 	 */
-	boolean isNotStructuralChange(final int modus) {
+	private static boolean isNotStructuralChange(final int modus) {
 		return (modus != SIMPLE_MODUS) && (modus != PSI_ONLY_MODUS) && (modus != PACKET_MODUS);
 	}
 
@@ -427,10 +422,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * 
 	 */
 
-	public String getExpansionState() {
+	private String getExpansionState() {
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < tree.getRowCount(); i++) {
+		int rowCount = tree.getRowCount();
+		for (int i = 0; i < rowCount; i++) {
 			if (tree.isExpanded(i)) {
 				sb.append(i).append(",");
 			}
@@ -448,7 +444,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param s the expansion state based upon a comma delimited list of row indexes that need to be expanded
 	 */
 
-	public void setExpansionState(String s) {
+	private void setExpansionState(String s) {
 		String[] indexes = s.split(",");
 
 		for (String st : indexes) {
@@ -475,19 +471,15 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			return;
 		}
 		// not always a DefaultMutableTreeNode
-		if(node1 instanceof DefaultMutableTreeNode){
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) node1;
+		if(node1 instanceof DefaultMutableTreeNode node){
 
-			final Object nodeInfo = node.getUserObject();
-
-			if (nodeInfo instanceof KVP) {
-				final KVP kvp = (KVP)nodeInfo;
+			if (node.getUserObject() instanceof final KVP kvp) {
 				if(kvp.getImageSource()!=null){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					BufferedImage img = null;
+					BufferedImage img;
 					try {
 						img = kvp.getImageSource().getImage();
-					} catch (Exception e1) {
+					} catch (RuntimeException e1) {
 						logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
 						img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
 					}
@@ -543,12 +535,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	@Override
 	public void actionPerformed(final ActionEvent ae) {
-		DefaultMutableTreeNode dmtn;
 
 		final TreePath path = tree.getSelectionPath();
 		if(path!=null){
 
-			dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
+			DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 			final KVP kvp = (KVP)dmtn.getUserObject();
 			if (ae.getActionCommand().equals(EXPAND)) {
 				expandItem();
@@ -591,7 +582,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param dmtn start node from where to expand
 	 */
-	void expandAllItems(DefaultMutableTreeNode dmtn) {
+	private void expandAllItems(DefaultMutableTreeNode dmtn) {
 		expandItem();
 		long end = System.currentTimeMillis() + MAX_EXPAND_ALL_TIME_MILLISECS;
 		expandAllItemsRecursive(dmtn,end);
@@ -601,7 +592,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param dmtn start node from where to expand
 	 * @param end time (System.currentTimeMillis()) when this should stop expanding, to prevent long responses in the AWT Event thread
 	 */
-	void expandAllItemsRecursive(final DefaultMutableTreeNode dmtn, long end) {
+	private void expandAllItemsRecursive(final DefaultMutableTreeNode dmtn, long end) {
 		if(System.currentTimeMillis() > end){
 			return;
 		}
@@ -611,8 +602,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 		while (children.hasMoreElements()) {
 			Object nextElement = children.nextElement();
-			if(nextElement instanceof DefaultMutableTreeNode) {
-				DefaultMutableTreeNode child = (DefaultMutableTreeNode) nextElement;
+			if(nextElement instanceof DefaultMutableTreeNode child) {
 				if (!child.isLeaf()) {
 					expandAllItemsRecursive(child,end);
 				}
@@ -621,9 +611,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	}
 	
 
-	void expandItem() {
-		TreePath selectedPath = tree.getSelectionPath();
-		tree.expandPath(selectedPath);
+	private void expandItem() {
+		tree.expandPath(tree.getSelectionPath());
 	}
 
 	private void saveT2miTs(KVP kvp) {
@@ -703,7 +692,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final int pid = p.getPid();
 		GeneralPidHandler pesH = p.getPidHandler();
 		if(!pesH.isInitialized()){ // prevent double click
-			HashMap<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
+			Map<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
 			handlerMap.put(pid, pesH);
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -712,7 +701,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			} catch (final IOException e) {
 				logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
 				setCursor(Cursor.getDefaultCursor());
-			}catch (Exception e) {
+			}catch (RuntimeException e) {
 				logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+pesH.getClass().getName(),e);
 				if((pesH.getClass() != GeneralPesHandler.class) &&
 					(pesH.getClass() != GeneralPsiTableHandler.class)){ // only if specialized subclass of GeneralPesHandler
@@ -748,11 +737,10 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param kvp
 	 */
 	private void copyVisibleSubTreeToClipboard(DefaultMutableTreeNode dmtn, final TreePath path, final KVP kvp) {
-		final StringBuilder res = new StringBuilder(kvp.getPlainText());
-		res.append(System.lineSeparator());
 
-		res.append(getViewTree(dmtn,"",path));
-		final StringSelection stringSelection = new StringSelection( res.toString() );
+		String res = kvp.getPlainText() + System.lineSeparator() +
+				getViewTree(dmtn, "", path);
+		final StringSelection stringSelection = new StringSelection(res);
 		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
 	}
@@ -773,7 +761,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param kvp
 	 */
-	void copyItemToClipboard(final KVP kvp) {
+	private void copyItemToClipboard(final KVP kvp) {
 		final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
 		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
@@ -790,17 +778,15 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		final Enumeration children = dmtn.children();
 		while(children.hasMoreElements()){
 			Object next = children.nextElement();
-			if(next instanceof DefaultMutableTreeNode){
-				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
+			if(next instanceof final DefaultMutableTreeNode child){
 				Object userObject = child.getUserObject();
-				if( userObject instanceof KVP) {
-					final KVP chKVP = (KVP)userObject;
+				if(userObject instanceof final KVP chKVP) {
 					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(System.lineSeparator());
 					if(!child.isLeaf()){
-						if(child!=dmtn.getLastChild()){
-							res.append(getEntireTree(child,preFix+"| ")); // more children follow, so start with "| "
-						}else{ // lastChild
-							res.append(getEntireTree(child,preFix+"  ")); // last , so prefix with "  "
+						if (child == dmtn.getLastChild()) { // lastChild
+							res.append(getEntireTree(child, preFix + "  ")); // last , so prefix with "  "
+						} else {
+							res.append(getEntireTree(child, preFix + "| ")); // more children follow, so start with "| "
 						}
 					}
 				}else {
@@ -823,17 +809,16 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		while(children.hasMoreElements()){
 
 			Object next = children.nextElement();
-			if(next instanceof DefaultMutableTreeNode){
-				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
+			if(next instanceof final DefaultMutableTreeNode child){
 				final TreePath childPath = path.pathByAddingChild(child);
 				if(tree.isVisible(childPath)){
 					final KVP chKVP = (KVP)child.getUserObject();
 					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(System.lineSeparator());
 					if(!child.isLeaf()){
-						if(child!=dmtn.getLastChild()){
-							res.append(getViewTree(child,preFix+"| ",childPath)); // more children follow, so start with "| "
-						}else{ // lastChild
-							res.append(getViewTree(child,preFix+"  ",childPath)); // last , so prefix with "  "
+						if (child == dmtn.getLastChild()) { // lastChild
+							res.append(getViewTree(child, preFix + "  ", childPath)); // last , so prefix with "  "
+						} else {
+							res.append(getViewTree(child, preFix + "| ", childPath)); // more children follow, so start with "| "
 						}
 					}
 				}
@@ -845,7 +830,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	/**
 	 * @param e
 	 */
-	void showContextMenu(final MouseEvent e) {
+	private void showContextMenu(final MouseEvent e) {
 		final TreePath path = tree.getSelectionPath();
 		
 		
@@ -872,8 +857,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 				JMenuItem subMenu = kvp.getSubMenu();
 				if(subMenu!=null){
 					final Object owner =  kvp.getOwner();
-					if(owner instanceof PID){ // if PID has a owner, it is a PES that maybe has not been parsed yet.
-						final PID p = (PID) owner;
+					if(owner instanceof final PID p){ // if PID has a owner, it is a PES that maybe has not been parsed yet.
 						final GeneralPidHandler pesH = p.getPidHandler();
 						if(!pesH.isInitialized()){
 							subMenu.addActionListener(this);
@@ -949,18 +933,16 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 
 	private void saveBytes(KVP kvp) {
-		
+
 		if(kvp.getFieldType()!= KVP.FIELD_TYPE_BYTES) {
 			return;
 		}
 		SaveAble saveAble = file -> {
 			try (FileOutputStream out = new FileOutputStream(file)) {
 				out.write(kvp.getByteValue());
-				
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "could not write file", e);
 			}
-			
 		};
 		
 		selectFileAndSave(kvp.getLabel(), saveAble);
@@ -970,7 +952,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param fileName
 	 * @param saveAble
 	 */
-	protected void selectFileAndSave(String fileName, SaveAble saveAble) {
+	private void selectFileAndSave(String fileName, SaveAble saveAble) {
 		final JFileChooser chooser = createFileChooserDefaultSaveDir();
 
 		chooser.setSelectedFile(new File(fileName));
@@ -991,7 +973,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param file
 	 * @param saveAble
 	 */
-	protected void confirmOverwriteIfExisting(final File file, SaveAble saveAble) {
+	private void confirmOverwriteIfExisting(final File file, SaveAble saveAble) {
 		boolean write=true;
 		if(file.exists()){
 			logger.log(Level.INFO, "file {} already exists.", file);
