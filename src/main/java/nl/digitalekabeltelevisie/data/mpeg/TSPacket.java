@@ -23,6 +23,10 @@
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
  *
+ * Change log:
+ * - Feb 8th 2022: If the packet contains a specific elementary stream header,
+ *                 decode and display it, in addition to the standard
+ *                 PES header.
  */
 
 package nl.digitalekabeltelevisie.data.mpeg;
@@ -47,6 +51,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
+import nl.digitalekabeltelevisie.data.mpeg.pes.headers.ElementaryStreamHeader;
+import nl.digitalekabeltelevisie.data.mpeg.pes.headers.ElementaryStreamHeaderFactory;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.RangeHashMap;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -74,6 +81,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	final private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
 	final private static Color FEC_COLOR = new Color(0x800080);
 	final private static Color PES_HEADER_COLOR = new Color(0x800000);
+	final private static Color ES_HEADER_COLOR = new Color(0xB19D19);
 	private static final Color ERROR_COLOR = new Color(0xFF0000);
 	final private TransportStream transportStream;
 	private long packetOffset = -1;
@@ -313,10 +321,22 @@ public class TSPacket implements HTMLSource, TreeNode{
 					Utils.appendHeader(s, "Pes Header:", PES_HEADER_COLOR);
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					s.append("</span>");
-					if(pesHeaderView.hasExtendedHeader()){
-						coloring.put(payloadStart, payloadStart+8+pesHeaderView.getPes_header_data_length(), PES_HEADER_COLOR);
-					}else{
-						coloring.put(payloadStart, payloadStart+5, PES_HEADER_COLOR);
+					int pesHeaderEnd = pesHeaderView.hasExtendedHeader()
+							? payloadStart+8+pesHeaderView.getPes_header_data_length()
+							: payloadStart+5;
+					coloring.put(payloadStart, pesHeaderEnd, PES_HEADER_COLOR);
+
+					int streamType = getStreamType();
+					ElementaryStreamHeader elementaryStreamHeader = ElementaryStreamHeaderFactory.getFromStreamType(streamType);
+					elementaryStreamHeader.parse(buffer, pesHeaderEnd + 1);
+					DefaultMutableTreeNode esTreeNode = elementaryStreamHeader.getJTreeNode();
+					if (esTreeNode != null) {
+						Utils.appendHeader(s, "Elementary stream header:", ES_HEADER_COLOR);
+						s.append("<br>").append(Utils.getChildrenAsHTML(esTreeNode));
+						s.append("</span>");
+						int esStart = pesHeaderEnd + 1;
+						int esEnd = esStart + elementaryStreamHeader.getLength() - 1;
+						coloring.put(esStart, esEnd, ES_HEADER_COLOR);
 					}
 				}
 			}
@@ -399,6 +419,17 @@ public class TSPacket implements HTMLSource, TreeNode{
 				final PesHeader pesHeaderView = getPesHeader();
 				if((pesHeaderView !=null)&&(pesHeaderView.isValidPesHeader())){
 					t.add(pesHeaderView.getJTreeNode(modus));
+
+					int pesHeaderEnd = pesHeaderView.hasExtendedHeader()
+							? payloadStart+8+pesHeaderView.getPes_header_data_length()
+							: payloadStart+5;
+					int streamType = getStreamType();
+					ElementaryStreamHeader elementaryStreamHeader = ElementaryStreamHeaderFactory.getFromStreamType(streamType);
+					elementaryStreamHeader.parse(buffer, pesHeaderEnd + 1);
+					DefaultMutableTreeNode esTreeNode = elementaryStreamHeader.getJTreeNode();
+					if (esTreeNode != null) {
+						t.add(esTreeNode);
+					}
 				}
 			}
 			if(buffer.length>PAYLOAD_PACKET_LENGTH){
@@ -423,4 +454,18 @@ public class TSPacket implements HTMLSource, TreeNode{
 		return buffer;
 	}
 
+	private int getStreamType() {
+		if (transportStream != null) {
+			final short pid = transportStream.getPacket_pid(packetNo);
+			PMTsection pmt = transportStream.getPMTforPID(pid);
+			if (pmt != null) {
+				return pmt.getComponentenList().stream()
+						.filter(component -> component.getElementaryPID() == pid)
+						.findFirst()
+						.map(PMTsection.Component::getStreamtype)
+						.orElse(-1);
+			}
+		}
+		return -1;
+	}
 }

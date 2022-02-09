@@ -23,6 +23,8 @@
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
  *
+ * Change log:
+ * - Feb 8th 2022: Handle JPEG-XS video descriptor
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
@@ -358,6 +360,8 @@ public final class DescriptorFactory {
 		
 		case 0x03:
 			return new HEVCTimingAndHRDDescriptor(data, 0, tableSection);
+		case 0x14:
+			return new JpegXsVideoDescriptor(data, 0, tableSection);
 		default:
 			MPEGExtensionDescriptor d = new MPEGExtensionDescriptor(data, 0, tableSection);
 			logger.warning("unimplemented MPEGExtensionDescriptor:" +

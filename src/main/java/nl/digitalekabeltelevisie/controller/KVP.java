@@ -23,6 +23,8 @@
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
  *
+ * Change log:
+ * - Feb 8th 2022: Added constructor supporting boolean value
  */
 package nl.digitalekabeltelevisie.controller;
 
@@ -182,6 +184,10 @@ public class KVP{
 		this.longValue = value;
 		this.description = description;
 		this.fieldType = FIELD_TYPE_LONG;
+	}
+
+	public KVP(final String label, final boolean value, final String description) {
+		this(label, value ? 1 : 0, description);
 	}
 
 	public KVP(final String html, final String label) {
