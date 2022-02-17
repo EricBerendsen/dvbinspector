@@ -25,7 +25,7 @@
  *
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.pes.video;
+package nl.digitalekabeltelevisie.data.mpeg.pes.video.jpegxs;
 
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;

@@ -45,7 +45,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescrip
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TtmlSubtitlingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video.JpegXsHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.jpegxs.JpegXsHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
