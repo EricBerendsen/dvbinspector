@@ -25,35 +25,17 @@
  *
  */
 
-package nl.digitalekabeltelevisie.data.mpeg.pes.headers;
+package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
 /**
- * Generic interface used to parse an elementary stream's header. The elementary
- * stream header, if any, follows directly the PES header.
- *
  * @author Simon Provost
  */
-public interface ElementaryStreamHeader {
-    /**
-     * Parse an elementary stream header from a byte buffer.
-     *
-     * @param buffer The buffer containing the header's information
-     * @param offset Offset, within the buffer, at which the header starts
-     */
-    void parse(byte[] buffer, int offset);
-
-    /**
-     * @return A {@link  DefaultMutableTreeNode} representing this header. May return
-     * null if there is an error (e.g. parsing error, buffer does not represent an
-     * actual header, header type not handled by the code)
-     */
-    DefaultMutableTreeNode getJTreeNode();
-
-    /**
-     * @return The length, in bytes, of the header. Does NOT include the
-     * offset (if any), passed to the method {@link #parse(byte[], int)}.
-     */
-    int getLength();
+public class JpegXsHandler extends GeneralPesHandler {
+    @Override
+    protected void processPesDataBytes(final PesPacketData pesData){
+        pesPackets.add(new JpegXsDataField(pesData));
+    }
 }
