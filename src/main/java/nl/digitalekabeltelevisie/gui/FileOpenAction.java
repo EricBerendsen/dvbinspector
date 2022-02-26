@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -73,7 +73,6 @@ public class FileOpenAction extends AbstractAction {
 
 			final File file = fileChooser.getSelectedFile();
 			PreferencesManager.setSelectMpegFileFilter(fileChooser.getFileFilter()==tsFilter);
-			PreferencesManager.setLastUsedDir(file.getParent());
 
 			final TSLoader tsLoader = new TSLoader(file,contr);
 			tsLoader.execute();

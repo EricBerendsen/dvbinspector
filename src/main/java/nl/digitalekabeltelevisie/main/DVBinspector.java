@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -68,6 +68,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
+import nl.digitalekabeltelevisie.gui.utils.RecentFiles;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -95,6 +96,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private JTabbedPane tabbedPane;
 	private JMenu viewTreeMenu;
 	private JMenu viewMenu;
+	private JMenu recentFilesMenu;
+	
 	private PIDDialog pidDialog = null;
 
 	private ViewContext viewContext = new ViewContext();
@@ -533,11 +536,48 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		fileMenu.add(openMenuItem);
 
+		recentFilesMenu = createRecentFilesMenu();
+		
+		fileMenu.add(recentFilesMenu);
+
 		final JMenuItem exitMenuItem = new JMenuItem("Exit",KeyEvent.VK_X);
 		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
 		exitMenuItem.addActionListener(this);
 		fileMenu.add(exitMenuItem);
 		return fileMenu;
+	}
+
+	private JMenu createRecentFilesMenu() {
+		final JMenu recentFilesMenu = new JMenu("Recent Files");
+		recentFilesMenu.setMnemonic(KeyEvent.VK_R);
+		
+		populateRecenFilesMenu(recentFilesMenu);
+		return recentFilesMenu;
+	}
+
+	private void populateRecenFilesMenu(final JMenu recentFilesMenu) {
+		addFilesToMenu(recentFilesMenu);
+		recentFilesMenu.addSeparator();
+		final JMenuItem clearRecentFilesMenuItem = new JMenuItem("Empty Recent Files List",KeyEvent.VK_X);
+		clearRecentFilesMenuItem.setMnemonic(KeyEvent.VK_E);
+		clearRecentFilesMenuItem.addActionListener(new ClearRecentFilesAction(this));
+		recentFilesMenu.add(clearRecentFilesMenuItem);
+	}
+
+	private void addFilesToMenu(final JMenu recentFilesMenu) {
+		RecentFiles recent = RecentFiles.getInstance();
+		
+		List<String> files = recent.getRecentFiles();
+		int no = 1;
+		for(String f:files) {
+			RecentFileOpenAction recentAction = new RecentFileOpenAction(this,f, no);
+			final JMenuItem fileMenuItem = new JMenuItem(recentAction);
+			String numberString = Integer.toString(no);
+			int mnemonic = numberString.codePointAt(numberString.length()-1);
+			fileMenuItem.setMnemonic(mnemonic);
+			recentFilesMenu.add(fileMenuItem);
+			no++;
+		}
 	}
 
 
@@ -763,4 +803,27 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	}
 
 
+	public void addRecentFile(String fileName) {
+		RecentFiles recentFiles = RecentFiles.getInstance();
+		recentFiles.addOrMoveToBegin(fileName);
+		recentFilesMenu.removeAll();
+		populateRecenFilesMenu(recentFilesMenu);
+	}
+	
+	
+	public void removeRecentFile(String fileName) {
+		RecentFiles recentFiles = RecentFiles.getInstance();
+		if(recentFiles.remove(fileName)){
+			recentFilesMenu.removeAll();
+			populateRecenFilesMenu(recentFilesMenu);
+		}
+	}
+
+	
+	public void clearRecentFiles() {
+		RecentFiles recentFiles = RecentFiles.getInstance();
+		recentFiles.reset();
+		recentFilesMenu.removeAll();
+		populateRecenFilesMenu(recentFilesMenu);
+	}
 }

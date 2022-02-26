@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -37,6 +37,7 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.main.DVBinspector;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public class TSLoader extends SwingWorker<TransportStream, Void>{
 
@@ -64,6 +65,8 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			if(ts!=null){
 				control.setTransportStream(get());
 				control.resetSearch();
+				PreferencesManager.setLastUsedDir(file.getParent());
+				control.addRecentFile(file.getCanonicalPath());
 			}
 		} catch (final Throwable t) {
 			logger.log(Level.SEVERE, "Error displaying stream", t);
@@ -88,6 +91,11 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 			transportStream.parsePSITables(control.getFrame());
 
 		} catch (final NotAnMPEGFileException e) {
+			try {
+				control.removeRecentFile(file.getCanonicalPath());
+			} catch (IOException ioException) {
+				logger.log(Level.INFO,"Removing file from recent files failed; ",ioException);
+			}
 			String msg = e.getMessage();
 			logger.log(Level.WARNING, "could not determine packet size stream",e);
 			showMessage(msg);

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -40,6 +40,7 @@ public class PreferencesManager {
 	private static final String DEFAULT_VIEW_MODUS = "view_modus";
 
 	private static final String LAST_USED_DIR = "stream_directory";
+	private static final String RECENT_FILES= "recent_files";
 	
 	private static final String SAVE_DIR = "save_directory";
 
@@ -97,6 +98,14 @@ public class PreferencesManager {
 
 	public static String getLastUsedDir() {
 		return prefs.get(LAST_USED_DIR, null);
+	}
+
+	public static void setRecentFiles(String files) {
+		prefs.put(RECENT_FILES, files);
+	}
+
+	public static String getRecentFiles() {
+		return prefs.get(RECENT_FILES, "");
 	}
 
 	public static void setSaveDir(String dir) {
