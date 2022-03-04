@@ -40,6 +40,7 @@ import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.*;
 
 public class LinkageDescriptor extends Descriptor {
@@ -379,6 +380,8 @@ public class LinkageDescriptor extends Descriptor {
 			reserved = getInt(b,offset+11,1,MASK_6BITS);
 			privateDataByte = copyOfRange(b, offset+12, offset+descriptorLength+2);
 
+		}else if(linkageType>=0x0e && linkageType<=0x1f){ // extended event linkage 
+			logger.info("extended event linkage not implemented");
 		}else if(linkageType==0x20){ // downloadable font info linkage
 			font_count = getInt(b,offset+9,1,MASK_8BITS);
 			for (int i = 0; i < font_count; i++) {
@@ -482,7 +485,8 @@ public class LinkageDescriptor extends Descriptor {
 			t.add(new DefaultMutableTreeNode(new KVP("target_listed",target_listed ,target_listed==1?"service shall be included in SDT":"service may not be included in SDT")));
 			t.add(new DefaultMutableTreeNode(new KVP("event_simulcast",event_simulcast ,event_simulcast==1?"target and source are being simulcast":"events are offset in time")));
 			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-
+		}else if(linkageType>=0x0e && linkageType<=0x1f){ // extended event linkage 
+			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("extended event linkage")));
 		}else if(linkageType==0x20){ // downloadable font info linkage
 			
 			t.add(new DefaultMutableTreeNode(new KVP("font_count",font_count ,null)));
@@ -559,7 +563,7 @@ public class LinkageDescriptor extends Descriptor {
 		case 0x8A : return "user defined: (M7 Fastscan Home TP location descriptor)";
 		case 0x8D : return "user defined: (M7 Fastscan ONT location location descriptor)";
 
-		case 0xA0 : return "user defined: link to OpenTV VOD service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0xA0 : return "user defined:	";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0xA6 : return "user defined: link to OpenTV ITV service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0xA7 : return "user defined: link to WEB service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
@@ -567,7 +571,7 @@ public class LinkageDescriptor extends Descriptor {
 
 		default:
 			if((0x0E<=linkageType)&&(linkageType<=0x1F )){return "extended event linkage";}
-			if((0x0D<=linkageType)&&(linkageType<=0x7F )){return "reserved for future use";}
+			if((0x21<=linkageType)&&(linkageType<=0x7F )){return "reserved for future use";}
 			if((0x80<=linkageType)&&(linkageType<=0xFE )){return "user defined";}
 
 			return "Illegal value";
