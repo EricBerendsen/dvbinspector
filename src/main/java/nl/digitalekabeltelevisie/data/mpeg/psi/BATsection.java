@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,6 +26,8 @@
  */
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
+
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
 
@@ -132,11 +134,11 @@ public class BATsection extends TableSectionExtendedSyntax{
 	public BATsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data, parent);
 
-		networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, 0x0FFF);
-		transportStreamLoopLength = Utils.getInt(raw_data.getData(), 10 + networkDescriptorsLength, 2, 0x0FFF);
+		networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, MASK_12BITS);
 
 		networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(), 10, networkDescriptorsLength,
 				this);
+		transportStreamLoopLength = Utils.getInt(raw_data.getData(), 10 + networkDescriptorsLength, 2, MASK_12BITS);
 		transportStreamList = buildTransportStreamList(raw_data.getData(), 12 + networkDescriptorsLength,
 				transportStreamLoopLength);
 	}
@@ -195,9 +197,9 @@ public class BATsection extends TableSectionExtendedSyntax{
 		int t = 0;
 		while (t < programInfoLength) {
 			final TransportStream c = new TransportStream();
-			c.setTransportStreamID(Utils.getInt(data, i + t, 2, 0x0FFF));
-			c.setOriginalNetworkID(Utils.getInt(data, i + t + 2, 2, 0x0FFF));
-			c.setTransportDescriptorsLength(Utils.getInt(data, i + t + 4, 2, 0x0FFF));
+			c.setTransportStreamID(Utils.getInt(data, i + t, 2, MASK_16BITS));
+			c.setOriginalNetworkID(Utils.getInt(data, i + t + 2, 2, MASK_16BITS));
+			c.setTransportDescriptorsLength(Utils.getInt(data, i + t + 4, 2, MASK_12BITS));
 			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data, i + t + 6, c
 					.getTransportDescriptorsLength(), this));
 			t += 6 + c.getTransportDescriptorsLength();
@@ -237,40 +239,6 @@ public class BATsection extends TableSectionExtendedSyntax{
 		tableModel.process();
 		return tableModel;
 	}
-//    
-//	public List<Map<String, Object>> getRowData() {
-//		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
-//
-//		HashMap<String, Object> networkTableData = TableUtils.getDescriptorTableData(getNetworkDescriptorList());
-//		for(TransportStream stream:transportStreamList) {
-//			Map<String, Object> transportStreamTableRow = stream.getTableRowData();
-//			transportStreamTableRow.putAll(networkTableData);
-//			rowData.add(transportStreamTableRow);
-//		}
-//		return rowData;
-//	}
-
-
-	
-//	static TableHeader<BATsection,List<BATsection.TransportStream>> buildBatTableHeader() {
-//		Function<BATsection, Object> fun = BATsection::getBouqetID;
-//		Function<BATsection, Object> fun2 = (b) -> Utils.getBouquetIDString(b.getBouqetID());
-//		return new TableHeaderBuilder<BATsection,List<BATsection.TransportStream>>().
-//				addBaseColumn("bouquet id",fun, Integer.class).
-//				addBaseColumn("bouquet id",fun2, Integer.class).
-////				addBaseColumn("bouquet id",BATsection::getBouqetID, Integer.class).
-////				addOptionalColumn("bouquet id name", "bouquet_id_name", String.class).
-////				
-////				addOptionalColumn("bouquet name descriptor", "bouquet.name", String.class).
-////				
-////				addOptionalColumn("transport stream id", "transport_stream_id", Integer.class).
-////				addOptionalColumn("original network id", "original_network_id", Integer.class).
-////				addOptionalColumn("original network name", "original_network_name", String.class).
-//				
-//				
-//				
-//				build();
-//	}
 
 
 }
