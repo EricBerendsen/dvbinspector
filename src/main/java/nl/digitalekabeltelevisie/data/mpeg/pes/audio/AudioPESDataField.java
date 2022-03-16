@@ -29,6 +29,8 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -38,6 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
  *
  */
 
+@JsonIgnoreProperties({"pesHandler","image"})
 public class AudioPESDataField extends PesPacketData implements TreeNode {
 
 

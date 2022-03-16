@@ -65,4 +65,8 @@ public class DFITs extends AbstractPSITabel {
 		return t;
 	}
 
+	public Map<Integer, DFIT> getDfits() {
+		return dfits;
+	}
+
 }

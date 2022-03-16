@@ -211,7 +211,8 @@ public class DSMCCs extends AbstractPSITabel{
 		return t;
 	}
 
-
-
+	public Map<Integer, DSMCC> getDsmccs() {
+		return dsmccs;
+	}
 
 }

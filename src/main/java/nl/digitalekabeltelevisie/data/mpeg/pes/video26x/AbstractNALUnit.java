@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -35,6 +37,7 @@ import nl.digitalekabeltelevisie.util.BitSource;
  * @author Eric
  *
  */
+@JsonIgnoreProperties({"bytes","rbsp_byte"})
 public abstract class AbstractNALUnit  implements TreeNode{
 
 	protected static final Logger logger = Logger.getLogger(NALUnit.class.getName());

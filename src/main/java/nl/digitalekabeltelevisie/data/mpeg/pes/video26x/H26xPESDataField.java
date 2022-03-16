@@ -28,12 +28,14 @@ import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
 /**
  * @author Eric
  *
  */
+@JsonIgnoreProperties({"pesHandler"})
 public abstract class H26xPESDataField<E extends AbstractNALUnit> extends PesPacketData {
 
 	private static final Logger	logger	= Logger.getLogger(H26xPESDataField.class.getName());

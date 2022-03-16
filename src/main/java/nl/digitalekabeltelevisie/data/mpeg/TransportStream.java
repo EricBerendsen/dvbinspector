@@ -38,6 +38,8 @@ import java.util.logging.*;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.AC4Descriptor;
@@ -72,6 +74,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
  * TransportStream is responsible for parsing a file containing a transport stream, dividing it into 188 byte {@link TSPackets}, and handing them over to the correct PID.
  *
  */
+@JsonIgnoreProperties({"psi","pids"})
 public class TransportStream implements TreeNode{
 	
 	public enum ComponentType{
@@ -1123,6 +1126,11 @@ public class TransportStream implements TreeNode{
 			}
 		}
 		return false;
+	}
+
+
+	public long getBitRateTDT() {
+			return bitRateTDT;
 	}
 	
 }

@@ -79,7 +79,7 @@ public class RCTs extends AbstractPSITabel{
 		return t;
 	}
 
-
-
-
+	public Map<Integer, RCT> getRcts() {
+		return rcts;
+	}
 }

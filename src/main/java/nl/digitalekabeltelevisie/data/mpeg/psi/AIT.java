@@ -78,5 +78,8 @@ public class AIT extends AbstractPSITabel{
 		return t;
 	}
 
+	public Map<Integer, AITsection[]> getAits() {
+		return aits;
+	}
 
 }

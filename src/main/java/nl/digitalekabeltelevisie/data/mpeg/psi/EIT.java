@@ -37,6 +37,7 @@ import java.util.stream.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.ArrayUtils;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -53,6 +54,8 @@ import nl.digitalekabeltelevisie.util.*;
  * @author Eric
  *
  */
+// parentTransportStream and parentPID to shortened the export
+@JsonIgnoreProperties({"psi","parentTransportStream","parentPID"})
 public class EIT extends AbstractPSITabel{
 
 	//     original_network_id,transport_stream_id,  serviceId, table_id 
@@ -282,4 +285,7 @@ public class EIT extends AbstractPSITabel{
 		return result;
 	}
 
+	public Map<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> getNewEit() {
+		return newEit;
+	}
 }

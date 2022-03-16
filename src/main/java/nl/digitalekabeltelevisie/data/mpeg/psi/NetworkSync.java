@@ -61,6 +61,8 @@ public class NetworkSync extends AbstractPSITabel{
 		return t;
 	}
 
-
+	public List<MegaFrameInitializationPacket> getMegaFrameList() {
+		return megaFrameList;
+	}
 
 }

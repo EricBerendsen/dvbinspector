@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -48,6 +49,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
  *
  */
 
+@JsonIgnoreProperties({"pesHandler","image"})
 public class VideoPESDataField extends PesPacketData implements TreeNode, ImageSource {
 
 

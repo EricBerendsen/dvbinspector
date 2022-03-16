@@ -35,6 +35,8 @@ import java.util.function.Function;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -45,6 +47,7 @@ import nl.digitalekabeltelevisie.util.*;
  * @author Eric Berendsen
  *
  */
+@JsonIgnoreProperties({"psi","parentPID","parentTransportStream"})
 public class Descriptor implements TreeNode {
 
 	private static final LookUpList metadata_application_format_list = new LookUpList.Builder().

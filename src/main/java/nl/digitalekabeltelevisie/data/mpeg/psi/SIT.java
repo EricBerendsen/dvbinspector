@@ -70,4 +70,9 @@ public class SIT extends AbstractPSITabel{
 		return t;
 	}
 
+	public SITsection[] getSit() {
+		return sit;
+	}
+
+
 }

@@ -38,6 +38,8 @@ import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -51,6 +53,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  *
  */
+@JsonIgnoreProperties({"pesPackets"})
 public class GeneralPesHandler extends GeneralPidHandler{
 
 	private static final Logger logger = Logger.getLogger(GeneralPesHandler.class.getName());

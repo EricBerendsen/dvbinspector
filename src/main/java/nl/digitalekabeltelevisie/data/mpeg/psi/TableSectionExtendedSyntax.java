@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 
@@ -39,6 +41,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
  * @author Eric
  *
  */
+@JsonIgnoreProperties({"psi","parentTransportStream"})
 public class TableSectionExtendedSyntax extends TableSection {
 
 

@@ -83,4 +83,9 @@ public class TSDT extends AbstractPSITabel {
 		return t;
 	}
 
+
+	public TSDTsection[] getTsdt() {
+		return tsdt;
+	}
+
 }

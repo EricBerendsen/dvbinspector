@@ -39,6 +39,8 @@ import java.util.logging.*;
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
@@ -52,6 +54,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
  *
  */
 
+@JsonIgnoreProperties({"bgImage576","bgImage720","bgImage1080","segmentList","image","pesHandler","pes_header_data_length"})
 public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode, ImageSource {
 
 	/**

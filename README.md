@@ -25,12 +25,17 @@ Unzip DVBinspector-1.16.0-dist.zip to a directory of your choice. It will create
 *    dvb.sh Bash script to start the program using Linux.
 *    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
 *    DVBinspector-1.16.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
+*    DVBinspectorCLI-1.16.0.jar. Self contained jar that contains all resources and libs. Can be executed in Command Prompt.
 
 ## Usage
 
 ### DVBinspector-1.16.0.jar
 
 There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.16.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.16.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.16.0.jar".
+
+### DVBinspectorCLI-1.16.0.jar
+
+Start DVBInspector without the Gui. To start it, open DVBinspectorCLI-1.16.0.jar in a command prompt using "java -jar DVBinspectorCLI-1.16.0.jar". This jar is working as DVBinspector-1.16.0.jar, without displaying the Gui. Some options are available, type "java -jar DVBinspectorCLI-1.16.0.jar --help" to obtain some help about how to use it.  
 
 ### dvb.bat 
 

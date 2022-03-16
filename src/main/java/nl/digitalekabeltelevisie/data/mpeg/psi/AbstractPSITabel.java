@@ -29,8 +29,11 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+@JsonIgnoreProperties({"parentPSI"})
 
 public abstract class AbstractPSITabel implements TreeNode{
 

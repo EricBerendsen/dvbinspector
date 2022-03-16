@@ -74,7 +74,7 @@ public class UNTs extends AbstractPSITabel{
 		return t;
 	}
 
-
-
-
+	public Map<Integer, UNT> getUnts() {
+		return unts;
+	}
 }

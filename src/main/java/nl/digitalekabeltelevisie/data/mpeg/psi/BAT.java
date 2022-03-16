@@ -161,6 +161,10 @@ public class BAT extends AbstractPSITabel{
 		tableModel.process();
 		return tableModel;
 	}
+
+	public Map<Integer, BATsection[]> getNetworks() {
+		return networks;
+	}
 	
 }
 

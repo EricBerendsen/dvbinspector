@@ -44,6 +44,8 @@ import java.util.logging.Logger;
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -61,6 +63,9 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  * Collects all {@link TSPacket}s with same packet_id, groups them together, and interprets them depending on type. For PSI packets tables are built, PES packets are (initially) only counted.
  * Does not store all data packets for this PID
  */
+
+ // pcrList, ptsList, dtsList, temiList not displayed to shortened the export
+@JsonIgnoreProperties({"psi","parentPSI","pidHandler","parentTransportStream","pcrList","ptsList","dtsList","temiList"})
 public class PID implements TreeNode{
 	
 	private record ContinuityError(int lastPacketNo, int lastCCounter, int newPacketNo,int newCCounter) {}
@@ -240,7 +245,7 @@ public class PID implements TreeNode{
 	}
 
 
-	static class LabelMaker{
+	public static class LabelMaker{
 		
 		private String base;
 		private final LinkedHashMap <String, LinkedHashSet<String>> components = new LinkedHashMap<>();
@@ -614,7 +619,7 @@ public class PID implements TreeNode{
 		return psi;
 	}
 
-	private String getRepetitionRate(final long count,final long last, final long  first) {
+	public String getRepetitionRate(final long count,final long last, final long  first) {
 		final long bitrate=getParentTransportStream().getBitRate();
 		if((bitrate>0)&&(count>=2)){
 			@SuppressWarnings("resource")

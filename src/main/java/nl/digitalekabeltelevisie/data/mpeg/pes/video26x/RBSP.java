@@ -29,10 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
+@JsonIgnoreProperties({"bytes"})
 public abstract class RBSP implements TreeNode {
 
 	public static String getChroma_format_idcString(int chroma_format_idc) {

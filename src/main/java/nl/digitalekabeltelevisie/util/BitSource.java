@@ -29,6 +29,8 @@ package nl.digitalekabeltelevisie.util;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 
@@ -46,6 +48,8 @@ import nl.digitalekabeltelevisie.gui.HTMLSource;
  *
  *
  */
+@JsonIgnoreProperties({"html"})
+
 public class BitSource implements HTMLSource{
 	private final byte[] bytes;
 	private int byteOffset = 0;

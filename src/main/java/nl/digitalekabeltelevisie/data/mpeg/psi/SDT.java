@@ -332,4 +332,8 @@ public class SDT extends AbstractPSITabel{
 		}
 	}
 
+	public SDTsection[] getActualTransportStreamSDT(){
+		return actualTransportStreamSDT;
+	}
+
 }

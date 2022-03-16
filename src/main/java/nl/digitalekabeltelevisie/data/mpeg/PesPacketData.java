@@ -32,6 +32,8 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
@@ -48,6 +50,8 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
  * @author Eric Berendsen
  *
  */
+// hiding pesHandler to avoid infinite recursivity. Data to make the dump smaller
+@JsonIgnoreProperties({"pesPackets","data"})
 public class PesPacketData  implements TreeNode{
 
 	/**

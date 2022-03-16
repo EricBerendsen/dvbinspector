@@ -85,5 +85,9 @@ public class INT extends AbstractPSITabel{
 		return t;
 	}
 
+	public Map<Integer, INTsection[]> getNetworks() {
+		return networks;
+	}
+
 
 }

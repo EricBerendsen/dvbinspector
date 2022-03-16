@@ -44,6 +44,8 @@ import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
@@ -63,6 +65,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric Berendsen
  *
  */
+@JsonIgnoreProperties({"buffer"}) //reducing size of dump
 public class TSPacket implements HTMLSource, TreeNode{
 	
 	private static final Logger	logger	= Logger.getLogger(TSPacket.class.getName());

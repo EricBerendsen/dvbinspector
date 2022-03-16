@@ -39,6 +39,8 @@ import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.*;
 import org.jfree.chart.plot.CategoryPlot;
@@ -55,6 +57,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
  * @author Eric Berendsen
  *
  */
+@JsonIgnoreProperties({"image"})
 public class Video138182Handler extends VideoHandler implements ImageSource{
 
 	private static final Logger logger = Logger.getLogger(Video138182Handler.class.getName());

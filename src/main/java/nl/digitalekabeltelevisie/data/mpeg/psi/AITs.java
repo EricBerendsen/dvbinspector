@@ -76,7 +76,7 @@ public class AITs extends AbstractPSITabel{
 		return t;
 	}
 
-
-
-
+	public Map<Integer, AIT> getAits() {
+		return aits;
+	}
 }

@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class CAT extends AbstractPSITabel {
 
-	private CAsection[]	cat	= null;
+	private CAsection[]	cat;
 
 	public List<Descriptor> getDescriptorList() {
 		final ArrayList<Descriptor> l = new ArrayList<>();
@@ -132,4 +132,7 @@ public class CAT extends AbstractPSITabel {
 		return false;
 	}
 
+	public CAsection[] getCat() {
+		return cat;
+	}
 }
