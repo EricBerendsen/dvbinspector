@@ -257,26 +257,34 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		tabbedPane = new JTabbedPane();
 		treeView = new DVBtree(tStream,modus);
 		tabbedPane.addTab("Tree", treeView);
+		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+
 		views.add(treeView);
 
 		final EITView eitView = new EITView(tStream,viewContext);
 		tabbedPane.addTab("EIT View", eitView);
 		views.add(eitView);
+		tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
+
 
 		bitRateView = new BitRateChart(tStream,viewContext);
 		tabbedPane.addTab("BitRate View", bitRateView);
+		tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
 		views.add(bitRateView);
 
 		barChart = new BarChart(tStream,viewContext);
 		tabbedPane.addTab("Bar View", barChart);
+		tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
 		views.add(barChart);
 
 		gridView = new GridView(tStream,viewContext);
 		tabbedPane.addTab("Grid View", gridView);
+		tabbedPane.setMnemonicAt(4, KeyEvent.VK_5);
 		views.add(gridView);
 
 		timeStampChart = new TimeStampChart(tStream, viewContext);
 		tabbedPane.addTab("PCR/PTS/DTS View", timeStampChart);
+		tabbedPane.setMnemonicAt(5, KeyEvent.VK_6);
 		views.add(timeStampChart);
 
 		tabbedPane.validate();
@@ -558,8 +566,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private void populateRecenFilesMenu(final JMenu recentFilesMenu) {
 		addFilesToMenu(recentFilesMenu);
 		recentFilesMenu.addSeparator();
-		final JMenuItem clearRecentFilesMenuItem = new JMenuItem("Empty Recent Files List",KeyEvent.VK_X);
-		clearRecentFilesMenuItem.setMnemonic(KeyEvent.VK_E);
+		final JMenuItem clearRecentFilesMenuItem = new JMenuItem("Empty Recent Files List",KeyEvent.VK_E);
+		
 		clearRecentFilesMenuItem.addActionListener(new ClearRecentFilesAction(this));
 		recentFilesMenu.add(clearRecentFilesMenuItem);
 	}
