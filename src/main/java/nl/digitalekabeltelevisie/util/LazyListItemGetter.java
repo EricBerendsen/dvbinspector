@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -51,5 +51,17 @@ public interface LazyListItemGetter {
 	 * @return total number of elements to be displayed
 	 */
 	int getNoItems();
+	
+	/**
+	 * Retrun the number of the packet for the i-th packet in this list
+	 * For list off all packets the return value will be equal to i, for list of Packets 
+	 * in PID the return value will be the position  (in the stream) of the i-th packet in this PID
+	 * 
+	 * @param i
+	 * @return
+	 */
+	default int getActualNumberForIndex(int i) {
+		return i;
+	}
 
 }

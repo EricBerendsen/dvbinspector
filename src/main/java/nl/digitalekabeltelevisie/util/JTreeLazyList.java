@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -93,7 +93,11 @@ public class JTreeLazyList{
 
 		public String toString(){
 			StringBuilder b = new StringBuilder();
-			b.append(label).append('[').append(start).append("..").append(end).append(']');
+			b.append(label).append('[').
+				append(itemGetter.getActualNumberForIndex(start)).
+				append("..").
+				append(itemGetter.getActualNumberForIndex(end)).
+				append(']');
 			return b.toString();
 		}
 
@@ -119,21 +123,20 @@ public class JTreeLazyList{
 					children[childIndex]=t;
 				}
 				return t;
-			}else{ //lowest level, now return leaf
-				MutableTreeNode t = null;
-				if(children!=null){
-					t = children[childIndex];
-					if(t==null){
-						t= itemGetter.getTreeNode(childIndex+start);
-						children[childIndex]=t;
-					}
-				}else{
-					children = new MutableTreeNode[STEP_SIZE];
+			}
+			MutableTreeNode t = null;
+			if(children!=null){
+				t = children[childIndex];
+				if(t==null){
 					t= itemGetter.getTreeNode(childIndex+start);
 					children[childIndex]=t;
 				}
-				return t;
+			}else{
+				children = new MutableTreeNode[STEP_SIZE];
+				t= itemGetter.getTreeNode(childIndex+start);
+				children[childIndex]=t;
 			}
+			return t;
 		}
 
 		/* (non-Javadoc)
@@ -143,14 +146,11 @@ public class JTreeLazyList{
 		public int getChildCount() {
 			if((start+ipower(STEP_SIZE, level+1))<=itemGetter.getNoItems() ){
 				return STEP_SIZE;
-			}else{
-				if(level==0){
-					return (end-start)+1;
-				}else{
-					return divideRoundUp((end-start),ipower(STEP_SIZE,level));
-				}
-
 			}
+			if(level==0){
+				return (end-start)+1;
+			}
+			return divideRoundUp((end-start),ipower(STEP_SIZE,level));
 		}
 
 		/* (non-Javadoc)

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -61,17 +61,22 @@ public class PIDPacketGetter implements LazyListItemGetter {
 	@Override
 	public MutableTreeNode getTreeNode(int i) {
 		if(packetMapping==null){
-			int k = 0;
-			packetMapping = new int [getNoItems()];
-			for (int j = 0; j < transportStream.getNo_packets(); j++) {
-				int p = transportStream.getPacket_pid(j);
-				if(p==pid){
-					packetMapping[k++]=j;
-				}
-			}
+			buildPacketMapping();
 		}
 
 		return transportStream.getTSPacket(packetMapping[i]).getJTreeNode(modus);
+	}
+
+	private void buildPacketMapping() {
+		System.err.println("running buildPacketMapping for pid:"+pid);
+		int k = 0;
+		packetMapping = new int [getNoItems()];
+		for (int j = 0; j < transportStream.getNo_packets(); j++) {
+			int p = transportStream.getPacket_pid(j);
+			if(p==pid){
+				packetMapping[k++]=j;
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -82,13 +87,19 @@ public class PIDPacketGetter implements LazyListItemGetter {
 
 		 PID p = transportStream.getPID(pid);
 		 if(p!=null){
-			 // if p.getPackets()> MAX_INT means TSfile > 403.726.925.636 bytes
-			 // we'll never have enough memory for packet_offset[] (20GB)
-			 // so this cast is safe.
 			 return p.getPackets();
 		 }
 		 return 0;
 
+	}
+	
+	@Override
+	public int getActualNumberForIndex(int i) {
+		if(packetMapping==null){
+			buildPacketMapping();
+		}
+
+		return transportStream.getTSPacket(packetMapping[i]).getPacketNo();
 	}
 
 }
