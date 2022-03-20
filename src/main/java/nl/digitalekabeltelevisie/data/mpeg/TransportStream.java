@@ -474,7 +474,7 @@ public class TransportStream implements TreeNode{
 				addOptionalRowColumn("pid type", PID::getTypeString, String.class).
 				addOptionalRowColumn("packets", PID::getPackets, Integer.class).
 				addOptionalRowColumn("duplicate packets", PID::getDup_packets, Integer.class).
-				addOptionalRowColumn("continuity errors", PID::getContinuity_errors, Integer.class).
+				addOptionalRowColumn("continuity errors", PID::getContinuity_errors_count, Integer.class).
 				addOptionalRowColumn("scrambled", PID::isScrambled, Boolean.class).
 				build();
 	}

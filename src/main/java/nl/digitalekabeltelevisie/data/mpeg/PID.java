@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -63,6 +63,7 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  */
 public class PID implements TreeNode{
 	
+	private record ContinuityError(int lastPacketNo, int lastCCounter, int newPacketNo,int newCCounter) {}
 	
 	private static final Logger logger = Logger.getLogger(PID.class.getName());
 
@@ -95,10 +96,12 @@ public class PID implements TreeNode{
 	/**
 	 *  number of continuity_errors
 	 */
-	private long continuity_errors = 0;
+	private long continuity_errors_count = 0;
+	private List<ContinuityError> continuityErrors = new ArrayList<>();
+
 	private int last_continuity_counter = -1;
 	private int pid = -1;
-	private long last_packet_no=-1;
+	private int last_packet_no=-1;
 	private TSPacket last_packet = null;
 	private int dup_found=0; // number of times current packet is duplicated. 
 	private PCR lastPCR;
@@ -397,10 +400,11 @@ public class PID implements TreeNode{
 
 	private void handleContinuityError(final TSPacket packet) {
 		//logger.warning("continuity error, PID="+pid+", last="+last_continuity_counter+", new="+packet.getContinuityCounter()+", last_no="+last_packet_no +", packet_no="+packet.getPacketNo()+", adaptation_field_control="+packet.getAdaptationFieldControl());
+		continuityErrors.add(new ContinuityError(last_packet_no, last_continuity_counter, packet.getPacketNo(), packet.getContinuityCounter()));
 		last_continuity_counter=packet.getContinuityCounter();
 		last_packet_no = packet.getPacketNo();
 		last_packet = packet;
-		continuity_errors++;
+		continuity_errors_count++;
 		gatherer.reset();
 	}
 
@@ -521,7 +525,9 @@ public class PID implements TreeNode{
 
 		t.add(new DefaultMutableTreeNode(new KVP("packets",getPackets(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("duplicate packets",dup_packets,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("continuity errors",continuity_errors,null)));
+		final KVP continuityErrorsKvp = new KVP("continuity errors",continuity_errors_count,null);
+		continuityErrorsKvp.setHtmlSource(()->createHtmlList(continuityErrors));
+		t.add(new DefaultMutableTreeNode(continuityErrorsKvp));
 
 
 		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",Boolean.toString(scrambled),null)));
@@ -551,6 +557,36 @@ public class PID implements TreeNode{
 		}
 
 		return t;
+	}
+
+	/**
+	 * @param continuityErrors2
+	 * @return
+	 */
+	private static String createHtmlList(List<ContinuityError> continuityErrorsList) {
+		if(continuityErrorsList.isEmpty()) {
+			return "No Continuity Errors in this PID";
+		}
+		StringBuilder sb = new StringBuilder("""
+			<table><tr>\
+			<th>Last<br>Packet<br>No</th>\
+			<th>Last<br>Continuity<br>Counter</th>\
+			<th>Next<br>Packet<br>No</th>\
+			<th>Next<br>Continuity<br>Counter</th>\
+			</tr>""");
+		for(ContinuityError error:continuityErrorsList) {
+			sb.append("<tr><td align=\"right\">").
+			append(error.lastPacketNo).
+			append("</td><td align=\"right\">").
+			append(error.lastCCounter).
+			append("</td><td align=\"right\">").
+			append(error.newPacketNo).
+			append("</td><td align=\"right\">").
+			append(error.newCCounter).
+			append("</td></tr>");
+		}
+		sb.append("</table>");
+		return sb.toString();
 	}
 
 	public String getTypeString() {
@@ -603,8 +639,8 @@ public class PID implements TreeNode{
 		return scrambled;
 	}
 
-	public long getContinuity_errors() {
-		return continuity_errors;
+	public long getContinuity_errors_count() {
+		return continuity_errors_count;
 	}
 
 	public PCR getLastPCR() {
