@@ -53,7 +53,7 @@ public interface LazyListItemGetter {
 	int getNoItems();
 	
 	/**
-	 * Retrun the number of the packet for the i-th packet in this list
+	 * Return the number of the packet for the i-th packet in this list
 	 * For list off all packets the return value will be equal to i, for list of Packets 
 	 * in PID the return value will be the position  (in the stream) of the i-th packet in this PID
 	 * 
@@ -63,5 +63,10 @@ public interface LazyListItemGetter {
 	default int getActualNumberForIndex(int i) {
 		return i;
 	}
+
+	default int getIndexForActualNumber(int i) {
+		return i;
+	}
+
 
 }

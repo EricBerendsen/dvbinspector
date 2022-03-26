@@ -58,7 +58,7 @@ public class JTreeLazyList{
 
 
 	private static final int STEP_SIZE = 100;
-	private MutableTreeNode mutableTreeNode = null;
+	private RangeNode mutableTreeNode = null;
 
 	LazyListItemGetter itemGetter =null;
 
@@ -69,6 +69,9 @@ public class JTreeLazyList{
 		int start;
 		int end;
 		private MutableTreeNode[] children=null;
+		
+		private MutableTreeNode parent;
+		
 		private String label="";
 
 		/**
@@ -76,11 +79,12 @@ public class JTreeLazyList{
 		 * @param start
 		 * @param end
 		 */
-		private RangeNode(int level, int start, int end) {
+		private RangeNode(int level, int start, int end, MutableTreeNode parent) {
 			super();
 			this.level = level;
 			this.start = start;
 			this.end = end;
+			this.parent = parent;
 		}
 
 		private RangeNode(int level, int start, int end,String label) {
@@ -101,40 +105,36 @@ public class JTreeLazyList{
 			return b.toString();
 		}
 
-		private RangeNode getChild(int level, int currentStart, int index){
+		private RangeNode createChild(int level, int currentStart, int index){
 			int start = currentStart+(ipower(STEP_SIZE,level)*index);
 			int end = (currentStart+(ipower(STEP_SIZE,level)*(index+1)))-1;
 			end = Math.min(itemGetter.getNoItems()-1, end);
-			return new RangeNode(level-1,start,end);
+			return new RangeNode(level-1,start,end,this);
 		}
 
-		public javax.swing.tree.TreeNode getChildAt(int childIndex) {
+		public MutableTreeNode getChildAt(int childIndex) {
 			if(level>0){
 				RangeNode t = null;
-				if(children!=null){
-					t = (RangeNode)children[childIndex];
-					if(t==null){
-						t=getChild(level, start, childIndex);
-						children[childIndex]=t;
-					}
-				}else{
+				
+				if (children == null) {
 					children = new MutableTreeNode[STEP_SIZE];
-					t=getChild(level, start, childIndex);
+				}
+				t = (RangeNode)children[childIndex];
+				if(t==null){
+					t=createChild(level, start, childIndex);
 					children[childIndex]=t;
 				}
 				return t;
 			}
 			MutableTreeNode t = null;
-			if(children!=null){
-				t = children[childIndex];
-				if(t==null){
-					t= itemGetter.getTreeNode(childIndex+start);
-					children[childIndex]=t;
-				}
-			}else{
+			if (children == null) {
 				children = new MutableTreeNode[STEP_SIZE];
-				t= itemGetter.getTreeNode(childIndex+start);
-				children[childIndex]=t;
+			}
+			t = children[childIndex];
+			if (t == null) {
+				t = itemGetter.getTreeNode(childIndex + start);
+				t.setParent(this);
+				children[childIndex] = t;
 			}
 			return t;
 		}
@@ -158,7 +158,7 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public javax.swing.tree.TreeNode getParent() {
-			return null;
+			return parent;
 		}
 
 		/* (non-Javadoc)
@@ -221,7 +221,6 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public void remove(MutableTreeNode node) {
-			System.out.println("remove");
 			throw new IllegalStateException("node does not allow remove");
 
 		}
@@ -231,9 +230,7 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public void setUserObject(Object object) {
-			System.out.println("setUserObject");
 			// null
-
 		}
 
 		/* (non-Javadoc)
@@ -241,8 +238,7 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public void removeFromParent() {
-			System.out.println("removeFromParent");
-
+			// empty
 		}
 
 		/* (non-Javadoc)
@@ -250,7 +246,38 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public void setParent(MutableTreeNode newParent) {
+			parent = newParent;
+		}
 
+		public String getLabel() {
+			return label;
+		}
+
+		/**
+		 * @param children = new MutableTreeNode[STEP_SIZE];
+		 * @return
+		 */
+		public MutableTreeNode findChildForActual(int actual) {
+			int index = itemGetter.getIndexForActualNumber(actual);
+			return findChildForIndex(index);
+		}
+
+		/**
+		 * @param index
+		 * @return
+		 */
+		private MutableTreeNode findChildForIndex(int index) {
+			if(level == 0) {
+				return getChildAt(index);
+			}
+			int divisor = ipower(STEP_SIZE,level);			
+			MutableTreeNode child = getChildAt(Integer.divideUnsigned(index, divisor));
+			int newIndex = Integer.remainderUnsigned(index, divisor);
+			if(child instanceof RangeNode rangeNode) {
+				return rangeNode.findChildForIndex(newIndex);
+			}
+
+			return null;
 		}
 
 	}
@@ -268,7 +295,7 @@ public class JTreeLazyList{
 	 * @param label display name for the top-element of the tree
 	 * @return
 	 */
-	public MutableTreeNode getJTreeNode(int modus, String label) {
+	public RangeNode getJTreeNode(int modus, String label) {
 		if(mutableTreeNode==null){
 			int level = determineLevel(itemGetter.getNoItems());
 			mutableTreeNode = new RangeNode(level, 0, itemGetter.getNoItems()-1,label);

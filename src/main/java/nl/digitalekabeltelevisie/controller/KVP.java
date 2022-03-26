@@ -137,7 +137,17 @@ public class KVP{
 	private XMLSource 	xmlSource;
 
 	private TableSource tableSource;
+	
 
+	/**
+	 * crumb's are used to be able to jump to any place in the tree, based on a url-like
+	 * string. The crumb for each node defaults to its label, with any int or long value 
+	 * appended to it separated by a ':'. 
+	 * 
+	 * This is called a trail of crumbs te prevent confusion with the Path used in JTree. 
+	 * That is not text based, so can not be used in creating hyperlinks in HTMLEditor
+	 */
+	private String crumb;
 
 	public void setHtmlSource(final HTMLSource htmlSource) {
 		this.htmlSource = htmlSource;
@@ -145,6 +155,7 @@ public class KVP{
 
 	private JMenuItem subMenu;
 	private Object owner;
+	private String labelAppend = "";
 
 	public KVP(final String label) {
 		super();
@@ -264,8 +275,9 @@ public class KVP{
 		this.label = label;
 	}
 
+	// put appends in separate String, so original label is constant and available for path
 	public void appendLabel(final String labelAppend) {
-		this.label = label + labelAppend;
+		this.labelAppend  = this.labelAppend + labelAppend;
 	}
 
 	public String getValue() {
@@ -283,6 +295,9 @@ public class KVP{
 
 	public String toString(final byte stringFormat, final byte numberFormat) {
 		StringBuilder b = new StringBuilder(label);
+		if(!labelAppend.isEmpty()) {
+			b.append(labelAppend);
+		}
 
 		if ((fieldType != FIELD_TYPE_LABEL)&&(fieldType != FIELD_TYPE_HTML)) {
 			appendValueAfterLabel(numberFormat, b);
@@ -307,7 +322,7 @@ public class KVP{
 		}else if(stringFormat==STRING_DISPLAY_HTML_FRAGMENTS){
 			return new StringBuilder(value);
 		}
-		return null;
+		return new StringBuilder();
 	}
 
 	/**
@@ -515,6 +530,29 @@ public class KVP{
 
 	public void setXmlSource(XMLSource xmlSource) {
 		this.xmlSource = xmlSource;
+	}
+
+	public String getCrumb() {
+		if(crumb!=null) {
+			return crumb;
+		}
+		if(fieldType==FIELD_TYPE_LABEL) {
+			return label;
+		}
+		if(fieldType==FIELD_TYPE_INT) {
+			return label+":"+intValue;
+		}
+		if(fieldType==FIELD_TYPE_LONG) {
+			return label+":"+longValue;
+		}
+		return null;
+
+	}
+	
+	
+
+	public void setCrumb(String path) {
+		this.crumb = path;
 	}
 
 }

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -1189,7 +1189,9 @@ public final class Utils {
 			if(simpleModus(modus)){ // simple layout
 				addToList(parent, itemList, modus);
 			}else{
-				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(new KVP(label +": "+ itemList.size()+" entries"));
+				final KVP kvp = new KVP(label +": "+ itemList.size()+" entries");
+				kvp.setCrumb(label);
+				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
 				addToList(descriptorListNode, itemList, modus);
 				parent.add(descriptorListNode);
 			}

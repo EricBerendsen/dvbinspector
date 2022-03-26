@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -43,7 +43,6 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.gui.EITableImage;
-import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.*;
 
 
@@ -139,7 +138,7 @@ public class EIT extends AbstractPSITabel{
 							map(Entry::getValue).
 							flatMap(Arrays::stream).
 							filter(Objects::nonNull).
-							map(HTMLSource::getHTML).
+							map(e -> e.getHtmlForEit(modus)).
 							collect(Collectors.joining("","<b>Schedule</b><br><br>","")));
 					
 					streamNode.add(serviceNode);
@@ -151,7 +150,7 @@ public class EIT extends AbstractPSITabel{
 						final KVP tableNodeKVP = new KVP("tableid", tableId,TableSection.getTableType(tableId));
 						tableNodeKVP.setHtmlSource(() -> Arrays.stream(sections).
 								filter(Objects::nonNull).
-								map(HTMLSource::getHTML).
+								map(e -> e.getHtmlForEit(modus)).
 								collect(Collectors.joining())
 								);
 

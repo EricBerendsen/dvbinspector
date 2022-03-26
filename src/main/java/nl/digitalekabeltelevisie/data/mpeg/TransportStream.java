@@ -423,7 +423,9 @@ public class TransportStream implements TreeNode{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Transport Stream "+psi.getPat().getTransportStreamId()));
+		final KVP tsKvp = new KVP("Transport Stream "+psi.getPat().getTransportStreamId());
+		tsKvp.setCrumb("root");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(tsKvp);
 
 		t.add(new DefaultMutableTreeNode(new KVP("file",file.getPath(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("size",file.length(),null)));

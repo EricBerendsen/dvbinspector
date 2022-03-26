@@ -390,6 +390,7 @@ public class TableSection implements TreeNode{
 			kvp.appendLabel(" <version "+version+">");
 
 		}
+		kvp.setCrumb("tablesection:"+getSectionNumber());
 		return kvp;
 	}
 

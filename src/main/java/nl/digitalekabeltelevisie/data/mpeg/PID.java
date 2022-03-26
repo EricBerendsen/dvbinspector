@@ -154,31 +154,28 @@ public class PID implements TreeNode{
 					startNewSection(packet, parentPID, data);
 				}
 				//	something started
-			}else if(packetHasPayload){
-				// are we in a PSI PID??
-				if(type==PSI){
-					int start;
-					if(packet.isPayloadUnitStartIndicator()){ //first byte is pointer, skip pointer and continue with what we already got from previous TSPacket
-						start = 1;
-					}else{
-						start = 0;
-					}
-					int available = data.length -start;
-					if(!lastPSISection.isComplete()){
-						final int bytes_read=lastPSISection.readBytes(data, start, available);
-						start+=bytes_read;
-						available-=bytes_read;
-					}
-					if (lastPSISection != null && lastPSISection.isComplete()) {
-						lastPSISection = null;
-					}
-					if(packet.isPayloadUnitStartIndicator()){
-						while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
-							lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
-							final int bytes_read = lastPSISection.readBytes(data, start, available);
-							start += bytes_read;
-							available -= bytes_read;
-						}
+			} else if (packetHasPayload && type==PSI) {
+				int start;
+				if(packet.isPayloadUnitStartIndicator()){ //first byte is pointer, skip pointer and continue with what we already got from previous TSPacket
+					start = 1;
+				}else{
+					start = 0;
+				}
+				int available = data.length -start;
+				if(!lastPSISection.isComplete()){
+					final int bytes_read=lastPSISection.readBytes(data, start, available);
+					start+=bytes_read;
+					available-=bytes_read;
+				}
+				if (lastPSISection != null && lastPSISection.isComplete()) {
+					lastPSISection = null;
+				}
+				if(packet.isPayloadUnitStartIndicator()){
+					while ((available > 0) && (toUnsignedInt(data[start]) != 0xFF)) {
+						lastPSISection = new PsiSectionData(parentPID, packet.getPacketNo(), parentTransportStream);
+						final int bytes_read = lastPSISection.readBytes(data, start, available);
+						start += bytes_read;
+						available -= bytes_read;
 					}
 				}
 			}
@@ -563,7 +560,7 @@ public class PID implements TreeNode{
 	 * @param continuityErrors2
 	 * @return
 	 */
-	private static String createHtmlList(List<ContinuityError> continuityErrorsList) {
+	private  String createHtmlList(List<ContinuityError> continuityErrorsList) {
 		if(continuityErrorsList.isEmpty()) {
 			return "No Continuity Errors in this PID";
 		}
@@ -575,20 +572,40 @@ public class PID implements TreeNode{
 			<th>Next<br>Continuity<br>Counter</th>\
 			</tr>""");
 		for(ContinuityError error:continuityErrorsList) {
-			sb.append("<tr><td align=\"right\">").
-			append(error.lastPacketNo).
-			append("</td><td align=\"right\">").
-			append(error.lastCCounter).
-			append("</td><td align=\"right\">").
-			append(error.newPacketNo).
-			append("</td><td align=\"right\">").
-			append(error.newCCounter).
-			append("</td></tr>");
+			sb.append("<tr>").
+			append(getPacketColumns(error.lastPacketNo, error.lastCCounter)).
+			append(getPacketColumns(error.newPacketNo, error.newCCounter)).
+
+			append("</tr>");
 		}
 		sb.append("</table>");
 		return sb.toString();
 	}
 
+	private String getPacketColumns(int packetNo, int cCounter) {
+		return new StringBuilder().
+				append("<td align=\"right\">").
+				append("<a href=\"").
+				append(getPacketCrumbTrail(packetNo)).
+				append("\">").
+				append(packetNo).
+				append("</a>").
+				append("</td><td align=\"right\">").
+				append(cCounter).
+				append("</td>").
+				toString();
+	}
+	
+	private String getPacketCrumbTrail(int packetNo) {
+		return new StringBuilder().
+		append("root/pids/pid:").
+		append(pid).
+		append("/transport packets/").
+		append(packetNo).
+		toString();
+
+	}
+	
 	public String getTypeString() {
 		return (type==PSI)?"PSI":((type==PES)?"PES":"-");
 	}

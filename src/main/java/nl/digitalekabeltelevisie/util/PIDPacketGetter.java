@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.util;
 
+import java.util.Arrays;
+
 import javax.swing.tree.MutableTreeNode;
 
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -44,7 +46,7 @@ public class PIDPacketGetter implements LazyListItemGetter {
 	TransportStream transportStream = null;
 	int modus;
 	int pid;
-	int packetMapping[] = null;
+	int[] packetMapping = null;
 	/**
 	 *
 	 */
@@ -68,7 +70,6 @@ public class PIDPacketGetter implements LazyListItemGetter {
 	}
 
 	private void buildPacketMapping() {
-		System.err.println("running buildPacketMapping for pid:"+pid);
 		int k = 0;
 		packetMapping = new int [getNoItems()];
 		for (int j = 0; j < transportStream.getNo_packets(); j++) {
@@ -101,5 +102,12 @@ public class PIDPacketGetter implements LazyListItemGetter {
 
 		return transportStream.getTSPacket(packetMapping[i]).getPacketNo();
 	}
+	
+	@Override
+	public int getIndexForActualNumber(int a) {
+		return Arrays.binarySearch(packetMapping, a);
+		
+	}
+
 
 }

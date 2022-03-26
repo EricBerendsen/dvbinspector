@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -56,7 +56,7 @@ import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-public class EITsection extends TableSectionExtendedSyntax implements HTMLSource {
+public class EITsection extends TableSectionExtendedSyntax{
 
 	private List<Event> eventList;
 	private final int transportStreamID;
@@ -404,7 +404,7 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus,this);
+		final DefaultMutableTreeNode t = super.getJTreeNode(modus, ()->getHtmlForEit(modus));
 
 		t.add(new DefaultMutableTreeNode(new KVP("service_id",getServiceID(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamID,null)));
@@ -417,23 +417,58 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 		return t;
 	}
 
+	/**
+	 * @param modus
+	 * @return
+	 */
+	String getHtmlForEit(int modus) {
+		final StringBuilder b = new StringBuilder();
+		b.append("<code>");
+		b.append(getHTMLLines(modus));
+		b.append("</code>");
+		return b.toString();
+
+	}
+
+
 	@Override
 	protected String getTableIdExtensionLabel() {
 		return "service_id";
 	}
 
-	public StringBuilder getHTMLLines(){
+	public StringBuilder getHTMLLines(int modus){
 		final StringBuilder b = new StringBuilder();
 		for(final Event event:eventList){
-			b.append(Utils.escapeHTML(Utils.getEITStartTimeAsString(event.getStartTime()))).append("&nbsp;");
-			b.append(formatDuration(event.getDuration())).append("&nbsp;");
+			b.append(Utils.escapeHTML(Utils.getEITStartTimeAsString(event.getStartTime()))).
+				append("&nbsp;").
+				append(formatDuration(event.getDuration())).
+				append("&nbsp;");
 			final List<Descriptor> descList = event.getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(shortDesc.size()>0){
 				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
-					b.append("<b><span style=\"background-color: white\">");
-					b.append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).append("</span></b>&nbsp;");
-					b.append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
+					b.append("<b><span style=\"background-color: white\">").
+					append("<a href=\"root/psi/eit/original_network_id:").
+					append(originalNetworkID).
+					append("/transport_stream_id:").
+					append(transportStreamID).
+					append("/service_id:").
+					append(getServiceID()).
+					append("/tableid:").
+					append(tableId);
+					if(!Utils.simpleModus(modus)) {
+						b.append("/tablesection:").
+						append(getSectionNumber()).
+						append("/events");
+						
+					}
+					b.append("/event:").
+					append(event.eventID).
+					append("\">").
+					append(Utils.escapeHTML(shortEventDescriptor.getEventName().toString())).
+					append("</a>").
+					append("</span></b>&nbsp;").
+					append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
 				}
 			}
 			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
@@ -444,16 +479,6 @@ public class EITsection extends TableSectionExtendedSyntax implements HTMLSource
 			b.append("<br>");
 		}
 		return b;
-	}
-
-
-	@Override
-	public String getHTML() {
-		final StringBuilder b = new StringBuilder();
-		b.append("<code>");
-		b.append(getHTMLLines());
-		b.append("</code>");
-		return b.toString();
 	}
 
 
