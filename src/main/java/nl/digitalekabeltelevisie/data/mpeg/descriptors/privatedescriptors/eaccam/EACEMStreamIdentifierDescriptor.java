@@ -55,6 +55,10 @@ public class EACEMStreamIdentifierDescriptor extends Descriptor {
 	}
 
 
+	@Override
+	public String getDescriptorname(){
+		return "Eacem Stream Identifier 2escriptor";
+	}
 
 
 
