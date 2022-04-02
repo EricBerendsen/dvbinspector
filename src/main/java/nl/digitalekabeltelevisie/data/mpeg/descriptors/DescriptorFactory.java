@@ -38,6 +38,10 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosBatSelectionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosTimezoneDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosInformationParametersDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus.CIProtectionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.GuidanceDescriptor;
@@ -266,6 +270,19 @@ public final class DescriptorFactory {
 			case 0xCE:
 				return new CIProtectionDescriptor(data, 0, tableSection);
 			}
+		} else if (private_data_specifier == 0xa4) { // Canal + International
+			switch (descriptor_tag) {
+			case 0x80:
+				return new CosBatSelectionDescriptor (data, 0, tableSection);
+			case 0x81:
+				return new CosInformationParametersDescriptor(data, 0, tableSection);
+			case 0x83:
+				return new CosLogicalChannelDescriptor(data, 0, tableSection);
+			case 0x88:
+				return new CosTimezoneDescriptor(data, 0, tableSection);
+				
+				
+		}
 		} else if (private_data_specifier == 0x233a) { // DTG
 			switch (descriptor_tag) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
