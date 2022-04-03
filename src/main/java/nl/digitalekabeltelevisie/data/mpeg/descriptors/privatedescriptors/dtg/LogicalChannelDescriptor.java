@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,58 +27,34 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_10BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
-public class LogicalChannelDescriptor extends Descriptor {
-
-	private List<LogicalChannel> channelList = new ArrayList<>();
+public class LogicalChannelDescriptor extends AbstractLogicalChannelDescriptor {
 
 
-	public class LogicalChannel implements TreeNode{
-		private int serviceID;
-		private final int reserved;
+	public class LogicalChannel extends AbstractLogicalChannel{
+		
+		// ignore visible_service
 
-		private int logicalChannelNumber;
-
-		public LogicalChannel(final int id, final int res, final int type){
-			serviceID = id;
-			reserved = res;
-			logicalChannelNumber = type;
+		public LogicalChannel(final int service_id, final int reserved, final int logical_channel_number){
+			super(service_id, 1, reserved, logical_channel_number);
 		}
 
-		public int getServiceID() {
-			return serviceID;
-		}
-
-		public void setServiceID(final int serviceID) {
-			this.serviceID = serviceID;
-		}
-
-		public int getLogicalChannelNumber() {
-			return logicalChannelNumber;
-		}
-
-		public void setLogicalChannelNumber(final int serviceType) {
-			this.logicalChannelNumber = serviceType;
-		}
-
-
+		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			//TODO SDT.getServiceName needs original_network_id and transport_stream_id from enclosing NIT section TS loop.
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel : "+logicalChannelNumber));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
+			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(createNodeLabel(service_id, logical_channel_number)));
+			s.add(new DefaultMutableTreeNode(new KVP("service_id",service_id,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logicalChannelNumber,null)));
+			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logical_channel_number,null)));
 			return s;
 		}
 
@@ -86,8 +62,8 @@ public class LogicalChannelDescriptor extends Descriptor {
 
 	}
 
-	public LogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public LogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
+		super(b, offset,parent, descriptorContext);
 		int t=0;
 		while (t<descriptorLength) {
 			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
@@ -97,39 +73,6 @@ public class LogicalChannelDescriptor extends Descriptor {
 			channelList.add(s);
 			t+=4;
 		}
-	}
-
-	public int getNoServices(){
-		return channelList.size();
-	}
-
-
-	@Override
-	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
-		for (int i = 0; i < getNoServices(); i++) {
-			final LogicalChannel s = channelList.get(i);
-			buf.append("(").append(i).append(";").append(s.getServiceID()).append(":").append(s.getLogicalChannelNumber()).append("),");
-		}
-
-
-		return buf.toString();
-	}
-
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channels");
-		return t;
-	}
-
-	public List<LogicalChannel> getChannelList() {
-		return channelList;
-	}
-
-	public void setChannelList(final List<LogicalChannel> channelList) {
-		this.channelList = channelList;
 	}
 
 	@Override

@@ -27,117 +27,47 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
-public class HDSimulcastLogicalChannelDescriptor extends Descriptor {
-
-	private final List<LogicalChannel> channelList = new ArrayList<>();
+public class HDSimulcastLogicalChannelDescriptor extends AbstractLogicalChannelDescriptor {
 
 
-	public class LogicalChannel implements TreeNode{
-		private int serviceID;
-		private int visibleServiceFlag;
+	public class LogicalChannel extends AbstractLogicalChannel {
 
-		private int logicalChannelNumber;
+		public LogicalChannel(final int service_id, final int visible_service, final int reserved,
+				final int logical_channel_number) {
+			super(service_id, visible_service, reserved, logical_channel_number);
 
-		public LogicalChannel(final int id, final int visibleService, final int type){
-			serviceID = id;
-			visibleServiceFlag = visibleService;
-			logicalChannelNumber = type;
 		}
-
-		public int getServiceID() {
-			return serviceID;
-		}
-
-		public void setServiceID(final int serviceID) {
-			this.serviceID = serviceID;
-		}
-
-		public int getLogicalChannelNumber() {
-			return logicalChannelNumber;
-		}
-
-		public void setLogicalChannelNumber(final int serviceType) {
-			this.logicalChannelNumber = serviceType;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			//TODO SDT.getServiceName needs original_network_id and transport_stream_id from enclosing NIT section TS loop.
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel"));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("visible_service",visibleServiceFlag,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logicalChannelNumber,null)));
-			return s;
-		}
-
-		public int getVisibleServiceFlag() {
-			return visibleServiceFlag;
-		}
-
-		public void setVisibleServiceFlag(final int visibleServiceFlag) {
-			this.visibleServiceFlag = visibleServiceFlag;
-		}
-
 	}
 
-	public HDSimulcastLogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public HDSimulcastLogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
+		super(b, offset,parent, descriptorContext);
 		int t=0;
 		while (t<descriptorLength) {
 
 			final int serviceId=getInt(b, offset+t+2,2,0xFFFF);
 			final int visisble = (b[offset+t+4] & 0x80) >>7;
+			final int reserved = getInt(b,offset+t+4,1,0x7C) >>2;
 			final int chNumber=getInt(b, offset+t+4,2,0x03FF);
 
-			final LogicalChannel s = new LogicalChannel(serviceId, visisble, chNumber);
+			final LogicalChannel s = new LogicalChannel(serviceId, visisble, reserved, chNumber);
 			channelList.add(s);
 			t+=4;
 		}
 	}
 
-	public int getNoServices(){
-		return channelList.size();
-	}
 
 
-	@Override
-	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
-		for (int i = 0; i < getNoServices(); i++) {
-			final LogicalChannel s = channelList.get(i);
-			buf.append("(").append(i).append(";").append(s.getServiceID()).append(":").append(s.getLogicalChannelNumber()).append(":").append(s.getVisibleServiceFlag()).append("),");
-		}
-
-
-		return buf.toString();
-	}
-
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channels");
-		return t;
-	}
 
 	@Override
 	public String getDescriptorname(){
 		return "HD_simulcast_logical_channel_descriptor";
 	}
 
-	public List<LogicalChannel> getChannelList() {
-		return channelList;
-	}
 
 }

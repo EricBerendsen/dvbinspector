@@ -59,7 +59,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public final class DescriptorFactory {
-
+	
 	/**
 	 *
 	 */
@@ -71,16 +71,17 @@ public final class DescriptorFactory {
 	private static final Logger	logger	= Logger.getLogger(DescriptorFactory.class.getName());
 
 
-	/**
-	 * @param data
-	 * @param offset
-	 * @param len
-	 * @param tableSection
-	 * @return List of Descriptor
-	 */
 	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len,
 			final TableSection tableSection) {
-		long private_data_specifier = PreferencesManager.getDefaultPrivateDataSpecifier();
+		
+		DescriptorContext descriptorContext = new DescriptorContext();
+		return buildDescriptorList(data, offset, len, tableSection, descriptorContext);
+	
+	}
+
+	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len,
+			final TableSection tableSection, DescriptorContext descriptorContext) {
+		descriptorContext.setPrivate_data_specifier(PreferencesManager.getDefaultPrivateDataSpecifier());
 		final List<Descriptor> r = new ArrayList<>();
 		int t = 0;
 
@@ -96,16 +97,12 @@ public final class DescriptorFactory {
 			int descriptorLen = toUnsignedInt(data[offset + t+ 1]);
 			byte[] descriptorData = Arrays.copyOfRange(data, offset + t, offset + t + descriptorLen + 2);
 
-			Descriptor d = getDescriptor(descriptorData, tableSection, private_data_specifier);
+			Descriptor d = getDescriptor(descriptorData, tableSection, descriptorContext);
 
 			t += d.getDescriptorLength() + 2;
 			r.add(d);
 			if (d instanceof final PrivateDataSpecifierDescriptor privateDescriptor) {
-				private_data_specifier = privateDescriptor.getPrivateDataSpecifier();
-			}
-			if (d instanceof final PrivateDataIndicatorDescriptor privateDescriptor) { // TODO check is this interchangeable with
-				// PrivateDataSpecifierDescriptor?
-				private_data_specifier = privateDescriptor.getPrivateDataIndicator();
+				descriptorContext.setPrivate_data_specifier(privateDescriptor.getPrivateDataSpecifier());
 			}
 		}
 
@@ -116,11 +113,11 @@ public final class DescriptorFactory {
 	 * @param localOffset
 	 * @param data
 	 * @param tableSection
-	 * @param private_data_specifier
+	 * @param descriptorContext
 	 * @return
 	 */
 	private static Descriptor getDescriptor(final byte[] data, final TableSection tableSection,
-											long private_data_specifier) {
+											DescriptorContext descriptorContext) {
 		final int descriptorTag = toUnsignedInt(data[0]);
 		try {
 			if(descriptorTag == 0xE9) {
@@ -169,9 +166,9 @@ public final class DescriptorFactory {
 				
 			}
 			if (descriptorTag <= 0x7f) {
-				return getDVBSIDescriptor(data, tableSection);
+				return getDVBSIDescriptor(data, tableSection, descriptorContext);
 			}
-			return  getPrivateDVBSIDescriptor(data, tableSection, private_data_specifier);
+			return  getPrivateDVBSIDescriptor(data, tableSection, descriptorContext);
 			
 		} catch (final RuntimeException iae) {
 			// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
@@ -224,12 +221,13 @@ public final class DescriptorFactory {
 	 * @param t
 	 * @param data
 	 * @param tableSection
-	 * @param private_data_specifier
+	 * @param DescriptorContext
 	 * @return
 	 */
 	private static Descriptor getPrivateDVBSIDescriptor(final byte[] data, final TableSection tableSection,
-														final long private_data_specifier) {
+														final DescriptorContext descriptorContext) {
 
+		final long private_data_specifier = descriptorContext.getPrivate_data_specifier();
 		final int descriptor_tag =  toUnsignedInt(data[0]);
 		if (private_data_specifier == 0x600) { // UPC1
 			switch (descriptor_tag) {
@@ -250,18 +248,18 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0x28) { // EACEM
 			switch (descriptor_tag) {
 			case 0x83:
-				return new LogicalChannelDescriptor(data, 0, tableSection);
+				return new LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
 			case 0x86:
 				return new EACEMStreamIdentifierDescriptor(data, 0, tableSection);
 			case 0x88:
-				return new HDSimulcastLogicalChannelDescriptor(data, 0, tableSection);
+				return new HDSimulcastLogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
 			}
 		} else if (private_data_specifier == 0x29) { // Nordig
 			switch (descriptor_tag) {
 			case 0x83:
-				return new NordigLogicalChannelDescriptorV1(data, 0, tableSection);
+				return new NordigLogicalChannelDescriptorV1(data, 0, tableSection, descriptorContext);
 			case 0x87:
-				return new NordigLogicalChannelDescriptorV2(data, 0, tableSection);
+				return new NordigLogicalChannelDescriptorV2(data, 0, tableSection, descriptorContext);
 			}
 
 
@@ -277,7 +275,7 @@ public final class DescriptorFactory {
 			case 0x81:
 				return new CosInformationParametersDescriptor(data, 0, tableSection);
 			case 0x83:
-				return new CosLogicalChannelDescriptor(data, 0, tableSection);
+				return new CosLogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
 			case 0x88:
 				return new CosTimezoneDescriptor(data, 0, tableSection);
 				
@@ -286,7 +284,7 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0x233a) { // DTG
 			switch (descriptor_tag) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
-				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, 0, tableSection);
+				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
 			case 0x86:
 				return new ServiceAttributeDescriptor(data, 0, tableSection);
 			case 0x89:
@@ -389,13 +387,13 @@ public final class DescriptorFactory {
 
 	}
 
-	private static Descriptor getDVBSIDescriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getDVBSIDescriptor(final byte[] data, final TableSection tableSection, DescriptorContext descriptorContext) {
 		switch (toUnsignedInt(data[0])) {
 
 		case 0x40:
 			return new NetworkNameDescriptor(data, 0, tableSection);
 		case 0x41:
-			return new ServiceListDescriptor(data, 0, tableSection);
+			return new ServiceListDescriptor(data, 0, tableSection, descriptorContext);
 		case 0x43:
 			return new SatelliteDeliverySystemDescriptor(data, 0, tableSection);
 		case 0x44:

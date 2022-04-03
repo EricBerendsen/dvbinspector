@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -61,9 +61,10 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.LogicalChannelInterface;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
@@ -128,8 +129,8 @@ public class NIT extends AbstractPSITabel{
 			for (final NITsection section : sections) {
 				if(section!= null){
 					for (Descriptor d : section.getNetworkDescriptorList()) {
-						if (d instanceof NetworkNameDescriptor) {
-							return ((NetworkNameDescriptor) d).getNetworkNameAsString();
+						if (d instanceof NetworkNameDescriptor networkNameDescriptor) {
+							return networkNameDescriptor.getNetworkNameAsString();
 						}
 					}
 
@@ -146,14 +147,14 @@ public class NIT extends AbstractPSITabel{
 		if(sections!=null){
 			for (final NITsection section : sections) {
 				if(section!= null){
-					for(final NITsection.TransportStream stream :section.getTransportStreamList() ){
-						if(stream.getTransportStreamID()==streamID) {
-							final List<LogicalChannelDescriptor> logicalChannelDescriptorList = Descriptor.findGenericDescriptorsInList(stream.getDescriptorList(),LogicalChannelDescriptor.class);
-							if(logicalChannelDescriptorList.size()>0) {
-								final LogicalChannelDescriptor d = logicalChannelDescriptorList.get(0); // there should be only one..
-								for ( final LogicalChannelDescriptor.LogicalChannel ch : d.getChannelList()){
-									if(ch.getServiceID()==serviceID){
-										r = ch.getLogicalChannelNumber();
+					for(final TransportStream stream :section.getTransportStreamList() ){
+						if(stream.transport_stream_id()==streamID) {
+							final List<LogicalChannelDescriptor> logicalChannelDescriptorList = Descriptor.findGenericDescriptorsInList(stream.descriptorList(),LogicalChannelDescriptor.class);
+							if(!logicalChannelDescriptorList.isEmpty()) {
+								final AbstractLogicalChannelDescriptor d = logicalChannelDescriptorList.get(0); // there should be only one..
+								for ( final LogicalChannelInterface ch : d.getChannelList()){
+									if(ch.getService_id()==serviceID){
+										r = ch.getLogical_channel_number();
 										return r;
 									}
 								}
@@ -173,18 +174,18 @@ public class NIT extends AbstractPSITabel{
 		if (sections != null) {
 			for (final NITsection section : sections) {
 				if (section != null) {
-					for (final NITsection.TransportStream stream : section
+					for (final TransportStream stream : section
 							.getTransportStreamList()) {
-						if (stream.getTransportStreamID() == streamID) {
+						if (stream.transport_stream_id() == streamID) {
 							final List<HDSimulcastLogicalChannelDescriptor> hdSimulcastDescriptorList = Descriptor
 									.findGenericDescriptorsInList(
-											stream.getDescriptorList(),
+											stream.descriptorList(),
 											HDSimulcastLogicalChannelDescriptor.class);
-							if (hdSimulcastDescriptorList.size() > 0) {
+							if (!hdSimulcastDescriptorList.isEmpty()) {
 								final HDSimulcastLogicalChannelDescriptor d = hdSimulcastDescriptorList.get(0); // there should be only one..
-								for (final HDSimulcastLogicalChannelDescriptor.LogicalChannel ch : d.getChannelList()) {
-									if (ch.getServiceID() == serviceID) {
-										r = ch.getLogicalChannelNumber();
+								for (final LogicalChannelInterface ch : d.getChannelList()) {
+									if (ch.getService_id() == serviceID) {
+										r = ch.getLogical_channel_number();
 										return r;
 									}
 								}
@@ -296,73 +297,73 @@ public class NIT extends AbstractPSITabel{
 
 		return new TableHeaderBuilder<NITsection,TransportStream>().
 				addRequiredBaseColumn("network_id", NITsection::getNetworkID,Integer.class).
-				addRequiredRowColumn("tsid", TransportStream::getTransportStreamID, Integer.class).
-				addRequiredRowColumn("onid", TransportStream::getOriginalNetworkID, Integer.class).
+				addRequiredRowColumn("tsid", TransportStream::transport_stream_id, Integer.class).
+				addRequiredRowColumn("onid", TransportStream::original_network_id, Integer.class).
 
 				// terrestrial
 
 				addOptionalRowColumn("terrestrial frequency",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								ter -> formatTerrestrialFrequency(ter.getFrequency())),
 						Number.class).
 
 				addOptionalRowColumn("terrestrial bandwidth",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								ter -> getBandwidtString(ter.getBandwidth())),
 						Number.class).
 
 				addOptionalRowColumn("terrestrial priority",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								ter -> getPriorityString(ter.getPriority())),
 						String.class).
 				addOptionalRowColumn("terrestrial time_slicing_indicator",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								TerrestrialDeliverySystemDescriptor::getTimeSlicingString),
 						String.class).
 				addOptionalRowColumn("terrestrial MPE-FEC_indicator",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								TerrestrialDeliverySystemDescriptor::getMpeFecString),
 						String.class).
 
 				addOptionalRowColumn("terrestrial constellation",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								t -> TerrestrialDeliverySystemDescriptor.getConstellationString(t.getConstellation())),
 						String.class).
 
 				
 				addOptionalRowColumn("terrestrial hierarchy_information",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								t -> TerrestrialDeliverySystemDescriptor.getHierarchyInformationString(t.getHierarchy_information())),
 						String.class).
 				
 				
 				addOptionalRowColumn("terrestrial code_rate-HP_stream",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								t -> TerrestrialDeliverySystemDescriptor.getCodeRateString(t.getCode_rate_HP_stream())),
 						String.class).
 				
 				addOptionalRowColumn("terrestrial code_rate-LP_stream",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								t -> TerrestrialDeliverySystemDescriptor.getCodeRateString(t.getCode_rate_LP_stream())),
 						String.class).
 
 				addOptionalRowColumn("terrestrial guard_interval",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								t -> TerrestrialDeliverySystemDescriptor.getGuardIntervalString(t.getGuard_interval())),
 						String.class).
 
 				addOptionalRowColumn("terrestrial transmission_mode",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								TerrestrialDeliverySystemDescriptor.class,
 								t -> TerrestrialDeliverySystemDescriptor.getTransmissionModeString(t.getTransmission_mode())),
 						String.class).
@@ -370,35 +371,35 @@ public class NIT extends AbstractPSITabel{
 				// DVB-T2
 
 				addOptionalRowColumn("T2 plp_id",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								T2DeliverySystemDescriptor.class,
 								T2DeliverySystemDescriptor::getPlp_id),
 						Integer.class).
 				addOptionalRowColumn("T2_system_id",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								T2DeliverySystemDescriptor.class,
 								T2DeliverySystemDescriptor::getT2_system_id),
 						Integer.class).
 
 
 				addOptionalRowColumn("T2 siso_miso",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								T2DeliverySystemDescriptor.class,
 								t2 -> (t2.getDescriptorLength()>4? getSisoMisoModeList().get(t2.getSiso_miso()):null)),
 						String.class).
 				addOptionalRowColumn("T2 bandwidth",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								T2DeliverySystemDescriptor.class,
 								t2 -> (t2.getDescriptorLength()>4? getBandwidthList().get(t2.getBandwidth()):null)),
 						Number.class).
 
 				addOptionalRowColumn("T2 guard_interval",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								T2DeliverySystemDescriptor.class,
 								t2 -> (t2.getDescriptorLength()>4? getGuardIntervalList().get(t2.getGuard_interval()):null)),
 						Number.class).
 				addOptionalRowColumn("T2 transmission_mode",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								T2DeliverySystemDescriptor.class,
 								t2 -> (t2.getDescriptorLength()>4? getTransmissionModeList().get(t2.getTransmission_mode()):null)),
 						Number.class).
@@ -408,29 +409,29 @@ public class NIT extends AbstractPSITabel{
 				// Cable
 
 				addOptionalRowColumn("cable frequency",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								CableDeliverySystemDescriptor.class,
 								cable -> formatCableFrequency(cable.getFrequency())),
 						Number.class).
 				addOptionalRowColumn("cable fec_outter",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								CableDeliverySystemDescriptor.class,
 								CableDeliverySystemDescriptor::getFEC_outerString),
 						String.class).
 
 				addOptionalRowColumn("cable modulation",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								CableDeliverySystemDescriptor.class,
 								cable -> CableDeliverySystemDescriptor.getModulationString(cable.getModulation())),
 						String.class).
 
 				addOptionalRowColumn("cable symbol_rate",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								CableDeliverySystemDescriptor.class,
 								cable -> formatSymbolRate(cable.getSymbol_rate())),
 						Number.class).
 				addOptionalRowColumn("cable fec_inner",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								CableDeliverySystemDescriptor.class,
 								cable -> Descriptor.getFEC_innerString(cable.getFEC_inner())),
 						String.class).
@@ -438,47 +439,47 @@ public class NIT extends AbstractPSITabel{
 				// Satellite
 
 				addOptionalRowColumn("satellite frequency",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> formatSatelliteFrequency(sat.getFrequency())),
 						Number.class).
 				addOptionalRowColumn("satellite orbital_position",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> formatOrbitualPosition(sat.getOrbitalPosition())),
 						Number.class).
 				addOptionalRowColumn("satellite west_east_flag",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								SatelliteDeliverySystemDescriptor::getWestEastFlagString),
 						String.class).
 				addOptionalRowColumn("satellite polarization",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> getPolarizationString(sat.getPolarization())),
 						String.class).
 				addOptionalRowColumn("satellite modulation_system",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								SatelliteDeliverySystemDescriptor::getModulationSystemString),
 						String.class).
 				addOptionalRowColumn("satellite roll_off",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> (sat.getModulationSystem()==1? getRollOffString(sat.getRollOff()):null)),
 						Number.class).
 				addOptionalRowColumn("satellite modulation_type",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> getModulationString(sat.getModulationType())),
 						String.class).
 				addOptionalRowColumn("satellite symbol_rate",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> formatSymbolRate(sat.getSymbol_rate())),
 						Number.class).
 				addOptionalRowColumn("satellite fec_inner",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> getFEC_innerString(sat.getFEC_inner())),
 						String.class).
@@ -497,7 +498,7 @@ public class NIT extends AbstractPSITabel{
 				if (tsection != null) {
 					TransportStream ts = tsection.getTransportStream(streamID);
 					if (ts != null) {
-						return ts.getOriginalNetworkID();
+						return ts.original_network_id();
 					}
 				}
 			}

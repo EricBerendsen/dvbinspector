@@ -40,7 +40,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ServiceListDescriptor extends Descriptor {
 
-	private final List<Service> serviceList = new ArrayList<Service>();
+	private final List<Service> serviceList = new ArrayList<>();
+	private DescriptorContext descriptorContext;
 
 
 	public class Service implements TreeNode{
@@ -75,28 +76,32 @@ public class ServiceListDescriptor extends Descriptor {
 		}
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			// TODO the correct service name can only be found using the original_network_id and transport_stream_id from the enclosing NIT/BAT section
-			// Not even from section values, but from inner transport stream loop. 
-			
-			
-//			final String serviceName = parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(serviceID);
-//			String nodeName;
-//			if(serviceName==null){
-//				nodeName="service";
-//			}else{
-//				nodeName="service ("+serviceName+")";
-//			}
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("service"));
+		
+			String nodeLabel = "service";
+			if(descriptorContext.hasOnidTsid()) {
+				String serviceName = getServiceName();
+				if(serviceName != null){
+					nodeLabel = "service ("+serviceName+")";
+				}
+				
+			}
+
+			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(nodeLabel));
 			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
 			s.add(new DefaultMutableTreeNode(new KVP("service_type",serviceType,Descriptor.getServiceTypeString(serviceType))));
 			return s;
 
 		}
 
+		public String getServiceName() {
+			return getPSI().getSdt().getServiceName(descriptorContext.original_network_id, descriptorContext.transport_stream_id, serviceID);
+		}
+
 	}
 
-	public ServiceListDescriptor(final byte[] b, final int offset, final TableSection parent) {
+	public ServiceListDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
 		super(b, offset,parent);
+		this.descriptorContext = descriptorContext;
 		int t=0;
 		while (t<descriptorLength) {
 			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);

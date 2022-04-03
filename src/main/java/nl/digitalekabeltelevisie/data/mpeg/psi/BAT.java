@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,13 +38,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
-import nl.digitalekabeltelevisie.data.mpeg.psi.BATsection.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.*;
 
 public class BAT extends AbstractPSITabel{
 
-	private final Map<Integer, BATsection []> networks = new HashMap<Integer, BATsection []>();
+	private final Map<Integer, BATsection []> networks = new HashMap<>();
 
 	public BAT(final PSI parent){
 		super(parent);
@@ -53,12 +52,7 @@ public class BAT extends AbstractPSITabel{
 	public void update(final BATsection section){
 
 		final int key = section.getBouqetID();
-		BATsection [] sections= networks.get(key);
-
-		if(sections==null){
-			sections = new BATsection[section.getSectionLastNumber()+1];
-			networks.put(key, sections);
-		}
+		BATsection [] sections= networks.computeIfAbsent(key, k ->  new BATsection[section.getSectionLastNumber()+1]);
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
@@ -75,14 +69,9 @@ public class BAT extends AbstractPSITabel{
 			kvpBat.setTableSource(this::getTableModel);
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvpBat);
-		final TreeSet<Integer> s = new TreeSet<Integer>(networks.keySet());
+		for(int bouquetNo:new TreeSet<>(networks.keySet())) {
 
-		final Iterator<Integer> i = s.iterator();
-		while(i.hasNext()){
-			final Integer bouquetNo=i.next();
-
-
-			KVP kvp = new KVP("bouqet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
+			KVP kvp = new KVP("bouquet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
 			if(hasTransportStreams(bouquetNo)) {
 				kvp.setTableSource(()->getTableForBouqetID(bouquetNo));
 			}
@@ -108,7 +97,7 @@ public class BAT extends AbstractPSITabel{
 	
 	static TableHeader<BATsection,TransportStream> buildBatTableHeader() {
 
-		TableHeader<BATsection,TransportStream> tableHeader =  new TableHeaderBuilder<BATsection,TransportStream>().
+		return new TableHeaderBuilder<BATsection,TransportStream>().
 				addRequiredBaseColumn("bouquet id",b->b.getBouqetID(), Integer.class).
 				addRequiredBaseColumn("bouquet id name", b -> getBouquetIDString(b.getBouqetID()), String.class).
 				
@@ -119,18 +108,17 @@ public class BAT extends AbstractPSITabel{
 						String.class).
 
 				addOptionalRowColumn("tsid",
-						ts -> ts.getTransportStreamID(),
+						ts -> ts.transport_stream_id(),
 						Integer.class).
 				addOptionalRowColumn("onid",
-						ts -> ts.getOriginalNetworkID(),
+						ts -> ts.original_network_id(),
 						Integer.class).
 				
 				addOptionalRowColumn("original network name",
-						ts ->  Utils.getOriginalNetworkIDString(ts.getOriginalNetworkID()),
+						ts ->  getOriginalNetworkIDString(ts.original_network_id()),
 						String.class).
 			
 			build();
-		return tableHeader;
 	}
 
 	private boolean hasTransportStreams(int bouqetNo) {

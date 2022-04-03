@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,78 +27,29 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_14BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 //based on NorDig Unified ver 2.3 12.2.9.2 NorDig private; Logical Channel Descriptor (version 1)
-public class NordigLogicalChannelDescriptorV1 extends Descriptor {
-
-	private List<LogicalChannel> channelList = new ArrayList<>();
+public class NordigLogicalChannelDescriptorV1 extends AbstractLogicalChannelDescriptor {
 
 
-	public class LogicalChannel implements TreeNode{
-		private int serviceID;
-		private int visibleServiceFlag;
-		private final int reserved;
+	public class LogicalChannel extends AbstractLogicalChannel{
 
-		private int logicalChannelNumber;
+		public LogicalChannel(final int service_id, final int visible_service, final int reserved, final int logical_channel_number){
+			super(service_id, visible_service, reserved, logical_channel_number);
 
-		public LogicalChannel(final int id, final int visibleService, final int res, final int type){
-			serviceID = id;
-			visibleServiceFlag = visibleService;
-			reserved = res;
-			logicalChannelNumber = type;
 		}
-
-		public int getServiceID() {
-			return serviceID;
-		}
-
-		public void setServiceID(final int serviceID) {
-			this.serviceID = serviceID;
-		}
-
-		public int getLogicalChannelNumber() {
-			return logicalChannelNumber;
-		}
-
-		public void setLogicalChannelNumber(final int serviceType) {
-			this.logicalChannelNumber = serviceType;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			//TODO SDT.getServiceName needs original_network_id and transport_stream_id from enclosing NIT section TS loop.
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel "+logicalChannelNumber));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("visible_service",visibleServiceFlag,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logicalChannelNumber,null)));
-			return s;
-		}
-
-		public int getVisibleServiceFlag() {
-			return visibleServiceFlag;
-		}
-
-		public void setVisibleServiceFlag(final int visibleServiceFlag) {
-			this.visibleServiceFlag = visibleServiceFlag;
-		}
-
 
 	}
 
-	public NordigLogicalChannelDescriptorV1(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public NordigLogicalChannelDescriptorV1(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
+		super(b, offset,parent, descriptorContext);
 		int t=0;
 		while (t<descriptorLength) {
 			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
@@ -110,35 +61,6 @@ public class NordigLogicalChannelDescriptorV1 extends Descriptor {
 			channelList.add(s);
 			t+=4;
 		}
-	}
-
-	public int getNoServices(){
-		return channelList.size();
-	}
-
-
-	@Override
-	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
-		for (int i = 0; i < getNoServices(); i++) {
-			final LogicalChannel s = channelList.get(i);
-			buf.append("(").append(i).append(";").append(s.getServiceID()).append(":").append(s.getLogicalChannelNumber()).append(":").append(s.getVisibleServiceFlag()).append("),");
-		}
-
-
-		return buf.toString();
-	}
-
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channels");
-		return t;
-	}
-
-	public List<LogicalChannel> getChannelList() {
-		return channelList;
 	}
 
 

@@ -47,90 +47,6 @@ public class BATsection extends TableSectionExtendedSyntax{
 	private int						networkDescriptorsLength;
 	private int						transportStreamLoopLength;
 
-	public class TransportStream implements TreeNode {
-
-		private int			transportStreamID;
-		private int			originalNetworkID;
-		private int			transportDescriptorsLength;
-
-		private List<Descriptor>	descriptorList;
-
-		public List<Descriptor> getDescriptorList() {
-			return descriptorList;
-		}
-
-		public void setDescriptorList(final List<Descriptor> descriptorList) {
-			this.descriptorList = descriptorList;
-		}
-
-		public int getOriginalNetworkID() {
-			return originalNetworkID;
-		}
-
-		public void setOriginalNetworkID(final int originalNetworkID) {
-			this.originalNetworkID = originalNetworkID;
-		}
-
-		public int getTransportDescriptorsLength() {
-			return transportDescriptorsLength;
-		}
-
-		public void setTransportDescriptorsLength(final int transportDescriptorsLength) {
-			this.transportDescriptorsLength = transportDescriptorsLength;
-		}
-
-		public int getTransportStreamID() {
-			return transportStreamID;
-		}
-
-		public void setTransportStreamID(final int transportStreamID) {
-			this.transportStreamID = transportStreamID;
-		}
-
-		@Override
-		public String toString() {
-			final StringBuilder b = new StringBuilder("Service, transportStreamID=");
-			b.append(getTransportStreamID()).append(", originalNetworkID=").append(getOriginalNetworkID()).append(", ");
-			for (Descriptor d : descriptorList) {
-				b.append(d).append(", ");
-
-			}
-			return b.toString();
-
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("transport_stream:",transportStreamID,null));
-
-			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id", transportStreamID, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("original_network_id", originalNetworkID, Utils
-					.getOriginalNetworkIDString(originalNetworkID))));
-			t.add(new DefaultMutableTreeNode(new KVP("transport_descriptors_length", getTransportDescriptorsLength(),
-					null)));
-
-			Utils.addListJTree(t, descriptorList, modus, "transport_descriptors");
-
-			return t;
-		}
-
-		public Map<String, Object> getTableRowData() {
-			HashMap<String, Object> streamData = new HashMap<>();
-
-			streamData.put("bouquet_id",getTableIdExtension());
-			streamData.put("bouquet_id_name",Utils.getBouquetIDString(getTableIdExtension()));
-
-			streamData.put("transport_stream_id", getTransportStreamID());
-			streamData.put("original_network_id", getOriginalNetworkID());
-			streamData.put("original_network_name", Utils.getOriginalNetworkIDString(originalNetworkID));
-			
-
-			return streamData;
-
-		}
-
-	}
-
 	public BATsection(final PsiSectionData raw_data, final PID parent){
 		super(raw_data, parent);
 
@@ -160,24 +76,12 @@ public class BATsection extends TableSectionExtendedSyntax{
 		return networkDescriptorList;
 	}
 
-	public void setNetworkDescriptorList(final List<Descriptor> networkDescriptorList) {
-		this.networkDescriptorList = networkDescriptorList;
-	}
-
 	public int getNetworkDescriptorsLength() {
 		return networkDescriptorsLength;
 	}
 
-	public void setNetworkDescriptorsLength(final int networkDescriptorsLength) {
-		this.networkDescriptorsLength = networkDescriptorsLength;
-	}
-
 	public List<TransportStream> getTransportStreamList() {
 		return transportStreamList;
-	}
-
-	public void setTransportStreamList(final List<TransportStream> transportStreamList) {
-		this.transportStreamList = transportStreamList;
 	}
 
 	public int getTransportStreamLoopLength() {
@@ -188,21 +92,18 @@ public class BATsection extends TableSectionExtendedSyntax{
 		return transportStreamList.size();
 	}
 
-	public void setTransportStreamLoopLength(final int transportStreamLoopLength) {
-		this.transportStreamLoopLength = transportStreamLoopLength;
-	}
-
 	private List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
 		final List<TransportStream> r = new ArrayList<>();
 		int t = 0;
 		while (t < programInfoLength) {
-			final TransportStream c = new TransportStream();
-			c.setTransportStreamID(Utils.getInt(data, i + t, 2, MASK_16BITS));
-			c.setOriginalNetworkID(Utils.getInt(data, i + t + 2, 2, MASK_16BITS));
-			c.setTransportDescriptorsLength(Utils.getInt(data, i + t + 4, 2, MASK_12BITS));
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data, i + t + 6, c
-					.getTransportDescriptorsLength(), this));
-			t += 6 + c.getTransportDescriptorsLength();
+			
+			final int transport_stream_id = Utils.getInt(data, i + t, 2, MASK_16BITS);
+			final int original_network_id = Utils.getInt(data, i + t + 2, 2, MASK_16BITS);
+			final int transport_descriptors_length = Utils.getInt(data, i + t + 4, 2, MASK_12BITS);
+			List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(data, i + t + 6, transport_descriptors_length, this, new DescriptorContext(original_network_id, transport_stream_id));
+			
+			final TransportStream c = new TransportStream(transport_stream_id, original_network_id, transport_descriptors_length,descriptorList);
+			t += 6 + transport_descriptors_length;
 			r.add(c);
 
 		}
