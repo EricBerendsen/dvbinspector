@@ -29,7 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal
 
 import static nl.digitalekabeltelevisie.util.Utils.MASK_10BITS;
 import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -75,16 +74,6 @@ public class CosLogicalChannelDescriptor extends AbstractLogicalChannelDescripto
 			channelList.add(new CosLogicalChannel(serviceId, visible, free_access, reserved, chNumber));
 			t+=4;
 		}
-	}
-
-
-
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channels");
-		return t;
 	}
 
 
