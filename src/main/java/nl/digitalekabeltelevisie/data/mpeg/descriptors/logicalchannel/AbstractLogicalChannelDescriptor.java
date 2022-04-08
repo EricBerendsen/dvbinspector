@@ -57,10 +57,10 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 			this.logical_channel_number = logical_channel_number;
 		}
 
-		protected int service_id;
-		protected int visible_service_flag;
-		protected int reserved;
-		protected int logical_channel_number;
+		protected final int service_id;
+		protected final int visible_service_flag;
+		protected final int reserved;
+		protected final int logical_channel_number;
 		
 		
 		@Override
@@ -97,14 +97,10 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 		
 	}
 
-	public DescriptorContext descriptorContext;
-	protected List<LogicalChannelInterface> channelList = new ArrayList<>();
+	public final DescriptorContext descriptorContext;
+	protected final List<LogicalChannelInterface> channelList = new ArrayList<>();
 
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
+
 	public AbstractLogicalChannelDescriptor(byte[] b, int offset, TableSection parent, DescriptorContext descriptorContext) {
 		super(b, offset, parent);
 		this.descriptorContext = descriptorContext;
@@ -116,15 +112,13 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 	}
 
 	public String createNodeLabel(int service_id, int logical_channel_number) {
-		String nodeLabel = "logical_channel  " + logical_channel_number;
 		if (descriptorContext.hasOnidTsid()) {
 			String serviceName = findServiceName(service_id);
 			if (serviceName != null) {
-				nodeLabel = "logical_channel (" + serviceName + "): " + logical_channel_number;
+				return "logical_channel (" + serviceName + "): " + logical_channel_number;
 			}
-	
 		}
-		return nodeLabel;
+		return "logical_channel  " + logical_channel_number;
 	}
 	
 	@Override
@@ -140,8 +134,7 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 	@Override
 	public String toString() {
 		final StringBuilder buf = new StringBuilder(super.toString());
-		for (int i = 0; i < channelList.size(); i++) {
-			final LogicalChannelInterface s = channelList.get(i);
+		for (final LogicalChannelInterface s : channelList) {
 			buf.append(s.toString());
 		}
 

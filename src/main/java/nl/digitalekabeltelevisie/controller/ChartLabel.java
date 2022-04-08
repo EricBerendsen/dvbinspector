@@ -2,7 +2,7 @@
  *
  * http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- * This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  * This file is part of DVB Inspector.
  *
@@ -39,9 +39,9 @@ import java.awt.Paint;
 @SuppressWarnings("rawtypes")
 public class ChartLabel implements Comparable {
 
-	private String label;
-	private short pid;
-	private Paint color;
+	private final String label;
+	private final short pid;
+	private final Paint color;
 
 	public ChartLabel(final String label, final short pid, final Paint color) {
 		super();
@@ -60,14 +60,7 @@ public class ChartLabel implements Comparable {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(final Object o) {
-		if (o == null) {
-			throw new NullPointerException(); // NOPMD by Eric on 23-8-14 12:31
-		}
-		if (!(o instanceof ChartLabel)) {
-			throw new ClassCastException();
-		}
-
-		return Short.valueOf(this.pid).compareTo(((ChartLabel) o).getPid());
+		return Short.compare(this.pid, ((ChartLabel) o).getPid());
 	}
 
 	@Override
@@ -79,16 +72,8 @@ public class ChartLabel implements Comparable {
 		return label;
 	}
 
-	public void setLabel(final String label) {
-		this.label = label;
-	}
-
 	public short getPid() {
 		return pid;
-	}
-
-	public void setPid(final short pid) {
-		this.pid = pid;
 	}
 
 	/**
@@ -96,13 +81,6 @@ public class ChartLabel implements Comparable {
 	 */
 	public Paint getColor() {
 		return color;
-	}
-
-	/**
-	 * @param color the color to set
-	 */
-	public void setColor(final Paint color) {
-		this.color = color;
 	}
 
 }

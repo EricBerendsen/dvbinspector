@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -41,16 +40,16 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class CountryAvailabilityDescriptor extends Descriptor {
 
-	private int country_availability_flag = 0;
+	private final int country_availability_flag;
 
-	private final List<Country> countryList = new ArrayList<Country>();
+	private final List<Country> countryList = new ArrayList<>();
 
 
 	public static class Country implements TreeNode{
 		/**
 		 * 
 		 */
-		private String countryCode;
+		private final String countryCode;
 
 
 		public Country(final String lCode){
@@ -71,10 +70,6 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 			return countryCode;
 		}
 
-
-		public void setCountryCode(final String iso639LanguageCode) {
-			this.countryCode = iso639LanguageCode;
-		}
 
 		@Override
 		public String toString(){
@@ -100,8 +95,8 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 	@Override
 	public String toString() {
 		final StringBuilder buf = new StringBuilder(super.toString());
-		for (final Iterator<Country> iter = countryList.iterator(); iter.hasNext();) {
-			buf.append(iter.next().toString());
+		for (Country country : countryList) {
+			buf.append(country.toString());
 		}
 
 
@@ -109,11 +104,11 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 	}
 
 	public static String getCountryAvailabilityFlagString(final int flag) {
-		switch (flag) {
-		case 0: return "reception of the service is not intended";
-		case 1: return "reception of the service is intended";
-		default: return "Illegal value";
-		}
+		return switch (flag) {
+			case 0 -> "reception of the service is not intended";
+			case 1 -> "reception of the service is intended";
+			default -> "Illegal value";
+		};
 	}
 
 	@Override
