@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -57,10 +57,6 @@ public final class GuiUtils {
 		// Do not instantiate
 	}
 
-	/**
-	 * @param title
-	 * @return
-	 */
 	public static JFreeChart createTitleOnlyChart(final String title) {
 		final Plot plot = new Plot() {
 
@@ -75,35 +71,27 @@ public final class GuiUtils {
 				// empty
 			}
 		};
-		final JFreeChart mesg = new JFreeChart(title,plot);
-		return mesg;
+		return new JFreeChart(title,plot);
 	}
 
 	public static KVP getNotImplementedKVP(final String feature){
 		final StringBuilder message = new StringBuilder();
 		message.append(feature).append(" not implemented. ").append(getImproveMsg());
-		return new KVP("<span style=\"color: red;\">"+message.toString()+"</span>",message.toString());
+		return new KVP("<span style=\"color: red;\">"+ message +"</span>",message.toString());
 	}
 
 	public static KVP getErrorKVP(final String message){
-		return new KVP("<span style=\"color: red;\">"+message.toString()+"</span>",message.toString());
+		return new KVP("<span style=\"color: red;\">"+ message +"</span>", message);
 	}
 
-	/**
-	 * @return
-	 */
 	public static String getImproveMsg() {
 		final String version = getVersionString();
 
-		final String improveMsg = "You can help to improve DVB Inspector by making this stream available\n" +
+		return "You can help to improve DVB Inspector by making this stream available\n" +
 				"to Eric Berendsen (e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
 				"Please include the version of DVB Inspector: "+version;
-		return improveMsg;
 	}
 
-	/**
-	 * @return
-	 */
 	public static String getVersionString() {
 		final Package p = GuiUtils.class.getPackage();
 		String version = p.getImplementationVersion();
