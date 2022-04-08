@@ -48,21 +48,21 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class CosInformationParametersDescriptor extends Descriptor {
 	
-	private List<InformationParameter> informationParameters = new ArrayList<>();
+	private final List<InformationParameter> informationParameters = new ArrayList<>();
 	
 	public record InformationParameter(int info_parameter_id, int info_parameter_length, byte[] info_parameter_byte) implements TreeNode{
 
 
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
 			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("InformationParameter"));
-			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_id",info_parameter_id,getInfoPparameterIdDescription(info_parameter_id))));
+			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_id",info_parameter_id,getInfoParameterIdDescription(info_parameter_id))));
 			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_length",info_parameter_length,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_byte",info_parameter_byte,null)));
 			return t;
 		}
 
 
-		private static String getInfoPparameterIdDescription(int info_parameter_id) {
+		private static String getInfoParameterIdDescription(int info_parameter_id) {
 			return switch (info_parameter_id) {
 			case 1 -> "Call center phone number";
 			case 2 -> "Web address";
@@ -82,6 +82,7 @@ public class CosInformationParametersDescriptor extends Descriptor {
 			int info_parameter_length = getInt(b, offset+t+3, 1, MASK_8BITS);
 			byte[] info_parameter_byte = Utils.getBytes(b, offset+t+4, info_parameter_length);
 			informationParameters.add(new InformationParameter(info_parameter_id, info_parameter_length, info_parameter_byte));
+			t += 2 + info_parameter_length;
 		}
 	}
 	
