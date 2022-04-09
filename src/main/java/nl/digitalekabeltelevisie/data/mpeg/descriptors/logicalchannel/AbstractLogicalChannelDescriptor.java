@@ -32,18 +32,23 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.gui.TableSource;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 /**
  * @author Eric
  *
  */
-public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
+public abstract class AbstractLogicalChannelDescriptor extends Descriptor implements TableSource{
 	
 	
 	public abstract class AbstractLogicalChannel implements LogicalChannelInterface{
@@ -82,6 +87,10 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 		public int getLogical_channel_number() {
 			return logical_channel_number;
 		}
+		
+		public String getServiceName() {
+			return findServiceName(service_id);
+		}
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus) {
@@ -94,11 +103,11 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 			return s;
 		}
 
-		
+
 	}
 
 	public final DescriptorContext descriptorContext;
-	protected final List<LogicalChannelInterface> channelList = new ArrayList<>();
+	protected final List<AbstractLogicalChannel> channelList = new ArrayList<>();
 
 
 	public AbstractLogicalChannelDescriptor(byte[] b, int offset, TableSection parent, DescriptorContext descriptorContext) {
@@ -124,8 +133,8 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channels");
+		final DefaultMutableTreeNode t = super.getJTreeNode(modus, this);
+		addListJTree(t,channelList,modus,"logical_channels",this);
 		return t;
 	}
 
@@ -147,8 +156,30 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor{
 	}
 
 
-	public List<LogicalChannelInterface> getChannelList() {
+	public List<AbstractLogicalChannel> getChannelList() {
 		return channelList;
 	}
+
+	private static TableHeader<AbstractLogicalChannel,AbstractLogicalChannel>  buildTableHeader() {
+
+		return new TableHeaderBuilder<AbstractLogicalChannel,AbstractLogicalChannel>().
+				addRequiredRowColumn("service_id", AbstractLogicalChannel::getService_id, Integer.class).
+				addRequiredRowColumn("logical_channel_number", AbstractLogicalChannel::getLogical_channel_number, Integer.class).
+				addOptionalRowColumn("service name", AbstractLogicalChannel::getServiceName, String.class).
+				build();
+	}
+
+
+	public TableModel getTableModel() {
+		FlexTableModel<AbstractLogicalChannel,AbstractLogicalChannel> tableModel =  new FlexTableModel<>(buildTableHeader());
+
+		for(AbstractLogicalChannel ch:channelList) {
+			tableModel.addData(ch, List.of(ch));
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
+
 
 }

@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,18 +27,26 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.gui.TableSource;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
-public class ServiceListDescriptor extends Descriptor {
+public class ServiceListDescriptor extends Descriptor implements TableSource {
 
 	private final List<Service> serviceList = new ArrayList<>();
 	private DescriptorContext descriptorContext;
@@ -131,13 +139,35 @@ public class ServiceListDescriptor extends Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,serviceList,modus,"service_list");
+		final DefaultMutableTreeNode t = super.getJTreeNode(modus, this);
+		addListJTree(t,serviceList,modus,"service_list",this);
 		return t;
 	}
 
 	public List<Service> getServiceList() {
 		return serviceList;
+	}
+
+	private static TableHeader<Service,Service>  buildTableHeader() {
+
+		return new TableHeaderBuilder<Service,Service>().
+				addRequiredRowColumn("service_id", Service::getServiceID, Integer.class).
+				addRequiredRowColumn("service_type", Service::getServiceType, Integer.class).
+				addRequiredRowColumn("service type description", Service::getServiceTypeString, String.class).
+				addOptionalRowColumn("service name", Service::getServiceName, String.class).
+				build();
+	}
+
+
+	public TableModel getTableModel() {
+		FlexTableModel<Service,Service> tableModel =  new FlexTableModel<>(buildTableHeader());
+
+		for(Service service:serviceList) {
+			tableModel.addData(service, List.of(service));
+		}
+
+		tableModel.process();
+		return tableModel;
 	}
 
 }

@@ -60,6 +60,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.gui.DVBtree;
+import nl.digitalekabeltelevisie.gui.TableSource;
 
 /**
  * Only static helper methods
@@ -228,7 +229,7 @@ public final class Utils {
 		try(InputStream fileInputStream = classL.getResourceAsStream(fileName)){
 			image = ImageIO.read(fileInputStream);
 		} catch (final Exception e) {
-			logger.log(Level.WARNING, "Error reading icon image: exception:{0}", e);
+			logger.log(Level.WARNING, "Error reading icon image: exception:", e);
 		}
 		return image;
 	}
@@ -527,7 +528,6 @@ public final class Utils {
 			}
 			if(t>9){
 				logger.warning("Error parsing BCD: "+toHexString(b)+" ,nibble_no: "+startNibbleNo+" ,len: "+len);
-				//return "Error parsing BCD";
 			}
 			buf.append(Integer.toString(t,16));
 		}
@@ -1184,15 +1184,21 @@ public final class Utils {
 	 * @param modus
 	 * @param label
 	 */
-	public static <U extends TreeNode>void addListJTree(final DefaultMutableTreeNode parent,final Collection<U> itemList, final int modus, final String label) {
-		if((itemList!=null)&&(itemList.size()!=0)){
+	public static void addListJTree(final DefaultMutableTreeNode parent,final Collection<? extends TreeNode> itemList, final int modus, final String label) {
+		addListJTree(parent, itemList, modus, label, null);
+	}
+
+	
+	public static void addListJTree(final DefaultMutableTreeNode parent,final Collection<? extends TreeNode> itemCollection, final int modus, final String label, TableSource tableSource) {
+		if((itemCollection!=null)&&(!itemCollection.isEmpty())){
 			if(simpleModus(modus)){ // simple layout
-				addToList(parent, itemList, modus);
+				addToList(parent, itemCollection, modus);
 			}else{
-				final KVP kvp = new KVP(label +": "+ itemList.size()+" entries");
+				final KVP kvp = new KVP(label +": "+ itemCollection.size()+" entries");
 				kvp.setCrumb(label);
+				kvp.setTableSource(tableSource);
 				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
-				addToList(descriptorListNode, itemList, modus);
+				addToList(descriptorListNode, itemCollection, modus);
 				parent.add(descriptorListNode);
 			}
 		}
@@ -1200,23 +1206,20 @@ public final class Utils {
 
 
 
-	public static <U> void addToList(final DefaultMutableTreeNode parent,
-			final Collection<U> itemList, final int modus) {
+	public static void addToList(final DefaultMutableTreeNode parent,
+			final Collection<? extends TreeNode> itemCollection, final int modus) {
 		if(countListModus(modus)){
 			int count = 0;
-			for (final U u : itemList) {
-				final DefaultMutableTreeNode node = ((TreeNode) u).getJTreeNode(modus);
-				final Object userObject = node.getUserObject();
-				if (userObject instanceof KVP) {
-					final KVP kvp = (KVP)userObject;
-					kvp.appendLabel(" ["+ count +"]");
-					count++;
+			for (final TreeNode treeNode : itemCollection) {
+				final DefaultMutableTreeNode node = treeNode.getJTreeNode(modus);
+				if (node.getUserObject() instanceof KVP kvp) {
+					kvp.appendLabel(" ["+ count++ +"]");
 				}
 				parent.add(node);
 			}
 		}else{
-			for (final U u : itemList) {
-				parent.add(((TreeNode) u).getJTreeNode(modus));
+			for (final TreeNode treeNode  : itemCollection) {
+				parent.add(treeNode.getJTreeNode(modus));
 			}
 		}
 	}
@@ -2146,8 +2149,7 @@ public final class Utils {
 		final Enumeration children = dmtn.children();
 		while(children.hasMoreElements()){
 			final Object next = children.nextElement();
-			if(next instanceof DefaultMutableTreeNode){
-				final DefaultMutableTreeNode child = (DefaultMutableTreeNode)next;
+			if(next instanceof DefaultMutableTreeNode child){
 				final KVP chKVP = (KVP)child.getUserObject();
 				res.append(chKVP.toString(KVP.STRING_DISPLAY_HTML_FRAGMENTS, KVP.NUMBER_DISPLAY_BOTH)).append(lineSep);
 				if(!child.isLeaf()){

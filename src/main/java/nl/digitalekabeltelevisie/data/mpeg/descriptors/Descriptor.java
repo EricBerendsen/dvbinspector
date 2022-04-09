@@ -38,6 +38,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.*;
 
 /**
@@ -343,9 +344,15 @@ public class Descriptor implements TreeNode {
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		return getJTreeNode(modus, null);
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Descriptor: " + getDescriptorname(),
-				descriptorTag, null));
+	}
+	
+	public DefaultMutableTreeNode getJTreeNode(final int modus, TableSource tableSource) {
+
+		final KVP kvp = new KVP("Descriptor: " + getDescriptorname(), descriptorTag, null);
+		kvp.setTableSource(tableSource);
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		addGeneralDescriptorInfo(modus, t);
 		return t;
