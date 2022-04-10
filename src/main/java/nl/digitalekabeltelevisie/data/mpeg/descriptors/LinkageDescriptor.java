@@ -48,9 +48,9 @@ public class LinkageDescriptor extends Descriptor {
 
 	private static final Logger logger = Logger.getLogger(LinkageDescriptor.class.getName());
 
-	private List<OUIEntry> ouiList = new ArrayList<OUIEntry>();
-	private List<Platform> platformList = new ArrayList<Platform>();
-	private List<NordigBootLoader> bootLoaderList = new ArrayList<NordigBootLoader>();
+	private List<OUIEntry> ouiList = new ArrayList<>();
+	private List<Platform> platformList = new ArrayList<>();
+	private List<NordigBootLoader> bootLoaderList = new ArrayList<>();
 	private List<BrandHomeTransponder> m7BrandHomeTransponderList = new ArrayList<>();
 
 	public static class OUIEntry implements TreeNode{
@@ -83,7 +83,7 @@ public class LinkageDescriptor extends Descriptor {
 		 *
 		 */
 		private final int platformId;
-		private List<PlatformName> platformNameList = new ArrayList<PlatformName>();
+		private List<PlatformName> platformNameList = new ArrayList<>();
 
 		public Platform(final int pID){
 			platformId = pID;
@@ -194,7 +194,7 @@ public class LinkageDescriptor extends Descriptor {
 
 
 		int operator_network_id;
-		int operator_sublist_id;;
+		int operator_sublist_id;
 		int home_transport_stream_id;
 		int home_original_network_id;
 		int homebckp_transport_stream_id;
@@ -558,12 +558,12 @@ public class LinkageDescriptor extends Descriptor {
 		case 0x81 : return "user defined: (linkage to NorDig bootloader)";
 		case 0x82 : return "user defined: (NorDig Simulcast replacement service/linkage to Ziggo software update)"; // or NorDig Simulcast replacement service.
 		
-		case 0x88 : // fall through
-		case 0x89 : // fall through
-		case 0x8A : return "user defined: (M7 Fastscan Home TP location descriptor)";
+		case 0x88, 
+			 0x89, 
+			 0x8A : return "user defined: (M7 Fastscan Home TP location descriptor)";
 		case 0x8D : return "user defined: (M7 Fastscan ONT location location descriptor)";
 
-		case 0xA0 : return "user defined:	";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0xA0 : return "user defined: link to OpenTV VOD service";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0xA6 : return "user defined: link to OpenTV ITV service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0xA7 : return "user defined: link to WEB service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
