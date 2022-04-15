@@ -390,7 +390,7 @@ public class LinkageDescriptor extends Descriptor {
 			}
 			privateDataByte = copyOfRange(b, offset + 10 + font_count, offset + descriptorLength + 2);
 
-		}else if(linkageType==0x81){ // 13.2.6 NorDig linkage for bootloader
+		}else if(linkageType==0x81){ //  NorDig Unified ver 2.1    ch 12.2.6 NorDig linkage for bootloader
 			// TODO, this is a private usage, but not indicated by a private_data_specifier_descriptor: 0x5F
 			// just assume it is nordig?
 			int s = 9; // private data, if any, starts at position 9
