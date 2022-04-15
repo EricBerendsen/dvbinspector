@@ -115,7 +115,7 @@ public class StreamMuxConfig implements TreeNode {
 				laySIndx[streamCnt] = lay; 
 				streamID [ prog][ lay] = streamCnt++; 
 				
-				if (prog == 0 & lay == 0) {
+				if (prog == 0 && lay == 0) {
 					useSameConfig = 0;
 				} else {
 					useSameConfig = bitSource.readBits(1);
