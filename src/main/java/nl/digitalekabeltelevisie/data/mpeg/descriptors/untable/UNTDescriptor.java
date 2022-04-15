@@ -32,6 +32,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 /**
  * @author Eric Berendsen
+ * 
+ * Based on ETSI TS 102 006 V1.4.1 (2015-06) 9.5.1 Descriptor identification and location
  *
  */
 
