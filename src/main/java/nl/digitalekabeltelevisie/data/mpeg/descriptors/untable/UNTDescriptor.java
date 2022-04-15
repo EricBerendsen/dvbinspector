@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -37,7 +37,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 // TODO combine with INTDescriptor, see EN 301 192 V1.6.1  8.4.5.1 Descriptor identification and location
 // Note that descriptor tags from 0x00 to 0x3F share a common descriptor name space with UNT descriptors
-// (see ETSI TS 102 006 [18]).
+// (see ETSI TS 102 006 [18]). Problem, 0x0C and 0x0D are not identical, so leave for now 
 
 public class UNTDescriptor extends Descriptor {
 
@@ -76,6 +76,8 @@ public class UNTDescriptor extends Descriptor {
 		case 0x09: return "target_IP_address_descriptor";
 		case 0x0A: return "target_IPv6_address_descriptor";
 		case 0x0B: return "ssu_subgroup_association_descriptor";
+		case 0x0C: return "enhanced_message_descriptor";
+		case 0x0D: return "ssu_uri_descriptor";
 		default:
 
 			return "illegal descriptor tag value in UNT";
