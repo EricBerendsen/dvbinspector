@@ -74,36 +74,27 @@ public class TEMIXYDataset implements XYDataset {
 	}
 
 	private void addToSeriesList(final List<TemiTimeStamp> list, String componentLabel) {
-		if((list!=null)&&(list.size()>0)){
+		if ((list != null) && (!list.isEmpty())) {
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);
-			TemiTimeStamp startKey = new TemiTimeStamp(startPacket,BigInteger.ZERO);
+			TemiTimeStamp startKey = new TemiTimeStamp(startPacket, BigInteger.ZERO);
 			TemiTimeStamp endKey = new TemiTimeStamp(endPacket, BigInteger.valueOf(Long.MAX_VALUE));
-			Comparator<TemiTimeStamp> comperator = new Comparator<TemiTimeStamp>() {
-				
-				@Override
-				public int compare(TemiTimeStamp o1, TemiTimeStamp o2) {
-					if (o1.getPacketNo() < o2.getPacketNo()) {
-						return -1;
-					} else if (o1.getPacketNo() > o2.getPacketNo()) {
-						return 1;
-					} else{
-						return (o1.getMediaTimeStamp().compareTo(o2.getMediaTimeStamp())); 
-					}
-				}
-			};
+
+			Comparator<TemiTimeStamp> comperator = Comparator.comparing(TemiTimeStamp::getPacketNo)
+					.thenComparing(TemiTimeStamp::getMediaTimeStamp);
+
 			int startOffset = Collections.binarySearch(list, startKey, comperator);
-			if(startOffset<0){ 
-				startOffset = (-startOffset)-1;
+			if (startOffset < 0) {
+				startOffset = (-startOffset) - 1;
 			}
 			int endRange = Collections.binarySearch(list, endKey, comperator);
-			
-			if(endRange<0){ 
-				endRange = (-endRange)-1;
+
+			if (endRange < 0) {
+				endRange = (-endRange) - 1;
 			}
 
 			seriesOffset.add(startOffset);
-			seriesViewContextLength.add(endRange-startOffset);
+			seriesViewContextLength.add(endRange - startOffset);
 		}
 	}
 
@@ -118,7 +109,7 @@ public class TEMIXYDataset implements XYDataset {
 	}
 
 	@Override
-	public int indexOf(@SuppressWarnings("rawtypes") Comparable seriesKey) {
+	public int indexOf(Comparable seriesKey) {
 		return seriesKeys.indexOf(seriesKey);
 	}
 
@@ -151,7 +142,6 @@ public class TEMIXYDataset implements XYDataset {
 
 	@Override
 	public int getItemCount(int series) {
-		//return seriesList.get(series).size();
 		return seriesViewContextLength.get(series);
 	}
 
