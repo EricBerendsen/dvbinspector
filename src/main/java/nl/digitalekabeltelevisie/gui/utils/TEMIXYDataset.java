@@ -42,16 +42,15 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 public class TEMIXYDataset implements XYDataset {
 	
 	/** The group that the dataset belongs to. */
-    private DatasetGroup group;
+	private DatasetGroup group;
 
-    private ArrayList<List<TemiTimeStamp>> seriesList = new ArrayList<>();
-    ArrayList<String> seriesKeys = new ArrayList<>(); 
-    ArrayList<Integer> seriesOffset = new ArrayList<>();
-    ArrayList<Integer> seriesViewContextLength = new ArrayList<>();
-    
-    int startPacket;
-    int endPacket;
-    
+	private final ArrayList<List<TemiTimeStamp>> seriesList = new ArrayList<>();
+	private final ArrayList<String> seriesKeys = new ArrayList<>();
+	private final ArrayList<Integer> seriesOffset = new ArrayList<>();
+	private final ArrayList<Integer> seriesViewContextLength = new ArrayList<>();
+
+	private final int startPacket;
+	private final int endPacket;
 
 	public TEMIXYDataset(PMTsection pmt, TransportStream transportStream, ViewContext viewContext) {
 
