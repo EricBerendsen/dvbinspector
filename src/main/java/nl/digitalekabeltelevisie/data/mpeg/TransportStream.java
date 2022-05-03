@@ -52,6 +52,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4.AC4Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.smpte.Smpte2038Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
@@ -811,6 +812,8 @@ public class TransportStream implements TreeNode{
 				abstractPidHandler = new H265Handler();
 			}else if(streamType==0x32){
 				abstractPidHandler = new JpegXsHandler();
+			}else if(streamType==0x06){
+				abstractPidHandler = new Smpte2038Handler();
 			}else{
 				abstractPidHandler = new GeneralPesHandler();
 			}
