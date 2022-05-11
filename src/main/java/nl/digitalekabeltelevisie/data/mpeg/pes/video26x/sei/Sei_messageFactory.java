@@ -64,6 +64,9 @@ public class Sei_messageFactory {
 				case 0x90:
 					sei_message = new ContentLightLevelInformationSei_message(bitSource);
 					break;
+				case 0x93:
+					sei_message = new AlternativeTransferCharacteristicsSei_message(bitSource);
+					break;
 				default:
 					sei_message = new Sei_message(bitSource);
 					break;
