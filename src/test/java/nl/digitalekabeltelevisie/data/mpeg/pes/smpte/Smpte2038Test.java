@@ -1,9 +1,13 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.smpte;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import nl.digitalekabeltelevisie.data.mpeg.pes.smpte.AncillaryDataPacket.DataWord;
+import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Smpte2038Test {
 
@@ -16,20 +20,26 @@ public class Smpte2038Test {
 
 		final int offset = 0;
 
-		final AncillaryDataPacket anc = new AncillaryDataPacket(data, offset);
+        final BitSource bs = new BitSource(data, offset);
+        
+		final AncillaryDataPacket anc = new AncillaryDataPacket(bs);
 
 		Assert.assertEquals(anc.getB0(), 0);
 		Assert.assertEquals(anc.getC_not_y_channel_flag(), 1);
 		Assert.assertEquals(anc.getLine_number(), 197);
 		Assert.assertEquals(anc.getHorizontal_offset(), 2225);
-		Assert.assertEquals(anc.getDID(), 139);
-		Assert.assertEquals(anc.getSDID(), 88);
-		Assert.assertEquals(anc.getData_count(), 3);
+		Assert.assertEquals(anc.getDID() & 0xFF, 139);
+		Assert.assertEquals(anc.getSDID() & 0xFF, 88);
+		Assert.assertEquals(anc.getData_count() & 0xFF, 3);
 
-		final List<Integer> user_data_words = anc.getUser_data_word();
-		Assert.assertEquals((int) user_data_words.get(0), 44);
-		Assert.assertEquals((int) user_data_words.get(1), 97);
-		Assert.assertEquals((int) user_data_words.get(2), 14);
+		final List<DataWord> user_data_words = anc.getUser_data_word();
+        final DataWord userDataWords0 = new DataWord(0b1000101100);
+        final DataWord userDataWords1 = new DataWord(0b0001100001); 
+        final DataWord userDataWords2 = new DataWord(0b1100001110); 
+
+		Assert.assertEquals(user_data_words.get(0), userDataWords0);
+		Assert.assertEquals(user_data_words.get(1), userDataWords1);
+		Assert.assertEquals(user_data_words.get(2), userDataWords2);
 
 		Assert.assertEquals(anc.getChecksum_word(), 112);
 	}

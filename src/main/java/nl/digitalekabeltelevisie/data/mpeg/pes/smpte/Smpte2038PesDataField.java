@@ -1,6 +1,7 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.smpte;
 
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+import nl.digitalekabeltelevisie.util.BitSource;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.controller.KVP;
 
@@ -22,13 +23,14 @@ public class Smpte2038PesDataField extends PesPacketData {
 	protected Smpte2038PesDataField(final PesPacketData pesPacket) {
 		super(pesPacket);
 
-		int bytesOffset = pesDataStart;
+		BitSource bs = new BitSource(data, pesDataStart, pesDataStart + pesDataLen);
 
-		// add ancillaryDataPacket if length is sufficient
-		while (bytesOffset <= pesDataLen) {
-			final AncillaryDataPacket ancData = createAncillaryDataPacket(data, bytesOffset);
+		while (bs.available() >= 64) {
+			final AncillaryDataPacket ancData = createAncillaryDataPacket(bs);
 			ancDataPackets.add(ancData);
-			bytesOffset += data.length;
+			if (!bs.isByteAligned()) {
+				bs.skiptoByteBoundary();
+			}
 		}
 	}
 
@@ -49,7 +51,7 @@ public class Smpte2038PesDataField extends PesPacketData {
 	 * @return
 	 * @throws Exception
 	 */
-	private AncillaryDataPacket createAncillaryDataPacket(final byte[] data, final int start) {
-		return new AncillaryDataPacket(data, start);
+	private AncillaryDataPacket createAncillaryDataPacket(final BitSource bs) {
+		return new AncillaryDataPacket(bs);
 	}
 }
