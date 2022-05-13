@@ -38,6 +38,7 @@ public class RegistrationDescriptor extends Descriptor {
 
 	public static final byte[] SCTE_35 = {'C','U','E','I'};
 	public static final byte[] AC_3 = {'A','C','-','3'};
+	public static final byte[] SMPTE_2038 = {'V','A','N','C'};
 
 	private final byte[]  formatIdentifier;
 	private final byte[]  additionalIdentificationInfo;

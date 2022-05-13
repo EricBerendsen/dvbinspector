@@ -52,6 +52,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4.AC4Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.smpte.Smpte2038Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
@@ -84,7 +85,8 @@ public class TransportStream implements TreeNode{
 		RCT("Related Content Table (RCT)"), 
 		T2MI("T2-MI"),
 		TTML("TTML subtitling"),
-		AC4("Dolby AC-4 Audio");
+		AC4("Dolby AC-4 Audio"),
+		SMPTE2038("SMPTE 2038");
 		
 		private final String description;
 		
@@ -731,6 +733,9 @@ public class TransportStream implements TreeNode{
 				case TTML:
 					generalPidHandler = new TtmlPesHandler();
 					break;
+				case SMPTE2038:
+					generalPidHandler = new Smpte2038Handler();
+					break;
 				default:
 					logger.warning("no componenttype found for pid " + component.getElementaryPID()
 							+ ", part of service " + service_name);
@@ -775,6 +780,9 @@ public class TransportStream implements TreeNode{
 				byte[] formatIdentifier = ((RegistrationDescriptor)d).getFormatIdentifier();
 				if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.AC_3,0,RegistrationDescriptor.AC_3.length)){
 					return ComponentType.AC3;
+				}
+				if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.SMPTE_2038,0,RegistrationDescriptor.SMPTE_2038.length)){
+					return ComponentType.SMPTE2038;
 				}
 			}else if(d instanceof EnhancedAC3Descriptor){
 				return ComponentType.E_AC3;
