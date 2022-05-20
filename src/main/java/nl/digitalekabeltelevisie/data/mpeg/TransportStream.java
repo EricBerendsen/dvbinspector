@@ -29,24 +29,42 @@ package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.df2pos;
+import static nl.digitalekabeltelevisie.util.Utils.df3pos;
+import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeShortString;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCCalender;
+import static nl.digitalekabeltelevisie.util.Utils.psiOnlyModus;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.AC4Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2MIDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.TtmlSubtitlingDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video.jpegxs.JpegXsHandler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.AC3Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.EAC3Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.Audio144963Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4.AC4Handler;
@@ -55,18 +73,31 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.smpte.Smpte2038Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.jpegxs.JpegXsHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
-import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
+import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.OperatorFastscan;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
-import nl.digitalekabeltelevisie.util.*;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.JTreeLazyList;
+import nl.digitalekabeltelevisie.util.OffsetHelper;
+import nl.digitalekabeltelevisie.util.PositionPushbackInputStream;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
+import nl.digitalekabeltelevisie.util.ProgressMonitorLargeInputStream;
+import nl.digitalekabeltelevisie.util.TSPacketGetter;
+import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 
 /**
@@ -206,8 +237,7 @@ public class TransportStream implements TreeNode{
 	 */
 	private static int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
 		if(file.length()< 752) {
-			throw new NotAnMPEGFileException("File too short to determine packet length automatic. File should have at least 5 consecutive packets.\n\n"
-					+ "Try setting packet length manual.");
+			throw new NotAnMPEGFileException("File too short to determine packet length automatic. File should have at least 5 consecutive packets.\n\nTry setting packet length manual.");
 		}
 		try(final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
 			for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
@@ -245,7 +275,7 @@ public class TransportStream implements TreeNode{
 			// found a sync byte, try to find next 4 sync bytes
 			boolean seqFound = true;
 			for (int i = 1; (i < CONSECUTIVE_PACKETS) && seqFound; i++) {
-				randomAccessFile.seek(startPos + (i * possiblePacketLength));
+				randomAccessFile.seek((long)startPos + (i * possiblePacketLength));
 				logger.log(Level.INFO, "found {0} sequence syncs at pos {1}",new Object[]{i,startPos + (i * possiblePacketLength)});
 				seqFound &= (randomAccessFile.read() == sync_byte);
 			}
@@ -313,8 +343,15 @@ public class TransportStream implements TreeNode{
 				}
 			} while (bytes_read == packetLength);
 		}
+		postProcess();
+	}
+
+	public void postProcess() {
 		namePIDs();
+		setGeneralPsiTableHandlers();
 		calculateBitRate();
+		calculateBitrateTDT();
+		calculateZeroTime();
 	}
 
 	private void processPacket(TSPacket packet) {
@@ -562,7 +599,7 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	public void namePIDs() {
+	private void namePIDs() {
 
 		// first the easy ones, the fixed values
 		for (short i = 0; i <=0x1f; i++) {
@@ -600,23 +637,24 @@ public class TransportStream implements TreeNode{
 			labelM7FastscanTables();
 		}
 		
+
+	}
+
+	private void setGeneralPsiTableHandlers() {
 		if(PreferencesManager.isEnableGenericPSI()) {
 			for (final PID pid : pids) {
 				if((pid!=null)&&(pid.getType()==PID.PSI)) {
 						final GeneralPSITable psiData = pid.getPsi();
-						if((!psiData.getLongSections().isEmpty())|| 
-								(!psiData.getSimpleSectionsd().isEmpty())) {
-							if(pid.getPidHandler()==null) {
-								GeneralPsiTableHandler generalPsiTableHandler = new GeneralPsiTableHandler();
-								generalPsiTableHandler.setPID(pid);
-								generalPsiTableHandler.setTransportStream(this);
-								pid.setPidHandler(generalPsiTableHandler);
-							}
+						if (((!psiData.getLongSections().isEmpty())|| 
+								(!psiData.getSimpleSectionsd().isEmpty())) && pid.getPidHandler()==null) {
+							GeneralPsiTableHandler generalPsiTableHandler = new GeneralPsiTableHandler();
+							generalPsiTableHandler.setPID(pid);
+							generalPsiTableHandler.setTransportStream(this);
+							pid.setPidHandler(generalPsiTableHandler);
 						}
 					}
 				}
 			}
-
 	}
 
 	/**
@@ -743,12 +781,10 @@ public class TransportStream implements TreeNode{
 			}
 
 			final PID pid = pids[component.getElementaryPID()];
-			if(pid!=null){
-				if(generalPidHandler!=null){
-					generalPidHandler.setTransportStream(this);
-					generalPidHandler.setPID(pid);
-					pid.setPidHandler(generalPidHandler);
-				}
+			if (pid!=null && generalPidHandler!=null) {
+				generalPidHandler.setTransportStream(this);
+				generalPidHandler.setPID(pid);
+				pid.setPidHandler(generalPidHandler);
 			}
 			
 			final List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
@@ -776,12 +812,12 @@ public class TransportStream implements TreeNode{
 				return ComponentType.AC3;
 			}else if(d instanceof AC4Descriptor){
 				return ComponentType.AC4;
-			}else if(d instanceof RegistrationDescriptor){
-				byte[] formatIdentifier = ((RegistrationDescriptor)d).getFormatIdentifier();
-				if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.AC_3,0,RegistrationDescriptor.AC_3.length)){
+			}else if(d instanceof RegistrationDescriptor registrationDescriptor){
+				byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
+				if (Arrays.equals(formatIdentifier, RegistrationDescriptor.AC_3)) {
 					return ComponentType.AC3;
 				}
-				if(Utils.equals(formatIdentifier, 0, formatIdentifier.length,RegistrationDescriptor.SMPTE_2038,0,RegistrationDescriptor.SMPTE_2038.length)){
+				if (Arrays.equals(formatIdentifier, RegistrationDescriptor.SMPTE_2038)) {
 					return ComponentType.SMPTE2038;
 				}
 			}else if(d instanceof EnhancedAC3Descriptor){
@@ -829,7 +865,7 @@ public class TransportStream implements TreeNode{
 	private static int getAncillaryDataIdentifier(final Component component) {
 		int ancillaryData = 0;
 		final List<AncillaryDataDescriptor> ancillaryDataDescriptors = findGenericDescriptorsInList(component.getComponentDescriptorList(), AncillaryDataDescriptor.class);
-		if(ancillaryDataDescriptors.size()>0){
+		if(!ancillaryDataDescriptors.isEmpty()){
 			ancillaryData = ancillaryDataDescriptors.get(0).getAncillaryDataIdentifier();
 		}
 		return ancillaryData;
@@ -840,7 +876,7 @@ public class TransportStream implements TreeNode{
 	/**
 	 *
 	 */
-	public void calculateBitRate() {
+	private void calculateBitRate() {
 
 		// now calculate bitrate of stream by averaging bitrates of PIDS with PCR
 
@@ -855,14 +891,16 @@ public class TransportStream implements TreeNode{
 		if(teller!=0){
 			bitRate = totBitrate / teller;
 		}
+	}
 
+	private void calculateBitrateTDT() {
 		// calculate bitrate based on TDT sections. Need at least 2
 		if(getPsi().getTdt()!=null){
 			final List<TDTsection> tdtSectionList  = getPsi().getTdt().getTdtSectionList();
 			if(tdtSectionList.size()>=2){
 				final TDTsection first = tdtSectionList.get(0);
 				final TDTsection last = tdtSectionList.get(tdtSectionList.size()-1);
-				final long diffPacket = last.getPacket_no() - first.getPacket_no();
+				final long diffPacket = (long)last.getPacket_no() - first.getPacket_no();
 				final Calendar utcCalenderLast = getUTCCalender(last.getUTC_time());
 				final Calendar utcCalenderFirst = getUTCCalender(first.getUTC_time());
 				// getUTCCalender might fail if not correct BCD, then will return null.
@@ -872,15 +910,14 @@ public class TransportStream implements TreeNode{
 						bitRateTDT = (diffPacket * packetLength * 8 * 1000)/timeDiffMills;
 					}
 				}
-
 			}
-
 		}
-		// calculate zeroTime
+	}
 
+	private void calculateZeroTime() {
 		if((getPsi().getTdt()!=null)&&(getBitRate()!=-1)){
 			final List<TDTsection> tdtSectionList  = getPsi().getTdt().getTdtSectionList();
-			if(tdtSectionList.size()>=1){
+			if(!tdtSectionList.isEmpty()){
 				final TDTsection first = tdtSectionList.get(0);
 				final Calendar firstTime = getUTCCalender(first.getUTC_time());
 				if(firstTime!=null){

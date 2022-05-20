@@ -63,7 +63,7 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 
 			final TransportStream ts = get();
 			if(ts!=null){
-				control.setTransportStream(get());
+				control.setTransportStream(ts);
 				control.resetSearch();
 				PreferencesManager.setLastUsedDir(file.getParent());
 				control.addRecentFile(file.getCanonicalPath());
@@ -106,8 +106,7 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 					+ "DVB Inspector will show only part of stream.";
 			showMessage(msg);
 			if (transportStream != null) {
-				transportStream.namePIDs();
-				transportStream.calculateBitRate();
+				transportStream.postProcess();
 			}
 			
 		} catch (final Throwable t) {
