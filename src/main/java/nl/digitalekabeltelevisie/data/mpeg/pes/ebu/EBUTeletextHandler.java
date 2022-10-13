@@ -27,15 +27,24 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.invtab;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
+import nl.digitalekabeltelevisie.gui.DVBtree;
+import nl.digitalekabeltelevisie.gui.SaveAble;
 
 /**
  * @author Eric Berendsen
@@ -43,7 +52,9 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
  * based on EN 300 706
  *
  */
-public class EBUTeletextHandler extends GeneralPesHandler{
+public class EBUTeletextHandler extends GeneralPesHandler implements SaveAble{
+
+	private static final Logger logger = Logger.getLogger(EBUTeletextHandler.class.getName());
 
 
 	private TxtService txtService = null;
@@ -77,7 +88,14 @@ public class EBUTeletextHandler extends GeneralPesHandler{
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
+		final KVP kvp = new KVP("EBU PES Data");
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(kvp);
+		
+		final JMenuItem objectMenu = new JMenuItem("Save Txt Service as .t42");
+		objectMenu.setActionCommand(DVBtree.T42);
+		kvp.setSubMenuAndOwner(objectMenu, this);
+
+		addListJTree(s,pesPackets,modus,"PES Packets");
 
 		final DefaultMutableTreeNode t=new DefaultMutableTreeNode(new KVP("EBU Data"));
 		if(txtService!=null){ t.add(txtService.getJTreeNode(modus));}
@@ -102,21 +120,21 @@ public class EBUTeletextHandler extends GeneralPesHandler{
 		pesPackets.add(pesDataField);
 		final List<EBUDataField> lines = pesDataField.getFieldList();
 		for(final EBUDataField ebuData: lines){
-			if(ebuData instanceof TxtDataField) {
+			if(ebuData instanceof TxtDataField txtDataField) {
 				if(txtService==null){
 					txtService = new TxtService(getTransportStream());
 				}
-				txtService.addTxtDataField((TxtDataField)ebuData);
-			}else if(ebuData instanceof VPSDataField){
+				txtService.addTxtDataField(txtDataField);
+			}else if(ebuData instanceof VPSDataField vpsDataField){
 				if(vps==null){
-					vps = new ArrayList<VPSDataField>();
+					vps = new ArrayList<>();
 				}
-				add((VPSDataField)ebuData, vps);
-			}else if(ebuData instanceof WSSDataField){
+				add(vpsDataField, vps);
+			}else if(ebuData instanceof WSSDataField wssDataField){
 				if(wss==null){
-					wss = new ArrayList<WSSDataField>();
+					wss = new ArrayList<>();
 				}
-				add((WSSDataField)ebuData, wss);
+				add(wssDataField, wss);
 			}
 		}
 	}
@@ -145,6 +163,35 @@ public class EBUTeletextHandler extends GeneralPesHandler{
 
 	public List<WSSDataField> getWss() {
 		return wss;
+	}
+
+	@Override
+	public void save(File file) {
+		
+		try (FileOutputStream out = new FileOutputStream(file)) {
+			for(PesPacketData packet:pesPackets) {
+				if(packet instanceof EBUPESDataField ebuDataField) {
+					for(EBUDataField field:ebuDataField.getFieldList()) {
+						saveLineT42(out, field);
+					}
+				}
+			}
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "could not write file", e);
+		}
+
+		
+	}
+
+	public static void saveLineT42(FileOutputStream out, EBUDataField line) throws IOException {
+		if (line != null) {
+			byte[] d = line.getData_block();
+	
+			int offset = line.getOffset();
+			for (int i = 4; i < 46; i++) {
+				out.write(invtab[Byte.toUnsignedInt(d[offset + i])]);
+			}
+		}
 	}
 
 

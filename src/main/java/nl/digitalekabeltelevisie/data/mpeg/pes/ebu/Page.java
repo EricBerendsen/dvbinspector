@@ -3,12 +3,10 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 import static nl.digitalekabeltelevisie.util.Utils.toHexString;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -16,7 +14,8 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
 /**
- * Page holds a listof subPages. For normal teletext (non subtitle) this is a hashmap. If only one subpage exitst with subPageNo==0, it is treated specia+
+ * Page holds a list of subPages. For normal teletext (non subtitle) this is a treemap. 
+ * If only one subpage exists with subPageNo==0, it is treated special
  * For subtitle pages all versions are stored in an ArrayList.
  */
 public class Page implements TreeNode{
@@ -25,14 +24,12 @@ public class Page implements TreeNode{
 	 *
 	 */
 	private final Magazine	magazineHandler;
-	private final Map<Integer, SubPage>subPages = new HashMap<Integer, SubPage>();
-	private final List<SubPage> subtitles = new ArrayList<SubPage>();
+	private final TreeMap<Integer, SubPage>subPages = new TreeMap<>();
+	private final List<SubPage> subtitles = new ArrayList<>();
 
 	private int pageNo=-1;
-	private int currentSubPageNo=-1;
 	private SubPage currentSubPage=null;
-
-	//private TxtDataField[][] linesList = new TxtDataField[1][32]; //subPages, lines
+	
 	/**
 	 * @param currentPageNo
 	 * @param magazine
@@ -53,15 +50,15 @@ public class Page implements TreeNode{
 	 * @param txtDataField
 	 */
 	public void setHeader(final TxtDataField txtDataField) {
-		currentSubPageNo = txtDataField.getSubPage();
+		int currentSubPageNo = txtDataField.getSubPage();
 		if((txtDataField.getDataUnitId()==0x02)|| (txtDataField.getDataUnitId()== 0xc0)){ //EBU Teletext non-subtitle data , or inverted
-			currentSubPage=getSubPages().get(currentSubPageNo);
+			currentSubPage=subPages.get(currentSubPageNo);
 			if(currentSubPage==null){
 				currentSubPage=new SubPage(this, currentSubPageNo);
-				getSubPages().put(currentSubPageNo, currentSubPage);
+				subPages.put(currentSubPageNo, currentSubPage);
 			}
 			currentSubPage.setHeader(txtDataField);
-		}else if(txtDataField.getDataUnitId()==03){ //EBU Teletext subtitle data // TODO ??check also for subtitle flag, because spanish TVE uses DataUnitId()==03 on all pages.... && txtDataField.isSubtitle()
+		}else if(txtDataField.getDataUnitId()==0x03){ //EBU Teletext subtitle data // TODO ??check also for subtitle flag, because spanish TVE uses DataUnitId()==03 on all pages.... && txtDataField.isSubtitle()
 			// But then normal pages of TVE text are not shown at all...
 			currentSubPage=new SubPage(this, currentSubPageNo);
 			subtitles.add(currentSubPage);
@@ -73,21 +70,17 @@ public class Page implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		DefaultMutableTreeNode s;
-		if((getSubPages().size()==1)&&(getSubPages().keySet().iterator().next()==0)){ //only one subPage, and its number is 0000
-			final SubPage p = getSubPages().values().iterator().next();
-			s = p.getJTreeNode(modus);
-			s.setUserObject(new KVP(getPageNumberLabel(),p));
-		}else if(getSubPages().size()>0){ // normal list of subpages
-			s=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
-			final SortedSet<Integer> sortedSubPages = new TreeSet<Integer>(getSubPages().keySet());
-			for (Integer integer : sortedSubPages) {
-				final int subPage= integer;
-				final SubPage p = getSubPages().get(subPage);
-				s.add(p.getJTreeNode(modus));
+		DefaultMutableTreeNode treeNode;
+		if((subPages.size()==1)&&(subPages.get(0) != null)){ //only one subPage, and its number is 0000
+			treeNode = subPages.get(0).getJTreeNode(modus);
+			((KVP) treeNode.getUserObject()).setLabel(getPageNumberLabel());
+		}else if(subPages.size()>0){ // normal list of subpages
+			treeNode=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
+			for (SubPage subPage : subPages.values()) {
+				treeNode.add(subPage.getJTreeNode(modus));
 			}
-		}else if(subtitles.size()>0){
-			s=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
+		}else if(!subtitles.isEmpty()){
+			treeNode=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
 			for(final SubPage subPage: subtitles){
 				if(subPage!=null){
 					final DefaultMutableTreeNode t = subPage.getJTreeNode(modus);
@@ -100,13 +93,13 @@ public class Page implements TreeNode{
 					}
 
 					t.setUserObject(new KVP(titel.toString().trim(),subPage));
-					s.add(t);
+					treeNode.add(t);
 				}
 			}
 		}else{
-			s=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
+			treeNode=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
 		}
-		return s;
+		return treeNode;
 	}
 
 	private String getPageNumberLabel(){
@@ -170,8 +163,8 @@ public class Page implements TreeNode{
 	 */
 	public SubPage getMOTPage() {
 		final Page p = magazineHandler.getPage(0xFE);
-		if((p!=null)&&!p.getSubPages().isEmpty()){// always hashMap, maybe no entries ?
-			return p.getSubPages().values().iterator().next();
+		if((p!=null)&&!p.subPages.isEmpty()){// always hashMap, maybe no entries ?
+			return p.subPages.values().iterator().next();
 		}
 		return null;
 	}
@@ -197,10 +190,10 @@ public class Page implements TreeNode{
 	 * @return
 	 */
 	public SubPage getSubPageByS1(final int subPageS1) {
-		final Set<Integer> subPageNos = getSubPages().keySet();
+		final Set<Integer> subPageNos = subPages.keySet();
 		for(final Integer subNo:subPageNos){
 			if(subPageS1==(subNo&0xF)){ // last hex digit matches
-				return getSubPages().get(subNo);
+				return subPages.get(subNo);
 			}
 		}
 		return null;
@@ -211,7 +204,7 @@ public class Page implements TreeNode{
 		return "Mag:"+getMagazineNo()+", pageNo"+getPageNo();
 	}
 
-	public Map<Integer, SubPage> getSubPages() {
+	public SortedMap<Integer, SubPage> getSubPages() {
 		return subPages;
 	}
 

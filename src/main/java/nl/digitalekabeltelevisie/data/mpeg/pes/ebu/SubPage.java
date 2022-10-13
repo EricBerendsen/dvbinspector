@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,19 +31,25 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 import java.util.logging.*;
 
 import javax.imageio.ImageIO;
+import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.gui.DVBtree;
 import nl.digitalekabeltelevisie.gui.ImageSource;
+import nl.digitalekabeltelevisie.gui.SaveAble;
 import nl.digitalekabeltelevisie.util.*;
 
-public class SubPage implements TreeNode, ImageSource, TextConstants{
+public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 	/**
 	 *
@@ -106,9 +112,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 	static {
 		try {
-			final InputStream fileInputStream = classLoader.getResourceAsStream("g3_charset.gif");
-			g3CharsImage = ImageIO.read(fileInputStream);
-
+			try (InputStream fileInputStream = classLoader.getResourceAsStream("g3_charset.gif")) {
+				g3CharsImage = ImageIO.read(fileInputStream);
+			}
 		} catch (final Exception e) {
 			logger.log(Level.WARNING, "error reading image g3_charset.gif:", e);
 		}
@@ -218,8 +224,13 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("SubPage " + toHexString(subPageNo, 4), this));
+		final KVP kvp = new KVP("SubPage " + toHexString(subPageNo, 4), this);
+		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(kvp);
 
+		final JMenuItem objectMenu = new JMenuItem("Save Page as .t42");
+		objectMenu.setActionCommand(DVBtree.T42);
+		kvp.setSubMenuAndOwner(objectMenu, this);
+		
 		for (int i = 0; i < 26; i++) { // 24 or 25 lines, what is line 25 used for anyaway ??? normal is 0 (header) + 1 to 24
 			final PageLine pageLine = linesList[i];
 			if (pageLine != null) {
@@ -593,8 +604,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	 * @return
 	 */
 	private static List<ObjectLink> getObjectLinks(final TxtDataField txtDataField1, final TxtDataField txtDataField2) {
-		final List<ObjectLink> objects=new ArrayList<ObjectLink>();
-		if(txtDataField1!=null){
+		final List<ObjectLink> objects = new ArrayList<>();
+		if (txtDataField1 != null) {
 			final ObjectLink gpop = new ObjectLink(txtDataField1.data_block, 6 + txtDataField1.offset);
 			objects.add(gpop);
 			for (int i = 1; i < 4; i++) {
@@ -602,7 +613,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				objects.add(pop);
 			}
 		}
-		if(txtDataField2!=null){
+		if (txtDataField2 != null) {
 			for (int i = 4; i < 8; i++) {
 				final ObjectLink pop = new ObjectLink(txtDataField2.data_block, 6 + (10 * (i-4)) + txtDataField2.offset);
 				objects.add(pop);
@@ -824,7 +835,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 
 
 	private static List<DRCSLink> getDRCSLinks(final TxtDataField txtDataField) {
-		final ArrayList<DRCSLink> res = new ArrayList<DRCSLink>();
+		final ArrayList<DRCSLink> res = new ArrayList<>();
 		if (txtDataField != null) {
 			final DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
 			res.add(gpop);
@@ -1229,7 +1240,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 				}
 				// bits 1-12 of triplet 12
 				bs.addIntBitsReverse(tripletList.get(11).getVal() & 0xFFF, 12);
-				final List<DRCSCharacter> drcsChars = new ArrayList<DRCSCharacter>();
+				final List<DRCSCharacter> drcsChars = new ArrayList<>();
 
 				for (int i = 0; i < 48; i++) {
 					final int drcsMode = bs.getIntBitsReverse(4); // 0..15
@@ -1341,7 +1352,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		
 		int lineNumber = lineNo;
 		int offset = tripletOffset;
-		final List<TxtTriplet> objectDefinition = new ArrayList<TxtTriplet>();
+		final List<TxtTriplet> objectDefinition = new ArrayList<>();
 
 		TxtDataField line = objectDefSubPage.getLine(lineNumber);
 		if(line!=null){
@@ -1497,12 +1508,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 		if(i>15){
 			if(packetx_28[0]!=null){		// first look at page level for line 28/0,
 				return packetx_28[0].getColor(i);
-			}else{// then at magazine level line 29/0
-				final Magazine mag = pageHandler.getMagazine();
-				final TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
-				if(line!=null){
-					return line.getColor(i);
-				}
+			}
+			final Magazine mag = pageHandler.getMagazine();
+			final TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
+			if(line!=null){
+				return line.getColor(i);
 			}
 		}
 
@@ -1528,7 +1538,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	 *
 	 */
 	private void processX26Enhancements() {
-		final List<TxtTriplet> tripletList = new ArrayList<TxtTriplet>();
+		final List<TxtTriplet> tripletList = new ArrayList<>();
 		for (final TxtDataField x26 : packetx_26) {
 			if((x26!=null)&&(x26.getTxtTripletList()!=null)){
 				tripletList.addAll(x26.getTxtTripletList());
@@ -1828,6 +1838,31 @@ public class SubPage implements TreeNode, ImageSource, TextConstants{
 	 */
 	public int getPageNo() {
 		return pageHandler.getPageNo();
+	}
+
+	@Override
+	public void save(File file) {
+		try (FileOutputStream out = new FileOutputStream(file)) {
+			saveSubPage(out);
+				
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "could not write file", e);
+		}
+	}
+
+	public void saveSubPage(FileOutputStream out) throws IOException {
+		saveLineArray(out, getMagazine().getPageEnhanceMentDataPackes());
+		saveLineArray(out, linesList);
+		saveLineArray(out, packetx_26);
+		saveLineArray(out, packetx_27);
+		saveLineArray(out, packetx_28);
+	}
+	
+	
+	public static void saveLineArray(FileOutputStream out, EBUDataField[] linesList) throws IOException {
+		for(EBUDataField line:linesList) {
+			EBUTeletextHandler.saveLineT42(out, line);
+		}
 	}
 
 }

@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import static nl.digitalekabeltelevisie.util.Utils.toHexStringUnformatted;
+
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -75,6 +77,8 @@ import nl.digitalekabeltelevisie.data.mpeg.dsmcc.ServiceDSMCC.DSMFile;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.Audio138183Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.SubPage;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -98,6 +102,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public static final String SAVE = "save";
 	public static final String PARSE = "parse";
 	public static final String T2MI = "t2mi";
+	public static final String T42 = "t42";
 
 	private static final String EXPAND = "expand";
 	private static final String EXPAND_ALL = "expand_all";
@@ -642,6 +647,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 			if (ae.getActionCommand().equals(T2MI)){
 				saveT2miTs(kvp);
 			}
+			if (ae.getActionCommand().equals(T42)){
+				saveT42File(kvp);
+			}
 			if (ae.getActionCommand().equals(SAVE_BYTES)){
 				saveBytes(kvp);
 			}
@@ -745,6 +753,23 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		String fileName = dsmFile.getLabel();
 
 		selectFileAndSave(fileName, dsmFile);
+	}
+
+	
+	private void saveT42File(final KVP kvp) {
+		Object owner = kvp.getOwner();
+		if (owner instanceof SaveAble savable) {
+			if (savable instanceof SubPage subPage) {
+				String fileName = "Page" + subPage.getMagazineNo() + toHexStringUnformatted(subPage.getPageNo(), 2) + "-"
+						+ toHexStringUnformatted(subPage.getSubPageNo(), 4) + ".t42";
+				selectFileAndSave(fileName, savable);
+
+			} else if (savable instanceof EBUTeletextHandler txtHandler) {
+				String fileName = "Txt Service.t42";
+				selectFileAndSave(fileName, savable);
+
+			}
+		}
 	}
 
 	/**
