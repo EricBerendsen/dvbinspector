@@ -38,6 +38,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosBatSelectionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosTimezoneDescriptor;
@@ -289,6 +290,11 @@ public final class DescriptorFactory {
 				return new ServiceAttributeDescriptor(data, 0, tableSection);
 			case 0x89:
 				return new GuidanceDescriptor(data, 0, tableSection);
+			}
+		} else if (private_data_specifier == 0x41565356) { // AVS
+			switch (descriptor_tag) {
+				case 0xD1:
+					return new AVS3VideoDescriptor(data, 0, tableSection);
 			}
 		}
 		logger.info("Unimplemented private descriptor, private_data_specifier=" + private_data_specifier
