@@ -27,11 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs;
 
-import static nl.digitalekabeltelevisie.util.Utils.MASK_10BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
-import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
@@ -42,13 +37,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
-//import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
+//import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
-//public class AVS3VideoDescriptor extends AbstractLogicalChannelDescriptor {
 public class AVS3VideoDescriptor extends Descriptor {
 
 	private final int profile_id;						// 8 bits
@@ -89,76 +82,78 @@ public class AVS3VideoDescriptor extends Descriptor {
 	}
 
 	public static final String profile_id_String(int value) {
-		switch (value) {
-			case 0x20: return "Main 8-bit Profile";
-			case 0x22: return "Main 10-bit Profile";
-			case 0x30: return "High 8-bit Profile";
-			case 0x32: return "High 10-bit Profile";
-		}
-		throw new IllegalArgumentException("Invalid value in profile_id_String:"+value);
+		String res = switch (value) {
+			case 0x20 -> "Main 8-bit Profile";
+			case 0x22 -> "Main 10-bit Profile";
+			case 0x30 -> "High 8-bit Profile";
+			case 0x32 -> "High 10-bit Profile";
+			default -> throw new IllegalArgumentException("Invalid value in profile_id_String:"+value);
+		};
+		return res;
 	}
 
 	public static final String level_id_String(int value) {
-		switch (value) {
-			case 0x10: return "2.0.15";
-			case 0x12: return "2.0.30";
-			case 0x14: return "2.0.60";
-			case 0x20: return "4.0.30";
-			case 0x22: return "4.0.60";
-			case 0x40: return "6.0.30";
-			case 0x42: return "6.2.30";
-			case 0x41: return "6.4.30";
-			case 0x43: return "6.6.30";
-			case 0x44: return "6.0.60";
-			case 0x46: return "6.2.60";
-			case 0x45: return "6.4.60";
-			case 0x47: return "6.6.60";
-			case 0x48: return "6.0.120";
-			case 0x4A: return "6.2.120";
-			case 0x49: return "6.4.120";
-			case 0x4B: return "6.6.120";
-			case 0x50: return "8.0.30";
-			case 0x52: return "8.2.30";
-			case 0x51: return "8.4.30";
-			case 0x53: return "8.6.30";
-			case 0x54: return "8.0.60";
-			case 0x56: return "8.2.60";
-			case 0x55: return "8.4.60";
-			case 0x57: return "8.6.60";
-			case 0x58: return "8.0.120";
-			case 0x5A: return "8.2.120";
-			case 0x59: return "8.4.120";
-			case 0x5B: return "8.6.120";
-			case 0x60: return "10.0.30";
-			case 0x62: return "10.2.30";
-			case 0x61: return "10.4.30";
-			case 0x63: return "10.6.30";
-			case 0x64: return "10.0.60";
-			case 0x66: return "10.2.60";
-			case 0x65: return "10.4.60";
-			case 0x67: return "10.6.60";
-			case 0x68: return "10.0.120";
-			case 0x6A: return "10.2.120";
-			case 0x69: return "10.4.120";
-			case 0x6B: return "10.6.120";
-		}
-		throw new IllegalArgumentException("Invalid value in level_id_String:"+value);
+		String res = switch (value) {
+			case 0x10 -> "2.0.15";
+			case 0x12 -> "2.0.30";
+			case 0x14 -> "2.0.60";
+			case 0x20 -> "4.0.30";
+			case 0x22 -> "4.0.60";
+			case 0x40 -> "6.0.30";
+			case 0x42 -> "6.2.30";
+			case 0x41 -> "6.4.30";
+			case 0x43 -> "6.6.30";
+			case 0x44 -> "6.0.60";
+			case 0x46 -> "6.2.60";
+			case 0x45 -> "6.4.60";
+			case 0x47 -> "6.6.60";
+			case 0x48 -> "6.0.120";
+			case 0x4A -> "6.2.120";
+			case 0x49 -> "6.4.120";
+			case 0x4B -> "6.6.120";
+			case 0x50 -> "8.0.30";
+			case 0x52 -> "8.2.30";
+			case 0x51 -> "8.4.30";
+			case 0x53 -> "8.6.30";
+			case 0x54 -> "8.0.60";
+			case 0x56 -> "8.2.60";
+			case 0x55 -> "8.4.60";
+			case 0x57 -> "8.6.60";
+			case 0x58 -> "8.0.120";
+			case 0x5A -> "8.2.120";
+			case 0x59 -> "8.4.120";
+			case 0x5B -> "8.6.120";
+			case 0x60 -> "10.0.30";
+			case 0x62 -> "10.2.30";
+			case 0x61 -> "10.4.30";
+			case 0x63 -> "10.6.30";
+			case 0x64 -> "10.0.60";
+			case 0x66 -> "10.2.60";
+			case 0x65 -> "10.4.60";
+			case 0x67 -> "10.6.60";
+			case 0x68 -> "10.0.120";
+			case 0x6A -> "10.2.120";
+			case 0x69 -> "10.4.120";
+			case 0x6B -> "10.6.120";
+			default -> throw new IllegalArgumentException("Invalid value in level_id_String:"+value);
+		};
+		return res;
 	}
 
 	public static final String frame_rate_code_String(int value){
-		if(value < 0 || value > 15)
+		if (value < 0 || value > 15)
 			throw new IllegalArgumentException("Invalid value in frame_rate_code_String:"+value);
 		return frame_rate_Strings[value];
 	}
 
 	public static final String sample_precision_String(int value){
-		if(value < 0 || value > 7)
+		if (value < 0 || value > 7)
 			throw new IllegalArgumentException("Invalid value in sample_precision_String:"+value);
 		return sample_precision_Strings[value];
 	}
 
 	public static final String chroma_format_String(int value){
-		if(value < 0 || value > 3)
+		if (value < 0 || value > 3)
 			throw new IllegalArgumentException("Invalid value in chroma_format_String:"+value);
 		return chroma_format_Strings[value];
 	}
