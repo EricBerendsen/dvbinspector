@@ -458,6 +458,7 @@ public class Descriptor implements TreeNode {
 			case 0x1E -> "H.264/AVC frame compatible plano-stereoscopic HD NVOD reference service";
 			case 0x1F -> "HEVC digital television service";
 			case 0x20 -> "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a resolution greater than 3840x2160, SDR or HDR, with a frame rate up to 60Hz";
+			case 0x22 -> "AVS3 digital television service";
 			case 0x84 -> "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf -- Mandatory for legacy STB (ICD3000, ICD4000 and ICD60)
 			case 0x87 -> "Sagem OpenTV out_of_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf  -- Mandatory for legacy STB (ICD3000, ICD4000 and ICD60)
 			case 0x88 -> "Sagem OpenTV in_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
@@ -567,6 +568,7 @@ public class Descriptor implements TreeNode {
 					case 0x06 -> "SMPTE ST 2094-10 DMI format";
 					case 0x07 -> "SL-HDR2 DMI format";
 					case 0x08 -> "SMPTE ST 2094-40 DMI format";
+					case 0x09 -> "PQ10 HDR";
 					default -> "reserved for future use";
 				};
 			}else{
@@ -597,6 +599,10 @@ public class Descriptor implements TreeNode {
 				case 0x06 -> "HEVC ultra high definition video, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bitstream";
 				case 0x07 -> "HEVC ultra high definition video with PQ10 HDR, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bit-stream";
 				case 0x08 -> "HEVC ultra high definition video with a resolution up to 7680x4320";
+				case 0x20 -> "AVS3 High 10 Profile with resolution up to 3840x2160, frame rate up to 60 Hz";
+				case 0x21 -> "AVS3 High 10 Profile with resolution up to 3840x2160, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz ";
+				case 0x22 -> "AVS3 High 10 Profile with resolution up to 7680x4320, frame rate up to 60 Hz";
+				case 0x23 -> "AVS3 High 10 Profile with resolution up to 7680x4320, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz ";
 				default -> "reserved for future use";
 			};
 			case 0x01 -> switch (component_type) {
