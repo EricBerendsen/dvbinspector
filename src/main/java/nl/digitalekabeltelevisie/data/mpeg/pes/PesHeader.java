@@ -37,6 +37,8 @@ import static nl.digitalekabeltelevisie.util.Utils.getLong;
 import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
 
+import java.util.logging.Logger;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -52,6 +54,7 @@ import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
  */
 public class PesHeader implements TreeNode {
 
+	private static final Logger logger = Logger.getLogger(PesHeader.class.getName());
 
 	class AdDescriptor implements TreeNode{
 		
@@ -224,6 +227,17 @@ public class PesHeader implements TreeNode {
 					pack_header = getBytes(data, off, pack_field_length);
 					off += pack_field_length;
 				}
+				if (program_packet_sequence_counter_flag == 1) {
+					logger.info("Not implemented: program_packet_sequence_counter_flag=");
+				}
+
+				if (p_std_buffer_flag == 1) {
+					logger.info("Not implemented: p_std_buffer_flag=");
+				}
+				if (pes_extension_flag_2 == 1) {
+					logger.info("Not implemented: pes_extension_flag_2=");
+				}						
+
 
 			}// endif (pes_extension_flag == 1) 
 		}
@@ -326,6 +340,18 @@ public class PesHeader implements TreeNode {
 						t.add(new DefaultMutableTreeNode(new KVP("pack_field_length", pack_field_length, null)));
 						t.add(new DefaultMutableTreeNode(new KVP("pack_header", pack_header, null)));
 					}
+					
+					if (program_packet_sequence_counter_flag == 1) {
+						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("program_packet_sequence_counter_flag")));
+					}
+
+					if (p_std_buffer_flag == 1) {
+						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("p_std_buffer_flag")));
+					}
+					if (pes_extension_flag_2 == 1) {
+						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pes_extension_flag_2")));
+					}						
+
 
 				}// endif ( pes_extension_flag == 1) 
 
