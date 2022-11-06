@@ -28,6 +28,8 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,7 +81,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 	//                   tableId    tableIdExtension       sectionNumber
 	private final TreeMap<Integer, TreeMap<Integer,TableSection []>> longSections = new TreeMap<>();
 	// Contains only unique table section (short syntax. ie section_syntax_indicator==0)
-	private List<TableSection> simpleSectionsd = new ArrayList<>();
+	private LinkedHashMap<TableSection, TableSection> simpleSectionsd = new LinkedHashMap<>();
 	
 	// contains entry for each occurrence of a TableSection, with packetNo at which it really started 
 	// (The packetyNo in the referenced  TableSection is the first occurence
@@ -115,26 +117,25 @@ public class GeneralPSITable extends AbstractPSITabel{
 			}
 		}else{ // short syntax, section_syntax_indicator==0
 			// look for duplicates, if so update counters on existing on
-
-			for (final TableSection existingSection : simpleSectionsd) {
-				if(existingSection.equals(section)){
-					int previousPacketNo = existingSection.getLast_packet_no();
-					int distance = section.getPacket_no() - previousPacketNo;
-					if(distance>existingSection.getMaxPacketDistance()){
-						existingSection.setMaxPacketDistance(distance);
-					}
-					if(distance<existingSection.getMinPacketDistance()){
-						existingSection.setMinPacketDistance(distance);
-					}
-
-					existingSection.setLast_packet_no(section.getPacket_no());
-					existingSection.setOccurrence_count(existingSection.getOccurrence_count()+1);
-					tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, existingSection));
-					return;
+			TableSection existingSection = simpleSectionsd.get(section);
+			if (existingSection != null)
+			{
+				int previousPacketNo = existingSection.getLast_packet_no();
+				int distance = section.getPacket_no() - previousPacketNo;
+				if(distance>existingSection.getMaxPacketDistance()){
+					existingSection.setMaxPacketDistance(distance);
 				}
+				if(distance<existingSection.getMinPacketDistance()){
+					existingSection.setMinPacketDistance(distance);
+				}
+
+				existingSection.setLast_packet_no(section.getPacket_no());
+				existingSection.setOccurrence_count(existingSection.getOccurrence_count()+1);
+				tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, existingSection));
+			}else{
+				simpleSectionsd.put(section, section);
+				tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, section));
 			}
-			simpleSectionsd.add(section);
-			tableSectionOccurrences.add(new TableSectionOccurrence(startPacket, section));
 		}
 	}
 
@@ -172,7 +173,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 			t.add(n);
 		}
 		if(!simpleSectionsd.isEmpty()){
-			Utils.addListJTree(t, simpleSectionsd, modus, "syntax0");
+			Utils.addListJTree(t, simpleSectionsd.keySet(), modus, "syntax0");
 		}
 		return t;
 	}
@@ -220,8 +221,8 @@ public class GeneralPSITable extends AbstractPSITabel{
 		return longSections;
 	}
 
-	public List<TableSection> getSimpleSectionsd() {
-		return simpleSectionsd;
+	public Collection<TableSection> getSimpleSectionsd() {
+		return simpleSectionsd.keySet();
 	}
 
 	public List<TableSectionOccurrence> getTableSectionOccurrences() {
