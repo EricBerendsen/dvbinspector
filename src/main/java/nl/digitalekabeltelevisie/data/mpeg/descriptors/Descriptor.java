@@ -476,50 +476,6 @@ public class Descriptor implements TreeNode {
 
 	}
 
-	public static String getServiceTypeStringShort(final int serviceType) {
-
-		return switch (serviceType) {
-			case 0x00 -> "reserved";
-			case 0x01 -> "TV (SD)";
-			case 0x02 -> "Radio";
-			case 0x03 -> "Teletext";
-			case 0x04 -> "NVOD reference";
-			case 0x05 -> "NVOD time-shifted";
-			case 0x06 -> "mosaic";
-			case 0x07 -> "PAL coded signal"; // http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf, p.14
-			case 0x08 -> "reserved";
-			case 0x09 -> "reserved";
-			case 0x0A -> "radio (advanced)";
-			case 0x0B -> "mosaic advanced)";
-			case 0x0C -> "data broadcast";
-			case 0x0D -> "Common Interface Usage";
-			case 0x0E -> "RCS Map";
-			case 0x0F -> "RCS FLS";
-			case 0x10 -> "DVB MHP service";
-			case 0x11 -> "TV (HD-MPEG2)";
-			case 0x12 -> "reserved";
-			case 0x13 -> "reserved";
-			case 0x14 -> "reserved";
-			case 0x15 -> "reserved";
-			case 0x16 -> "TV (SD-MPEG4)";
-			case 0x17 -> "advanced codec SD NVOD time-shifted ";
-			case 0x18 -> "advanced codec SD NVOD reference";
-			case 0x19 -> "TV (HD-MPEG4)";
-			case 0x1A -> "advanced codec HD NVOD time-shifted";
-			case 0x1B -> "advanced codec HD NVOD reference";
-			default -> {
-				if ((0x1C <= serviceType) && (serviceType <= 0x7F)) {
-					yield "reserved";
-				}
-				if ((0x80 <= serviceType) && (serviceType <= 0xFE)) {
-					yield "user defined";
-				}
-				yield "Illegal value";
-			}
-		};
-
-	}
-
 	public static String getComponentDescriptorString(final int stream_content,final int stream_content_ext, final int component_type) {
 		switch (stream_content) {
 		case 0x00:
