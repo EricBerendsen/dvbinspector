@@ -6,13 +6,13 @@
 
 ## Prerequisites
 
-DVB inspector requires java 11 or higher.
+DVB inspector requires java 17 or higher.
 
 ## Installation
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.16.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.17.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 ### Directory structure
 
@@ -28,9 +28,9 @@ Unzip DVBinspector-1.16.0-dist.zip to a directory of your choice. It will create
 
 ## Usage
 
-### DVBinspector-1.16.0.jar
+### DVBinspector-1.17.0.jar
 
-There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.16.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.16.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.16.0.jar".
+There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.17.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.16.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.16.0.jar".
 
 ### dvb.bat 
 
@@ -47,6 +47,33 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 ## Changelog
 
 List of the most important changes between releases.
+
+###Release 1.17.0
+Release date: 11/11/2022
+
+This release requires Java 17 or newer!
+
+* improved: faster loading of simple private sections. Thanks to Alen Vrečko
+* added: AVS3VideoDescriptor and AVS3 components and stream type. Thanks to Paul Higgs
+* added: option to save teletext pages and services as .t42 file
+* added: parsing of SMPTE2038. Thanks to Loïc Bienvenu
+* added: documentation on how to add a parser. Thanks to Loïc Bienvenu
+* added: AlternativeTransferCharacteristicsSei_message. Thanks to Loïc Bienvenu
+* added: some Canal+ International private descriptors
+* added: jump to tree location from htmlView for EIT, cc_errors
+* added: list of packetNo's of continuity errors
+* improved: list of packets for PID now shows actual packetNo in range [..]
+* added: accelerator keys for tabbed panes (Alt-1 .. Alt-5)
+* fixed: Wrong TSID in BAT
+* added: Recent Files Menu
+* added: JPEG-XS descriptor, decoding of JPEG-XS elementary stream header. Thanks to Simon Provost
+
+
+###Release 1.16.1 (bug fix release)
+Release date: 28/01/2022
+
+* fixed: dvb.sh and dvb.bat to use correct dependencies
+
 
 ### Release 1.16.0
 Release date: 23/01/2022
