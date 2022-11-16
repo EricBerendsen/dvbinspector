@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,10 +34,10 @@ import java.io.StringWriter;
 
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.TransferHandler;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 
+import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
@@ -51,10 +51,17 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Steve McLeod, Eric Berendsen
  *
  */
-public class EditorTextHTMLTransferHandler extends TransferHandler {
+public class EditorTextHTMLTransferHandler extends FileDropHandler {
 
 
-    protected Transferable createTransferable(JComponent c) {
+    /**
+	 * @param controller
+	 */
+	public EditorTextHTMLTransferHandler(DVBinspector controller) {
+		super(controller);
+	}
+
+	protected Transferable createTransferable(JComponent c) {
         final JEditorPane pane = (JEditorPane) c;
 
         int start = pane.getSelectionStart();

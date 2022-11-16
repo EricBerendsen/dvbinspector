@@ -83,6 +83,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.gui.xmleditorkit.XMLEditorKit;
+import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
@@ -218,7 +219,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param transportStream stream to be displayed (can be {@code null})
 	 * @param modus determines options of JTree, (like simple view, number list items, etc.)
 	 */
-	public DVBtree(final TransportStream transportStream, final int modus) {
+	public DVBtree(final TransportStream transportStream, final int modus, DVBinspector controller) {
 		super(new GridLayout(1,0));
 		mod=modus;
 		ts=transportStream;
@@ -298,7 +299,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		editorPane.setEditable(false);
 		editorPane.setBackground(Color.LIGHT_GRAY);
 		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-		editorPane.setTransferHandler(new EditorTextHTMLTransferHandler());
+		editorPane.setTransferHandler(new EditorTextHTMLTransferHandler(controller));
 
 
 		editorPane.addHyperlinkListener(this::handleHyperLinkEvent);

@@ -257,7 +257,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		updatePIDLists(tStream,pidDialog);
 
 		tabbedPane = new JTabbedPane();
-		treeView = new DVBtree(tStream,modus);
+		treeView = new DVBtree(tStream, modus, this);
 		tabbedPane.addTab("Tree", treeView);
 		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
