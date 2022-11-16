@@ -180,11 +180,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param args
 	 * @param ts
 	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
+	 * @throws ReflectiveOperationException
 	 */
 	public static Map<Integer, GeneralPidHandler> determinePidHandlers(final String[] args, final TransportStream ts)
-			throws InstantiationException, IllegalAccessException {
+			throws ReflectiveOperationException {
 		Class<? extends GeneralPidHandler> forcedHandlerClass = null;
 		final PID[] pids = ts.getPids();
 		final Map<Integer, GeneralPidHandler> pidHandlerMap = new HashMap<>();
@@ -201,7 +200,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 					if (forcedHandlerClass == null) {
 						pidHandlerMap.put(pid, p.getPidHandler());
 					} else {
-						GeneralPidHandler handlerInstance = forcedHandlerClass.newInstance();
+						GeneralPidHandler handlerInstance = forcedHandlerClass.getDeclaredConstructor().newInstance();
 						handlerInstance.setPID(p);
 						handlerInstance.setTransportStream(ts);
 						p.setPidHandler(handlerInstance);
