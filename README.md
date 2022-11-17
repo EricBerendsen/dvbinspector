@@ -48,7 +48,7 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 
 List of the most important changes between releases.
 
-###Release 1.17.0
+### Release 1.17.0
 Release date: 11/11/2022
 
 This release requires Java 17 or newer!
@@ -69,7 +69,7 @@ This release requires Java 17 or newer!
 * added: JPEG-XS descriptor, decoding of JPEG-XS elementary stream header. Thanks to Simon Provost
 
 
-###Release 1.16.1 (bug fix release)
+### Release 1.16.1 (bug fix release)
 Release date: 28/01/2022
 
 * fixed: dvb.sh and dvb.bat to use correct dependencies
