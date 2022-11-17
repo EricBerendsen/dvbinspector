@@ -1393,22 +1393,24 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	/**
-	 * @param pageNo
+	 * @param pageNo (hex) pagenumber within magazine,range 0x00 - 0xff
 	 * @return
 	 */
 	private int getObjectPageAssociation(final int pageNo) {
 		// assumes this is a MOT page.
 		int objectPageAssociation = 0;
-		if((pageNo&0x0F)<10){
-			final int row=1+(((pageNo&0xF0)>>4) / 2);
-			final int col = 2 * (pageNo&0x0F);
+		final int pageNoUnits = pageNo & 0x0F; // last (hex) digit pageNo
+		final int pageNoTens = (pageNo & 0xF0) >> 4; // first (hex) digit pageNo
+		if(pageNoUnits < 0xA){
+			final int row = 1 + (pageNoTens / 2);
+			final int col = 2 * pageNoUnits + (pageNoTens % 2) * 20;
 			if(linesList[row]!=null){
 				objectPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
 			}
 
 		}else{
-			final int row=10+ (((pageNo&0xF0)>>4) / 3);
-			final int col = 3 * ((pageNo&0x0F)-10);
+			final int row = 9 + (pageNoTens / 3);
+			final int col = 2 * (pageNoUnits - 0XA) + (pageNoTens % 3) * 12;
 			if(linesList[row]!=null){
 				objectPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
 			}
@@ -1417,6 +1419,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	/**
+	 * See 10.6.1 Page Format, page 52, ETSI EN 300 706 V1.2.1 (2003-04)
+	 * 
 	 * @param pageNo
 	 * @return
 	 */
