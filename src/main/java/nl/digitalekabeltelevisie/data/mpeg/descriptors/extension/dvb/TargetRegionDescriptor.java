@@ -70,7 +70,7 @@ public class TargetRegionDescriptor extends DVBExtensionDescriptor {
 			this.reserved = reserved;
 			this.country_code_flag = country_code_flag;
 			this.region_dept = region_dept;
-			if((country_code_flag == 1) && (country_codeBytes != null)){
+			if((country_code_flag == 1) && (country_codeBytes.length > 0)){
 				this.country_code = getISO8859_1String(country_codeBytes,0,3);
 			}
 			this.primary_region_code = primary_region_code;

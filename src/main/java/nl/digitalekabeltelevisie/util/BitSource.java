@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -202,18 +202,16 @@ public class BitSource implements HTMLSource{
 	 * @return
 	 */
 	public byte[] readBytes(final int noBytes) {
-		byte[] result = null;
-
 		skiptoByteBoundary();
 
 		// Next read whole bytes
 		if(noBytes>0){
-			result = Arrays.copyOfRange(bytes, byteOffset,byteOffset+noBytes);
+			byte[] result = Arrays.copyOfRange(bytes, byteOffset,byteOffset+noBytes);
 			byteOffset+=noBytes;
+			return result;
 		}
 
-
-		return result;
+		return new byte[0];
 	}
 
 
