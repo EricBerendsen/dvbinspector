@@ -104,7 +104,7 @@ public class AudioPreselectionDescriptor extends DVBExtensionDescriptor {
 			if (future_extension == 1) {
 				reserved_zero_future_use3 = bs.readBits(3);
 				future_extension_length = bs.readBits(5);
-				future_extension_byte = bs.readBytes(3);
+				future_extension_byte = bs.readBytes(future_extension_length);
 			}
 		}
 
