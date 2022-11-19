@@ -29,7 +29,6 @@ package nl.digitalekabeltelevisie.gui;
 
 import static nl.digitalekabeltelevisie.util.Utils.toHexStringUnformatted;
 
-import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -61,6 +60,7 @@ import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -167,34 +167,11 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		}
 	}
 	
-	/**
-	 * key for cardlayout
-	 */
-	private static final String EMPTY_PANEL = "empty";
-	/**
-	 * key for cardlayout
-	 */
-	private static final String HTML_PANEL = "html";
-	/**
-	 * key for cardlayout
-	 */
-	private static final String IMAGE_PANEL = "image";
-
-	/**
-	 * key for cardlayout
-	 */
-	private static final String TABLE_PANEL = "table";
-
-	/**
-	 * key for cardlayout
-	 */
-	private static final String XML_PANEL = "xml";
-	
 	private static final long serialVersionUID = 9200238343077897328L;
 	private static final Logger logger = Logger.getLogger(DVBtree.class.getName());
 
 	private final JTree tree;
-	private final JPanel detailPanel;
+	private final JTabbedPane detailPanel;
 	private final JEditorPane editorPane;
 	private final JEditorPane xmlPane;
 	private final JPopupMenu popup;
@@ -311,15 +288,21 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		xmlPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 
 		
-		detailPanel = new JPanel(new CardLayout());
-		JPanel empty = new JPanel();
-		//each panel should handle own scrolling
-		detailPanel.add(empty,EMPTY_PANEL);
-		detailPanel.add(imagePanel,IMAGE_PANEL);
-		detailPanel.add(new JScrollPane(editorPane),HTML_PANEL);
-		detailPanel.add(tablePanel,TABLE_PANEL);
-		detailPanel.add(new JScrollPane(xmlPane),XML_PANEL);
-
+		detailPanel = new JTabbedPane();
+		
+		// hide tabs when only one tab is present
+		// https://stackoverflow.com/questions/942500/is-there-a-way-to-hide-the-tab-bar-of-jtabbedpane-if-only-one-tab-exists
+		
+		detailPanel.setUI(new BasicTabbedPaneUI() {  
+		    @Override  
+		    protected int calculateTabAreaHeight(int tab_placement, int run_count, int max_tab_height) {  
+		        if (detailPanel.getTabCount() > 1) {
+		            return super.calculateTabAreaHeight(tab_placement, run_count, max_tab_height); 
+		        }
+	            return 0;  
+		    }  
+		});  
+		
 
 		//Add the scroll panes to a split pane.
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -537,71 +520,70 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		imagePanel.setImage(null);
 		editorPane.setText(null);
 		xmlPane.setText(null);
-		
-		CardLayout cardLayout = (CardLayout)(detailPanel.getLayout());
+		detailPanel.removeAll();
 
 		if (node1 == null){
-			cardLayout.show(detailPanel, EMPTY_PANEL);
 			return;
 		}
 		// not always a DefaultMutableTreeNode
 		if(node1 instanceof DefaultMutableTreeNode node){
 
 			if (node.getUserObject() instanceof final KVP kvp) {
-				if(kvp.getImageSource()!=null){
+				List<DetailSource> detailSources = kvp.getDetailSources();
+				if(detailSources.isEmpty()) {
+					return;
+				}
+				
+				DetailSource detailSource = detailSources.get(0);
+				if(detailSource instanceof ImageSource imageSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					BufferedImage img;
 					try {
-						img = kvp.getImageSource().getImage();
+						img = imageSource.getImage();
 					} catch (RuntimeException e1) {
 						logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
 						img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
 					}
 					setCursor(Cursor.getDefaultCursor());
 					if(img != null){
+						ImagePanel imagePanel = new ImagePanel();
 						imagePanel.setImage(img);
-						cardLayout.show(detailPanel, IMAGE_PANEL);
+						detailPanel.addTab("img", imagePanel);
 						return;
 					}
-				} else if(kvp.getHTMLSource()!=null){
+				} else if(detailSource instanceof HTMLSource htmlSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					editorPane.setText("<html>" + kvp.getHTMLSource().getHTML() + "</html>");
+					editorPane.setText("<html>" + htmlSource.getHTML() + "</html>");
 					editorPane.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
-					cardLayout.show(detailPanel, HTML_PANEL);
+					detailPanel.addTab("txt", editorPane);
 					return;
-				} else if(kvp.getXmlSource()!=null){
+				} else if(detailSource instanceof XMLSource xmlSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					// hack to reset
 					xmlPane.setDocument(xmlPane.getEditorKit().createDefaultDocument());
-					xmlPane.setText(kvp.getXmlSource().getXML());
+					xmlPane.setText(xmlSource.getXML());
 					xmlPane.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
-					cardLayout.show(detailPanel, XML_PANEL);
+					detailPanel.addTab("xml", xmlPane);
 					return;
-				} else {
-					TableSource tableSource = kvp.getTableSource();
-					if(tableSource!=null) {
-						try {
-							TableModel tableModel = tableSource.getTableModel();
-							if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
-								tablePanel.setModel(tableModel);
-								cardLayout.show(detailPanel, TABLE_PANEL);
-							}else{
-								cardLayout.show(detailPanel, EMPTY_PANEL);
-							}
-						}catch (RuntimeException e2) {
-							cardLayout.show(detailPanel, EMPTY_PANEL);
-							logger.log(Level.WARNING, "could not create table:", e2);
+				} else if(detailSource instanceof TableSource tableSource){
+					
+					try {
+						TableModel tableModel = tableSource.getTableModel();
+						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+							tablePanel.setModel(tableModel);
+							detailPanel.addTab(null, tablePanel);
 						}
-						return;
+					}catch (RuntimeException e2) {
+						logger.log(Level.WARNING, "could not create table:", e2);
 					}
+					return;
 				}
-
 			}
 		}
-		cardLayout.show(detailPanel, EMPTY_PANEL);
-
+		
+		detailPanel.removeAll();
 	}
 
 	/* (non-Javadoc)

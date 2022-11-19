@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,7 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import javax.swing.table.TableModel;
 
-public interface TableSource {
+public interface TableSource extends DetailSource{
 	TableModel getTableModel();
 
 }

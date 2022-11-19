@@ -83,18 +83,18 @@ public class PesHandlerSetup {
 		map.put(pid, transportStream.getPID(pid).getPidHandler());
 	}
 
-	protected static void validatePreviewImageSize(DefaultMutableTreeNode tree, int height, int width, String msg) {
-		Object o = tree.getUserObject();
-		assertNotNull(msg,o);
-		
-		assertEquals(KVP.class, o.getClass());
-		KVP kvp = (KVP)o;
-		ImageSource imgSrc = kvp.getImageSource();
-		assertNotNull(msg,imgSrc);
-		BufferedImage img = imgSrc.getImage();
-		assertNotNull(msg,img);
-		assertEquals(msg+" img height",height,img.getHeight());
-		assertEquals(msg+" img width",width,img.getWidth());
-	}
+//	protected static void validatePreviewImageSize(DefaultMutableTreeNode tree, int height, int width, String msg) {
+//		Object o = tree.getUserObject();
+//		assertNotNull(msg,o);
+//		
+//		assertEquals(KVP.class, o.getClass());
+//		KVP kvp = (KVP)o;
+//		ImageSource imgSrc = kvp.getImageSource();
+//		assertNotNull(msg,imgSrc);
+//		BufferedImage img = imgSrc.getImage();
+//		assertNotNull(msg,img);
+//		assertEquals(msg+" img height",height,img.getHeight());
+//		assertEquals(msg+" img width",width,img.getWidth());
+//	}
 
 }
