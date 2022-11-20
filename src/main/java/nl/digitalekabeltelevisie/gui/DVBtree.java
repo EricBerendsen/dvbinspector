@@ -29,7 +29,6 @@ package nl.digitalekabeltelevisie.gui;
 
 import static nl.digitalekabeltelevisie.util.Utils.toHexStringUnformatted;
 
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -58,6 +57,7 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
@@ -83,7 +83,6 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.SubPage;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.gui.xmleditorkit.XMLEditorKit;
 import nl.digitalekabeltelevisie.main.DVBinspector;
 import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
@@ -96,7 +95,7 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  * @author Eric
  *
  */
-public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
+public class DVBtree extends JPanel implements HyperlinkListener, TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
 	
 	
 
@@ -175,8 +174,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 
 	private final JTree tree;
 	private final JTabbedPane detailPanel;
-	private final JEditorPane editorPane;
-	private final JEditorPane xmlPane;
 	private final JPopupMenu popup;
 
 	public static final int SIMPLE_MODUS=0x1;
@@ -189,8 +186,8 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	private int mod;
 	private TransportStream ts;
 	private DefaultTreeModel model;
-	private final ImagePanel imagePanel = new ImagePanel();
-	private final TablePanel tablePanel = new TablePanel(new JTable());
+	
+	private DVBinspector controller;
 
 	/**
 	 *
@@ -201,8 +198,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 */
 	public DVBtree(final TransportStream transportStream, final int modus, DVBinspector controller) {
 		super(new GridLayout(1,0));
-		mod=modus;
-		ts=transportStream;
+		this.mod=modus;
+		this.ts=transportStream;
+		this.controller = controller;
 
 		//Create a tree that allows one selection at a time.
 		if(ts!=null){
@@ -271,25 +269,6 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		KeyStroke keyStar = KeyStroke.getKeyStroke('*');
 		inputMap.put(keyStar, EXPAND_ALL);
 		tree.getActionMap().put(EXPAND_ALL, new ExpandAllAction());
-
-		editorPane = new JEditorPane();
-		editorPane.getTransferHandler();
-		editorPane.setContentType("text/html");
-		editorPane.setText(null);
-		editorPane.setEditable(false);
-		editorPane.setBackground(Color.LIGHT_GRAY);
-		editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-		editorPane.setTransferHandler(new EditorTextHTMLTransferHandler(controller));
-
-
-		editorPane.addHyperlinkListener(this::handleHyperLinkEvent);
-		
-		xmlPane = new JEditorPane();
-		xmlPane.setEditorKit(new XMLEditorKit());
-		xmlPane.setText(null);
-		xmlPane.setEditable(false);
-		xmlPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-
 		
 		detailPanel = new JTabbedPane();
 		
@@ -326,7 +305,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	 * @param e
 	 * @return
 	 */
-	private void handleHyperLinkEvent(HyperlinkEvent e) {
+	public void hyperlinkUpdate(HyperlinkEvent e) {
 		if(e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
 			MutableTreeNode node = findNodeByTrail(e.getDescription(), model);
 			if(node!=null) {
@@ -520,9 +499,9 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 	public void valueChanged(final TreeSelectionEvent e) {
 		// node1 is either a DefaultMutableTreeNode (most normal items) or a MutableTreeNode (for LazyList)
 		final MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
-		imagePanel.setImage(null);
-		editorPane.setText(null);
-		xmlPane.setText(null);
+		//imagePanel.setImage(null);
+		//htmlPanel.setText(null);
+		//xmlPanel.setText(null);
 		detailPanel.removeAll();
 
 		if (node1 == null){
@@ -558,25 +537,28 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					}
 				} else if(detailSource instanceof HTMLSource htmlSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					editorPane.setText("<html>" + htmlSource.getHTML() + "</html>");
-					editorPane.setCaretPosition(0);
+					HtmlPanel htmlPanel = new HtmlPanel(controller, this);
+					htmlPanel.setText("<html>" + htmlSource.getHTML() + "</html>");
+					htmlPanel.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
-					detailPanel.addTab(label, editorPane);
+					detailPanel.addTab(label, htmlPanel);
 					return;
 				} else if(detailSource instanceof XMLSource xmlSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					XmlPanel xmlPanel = new XmlPanel();
 					// hack to reset
-					xmlPane.setDocument(xmlPane.getEditorKit().createDefaultDocument());
-					xmlPane.setText(xmlSource.getXML());
-					xmlPane.setCaretPosition(0);
+					xmlPanel.setDocument(xmlPanel.getEditorKit().createDefaultDocument());
+					xmlPanel.setText(xmlSource.getXML());
+					xmlPanel.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
-					detailPanel.addTab(label, xmlPane);
+					detailPanel.addTab(label, xmlPanel);
 					return;
 				} else if(detailSource instanceof TableSource tableSource){
 					
 					try {
 						TableModel tableModel = tableSource.getTableModel();
 						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+							TablePanel tablePanel = new TablePanel(new JTable());
 							tablePanel.setModel(tableModel);
 							detailPanel.addTab(label, tablePanel);
 						}
