@@ -48,7 +48,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 		for (R row : rows) {
 			if (row != null) {
 				Map<String, Object> rowData = new HashMap<>();
-				List<ColumnDetails<?>> columns = tableHeader.getHeader();
+				List<ColumnDetails<?>> columns = tableHeader.header();
 				for (ColumnDetails<?> column : columns) {
 					if (column.isBaseColumn()) {
 						@SuppressWarnings("unchecked")
@@ -86,7 +86,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 	}
 
 	void buildDisplayableColumnsList() {
-		List<ColumnDetails<?>> header = tableHeader.getHeader();
+		List<ColumnDetails<?>> header = tableHeader.header();
 		int headerIndex = 0;
 		while (headerIndex < header.size()) {
 			ColumnDetails<?> column = header.get(headerIndex);
@@ -186,7 +186,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 
     @Override
 	public Class<?> getColumnClass(int columnIndex) {
-        ColumnDetails<?> columnDetails = tableHeader.getMap().get(getBaseKey(columnIndex));
+        ColumnDetails<?> columnDetails = tableHeader.map().get(getBaseKey(columnIndex));
 		return columnDetails.getDataClass();
     }
     
@@ -197,7 +197,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 	@Override
 	public String getColumnName(int columnIndex) {
 		String key = displayableColumns.get(columnIndex);
-		ColumnDetails<?> columnDetails = tableHeader.getMap().get(getBase(key));
+		ColumnDetails<?> columnDetails = tableHeader.map().get(getBase(key));
 		if (columnDetails.isList()) {
 			String baseName = columnDetails.getName();
 			return baseName + " " + getOrdinal(key);

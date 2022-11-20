@@ -29,34 +29,17 @@ package nl.digitalekabeltelevisie.util.tablemodel;
 
 import java.util.*;
 
-public class TableHeader<E,R> {
-	
-	private final List<ColumnDetails<?>> header;
-	private final Map<String, ColumnDetails<?>> map;
-	
-
-	public TableHeader(List<ColumnDetails<?>> header, Map<String, ColumnDetails<?>> map) {
-		super();
-		this.header = header;
-		this.map = map;
-	}
+public record TableHeader<E, R>(List<ColumnDetails<?>> header, Map<String, ColumnDetails<?>> map) {
 
 
 	public void flagUsed(String key) {
 		ColumnDetails<?> cd = map.get(key);
-		if(cd!=null) {
+		if (cd != null) {
 			cd.setUsed(true);
 		}
-		
+
 	}
 
-	public List<ColumnDetails<?>> getHeader() {
-		return header;
-	}
-
-	public Map<String, ColumnDetails<?>> getMap() {
-		return map;
-	}
 
 	public boolean isRepeatingColumn(String keyBase) {
 		ColumnDetails<?> cd = map.get(keyBase);
@@ -68,12 +51,10 @@ public class TableHeader<E,R> {
 
 	public void countOrdinal(String keyBase, int keyOrd) {
 		ColumnDetails<?> cd = map.get(keyBase);
-		if(cd!=null) {
+		if (cd != null) {
 			cd.setUsed(true);
 			cd.setListMax(Integer.max(cd.getListMax(), keyOrd));
 		}
-		
-		
 	}
 
 }
