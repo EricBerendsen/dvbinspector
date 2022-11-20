@@ -67,6 +67,7 @@ import nl.digitalekabeltelevisie.gui.*;
  */
 public class KVP{
 
+	public record DetailView(DetailSource detailSource, String label) {}
 
 	/**
 	 * maximum length of byte[] to be shown in JTree, only has meaning in case data is array of byte.
@@ -131,7 +132,7 @@ public class KVP{
 	/**
 	 * 
 	 */
-	private List<DetailSource> detailSources = new ArrayList<>();
+	private List<DetailView> detailViews = new ArrayList<>();
 	
 
 	/**
@@ -145,7 +146,7 @@ public class KVP{
 	private String crumb;
 
 	public void setHtmlSource(final HTMLSource htmlSource) {
-		detailSources.add(htmlSource);
+		detailViews.add(new DetailView(htmlSource, ""));
 	}
 
 	private JMenuItem subMenu;
@@ -162,7 +163,7 @@ public class KVP{
 		super();
 		this.label = label;
 		this.fieldType = FIELD_TYPE_LABEL;
-		detailSources.add(imageSource);
+		detailViews.add(new DetailView(imageSource,""));
 	}
 	public KVP(final String label, final String value, final String description) {
 		super();
@@ -218,7 +219,7 @@ public class KVP{
 		this.byteLen = value.length;
 		this.description = description;
 		this.fieldType = FIELD_TYPE_BYTES;
-		detailSources.add((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen));
+		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
 	}
 
 	public KVP(final String label, final byte[] value, final int offset, final int len, final String description) {
@@ -229,7 +230,7 @@ public class KVP{
 		this.byteLen = len;
 		this.description = description;
 		this.fieldType = FIELD_TYPE_BYTES;
-		detailSources.add((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen));
+		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
 	}
 
 	public KVP(final String label, final DVBString value, final String description) {
@@ -244,7 +245,7 @@ public class KVP{
 		super();
 		this.label = string;
 		this.fieldType = FIELD_TYPE_LABEL;
-		detailSources.add(htmlSource);
+		detailViews.add(new DetailView(htmlSource,""));
 	}
 
 	public KVP(final String string, final BigInteger value, final String description) {
@@ -445,7 +446,7 @@ public class KVP{
 	 * @param imageSource the imageSource to set
 	 */
 	public void setImageSource(final ImageSource imageSource) {
-		detailSources.add(imageSource);
+		detailViews.add(new DetailView(imageSource,""));
 	}
 
 	public String getPlainText(){
@@ -500,12 +501,12 @@ public class KVP{
 
 
 	public void setTableSource(TableSource tableSource) {
-		detailSources.add(tableSource);
+		detailViews.add(new DetailView(tableSource,""));
 	}
 
 
 	public void setXmlSource(XMLSource xmlSource) {
-		detailSources.add(xmlSource);
+		detailViews.add(new DetailView(xmlSource,""));
 	}
 
 	public String getCrumb() {
@@ -531,8 +532,8 @@ public class KVP{
 		this.crumb = path;
 	}
 
-	public List<DetailSource> getDetailSources() {
-		return detailSources;
+	public List<DetailView> getDetailViews() {
+		return detailViews;
 	}
 
 }

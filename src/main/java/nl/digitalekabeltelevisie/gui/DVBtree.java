@@ -70,6 +70,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.KVP.DetailView;
 import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -96,6 +97,8 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  *
  */
 public class DVBtree extends JPanel implements TransportStreamView , TreeSelectionListener, ActionListener, ClipboardOwner {
+	
+	
 
 	public static final String STOP = "stop";
 	public static final String PLAY = "play";
@@ -529,12 +532,14 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 		if(node1 instanceof DefaultMutableTreeNode node){
 
 			if (node.getUserObject() instanceof final KVP kvp) {
-				List<DetailSource> detailSources = kvp.getDetailSources();
-				if(detailSources.isEmpty()) {
+				List<DetailView> detailViews = kvp.getDetailViews();
+				if(detailViews.isEmpty()) {
 					return;
 				}
+				DetailView view = detailViews.get(0);
 				
-				DetailSource detailSource = detailSources.get(0);
+				DetailSource detailSource = view.detailSource();
+				String label = view.label();
 				if(detailSource instanceof ImageSource imageSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					BufferedImage img;
@@ -548,7 +553,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					if(img != null){
 						ImagePanel imagePanel = new ImagePanel();
 						imagePanel.setImage(img);
-						detailPanel.addTab("img", imagePanel);
+						detailPanel.addTab(label, imagePanel);
 						return;
 					}
 				} else if(detailSource instanceof HTMLSource htmlSource){
@@ -556,7 +561,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					editorPane.setText("<html>" + htmlSource.getHTML() + "</html>");
 					editorPane.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
-					detailPanel.addTab("txt", editorPane);
+					detailPanel.addTab(label, editorPane);
 					return;
 				} else if(detailSource instanceof XMLSource xmlSource){
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -565,7 +570,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 					xmlPane.setText(xmlSource.getXML());
 					xmlPane.setCaretPosition(0);
 					setCursor(Cursor.getDefaultCursor());
-					detailPanel.addTab("xml", xmlPane);
+					detailPanel.addTab(label, xmlPane);
 					return;
 				} else if(detailSource instanceof TableSource tableSource){
 					
@@ -573,7 +578,7 @@ public class DVBtree extends JPanel implements TransportStreamView , TreeSelecti
 						TableModel tableModel = tableSource.getTableModel();
 						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
 							tablePanel.setModel(tableModel);
-							detailPanel.addTab(null, tablePanel);
+							detailPanel.addTab(label, tablePanel);
 						}
 					}catch (RuntimeException e2) {
 						logger.log(Level.WARNING, "could not create table:", e2);
