@@ -499,9 +499,6 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	public void valueChanged(final TreeSelectionEvent e) {
 		// node1 is either a DefaultMutableTreeNode (most normal items) or a MutableTreeNode (for LazyList)
 		final MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
-		//imagePanel.setImage(null);
-		//htmlPanel.setText(null);
-		//xmlPanel.setText(null);
 		detailPanel.removeAll();
 
 		if (node1 == null){
@@ -515,62 +512,60 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 				if(detailViews.isEmpty()) {
 					return;
 				}
-				DetailView view = detailViews.get(0);
-				
-				DetailSource detailSource = view.detailSource();
-				String label = view.label();
-				if(detailSource instanceof ImageSource imageSource){
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					BufferedImage img;
-					try {
-						img = imageSource.getImage();
-					} catch (RuntimeException e1) {
-						logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
-						img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
-					}
-					setCursor(Cursor.getDefaultCursor());
-					if(img != null){
-						ImagePanel imagePanel = new ImagePanel();
-						imagePanel.setImage(img);
-						detailPanel.addTab(label, imagePanel);
-						return;
-					}
-				} else if(detailSource instanceof HTMLSource htmlSource){
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					HtmlPanel htmlPanel = new HtmlPanel(controller, this);
-					htmlPanel.setText("<html>" + htmlSource.getHTML() + "</html>");
-					htmlPanel.setCaretPosition(0);
-					setCursor(Cursor.getDefaultCursor());
-					detailPanel.addTab(label, htmlPanel);
-					return;
-				} else if(detailSource instanceof XMLSource xmlSource){
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					XmlPanel xmlPanel = new XmlPanel();
-					// hack to reset
-					xmlPanel.setDocument(xmlPanel.getEditorKit().createDefaultDocument());
-					xmlPanel.setText(xmlSource.getXML());
-					xmlPanel.setCaretPosition(0);
-					setCursor(Cursor.getDefaultCursor());
-					detailPanel.addTab(label, xmlPanel);
-					return;
-				} else if(detailSource instanceof TableSource tableSource){
-					
-					try {
-						TableModel tableModel = tableSource.getTableModel();
-						if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
-							TablePanel tablePanel = new TablePanel(new JTable());
-							tablePanel.setModel(tableModel);
-							detailPanel.addTab(label, tablePanel);
-						}
-					}catch (RuntimeException e2) {
-						logger.log(Level.WARNING, "could not create table:", e2);
-					}
-					return;
+				for(DetailView view : detailViews) {
+					createTabForView(view);
 				}
 			}
+			return;
 		}
 		
 		detailPanel.removeAll();
+	}
+
+	private void createTabForView(DetailView view) {
+		DetailSource detailSource = view.detailSource();
+		String label = view.label();
+		if(detailSource instanceof ImageSource imageSource){
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			BufferedImage img;
+			try {
+				img = imageSource.getImage();
+			} catch (RuntimeException e1) {
+				logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
+				img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
+			}
+			setCursor(Cursor.getDefaultCursor());
+			if(img != null){
+				ImagePanel imagePanel = new ImagePanel();
+				imagePanel.setImage(img);
+				detailPanel.addTab(label, imagePanel);
+			}
+		} else if(detailSource instanceof HTMLSource htmlSource){
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			HtmlPanel htmlPanel = new HtmlPanel(controller, this, htmlSource.getHTML());
+			setCursor(Cursor.getDefaultCursor());
+			detailPanel.addTab(label, new JScrollPane(htmlPanel));
+		} else if(detailSource instanceof XMLSource xmlSource){
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			XmlPanel xmlPanel = new XmlPanel();
+			// hack to reset
+			xmlPanel.setDocument(xmlPanel.getEditorKit().createDefaultDocument());
+			xmlPanel.setText(xmlSource.getXML());
+			xmlPanel.setCaretPosition(0);
+			setCursor(Cursor.getDefaultCursor());
+			detailPanel.addTab(label, new JScrollPane(xmlPanel));
+		} else if(detailSource instanceof TableSource tableSource){
+			try {
+				TableModel tableModel = tableSource.getTableModel();
+				if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+					TablePanel tablePanel = new TablePanel(new JTable());
+					tablePanel.setModel(tableModel);
+					detailPanel.addTab(label, tablePanel);
+				}
+			}catch (RuntimeException e2) {
+				logger.log(Level.WARNING, "could not create table:", e2);
+			}
+		}
 	}
 
 	/* (non-Javadoc)

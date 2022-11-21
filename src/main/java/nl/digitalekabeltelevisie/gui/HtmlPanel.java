@@ -40,17 +40,18 @@ import nl.digitalekabeltelevisie.main.DVBinspector;
  */
 public class HtmlPanel extends JEditorPane {
 
-	public HtmlPanel(DVBinspector controller, HyperlinkListener hyperlinkListener) {
+	public HtmlPanel(DVBinspector controller, HyperlinkListener hyperlinkListener, String html) {
 		super();
-		//htmlPanel = new JEditorPane();
-		//getTransferHandler();
 		setContentType("text/html");
-		setText(null);
+		
 		setEditable(false);
 		setBackground(Color.LIGHT_GRAY);
 		putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 		setTransferHandler(new EditorTextHTMLTransferHandler(controller));
 		addHyperlinkListener(hyperlinkListener);
+		
+		setText(html);
+		setCaretPosition(0);
 
 	}
 

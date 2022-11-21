@@ -145,6 +145,7 @@ public class KVP{
 	 */
 	private String crumb;
 
+	@Deprecated
 	public void setHtmlSource(final HTMLSource htmlSource) {
 		detailViews.add(new DetailView(htmlSource, ""));
 	}
@@ -445,6 +446,7 @@ public class KVP{
 	/**
 	 * @param imageSource the imageSource to set
 	 */
+	@Deprecated
 	public void setImageSource(final ImageSource imageSource) {
 		detailViews.add(new DetailView(imageSource,""));
 	}
@@ -500,11 +502,13 @@ public class KVP{
 
 
 
+	@Deprecated
 	public void setTableSource(TableSource tableSource) {
 		detailViews.add(new DetailView(tableSource,""));
 	}
 
 
+	@Deprecated
 	public void setXmlSource(XMLSource xmlSource) {
 		detailViews.add(new DetailView(xmlSource,""));
 	}
@@ -534,6 +538,10 @@ public class KVP{
 
 	public List<DetailView> getDetailViews() {
 		return detailViews;
+	}
+	
+	public void addDetailSource(DetailSource detailSource, String label) {
+		detailViews.add(new DetailView(detailSource, label));
 	}
 
 }
