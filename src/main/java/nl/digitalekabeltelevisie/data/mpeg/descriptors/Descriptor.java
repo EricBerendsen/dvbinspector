@@ -556,6 +556,10 @@ public class Descriptor implements TreeNode {
 				case 0x06 -> "HEVC ultra high definition video, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bitstream";
 				case 0x07 -> "HEVC ultra high definition video with PQ10 HDR, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz without a half frame rate HEVC temporal video sub-bit-stream";
 				case 0x08 -> "HEVC ultra high definition video with a resolution up to 7680x4320";
+				case 0x10 -> "VVC Main 10 Profile with resolution up to 3840x2160, frame rate up to 60 Hz";
+				case 0x11 -> "VVC Main 10 Profile with resolution up to 3840x2160, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz ";
+				case 0x12 -> "VVC Main 10 Profile with resolution up to 7680x4320, frame rate up to 60 Hz";
+				case 0x13 -> "VVC Main 10 Profile with resolution up to 7680x4320, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz ";
 				case 0x20 -> "AVS3 High 10 Profile with resolution up to 3840x2160, frame rate up to 60 Hz";
 				case 0x21 -> "AVS3 High 10 Profile with resolution up to 3840x2160, frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz ";
 				case 0x22 -> "AVS3 High 10 Profile with resolution up to 7680x4320, frame rate up to 60 Hz";
