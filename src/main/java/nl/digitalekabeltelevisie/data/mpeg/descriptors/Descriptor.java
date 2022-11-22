@@ -458,6 +458,7 @@ public class Descriptor implements TreeNode {
 			case 0x1E -> "H.264/AVC frame compatible plano-stereoscopic HD NVOD reference service";
 			case 0x1F -> "HEVC digital television service";
 			case 0x20 -> "HEVC UHD digital television service with HDR and/or a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz, or a resolution greater than 3840x2160, SDR or HDR, with a frame rate up to 60Hz";
+			case 0x21 -> "VVC digital television service";
 			case 0x22 -> "AVS3 digital television service";
 			case 0x84 -> "Sagem firmware download service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf -- Mandatory for legacy STB (ICD3000, ICD4000 and ICD60)
 			case 0x87 -> "Sagem OpenTV out_of_list_service"; // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf  -- Mandatory for legacy STB (ICD3000, ICD4000 and ICD60)
