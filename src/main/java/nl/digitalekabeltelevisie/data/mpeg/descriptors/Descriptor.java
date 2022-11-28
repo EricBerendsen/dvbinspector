@@ -863,7 +863,7 @@ public class Descriptor implements TreeNode {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> List<Object> findDescriptorApplyListFunc(final Iterable<Descriptor> descriptorList, final Class<U> u , final Function<U, List<Object>> fun) {
+	public static <U extends Descriptor, V extends Object> List<V> findDescriptorApplyListFunc(final Iterable<Descriptor> descriptorList, final Class<U> u , final Function<U, List<V>> fun) {
 		for (final Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				return fun.apply((U) element);

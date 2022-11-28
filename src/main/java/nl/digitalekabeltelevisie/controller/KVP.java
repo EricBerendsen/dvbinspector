@@ -540,8 +540,20 @@ public class KVP{
 		return detailViews;
 	}
 	
-	public void addDetailSource(DetailSource detailSource, String label) {
-		detailViews.add(new DetailView(detailSource, label));
+	public void addHTMLSource(HTMLSource htmlSource, String label) {
+		detailViews.add(new DetailView(htmlSource, label));
+	}
+
+	public void addImageSource(ImageSource imageSource, String label) {
+		detailViews.add(new DetailView(imageSource, label));
+	}
+
+	public void addTableSource(TableSource tableSource, String label) {
+		detailViews.add(new DetailView(tableSource, label));
+	}
+
+	public void addXMLSource(XMLSource xmlSource, String label) {
+		detailViews.add(new DetailView(xmlSource, label));
 	}
 
 }

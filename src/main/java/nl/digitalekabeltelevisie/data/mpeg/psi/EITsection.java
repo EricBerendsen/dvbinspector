@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
@@ -54,6 +55,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.ShortEventDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.TimeShiftedEventDescriptor;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 
 public class EITsection extends TableSectionExtendedSyntax{
@@ -110,8 +112,8 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 
 			for (Descriptor d : descriptorList) {
-				if (d instanceof ShortEventDescriptor) {
-					return ((ShortEventDescriptor) d).getEventName().toString();
+				if (d instanceof ShortEventDescriptor shortEventDescriptor) {
+					return shortEventDescriptor.getEventName().toString();
 				}
 			}
 			//  no ShortEventDescriptor, give up
@@ -122,7 +124,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 			final KVP kvp = new KVP("event",eventID,Utils.getEITStartTimeAsString(startTime)+" "+getEventName());
-			kvp.setHtmlSource(this);
+			kvp.addHTMLSource(this,"Event details");
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 			t.add(new DefaultMutableTreeNode(new KVP("event_id",eventID,null)));
@@ -273,7 +275,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 		private static void addShortEventDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(languageList, ShortEventDescriptor.class);
-			if(shortDesc.size()>0){
+			if(!shortDesc.isEmpty()){
 				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
 					
 					r1.append("Event name: <b>").
@@ -319,8 +321,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> languageDependentDescriptorsMap = new LinkedHashMap<>();
 			
 			for(Descriptor d:descList) {
-				if(d instanceof LanguageDependentEitDescriptor) {
-					LanguageDependentEitDescriptor languageDependentEitDescriptor = (LanguageDependentEitDescriptor) d;
+				if(d instanceof LanguageDependentEitDescriptor languageDependentEitDescriptor) {
 					String iso639LanguageCode = languageDependentEitDescriptor.getIso639LanguageCode();
 					List<LanguageDependentEitDescriptor> lst = languageDependentDescriptorsMap.computeIfAbsent(iso639LanguageCode, s -> new ArrayList<>());
 					
@@ -404,8 +405,11 @@ public class EITsection extends TableSectionExtendedSyntax{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus, ()->getHtmlForEit(modus));
+		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 
+		KVP kvp = (KVP)t.getUserObject();
+		kvp.addHTMLSource(()->getHtmlForEit(modus), "List");
+		kvp.addTableSource(this::getTableModel, "Events");
 		t.add(new DefaultMutableTreeNode(new KVP("service_id",getServiceID(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamID,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID))));
@@ -445,7 +449,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 				append("&nbsp;");
 			final List<Descriptor> descList = event.getDescriptorList();
 			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
-			if(shortDesc.size()>0){
+			if(!shortDesc.isEmpty()){
 				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
 					b.append("<b><span style=\"background-color: white\">").
 					append("<a href=\"root/psi/eit/original_network_id:").
@@ -488,6 +492,25 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 
 	public int getOriginalNetworkID() {
+		
+		
 		return originalNetworkID;
 	}
+	
+	public String findServiceName() {
+		return getPSI().getSdt().getServiceName(originalNetworkID, transportStreamID, getServiceID());
+	}
+
+	
+	public TableModel getTableModel() {
+		FlexTableModel<EITsection,Event> tableModel =  new FlexTableModel<>(EIT.buildEitTableHeader());
+
+		tableModel.addData(this, getEventList());
+
+		tableModel.process();
+		return tableModel;
+	}
+	
+
+
 }
