@@ -69,7 +69,7 @@ public class EBUHandlerTest extends PesHandlerSetup{
 		
 		Page page = magazine.getPage(0x51); // page 251
 		
-		//validatePreviewImageSize(page.getJTreeNode(0), 475, 600, "tt page 251");
+		validatePreviewImageSize(page.getJTreeNode(0), 475, 600, "tt page 251");
 		
 		Map<Integer, SubPage> subPages = page.getSubPages();
 		assertEquals(1, subPages.size());

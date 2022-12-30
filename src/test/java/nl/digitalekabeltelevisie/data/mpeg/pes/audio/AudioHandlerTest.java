@@ -59,7 +59,7 @@ public class AudioHandlerTest extends PesHandlerSetup{
 
 		final Audio138183Handler audio138182Handler = (Audio138183Handler) pidHandler;
 		
-		//validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2280, "audio graph");
+		validatePreviewImageSize(audio138182Handler.getJTreeNode(0),840, 2280, "audio graph");
 
 		final List<PesPacketData> pesPackets = audio138182Handler.getPesPackets();
 		assertNotNull("pesPackets = null",pesPackets);

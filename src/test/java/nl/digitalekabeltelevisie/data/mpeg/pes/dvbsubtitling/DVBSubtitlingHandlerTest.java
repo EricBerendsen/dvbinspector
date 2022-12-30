@@ -77,7 +77,7 @@ public class DVBSubtitlingHandlerTest extends PesHandlerSetup{
 		DisplaySet set1 = sets.get(1);
 		assertNotNull(set1);
 		
-		//validatePreviewImageSize(set1.getJTreeNode(0),576,720,"display set 1");
+		validatePreviewImageSize(set1.getJTreeNode(0),576,720,"display set 1");
 
 		
 		List<Segment> segments1 = set1.getSegments();
@@ -102,7 +102,7 @@ public class DVBSubtitlingHandlerTest extends PesHandlerSetup{
 		assertEquals(19, objectDataSegment.getSegmentType());
 		assertEquals(2, objectDataSegment.getPageID());
 		
-		//validatePreviewImageSize(objectDataSegment.getJTreeNode(0),58,272,"ObjectDataSegment");
+		validatePreviewImageSize(objectDataSegment.getJTreeNode(0),58,272,"ObjectDataSegment");
 
 	}
 	
