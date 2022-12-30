@@ -27,18 +27,32 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import java.awt.Color;
 
+import javax.swing.JEditorPane;
+import javax.swing.event.HyperlinkListener;
+
+import nl.digitalekabeltelevisie.main.DVBinspector;
 
 /**
  * @author Eric
  *
  */
+public class HtmlPanel extends JEditorPane {
 
-@FunctionalInterface
-public interface XMLSource extends DetailSource{
+	public HtmlPanel(DVBinspector controller, HyperlinkListener hyperlinkListener, String html) {
+		super();
+		setContentType("text/html");
+		
+		setEditable(false);
+		setBackground(Color.LIGHT_GRAY);
+		putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
+		setTransferHandler(new EditorTextHTMLTransferHandler(controller));
+		addHyperlinkListener(hyperlinkListener);
+		
+		setText(html);
+		setCaretPosition(0);
 
-	/**
-	 * @return a XML string
-	 */
-	String getXML();
+	}
+
 }

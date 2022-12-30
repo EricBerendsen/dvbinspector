@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -35,7 +35,7 @@ package nl.digitalekabeltelevisie.gui;
  */
 
 @FunctionalInterface
-public interface HTMLSource {
+public interface HTMLSource extends DetailSource{
 
 	/**
 	 * @return a HTML fragment, without the start and end &lt;html&gt; tags. This way several fragments can be concatenated.

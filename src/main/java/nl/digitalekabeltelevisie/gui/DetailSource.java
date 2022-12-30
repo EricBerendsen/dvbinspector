@@ -27,18 +27,10 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-
-
 /**
  * @author Eric
  *
  */
+public interface DetailSource {
 
-@FunctionalInterface
-public interface XMLSource extends DetailSource{
-
-	/**
-	 * @return a XML string
-	 */
-	String getXML();
 }

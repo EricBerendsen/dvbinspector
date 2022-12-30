@@ -27,18 +27,25 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import javax.swing.JEditorPane;
 
+import nl.digitalekabeltelevisie.gui.xmleditorkit.XMLEditorKit;
 
 /**
  * @author Eric
  *
  */
+public class XmlPanel extends JEditorPane {
 
-@FunctionalInterface
-public interface XMLSource extends DetailSource{
+	public XmlPanel() {
+		super();
+		
+		//xmlPanel = new JEditorPane();
+		setEditorKit(new XMLEditorKit());
+		setText(null);
+		setEditable(false);
+		putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 
-	/**
-	 * @return a XML string
-	 */
-	String getXML();
+	}
+
 }

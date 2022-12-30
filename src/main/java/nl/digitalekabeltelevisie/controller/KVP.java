@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,6 +32,8 @@ import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JMenuItem;
 
@@ -65,6 +67,7 @@ import nl.digitalekabeltelevisie.gui.*;
  */
 public class KVP{
 
+	public record DetailView(DetailSource detailSource, String label) {}
 
 	/**
 	 * maximum length of byte[] to be shown in JTree, only has meaning in case data is array of byte.
@@ -125,18 +128,11 @@ public class KVP{
 	public static final byte	FIELD_TYPE_BIGINT 			= 8;
 
 
-
+	
 	/**
-	 * if imageSource is set, means there is a image to display with this KVP. In DVB Inspector is will be shown in the right panel. (example, teletext page, or DVB subtitle)
+	 * 
 	 */
-	private ImageSource imageSource;
-	/**
-	 * if htmlSource is set, means there is a html fragment to display with this KVP. In DVB Inspector is will be shown in the right panel. (example, hex dump of byte[]. or EPG)
-	 */
-	private HTMLSource 	htmlSource;
-	private XMLSource 	xmlSource;
-
-	private TableSource tableSource;
+	private List<DetailView> detailViews = new ArrayList<>();
 	
 
 	/**
@@ -149,8 +145,9 @@ public class KVP{
 	 */
 	private String crumb;
 
+	@Deprecated
 	public void setHtmlSource(final HTMLSource htmlSource) {
-		this.htmlSource = htmlSource;
+		detailViews.add(new DetailView(htmlSource, ""));
 	}
 
 	private JMenuItem subMenu;
@@ -163,11 +160,11 @@ public class KVP{
 		this.fieldType = FIELD_TYPE_LABEL;
 	}
 
-	public KVP(final String label,final ImageSource im) {
+	public KVP(final String label,final ImageSource imageSource) {
 		super();
 		this.label = label;
 		this.fieldType = FIELD_TYPE_LABEL;
-		this.imageSource = im;
+		detailViews.add(new DetailView(imageSource,""));
 	}
 	public KVP(final String label, final String value, final String description) {
 		super();
@@ -223,6 +220,7 @@ public class KVP{
 		this.byteLen = value.length;
 		this.description = description;
 		this.fieldType = FIELD_TYPE_BYTES;
+		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
 	}
 
 	public KVP(final String label, final byte[] value, final int offset, final int len, final String description) {
@@ -233,6 +231,7 @@ public class KVP{
 		this.byteLen = len;
 		this.description = description;
 		this.fieldType = FIELD_TYPE_BYTES;
+		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
 	}
 
 	public KVP(final String label, final DVBString value, final String description) {
@@ -247,7 +246,7 @@ public class KVP{
 		super();
 		this.label = string;
 		this.fieldType = FIELD_TYPE_LABEL;
-		this.htmlSource = htmlSource;
+		detailViews.add(new DetailView(htmlSource,""));
 	}
 
 	public KVP(final String string, final BigInteger value, final String description) {
@@ -444,21 +443,12 @@ public class KVP{
 	public static void setStringDisplay(final byte stringDisplay) {
 		KVP.stringDisplay = stringDisplay;
 	}
-
-
-	/**
-	 * @return the imageSource
-	 */
-	public ImageSource getImageSource() {
-		return imageSource;
-	}
-
-
 	/**
 	 * @param imageSource the imageSource to set
 	 */
+	@Deprecated
 	public void setImageSource(final ImageSource imageSource) {
-		this.imageSource = imageSource;
+		detailViews.add(new DetailView(imageSource,""));
 	}
 
 	public String getPlainText(){
@@ -497,12 +487,6 @@ public class KVP{
 		return owner;
 	}
 
-	public HTMLSource getHTMLSource() {
-		if (fieldType == FIELD_TYPE_BYTES) {
-			return () -> getHTMLHexview(byteValue, byteStart, byteLen);
-		}
-		return htmlSource;
-	}
 
 	public byte getFieldType() {
 		return fieldType;
@@ -513,23 +497,20 @@ public class KVP{
 			return copyOfRange(byteValue, byteStart, byteStart+byteLen);
 		}
 		
-		return null;
+		return new byte[0];
 	}
 
-	public TableSource getTableSource() {
-		return tableSource;
-	}
 
+
+	@Deprecated
 	public void setTableSource(TableSource tableSource) {
-		this.tableSource = tableSource;
+		detailViews.add(new DetailView(tableSource,""));
 	}
 
-	public XMLSource getXmlSource() {
-		return xmlSource;
-	}
 
+	@Deprecated
 	public void setXmlSource(XMLSource xmlSource) {
-		this.xmlSource = xmlSource;
+		detailViews.add(new DetailView(xmlSource,""));
 	}
 
 	public String getCrumb() {
@@ -553,6 +534,26 @@ public class KVP{
 
 	public void setCrumb(String path) {
 		this.crumb = path;
+	}
+
+	public List<DetailView> getDetailViews() {
+		return detailViews;
+	}
+	
+	public void addHTMLSource(HTMLSource htmlSource, String label) {
+		detailViews.add(new DetailView(htmlSource, label));
+	}
+
+	public void addImageSource(ImageSource imageSource, String label) {
+		detailViews.add(new DetailView(imageSource, label));
+	}
+
+	public void addTableSource(TableSource tableSource, String label) {
+		detailViews.add(new DetailView(tableSource, label));
+	}
+
+	public void addXMLSource(XMLSource xmlSource, String label) {
+		detailViews.add(new DetailView(xmlSource, label));
 	}
 
 }

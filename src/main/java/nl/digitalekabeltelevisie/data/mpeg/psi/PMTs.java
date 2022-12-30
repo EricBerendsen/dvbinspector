@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -93,7 +93,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		for (Integer programNumber : s) {
 			final PMTsection[] sections = pmts.get(programNumber);
 			KVP kvp = new KVP("program", programNumber, getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber));
-			kvp.setTableSource(() -> getTableForProgram(programNumber));
+			kvp.addTableSource(() -> getTableForProgram(programNumber),"Components");
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			for (final PMTsection pmtSection : sections) {
 				if (pmtSection != null) {
@@ -158,7 +158,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 				addOptionalRepeatingGroupedColumn("teletext language",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								TeletextDescriptor.class,
-								iso -> iso.getTeletextList().
+								ttd -> ttd.getTeletextList().
 									stream().
 									map(TeletextDescriptor.Teletext::getIso639LanguageCode).
 									collect(Collectors.toList())),
@@ -167,7 +167,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 				addOptionalRepeatingGroupedColumn("teletext type",
 						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
 								TeletextDescriptor.class,
-								iso -> iso.getTeletextList().
+								teletextDescriptor -> teletextDescriptor.getTeletextList().
 									stream().
 									map(t->getTeletextTypeString(t.getTeletextType())).
 									collect(Collectors.toList())),

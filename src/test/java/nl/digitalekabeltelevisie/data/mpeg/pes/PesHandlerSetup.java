@@ -39,6 +39,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.junit.BeforeClass;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.KVP.DetailView;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
@@ -89,7 +90,18 @@ public class PesHandlerSetup {
 		
 		assertEquals(KVP.class, o.getClass());
 		KVP kvp = (KVP)o;
-		ImageSource imgSrc = kvp.getImageSource();
+		List<DetailView> detailViews = kvp.getDetailViews();
+		assertNotEquals(0, detailViews.size()); 
+		
+		List<ImageSource> imageSources = new ArrayList<>();
+		for(DetailView view : detailViews) {
+			if(view.detailSource() instanceof ImageSource imageSource) {
+				imageSources.add(imageSource);
+			}
+		}
+		assertEquals(1, imageSources.size());
+		ImageSource imgSrc = imageSources.get(0);
+		
 		assertNotNull(msg,imgSrc);
 		BufferedImage img = imgSrc.getImage();
 		assertNotNull(msg,img);

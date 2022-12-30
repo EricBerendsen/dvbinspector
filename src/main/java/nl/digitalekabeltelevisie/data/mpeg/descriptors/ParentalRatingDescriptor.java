@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -40,10 +41,10 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ParentalRatingDescriptor extends Descriptor {
 
-	private List<Rating> ratingList = new ArrayList<Rating>();
+	private List<Rating> ratingList = new ArrayList<>();
 
 
-	public static class Rating implements TreeNode{
+	public  class Rating implements TreeNode, Comparable<Rating>{
 		/**
 		 *
 		 */
@@ -72,7 +73,7 @@ public class ParentalRatingDescriptor extends Descriptor {
 
 		@Override
 		public String toString(){
-			return "countryCode:'"+countryCode;
+			return getRatingTypeAge(rating)+", countryCode:"+countryCode;
 		}
 
 
@@ -85,6 +86,15 @@ public class ParentalRatingDescriptor extends Descriptor {
 
 		public String getCountryCode() {
 			return countryCode;
+		}
+
+
+
+		@Override
+		public int compareTo(Rating o) {
+			return  Comparator.comparing(Rating::getRating)
+					.thenComparing(Rating::getCountryCode)
+					.compare(this, o);
 		}
 
 

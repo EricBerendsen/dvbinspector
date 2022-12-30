@@ -26,24 +26,43 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getDurationMillis;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCDate;
+import static nl.digitalekabeltelevisie.util.Utils.isUndefined;
+import static nl.digitalekabeltelevisie.util.Utils.simpleModus;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.IntPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.gui.EITableImage;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.Interval;
+import nl.digitalekabeltelevisie.util.ServiceIdentification;
+import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 
 /**
@@ -54,6 +73,9 @@ import nl.digitalekabeltelevisie.util.*;
  *
  */
 public class EIT extends AbstractPSITabel{
+
+	private static final String EVENT_GRID_TITLE = "Grid";
+	private static final String EVENTS_SCHEDULE_TITLE = "Events Schedule";
 
 	//     original_network_id,transport_stream_id,  serviceId, table_id 
 	private final Map<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer,EITsection []>>>> newEit = 
@@ -120,7 +142,7 @@ public class EIT extends AbstractPSITabel{
 				final DefaultMutableTreeNode streamNode = new DefaultMutableTreeNode(streamNodeKVP);
 				networkNode.add(streamNode);
 
-				Map<ServiceIdentification, EITsection[]> streamImageMap = new TreeMap<>();
+				TreeMap<ServiceIdentification, EITsection[]> streamImageMap = new TreeMap<>();
 
 				for(Entry<Integer, TreeMap<Integer, EITsection[]>> streamEntry: streams.entrySet()) {
 					final Integer serviceId = streamEntry.getKey();
@@ -132,14 +154,17 @@ public class EIT extends AbstractPSITabel{
 					final KVP serviceNodeKVP = new KVP("service_id", serviceId,getParentPSI().getSdt().getServiceName(orgNetworkId, transport_stream_id, serviceId));
 					final DefaultMutableTreeNode serviceNode = new DefaultMutableTreeNode(serviceNodeKVP);
 										
-					serviceNodeKVP.setHtmlSource(() -> service.entrySet().
+					serviceNodeKVP.addHTMLSource(() -> service.entrySet().
 							stream().
 							filter(s -> s.getKey()>=80).
 							map(Entry::getValue).
 							flatMap(Arrays::stream).
 							filter(Objects::nonNull).
 							map(e -> e.getHtmlForEit(modus)).
-							collect(Collectors.joining("","<b>Schedule</b><br><br>","")));
+							collect(Collectors.joining("","<b>Schedule</b><br><br>","")),
+							"List");
+					
+					serviceNodeKVP.addTableSource(() -> getTableModelForService(service.entrySet()), EVENTS_SCHEDULE_TITLE);
 					
 					streamNode.add(serviceNode);
 				
@@ -148,12 +173,14 @@ public class EIT extends AbstractPSITabel{
 						EITsection[] sections = serviceEntry.getValue();
 
 						final KVP tableNodeKVP = new KVP("tableid", tableId,TableSection.getTableType(tableId));
-						tableNodeKVP.setHtmlSource(() -> Arrays.stream(sections).
+						tableNodeKVP.addHTMLSource(() -> Arrays.stream(sections).
 								filter(Objects::nonNull).
 								map(e -> e.getHtmlForEit(modus)).
-								collect(Collectors.joining())
+								collect(Collectors.joining()),
+								"List"
 								);
 
+						tableNodeKVP.addTableSource(()->getTableModel(sections), "Events");
 						final DefaultMutableTreeNode tableNode = new DefaultMutableTreeNode(tableNodeKVP);
 						serviceNode.add(tableNode);
 
@@ -175,15 +202,80 @@ public class EIT extends AbstractPSITabel{
 					// now all sections for service are in serviceSections
 					streamImageMap.put(new ServiceIdentification(orgNetworkId, transport_stream_id, serviceId), serviceSections);
 				}
-				streamNodeKVP.setImageSource(new EITableImage(this, streamImageMap));
+				streamNodeKVP.addImageSource(new EITableImage(this, streamImageMap),EVENT_GRID_TITLE);
+				streamNodeKVP.addTableSource(() ->getTableModelForStream(streamImageMap.values()),EVENTS_SCHEDULE_TITLE);
+				
 				networkImageMap.putAll(streamImageMap);
 			}
-			networkNodeKVP.setImageSource(new EITableImage(this, networkImageMap));
+			networkNodeKVP.addImageSource(new EITableImage(this, networkImageMap),EVENT_GRID_TITLE);
+			networkNodeKVP.addTableSource(() ->getTableModelForStream(networkImageMap.values()),EVENTS_SCHEDULE_TITLE);
 			allEitImageMap.putAll(networkImageMap);
 		}
-		eitKVP.setImageSource(new EITableImage(this, allEitImageMap));
+		eitKVP.addImageSource(new EITableImage(this, allEitImageMap),EVENT_GRID_TITLE);
+		eitKVP.addTableSource(() ->getTableModelForStream(allEitImageMap.values()),EVENTS_SCHEDULE_TITLE);
 		return t;
 
+	}
+
+	/**
+	 * @param collection
+	 * @return
+	 */
+	private static TableModel getTableModelForStream(Collection<EITsection[]> collection) {
+		FlexTableModel<EITsection,Event> tableModel =  new FlexTableModel<>(buildEitTableHeader());
+		
+		for( EITsection[] sections:collection) {
+			for(EITsection section:sections) {
+				if(section != null) {
+					tableModel.addData(section, section.getEventList());
+				}
+			}
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
+
+
+	/**
+	 * @param entrySet
+	 * @return
+	 */
+	private static TableModel getTableModelForService(Set<Entry<Integer, EITsection[]>> entrySet) {
+		FlexTableModel<EITsection,Event> tableModel =  new FlexTableModel<>(buildEitTableHeader());
+
+		for(Entry<Integer, EITsection[]> entry:entrySet) {
+			if(entry.getKey() >= 80) {
+				EITsection[] sections = entry.getValue();
+				for(EITsection section:sections) {
+					if(section != null) {
+						tableModel.addData(section, section.getEventList());
+					}
+				}
+			}
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
+
+	/**
+	 * @param sections
+	 * @return
+	 */
+	private static TableModel getTableModel(EITsection[] sections) {
+		FlexTableModel<EITsection,Event> tableModel =  new FlexTableModel<>(buildEitTableHeader());
+
+		for(EITsection section:sections) {
+			if(section != null) {
+				tableModel.addData(section, section.getEventList());
+			}
+			
+		}
+		
+
+		tableModel.process();
+		return tableModel;
 	}
 
 	/**
@@ -253,7 +345,7 @@ public class EIT extends AbstractPSITabel{
 		return getFlatEit(tableId -> tableId < 80);
 	}
 
-	public Map<ServiceIdentification, EITsection[]> getFlatEit(Predicate<Integer> scheduleOrPF) {
+	public Map<ServiceIdentification, EITsection[]> getFlatEit(IntPredicate scheduleOrPF) {
 		Map<ServiceIdentification, EITsection[]> result = new TreeMap<>();
 
 		for (Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> networkEntry : newEit.entrySet()) {
@@ -280,6 +372,28 @@ public class EIT extends AbstractPSITabel{
 			}
 		}
 		return result;
+	}
+
+	
+	static TableHeader<EITsection, Event> buildEitTableHeader() {
+
+		return new TableHeaderBuilder<EITsection, Event>()
+				.addRequiredBaseColumn("onid", EITsection::getOriginalNetworkID, Integer.class)
+				.addRequiredBaseColumn("tsid", EITsection::getTransportStreamID, Integer.class)
+				.addRequiredBaseColumn("sid", EITsection::getServiceID, Integer.class)
+				.addRequiredBaseColumn("service", EITsection::findServiceName, String.class)
+
+				.addRequiredRowColumn("Start time", e -> Utils.getEITStartTimeAsString(e.getStartTime()), String.class)
+				.addRequiredRowColumn("duration", e -> Utils.formatDuration(e.getDuration()), String.class)
+				.addRequiredRowColumn("Event ID", Event::getEventID, Integer.class)
+
+				.addRequiredRowColumn("Event Name", Event::getEventName, String.class)
+
+				.addOptionalRepeatingRowColumn("rating ", component -> findDescriptorApplyListFunc(
+						component.getDescriptorList(), ParentalRatingDescriptor.class,
+						ratingDescriptor -> ratingDescriptor.getRatingList().stream().collect(Collectors.toList())),
+						ParentalRatingDescriptor.Rating.class)
+				.build();
 	}
 
 }

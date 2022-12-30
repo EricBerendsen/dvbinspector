@@ -41,7 +41,6 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class TableSection implements TreeNode{
@@ -444,14 +443,6 @@ public class TableSection implements TreeNode{
 		return null;
 	}
 
-	
-	public DefaultMutableTreeNode getJTreeNode(final int modus,final HTMLSource htmlSource){
-		KVP kvp = getSectionKVP(modus);
-		kvp.setHtmlSource(htmlSource);
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-		addTableDetails(modus, t);
-		return t;
-	}
 
 	/**
 	 * @return

@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -30,7 +30,7 @@ package nl.digitalekabeltelevisie.gui;
 import java.awt.image.BufferedImage;
 
 @FunctionalInterface
-public interface ImageSource {
+public interface ImageSource extends DetailSource{
 
 	BufferedImage getImage();
 }
