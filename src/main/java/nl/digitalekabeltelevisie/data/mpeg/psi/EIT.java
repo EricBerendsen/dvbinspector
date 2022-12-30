@@ -55,7 +55,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor.Rating;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.gui.EITableImage;
 import nl.digitalekabeltelevisie.util.Interval;
@@ -74,6 +73,9 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
  *
  */
 public class EIT extends AbstractPSITabel{
+
+	private static final String EVENT_GRID_TITLE = "Grid";
+	private static final String EVENTS_SCHEDULE_TITLE = "Events Schedule";
 
 	//     original_network_id,transport_stream_id,  serviceId, table_id 
 	private final Map<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer,EITsection []>>>> newEit = 
@@ -162,7 +164,7 @@ public class EIT extends AbstractPSITabel{
 							collect(Collectors.joining("","<b>Schedule</b><br><br>","")),
 							"List");
 					
-					serviceNodeKVP.addTableSource(() -> getTableModelForService(service.entrySet()), "Events Schedule");
+					serviceNodeKVP.addTableSource(() -> getTableModelForService(service.entrySet()), EVENTS_SCHEDULE_TITLE);
 					
 					streamNode.add(serviceNode);
 				
@@ -200,17 +202,17 @@ public class EIT extends AbstractPSITabel{
 					// now all sections for service are in serviceSections
 					streamImageMap.put(new ServiceIdentification(orgNetworkId, transport_stream_id, serviceId), serviceSections);
 				}
-				streamNodeKVP.addImageSource(new EITableImage(this, streamImageMap),"Grid");
-				streamNodeKVP.addTableSource(() ->getTableModelForStream(streamImageMap.values()),"Events Schedule");
+				streamNodeKVP.addImageSource(new EITableImage(this, streamImageMap),EVENT_GRID_TITLE);
+				streamNodeKVP.addTableSource(() ->getTableModelForStream(streamImageMap.values()),EVENTS_SCHEDULE_TITLE);
 				
 				networkImageMap.putAll(streamImageMap);
 			}
-			networkNodeKVP.addImageSource(new EITableImage(this, networkImageMap),"Grid");
-			networkNodeKVP.addTableSource(() ->getTableModelForStream(networkImageMap.values()),"Events Schedule");
+			networkNodeKVP.addImageSource(new EITableImage(this, networkImageMap),EVENT_GRID_TITLE);
+			networkNodeKVP.addTableSource(() ->getTableModelForStream(networkImageMap.values()),EVENTS_SCHEDULE_TITLE);
 			allEitImageMap.putAll(networkImageMap);
 		}
-		eitKVP.addImageSource(new EITableImage(this, allEitImageMap),"Grid");
-		eitKVP.addTableSource(() ->getTableModelForStream(allEitImageMap.values()),"Events Schedule");
+		eitKVP.addImageSource(new EITableImage(this, allEitImageMap),EVENT_GRID_TITLE);
+		eitKVP.addTableSource(() ->getTableModelForStream(allEitImageMap.values()),EVENTS_SCHEDULE_TITLE);
 		return t;
 
 	}
@@ -375,135 +377,23 @@ public class EIT extends AbstractPSITabel{
 	
 	static TableHeader<EITsection, Event> buildEitTableHeader() {
 
-		return new TableHeaderBuilder<EITsection,Event>().
-				addRequiredBaseColumn("onid", EITsection::getOriginalNetworkID, Integer.class).
-				addRequiredBaseColumn("tsid", EITsection::getTransportStreamID, Integer.class).
-				addRequiredBaseColumn("sid", EITsection::getServiceID, Integer.class).
-				addRequiredBaseColumn("service", EITsection::findServiceName, String.class).
+		return new TableHeaderBuilder<EITsection, Event>()
+				.addRequiredBaseColumn("onid", EITsection::getOriginalNetworkID, Integer.class)
+				.addRequiredBaseColumn("tsid", EITsection::getTransportStreamID, Integer.class)
+				.addRequiredBaseColumn("sid", EITsection::getServiceID, Integer.class)
+				.addRequiredBaseColumn("service", EITsection::findServiceName, String.class)
 
-				addRequiredRowColumn("Start time", 
-						e -> Utils.getEITStartTimeAsString(e.getStartTime())
-						, String.class).
-				addRequiredRowColumn("duration", 
-						e -> Utils.formatDuration(e.getDuration())
-						, String.class).
-				addRequiredRowColumn("Event ID", Event::getEventID, Integer.class).
-				
-				addRequiredRowColumn("Event Name", Event::getEventName, String.class).
-				addOptionalRepeatingGroupedColumn("rating country",
-						component -> findDescriptorApplyListFunc(component.getDescriptorList(),
-								ParentalRatingDescriptor.class,
-								ratingDescriptor -> ratingDescriptor.getRatingList().
-									stream().
-									map(Rating::getCountryCode).
-									collect(Collectors.toList())),
-						String.class,
-						"prate").
+				.addRequiredRowColumn("Start time", e -> Utils.getEITStartTimeAsString(e.getStartTime()), String.class)
+				.addRequiredRowColumn("duration", e -> Utils.formatDuration(e.getDuration()), String.class)
+				.addRequiredRowColumn("Event ID", Event::getEventID, Integer.class)
 
-				// SUB
+				.addRequiredRowColumn("Event Name", Event::getEventName, String.class)
 
-				addOptionalRepeatingGroupedColumn("rating age",
-						component -> findDescriptorApplyListFunc(component.getDescriptorList(),
-								ParentalRatingDescriptor.class,
-								ratingDescriptor -> ratingDescriptor.getRatingList().
-									stream().
-									map(t -> ParentalRatingDescriptor.getRatingTypeAge(t.getRating())).
-									collect(Collectors.toList())),
-						String.class,
-						"prate").
-
-				
-				build();
-		
-//				addOptionalRowColumn("usage",
-//						c ->  determineComponentType(c.getComponentDescriptorList()).
-//							map(ComponentType::getDescription).
-//							orElse(getStreamTypeShortString(c.getStreamtype())),
-//						String.class).
-//				addOptionalRowColumn("elementary PID", Component::getElementaryPID, Integer.class).
-//
-//				addOptionalRowColumn("component tag",
-//						component -> findDescriptorApplyFunc(component.getComponentDescriptorList(),
-//								StreamIdentifierDescriptor.class,
-//								StreamIdentifierDescriptor::getComponentTag),
-//						Integer.class).
-//
-//				//ISO639
-//
-//				addOptionalRepeatingGroupedColumn("iso language",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								ISO639LanguageDescriptor.class,
-//								iso -> iso.getLanguageList().
-//									stream().
-//									map(ISO639LanguageDescriptor.Language::getIso639LanguageCode).
-//									collect(Collectors.toList())),
-//						String.class,
-//						"iso").
-//				addOptionalRepeatingGroupedColumn("iso type",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								ISO639LanguageDescriptor.class,
-//								iso -> iso.getLanguageList().
-//									stream().
-//									map(l->getAudioTypeString(l.getAudioType())).
-//									collect(Collectors.toList())),
-//						String.class,
-//						"iso").
-//
-//				// TTX
-//
-//				addOptionalRepeatingGroupedColumn("teletext language",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								TeletextDescriptor.class,
-//								iso -> iso.getTeletextList().
-//									stream().
-//									map(TeletextDescriptor.Teletext::getIso639LanguageCode).
-//									collect(Collectors.toList())),
-//						String.class,
-//						"ttx").
-//				addOptionalRepeatingGroupedColumn("teletext type",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								TeletextDescriptor.class,
-//								iso -> iso.getTeletextList().
-//									stream().
-//									map(t->getTeletextTypeString(t.getTeletextType())).
-//									collect(Collectors.toList())),
-//						String.class,
-//						"ttx").
-//
-//				// SUB
-//
-//				addOptionalRepeatingGroupedColumn("subtitle language",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								SubtitlingDescriptor.class,
-//								sub -> sub.getSubtitleList().
-//									stream().
-//									map(SubtitlingDescriptor.Subtitle::getIso639LanguageCode).
-//									collect(Collectors.toList())),
-//						String.class,
-//						"sub").
-//				addOptionalRepeatingGroupedColumn("subtitle type",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								SubtitlingDescriptor.class,
-//								sub -> sub.getSubtitleList().
-//									stream().
-//									map(t->getComponentType0x03String(t.getSubtitlingType())).
-//									collect(Collectors.toList())),
-//						String.class,
-//						"sub").
-//
-//				//ApplicationSignallingDescriptor
-//
-//				addOptionalRepeatingRowColumn("application type",
-//						component -> findDescriptorApplyListFunc(component.getComponentDescriptorList(),
-//								ApplicationSignallingDescriptor.class,
-//								app -> app.getApplicationTypeList().
-//									stream().
-//									map(a->getAppTypeIDString(a.getApplicationType())).
-//									collect(Collectors.toList())),
-//						String.class).
-
-				//build();
+				.addOptionalRepeatingRowColumn("rating ", component -> findDescriptorApplyListFunc(
+						component.getDescriptorList(), ParentalRatingDescriptor.class,
+						ratingDescriptor -> ratingDescriptor.getRatingList().stream().collect(Collectors.toList())),
+						ParentalRatingDescriptor.Rating.class)
+				.build();
 	}
-
 
 }

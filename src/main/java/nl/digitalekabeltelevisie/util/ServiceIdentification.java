@@ -51,26 +51,14 @@ public class ServiceIdentification implements Comparable<ServiceIdentification>,
 		return originalNetworkId;
 	}
 	
-	public void setOriginalNetworkId(int originalNetworkId) {
-		this.originalNetworkId = originalNetworkId;
-	}
-	
 	public int getTransportStreamId() {
 		return transportStreamId;
-	}
-
-	public void setTransportStreamId(int transportStreamId) {
-		this.transportStreamId = transportStreamId;
 	}
 
 	public int getServiceId() {
 		return serviceId;
 	}
 
-	public void setServiceId(int serviceId) {
-		this.serviceId = serviceId;
-	}
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
