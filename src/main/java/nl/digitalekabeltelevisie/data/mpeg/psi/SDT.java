@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -159,7 +159,7 @@ public class SDT extends AbstractPSITabel{
 	}
 
 	public Optional<DVBString> getServiceNameDVBString(final ServiceIdentification serviceIdentification){
-		return getServiceNameDVBString(serviceIdentification.getOriginalNetworkId(),serviceIdentification.getTransportStreamId(),serviceIdentification.getServiceId());
+		return getServiceNameDVBString(serviceIdentification.originalNetworkId(),serviceIdentification.transportStreamId(),serviceIdentification.serviceId());
 	}
 
 	public Optional<DVBString> getServiceNameDVBString(final int original_network_id, final int transport_stream_id, final int serviceID){

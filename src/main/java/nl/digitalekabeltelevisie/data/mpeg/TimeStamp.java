@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,24 +26,7 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg;
 
-public class TimeStamp {
+public record TimeStamp(int packetNo, long time) {
 
-	private final int packetNo;
-	private final long time;
-
-	public TimeStamp(int packetNo, long time) {
-		super();
-		this.packetNo = packetNo;
-		this.time = time;
-	}
-
-	public int getPacketNo() {
-		return packetNo;
-	}
-
-	public long getTime() {
-		return time;
-	}
-	
 
 }

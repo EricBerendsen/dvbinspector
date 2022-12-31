@@ -150,8 +150,8 @@ public class TimestampXYDataset implements XYDataset {
 			TimeStamp startKey = new TimeStamp(startPacket, 0);
 			TimeStamp endKey = new TimeStamp(endPacket, Long.MAX_VALUE);
 			Comparator<TimeStamp> comperator = Comparator
-											.comparingInt(TimeStamp::getPacketNo)
-											.thenComparingLong(TimeStamp::getTime);
+											.comparingInt(TimeStamp::packetNo)
+											.thenComparingLong(TimeStamp::time);
 			
 			int startOffset = Collections.binarySearch(list, startKey, comperator);
 			if(startOffset<0){ 
@@ -217,7 +217,7 @@ public class TimestampXYDataset implements XYDataset {
 
 	@Override
 	public Number getX(int series, int item) {
-		return getTimestamp(series, item).getPacketNo();
+		return getTimestamp(series, item).packetNo();
 	}
 
 	private TimeStamp getTimestamp(int series, int item) {
@@ -226,17 +226,17 @@ public class TimestampXYDataset implements XYDataset {
 
 	@Override
 	public double getXValue(int series, int item) {
-		return getTimestamp(series, item).getPacketNo();
+		return getTimestamp(series, item).packetNo();
 	}
 
 	@Override
 	public Number getY(int series, int item) {
-		return getTimestamp(series, item).getTime();
+		return getTimestamp(series, item).time();
 	}
 
 	@Override
 	public double getYValue(int series, int item) {
-		return getTimestamp(series, item).getTime();
+		return getTimestamp(series, item).time();
 	}
 
 }

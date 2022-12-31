@@ -315,7 +315,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 					getSdt().
 					getServiceNameDVBString(serviceNo).
 					map(DVBString::toString).
-					orElse("Service " + serviceNo.getServiceId());
+					orElse("Service " + serviceNo.serviceId());
 			gd.setColor(Color.BLUE);
 			gd.fillRect(x, labelY, SERVICE_NAME_WIDTH, LINE_HEIGHT);
 			gd.setColor(Color.WHITE);
@@ -343,7 +343,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		// do we have a current time in the TDT?
 		if(this.eit.getParentPSI().getTdt()!=null){
 			final List<TDTsection> tdtSectionList  = this.eit.getParentPSI().getTdt().getTdtSectionList();
-			if(tdtSectionList.size()>=1){
+			if(!tdtSectionList.isEmpty()){
 				final TDTsection first = tdtSectionList.get(0);
 				final Calendar utcCalender = getUTCCalender(first.getUTC_time());
 				if(utcCalender!=null){
@@ -438,7 +438,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 								getSdt().
 								getServiceNameDVBString(serviceIdent).
 								map(DVBString::toEscapedHTML).
-								orElse("Service "+serviceIdent.getServiceId());
+								orElse("Service "+serviceIdent.serviceId());
 						r1.append(name).append("</b><br><br>");
 	
 						Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
@@ -458,11 +458,11 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 								orElse("[Name not in SDT]<br><br>");
 						r1.append(name).
 						append("</b><br><br>original_network_id:").
-						append(serviceIdent.getOriginalNetworkId()).
+						append(serviceIdent.originalNetworkId()).
 						append("<br>transport_stream_id:").
-						append(serviceIdent.getTransportStreamId()).
+						append(serviceIdent.transportStreamId()).
 						append("<br>service_id:").
-						append(serviceIdent.getServiceId());
+						append(serviceIdent.serviceId());
 					}
 					r1.append("</html>");
 				}
