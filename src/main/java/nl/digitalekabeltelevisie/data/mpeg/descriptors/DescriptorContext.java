@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,6 +31,7 @@ public class  DescriptorContext {
 	
 	public int original_network_id;
 	public int transport_stream_id;
+	private int network_id;
 	long private_data_specifier;
 	
 	 public DescriptorContext() {
@@ -43,6 +44,13 @@ public class  DescriptorContext {
 		 this.transport_stream_id = transport_stream_id;
 	 }
 	
+	 public DescriptorContext(int original_network_id, int transport_stream_id, int network_id) {
+		 super();
+		 this.original_network_id = original_network_id;
+		 this.transport_stream_id = transport_stream_id;
+		 this.network_id = network_id;
+	 }
+	 
 	 public boolean hasOnidTsid() {
 		 return (original_network_id != 0 && transport_stream_id !=0);
 	 }
@@ -69,5 +77,9 @@ public class  DescriptorContext {
 
 	public void setPrivate_data_specifier(long private_data_specifier) {
 		this.private_data_specifier = private_data_specifier;
+	}
+
+	public int getNetwork_id() {
+		return network_id;
 	}
 }

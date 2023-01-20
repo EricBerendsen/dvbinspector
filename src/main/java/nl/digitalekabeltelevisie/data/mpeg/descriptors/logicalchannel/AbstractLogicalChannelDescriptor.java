@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -53,7 +53,7 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	
 	public abstract class AbstractLogicalChannel implements LogicalChannelInterface{
 		
-		public AbstractLogicalChannel(int service_id, int visible_service_flag, int reserved,
+		protected AbstractLogicalChannel(int service_id, int visible_service_flag, int reserved,
 				int logical_channel_number) {
 			super();
 			this.service_id = service_id;
@@ -110,7 +110,7 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	protected final List<AbstractLogicalChannel> channelList = new ArrayList<>();
 
 
-	public AbstractLogicalChannelDescriptor(byte[] b, int offset, TableSection parent, DescriptorContext descriptorContext) {
+	protected AbstractLogicalChannelDescriptor(byte[] b, int offset, TableSection parent, DescriptorContext descriptorContext) {
 		super(b, offset, parent);
 		this.descriptorContext = descriptorContext;
 
@@ -179,6 +179,16 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 
 		tableModel.process();
 		return tableModel;
+	}
+	
+	public Integer getLCN(int serviceId) {
+		for (AbstractLogicalChannel channel : getChannelList()) {
+			if (channel.getService_id() == serviceId) {
+				return channel.getLogical_channel_number();
+			}
+		}
+
+		return null;
 	}
 
 

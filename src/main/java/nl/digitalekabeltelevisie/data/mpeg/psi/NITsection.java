@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,6 +36,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceListDescriptor.Service;
 import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
@@ -137,7 +138,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 			final int transport_stream_id = getInt(data, i + t, 2, Utils.MASK_16BITS);
 			final int original_network_id = getInt(data, i + t + 2, 2, Utils.MASK_16BITS);
 			final int transport_descriptors_length = getInt(data, i + t + 4, 2, Utils.MASK_12BITS);
-			DescriptorContext dc = new DescriptorContext(original_network_id, transport_stream_id);
+			DescriptorContext dc = new DescriptorContext(original_network_id, transport_stream_id,getNetworkID());
 			final List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(data, i + t + 6,
 					transport_descriptors_length, this, dc);
 
@@ -154,7 +155,9 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this);
+		kvp.addTableSource(this, "Transport Streams");
+		kvp.addTableSource(this::getServicesTableD, "Services");
+		
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_length",getNetworkDescriptorsLength(),null)));
 		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length",getTransportStreamLoopLength(),null)));
@@ -168,6 +171,21 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	@Override
 	protected String getTableIdExtensionLabel() {
 		return "network_id";
+	}
+	
+	private TableModel getServicesTableD() {
+		FlexTableModel<TransportStream, Service> tableModel = new FlexTableModel<>(NIT.buildServiceTableHeader());
+
+		for (TransportStream ts : getTransportStreamList()) {
+			List<ServiceListDescriptor> sldList = Descriptor.findGenericDescriptorsInList(ts.descriptorList(),ServiceListDescriptor.class);
+			for (ServiceListDescriptor sld : sldList) {
+				tableModel.addData(ts, sld.getServiceList());
+			}
+		}
+
+	tableModel.process();
+	return tableModel;
+
 	}
 
 	@Override

@@ -59,12 +59,10 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.CableDeliverySystemDescri
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.NetworkNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.SatelliteDeliverySystemDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceListDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceListDescriptor.Service;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.TerrestrialDeliverySystemDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.T2DeliverySystemDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.LogicalChannelInterface;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
@@ -96,14 +94,17 @@ public class NIT extends AbstractPSITabel{
 
 		KVP kvpNit = new KVP("NIT");
 		if(!networks.isEmpty()) {
-			kvpNit.setTableSource(this::getTableModel);
+			kvpNit.addTableSource(this::getTableModel,"Transport Streams");
 		}
 		final DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode( kvpNit);
 		final TreeSet<Integer> s = new TreeSet<>(networks.keySet());
 
 		for (Integer networkNo : s) {
 			KVP kvp = new KVP("network_id", networkNo, getNetworkName(networkNo));
-			kvp.setTableSource(() -> getTableForNetworkID(networkNo));
+			kvp.addTableSource(() -> getTableForNetworkID(networkNo),"Transport Streams");
+			kvp.addTableSource(() -> getServiceTableForNetworkID(networkNo),"Services");
+			
+			
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 
 			final NITsection[] sections = networks.get(networkNo);
@@ -140,63 +141,6 @@ public class NIT extends AbstractPSITabel{
 		return null;
 	}
 
-
-	public int getLCN(final int networkNo, final int streamID, final int serviceID){
-		int r = -1;
-		final NITsection [] sections = networks.get(networkNo);
-		if(sections!=null){
-			for (final NITsection section : sections) {
-				if(section!= null){
-					for(final TransportStream stream :section.getTransportStreamList() ){
-						if(stream.transport_stream_id()==streamID) {
-							final List<LogicalChannelDescriptor> logicalChannelDescriptorList = Descriptor.findGenericDescriptorsInList(stream.descriptorList(),LogicalChannelDescriptor.class);
-							if(!logicalChannelDescriptorList.isEmpty()) {
-								final AbstractLogicalChannelDescriptor d = logicalChannelDescriptorList.get(0); // there should be only one..
-								for ( final LogicalChannelInterface ch : d.getChannelList()){
-									if(ch.getService_id()==serviceID){
-										r = ch.getLogical_channel_number();
-										return r;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return r;
-	}
-
-	public int getHDSimulcastLCN(final int networkNo, final int streamID,
-			final int serviceID) {
-		int r = -1;
-		final NITsection[] sections = networks.get(networkNo);
-		if (sections != null) {
-			for (final NITsection section : sections) {
-				if (section != null) {
-					for (final TransportStream stream : section
-							.getTransportStreamList()) {
-						if (stream.transport_stream_id() == streamID) {
-							final List<HDSimulcastLogicalChannelDescriptor> hdSimulcastDescriptorList = Descriptor
-									.findGenericDescriptorsInList(
-											stream.descriptorList(),
-											HDSimulcastLogicalChannelDescriptor.class);
-							if (!hdSimulcastDescriptorList.isEmpty()) {
-								final HDSimulcastLogicalChannelDescriptor d = hdSimulcastDescriptorList.get(0); // there should be only one..
-								for (final LogicalChannelInterface ch : d.getChannelList()) {
-									if (ch.getService_id() == serviceID) {
-										r = ch.getLogical_channel_number();
-										return r;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return r;
-	}
 
 	public boolean exists(final int netWorkID, final int section){
 		return ((networks.get(netWorkID)!=null) &&
@@ -291,7 +235,41 @@ public class NIT extends AbstractPSITabel{
 		return tableModel;
 	}
 
+	
+	private TableModel getServiceTableForNetworkID(int networkNo) {
+		FlexTableModel<TransportStream,Service> tableModel =  new FlexTableModel<>(buildServiceTableHeader());
 
+		final NITsection [] sections = networks.get(networkNo);
+
+		for (final NITsection tsection : sections) {
+			if(tsection!= null){
+				List<TransportStream> tsList = tsection.getTransportStreamList();
+				for(TransportStream ts:tsList){
+					List<ServiceListDescriptor> sldList = Descriptor.findGenericDescriptorsInList(ts.descriptorList(), ServiceListDescriptor.class);
+					for(ServiceListDescriptor sld:sldList) {
+							tableModel.addData(ts, sld.getServiceList());
+					}
+				}
+				
+			}
+		}
+
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<TransportStream,Service> buildServiceTableHeader() {
+		return new TableHeaderBuilder<TransportStream,Service>().
+				addRequiredBaseColumn("tsid", TransportStream::transport_stream_id, Integer.class).
+				addRequiredBaseColumn("onid", TransportStream::original_network_id, Integer.class).
+				addRequiredRowColumn("sid",Service::getServiceID,Number.class).
+				addRequiredRowColumn("type",Service::getServiceType,Integer.class).
+				addRequiredRowColumn("type description",Service::getServiceTypeString,String.class).
+				addOptionalRowColumn("name",Service::getServiceName,String.class).
+				addOptionalRowColumn("lcn",Service::getLCN,Integer.class).
+				build();
+				
+	}
 	
 	static TableHeader<NITsection,TransportStream>  buildNitTableHeader() {
 

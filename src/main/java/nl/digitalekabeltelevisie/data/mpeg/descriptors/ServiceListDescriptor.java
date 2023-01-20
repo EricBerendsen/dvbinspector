@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -40,7 +40,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.psi.NITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TransportStream;
 import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
@@ -83,6 +86,7 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 			this.serviceType = serviceType;
 		}
 
+		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 		
 			String nodeLabel = "service";
@@ -104,7 +108,29 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 		public String getServiceName() {
 			return getPSI().getSdt().getServiceName(descriptorContext.original_network_id, descriptorContext.transport_stream_id, serviceID);
 		}
-
+		
+		public Integer getLCN() {
+			NITsection[] networkSections = getPSI().getNit().getNetworks().get(descriptorContext.getNetwork_id());
+			for (NITsection section : networkSections) {
+				if (section != null) {
+					TransportStream stream = section.getTransportStream(descriptorContext.transport_stream_id);
+					if (stream != null) {
+						for (Descriptor descriptor : stream.descriptorList()) {
+							if (descriptor instanceof AbstractLogicalChannelDescriptor abstractLogicalChannelDescriptor) {
+								Integer lcn = abstractLogicalChannelDescriptor.getLCN(serviceID);
+								if(lcn !=null) {
+									return lcn;
+								}
+							}
+						}
+						return null;
+					}
+				}
+			}
+			return null;
+		}		
+		
+		
 	}
 
 	public ServiceListDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
@@ -159,6 +185,7 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 	}
 
 
+	@Override
 	public TableModel getTableModel() {
 		FlexTableModel<Service,Service> tableModel =  new FlexTableModel<>(buildTableHeader());
 
