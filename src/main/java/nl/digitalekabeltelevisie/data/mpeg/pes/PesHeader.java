@@ -35,6 +35,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+import nl.digitalekabeltelevisie.util.LookUpList;
 
 /**
  * @author Eric
@@ -43,6 +44,22 @@ import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
  *
  */
 public class PesHeader implements TreeNode {
+	
+	// Rec. ITU-T H.222.0 (06/2021) Table 2-27 – Stream_id_extension assignments
+	
+	private static final LookUpList stream_id_extension_list = new LookUpList.Builder().
+			add(0, "IPMP control information stream").
+			add(1, "IPMP stream").
+			add(2, 0x0f, "ISO/IEC 14496-17 text stream").
+			add(0x10, 0x1f, "ISO/IEC 23002-3 auxiliary video stream").
+			add(0x20, 0x3f, "reserved_data_stream").
+			add(0x40, "private_stream").
+			add(0x41, "AVS3 video sequence stream"). // AVS3 T/AI 109.6—2022 9.2.1 Stream identification
+			add(0x42, "AVS3 video library stream").  // AVS3 T/AI 109.6—2022 9.2.1 Stream identification
+			add(0x43, 0x4f, "may be used by AVS standards in the future"). 
+			add(0x50, 0x7f, "private_stream").
+			build();
+
 
 	class AdDescriptor implements TreeNode{
 		
@@ -375,7 +392,7 @@ public class PesHeader implements TreeNode {
 						t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension_flag", stream_id_extension_flag, null)));
 
 						if ( stream_id_extension_flag == 0) { 
-							t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension", stream_id_extension, null)));
+							t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension", stream_id_extension, getStreamIdExtensionString(stream_id_extension))));
 						}else {
 							t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved_extension2, null)));
 							t.add(new DefaultMutableTreeNode(new KVP("tref_extension_flag", tref_extension_flag, null)));
@@ -392,6 +409,14 @@ public class PesHeader implements TreeNode {
 			t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP("Error parsing PESHeader")));
 
 		}
+	}
+
+	/**
+	 * @param stream_id_extension_flag2
+	 * @return
+	 */
+	private static String getStreamIdExtensionString(int stream_id_extension_) {
+		return stream_id_extension_list.get(stream_id_extension_);
 	}
 
 	/**
