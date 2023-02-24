@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,17 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes;
 
-import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_1BIT;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
-import static nl.digitalekabeltelevisie.util.Utils.getBytes;
-import static nl.digitalekabeltelevisie.util.Utils.getInt;
-import static nl.digitalekabeltelevisie.util.Utils.getLong;
-import static nl.digitalekabeltelevisie.util.Utils.indexOf;
-import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
-
-import java.util.logging.Logger;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -53,8 +43,6 @@ import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
  *
  */
 public class PesHeader implements TreeNode {
-
-	private static final Logger logger = Logger.getLogger(PesHeader.class.getName());
 
 	class AdDescriptor implements TreeNode{
 		
@@ -141,6 +129,17 @@ public class PesHeader implements TreeNode {
 	private int pack_field_length;
 	private byte[] pack_header;
 	private AdDescriptor adDescriptor;
+	private int program_packet_sequence_counter;
+	private int mpeg1_mpeg2_identifier;
+	private int original_stuff_length;
+	private int p_std_buffer_scale;
+	private int p_std_buffer_size;
+	private int pes_extension_field_length;
+	private int stream_id_extension_flag;
+	private int stream_id_extension;
+	private int tref_extension_flag;
+	private int reserved_extension2;
+	private long tref;
 
 	/**
 	 * @param data
@@ -228,14 +227,34 @@ public class PesHeader implements TreeNode {
 					off += pack_field_length;
 				}
 				if (program_packet_sequence_counter_flag == 1) {
-					logger.info("Not implemented: program_packet_sequence_counter_flag=");
+					program_packet_sequence_counter = getInt(data, off, 1, MASK_7BITS);
+					mpeg1_mpeg2_identifier = getInt(data, off + 1 , 1, 0b0100_0000)>>6;
+					original_stuff_length = getInt(data, off + 1 , 1, MASK_6BITS);
+					off += 2;
+
 				}
 
 				if (p_std_buffer_flag == 1) {
-					logger.info("Not implemented: p_std_buffer_flag=");
+					p_std_buffer_scale = getInt(data, off, 1, 0b0010_0000)>>5; 
+					p_std_buffer_size = getInt(data, off, 2, MASK_13BITS); 
+					off += 2;
 				}
 				if (pes_extension_flag_2 == 1) {
-					logger.info("Not implemented: pes_extension_flag_2=");
+					pes_extension_field_length = getInt(data, off, 1, MASK_7BITS);
+					off++;
+					stream_id_extension_flag  = getInt(data, off, 1, 0b1000_0000)>>7; 
+					if ( stream_id_extension_flag == 0) { 
+						stream_id_extension = getInt(data, off, 1, MASK_7BITS);
+					}else {
+						reserved_extension2 = getInt(data, off, 1, 0b0111_1110)>>1;
+						tref_extension_flag = getInt(data, off, 1, MASK_1BIT);
+						off ++;
+						if(tref_extension_flag == 0) {
+							 tref = getTimeStamp(data, off);
+							 off += 5;
+						}
+					}
+
 				}						
 
 
@@ -256,7 +275,6 @@ public class PesHeader implements TreeNode {
 		return pes_packet_length;
 	}
 
-	@SuppressWarnings("unused")
 	public void addToJtree(final DefaultMutableTreeNode t, final int modus) {
 
 		try {
@@ -342,16 +360,30 @@ public class PesHeader implements TreeNode {
 					}
 					
 					if (program_packet_sequence_counter_flag == 1) {
-						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("program_packet_sequence_counter_flag")));
+						t.add(new DefaultMutableTreeNode(new KVP("program_packet_sequence_counter", program_packet_sequence_counter, null)));
+						t.add(new DefaultMutableTreeNode(new KVP("MPEG1_MPEG2_identifier", mpeg1_mpeg2_identifier, null)));
+						t.add(new DefaultMutableTreeNode(new KVP("original_stuff_length", original_stuff_length, null)));
 					}
 
 					if (p_std_buffer_flag == 1) {
-						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("p_std_buffer_flag")));
+						t.add(new DefaultMutableTreeNode(new KVP("P-STD_buffer_scale", p_std_buffer_scale, null)));
+						t.add(new DefaultMutableTreeNode(new KVP("P-STD_buffer_size", p_std_buffer_size, null)));
 					}
 					if (pes_extension_flag_2 == 1) {
-						t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pes_extension_flag_2")));
-					}						
 
+						t.add(new DefaultMutableTreeNode(new KVP("pes_extension_field_length", pes_extension_field_length, null)));
+						t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension_flag", stream_id_extension_flag, null)));
+
+						if ( stream_id_extension_flag == 0) { 
+							t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension", stream_id_extension, null)));
+						}else {
+							t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved_extension2, null)));
+							t.add(new DefaultMutableTreeNode(new KVP("tref_extension_flag", tref_extension_flag, null)));
+							if(tref_extension_flag == 0) {
+								t.add(new DefaultMutableTreeNode(new KVP("TREF", tref, printTimebase90kHz(tref))));
+							}
+						}
+					}						
 
 				}// endif ( pes_extension_flag == 1) 
 
@@ -507,7 +539,7 @@ public class PesHeader implements TreeNode {
 	 * @return the value of the PTS/DTS as described in 2.4.3.7 of iso 13813, prefix
 	 *         and marker bits are ignored
 	 */
-	public final static long getTimeStamp(final byte[] array, final int offset) {
+	public static final long getTimeStamp(final byte[] array, final int offset) {
 
 		long ts = getLong(array, offset, 1, 0x0E) << 29; // bits 32..30
 		ts |= getLong(array, offset + 1, 2, 0xFFFE) << 14; // bits 29..15
