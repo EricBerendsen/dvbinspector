@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -485,7 +485,7 @@ public class TransportStream implements TreeNode{
 		t.add(psi.getJTreeNode(modus));
 		if(!psiOnlyModus(modus)){
 			KVP kvp = new KVP("PIDs");
-			kvp.setTableSource(this::getTableModel);
+			kvp.addTableSource(this::getTableModel,"PIDs");
 			final DefaultMutableTreeNode pidTreeNode = new DefaultMutableTreeNode(kvp);
 			t.add(pidTreeNode);
 			for (final PID pid : pids) {
@@ -557,28 +557,30 @@ public class TransportStream implements TreeNode{
 		switch (pid) {
 		case 0:
 			return "PAT";
-		case 1:
+		case 0x1:
 			return "CAT";
-		case 2:
+		case 0x2:
 			return "TSDT";
-		case 3:
+		case 0x3:
 			return "IPMP control information table "; // ISO/IEC 13818-1:2013 (E) 
-		case 4:
+		case 0x4:
 			return "Adaptive streaming information"; // ISO/IEC 13818-1:2013/Amd.4:2014 (E) 
-		case 16:
+		case 0x10:
 			return  "NIT";
-		case 17:
+		case 0x11:
 			return "SDT/BAT";
-		case 18:
+		case 0x12:
 			return "EIT";
-		case 19:
+		case 0x13:
 			return "RST, ST";
-		case 20:
+		case 0x14:
 			return "TOT/TDT";
-		case 21:
+		case 0x15:
 			return "network synchronization";
-		case 22:
+		case 0x16:
 			return "RNT (TS 102 323)";
+		case 0x1b:
+			return "SAT";
 		case 0x1c:
 			return "inband signalling";
 		case 0x1d:

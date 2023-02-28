@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -237,6 +237,7 @@ public class TableSection implements TreeNode{
 		case 0x4A: return "bouquet_association_section";
 		case 0x4B: return "SSU Update Notification Table (UNT)";
 		case 0x4C: return "IP/MAC Notification Table (INT)"; // EN 301 192
+		case 0x4D: return "satellite_access_table_section"; 
 
 		case 0x4E: return "event_information_section - actual_transport_stream, present/following";
 		case 0x4F: return "event_information_section - other_transport_stream, present/following";
