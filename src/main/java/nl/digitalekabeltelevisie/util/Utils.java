@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -1025,7 +1025,7 @@ public final class Utils {
 		switch (tag) {
 		case 0x00: return"ITU-T | ISO/IEC Reserved";
 		case 0x01: return"Video MPEG1";
-		case 0x02: return"Video MPEG2";
+		case 0x02: return"Video H.262 (MPEG2)";
 		case 0x03: return"Audio MPEG1";
 		case 0x04: return"Audio MPEG2";
 		case 0x05: return"private_sections MPEG2";
@@ -1055,7 +1055,7 @@ public final class Utils {
 		case 0x18: return"Metadata 13818-6 Object Carousel";
 		case 0x19: return"Metadata 13818-6 Synchronized Download Protocol";
 		case 0x1A: return"IPMP stream (13818-11, MPEG-2 IPMP)";
-		case 0x1B: return"Video H.264";
+		case 0x1B: return"Video H.264 (AVC)";
 		case 0x1C: return"ISO/IEC 14496-3 Audio, like DST, ALS and SLS";
 		case 0x1D: return"ISO/IEC 14496-17 Text";
 		case 0x1E: return"ISO/IEC 23002-3 Aux. video stream ";
@@ -1065,7 +1065,7 @@ public final class Utils {
 		case 0x21: return"J2K Video stream";
 		case 0x22: return"H.262 video stream for 3D services";
 		case 0x23: return"H.264 video stream for 3D services";
-		case 0x24: return"Video HEVC";
+		case 0x24: return"Video H.265 (HEVC)";
 		case 0x25: return"H.265 temporal video subset";
 		case 0x26: return"MVCD video sub-bitstream of an AVC video stream";
 		// ISO/IEC 13818-1:2015/Amd.1:2015 (E) /R ec. ITU-T H.222.0 (2014)/Amd.1 (04/2015)
@@ -1087,6 +1087,11 @@ public final class Utils {
 		case 0x30: return "Media Orchestration Access Units carried in sections";
 		case 0x31: return "Substream of a Rec. ITU-T H.265 | ISO/IEC 23008 2 video stream that contains a Motion Constrained Tile Set, parameter sets, slice headers or a combination thereof.";
 		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
+
+		// Rec. ITU-T H.222.0 (06/2021)
+		case 0x33: return" Video H.266 (VVC)";
+		case 0x34: return "VVC temporal video subset of a VVC video stream conforming to one or more profiles defined in Annex A of Rec. ITU-T H.266 | ISO/IEC 23090-3";
+		case 0x35: return "EVC video stream or an EVC temporal video sub-bitstream conforming to one or more profiles defined in ISO/IEC 23094-1";
 		
 		case 0x7f: return"IPMP stream";
 		
@@ -1190,21 +1195,21 @@ public final class Utils {
 	}
 
 	
-	public static void addListJTree(final DefaultMutableTreeNode parent,final Collection<? extends TreeNode> itemCollection, final int modus, final String label, TableSource tableSource) {
-		if((itemCollection!=null)&&(!itemCollection.isEmpty())){
-			if(simpleModus(modus)){ // simple layout
+	public static void addListJTree(final DefaultMutableTreeNode parent,
+			final Collection<? extends TreeNode> itemCollection, final int modus, final String label, TableSource tableSource) {
+		if ((itemCollection != null) && (!itemCollection.isEmpty())) {
+			if (simpleModus(modus)) { // simple layout
 				addToList(parent, itemCollection, modus);
-			}else{
-				final KVP kvp = new KVP(label +": "+ itemCollection.size()+" entries");
+			} else {
+				final KVP kvp = new KVP(label + ": " + itemCollection.size() + " entries");
 				kvp.setCrumb(label);
-				kvp.setTableSource(tableSource);
+				kvp.addTableSource(tableSource, label);
 				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
 				addToList(descriptorListNode, itemCollection, modus);
 				parent.add(descriptorListNode);
 			}
 		}
 	}
-
 
 
 	public static void addToList(final DefaultMutableTreeNode parent,
