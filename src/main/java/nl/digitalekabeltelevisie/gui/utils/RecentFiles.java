@@ -27,7 +27,6 @@
 
 package nl.digitalekabeltelevisie.gui.utils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +39,10 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  *
  */
 public class RecentFiles {
-	
+
+	// to avoid splitting on valid character we use a more unique combination of characters
+	public static final String ENTRY_SEPARATOR = "\u001D\u0011\u001B";
+
 	private List<String> recentFiles = new ArrayList<>();
 	
 	private static int MAX_ENTRIES = 10;
@@ -63,7 +65,7 @@ public class RecentFiles {
 		
 		recentFiles.clear();
 		if(!allFiles.isEmpty()) {
-			recentFiles.addAll(Arrays.asList(allFiles.split(File.pathSeparator)));
+			recentFiles.addAll(Arrays.asList(allFiles.split(ENTRY_SEPARATOR)));
 		}
 		if(recentFiles.size()>MAX_ENTRIES) {
 			recentFiles = recentFiles.subList(0, MAX_ENTRIES);
@@ -71,7 +73,7 @@ public class RecentFiles {
 	}
 	
 	public String getString() {
-		return recentFiles.stream().collect(Collectors.joining (File.pathSeparator));
+		return recentFiles.stream().collect(Collectors.joining (ENTRY_SEPARATOR));
 	}
 	
 	public void addOrMoveToBegin(String fileName) {
