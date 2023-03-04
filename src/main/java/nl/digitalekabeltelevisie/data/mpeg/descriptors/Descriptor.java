@@ -351,7 +351,7 @@ public class Descriptor implements TreeNode {
 	public DefaultMutableTreeNode getJTreeNode(final int modus, TableSource tableSource) {
 
 		final KVP kvp = new KVP("Descriptor: " + getDescriptorname(), descriptorTag, null);
-		kvp.setTableSource(tableSource);
+		kvp.addTableSource(tableSource,"");
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		addGeneralDescriptorInfo(modus, t);
@@ -518,8 +518,7 @@ public class Descriptor implements TreeNode {
 					case 0x00 -> "less than 16:9 aspect ratio";
 					case 0x01 -> "16:9 aspect ratio";
 					case 0x02 -> "greater than 16:9 aspect ratio";
-					case 0x03 -> "plano-stereoscopic top and\r\n" +
-							"bottom (TaB) frame-packing";
+					case 0x03 -> "plano-stereoscopic top and bottom (TaB) frame-packing";
 					case 0x04 -> "HLG10 HDR";
 					case 0x05 -> "HEVC temporal video subset for a frame rate of 100 Hz, 120 000/1 001 Hz, or 120 Hz";
 					case 0x06 -> "SMPTE ST 2094-10 DMI format";
