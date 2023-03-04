@@ -2,7 +2,7 @@
  * 
  * http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- * This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  * This file is part of DVB Inspector.
  * 
@@ -25,10 +25,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video264.*;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
@@ -37,9 +34,8 @@ import nl.digitalekabeltelevisie.util.BitSource;
  */
 public abstract class AbstractNALUnit  implements TreeNode{
 
-	protected static final Logger logger = Logger.getLogger(NALUnit.class.getName());
+	protected static final Logger logger = Logger.getLogger(AbstractNALUnit.class.getName());
 
-	public abstract DefaultMutableTreeNode getJTreeNode(int modus);
 	public abstract String getNALUnitTypeString(final int nal_unit_type);
 
 
