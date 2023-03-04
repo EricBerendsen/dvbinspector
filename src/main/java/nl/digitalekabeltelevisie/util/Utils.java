@@ -896,8 +896,8 @@ public final class Utils {
 		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
 
 
-		case 0x33: return "VVC video stream or a VVC temporal video sub-bitstream";
-		case 0x34: return "VVC temporal video subset of a VVC video stream";
+		case 0x33: return "H.266 VVC video stream or a VVC temporal video sub-bitstream";
+		case 0x34: return "H.266 VVC temporal video subset of a VVC video stream";
 		case 0x35: return "EVC video stream or an EVC temporal video sub-bitstream";
 
 		case 0x7f: return"IPMP stream";
