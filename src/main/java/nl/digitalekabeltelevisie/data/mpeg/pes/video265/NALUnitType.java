@@ -104,7 +104,7 @@ public enum NALUnitType {
 
 	}
 
-	private static Map<Integer, NALUnitType> enumMap = new HashMap<Integer, NALUnitType>();
+	private static Map<Integer, NALUnitType> enumMap = new HashMap<>();
 
 	static {
 		for (final NALUnitType e : NALUnitType.values()) {
@@ -118,14 +118,14 @@ public enum NALUnitType {
 		final NALUnitType byType = getByType(type);
 		if(byType!=null){
 			return byType.getDescription();
-		}else{
-			return "unknown";
 		}
+		return "unknown";
 	}
 
 	public static NALUnitType getByType(final int type) {
 		return enumMap.get(type);
 	}
+	
 	private int type;
 	private String description;
 
