@@ -76,6 +76,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.jpegxs.JpegXsHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video266.H266Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
 import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
@@ -855,6 +856,8 @@ public class TransportStream implements TreeNode{
 				abstractPidHandler = new Video14496Handler();
 			}else if(streamType==0x24){
 				abstractPidHandler = new H265Handler();
+			}else if(streamType==0x33){
+				abstractPidHandler = new H266Handler();
 			}else if(streamType==0x32){
 				abstractPidHandler = new JpegXsHandler();
 			}else{

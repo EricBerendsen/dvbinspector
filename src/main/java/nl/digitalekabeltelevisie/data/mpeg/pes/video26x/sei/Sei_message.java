@@ -183,6 +183,12 @@ public class Sei_message implements TreeNode{
 		case 201: return "sei_prefix_indication";
 		case 202: return "annotated_regions";
 
+		// Rec. ITU-T H.266 (04/2022)  D.2.1 General SEI message syntax
+		case 203: return "subpic_level_info";
+		case 204: return "sample_aspect_ratio_info";
+		case 205: return "scalability_dimension_info";
+		case 206: return "extended_drap_indication";
+		case 207: return "constrained_rasl_encoding_indication";
 
 		default:
 			return "reserved_sei_message";
