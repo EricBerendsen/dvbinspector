@@ -604,11 +604,11 @@ public class PesHeader implements TreeNode {
 	public static String getStreamIDDescription(final int streamId) {
 
 		if ((0xC0 <= streamId) && (streamId < 0xE0)) {
-			return "ISO/IEC 13818-3 or ISO/IEC 11172-3 or ISO/IEC 13818-7 or ISO/IEC 14496-3 audio stream number "
+			return "ISO/IEC 13818-3 or ISO/IEC 11172-3 or ISO/IEC 13818-7 or ISO/IEC 14496-3 or ISO/IEC 23008-3 audio stream number "
 					+ Integer.toHexString(streamId & 0x1F);
 		}
 		if ((0xE0 <= streamId) && (streamId < 0xF0)) {
-			return "ITU-T Rec. H.262 | ISO/IEC 13818-2 or ISO/IEC 11172-2 or ISO/IEC 14496-2 video stream number "
+			return "Rec. ITU-T H.262 | ISO/IEC 13818-2, ISO/IEC 11172-2, ISO/IEC 14496-2, Rec. ITU-T H.264 | ISO/IEC 14496-10, Rec. ITU-T H.265 | ISO/IEC 23008-2, Rec. ITU-T H.266 | ISO/IEC 23090-3 or ISO/IEC 23094-1 video stream number "
 					+ Integer.toHexString(streamId & 0x0F);
 		}
 
