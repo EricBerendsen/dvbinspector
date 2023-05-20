@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
@@ -98,7 +99,7 @@ public class VuiParameters extends AbstractVuiParamters implements TreeNode {
 		t.add(new DefaultMutableTreeNode(new KVP("timing_info_present_flag",timing_info_present_flag,null)));
 		if( timing_info_present_flag !=0) {
 			t.add(new DefaultMutableTreeNode(new KVP("num_units_in_tick",num_units_in_tick,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_scale",time_scale,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("time_scale",time_scale,getClockTickString(num_units_in_tick, time_scale))));
 			t.add(new DefaultMutableTreeNode(new KVP("fixed_frame_rate_flag",fixed_frame_rate_flag,null)));
 		}
 

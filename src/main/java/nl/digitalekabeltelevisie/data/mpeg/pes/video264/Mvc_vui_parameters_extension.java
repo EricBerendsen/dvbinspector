@@ -1,5 +1,6 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -91,7 +92,7 @@ public class Mvc_vui_parameters_extension {
 			vui_mvc_num_ops_minus1Node.add(vui_mvc_timing_info_present_flagNode);
 			if(vui_mvc_timing_info_present_flag[i]==1){
 				vui_mvc_timing_info_present_flagNode.add(new DefaultMutableTreeNode(new KVP("vui_mvc_num_units_in_tick["+i+"]",vui_mvc_num_units_in_tick[i],null)));
-				vui_mvc_timing_info_present_flagNode.add(new DefaultMutableTreeNode(new KVP("vui_mvc_time_scale["+i+"]",vui_mvc_time_scale[i],null)));
+				vui_mvc_timing_info_present_flagNode.add(new DefaultMutableTreeNode(new KVP("vui_mvc_time_scale["+i+"]",vui_mvc_time_scale[i],getClockTickString(vui_mvc_num_units_in_tick[i], vui_mvc_time_scale[i]))));
 				vui_mvc_timing_info_present_flagNode.add(new DefaultMutableTreeNode(new KVP("vui_mvc_fixed_frame_rate_flag["+i+"]",vui_mvc_fixed_frame_rate_flag[i],null)));
 			}
 			DefaultMutableTreeNode vui_mvc_nal_hrd_parameters_present_flagNode = new DefaultMutableTreeNode(new KVP("vui_mvc_nal_hrd_parameters_present_flag["+i+"]",vui_mvc_nal_hrd_parameters_present_flag[ i ],null));

@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
@@ -154,15 +156,6 @@ public class H265VuiParameters extends AbstractVuiParamters implements TreeNode 
 		}
 
 		return t;
-	}
-
-	/**
-	 * @param num_units_in_tick
-	 * @param time_scale
-	 * @return
-	 */
-	public static String getClockTickString(final long num_units_in_tick, final long time_scale) {
-		return "clock tick:" + (((double) num_units_in_tick) / ((double) time_scale)) + " seconds";
 	}
 
 }

@@ -70,5 +70,16 @@ public abstract class VideoHandler extends GeneralPesHandler {
 		cea608.find708AuxData(pts, auxData);
 	}
 
+	/**
+	 * @param num_units_in_tick
+	 * @param time_scale
+	 * @return
+	 */
+	public static String getClockTickString(final long num_units_in_tick, final long time_scale) {
+		return String.format("clock tick:  %+4.2f  seconds, framerate: %+4.2f fps", 
+				(double) num_units_in_tick / (double) time_scale,
+				(double)time_scale  / (double) num_units_in_tick);
+	}
+
 
 }

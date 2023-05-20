@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -44,16 +45,8 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		private int listIdx;
 		private int rplsIdx;
 
-
-
 		// based on 7.3.10 Reference picture list structure syntax
 
-
-		/**
-		 * @param i
-		 * @param j
-		 * @param bitSource
-		 */
 		public RefPicListStruct(int listIdx, int rplsIdx, BitSource bitSource) {
 			this.listIdx = listIdx;
 			this.rplsIdx = rplsIdx;
@@ -117,7 +110,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			if( sps_long_term_ref_pics_flag!=0 && rplsIdx < sps_num_ref_pic_lists[ listIdx ] && num_ref_entries_listIdx_rplsIdx > 0 ) {
 				t.add(new DefaultMutableTreeNode(new KVP("ltrp_in_header_flag["+listIdx+"]["+rplsIdx+"]",ltrp_in_header_flag[listIdx][rplsIdx],null)));
 			}
-			
 
 			for (int i = 0; i < num_ref_entries_listIdx_rplsIdx; i++) {
 				
@@ -145,8 +137,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			
 			return t;
 		}
-		
-		
 		
 		// 7.4.11 Reference picture list structure semantics (150)
 		private int AbsDeltaPocSt(int listIdx, int rplsIdx, int i) {
@@ -203,7 +193,7 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 
 			t.add(new DefaultMutableTreeNode(new KVP("num_units_in_tick",num_units_in_tick,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_scale",time_scale,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("time_scale",time_scale,getClockTickString(num_units_in_tick, time_scale))));
 			t.add(new DefaultMutableTreeNode(new KVP("general_nal_hrd_params_present_flag",general_nal_hrd_params_present_flag,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("general_vcl_hrd_params_present_flag",general_vcl_hrd_params_present_flag,null)));
 
@@ -238,11 +228,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		private SublayerHRDparameters[] nal_sublayer_hrd_parameters;
 		private SublayerHRDparameters[] vcl_sublayer_hrd_parameters;
 
-		/**
-		 * @param firstSubLayer
-		 * @param sps_max_sublayers_minus1
-		 * @param bitSource
-		 */
 		public OlsTimingHrdParameters(int firstSubLayer, int maxSubLayersVal, BitSource bitSource) {
 			
 			this.firstSubLayer = firstSubLayer;
@@ -291,14 +276,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
 			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ols_timing_hrd_parameters(firstSubLayer="+firstSubLayer+", MaxSubLayersVal="+maxSubLayersVal+")"));
-//
-//			fixed_pic_rate_general_flag = new int[maxSubLayersVal+1];
-//			fixed_pic_rate_within_cvs_flag = new int[maxSubLayersVal+1];
-//			elemental_duration_in_tc_minus1 = new int[maxSubLayersVal+1];
-//			low_delay_hrd_flag = new int[maxSubLayersVal+1];
-//			
-//			nal_sublayer_hrd_parameters = new SublayerHRDparameters[maxSubLayersVal+1];
-//			vcl_sublayer_hrd_parameters = new SublayerHRDparameters[maxSubLayersVal+1];
 			
 			for (int i = firstSubLayer; i <= maxSubLayersVal; i++) {
 				final DefaultMutableTreeNode fixed_pic_rate_general_flagNode = new DefaultMutableTreeNode(new KVP("fixed_pic_rate_general_flag["+i+"]",fixed_pic_rate_general_flag[i] ,null));
@@ -344,10 +321,7 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		private int[][] cbr_flag;
 
 		private int subLayerId;
-		/**
-		 * @param i
-		 * @param bitSource
-		 */
+
 		public SublayerHRDparameters(int subLayerId, BitSource bitSource) {
 			this.subLayerId = subLayerId;
 			
@@ -392,15 +366,11 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 	// based on 7.3.2.4 Sequence parameter set RBSP syntax Rec. ITU-T H.266 (04/2022)
 
-	private final int sps_seq_parameter_set_id;
+	private int sps_seq_parameter_set_id;
+	private int sps_video_parameter_set_id;
 
-
-	private final int sps_video_parameter_set_id;
-
-	private final int sps_max_sublayers_minus1;
-
+	private int sps_max_sublayers_minus1;
 	private int sps_chroma_format_idc;
-
 	private int sps_log2_ctu_size_minus5;
 
 	private int sps_ptl_dpb_hrd_params_present_flag;
@@ -673,6 +643,8 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private int sps_vui_parameters_present_flag;
 
 	private int sps_vui_payload_size_minus1;
+
+	private VUIParameters vuiParameters;
 
 
 
@@ -1029,11 +1001,13 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		sps_vui_parameters_present_flag = bitSource.u(1);
 		if (sps_vui_parameters_present_flag != 0) {
 			sps_vui_payload_size_minus1 = bitSource.ue();
+			bitSource.skiptoByteBoundary();
+			// should be vui_payload
+			vuiParameters = new VUIParameters(sps_vui_payload_size_minus1+1, bitSource);
 		}		
 		
-		bitsAvailable = bitSource.available();
-
-		System.err.println("bitsAvailable: "+bitsAvailable);
+		
+		// sps_extension_flag etc not supported
 
 	}
 
@@ -1363,10 +1337,9 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		
 		if (sps_vui_parameters_present_flag != 0) {
 			sps_vui_parameters_present_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_vui_payload_size_minus1",sps_vui_payload_size_minus1,null)));
+			sps_vui_parameters_present_flagNode.add(vuiParameters.getJTreeNode(modus));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("bitsAvailable",bitsAvailable,null)));
-
-
+		
 		return t;
 	}
 

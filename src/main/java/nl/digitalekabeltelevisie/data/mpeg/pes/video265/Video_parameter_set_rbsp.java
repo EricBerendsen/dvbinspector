@@ -27,6 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
+
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
+
 import java.util.logging.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -200,14 +203,7 @@ public class Video_parameter_set_rbsp extends RBSP {
 			return null; // Should not happen
 		}
 	}
-	/**
-	 * @param num_units_in_tick
-	 * @param time_scale
-	 * @return
-	 */
-	public static String getClockTickString(final long num_units_in_tick, final long time_scale) {
-		return "clock tick:" + (((double) num_units_in_tick) / ((double) time_scale)) + " seconds";
-	}
 
+	
 
 }
