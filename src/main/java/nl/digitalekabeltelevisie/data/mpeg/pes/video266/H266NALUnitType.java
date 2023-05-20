@@ -35,21 +35,23 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Sei_rbsp;
 
 /**
  * @author Eric
+ * 
+ * Rec. ITU-T H.266 (04/2022) 7.4.2.2 NAL unit header semantics, Table 5 – NAL unit type codes and NAL unit type classes
  *
  */
 public enum H266NALUnitType {
 
-	TRAIL_NUT(0,"Coded slice of a trailing picture or subpicture", null),
-	STSA_NUT(1,"Coded slice of an STSA picture or subpicture",null),
-	RADL_NUT(2,"Coded slice of a RADL picture or subpicture",null),
-	RASL_NUT(3,"Coded slice of a RASL picture or subpicture",null),
+	TRAIL_NUT(0,"Coded slice of a trailing picture or subpicture", Slice_layer_rbsp.class),
+	STSA_NUT(1,"Coded slice of an STSA picture or subpicture",Slice_layer_rbsp.class),
+	RADL_NUT(2,"Coded slice of a RADL picture or subpicture",Slice_layer_rbsp.class),
+	RASL_NUT(3,"Coded slice of a RASL picture or subpicture",Slice_layer_rbsp.class),
 	RSV_VCL_4(4,"Reserved non-IRAP VCL NAL unit types",null),
 	RSV_VCL_5(5,"Reserved non-IRAP VCL NAL unit types",null),
 	RSV_VCL_6(6,"Reserved non-IRAP VCL NAL unit types",null),
-	IDR_W_RADL(7,"Coded slice of an IDR picture or subpicture",null),
-	IDR_N_LP(8,"Coded slice of an IDR picture or subpicture",null),
-	CRA_NUT(9,"Coded slice of a CRA picture or subpicture",null),
-	GDR_NUT(10,"Coded slice of a GDR picture or subpicture",null),
+	IDR_W_RADL(7,"Coded slice of an IDR picture or subpicture",Slice_layer_rbsp.class),
+	IDR_N_LP(8,"Coded slice of an IDR picture or subpicture",Slice_layer_rbsp.class),
+	CRA_NUT(9,"Coded slice of a CRA picture or subpicture",Slice_layer_rbsp.class),
+	GDR_NUT(10,"Coded slice of a GDR picture or subpicture",Slice_layer_rbsp.class),
 	RSV_IRAP_11(11,"Reserved IRAP VCL NAL unit type",null),
 	OPI_NUT(12,"Operating point information",null),
 	DCI_NUT(13,"Decoding capability information",null),
