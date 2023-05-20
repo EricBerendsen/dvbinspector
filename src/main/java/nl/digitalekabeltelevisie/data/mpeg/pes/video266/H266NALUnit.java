@@ -124,4 +124,12 @@ public class H266NALUnit extends AbstractNALUnit{
 		}
 	}
 
+	public int getNuh_reserved_zero_bit() {
+		return nuh_reserved_zero_bit;
+	}
+
+	public H266NALUnitType getNal_unit_type() {
+		return nal_unit_type;
+	}
+
 }

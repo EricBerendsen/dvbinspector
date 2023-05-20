@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -62,8 +62,8 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 	@Override
 	public BufferedImage getImage() {
 
-		final List<int[]> frameSize  = new ArrayList<int[]>();
-		final List<ChartLabel> labels = new ArrayList<ChartLabel>();
+		final List<int[]> frameSize  = new ArrayList<>();
+		final List<ChartLabel> labels = new ArrayList<>();
 
 		int[] accessUnitData = new int[6]; // 0= P, 1 = B, 2 = I, 3 = SP, 4 = SI (all mod 5), 5 = Filler data
 		int count = 0;
@@ -73,6 +73,11 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 		while(unit!=null){
 			final RBSP rbsp = unit.getRbsp();
 			if(rbsp!=null){
+				
+				// Rec. ITU-T H.264 (06/2019)
+				// 7.4.1.2.3 Order of NAL units and coded pictures and association to access units
+				// TODO add NAL units with nal_unit_type in the range of 14 to 18, inclusive
+				// TODO only slice NALs and Filler are included in Graph, ignore rest?
 				if(( rbsp instanceof Access_unit_delimiter_rbsp) ||
 						( rbsp instanceof Seq_parameter_set_rbsp) ||
 						( rbsp instanceof Pic_parameter_set_rbsp) ||
@@ -80,17 +85,17 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 
 					count = drawBarAccessUnit(frameSize, labels, accessUnitData, count);
 					accessUnitData = new int[6];
-				}else if( rbsp instanceof Slice_layer_without_partitioning_rbsp){
-					final Slice_header header = ((Slice_layer_without_partitioning_rbsp)rbsp).getSlice_header();
+				} else if (rbsp instanceof Slice_layer_without_partitioning_rbsp slice_layer_without_partitioning_rbsp) {
+					final Slice_header header = slice_layer_without_partitioning_rbsp.getSlice_header();
 					final int slice_type = header.getSlice_type();
 					final int size = unit.getNumBytesInRBSP();
-					accessUnitData[slice_type%5] += size;
-				}else if( rbsp instanceof Slice_layer_extension_rbsp){
-					final Slice_header header = ((Slice_layer_extension_rbsp)rbsp).getSlice_header();
-					if(header!=null){
+					accessUnitData[slice_type % 5] += size;
+				} else if (rbsp instanceof Slice_layer_extension_rbsp slice_layer_extension_rbsp) {
+					final Slice_header header = slice_layer_extension_rbsp.getSlice_header();
+					if (header != null) {
 						final int slice_type = header.getSlice_type();
 						final int size = unit.getNumBytesInRBSP();
-						accessUnitData[slice_type%5] += size;
+						accessUnitData[slice_type % 5] += size;
 					}
 				}else if( rbsp instanceof Filler_data_rbsp){
 					final int size = unit.getNumBytesInRBSP();
@@ -100,7 +105,7 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 			unit =  nalIter.next();
 		}
 		// last unit is not followed by delimiter
-		count = drawBarAccessUnit(frameSize, labels, accessUnitData, count);
+		drawBarAccessUnit(frameSize, labels, accessUnitData, count);
 
 		final DefaultKeyedValues2DDataset dataset = new DefaultKeyedValues2DDataset();
 
@@ -142,6 +147,7 @@ public class Video14496Handler extends H26xHandler<Video14496PESDataField, NALUn
 		return chart.createBufferedImage(( frameSize.size()*18)+100, 640);
 	}
 
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.264 PES Data",this));
 		addListJTree(s,pesPackets,modus,"PES Packets");

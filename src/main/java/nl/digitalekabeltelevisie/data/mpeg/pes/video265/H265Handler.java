@@ -54,7 +54,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> implements ImageSource{
 
 
-	private final int MAX_TYPES =64; // incl potential extensions
+	private static final int MAX_NAL_TYPES = 64; // incl potential extensions
 	
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
@@ -75,12 +75,12 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 	@Override
 	public BufferedImage getImage() {
 
-		final List<int[]> frameSize  = new ArrayList<int[]>();
-		final List<ChartLabel> labels = new ArrayList<ChartLabel>();
+		final List<int[]> frameSize  = new ArrayList<>();
+		final List<ChartLabel> labels = new ArrayList<>();
 
-		int[] accessUnitData = new int[MAX_TYPES]; 
+		int[] accessUnitData = new int[MAX_NAL_TYPES]; 
 		
-		boolean [] typeUsed  = new boolean[MAX_TYPES]; 
+		boolean [] typeUsed  = new boolean[MAX_NAL_TYPES]; 
 		
 		int count = 0;
 
@@ -89,14 +89,19 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 		while(unit!=null){
 			final RBSP rbsp = unit.getRbsp();
 			if(rbsp!=null){
-				if(( rbsp instanceof Access_unit_delimiter_rbsp) ||
+				
+				// Rec. ITU-T H.265 v8 (08/2021) 
+				// 7.4.2.4.4 Order of NAL units and coded pictures and their association to access units
+				
+				if(unit.getNuh_layer_id() == 0 &&
+						(( rbsp instanceof Access_unit_delimiter_rbsp) ||
 						( rbsp instanceof Seq_parameter_set_rbsp) ||
 						( rbsp instanceof Pic_parameter_set_rbsp) ||
 						( rbsp instanceof Video_parameter_set_rbsp) ||
-						( rbsp instanceof Sei_rbsp)){
+						( rbsp instanceof Sei_rbsp))){
 
 					count = drawBarAccessUnit(frameSize, labels, accessUnitData, count);
-					accessUnitData = new int[MAX_TYPES];
+					accessUnitData = new int[MAX_NAL_TYPES];
 				}else if( rbsp instanceof Slice_segment_layer_rbsp){
 					final int slice_type = unit.getNal_unit_type().getType();
 					final int size = unit.getNumBytesInRBSP();
@@ -112,22 +117,20 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 			unit =  nalIter.next();
 		}
 		// last unit is not followed by delimiter
-		count = drawBarAccessUnit(frameSize, labels, accessUnitData, count);
+		drawBarAccessUnit(frameSize, labels, accessUnitData, count);
 
 		final DefaultKeyedValues2DDataset dataset = new DefaultKeyedValues2DDataset();
 
 
-		for (int i = 0; i < MAX_TYPES; i++) {
+		for (int i = 0; i < MAX_NAL_TYPES; i++) {
 			NALUnitType nalType = NALUnitType.getByType(i);
-			if (nalType != null) {
-				if(typeUsed[i]) {
-					final String typeName = nalType.name();
-					final Iterator<int[]> frameSizeIter = frameSize.iterator();
-					for (final ChartLabel l : labels) {
-						if (frameSizeIter.hasNext()) {
-							final int[] v = frameSizeIter.next();
-							dataset.setValue(v[i], typeName, l);
-						}
+			if (nalType != null && typeUsed[i]) {
+				final String typeName = nalType.name();
+				final Iterator<int[]> frameSizeIter = frameSize.iterator();
+				for (final ChartLabel l : labels) {
+					if (frameSizeIter.hasNext()) {
+						final int[] v = frameSizeIter.next();
+						dataset.setValue(v[i], typeName, l);
 					}
 				}
 			}
@@ -138,13 +141,6 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 		renderer.setDrawBarOutline(false);
 		renderer.setItemMargin(0.0);
 
-//		renderer.setSeriesPaint(0, Color.BLUE); // p
-//		renderer.setSeriesPaint(1, Color.GREEN); // b
-//		renderer.setSeriesPaint(2, Color.RED); // i
-//		renderer.setSeriesPaint(3, Color.YELLOW); //SP
-//		renderer.setSeriesPaint(4, Color.PINK); //SI
-//		renderer.setSeriesPaint(5, Color.GRAY); // filler
-//
 		final CategoryAxis categoryAxis = new CategoryAxis("time");
 		categoryAxis.setCategoryMargin(0.0);
 		categoryAxis.setUpperMargin(0.0);
@@ -162,6 +158,7 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
 	 */
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.265 PES Data",this));
 		addListJTree(s,pesPackets,modus,"PES Packets");
