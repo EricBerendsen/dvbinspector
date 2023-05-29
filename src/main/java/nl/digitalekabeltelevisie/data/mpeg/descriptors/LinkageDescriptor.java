@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -554,6 +554,9 @@ public class LinkageDescriptor extends Descriptor {
 		case 0x0D : return "event linkage";
 
 		case 0x20 : return "downloadable font info linkage";
+		
+		// DVB BlueBook A038r16 – (April 2023)
+		case 0x21 : return "Native IP bootstrap MPE stream";
 		
 		case 0x81 : return "user defined: (linkage to NorDig bootloader)";
 		case 0x82 : return "user defined: (NorDig Simulcast replacement service/linkage to Ziggo software update)"; // or NorDig Simulcast replacement service.
