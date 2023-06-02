@@ -32,6 +32,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.LookUpList;
 
 /**
  * @author Eric
@@ -40,6 +41,24 @@ import nl.digitalekabeltelevisie.util.BitSource;
  *
  */
 public class ProfileTierLevel implements TreeNode {
+	
+	public static final LookUpList general_profile_idc_list = new LookUpList.Builder()
+			.add(1, "Main 10 profile")
+			.add(2, "Main 12 profile")
+			.add(10, "Main 12 Intra profile")
+			.add(17, "Multilayer Main 10 pr")
+			.add(33, "Main 10 4:4:4 profile")
+			.add(34, "Main 12 4:4:4 profile")
+			.add(35, "Main 16 4:4:4 profile")
+			.add(42, "Main 12 4:4:4 Intra profile")
+			.add(43, "Main 16 4:4:4 Intra profile")
+			.add(49, "Multilayer Main 10 4:4:4 profile")
+			.add(65, "Main 10 Still Picture profile")
+			.add(66, "Main 12 Still Picture profile")
+			.add(97, "Main 10 4:4:4 Still Picture profile")
+			.add(98, "Main 12 4:4:4 Still Picture profile")
+			.add(99, "Main 16 4:4:4 Still Picture profile")
+			.build();
 
 	final int profileTierPresentFlag;
 
@@ -113,7 +132,7 @@ public class ProfileTierLevel implements TreeNode {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Profile_tier_level(profileTierPresentFlag="+profileTierPresentFlag+", max_num_sub_layers_minus1="+max_num_sub_layers_minus1+")"));
 		if(profileTierPresentFlag==1)
 		{
-			t.add(new DefaultMutableTreeNode(new KVP("general_profile_space",general_profile_idc,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("general_profile_idc",general_profile_idc,general_profile_idc_list.get(general_profile_idc, "unknown/reserved"))));
 			t.add(new DefaultMutableTreeNode(new KVP("general_tier_flag",general_tier_flag,null)));
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("general_level_idc",general_level_idc,null)));

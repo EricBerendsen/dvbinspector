@@ -27,16 +27,18 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video266.ProfileTierLevel.general_profile_idc_list;
+import static nl.digitalekabeltelevisie.util.Utils.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
 import nl.digitalekabeltelevisie.util.Utils;
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
 *
@@ -165,7 +167,7 @@ public class VVCVideoDescriptor extends Descriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,null)));
+		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,general_profile_idc_list.get(profile_idc, "unknown/reserved"))));
 		t.add(new DefaultMutableTreeNode(new KVP("tier_flag",tier_flag,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("num_sub_profiles",num_sub_profiles,null)));
 		
@@ -187,7 +189,7 @@ public class VVCVideoDescriptor extends Descriptor {
 		t.add(new DefaultMutableTreeNode(new KVP("VVC_24hr_picture_present_flag",VVC_24hr_picture_present_flag,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 		
-		t.add(new DefaultMutableTreeNode(new KVP("HDR_WCG_idc",HDR_WCG_idc,getHDR_WCG_idcString(HDR_WCG_idc))));
+		t.add(new DefaultMutableTreeNode(new KVP("HDR_WCG_idc",HDR_WCG_idc,hdr_wgc_idc_list.get(HDR_WCG_idc))));
 		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("video_properties_tag",video_properties_tag,getVideoPropertiesTagString(HDR_WCG_idc, video_properties_tag))));
 		
@@ -219,15 +221,6 @@ public class VVCVideoDescriptor extends Descriptor {
 		
 		
 		};
-	}
-
-
-	/**
-	 * @param hDR_WCG_idc2
-	 * @return
-	 */
-	private String getHDR_WCG_idcString(int hdr_wgc_idc2) {
-		return hdr_wgc_idc_list.get(hdr_wgc_idc2);
 	}
 
 }

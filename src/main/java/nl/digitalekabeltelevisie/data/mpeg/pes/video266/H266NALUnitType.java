@@ -54,7 +54,7 @@ public enum H266NALUnitType {
 	GDR_NUT(10,"Coded slice of a GDR picture or subpicture",Slice_layer_rbsp.class),
 	RSV_IRAP_11(11,"Reserved IRAP VCL NAL unit type",null),
 	OPI_NUT(12,"Operating point information",null),
-	DCI_NUT(13,"Decoding capability information",null),
+	DCI_NUT(13,"Decoding capability information",Decoding_capability_information_rbsp.class),
 	VPS_NUT(14,"Video parameter set",null),
 	SPS_NUT(15,"Sequence parameter set",Seq_parameter_set_rbsp.class),
 	PPS_NUT(16,"Picture parameter set",Pic_parameter_set_rbsp.class),
