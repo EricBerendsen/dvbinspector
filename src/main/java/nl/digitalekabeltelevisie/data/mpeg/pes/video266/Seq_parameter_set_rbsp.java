@@ -28,14 +28,13 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
-import java.util.logging.Logger;
+
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
-import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Seq_parameter_set_rbsp extends RBSP {
@@ -362,7 +361,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	}
 
 	
-	private static final Logger	logger	= Logger.getLogger(Seq_parameter_set_rbsp.class.getName());
 
 	// based on 7.3.2.4 Sequence parameter set RBSP syntax Rec. ITU-T H.266 (04/2022)
 
@@ -380,8 +378,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private int sps_ref_pic_resampling_enabled_flag;
 
 	private ProfileTierLevel profile_tier_level;
-
-	private int sps_ref_pic_resampling_en;
 
 	private int sps_res_change_in_clvs_allowed_flag;
 
@@ -403,7 +399,8 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 	private int sps_num_subpics_minus1;
 
-	private int sps_independent_subpics_flag;
+	// When not present, the value of sps_independent_subpics_flag is inferred to be equal to 1.
+	private int sps_independent_subpics_flag = 1;
 
 	private int sps_subpic_same_size_flag;
 
@@ -490,8 +487,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	private int[][] sps_delta_qp_in_val_minus1;
 
 	private int[][] sps_delta_qp_diff_val;
-
-	private int bitsAvailable;
 
 	private int sps_sao_enabled_flag;
 
@@ -646,6 +641,10 @@ public class Seq_parameter_set_rbsp extends RBSP {
 
 	private VUIParameters vuiParameters;
 
+	private int tmpWidthVal;
+
+	private int tmpHeightVal;
+
 
 
 
@@ -657,6 +656,11 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		
 		sps_chroma_format_idc = bitSource.u(2);
 		sps_log2_ctu_size_minus5 = bitSource.u(2);
+		
+		// 7.4.3.4 Sequence parameter set RBSP semantics 
+		CtbLog2SizeY = sps_log2_ctu_size_minus5 + 5; //  (35)
+		CtbSizeY = 1 << CtbLog2SizeY ;  //(36
+		
 		sps_ptl_dpb_hrd_params_present_flag = bitSource.u(1);
 		if( sps_ptl_dpb_hrd_params_present_flag ==1) {
 			profile_tier_level = new ProfileTierLevel(1, sps_max_sublayers_minus1, bitSource);
@@ -680,44 +684,81 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		sps_subpic_info_present_flag = bitSource.u(1);
 		
 		if (sps_subpic_info_present_flag == 1) {
-			logger.info("sps_subpic_info_present_flag == 1 not implemented");
-//			sps_num_subpics_minus1 = bitSource.ue();
-//			if (sps_num_subpics_minus1 > 0) {
-//				sps_independent_subpics_flag = bitSource.u(1);
-//				sps_subpic_same_size_flag = bitSource.u(1);
-//			}
-//			for (int i = 0; sps_num_subpics_minus1 > 0 && i <= sps_num_subpics_minus1; i++) {
-//				if (sps_subpic_same_size_flag == 0 || i == 0) {
-//					int CtbSizeY = 0;
-//					if (i > 0 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
-//						sps_subpic_ctu_top_left_x[i] = bitSource.u(v);
-//					}
-//					if (i > 0 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
-//						sps_subpic_ctu_top_left_y[i] = bitSource.u(v);
-//					}
-//					if (i < sps_num_subpics_minus1 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
-//						sps_subpic_width_minus1[i] = bitSource.u(v);
-//					}
-//					if (i < sps_num_subpics_minus1 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
-//						sps_subpic_height_minus1[i] = bitSource.u(v);
-//					}
-//				}
-//				if (sps_independent_subpics_flag == 0) {
-//					sps_subpic_treated_as_pic_flag[i] = bitSource.u(1);
-//					sps_loop_filter_across_subpic_enabled_flag[i] = bitSource.u(1);
-//				}
-//			}
-//			sps_subpic_id_len_minus1 = bitSource.ue();
-//			sps_subpic_id_mapping_explicitly_signalled_flag = bitSource.u(1);
-//			if (sps_subpic_id_mapping_explicitly_signalled_flag == 1) {
-//				sps_subpic_id_mapping_present_flag = bitSource.u(1);
-//				if (sps_subpic_id_mapping_present_flag == 1) {
-//					for (int i = 0; i <= sps_num_subpics_minus1; i++) {
-//						sps_subpic_id[i] = bitSource.u(1);
-//					}
-//				}
-//			}
+			sps_num_subpics_minus1 = bitSource.ue();
+			if (sps_num_subpics_minus1 > 0) {
+				sps_independent_subpics_flag = bitSource.u(1);
+				sps_subpic_same_size_flag = bitSource.u(1);
+			}
+			
+			//
+			// Helpers
+			//
+			// Let the variable tmpWidthVal be set equal to ( sps_pic_width_max_in_luma_samples + CtbSizeY − 1 ) / CtbSizeY, 
+			// and the variable tmpHeightVal be set equal to ( sps_pic_height_max_in_luma_samples + CtbSizeY − 1 ) / CtbSizeY.
+			//
+			
+			
+			tmpWidthVal = ( sps_pic_width_max_in_luma_samples + CtbSizeY - 1 ) / CtbSizeY;
+			tmpHeightVal = ( sps_pic_height_max_in_luma_samples + CtbSizeY - 1 ) / CtbSizeY;
+			
+			
+			sps_subpic_ctu_top_left_x = new int[sps_num_subpics_minus1 + 1];
+			sps_subpic_ctu_top_left_y = new int[sps_num_subpics_minus1 + 1];
+			sps_subpic_width_minus1 = new int[sps_num_subpics_minus1 + 1];
+			sps_subpic_height_minus1 = new int[sps_num_subpics_minus1 + 1];
+			
+
+			sps_subpic_treated_as_pic_flag = new int[sps_num_subpics_minus1 + 1];
+			sps_loop_filter_across_subpic_enabled_flag = new int[sps_num_subpics_minus1 + 1];
+			
+			// 7.4.3.4 Sequence parameter set RBSP semantics 
+			CtbLog2SizeY = sps_log2_ctu_size_minus5 + 5; //  (35)
+			CtbSizeY = 1 << CtbLog2SizeY ;  //(36
+
+			
+			for (int i = 0; sps_num_subpics_minus1 > 0 && i <= sps_num_subpics_minus1; i++) {
+				if (sps_subpic_same_size_flag == 0 || i == 0) {
+					if (i > 0 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
+						
+						// The length of the syntax element is Ceil( Log2( tmpWidthVal ) ) bits.
+						int v = (int) Math.ceil( Math.log(tmpWidthVal)/ Math.log(2));
+						sps_subpic_ctu_top_left_x[i] = bitSource.u(v);
+					}
+					if (i > 0 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
+						// The length of the syntax element is Ceil( Log2( tmpHeightVal ) ) bits.
+						int v = (int) Math.ceil( Math.log(tmpHeightVal)/ Math.log(2));
+						sps_subpic_ctu_top_left_y[i] = bitSource.u(v);
+					}
+					if (i < sps_num_subpics_minus1 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
+						// The length of the syntax element is Ceil( Log2( tmpWidthVal ) ) bits.
+						int v = (int) Math.ceil( Math.log(tmpWidthVal)/ Math.log(2));
+						sps_subpic_width_minus1[i] = bitSource.u(v);
+					}
+					if (i < sps_num_subpics_minus1 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
+						// The length of the syntax element is Ceil( Log2( tmpHeightVal ) ) bits.
+						int v = (int) Math.ceil( Math.log(tmpHeightVal)/ Math.log(2));
+						sps_subpic_height_minus1[i] = bitSource.u(v);
+					}
+				}
+				if (sps_independent_subpics_flag == 0) {
+					sps_subpic_treated_as_pic_flag[i] = bitSource.u(1);
+					sps_loop_filter_across_subpic_enabled_flag[i] = bitSource.u(1);
+				}
+			}
+			sps_subpic_id_len_minus1 = bitSource.ue();
+			sps_subpic_id_mapping_explicitly_signalled_flag = bitSource.u(1);
+			if (sps_subpic_id_mapping_explicitly_signalled_flag == 1) {
+				sps_subpic_id_mapping_present_flag = bitSource.u(1);
+				if (sps_subpic_id_mapping_present_flag == 1) {
+					sps_subpic_id = new int[sps_num_subpics_minus1 + 1];
+					for (int i = 0; i <= sps_num_subpics_minus1; i++) {
+						sps_subpic_id[i] = bitSource.u(sps_subpic_id_len_minus1+1);
+					}
+				}
+			}
 		}
+		
+		
 		sps_bitdepth_minus8 = bitSource.ue();
 		sps_entropy_coding_sync_enabled_flag = bitSource.u(1);
 		sps_entry_point_offsets_present_flag = bitSource.u(1);
@@ -774,9 +815,6 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			sps_log2_diff_max_tt_min_qt_inter_slice = bitSource.ue();
 		}
 		
-		// 7.4.3.4 Sequence parameter set RBSP semantics 
-		CtbLog2SizeY = sps_log2_ctu_size_minus5 + 5; //  (35)
-		CtbSizeY = 1 << CtbLog2SizeY ;  //(36
 		
 		if (CtbSizeY > 32) {
 			sps_max_luma_transform_size_64_flag = bitSource.u(1);
@@ -1046,11 +1084,53 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			sps_conformance_window_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_conf_win_top_offset",sps_conf_win_top_offset,null)));
 			sps_conformance_window_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_conf_win_bottom_offset",sps_conf_win_bottom_offset,null)));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_subpic_info_present_flag",sps_subpic_info_present_flag,null)));
+		final DefaultMutableTreeNode sps_subpic_info_present_flag_node = new DefaultMutableTreeNode(new KVP("sps_subpic_info_present_flag",sps_subpic_info_present_flag,null));
+		t.add(sps_subpic_info_present_flag_node);
 
-		if( sps_subpic_info_present_flag ==1) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP(" sps_subpic_info_present_flag ==1")));
-			return t;
+		if (sps_subpic_info_present_flag == 1) {
+			
+			final DefaultMutableTreeNode sps_num_subpics_minus1_node = new DefaultMutableTreeNode(new KVP("sps_num_subpics_minus1",sps_num_subpics_minus1,null));
+			sps_subpic_info_present_flag_node.add(sps_num_subpics_minus1_node);
+
+			if (sps_num_subpics_minus1 > 0) {
+				sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_independent_subpics_flag",sps_independent_subpics_flag,null)));
+				sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_same_size_flag",sps_subpic_same_size_flag,null)));
+			}
+			
+
+			
+			for (int i = 0; sps_num_subpics_minus1 > 0 && i <= sps_num_subpics_minus1; i++) {
+				if (sps_subpic_same_size_flag == 0 || i == 0) {
+					if (i > 0 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
+						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_ctu_top_left_x["+i+"]",sps_subpic_ctu_top_left_x[i],null)));
+					}
+					if (i > 0 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
+						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_ctu_top_left_y["+i+"]",sps_subpic_ctu_top_left_y[i],null)));
+					}
+					if (i < sps_num_subpics_minus1 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
+						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_width_minus1["+i+"]",sps_subpic_width_minus1[i],null)));
+					}
+					if (i < sps_num_subpics_minus1 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
+						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_height_minus1["+i+"]",sps_subpic_height_minus1[i],null)));
+					}
+				}
+				if (sps_independent_subpics_flag == 0) {
+					sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_treated_as_pic_flag["+i+"]",sps_subpic_treated_as_pic_flag[i],null)));
+					sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_loop_filter_across_subpic_enabled_flag["+i+"]",sps_loop_filter_across_subpic_enabled_flag[i],null)));
+				}
+			}
+			sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_id_len_minus1",sps_subpic_id_len_minus1,null)));
+			final DefaultMutableTreeNode sps_subpic_id_mapping_explicitly_signalled_flag_node = new DefaultMutableTreeNode(new KVP("sps_subpic_id_mapping_explicitly_signalled_flag",sps_subpic_id_mapping_explicitly_signalled_flag,null));
+			sps_num_subpics_minus1_node.add(sps_subpic_id_mapping_explicitly_signalled_flag_node);
+			if (sps_subpic_id_mapping_explicitly_signalled_flag == 1) {
+				final DefaultMutableTreeNode sps_subpic_id_mapping_present_flag_node = new DefaultMutableTreeNode(new KVP("sps_subpic_id_mapping_present_flag",sps_subpic_id_mapping_present_flag,null));
+				sps_subpic_id_mapping_explicitly_signalled_flag_node.add(sps_subpic_id_mapping_present_flag_node);
+				if (sps_subpic_id_mapping_present_flag == 1) {
+					for (int i = 0; i <= sps_num_subpics_minus1; i++) {
+						sps_subpic_id_mapping_present_flag_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_id["+i+"]",sps_subpic_id[i],null)));
+					}
+				}
+			}
 		}
 		
 		
