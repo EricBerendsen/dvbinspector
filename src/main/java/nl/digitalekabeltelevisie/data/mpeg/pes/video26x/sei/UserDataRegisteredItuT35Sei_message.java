@@ -94,7 +94,6 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 				&& (Itu_t_t35_provider_code==0x3a)){
 			s.add(new DefaultMutableTreeNode(new KVP("SL-HDR data (Annex A of TS 103 433-1)")));
 			s.add(sl_hdr_info.getJTreeNode(modus));
-			System.out.println("TODO SL-HDR data found");
 		}
 		return s;
 	}
