@@ -127,7 +127,7 @@ public class VUIParameters implements TreeNode {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("vui_parameters( payloadSize"+payloadSize+")"));
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("vui_parameters(payloadSize:"+payloadSize+")"));
 		t.add(new DefaultMutableTreeNode(new KVP("vui_progressive_source_flag",vui_progressive_source_flag,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("vui_interlaced_source_flag",vui_interlaced_source_flag,getSourceFlagsDescription(vui_progressive_source_flag,vui_interlaced_source_flag))));
 		t.add(new DefaultMutableTreeNode(new KVP("vui_non_packed_constraint_flag",vui_non_packed_constraint_flag,null)));
