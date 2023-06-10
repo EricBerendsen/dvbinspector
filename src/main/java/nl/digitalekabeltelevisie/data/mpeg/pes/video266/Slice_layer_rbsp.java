@@ -35,57 +35,12 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
- * @author Eric
  *
  * Rec. ITU-T H.266 (04/2022) 7.3.2.14 Slice layer RBSP syntax
  */
 public class Slice_layer_rbsp extends RBSP {
 	
-	// 7.3.2.8 Picture header structure syntax
 	
-	private class PictureHeaderStructure implements TreeNode{
-
-		private int ph_gdr_or_irap_pic_flag;
-		private int ph_non_ref_pic_flag;
-		private int ph_gdr_pic_flag;
-		private int ph_inter_slice_allowed_flag;
-		private int ph_intra_slice_allowed_flag;
-		private int ph_pic_parameter_set_id;
-
-		public PictureHeaderStructure(BitSource bitSource) {
-			ph_gdr_or_irap_pic_flag = bitSource.u(1);
-			ph_non_ref_pic_flag = bitSource.u(1);
-
-			if (ph_gdr_or_irap_pic_flag != 0) {
-				ph_gdr_pic_flag = bitSource.u(1);
-			}
-			ph_inter_slice_allowed_flag = bitSource.u(1);
-			if (ph_inter_slice_allowed_flag != 0) {
-				ph_intra_slice_allowed_flag = bitSource.u(1);
-			}
-			ph_pic_parameter_set_id = bitSource.ue();
-		}
-
-		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("picture_header_structure"));
-			t.add(new DefaultMutableTreeNode(new KVP("ph_gdr_or_irap_pic_flag",ph_gdr_or_irap_pic_flag,ph_gdr_or_irap_pic_flag==1?"current picture is a GDR or IRAP picture":"current picture is not a GDR")));
-			t.add(new DefaultMutableTreeNode(new KVP("ph_non_ref_pic_flag",ph_non_ref_pic_flag,ph_non_ref_pic_flag == 1?"current picture is never used as a reference picture":"current picture might or might not be used as a reference picture")));
-			 
-			if (ph_gdr_or_irap_pic_flag != 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("ph_gdr_pic_flag",ph_gdr_pic_flag,ph_gdr_pic_flag == 1?"current picture is a GDR picture":"current picture is not a GDR picture")));
-			}
-			final DefaultMutableTreeNode ph_inter_slice_allowed_flag_node = new DefaultMutableTreeNode(new KVP("ph_inter_slice_allowed_flag",ph_inter_slice_allowed_flag,ph_inter_slice_allowed_flag == 0?"all coded slices of the picture have sh_slice_type equal to 2.":"there might or might not be one or more coded slices in the picture that have sh_slice_type equal to 0 or 1"));
-			t.add(ph_inter_slice_allowed_flag_node);
-			if (ph_inter_slice_allowed_flag != 0) {
-				ph_inter_slice_allowed_flag_node.add(new DefaultMutableTreeNode(new KVP("ph_intra_slice_allowed_flag",ph_intra_slice_allowed_flag,ph_intra_slice_allowed_flag == 0?"all coded slices of the picture have sh_slice_type equal to 0 or 1":"there might or might not be one or more coded slices in the picture that have sh_slice_type equal to 2")));
-			}
-			t.add(new DefaultMutableTreeNode(new KVP("ph_pic_parameter_set_id",ph_pic_parameter_set_id,null)));
-
-			return t;
-		}
-		
-	}
 
 	// 7.3.7 Slice header syntax
 	private class SliceHeader implements TreeNode{

@@ -60,7 +60,7 @@ public enum H266NALUnitType {
 	PPS_NUT(16,"Picture parameter set",Pic_parameter_set_rbsp.class),
 	PREFIX_APS_NUT(17,"Adaptation parameter set",Adaptation_parameter_set_rbsp.class),
 	SUFFIX_APS_NUT(18,"Adaptation parameter set",Adaptation_parameter_set_rbsp.class),
-	PH_NUT(19,"Picture header",null),
+	PH_NUT(19,"Picture header",Picture_header_rbsp.class),
 	AUD_NUT(20,"AU delimiter",null),
 	EOS_NUT(21,"End of sequence",null),
 	EOB_NUT(22,"End of bitstream",null),
