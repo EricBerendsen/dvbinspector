@@ -186,7 +186,7 @@ public final class Utils {
 	
 
 	private static void readCSVIdString(final String fileName, final RangeHashMap<Integer,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_16))){
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
 
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
@@ -209,7 +209,7 @@ public final class Utils {
 	}
 
 	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_16))){
+		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
