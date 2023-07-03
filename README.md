@@ -12,7 +12,7 @@ DVB inspector requires java 17 or higher.
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.17.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.18.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 ### Directory structure
 
@@ -28,9 +28,9 @@ Unzip DVBinspector-1.17.0-dist.zip to a directory of your choice. It will create
 
 ## Usage
 
-### DVBinspector-1.17.0.jar
+### DVBinspector-1.18.0.jar
 
-There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.17.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.16.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.16.0.jar".
+There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.18.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.18.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.18.0.jar".
 
 ### dvb.bat 
 
@@ -47,6 +47,16 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 ## Changelog
 
 List of the most important changes between releases.
+
+### Release 1.18.0
+Release date: 3/07/2023
+
+* added: support for h.266 (VVC) parsing
+* added: labels for Satellite Access Tables PID and table_id
+* added: VVCVideoDescriptor
+* added: table view for NIT with services per network
+* added: multiple detail views per node
+* updated: versions of DVB identifiers and OUI list (thanks to lebernie)
 
 ### Release 1.17.0
 Release date: 11/11/2022
