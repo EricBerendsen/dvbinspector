@@ -24,7 +24,7 @@ Unzip DVBinspector-1.18.0-dist.zip to a directory of your choice. It will create
 *    dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default.
 *    dvb.sh Bash script to start the program using Linux.
 *    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
-*    DVBinspector-1.16.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
+*    DVBinspector-1.18.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 ## Usage
 
