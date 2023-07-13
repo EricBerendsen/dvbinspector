@@ -100,9 +100,11 @@ public class SpliceInfoSection extends TableSection {
 		}
 
 		private String getPreRollTimeString() {
-			String preRollTime = "";
 			if (time_specified_flag == 1) {
 				PID parentPid = getParentPID();
+				if(parentPid == null) {
+					return "";
+				}
 				TransportStream ts = parentPid.getParentTransportStream();
 				PMTs pmts = ts.getPsi().getPmts();
 
@@ -115,11 +117,11 @@ public class SpliceInfoSection extends TableSection {
 					if (packetPcrTime != null) {
 						// ptsTime = 90 kHz clock
 						double preRollSecs = ((double) (getSpliceTimeAdjusted() - (packetPcrTime / 300))) / 90_000L;
-						preRollTime = String.format(" (preroll time = %3.3f secs)", preRollSecs);
+						return String.format(" (preroll time = %3.3f secs)", preRollSecs);
 					}
 				}
 			}
-			return preRollTime;
+			return "";
 		}
 
 		public int getTime_specified_flag() {

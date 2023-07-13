@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.DSMCCStreamEventPayloadBinary;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 /**
@@ -47,6 +48,8 @@ public class StreamEventDescriptor extends Descriptor {
 	private int reserved;
 	private long eventNPT;
 	private final byte[]  privateDataByte;
+	
+	private DSMCCStreamEventPayloadBinary dsm_cc_stream_event_payload_binary;
 
 	public StreamEventDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
@@ -54,6 +57,12 @@ public class StreamEventDescriptor extends Descriptor {
 		reserved = getInt(b, offset+4, 4, MASK_31BITS)>>1;
 		eventNPT = getLong(b, offset+7, 5, MASK_33BITS);
 		privateDataByte = getBytes(b,offset+12,descriptorLength-10);
+		try {
+			dsm_cc_stream_event_payload_binary = new DSMCCStreamEventPayloadBinary(privateDataByte);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 
 	}
 
@@ -64,6 +73,9 @@ public class StreamEventDescriptor extends Descriptor {
 		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("eventNPT",eventNPT ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("privateDataByte",privateDataByte ,null)));
+		if(dsm_cc_stream_event_payload_binary != null) {
+			t.add(dsm_cc_stream_event_payload_binary.getJTreeNode(modus));
+		}
 		return t;
 	}
 

@@ -82,6 +82,17 @@ public class PsiSectionData {
 		this.complete = src.complete;
 	}
 
+
+	public PsiSectionData(byte[] src) {
+		this.parentPID = null;
+		this.packet_no = -1;
+		this.transportStream = null;
+		this.data = src;
+		this.noBytes = src.length;
+		this.complete = true;
+		
+	}
+
 	public int readBytes(final byte [] payload, final int offset, final int len){
 		int available = len;
 

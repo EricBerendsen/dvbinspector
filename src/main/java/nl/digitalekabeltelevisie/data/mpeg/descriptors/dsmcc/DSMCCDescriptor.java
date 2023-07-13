@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -74,6 +74,7 @@ public class DSMCCDescriptor extends Descriptor {
 		case 0x0B: return "subgroup_association_descriptor"; // was "reserved for future use by DVB";
 		case 0x70: return "label_descriptor";		// MHP
 		case 0x71: return "caching_priority_descriptor";	// MHP
+		case 0x72: return "content_type_descriptor";	// ETSI TS 102 809 V1.3.1 (2017-06) B.2.3.4 Content type descriptor Table B.17:
 		default:
 
 			return "illegal descriptor tag value in DSM-CC";

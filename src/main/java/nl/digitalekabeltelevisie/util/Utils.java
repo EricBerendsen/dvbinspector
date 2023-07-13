@@ -542,10 +542,7 @@ public final class Utils {
 	 * @return
 	 */
 	public static byte[] getBytes(final byte[] b, final int offset, final int len) {
-		if(len==0){
-			return new byte[0];
-		}
-		return Utils.copyOfRange(b, offset, offset+len);
+		return Arrays.copyOfRange(b, offset, offset+len);
 	}
 
 
