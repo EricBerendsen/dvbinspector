@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,21 +28,29 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getBouquetIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getOriginalNetworkIDString;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.BouquetNameDescriptor;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class BAT extends AbstractPSITabel{
 
+	public static final String CANAL_INTERNATIONAL_CHANNEL_LIST_TABLE_LABEL = "Canal+ International Channel List";
+	public static final String TRANSPORT_STREAMS_TABLE_LABEL = "Transport Streams";
 	private final Map<Integer, BATsection []> networks = new HashMap<>();
 
 	public BAT(final PSI parent){
@@ -66,14 +74,18 @@ public class BAT extends AbstractPSITabel{
 
 		KVP kvpBat = new KVP("BAT");
 		if(!networks.isEmpty()) {
-			kvpBat.setTableSource(this::getTableModel);
+			kvpBat.addTableSource(this::getTableModel,TRANSPORT_STREAMS_TABLE_LABEL);
+			kvpBat.addTableSource(this::getCanalTableModel,CANAL_INTERNATIONAL_CHANNEL_LIST_TABLE_LABEL);
+			
+			
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvpBat);
 		for(int bouquetNo:new TreeSet<>(networks.keySet())) {
 
 			KVP kvp = new KVP("bouquet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
 			if(hasTransportStreams(bouquetNo)) {
-				kvp.setTableSource(()->getTableForBouqetID(bouquetNo));
+				kvp.addTableSource(()->getTableForBouqetID(bouquetNo),TRANSPORT_STREAMS_TABLE_LABEL);
+				kvp.addTableSource(()->getCanalTableForBouqetID(bouquetNo),CANAL_INTERNATIONAL_CHANNEL_LIST_TABLE_LABEL);
 			}
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			final BATsection [] sections = networks.get(bouquetNo);
@@ -95,6 +107,40 @@ public class BAT extends AbstractPSITabel{
 	}
 	
 	
+	private TableModel getCanalTableForBouqetID(int bouquetNo) {
+		FlexTableModel<BATsection, BAT.CanalChannel> tableModel = new FlexTableModel<>(
+				BAT.buildCanalIntBatTableHeader());
+		final BATsection [] sections = networks.get(bouquetNo);
+
+
+		for (final BATsection tsection : sections) {
+			if(tsection!= null){
+				tableModel.addData(tsection, tsection.getCanalChannelList());
+			}
+		}
+
+
+		tableModel.process();
+		return tableModel;
+	}
+
+
+	private TableModel getCanalTableModel() {
+		FlexTableModel<BATsection, BAT.CanalChannel> tableModel = new FlexTableModel<>(
+				BAT.buildCanalIntBatTableHeader());
+		for(BATsection[] batSections:networks.values()) {
+			for (final BATsection tsection : batSections) {
+				if(tsection!= null){
+					tableModel.addData(tsection, tsection.getCanalChannelList());
+				}
+			}
+		}
+
+
+		tableModel.process();
+		return tableModel;
+	}
+
 	static TableHeader<BATsection,TransportStream> buildBatTableHeader() {
 
 		return new TableHeaderBuilder<BATsection,TransportStream>().
@@ -119,6 +165,29 @@ public class BAT extends AbstractPSITabel{
 						String.class).
 			
 			build();
+	}
+	
+	public record CanalChannel(int ts_id, int onid, int service_id, int logical_channel_number, String service_name) {}
+
+	static TableHeader<BATsection,CanalChannel> buildCanalIntBatTableHeader() {
+
+		return new TableHeaderBuilder<BATsection,CanalChannel>().
+				addRequiredBaseColumn("bouquet id",b->b.getBouqetID(), Integer.class).
+				addRequiredBaseColumn("bouquet id name", b -> getBouquetIDString(b.getBouqetID()), String.class).
+				
+				addOptionalBaseColumn("bouquet name descriptor",
+						bat -> findDescriptorApplyFunc(bat.getNetworkDescriptorList(), 
+								BouquetNameDescriptor.class,  
+								bnd -> bnd.getBouquetName().toString()), 
+						String.class).
+
+				
+				addOptionalRowColumn("tsid", c -> c.ts_id() , Integer.class).
+				addOptionalRowColumn("onid", c -> c.onid() , Integer.class).
+				addOptionalRowColumn("service_id", c -> c.service_id() , Integer.class).
+				addOptionalRowColumn("logical_channel_number", c -> c.logical_channel_number(), Integer.class).
+				addOptionalRowColumn("service name", c -> c.service_name(), String.class).
+				build();
 	}
 
 	private boolean hasTransportStreams(int bouqetNo) {

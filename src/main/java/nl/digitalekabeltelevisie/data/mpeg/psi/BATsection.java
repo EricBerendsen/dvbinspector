@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,16 +27,23 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_12BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor.AbstractLogicalChannel;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
@@ -117,7 +124,10 @@ public class BATsection extends TableSectionExtendedSyntax{
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
 		if(!transportStreamList.isEmpty()) {
-			kvp.setTableSource(this::getTableModel);
+			kvp.addTableSource(this::getTableModel,BAT.TRANSPORT_STREAMS_TABLE_LABEL);
+			kvp.addTableSource(this::getCanalTableModel,BAT.CANAL_INTERNATIONAL_CHANNEL_LIST_TABLE_LABEL);
+			
+			
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_lengt", getNetworkDescriptorsLength(), null)));
 		Utils.addListJTree(t, networkDescriptorList, modus, "network_descriptors");
@@ -141,5 +151,34 @@ public class BATsection extends TableSectionExtendedSyntax{
 		return tableModel;
 	}
 
+	public TableModel getCanalTableModel() {
+		FlexTableModel<BATsection, BAT.CanalChannel> tableModel = new FlexTableModel<>(
+				BAT.buildCanalIntBatTableHeader());
+
+		List<BAT.CanalChannel> canalChannelList = getCanalChannelList();
+		tableModel.addData(this, canalChannelList);
+
+		tableModel.process();
+		return tableModel;
+	}
+
+	List<BAT.CanalChannel> getCanalChannelList() {
+		List<BAT.CanalChannel> canalChannelList = new ArrayList<>();
+
+		for (TransportStream transportStream : getTransportStreamList()) {
+			for (Descriptor descriptor : transportStream.descriptorList()) {
+				if (descriptor instanceof CosLogicalChannelDescriptor channelDescriptor) {
+					for (AbstractLogicalChannel channel : channelDescriptor.getChannelList()) {
+						canalChannelList.add(new BAT.CanalChannel(transportStream.transport_stream_id(),
+								transportStream.original_network_id(),
+								channel.getService_id(),
+								channel.getLogical_channel_number(),
+								channel.getServiceName()));
+					}
+				}
+			}
+		}
+		return canalChannelList;
+	}
 
 }
