@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -61,7 +61,7 @@ public class StreamEventDescriptor extends Descriptor {
 			dsm_cc_stream_event_payload_binary = new DSMCCStreamEventPayloadBinary(privateDataByte);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			// ignore
 		}
 
 	}
