@@ -89,13 +89,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.OperatorFastscan;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
-import nl.digitalekabeltelevisie.util.JTreeLazyList;
-import nl.digitalekabeltelevisie.util.OffsetHelper;
-import nl.digitalekabeltelevisie.util.PositionPushbackInputStream;
-import nl.digitalekabeltelevisie.util.PreferencesManager;
-import nl.digitalekabeltelevisie.util.ProgressMonitorLargeInputStream;
-import nl.digitalekabeltelevisie.util.TSPacketGetter;
-import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.*;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
@@ -245,7 +239,6 @@ public class TransportStream implements TreeNode{
 				logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
 	
 				if(usesPacketLength(possiblePacketLength, randomAccessFile)){
-					randomAccessFile.close();
 					logger.log(Level.INFO, "Found packetLength {0}",possiblePacketLength);
 					return possiblePacketLength;
 				}
@@ -332,8 +325,8 @@ public class TransportStream implements TreeNode{
 					if ((next != -1)) {
 						if (lastHandledSyncErrorPacket != no_packets) {
 							sync_errors++;
-							logger.severe("Did not find sync byte, resyncing at offset:" + offset + ", packet_no:"
-									+ no_packets);
+							logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
+									no_packets));
 							lastHandledSyncErrorPacket = no_packets;
 						}
 						fileStream.unread(next);
@@ -365,7 +358,7 @@ public class TransportStream implements TreeNode{
 		pids[pid].updatePacket(packet);
 		if(packet.isTransportErrorIndicator()){
 			error_packets++;
-			logger.warning("TransportErrorIndicator set for packet "+ packet);
+			logger.warning(String.format("TransportErrorIndicator set for packet %s", packet));
 		}
 	}
 
@@ -635,7 +628,7 @@ public class TransportStream implements TreeNode{
 		}
 		
 		// Tables like AIT, DSM-CC, UNT, INT< etc, are all referenced from at least one PMT, so have been given a label
-		// ALL??  no, there is an exception;
+		// However, there is an exception;
 		if(PreferencesManager.isEnableM7Fastscan()) {
 			labelM7FastscanTables();
 		}
@@ -778,8 +771,7 @@ public class TransportStream implements TreeNode{
 					generalPidHandler = new Smpte2038Handler();
 					break;
 				default:
-					logger.warning("no componenttype found for pid " + component.getElementaryPID()
-							+ ", part of service " + service_name);
+					logger.warning(String.format("no componenttype found for pid %d, part of service %s", component.getElementaryPID(), service_name));
 				}
 			}
 
@@ -1085,6 +1077,7 @@ public class TransportStream implements TreeNode{
 		return null;
 	}
 
+	// TODO handle FileNotFoundException more elegant, show some msg in GUI  
 	public TSPacket getTSPacket(final int packetNo){
 		TSPacket packet = null;
 		if(offsetHelper.getMaxPacket()>packetNo){
@@ -1094,7 +1087,7 @@ public class TransportStream implements TreeNode{
 				logger.warning("IOException:"+e);
 			}
 		}else{
-			logger.warning("offsetHelper.getMaxPacket() ("+offsetHelper.getMaxPacket()+") < packetNo ("+packetNo+")");
+			logger.warning(String.format("offsetHelper.getMaxPacket() (%d) < packetNo (%d)", offsetHelper.getMaxPacket(), packetNo));
 		}
 		return packet;
 	}
@@ -1110,7 +1103,7 @@ public class TransportStream implements TreeNode{
 			packet = new TSPacket(buf, packetNo,this);
 			packet.setPacketOffset(offset);
 		}else{
-			logger.warning("read less then packetLenghth ("+packetLength+") bytes, actual read: "+bytesRead);
+			logger.warning(String.format("read less then packetLenghth (%d) bytes, actual read: %d", packetLength, bytesRead));
 		}
 		return packet;
 	}

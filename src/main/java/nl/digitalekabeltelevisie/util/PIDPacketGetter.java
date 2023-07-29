@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -99,8 +99,8 @@ public class PIDPacketGetter implements LazyListItemGetter {
 		if(packetMapping==null){
 			buildPacketMapping();
 		}
-
-		return transportStream.getTSPacket(packetMapping[i]).getPacketNo();
+		
+		return packetMapping[i];
 	}
 	
 	@Override

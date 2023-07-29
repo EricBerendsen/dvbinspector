@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,14 +28,15 @@
 package nl.digitalekabeltelevisie.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Vector;
+
 
 import javax.swing.tree.MutableTreeNode;
 
 /**
  * Class for holding a (long) list of MutableTreeNode's, and loading them only when needed (Lazy evaluation)
- * Will group items by 100, and create a tree with as many levels as needed.
+ * Will group items by STEP_SIZE (100), and create a tree with as many levels as needed.
  *
  *
  *Example: a list of 239 items will look like this;
@@ -54,7 +55,7 @@ import javax.swing.tree.MutableTreeNode;
  * @author Eric
  *
  */
-public class JTreeLazyList{
+public class JTreeLazyList {
 
 
 	private static final int STEP_SIZE = 100;
@@ -65,9 +66,13 @@ public class JTreeLazyList{
 
 	public class RangeNode implements MutableTreeNode {
 
-		int level;
-		int start;
-		int end;
+		/**
+		 * level = 0 -> All children are leafs
+		 * level > 0, direct children are RangeNodes with new level = level - 1
+		 */
+		final int level;
+		final int start;
+		final int end;
 		private MutableTreeNode[] children=null;
 		
 		private MutableTreeNode parent;
@@ -100,20 +105,22 @@ public class JTreeLazyList{
 			b.append(label).append('[').
 				append(itemGetter.getActualNumberForIndex(start)).
 				append("..").
-				append(itemGetter.getActualNumberForIndex(end)).
+				append(itemGetter.getActualNumberForIndex(end - 1)).
 				append(']');
 			return b.toString();
 		}
 
-		private RangeNode createChild(int level, int currentStart, int index){
-			int start = currentStart+(ipower(STEP_SIZE,level)*index);
-			int end = (currentStart+(ipower(STEP_SIZE,level)*(index+1)))-1;
-			end = Math.min(itemGetter.getNoItems()-1, end);
-			return new RangeNode(level-1,start,end,this);
+		private RangeNode createChild(int level, int currentStart, int index) {
+			final int maxLeafsChild = ipower(STEP_SIZE, level);
+			int childStart = currentStart + (maxLeafsChild * index);
+			int childEnd = (currentStart + (maxLeafsChild * (index + 1)));
+			childEnd = Math.min(itemGetter.getNoItems(), childEnd);
+			return new RangeNode(level - 1, childStart, childEnd, this);
 		}
 
+		@Override
 		public MutableTreeNode getChildAt(int childIndex) {
-			if(level>0){
+			if (level > 0) {
 				RangeNode t = null;
 				
 				if (children == null) {
@@ -144,11 +151,12 @@ public class JTreeLazyList{
 		 */
 		@Override
 		public int getChildCount() {
-			if((start+ipower(STEP_SIZE, level+1))<=itemGetter.getNoItems() ){
+			final int maxLeafsCurrentNode = ipower(STEP_SIZE, level+1);
+			if ((start + maxLeafsCurrentNode) <= itemGetter.getNoItems()) {
 				return STEP_SIZE;
 			}
-			if(level==0){
-				return (end-start)+1;
+			if (level == 0) {
+				return end - start;
 			}
 			return divideRoundUp((end-start),ipower(STEP_SIZE,level));
 		}
@@ -188,15 +196,14 @@ public class JTreeLazyList{
 		/* (non-Javadoc)
 		 * @see javax.swing.tree.TreeNode#children()
 		 */
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public Enumeration children() {
+		public Enumeration<MutableTreeNode> children() {
 			// first preload all children
 			int childCount = getChildCount();
 			for(int t=0;t<childCount;t++){
 				getChildAt(t);
 			}
-			return new Vector(Arrays.asList(children)).elements();
+			return Collections.enumeration(Arrays.asList(children));
 		}
 
 		/* (non-Javadoc)
@@ -298,37 +305,38 @@ public class JTreeLazyList{
 	public RangeNode getJTreeNode(int modus, String label) {
 		if(mutableTreeNode==null){
 			int level = determineLevel(itemGetter.getNoItems());
-			mutableTreeNode = new RangeNode(level, 0, itemGetter.getNoItems()-1,label);
+			mutableTreeNode = new RangeNode(level, 0, itemGetter.getNoItems(),label);
 		}
 
 		return mutableTreeNode;
 	}
-
 
 	/**
 	 * @param noPackets2
 	 * @return
 	 */
 	private static int determineLevel(int noPackets2) {
-		int l=0;
-		while(ipower(STEP_SIZE,l+1)<noPackets2){
-			l++;
+		int level=0;
+		int upperBound = STEP_SIZE;
+		while(upperBound < noPackets2){
+			upperBound *= STEP_SIZE;
+			level++;
 		}
-		return l;
+		return level;
 	}
 
 
-	static int ipower(int base, int exp)
-	{
-	    int result = 1;
-	    while (exp>0){
-            result *= base;
-            exp--;
-	    }
-	    return result;
+	static int ipower(int base, int exponent) {
+		int exp = exponent;
+		int result = 1;
+		while (exp > 0) {
+			result *= base;
+			exp--;
+		}
+		return result;
 	}
 
 	public static int divideRoundUp(int num, int divisor) {
-	    return ((num + divisor) - 1) / divisor;
+		return ((num + divisor) - 1) / divisor;
 	}
 }
