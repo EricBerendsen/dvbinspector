@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,6 +30,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 	private int userInfoLength;
 
 	// DSI SSU
-	private final List<GroupInfo> groupInfoIndication = new ArrayList<DSMCC_UNMessageSection.GroupInfo>();
+	private final List<GroupInfo> groupInfoIndication = new ArrayList<>();
 
 
 	// DII
@@ -85,7 +86,7 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 	private long tCDownloadScenario;
 	private int numberOfModules;
 
-	private final List<ModuleInfo> modules = new ArrayList<DSMCC_UNMessageSection.ModuleInfo>();
+	private final List<ModuleInfo> modules = new ArrayList<>();
 
 
 
@@ -341,13 +342,13 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		final int messageLength = Utils.getInt(raw_data.getData(), 18, 2, Utils.MASK_16BITS);
 		header = new DSMCCMessageHeader(protocolDiscriminator, dsmccType, messageId, transactionId, reserved, adaptationLength, messageLength);
 		if(messageId==0x1006){ // DSI
-			serverId=Utils.copyOfRange(raw_data.getData(), 20, 40); // should be FF
+			serverId=copyOfRange(raw_data.getData(), 20, 40); // should be FF
 
 			compatibilityDescriptor = new CompatibilityDescriptor(raw_data.getData(), 40);
 			int offs=42 + compatibilityDescriptor.getCompatibilityDescriptorLength();
 			privateDataLength = Utils.getInt(raw_data.getData(), offs, 2, Utils.MASK_16BITS);
 			offs +=2;
-			privateDataByte =Utils.copyOfRange(raw_data.getData(), offs, offs+privateDataLength);
+			privateDataByte =copyOfRange(raw_data.getData(), offs, offs+privateDataLength);
 			if(isObjectCarousel){
 				// create ServiceGatewayInfo from privateDataByte
 				serviceGatewayIOR = new IOR(privateDataByte,0);
@@ -496,9 +497,8 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		default:
 			if((dsmccType>=0x80)&&(dsmccType<=0xff)){
 				return "User Defined message type";
-			}else {
-				return "reserved";
 			}
+			return "reserved";
 
 		}
 	}

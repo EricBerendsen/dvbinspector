@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -193,9 +193,8 @@ public class DSMCC extends AbstractPSITabel{
 		}
 		if(res!=null){
 			return res[0];
-		}else{
-			return null;
 		}
+		return null;
 	}
 
 	public DSMCC_UNMessageSection getDII(final int transactionID){
@@ -207,9 +206,8 @@ public class DSMCC extends AbstractPSITabel{
 		}
 		if(res!=null){
 			return res[0];
-		}else{
-			return null;
 		}
+		return null;
 	}
 
 	public DSMCC_DownLoadDataMessageSection [] getDDM(final int modId){
