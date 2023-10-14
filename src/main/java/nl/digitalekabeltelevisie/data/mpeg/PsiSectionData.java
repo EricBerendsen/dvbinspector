@@ -426,7 +426,7 @@ public class PsiSectionData {
 						// assume there is only one (should be!)
 						final DataBroadcastIDDescriptor dataBroadcastIDDescriptor = data_broadcast_id_descriptors.get(0);
 						// is the dataBroadcastId in this descriptor in the list of id that represent object carousels?
-						if(Arrays.binarySearch(DataBroadcastIDDescriptor.OBJECT_CAROUSEL_BROADCASTID, dataBroadcastIDDescriptor.getDataBroadcastId())>=0){
+						if(DataBroadcastIDDescriptor.BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(dataBroadcastIDDescriptor.getDataBroadcastId())){
 							return true;
 						}
 					}

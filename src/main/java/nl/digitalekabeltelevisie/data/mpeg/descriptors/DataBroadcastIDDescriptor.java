@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -52,14 +53,14 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	/**
 	 * broadcast IDs that will be interpreted as indicating an object carousel.
 	 */
-	public static final int[] OBJECT_CAROUSEL_BROADCASTID={
-		0x0007, // DVB object carousel
-		0x00f0,	//MHP Object
-		0x0106,	//MHEG5(The Digital Network)
-		0x0123,	//HBBTV Carousel
-		0x0150, //OIPF Object Carousel
-		0xBBB2	//BBG Object Carousel
-	};
+	public static Set<Integer> BROADCASTIDS_WITH_OBJECT_CAROUSEL = Set.of(
+			0x0007, // DVB object carousel
+			0x00f0,	// MHP Object
+			0x0106,	// MHEG5(The Digital Network)
+			0x0123,	// HBBTV Carousel
+			0x0150, // OIPF Object Carousel
+			0xBBB2	// BBG Object Carousel
+	);
 
 	public static class Platform implements TreeNode{
 		/**

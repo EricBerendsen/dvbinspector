@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -109,6 +109,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 		}
 
 
+		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("component ("+Utils.getStreamTypeString(streamtype)+")"));
@@ -201,7 +202,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this::getTableModel);
+		kvp.addTableSource(this::getTableModel,"Components");
 
 		t.add(new DefaultMutableTreeNode(new KVP("PMT_PID",getParentPID().getPid(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("PCR_PID",pcrPid,null)));
@@ -224,5 +225,15 @@ public class PMTsection extends TableSectionExtendedSyntax{
 
 		tableModel.process();
 		return tableModel;
+	}
+
+
+	public boolean hasComponentWithPid(int pid) {
+		for(Component component:componentsList) {
+			if(component.getElementaryPID()==pid) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

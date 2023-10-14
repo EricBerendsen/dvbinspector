@@ -53,8 +53,8 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  */
 public class ExportTree {
 
-	public static String tsDir = "H:\\ts";
-	public static String exportDir = "H:\\export";
+	public static String tsDir = "I:\\regressiontests";
+	public static String exportDir = "I:\\regresssionexportrefactoreddsmcc20231014";
 	static Path baseDirPath = Paths.get(tsDir);
 	static Path exportDirPath = Paths.get(exportDir);
 	static File logFile = new File(exportDir, "log.txt");
@@ -65,7 +65,7 @@ public class ExportTree {
 		
 		log = new PrintWriter(logFile);
 		
-		PreferencesManager.setEnableDSMCC(false);
+		PreferencesManager.setEnableDSMCC(true);
 		PreferencesManager.setEnableGenericPSI(false);
 		PreferencesManager.setEnablePcrPtsView(false);
 	

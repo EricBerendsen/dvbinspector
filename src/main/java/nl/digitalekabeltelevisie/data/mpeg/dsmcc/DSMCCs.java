@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -49,6 +49,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 public class DSMCCs extends AbstractPSITabel{
+	
+	private enum DataType {UNKNOW, SSU, OBJECT_CAROUSEL, OTHER}
 
 	private static final Logger logger = Logger.getLogger(DSMCCs.class.getName());
 
@@ -80,101 +82,54 @@ public class DSMCCs extends AbstractPSITabel{
 
 		final int pid = section.getParentPID().getPid();
 
-		//check if this PID is referenced in a PMT which contains a broadcastID descriptor for one of its componenets that has a caroussel.
-		// does not mean this PID has to be the component with the broadcastIDdescriptor
+		DataType dataType = determineDataTypeFromPSI(pid);
 
-		boolean isPartOfObjectCarousel = false;
-		boolean isSSU = false;
-		for(final PMTsection[] pmtTable:pmts){
-			final PMTsection pmt=pmtTable[0];
-			// get carouselId from main loop
-			// should be there according to ETSI TR 101 202 V1.2.1 P.29
-			final List<Component> comps = pmt.getComponentenList();
-
-			for(final Component c2:comps){
-				if(c2.getElementaryPID()==pid){
-					// this pid belongs to this service, now iterate over all components again to see if any of them has a valid DataBroadcastIDDescriptor
-					for(final Component c1:comps){
-						final List<DataBroadcastIDDescriptor> dataBroadcastIdDescriptorsList = Descriptor.findGenericDescriptorsInList(c1.getComponentDescriptorList(), DataBroadcastIDDescriptor.class); //AssociationTagDescriptor
-						if(dataBroadcastIdDescriptorsList.size()>0){
-							// get the type, like HbbTV, MHP, etc..
-							final DataBroadcastIDDescriptor dataBroadcastIDDescriptor= dataBroadcastIdDescriptorsList.get(0);
-							final int dataBroadCastId = dataBroadcastIDDescriptor.getDataBroadcastId();
-							if(Arrays.binarySearch(DataBroadcastIDDescriptor.OBJECT_CAROUSEL_BROADCASTID, dataBroadCastId)>=0){
-								isPartOfObjectCarousel= true;
-							}else if(dataBroadCastId==0xa){
-								// SSU now see if there is a standard update carousel, or one with UNT
-								final List<OUIEntry> ouiList = dataBroadcastIDDescriptor.getOuiList();
-								for(final OUIEntry entry:ouiList){
-									if ((entry.getUpdateType() == 0x01) || (entry.getUpdateType() == 0x02)) {
-										isSSU = true;
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if(!(isPartOfObjectCarousel||isSSU)){
-			// NOT supported
-			logger.warning("Not supported type; isPartOfObjectCarousel:"+isPartOfObjectCarousel+", isSSU:"+isSSU+", pid:"+pid);
+		if(dataType.equals(DataType.UNKNOW)){
+			logger.warning("Not supported type; pid:"+pid);
 			return;
 		}
 
 		// just store on PID, referenced or not, both SSU and objectCarousel
-		DSMCC  dsmcc= dsmccs.get(pid);
-		if(dsmcc==null){
-			dsmcc = new DSMCC(parentPSI,isPartOfObjectCarousel);
-			dsmccs.put(pid, dsmcc);
-		}
+		DSMCC dsmcc= dsmccs.computeIfAbsent(pid, k ->  new DSMCC(parentPSI,dataType.equals(DataType.OBJECT_CAROUSEL)));
 		// TODO does not work for SSU
 		dsmcc.update(section);
 
-		if(isPartOfObjectCarousel){
+		if(dataType.equals(DataType.OBJECT_CAROUSEL)){
 			// object Carousels only, now find the carousels for which it is used,
 			for(final PMTsection[] pmtTable:pmts){
 				final PMTsection pmt=pmtTable[0];
 				// get carouselId from main loop
 				// should be there according to ETSI TR 101 202 V1.2.1 P.29
 				// in real life never found...
-				final List<CarouselIdentifierDescriptor> cidList = Descriptor.findGenericDescriptorsInList(pmt.getDescriptorList(),CarouselIdentifierDescriptor.class); //CarouselIdentifierDescriptor
-				if(cidList.size()>0){// should be only one
-					cidList.get(0);
-				}
-				final List<Component> comps = pmt.getComponentenList();
+				final List<Component> componentsList = pmt.getComponentenList();
 
-				for(final Component c:comps){
-					if(c.getElementaryPID()==pid){
-						ServiceDSMCC carousel = objectCarousels.get(pmt.getProgramNumber());
-						if(carousel==null){
-							carousel = new ServiceDSMCC(pmt.getProgramNumber());
-							objectCarousels.put(pmt.getProgramNumber(), carousel);
-						}
+				for(final Component component:componentsList){
+					if(component.getElementaryPID()==pid){
+						int programNumber = pmt.getProgramNumber();
+						ServiceDSMCC carousel = objectCarousels.computeIfAbsent(programNumber, k ->  new ServiceDSMCC(programNumber));
 						int associationTag = -1;
 						// now find assoctiation_tag
-						final List<AssociationTagDescriptor> associationDescriptorsList = Descriptor.findGenericDescriptorsInList(c.getComponentDescriptorList(), AssociationTagDescriptor.class); //AssociationTagDescriptor
-						if(associationDescriptorsList.size()>0){
+						List<Descriptor> componentDescriptorList = component.getComponentDescriptorList();
+						final List<AssociationTagDescriptor> associationDescriptorsList = Descriptor.findGenericDescriptorsInList(componentDescriptorList, AssociationTagDescriptor.class); //AssociationTagDescriptor
+						if(!associationDescriptorsList.isEmpty()){
 							associationTag = associationDescriptorsList.get(0).getAssociationTag();
 						}else{ // fall back to Descriptor: stream_identifier_descriptor: 0x52 (82)
-							final List<StreamIdentifierDescriptor> streamidentifierDescriptorsList = Descriptor.findGenericDescriptorsInList(c.getComponentDescriptorList(), StreamIdentifierDescriptor.class); //AssociationTagDescriptor
-							if(streamidentifierDescriptorsList.size()>0){
+							final List<StreamIdentifierDescriptor> streamidentifierDescriptorsList = Descriptor.findGenericDescriptorsInList(componentDescriptorList, StreamIdentifierDescriptor.class); //AssociationTagDescriptor
+							if(!streamidentifierDescriptorsList.isEmpty()){
 								associationTag = streamidentifierDescriptorsList.get(0).getComponentTag();
 							}
 						}
 						if(associationTag>=0){
 							carousel.addDSMCC(associationTag, dsmcc);
 							//find if this is a boot-PID
-							final List<DataBroadcastIDDescriptor> dataBroadcastIdDescriptorsList = Descriptor.findGenericDescriptorsInList(c.getComponentDescriptorList(),DataBroadcastIDDescriptor.class); //AssociationTagDescriptor
-							if(dataBroadcastIdDescriptorsList.size()>0){
+							final List<DataBroadcastIDDescriptor> dataBroadcastIdDescriptorsList = Descriptor.findGenericDescriptorsInList(componentDescriptorList,DataBroadcastIDDescriptor.class); //AssociationTagDescriptor
+							if(!dataBroadcastIdDescriptorsList.isEmpty()){
 								// get the type
 								final int dataBroadCastId = dataBroadcastIdDescriptorsList.get(0).getDataBroadcastId();
 								carousel.addBootPID(associationTag,dataBroadCastId);
-								// if there is a carousel_identifier_descriptor for this PID, store it. We mayneed it for bootstrapping if there is no DSI
-								final List<CarouselIdentifierDescriptor> carouselIdentifierDescriptorsList = Descriptor.findGenericDescriptorsInList(c.getComponentDescriptorList(),CarouselIdentifierDescriptor.class); //CarouselIdentifierDescriptor
-								if(carouselIdentifierDescriptorsList.size()>0){
+								// if there is a carousel_identifier_descriptor for this PID, store it. We may need it for bootstrapping if there is no DSI
+								final List<CarouselIdentifierDescriptor> carouselIdentifierDescriptorsList = Descriptor.findGenericDescriptorsInList(componentDescriptorList,CarouselIdentifierDescriptor.class); //CarouselIdentifierDescriptor
+								if(!carouselIdentifierDescriptorsList.isEmpty()){
 									final CarouselIdentifierDescriptor carouselIdentifierDescriptor =  carouselIdentifierDescriptorsList.get(0); // A single PID shall only contain messages from a single object carousel and so only one carousel_identifier_descriptor shall be present in any second descriptor loop.  B.2.8 Mounting an object carousel DVB Document A137
 									carousel.setCarouselIdentifierDescriptor(associationTag,carouselIdentifierDescriptor);
 								}
@@ -187,6 +142,43 @@ public class DSMCCs extends AbstractPSITabel{
 		}
 	}
 
+	private DataType determineDataTypeFromPSI(final int pid) {
+		//check if this PID is referenced in a PMT which contains a broadcastID descriptor for one of its componenets that has a caroussel.
+		// does not mean this PID has to be the component with the broadcastIDdescriptor
+
+	
+		for(final PMTsection[] pmtTable:pmts){
+			final PMTsection pmt=pmtTable[0];
+			// get carouselId from main loop
+			// should be there according to ETSI TR 101 202 V1.2.1 P.29
+			if(pmt.hasComponentWithPid(pid)){
+				// this pid belongs to this service, now iterate over all components again to see if any of them has a valid DataBroadcastIDDescriptor
+				final List<Component> comps = pmt.getComponentenList();
+				for(final Component c1:comps){
+					final List<DataBroadcastIDDescriptor> dataBroadcastIdDescriptorsList = Descriptor.findGenericDescriptorsInList(c1.getComponentDescriptorList(), DataBroadcastIDDescriptor.class); //AssociationTagDescriptor
+					if(!dataBroadcastIdDescriptorsList.isEmpty()){
+						// get the type, like HbbTV, MHP, etc..
+						final DataBroadcastIDDescriptor dataBroadcastIDDescriptor= dataBroadcastIdDescriptorsList.get(0);
+						if(DataBroadcastIDDescriptor.BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(dataBroadcastIDDescriptor.getDataBroadcastId())){
+							return DataType.OBJECT_CAROUSEL;
+						}
+						if(dataBroadcastIDDescriptor.getDataBroadcastId()==0xa){
+							// SSU now see if there is a standard update carousel, or one with UNT
+							final List<OUIEntry> ouiList = dataBroadcastIDDescriptor.getOuiList();
+							for(final OUIEntry entry:ouiList){
+								if ((entry.getUpdateType() == 0x01) || (entry.getUpdateType() == 0x02)) {
+									return DataType.SSU;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return DataType.UNKNOW;
+	}
+
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		
