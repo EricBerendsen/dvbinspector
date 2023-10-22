@@ -70,7 +70,8 @@ public class ImagePanel extends JPanel implements ImageSource{
 		 * @see javax.swing.JComponent#paint(java.awt.Graphics)
 		 */
 		@Override
-		public void paint(Graphics g) {
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
 			Graphics2D gd2 = (Graphics2D) g;
 			final AffineTransform originalTransform = gd2.getTransform();
 			
