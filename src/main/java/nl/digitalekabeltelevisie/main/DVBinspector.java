@@ -230,13 +230,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @param tStream Transport stream (can be <code>null</code>)
 	 */
 	private void createAndShowGUI(final TransportStream tStream) {
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (final Exception e)
-		{
-			LOGGER.warning("Couldn't use system look and feel. Exception:"+e.getMessage());
-		}
+
 		
 		int modus = PreferencesManager.getDefaultViewModus();
 
