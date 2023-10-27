@@ -53,7 +53,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	/**
 	 * broadcast IDs that will be interpreted as indicating an object carousel.
 	 */
-	public static Set<Integer> BROADCASTIDS_WITH_OBJECT_CAROUSEL = Set.of(
+	private static Set<Integer> BROADCASTIDS_WITH_OBJECT_CAROUSEL = Set.of(
 			0x0007, // DVB object carousel
 			0x00f0,	// MHP Object
 			0x0106,	// MHEG5(The Digital Network)
@@ -340,113 +340,69 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	}
 
 
+	public boolean describesObjectCarousel() {
+		return BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(getDataBroadcastId());
+	}
 
-
-
-
+	public boolean describesSSU() {
+		if(getDataBroadcastId()==0xa){
+			// SSU now see if there is a standard update carousel, or one with UNT
+			for(final OUIEntry entry:ouiList){
+				if ((entry.getUpdateType() == 0x01) || (entry.getUpdateType() == 0x02)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public int getAlignment_indicator() {
 		return alignment_indicator;
 	}
-
-
-
-
-
 
 	public List<ApplicationType> getApplicationTypeList() {
 		return applicationTypeList;
 	}
 
-
-
-
-
-
 	public int getDataBroadcastId() {
 		return dataBroadcastId;
 	}
-
-
-
-
-
 
 	public int getMAC_address_range() {
 		return MAC_address_range;
 	}
 
-
-
-
-
-
 	public int getMAC_IP_mapping_flag() {
 		return MAC_IP_mapping_flag;
 	}
-
-
-
-
-
 
 	public int getMax_sections_per_datagram() {
 		return max_sections_per_datagram;
 	}
 
-
-
-
-
-
 	public int getOUI_data_length() {
 		return OUI_data_length;
 	}
-
-
-
-
-
 
 	public List<OUIEntry> getOuiList() {
 		return ouiList;
 	}
 
-
-
-
-
-
 	public int getPlatform_id_data_length() {
 		return platform_id_data_length;
 	}
-
-
-
-
-
 
 	public List<Platform> getPlatformList() {
 		return platformList;
 	}
 
-
-
-
-
-
 	public byte[] getPrivateDataByte() {
 		return privateDataByte;
 	}
 
-
-
-
-
-
 	public byte[] getSelectorByte() {
 		return selectorByte;
 	}
-
 
 	public static String getMHEG5ApplicationTypeString(final int appType) {
 

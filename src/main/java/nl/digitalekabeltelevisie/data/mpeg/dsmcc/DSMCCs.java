@@ -38,7 +38,7 @@ import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.AssociationTagDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.CarouselIdentifierDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
+
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.StreamIdentifierDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
@@ -159,17 +159,11 @@ public class DSMCCs extends AbstractPSITabel{
 					if(!dataBroadcastIdDescriptorsList.isEmpty()){
 						// get the type, like HbbTV, MHP, etc..
 						final DataBroadcastIDDescriptor dataBroadcastIDDescriptor= dataBroadcastIdDescriptorsList.get(0);
-						if(DataBroadcastIDDescriptor.BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(dataBroadcastIDDescriptor.getDataBroadcastId())){
+						if(dataBroadcastIDDescriptor.describesObjectCarousel()){
 							return DataType.OBJECT_CAROUSEL;
 						}
-						if(dataBroadcastIDDescriptor.getDataBroadcastId()==0xa){
-							// SSU now see if there is a standard update carousel, or one with UNT
-							final List<OUIEntry> ouiList = dataBroadcastIDDescriptor.getOuiList();
-							for(final OUIEntry entry:ouiList){
-								if ((entry.getUpdateType() == 0x01) || (entry.getUpdateType() == 0x02)) {
-									return DataType.SSU;
-								}
-							}
+						if(dataBroadcastIDDescriptor.describesSSU()){
+							return DataType.SSU;
 						}
 					}
 				}

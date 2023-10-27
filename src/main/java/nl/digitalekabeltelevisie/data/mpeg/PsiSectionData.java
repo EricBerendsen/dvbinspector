@@ -396,46 +396,6 @@ public class PsiSectionData {
 		return false;
 	}
 
-	/**
-	 *
-	 *  is this PID a candidate to contain a DSM-CC
-	 *  the tabletype is already checked by caller  table_id: > =0x38 && <=0x3F =>
-	 *  now look through all PMTs looking for a component that refers to this pid and has a Descriptor: Data_broadcast_id: 0x66 (102)
-	 *
-	 *  // TODO also check data_broadcast_id == 0x06 (data carousel) Not implemented yet
-	 *  now check for  0x07 (object carousel)
-	 *  following are also object carousels
-	 *  0x00f0	MHP Object
-	 *  0x0106	MHEG5(The Digital Network)
-	 *  0x0123	HBBTV Carousel
-	 *  0x0150 	OIPF Object Carousel
-	 *  0xBBB2 	BBG Object Caroussel
-
-	 * @param pid
-	 * @return true if this PID contains the DSM-CC
-	 */
-	public boolean isDSMSection(final int pid){
-		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
-
-		for (final PMTsection[] pmt : pmtList.values()){
-			final PMTsection p=pmt[0]; // PMT always one section
-			for(final Component component : p.getComponentenList() ){
-				if(component.getElementaryPID()==pid){
-					final List<DataBroadcastIDDescriptor> data_broadcast_id_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), DataBroadcastIDDescriptor.class);
-					if(!data_broadcast_id_descriptors.isEmpty()){
-						// assume there is only one (should be!)
-						final DataBroadcastIDDescriptor dataBroadcastIDDescriptor = data_broadcast_id_descriptors.get(0);
-						// is the dataBroadcastId in this descriptor in the list of id that represent object carousels?
-						if(DataBroadcastIDDescriptor.BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(dataBroadcastIDDescriptor.getDataBroadcastId())){
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}
-
 	public void setPacket_no(final int packet_no) {
 		this.packet_no = packet_no;
 	}
@@ -443,8 +403,6 @@ public class PsiSectionData {
 	public int getPid() {
 		return parentPID.getPid();
 	}
-
-
 
 	public byte[] getData() {
 		return data;
@@ -473,6 +431,7 @@ public class PsiSectionData {
 	public int getTableIdExtension(){
 		return getInt(data,3,2,MASK_16BITS);
 	}
+	
 	public int getSectionNumber(){
 		return getInt(data,6,1,MASK_8BITS);
 	}
