@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,7 +32,6 @@ import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.system_clock_fre
 import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -121,7 +120,6 @@ public class PID implements TreeNode{
 
 	private final LabelMaker labelMaker = new LabelMaker();
 
-	private static final Formatter formatter = new Formatter();
 	
 	/**
 	 *
@@ -616,11 +614,11 @@ public class PID implements TreeNode{
 		return psi;
 	}
 
-	private String getRepetitionRate(final long count,final long last, final long  first) {
-		final long bitrate=getParentTransportStream().getBitRate();
-		if((bitrate>0)&&(count>=2)){
-			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
-			return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+	private String getRepetitionRate(final long count, final long last, final long first) {
+		final long bitrate = getParentTransportStream().getBitRate();
+		if ((bitrate > 0) && (count >= 2)) {
+			final float repRate = ((float) (last - first) * parentTransportStream.getPacketLenghth() * 8) / ((count - 1) * bitrate);
+			return "repetition rate: " + String.format("%3.3f seconds", repRate);
 		}
 		return null;
 	}

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import java.util.Formatter;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -448,26 +446,22 @@ public class TableSection implements TreeNode{
 	/**
 	 * @return
 	 */
-	private String getRepetitionRate(final int count,final int last, final int  first) {
+	private String getRepetitionRate(final int count, final int last, final int first) {
 		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
-		final long bitrate=parentTransportStream.getBitRate();
-		if((bitrate>0)&&(count>=2)){
-			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
-			try (Formatter formatter = new Formatter()){
-				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
-			}
+		final long bitrate = parentTransportStream.getBitRate();
+		if ((bitrate > 0) && (count >= 2)) {
+			final float repRate = ((float) (last - first) * parentTransportStream.getPacketLenghth() * 8) / ((count - 1) * bitrate);
+			return "repetition rate: " + String.format("%3.3f seconds", repRate);
 		}
 		return null;
 	}
 
 	private String getDistanceSecs(final long last) {
 		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
-		final long bitrate=parentTransportStream.getBitRate();
-		if(bitrate>0){
-			final float repRate=((float)(last)*parentTransportStream.getPacketLenghth()*8)/(bitrate);
-			try (Formatter formatter = new Formatter()){
-				return "interval: "+formatter.format("%3.3f seconds",repRate);
-			}
+		final long bitrate = parentTransportStream.getBitRate();
+		if (bitrate > 0) {
+			final float repRate = ((float) (last) * parentTransportStream.getPacketLenghth() * 8) / (bitrate);
+			return "interval: " + String.format("%3.3f seconds", repRate);
 		}
 		return null;
 	}
