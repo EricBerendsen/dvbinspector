@@ -1044,20 +1044,18 @@ public class TransportStream implements TreeNode{
 		String r = null;
 
 		if(getBitRate()!=-1){ //can't calculate time  without a bitrate
+			Calendar now;
 			if(zeroTime==null){
-				final Calendar now=new GregorianCalendar();
+				now = new GregorianCalendar();
 				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
-				// return only the hours/min,secs and millisecs. Not TS recording will last days
-				r = now.get(Calendar.HOUR_OF_DAY)+"h"+now.get(Calendar.MINUTE)+"m"+now.get(Calendar.SECOND)+":"+now.get(Calendar.MILLISECOND);
-
 			}else{
-				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
-
-				r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
+				now = (Calendar)zeroTime.clone();
 			}
+			now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
+			// return only the hours/min,secs and millisecs. Not TS recording will last days
+			r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
+
 		}else{ // no bitrate
 			r = packetNo +" (packetNo)";
 		}
