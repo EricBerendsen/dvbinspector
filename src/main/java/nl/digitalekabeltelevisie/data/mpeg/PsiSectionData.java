@@ -150,45 +150,48 @@ public class PsiSectionData {
 	 */
 	private void updatePSI(final int pid) {
 		try {
+			final PSI psi = transportStream.getPsi();
 			if(pid==0){
-				transportStream.getPsi().getPat().update(new PATsection(this,parentPID));
+				psi.getPat().update(new PATsection(this,parentPID));
 			} else {
 
 				final int tableId = Byte.toUnsignedInt(data[0]);
-				if((tableId==0x02)&&
-						(transportStream.getPsi().getPat().inPAT(pid))){
-					transportStream.getPsi().getPmts().update(new PMTsection(this,parentPID));
-				}else if((tableId==0x01)&&(pid==0x01)){
-					transportStream.getPsi().getCat().update(new CAsection(this,parentPID));
-				}else if((tableId==0x03)&&(pid==0x02)){
-					transportStream.getPsi().getTsdt().update(new TSDTsection(this,parentPID));
-				}else if((pid==0x10)&&((tableId==0x40)||(tableId==0x41))){  // NIT
-					transportStream.getPsi().getNit().update(new NITsection(this,parentPID));
-				}else if((tableId==0x4A)&&(pid==0x11)){
-					transportStream.getPsi().getBat().update(new BATsection(this,parentPID));
-				}else if((0x4E<=tableId)&&(tableId<=0x6F)&&(pid==0x12)){
-					transportStream.getPsi().getEit().update(new EITsection(this,parentPID));
-				}else if((pid==0x14) &&(tableId==0x70)){
-					transportStream.getPsi().getTdt().update(new TDTsection(this,parentPID));
-				}else if((pid==0x14) &&(tableId==0x73)){
-					transportStream.getPsi().getTot().update(new TOTsection(this,parentPID));
-				}else if((pid==0x11) &&((tableId==0x42)||(tableId==0x46))){
-					transportStream.getPsi().getSdt().update(new SDTsection(this,parentPID));
-				}else if((pid==0x1F) &&(tableId==0x7F)){
-					transportStream.getPsi().getSit().update(new SITsection(this,parentPID));
-				}else if((tableId==0x4c)&&isINTSection(pid)){ // check for linkage descriptors 0x0B located in the NIT  //ETSI EN 301 192 V1.4.2
-					transportStream.getPsi().getInt().update(new INTsection(this,parentPID));
-				}else if((tableId==0x4b)&&isUNTSection(pid)){
-					transportStream.getPsi().getUnts().update(new UNTsection(this,parentPID));
-				}else if((tableId==0x74)&&isAITSection(pid)){
-					transportStream.getPsi().getAits().update(new AITsection(this,parentPID));
-				}else if((tableId==0x76)&&isRCTSection(pid)){
-					transportStream.getPsi().getRcts().update(new RCTsection(this,parentPID));
-				}else if((tableId==0xFC)&&isSpliceInfoSection(pid)){
-					transportStream.getPsi().getScte35_table().update(new SpliceInfoSection(this,parentPID));
-				}else if(isDIFTSection(pid)) { // no check for table ID, as this might change 
-					transportStream.getPsi().getDfit_table().update(new DFITSection(this, parentPID));
-				}else if((tableId>=0x37)&&(tableId<=0x3F)){
+				if ((tableId == 0x02) && (psi.getPat().inPAT(pid))) {
+					psi.getPmts().update(new PMTsection(this, parentPID));
+				} else if ((tableId == 0x01) && (pid == 0x01)) {
+					psi.getCat().update(new CAsection(this, parentPID));
+				} else if ((tableId == 0x03) && (pid == 0x02)) {
+					psi.getTsdt().update(new TSDTsection(this, parentPID));
+				} else if ((pid == 0x10) && ((tableId == 0x40) || (tableId == 0x41))) { // NIT
+					psi.getNit().update(new NITsection(this, parentPID));
+				} else if ((tableId == 0x4A) && (pid == 0x11)) {
+					psi.getBat().update(new BATsection(this, parentPID));
+				} else if ((0x4E <= tableId) && (tableId <= 0x6F) && (pid == 0x12)) {
+					psi.getEit().update(new EITsection(this, parentPID));
+				} else if ((pid == 0x14) && (tableId == 0x70)) {
+					psi.getTdt().update(new TDTsection(this, parentPID));
+				} else if ((pid == 0x14) && (tableId == 0x73)) {
+					psi.getTot().update(new TOTsection(this, parentPID));
+				} else if ((pid == 0x11) && ((tableId == 0x42) || (tableId == 0x46))) {
+					psi.getSdt().update(new SDTsection(this, parentPID));
+				} else if ((pid == 0x1F) && (tableId == 0x7F)) {
+					psi.getSit().update(new SITsection(this, parentPID));
+				} else if ((tableId == 0x4c) && isINTSection(pid)) { // check for linkage descriptors 0x0B located in
+																		// the NIT //ETSI EN 301 192 V1.4.2
+					psi.getInt().update(new INTsection(this, parentPID));
+				} else if ((tableId == 0x4b) && isUNTSection(pid)) {
+					psi.getUnts().update(new UNTsection(this, parentPID));
+				} else if ((tableId == 0x74) && isAITSection(pid)) {
+					psi.getAits().update(new AITsection(this, parentPID));
+				} else if ((tableId == 0x76) && isRCTSection(pid)) {
+					psi.getRcts().update(new RCTsection(this, parentPID));
+				} else if ((tableId == 0xFC) && isSpliceInfoSection(pid)) {
+					psi.getScte35_table().update(new SpliceInfoSection(this, parentPID));
+				} else if (isDIFTSection(pid)) { // no check for table ID, as this might change
+					psi.getDfit_table().update(new DFITSection(this, parentPID));
+				}else if (isDSACISection(pid)) {// no check for table ID, not specified in Interim draft TS 103 615 V1.2.1)
+					psi.getDSACI_table().update(new DSACISection(this, parentPID));
+				} else if ((tableId >= 0x37) && (tableId <= 0x3F)) {
 					// also include all PES streams component (ISO/IEC 13818-6 type B) which
 					// do not have a data_broadcast_id_descriptor associated with it,
 					// but do have a Association_tag_descriptor (or a stream_identifier_descriptor)
@@ -196,15 +199,15 @@ public class PsiSectionData {
 					// Also, include PMTs to store the stream_identifier_descriptor
 					// all handled in DSMCCs.
 					if(PreferencesManager.isEnableDSMCC()) {
-						transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
+						psi.getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
 					}
 				}else if(PreferencesManager.isEnableM7Fastscan()) {
 					if(tableId== 0xBC){
-						transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
+						psi.getM7fastscan().update(new FNTsection(this, parentPID));
 					}else if(tableId== 0xBD) {
-						transportStream.getPsi().getM7fastscan().update(new FSTsection(this, parentPID));
+						psi.getM7fastscan().update(new FSTsection(this, parentPID));
 					}else if((tableId== 0xBE) && transportStream.isONTSection(pid)) {
-						transportStream.getPsi().getM7fastscan().update(new ONTSection(this, parentPID));
+						psi.getM7fastscan().update(new ONTSection(this, parentPID));
 					}
 				}
 			}
@@ -312,6 +315,27 @@ public class PsiSectionData {
 		return false;
 	}
 
+	// DSA Configuration Information (DSACI)
+	public boolean isDSACISection(final int pid){
+		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
+
+		for (final PMTsection[] pmt : pmtList.values()){
+			final PMTsection p=pmt[0]; // PMT always one section
+			for(final Component component : p.getComponentenList() ){
+				if(component.getElementaryPID()==pid){
+					final List<DataBroadcastIDDescriptor> data_broadcast_id_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), DataBroadcastIDDescriptor.class);
+					for (final DataBroadcastIDDescriptor dataBroadCastIDDescriptor : data_broadcast_id_descriptors) {
+						if(dataBroadCastIDDescriptor.getDataBroadcastId()==0xE && dataBroadCastIDDescriptor.getMetadataPresent()== 0x2){
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	
 	/**
 	 *
 	 *  is this PID a candidate to contain a AIT ( Application Information Table)
@@ -386,8 +410,8 @@ public class PsiSectionData {
 			final PMTsection p=pmt[0]; // PMT always one section
 			for(final Component component : p.getComponentenList() ){
 				if(component.getElementaryPID()==pid){
-					final List<RelatedContentDescriptor> application_signalling_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RelatedContentDescriptor.class);
-					if(!application_signalling_descriptors.isEmpty()){
+					final List<RelatedContentDescriptor> related_content_descriptors = Descriptor.findGenericDescriptorsInList(component.getComponentDescriptorList(), RelatedContentDescriptor.class);
+					if(!related_content_descriptors.isEmpty()){
 						return true;
 					}
 				}

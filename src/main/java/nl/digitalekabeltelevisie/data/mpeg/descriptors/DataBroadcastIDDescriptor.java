@@ -218,6 +218,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	private int MAC_IP_mapping_flag;
 	private int alignment_indicator;
 	private int max_sections_per_datagram ;
+	private int metadata_present;
 
 
 	public DataBroadcastIDDescriptor(final byte[] b, final int offset, final TableSection parent) {
@@ -259,6 +260,8 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 			}
 			privateDataByte = copyOfRange(b, offset+5+r, offset+descriptorLength+2);
 
+		}else if(dataBroadcastId==0x000E){ //DVB-SIS (Single Illumination System)  TS 103 615 V1.2.1)
+			 metadata_present  = getInt(b,offset+4,1,MASK_8BITS);
 
 		}else if((dataBroadcastId==0x00f0)||(dataBroadcastId==0x00f1)){ // MHP
 			int r =0;
@@ -327,6 +330,9 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 		}else if(dataBroadcastId==0x000b){ //IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
 			addListJTree(t,platformList,modus,"IP/MAC platform");
 			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
+		}else if(dataBroadcastId==0x000E){ //DVB-SIS (Single Illumination System)  TS 103 615 V1.2.1)
+			t.add(new DefaultMutableTreeNode(new KVP("metadata",metadata_present,getMetaDataString(metadata_present))));
+			
 		}else if((dataBroadcastId==0x00f0)||(dataBroadcastId==0x00f1)){ // MHP
 			addListJTree(t,applicationTypeList,modus,"application_type");
 
@@ -338,6 +344,19 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 
 		return t;
 	}
+
+
+	private String getMetaDataString(int metadata_present) {
+		return switch (metadata_present) {
+		case 0x01 -> "Framing & Timing Information (F&TI)";
+		case 0x02 -> "DSA Configuration Information (DSACI)";
+		case 0x03 -> "Terrestrial PSI/SI tables belonging to a hybrid or sheer terrestrial service/service component";
+		default -> "Unknown value";
+		};
+	}
+
+
+
 
 
 	public boolean describesObjectCarousel() {
@@ -412,6 +431,15 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 		case 0x0505: return "UK_PROFILE_BASELINE_1";
 		default: return "unknown";
 		}
+	}
+
+
+
+
+
+
+	public int getMetadataPresent() {
+		return metadata_present;
 	}
 
 

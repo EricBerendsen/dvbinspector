@@ -63,6 +63,7 @@ public class PSI {
 	private final DSMCCs dsm_table = new DSMCCs(this);
 	private final SCTE35 scte35_table = new SCTE35(this);
 	private final DFITs dfit_table = new DFITs(this);
+	private final DSACIs dsaci_table = new DSACIs(this);
 	
 	private final M7Fastscan m7fastscan = new M7Fastscan(this);
 	
@@ -89,6 +90,7 @@ public class PSI {
 		t.add(dsm_table.getJTreeNode(modus));
 		t.add(scte35_table.getJTreeNode(modus));
 		t.add(dfit_table.getJTreeNode(modus));
+		t.add(dsaci_table.getJTreeNode(modus));
 		if(PreferencesManager.isEnableM7Fastscan()) {
 			t.add(m7fastscan.getJTreeNode(modus));
 		}
@@ -179,6 +181,9 @@ public class PSI {
 	}
 	public DFITs getDfit_table() {
 		return dfit_table;
+	}
+	public DSACIs getDSACI_table() {
+		return dsaci_table;
 	}
 	public TSDT getTsdt() {
 		return tsdt;

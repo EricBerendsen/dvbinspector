@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import java.util.Arrays;
+
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 
@@ -55,6 +57,10 @@ public class TableSectionExtendedSyntax extends TableSection {
 
 		}
 
+	}
+	
+	byte [] getPrivateData() {
+		return Arrays.copyOfRange(raw_data.getData(), 8, sectionLength + 3);
 	}
 
 
