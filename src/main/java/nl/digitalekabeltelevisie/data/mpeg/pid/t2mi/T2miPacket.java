@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -54,6 +54,7 @@ public class T2miPacket implements TreeNode {
 			add(0x31 ,"FEF part: I/Q data").
 			add(0x32 ,"FEF part: composite").
 			add(0x33 ,"FEF sub-part"). 
+			add(0xF0 ,"SIS Framing & Timing Information (F&TI)"). 
 			build();
 	
 	
@@ -82,6 +83,9 @@ public class T2miPacket implements TreeNode {
 			break;
 		case 0x21: // Individual addressing
 			payload = new IndividualAddressingPayload(data);
+			break;
+		case 0xF0: // SIS Framing & Timing Information (F&TI
+			payload = new SIS_F_TI(data);
 			break;
 		default:
 			payload = new Payload(data, getPacketTypeString(getPacketType()));
@@ -145,7 +149,7 @@ public class T2miPacket implements TreeNode {
 	}
 
 	public int getT2miStreamId() {
-		return Byte.toUnsignedInt(data[4]) & Utils.MASK_3BITS;
+		return Byte.toUnsignedInt(data[3]) & Utils.MASK_3BITS;
 	}
 
 	public int getPayloadLen() {

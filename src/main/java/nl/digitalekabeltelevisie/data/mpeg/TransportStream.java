@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -113,7 +113,8 @@ public class TransportStream implements TreeNode{
 		TTML("TTML subtitling"),
 		AC4("Dolby AC-4 Audio"),
 		SMPTE2038("SMPTE 2038"),
-		SIS_DSACI("SIS Daughter Site Adapter Configuration Information (DSACI)");
+		SIS_DSACI("SIS Daughter Site Adapter Configuration Information (DSACI)"),
+		SIS_F_TI("SIS Framing & Timing Information (F&TI) .");
 		
 		private final String description;
 		
@@ -767,6 +768,9 @@ public class TransportStream implements TreeNode{
 				case T2MI:
 					generalPidHandler = new T2miPidHandler();
 					break;
+				case SIS_F_TI:
+					generalPidHandler = new T2miPidHandler();
+					break;
 				case TTML:
 					generalPidHandler = new TtmlPesHandler();
 					break;
@@ -817,6 +821,15 @@ public class TransportStream implements TreeNode{
 				}
 				if (Arrays.equals(formatIdentifier, RegistrationDescriptor.SMPTE_2038)) {
 					return ComponentType.SMPTE2038;
+				}
+			}else if(d instanceof DataBroadcastIDDescriptor dataBroadcastIDDescriptor){
+				if(dataBroadcastIDDescriptor.getDataBroadcastId() == 0xE) { // DVB-SIS
+					if(dataBroadcastIDDescriptor.getMetadataPresent() == 0x2) {
+						return ComponentType.SIS_DSACI;
+					}
+					if(dataBroadcastIDDescriptor.getMetadataPresent() == 0x1) {
+						return ComponentType.SIS_F_TI;
+					}
 				}
 			}else if(d instanceof EnhancedAC3Descriptor){
 				return ComponentType.E_AC3;
