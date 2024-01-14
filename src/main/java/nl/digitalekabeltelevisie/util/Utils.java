@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -896,6 +896,7 @@ public final class Utils {
 		case 0x33: return "H.266 VVC video stream or a VVC temporal video sub-bitstream";
 		case 0x34: return "H.266 VVC temporal video subset of a VVC video stream";
 		case 0x35: return "EVC video stream or an EVC temporal video sub-bitstream";
+		case 0x36: return "LCEVC video stream conforming to one or more profiles defined in ISO/IEC 23094-2"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
 
 		case 0x7f: return"IPMP stream";
 
