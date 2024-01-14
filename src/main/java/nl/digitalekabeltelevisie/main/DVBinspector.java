@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -376,6 +376,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0xa4, "CANAL+ INTERNATIONAL",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x600, "UPC",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x0000233A, "Independent Television Commission (DTG)",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x3200, "Australian Terrestrial Television Networks",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x41565356, "Audio Video Coding Standard Workgroup of China (AVS3)",defaultPrivateDataSpecifier);
 
 		settingsMenu.add(privateDataSubMenu);

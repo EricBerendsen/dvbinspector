@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -279,9 +279,7 @@ public final class DescriptorFactory {
 				return new CosLogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
 			case 0x88:
 				return new CosTimezoneDescriptor(data, 0, tableSection);
-				
-				
-		}
+			}
 		} else if (private_data_specifier == 0x233a) { // DTG
 			switch (descriptor_tag) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
@@ -291,6 +289,12 @@ public final class DescriptorFactory {
 			case 0x89:
 				return new GuidanceDescriptor(data, 0, tableSection);
 			}
+		} else if (private_data_specifier >= 0x00003200 && private_data_specifier <= 0x0000320F ) { // FREE TV AUSTRALIA OPERATIONAL PRACTICE OP-40
+			switch (descriptor_tag) {
+			case 0x83:
+				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.au.LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
+			}
+
 		} else if (private_data_specifier == 0x41565356) { // AVS
 			switch (descriptor_tag) {
 				case 0xD1:
