@@ -330,6 +330,8 @@ public final class DescriptorFactory {
 			return new SystemClockDescriptor(data, 0, tableSection);
 		case 0x0C:
 			return new MultiplexBufferUtilizationDescriptor(data, 0, tableSection);
+		case 0x0D:
+			return new CopyrightDescriptor(data, 0, tableSection);
 		case 0x0E:
 			return new MaximumBitrateDescriptor(data, 0, tableSection);
 		case 0x0F:
