@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -122,7 +122,7 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 				}
 				for (int i = 0; i < used_pids.length; i++) {
 					final int periodCount = periodpidcount[used_pids[i]];
-					if (transportStream.getBitRate() != -1) {
+					if (transportStream.getBitRate() != -1 && endPacketStep > startPacketStep) {
 						final double bitRate = (periodCount * transportStream.getBitRate()) / (endPacketStep - startPacketStep);
 						if (bitRate < data[1][i]) { // new min found
 							data[1][i] = bitRate;

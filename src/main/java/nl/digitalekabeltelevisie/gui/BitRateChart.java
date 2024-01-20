@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -217,7 +217,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 				if(transportStream.getBitRate()==-1){
 					categoryTableXYDataset.add(startPacketStep,pidcount[used_pids[pidIndex]],labels[pidIndex].getLabel());
-				}else{
+				} else if (endPacketStep > startPacketStep) {
 					categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[pidIndex]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[pidIndex].getLabel());
 				}
 			}
