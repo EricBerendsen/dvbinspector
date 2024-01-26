@@ -561,6 +561,8 @@ public final class DescriptorFactory {
 			return new AudioPreselectionDescriptor(data, 0, tableSection);
 		case 0x20:
 			return new TtmlSubtitlingDescriptor(data, 0, tableSection);
+		case 0x22:
+			return new ServiceProminenceDescriptor(data, 0, tableSection);
 		case 0x23:
 			return new VvcSubpicturesDescriptor(data, 0, tableSection);
 
