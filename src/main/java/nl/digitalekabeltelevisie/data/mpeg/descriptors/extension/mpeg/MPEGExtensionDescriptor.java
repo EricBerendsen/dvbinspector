@@ -80,7 +80,7 @@ public class MPEGExtensionDescriptor extends ExtensionDescriptor {
 		case 0x13:
 			return "HEVC_subregion_descriptor";
 		case 0x14:
-			return "JXS_video_descriptor";
+			return "JPEG_XS_video_descriptor";
 		case 0x15:
 			return "VVC_timing_and_HRD_descripto";
 		case 0x16:

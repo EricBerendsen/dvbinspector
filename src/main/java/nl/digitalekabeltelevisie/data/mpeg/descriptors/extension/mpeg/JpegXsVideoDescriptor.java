@@ -57,6 +57,19 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     private final boolean still_mode;
     private final boolean mdm_flag;
     private final byte[] private_data;
+	private final int zero_bits;
+	private int x_c0;
+	private int y_c0;
+	private int x_c1;
+	private int y_c1;
+	private int x_c2;
+	private int y_c2;
+	private int x_wp;
+	private int y_wp;
+	private long l_max;
+	private long l_min;
+	private int maxcll;
+	private int maxfall;
 
     public JpegXsVideoDescriptor(byte[] b, int offset, TableSection parent) {
         super(b, offset, parent);
@@ -79,6 +92,26 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
         reader.skiptoByteBoundary();
         still_mode = reader.readBits(1) == 1;
         mdm_flag = reader.readBits(1) == 1;
+        
+        zero_bits = reader.readBits(6);
+        if(mdm_flag) {
+        	
+        	x_c0 = reader.readBits(16);
+        	y_c0 = reader.readBits(16);
+        	x_c1 = reader.readBits(16);
+        	y_c1 = reader.readBits(16);
+        	x_c2 = reader.readBits(16);
+        	y_c2 = reader.readBits(16);
+        	x_wp = reader.readBits(16);
+        	y_wp = reader.readBits(16);
+        	l_max = reader.readBitsLong(32);
+        	l_min= reader.readBitsLong(32);
+        	maxcll = reader.readBits(16);
+        	maxfall = reader.readBits(16);
+        	
+        }
+        
+        
         reader.skiptoByteBoundary();
         private_data = reader.readBytes(reader.available() / 8);
     }
@@ -102,6 +135,25 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
         t.add(new DefaultMutableTreeNode(new KVP("video_full_range_flag", video_full_range_flag, null)));
         t.add(new DefaultMutableTreeNode(new KVP("still_mode", still_mode, null)));
         t.add(new DefaultMutableTreeNode(new KVP("mdm_flag", mdm_flag, null)));
+        t.add(new DefaultMutableTreeNode(new KVP("zero_bits", zero_bits, null)));
+ 
+        if(mdm_flag) {
+            t.add(new DefaultMutableTreeNode(new KVP("X_c0", x_c0, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("Y_c0", y_c0, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("X_c1", x_c1, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("Y_c1", y_c1, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("X_c2", x_c2, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("Y_c2", y_c2, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("X_wp", x_wp, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("Y_wp", y_wp, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("L_max", l_max, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("L_min", l_min, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("MaxCLL", maxcll, null)));
+            t.add(new DefaultMutableTreeNode(new KVP("MaxFALL", maxfall, null)));
+        	
+        }
+        	 
+        
         t.add(new DefaultMutableTreeNode(new KVP("private_data", private_data, null)));
         final DefaultMutableTreeNode parentNode = super.getJTreeNode(modus);
         parentNode.add(t);
