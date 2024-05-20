@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -102,7 +102,7 @@ public class SpliceInfoSection extends TableSection {
 		private String getPreRollTimeString() {
 			if (time_specified_flag == 1) {
 				PID parentPid = getParentPID();
-				if(parentPid == null) {
+				if (parentPid == null) {
 					return "";
 				}
 				TransportStream ts = parentPid.getParentTransportStream();
@@ -112,12 +112,14 @@ public class SpliceInfoSection extends TableSection {
 				if (pmtList.size() >= 1) {
 					PMTsection pmt = pmtList.get(0);
 					PID pcrPid = ts.getPID(pmt.getPcrPid());
+					if (pcrPid != null) {
 
-					Long packetPcrTime = pcrPid.getPacketPcrTime(getFirst_packet_no()); // 27 Mhz
-					if (packetPcrTime != null) {
-						// ptsTime = 90 kHz clock
-						double preRollSecs = ((double) (getSpliceTimeAdjusted() - (packetPcrTime / 300))) / 90_000L;
-						return String.format(" (preroll time = %3.3f secs)", preRollSecs);
+						Long packetPcrTime = pcrPid.getPacketPcrTime(getFirst_packet_no()); // 27 Mhz
+						if (packetPcrTime != null) {
+							// ptsTime = 90 kHz clock
+							double preRollSecs = ((double) (getSpliceTimeAdjusted() - (packetPcrTime / 300))) / 90_000L;
+							return String.format(" (preroll time = %3.3f secs)", preRollSecs);
+						}
 					}
 				}
 			}
