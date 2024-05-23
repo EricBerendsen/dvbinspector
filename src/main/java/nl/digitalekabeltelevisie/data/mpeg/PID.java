@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -120,8 +120,6 @@ public class PID implements TreeNode{
 	private final HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = new HashMap<>();
 
 	private final LabelMaker labelMaker = new LabelMaker();
-
-	private static final Formatter formatter = new Formatter();
 	
 	/**
 	 *
@@ -620,7 +618,9 @@ public class PID implements TreeNode{
 		final long bitrate=getParentTransportStream().getBitRate();
 		if((bitrate>0)&&(count>=2)){
 			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
-			return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+			try (Formatter formatter = new Formatter()){
+				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
+			}
 		}
 		return null;
 	}
