@@ -327,7 +327,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			final RangeHashMap<Integer, Color> localColoring = new RangeHashMap<>();
 			//for some reason using getHTMLHexview resets color, so we use getHTMLHexviewColored with only one color.
 			localColoring.put(0, buffer.length-PAYLOAD_PACKET_LENGTH, FEC_COLOR);
-			Utils.appendHeader(s, "FEC/timestamp:", FEC_COLOR);
+			Utils.appendHeader(s, "FEC/TP_extra_header of the next frame:", FEC_COLOR);
 			s.append(getHTMLHexviewColored(buffer,PAYLOAD_PACKET_LENGTH,buffer.length-PAYLOAD_PACKET_LENGTH,localColoring)).append("</span>");
 			coloring.put(PAYLOAD_PACKET_LENGTH, buffer.length, FEC_COLOR);
 		}
