@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -271,6 +271,10 @@ public class Descriptor implements TreeNode {
 			case 0x7D -> "XAIT location descriptor";
 			case 0x7E -> "FTA_content_management_descriptor";
 			case 0x7F -> "extension descriptor";
+			
+			// https://aomediacodec.github.io/av1-mpeg2-ts/
+			case 0x80 -> "user defined: AV1 video descriptor";
+
 			case 0x81 -> "user defined: UPC logic_channel_descriptor/ATSC AC-3 audio descriptor";
 			/* http://www.nordig.org/pdf/NorDig_RoOspec_0_9.pdf */
 			case 0x82 -> "user defined: Viasat private: Logic_channel_dscriptor";
