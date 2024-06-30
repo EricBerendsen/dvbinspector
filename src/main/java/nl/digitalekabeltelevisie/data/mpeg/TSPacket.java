@@ -344,18 +344,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final StringBuilder l = new StringBuilder("transport_packet [").append(packetNo).append("]");
-		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
-			l.append(" (adaptation field)");
-		}
-		if(hasPayload()) { //payload present
-			l.append(" (payload)");
-		}
-		if(isPayloadUnitStartIndicator()){
-			l.append(" (payload start)");
-		}
-
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(l.toString(), this));
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(buildNodeLabel(), this));
 		t.add(new DefaultMutableTreeNode(new KVP("sync_byte",getSyncByte() ,"Should be 0x47")));
 		t.add(new DefaultMutableTreeNode(new KVP("transport_error_indicator",getTransportErrorIndicator() ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("payload_unit_start_indicator",getPayloadUnitStartIndicator() ,null)));
@@ -390,11 +379,27 @@ public class TSPacket implements HTMLSource, TreeNode{
 					t.add(pesHeaderView.getJTreeNode(modus));
 				}
 			}
-			if(buffer.length>PAYLOAD_PACKET_LENGTH){
-				t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
-			}
+		}
+		if(buffer.length>PAYLOAD_PACKET_LENGTH){
+			t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
 		}
 		return t;
+	}
+
+	protected String buildNodeLabel() {
+		final StringBuilder l = new StringBuilder("transport_packet [").append(packetNo).append("]");
+		if((getAdaptationFieldControl()==2)||(getAdaptationFieldControl()==3)) { //Adaptation field present
+			l.append(" (adaptation field)");
+		}
+		if(hasPayload()) { //payload present
+			l.append(" (payload)");
+		}
+		if(isPayloadUnitStartIndicator()){
+			l.append(" (payload start)");
+		}
+
+		final String nodeLabel = l.toString();
+		return nodeLabel;
 	}
 
 	public long getPacketOffset() {
