@@ -67,16 +67,16 @@ public class TSPacket implements HTMLSource, TreeNode{
 	
 	private static final Logger	logger	= Logger.getLogger(TSPacket.class.getName());
 	private static final String ERROR_PARSING_ADAPTATION_FIELD = "Error parsing AdaptationField";
-	final private byte[] buffer ;
+	protected final byte[] buffer ;
 
-	private int packetNo=-1;
-	final private static Color HEADER_COLOR = new Color(0x0000ff);
-	final private static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
-	final private static Color FEC_COLOR = new Color(0x800080);
-	final private static Color PES_HEADER_COLOR = new Color(0x800000);
-	private static final Color ERROR_COLOR = new Color(0xFF0000);
-	final private TransportStream transportStream;
-	private long packetOffset = -1;
+	protected int packetNo=-1;
+	final protected static Color HEADER_COLOR = new Color(0x0000ff);
+	final protected static Color ADAPTATION_FIELD_COLOR = new Color(0x008000);
+	final protected static Color FEC_COLOR = new Color(0x800080);
+	final protected static Color PES_HEADER_COLOR = new Color(0x800000);
+	final protected static Color ERROR_COLOR = new Color(0xFF0000);
+	final protected  TransportStream transportStream;
+	protected long packetOffset = -1;
 
 	private PesHeader pesHeader = null;
 
@@ -261,9 +261,25 @@ public class TSPacket implements HTMLSource, TreeNode{
 			s.append("<br>").append(escapeHtmlBreakLines(transportStream.getShortLabel(pid))).append("<br>");
 		}
 
-		Utils.appendHeader(s, "Header:", HEADER_COLOR);
 		final RangeHashMap<Integer, Color> coloring = new RangeHashMap<>();
-		coloring.put(0, 3, HEADER_COLOR);
+		addBasicPacketDetails(s, 0, coloring);
+
+		// FEC / timestamp
+		if(buffer.length>PAYLOAD_PACKET_LENGTH){
+			final RangeHashMap<Integer, Color> localColoring = new RangeHashMap<>();
+			//for some reason using getHTMLHexview resets color, so we use getHTMLHexviewColored with only one color.
+			localColoring.put(0, buffer.length-PAYLOAD_PACKET_LENGTH, FEC_COLOR);
+			Utils.appendHeader(s, "FEC/timestamp:", FEC_COLOR);
+			s.append(getHTMLHexviewColored(buffer,PAYLOAD_PACKET_LENGTH,buffer.length-PAYLOAD_PACKET_LENGTH,localColoring)).append("</span>");
+			coloring.put(PAYLOAD_PACKET_LENGTH, buffer.length, FEC_COLOR);
+		}
+		s.append("<br><b>Data:</b><br>").append(getHTMLHexviewColored(buffer,0,buffer.length,coloring));
+		return s.toString();
+	}
+
+	protected void addBasicPacketDetails(final StringBuilder s, int coloringOffset,	final RangeHashMap<Integer, Color> coloring) {
+		Utils.appendHeader(s, "Header:", HEADER_COLOR);
+		coloring.put(coloringOffset, coloringOffset + 3, HEADER_COLOR);
 
 		s.append("<br>sync_byte: ").append(getHexAndDecimalFormattedString(getSyncByte()));
 		s.append("<br>transport_error_indicator: ").append(getTransportErrorIndicator());
@@ -286,7 +302,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 		if(adaptationField!=null){
 			Utils.appendHeader(s, "adaptation_field:", ADAPTATION_FIELD_COLOR);
 			s.append(adaptationField.getHTML()).append("<br></span>");
-			coloring.put(4, 4+adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
+			coloring.put(coloringOffset + 4, coloringOffset + 4 + adaptationField.getAdaptation_field_length(), ADAPTATION_FIELD_COLOR);
 		}
 
 		// PES header
@@ -303,25 +319,13 @@ public class TSPacket implements HTMLSource, TreeNode{
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					s.append("</span>");
 					if(pesHeaderView.hasExtendedHeader()){
-						coloring.put(payloadStart, payloadStart+8+pesHeaderView.getPes_header_data_length(), PES_HEADER_COLOR);
+						coloring.put(coloringOffset + payloadStart, coloringOffset + payloadStart+8+pesHeaderView.getPes_header_data_length(), PES_HEADER_COLOR);
 					}else{
-						coloring.put(payloadStart, payloadStart+5, PES_HEADER_COLOR);
+						coloring.put(coloringOffset + payloadStart, coloringOffset + payloadStart+5, PES_HEADER_COLOR);
 					}
 				}
 			}
 		}
-
-		// FEC / timestamp
-		if(buffer.length>PAYLOAD_PACKET_LENGTH){
-			final RangeHashMap<Integer, Color> localColoring = new RangeHashMap<>();
-			//for some reason using getHTMLHexview resets color, so we use getHTMLHexviewColored with only one color.
-			localColoring.put(0, buffer.length-PAYLOAD_PACKET_LENGTH, FEC_COLOR);
-			Utils.appendHeader(s, "FEC/timestamp:", FEC_COLOR);
-			s.append(getHTMLHexviewColored(buffer,PAYLOAD_PACKET_LENGTH,buffer.length-PAYLOAD_PACKET_LENGTH,localColoring)).append("</span>");
-			coloring.put(PAYLOAD_PACKET_LENGTH, buffer.length, FEC_COLOR);
-		}
-		s.append("<br><b>Data:</b><br>").append(getHTMLHexviewColored(buffer,0,buffer.length,coloring));
-		return s.toString();
 	}
 
 	/**
@@ -345,6 +349,14 @@ public class TSPacket implements HTMLSource, TreeNode{
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(buildNodeLabel(), this));
+		addMainPacketDetails(modus, t);
+		if(buffer.length>PAYLOAD_PACKET_LENGTH){
+			t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
+		}
+		return t;
+	}
+
+	protected void addMainPacketDetails(final int modus, final DefaultMutableTreeNode t) {
 		t.add(new DefaultMutableTreeNode(new KVP("sync_byte",getSyncByte() ,"Should be 0x47")));
 		t.add(new DefaultMutableTreeNode(new KVP("transport_error_indicator",getTransportErrorIndicator() ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("payload_unit_start_indicator",getPayloadUnitStartIndicator() ,null)));
@@ -380,10 +392,6 @@ public class TSPacket implements HTMLSource, TreeNode{
 				}
 			}
 		}
-		if(buffer.length>PAYLOAD_PACKET_LENGTH){
-			t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
-		}
-		return t;
 	}
 
 	protected String buildNodeLabel() {

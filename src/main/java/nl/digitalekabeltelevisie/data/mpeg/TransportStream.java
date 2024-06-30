@@ -101,6 +101,8 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
  */
 public class TransportStream implements TreeNode{
 	
+	private static final int AVCHD_PACKET_LENGTH = 192;
+
 	public enum ComponentType{
 		AC3("Dolby Audio (AC3)"),
 		E_AC3("Enhanced Dolby Audio (AC3)"), 
@@ -189,7 +191,7 @@ public class TransportStream implements TreeNode{
 
 	private int packetLength = 188;
 
-	public static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
+	public static final int [] ALLOWED_PACKET_LENGTHS = {188,AVCHD_PACKET_LENGTH,204,208};
 	
 
 	/**
@@ -287,8 +289,6 @@ public class TransportStream implements TreeNode{
 	 */
 	public void parseStream(final java.awt.Component component) throws IOException {
 		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
-			final byte[] buf = new byte[packetLength];
-			int count = 0;
 			no_packets = 0;
 
 			pids = new PID[8192];
@@ -297,38 +297,84 @@ public class TransportStream implements TreeNode{
 			bitRate = -1;
 			bitRateTDT = -1;
 
-			int bytes_read = 0;
-			int lastHandledSyncErrorPacket = -1;
-			do {
-				final long offset = fileStream.getPosition();
-				bytes_read = fileStream.read(buf, 0, packetLength);
-				final int next = fileStream.read();
-				if ((bytes_read == packetLength) && (buf[0] == MPEGConstants.sync_byte)
-						&& ((next == -1) || (next == MPEGConstants.sync_byte))) {
-					// always push back first byte of next packet
-					if ((next != -1)) {
-						fileStream.unread(next);
-					}
-					offsetHelper.addPacket(no_packets, offset);
-					processPacket(new TSPacket(buf, count, this));
-					count++;
-				} else { // something wrong, find next syncbyte. First push back the lot
-					if ((next != -1)) {
-						if (lastHandledSyncErrorPacket != no_packets) {
-							sync_errors++;
-							logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
-									no_packets));
-							lastHandledSyncErrorPacket = no_packets;
-						}
-						fileStream.unread(next);
-						fileStream.unread(buf, 0, bytes_read);
-						// now read 1 byte and restart all
-						fileStream.read(); // ignore result
-					}
-				}
-			} while (bytes_read == packetLength);
+			if(packetLength == AVCHD_PACKET_LENGTH) {
+				readAVCHDPackets(fileStream);
+			} else {
+				readPackets(fileStream);
+			}
 		}
 		postProcess();
+	}
+
+	private void readPackets(PositionPushbackInputStream fileStream) throws IOException {
+		int count = 0;
+		int bytes_read = 0;
+		int lastHandledSyncErrorPacket = -1;
+		final byte[] buf = new byte[packetLength];
+		do {
+			final long offset = fileStream.getPosition();
+			bytes_read = fileStream.read(buf, 0, packetLength);
+			final int next = fileStream.read();
+			if ((bytes_read == packetLength) && (buf[0] == MPEGConstants.sync_byte)
+					&& ((next == -1) || (next == MPEGConstants.sync_byte))) {
+				// always push back first byte of next packet
+				if ((next != -1)) {
+					fileStream.unread(next);
+				}
+				offsetHelper.addPacket(no_packets, offset);
+				processPacket(new TSPacket(buf, count, this));
+				count++;
+			} else { // something wrong, find next syncbyte. First push back the lot
+				if ((next != -1)) {
+					if (lastHandledSyncErrorPacket != no_packets) {
+						sync_errors++;
+						logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
+								no_packets));
+						lastHandledSyncErrorPacket = no_packets;
+					}
+					fileStream.unread(next);
+					fileStream.unread(buf, 0, bytes_read);
+					// now read 1 byte and restart all
+					fileStream.read(); // ignore result
+				}
+			}
+		} while (bytes_read == packetLength);
+	}
+
+	private void readAVCHDPackets(PositionPushbackInputStream fileStream) throws IOException {
+		int count = 0;
+		int bytes_read = 0;
+		int lastHandledSyncErrorPacket = -1;
+		final byte[] buf = new byte[AVCHD_PACKET_LENGTH];
+		do {
+			final long offset = fileStream.getPosition();
+			bytes_read = fileStream.read(buf, 0, AVCHD_PACKET_LENGTH);
+			final byte[] nextBytes =new byte[5];
+			final int next = fileStream.read(nextBytes,0,5);
+			if ((bytes_read == packetLength) && (buf[4] == MPEGConstants.sync_byte)
+					&& ((next != 5) || (nextBytes[4] == MPEGConstants.sync_byte))) {
+				// always push back first byte of next packet
+				if ((next != -1)) {
+					fileStream.unread(nextBytes,0,next);
+				}
+				offsetHelper.addPacket(no_packets, offset);
+				processPacket(new AVCHDPacket(buf, count, this,0));
+				count++;
+			} else { // something wrong, find next syncbyte. First push back the lot
+				if ((next != -1)) {
+					if (lastHandledSyncErrorPacket != no_packets) {
+						sync_errors++;
+						logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
+								no_packets));
+						lastHandledSyncErrorPacket = no_packets;
+					}
+					fileStream.unread(nextBytes,0,next);
+					fileStream.unread(buf, 0, bytes_read);
+					// now read 1 byte and restart all
+					fileStream.read(); // ignore result
+				}
+			}
+		} while (bytes_read == packetLength);
 	}
 
 	public void postProcess() {
@@ -1089,7 +1135,11 @@ public class TransportStream implements TreeNode{
 		final byte [] buf = new byte[packetLength];
 		final int bytesRead = randomAccessFile.read(buf);
 		if(bytesRead==packetLength){
-			packet = new TSPacket(buf, packetNo,this);
+			if(packetLength == AVCHD_PACKET_LENGTH) {
+				packet = new AVCHDPacket(buf, packetNo,this,0); //TODO handle roll-over
+			}else {
+				packet = new TSPacket(buf, packetNo,this);
+			}
 			packet.setPacketOffset(offset);
 		}else{
 			logger.warning(String.format("read less then packetLenghth (%d) bytes, actual read: %d", packetLength, bytesRead));
