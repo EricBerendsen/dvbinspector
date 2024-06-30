@@ -96,7 +96,7 @@ public class ExportTree {
 		
 		try {
 			TransportStream transportStream = new TransportStream(tsFile);
-			transportStream.parseStream();
+			transportStream.parseStream(null);
 			
 			DefaultMutableTreeNode node = transportStream.getJTreeNode(2); // psi only
 			

@@ -88,7 +88,7 @@ public class TSLoader extends SwingWorker<TransportStream, Void>{
 		TransportStream transportStream = null;
 		try {
 			transportStream = new TransportStream(file);
-			transportStream.parsePSITables(control.getFrame());
+			transportStream.parseStream(control.getFrame());
 
 		} catch (final NotAnMPEGFileException e) {
 			try {

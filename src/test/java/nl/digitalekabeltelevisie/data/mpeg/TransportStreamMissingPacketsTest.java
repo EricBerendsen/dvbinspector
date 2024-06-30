@@ -21,7 +21,7 @@ public class TransportStreamMissingPacketsTest {
 		// spaces in dirname...
 		final File ts =  new File(resource.toURI());
 		transportStream = new TransportStream(ts);
-		transportStream.parseStream();
+		transportStream.parseStream(null);
 
 	}
 	

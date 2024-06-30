@@ -66,7 +66,7 @@ public class PesHandlerSetup {
 		// spaces in dirname...
 		final File ts =  new File(resource.toURI());
 		transportStream = new TransportStream(ts);
-		transportStream.parseStream();
+		transportStream.parseStream(null);
 	
 		final Map<Integer, GeneralPidHandler> map = new HashMap<>();
 	

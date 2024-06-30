@@ -285,16 +285,7 @@ public class TransportStream implements TreeNode{
 	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
 	 * @throws IOException
 	 */
-	public void parseStream() throws IOException {
-		parsePSITables(null);
-	}
-
-
-	/**
-	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
-	 * @throws IOException
-	 */
-	public void parsePSITables(final java.awt.Component component) throws IOException {
+	public void parseStream(final java.awt.Component component) throws IOException {
 		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
 			final byte[] buf = new byte[packetLength];
 			int count = 0;

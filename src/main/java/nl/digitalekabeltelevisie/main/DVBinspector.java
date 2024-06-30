@@ -163,7 +163,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			try {
 				final TransportStream ts = new TransportStream(filename);
 				inspector.transportStream = ts;
-				inspector.transportStream.parseStream();
+				inspector.transportStream.parseStream(null);
 								
 				if (args.length >= 2) {
 					final Map<Integer, GeneralPidHandler> pidHandlerMap = determinePidHandlers(args, ts);
