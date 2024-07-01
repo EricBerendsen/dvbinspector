@@ -42,10 +42,12 @@ import nl.digitalekabeltelevisie.util.Utils;
  * 
  */
 public class AVCHDPacket extends TSPacket {
+	
+	static final int bit30 = 0x4000_0000;
 	byte[] tp_extra_header; 
-	int roll_over;
+	long roll_over;
 
-	public AVCHDPacket(byte[] buf, int no, TransportStream ts, int roll_over) {
+	public AVCHDPacket(byte[] buf, int no, TransportStream ts, long roll_over) {
 		super(Arrays.copyOfRange(buf,4,192), no, ts);
 		tp_extra_header = Arrays.copyOf(buf,4);
 		this.roll_over = roll_over;
@@ -71,7 +73,11 @@ public class AVCHDPacket extends TSPacket {
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(buildNodeLabel(),this));
 		final DefaultMutableTreeNode tpHeaderNode = new DefaultMutableTreeNode(new KVP("tp_extra_header",tp_extra_header,null));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Copy_permission_indicator",getCopyPermissionIndicator(),null)));
-		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",getArrivalTimestamp(),printPCRTime(getArrivalTimestamp()))));
+		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Roll-over",roll_over,null)));
+		final int arrivalTimestamp = getArrivalTimestamp();
+		long cats = (roll_over * bit30) + arrivalTimestamp;
+		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",arrivalTimestamp,printPCRTime(arrivalTimestamp))));
+		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Continuos ATS ",cats,printPCRTime(cats))));
 		t.add(tpHeaderNode);
 		addMainPacketDetails(modus, t);
 		return t;
@@ -100,6 +106,7 @@ public class AVCHDPacket extends TSPacket {
 		
 		
 		s.append("<br>Copy_permission_indicator: ").append(getCopyPermissionIndicator());
+		s.append("<br>roll-over: ").append(roll_over);
 		s.append("<br>Arrival_time_stamp: ").append(getArrivalTimestamp()).append(" (").append(printPCRTime(getArrivalTimestamp())).append(")").append("</span><br>");
 
 		addBasicPacketDetails(s, 4, coloring);
@@ -111,6 +118,16 @@ public class AVCHDPacket extends TSPacket {
 
 		s.append("<br><b>Data:</b><br>").append(getHTMLHexviewColored(buf,0,192,coloring));
 		return s.toString();
+	}
+
+
+	public long getRoll_over() {
+		return roll_over;
+	}
+
+
+	public void setRoll_over(long roll_over) {
+		this.roll_over = roll_over;
 	}
 
 

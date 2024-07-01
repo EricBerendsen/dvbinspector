@@ -157,6 +157,7 @@ public class TransportStream implements TreeNode{
 	private final short [] packet_pid;
 
 	private OffsetHelper offsetHelper = null;
+	private RollOverHelper rollOverHelper = null;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -216,6 +217,7 @@ public class TransportStream implements TreeNode{
 		int max_packets = (int) (len / packetLength);
 		packet_pid = new short [max_packets];
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
+		rollOverHelper = new RollOverHelper(max_packets);
 
 	}
 	
@@ -346,6 +348,9 @@ public class TransportStream implements TreeNode{
 		int bytes_read = 0;
 		int lastHandledSyncErrorPacket = -1;
 		final byte[] buf = new byte[AVCHD_PACKET_LENGTH];
+		
+		int lastArrivalTimeStamp = Integer.MAX_VALUE;
+		long currentRollOver = -1L;
 		do {
 			final long offset = fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, AVCHD_PACKET_LENGTH);
@@ -358,7 +363,14 @@ public class TransportStream implements TreeNode{
 					fileStream.unread(nextBytes,0,next);
 				}
 				offsetHelper.addPacket(no_packets, offset);
-				processPacket(new AVCHDPacket(buf, count, this,0));
+				final AVCHDPacket packet = new AVCHDPacket(buf, count, this,currentRollOver);
+				if(packet.getArrivalTimestamp()<lastArrivalTimeStamp) {
+					currentRollOver++;
+					packet.setRoll_over(currentRollOver);
+					rollOverHelper.addPacket(count, currentRollOver);
+				}
+				lastArrivalTimeStamp = packet.getArrivalTimestamp();
+				processPacket(packet);
 				count++;
 			} else { // something wrong, find next syncbyte. First push back the lot
 				if ((next != -1)) {
@@ -1131,12 +1143,13 @@ public class TransportStream implements TreeNode{
 			throws IOException {
 		TSPacket packet = null;
 		final long offset = offsetHelper.getOffset(packetNo);
+		long rollOver = rollOverHelper.getRollOver(packetNo);
 		randomAccessFile.seek(offset);
 		final byte [] buf = new byte[packetLength];
 		final int bytesRead = randomAccessFile.read(buf);
 		if(bytesRead==packetLength){
 			if(packetLength == AVCHD_PACKET_LENGTH) {
-				packet = new AVCHDPacket(buf, packetNo,this,0); //TODO handle roll-over
+				packet = new AVCHDPacket(buf, packetNo,this,rollOver); 
 			}else {
 				packet = new TSPacket(buf, packetNo,this);
 			}
