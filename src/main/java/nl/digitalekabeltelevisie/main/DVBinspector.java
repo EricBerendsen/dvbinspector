@@ -713,6 +713,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
 
+	@Override
 	public void stateChanged(final ChangeEvent e) {
 		enableViewMenus();
 	}
@@ -741,6 +742,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * called when "exit" is selected in menu.
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	public void actionPerformed(final ActionEvent e) {
 		saveWindowState();
 		System.exit(0);

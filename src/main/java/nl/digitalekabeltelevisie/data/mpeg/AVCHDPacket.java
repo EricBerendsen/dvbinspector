@@ -74,10 +74,8 @@ public class AVCHDPacket extends TSPacket {
 		final DefaultMutableTreeNode tpHeaderNode = new DefaultMutableTreeNode(new KVP("tp_extra_header",tp_extra_header,null));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Copy_permission_indicator",getCopyPermissionIndicator(),null)));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Roll-over",roll_over,null)));
-		final int arrivalTimestamp = getArrivalTimestamp();
-		long cats = (roll_over * bit30) + arrivalTimestamp;
-		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",arrivalTimestamp,printPCRTime(arrivalTimestamp))));
-		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Continuos ATS ",cats,printPCRTime(cats))));
+		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",getArrivalTimestamp(),printPCRTime(getArrivalTimestamp()))));
+		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Continuous ATS ",getTimeBase(),printPCRTime(getTimeBase()))));
 		t.add(tpHeaderNode);
 		addMainPacketDetails(modus, t);
 		return t;
@@ -107,7 +105,15 @@ public class AVCHDPacket extends TSPacket {
 		
 		s.append("<br>Copy_permission_indicator: ").append(getCopyPermissionIndicator());
 		s.append("<br>roll-over: ").append(roll_over);
-		s.append("<br>Arrival_time_stamp: ").append(getArrivalTimestamp()).append(" (").append(printPCRTime(getArrivalTimestamp())).append(")").append("</span><br>");
+		s.append("<br>Arrival_time_stamp: ").append(getArrivalTimestamp()).append(" (").append(printPCRTime(getArrivalTimestamp())).append(")");
+		s.append("<br>Continuous ATS: ").append(getTimeBase()).append(" (").append(printPCRTime(getTimeBase())).append(")");
+		int lowBits = getInt(tp_extra_header,0,4,MASK_9BITS);
+		s.append("<br>lowBits: ").append(lowBits);
+		if(lowBits >299) {
+			s.append("<br><br>lowBits > 299  <br><br>");
+		}
+		
+		s.append("</span><br>");
 
 		addBasicPacketDetails(s, 4, coloring);
 		
@@ -128,6 +134,17 @@ public class AVCHDPacket extends TSPacket {
 
 	public void setRoll_over(long roll_over) {
 		this.roll_over = roll_over;
+	}
+
+	
+	/**
+	 * for AVCHD file time corresponds to TP_header ATS (plus roll over
+	 */
+	
+	// TODO implement quirks mode for Humax, where last 9 bitss only use values 0-299 (like PCR)
+	@Override
+	public long getTimeBase() {
+		return (roll_over * bit30) + getArrivalTimestamp();
 	}
 
 

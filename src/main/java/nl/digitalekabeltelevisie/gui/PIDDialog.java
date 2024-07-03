@@ -125,7 +125,8 @@ PropertyChangeListener, ListSelectionListener {
 			 super(text);
 
 		 }
-		 public void actionPerformed(final ActionEvent e) {
+		 @Override
+		public void actionPerformed(final ActionEvent e) {
 			 final Enumeration<ChartLabel> el = leftListModel.elements();
 			 while(el.hasMoreElements()){
 				 rightListModel.addElement(el.nextElement());
@@ -144,6 +145,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 
 			final int index = leftList.getSelectedIndex();
@@ -169,6 +171,7 @@ PropertyChangeListener, ListSelectionListener {
 		public SwitchAction(final String text) {
 			super(text);
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final DefaultListModel<ChartLabel> tmp = leftListModel;
 			leftListModel = rightListModel;
@@ -190,6 +193,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -218,6 +222,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final Enumeration<ChartLabel> el = rightListModel.elements();
 			while(el.hasMoreElements()){
@@ -237,6 +242,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -260,6 +266,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -283,6 +290,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -311,6 +319,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -335,6 +344,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -358,6 +368,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final List<ChartLabel> shown = new ArrayList<>();
 
@@ -413,6 +424,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			clearAndHide();
 
@@ -558,8 +570,8 @@ PropertyChangeListener, ListSelectionListener {
 		pidPanel.add(sortButtonPanel);
 		pidPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 
-		packetSelectionStart = new PacketSelectionPanel("Start", 0, viewContext.getMaxPacket(), 0,viewContext.getTransportStream());
-		packetSelectionEnd = new PacketSelectionPanel("End",0, viewContext.getMaxPacket(), viewContext.getMaxPacket(),viewContext.getTransportStream());
+		packetSelectionStart = new PacketSelectionPanel("Start packet", 0, viewContext.getMaxPacket(), 0);
+		packetSelectionEnd = new PacketSelectionPanel("End packet",0, viewContext.getMaxPacket(), viewContext.getMaxPacket());
 
 		packetPanel.setLayout(new BoxLayout(packetPanel, BoxLayout.Y_AXIS));
 		packetPanel.add(packetSelectionStart);
@@ -607,6 +619,7 @@ PropertyChangeListener, ListSelectionListener {
 	}
 
 	/** This method handles events for the steps choosr field. */
+	@Override
 	public void actionPerformed(final ActionEvent e) {
 
 		// EMPTY
@@ -615,11 +628,13 @@ PropertyChangeListener, ListSelectionListener {
 
 
 
+	@Override
 	public void propertyChange(final PropertyChangeEvent evt) {
 		enableButtons();
 
 	}
 
+	@Override
 	public void valueChanged(final ListSelectionEvent e) {
 		enableButtons();
 

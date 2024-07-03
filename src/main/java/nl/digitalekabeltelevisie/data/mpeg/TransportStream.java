@@ -299,7 +299,7 @@ public class TransportStream implements TreeNode{
 			bitRate = -1;
 			bitRateTDT = -1;
 
-			if(packetLength == AVCHD_PACKET_LENGTH) {
+			if(isAVCHD()) {
 				readAVCHDPackets(fileStream);
 			} else {
 				readPackets(fileStream);
@@ -1090,7 +1090,10 @@ public class TransportStream implements TreeNode{
 	}
 
 	public String getShortPacketTime(final long packetNo){
-		String r = null;
+		
+		if(isAVCHD()) {
+			return Utils.printPCRTime(packetNo);
+		}
 
 		if(getBitRate()!=-1){ //can't calculate time  without a bitrate
 			Calendar now;
@@ -1103,12 +1106,14 @@ public class TransportStream implements TreeNode{
 			}
 			now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 			// return only the hours/min,secs and millisecs. Not TS recording will last days
-			r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
+			return now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 
-		}else{ // no bitrate
-			r = packetNo +" (packetNo)";
-		}
-		return r;
+		} // no bitrate
+		return packetNo +" (packetNo)";
+	}
+
+	public boolean isAVCHD() {
+		return packetLength == AVCHD_PACKET_LENGTH;
 	}
 
 	public PMTsection getPMTforPID(final int thisPID) {
@@ -1143,13 +1148,12 @@ public class TransportStream implements TreeNode{
 			throws IOException {
 		TSPacket packet = null;
 		final long offset = offsetHelper.getOffset(packetNo);
-		long rollOver = rollOverHelper.getRollOver(packetNo);
 		randomAccessFile.seek(offset);
 		final byte [] buf = new byte[packetLength];
 		final int bytesRead = randomAccessFile.read(buf);
 		if(bytesRead==packetLength){
-			if(packetLength == AVCHD_PACKET_LENGTH) {
-				packet = new AVCHDPacket(buf, packetNo,this,rollOver); 
+			if(isAVCHD()) {
+				packet = new AVCHDPacket(buf, packetNo,this,rollOverHelper.getRollOver(packetNo)); 
 			}else {
 				packet = new TSPacket(buf, packetNo,this);
 			}

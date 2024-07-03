@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,7 +38,6 @@ import javax.swing.BoundedRangeModel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -63,18 +62,14 @@ PropertyChangeListener {
 	private JSlider slider;
 	private BoundedRangeModel boundedRangeModel;
 
-	private final JLabel timeLabel = new JLabel();
 	private NumberFormat numberFormat;
-	private TransportStream transportStream;
 
 
-	PacketSelectionPanel( final String myTitle, final int low, final int upper, final int value, final TransportStream tStream) {
+	PacketSelectionPanel( final String myTitle, final int low, final int upper, final int value) {
 		super();
 		setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder(myTitle),
 				BorderFactory.createEmptyBorder(5,5,5,5)));
-
-		transportStream = tStream;
 
 
 		//Create the text field format, and then the text field.
@@ -126,7 +121,6 @@ PropertyChangeListener {
 		final JPanel timePanel = new JPanel();
 		timePanel.setLayout(new BoxLayout(timePanel,
 				BoxLayout.PAGE_AXIS));
-		timePanel.add(timeLabel);
 
 		//Put everything together.
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -156,9 +150,6 @@ PropertyChangeListener {
 		formatter.setMinimum(min);
 		formatter.setMaximum(max);
 		textField.setValue(val);
-		if(transportStream!=null){
-			timeLabel.setText(transportStream.getShortPacketTime(val));
-		}
 	}
 
 
@@ -178,10 +169,6 @@ PropertyChangeListener {
 		slider.setMaximum(max);
 		slider.setValue(val);
 		textField.setValue(val);
-		transportStream = ts;
-		if(transportStream!=null){
-			timeLabel.setText(transportStream.getShortPacketTime(val));
-		}
 	}
 
 	public int getValue(){

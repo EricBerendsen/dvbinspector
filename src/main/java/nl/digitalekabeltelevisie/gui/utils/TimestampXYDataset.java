@@ -50,8 +50,8 @@ public class TimestampXYDataset implements XYDataset {
     ArrayList<Integer> seriesOffset = new ArrayList<>();
     ArrayList<Integer> seriesViewContextLength = new ArrayList<>();
     
-    int startPacket;
-    int endPacket;
+    long startPacket;
+    long endPacket;
     
 	private static final Logger logger = Logger.getLogger(TimestampXYDataset.class.getName());
 
@@ -61,8 +61,12 @@ public class TimestampXYDataset implements XYDataset {
 		
 		short pcrPid= (short)pmt.getPcrPid();
 
-		startPacket = viewContext.getStartPacket();
-		endPacket = viewContext.getEndPacket();
+		int startPacketNo = viewContext.getStartPacket();
+		int endPacketNo = viewContext.getEndPacket()-1;
+		
+		startPacket = transportStream.getTSPacket(startPacketNo).getTimeBase();
+		endPacket = transportStream.getTSPacket(endPacketNo).getTimeBase() + 1;		
+		
 
 		if(transportStream.getPID(pcrPid)!=null){ // should not happen, however leave it up to UPC to fuck up...
 			String pcrLabel = pcrPid+" - "+transportStream.getShortLabel(pcrPid)+" PCR";
@@ -150,7 +154,7 @@ public class TimestampXYDataset implements XYDataset {
 			TimeStamp startKey = new TimeStamp(startPacket, 0);
 			TimeStamp endKey = new TimeStamp(endPacket, Long.MAX_VALUE);
 			Comparator<TimeStamp> comperator = Comparator
-											.comparingInt(TimeStamp::packetNo)
+											.comparingLong(TimeStamp::x)
 											.thenComparingLong(TimeStamp::time);
 			
 			int startOffset = Collections.binarySearch(list, startKey, comperator);
@@ -217,7 +221,7 @@ public class TimestampXYDataset implements XYDataset {
 
 	@Override
 	public Number getX(int series, int item) {
-		return getTimestamp(series, item).packetNo();
+		return getTimestamp(series, item).x();
 	}
 
 	private TimeStamp getTimestamp(int series, int item) {
@@ -226,7 +230,7 @@ public class TimestampXYDataset implements XYDataset {
 
 	@Override
 	public double getXValue(int series, int item) {
-		return getTimestamp(series, item).packetNo();
+		return getTimestamp(series, item).x();
 	}
 
 	@Override

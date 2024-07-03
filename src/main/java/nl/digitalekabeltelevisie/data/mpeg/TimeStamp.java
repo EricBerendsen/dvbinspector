@@ -26,7 +26,7 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg;
 
-public record TimeStamp(int packetNo, long time) {
+public record TimeStamp(long x, long time) {
 
 
 }

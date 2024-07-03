@@ -224,10 +224,10 @@ public class PID implements TreeNode{
 
 						final int pts_dts_flags = pesHeader.getPts_dts_flags();
 						if ((pts_dts_flags == 2) || (pts_dts_flags == 3)) { // PTS present,
-							ptsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getPts()));
+							ptsList.add(new TimeStamp(packet.getTimeBase(), pesHeader.getPts()));
 						}
 						if (pts_dts_flags == 3) { // DTS present,
-							dtsList.add(new TimeStamp(packet.getPacketNo(), pesHeader.getDts()));
+							dtsList.add(new TimeStamp(packet.getTimeBase(), pesHeader.getDts()));
 						}
 					}
 				} catch (Exception e) {
@@ -387,7 +387,7 @@ public class PID implements TreeNode{
 		AdaptationField adaptationField;
 		try{
 			adaptationField = packet.getAdaptationField();
-			processAdaptationField(adaptationField,packet.getPacketNo());
+			processAdaptationField(adaptationField,packet.getPacketNo(),packet.getTimeBase());
 		}catch(final RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			logger.log(Level.WARNING, "Error getting adaptationField", re);
 			adaptationField = null;
@@ -418,12 +418,12 @@ public class PID implements TreeNode{
 	}
 
 
-	private void processAdaptationField(AdaptationField adaptationField, int packetNo) {
+	private void processAdaptationField(AdaptationField adaptationField, int packetNo, long timeBase) {
 		processTEMI(adaptationField, temiList, packetNo);
 		if (adaptationField.isPCR_flag()) {
 			final PCR newPCR = adaptationField.getProgram_clock_reference();
 			if(PreferencesManager.isEnablePcrPtsView()) {
-				pcrList.add(new TimeStamp(packetNo, newPCR.getProgram_clock_reference_base()));
+				pcrList.add(new TimeStamp(timeBase, newPCR.getProgram_clock_reference_base()));
 			}
 			if ((firstPCR != null) && !adaptationField.isDiscontinuity_indicator()) {
 				final long packetsDiff = packetNo - firstPCRpacketNo;

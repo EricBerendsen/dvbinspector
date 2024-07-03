@@ -238,6 +238,12 @@ public class TSPacket implements HTMLSource, TreeNode{
 	}
 
 	/**
+	 * for CBR file time corresponds to packetNo
+	 */
+	public long getTimeBase() {
+		return packetNo;
+	}
+	/**
 	 * @param packet_no
 	 */
 	public void setPacketNo(final int packet_no) {
