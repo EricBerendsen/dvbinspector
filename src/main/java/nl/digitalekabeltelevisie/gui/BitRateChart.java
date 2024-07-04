@@ -198,27 +198,27 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	private static CategoryTableXYDataset createDataSet(final TransportStream transportStream,
 			final ViewContext viewContext, final int noPIDs) {
 
-		final short[]used_pids=new short[noPIDs];
-		final ChartLabel[] labels= new ChartLabel[noPIDs];
+		final short[] used_pids = new short[noPIDs];
+		final ChartLabel[] labels = new ChartLabel[noPIDs];
 		for (int i = 0; i < noPIDs; i++) {
-			labels[i]=viewContext.getShown().get(i);
-			used_pids[i]=viewContext.getShown().get(i).getPid();
+			labels[i] = viewContext.getShown().get(i);
+			used_pids[i] = viewContext.getShown().get(i).getPid();
 		}
-		final int numberOfSteps=viewContext.getGraphSteps();
+		final int numberOfSteps = viewContext.getGraphSteps();
 
 		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
 
-		for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
-			for(int step=0; step<numberOfSteps;step++){
+		for (int step = 0; step < numberOfSteps; step++) {
 
-				final int startPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step);
-				final int endPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step+1);
-				final int[] pidcount = countPidOccurrencesInStep(transportStream, startPacketStep, endPacketStep);
+			final int startPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step);
+			final int endPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step + 1);
+			final int[] pidcount = countPidOccurrencesInStep(transportStream, startPacketStep, endPacketStep);
 
-				if(transportStream.getBitRate()==-1){
-					categoryTableXYDataset.add(startPacketStep,pidcount[used_pids[pidIndex]],labels[pidIndex].getLabel());
+			for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
+				if (transportStream.getBitRate() == -1) {
+					categoryTableXYDataset.add(startPacketStep, pidcount[used_pids[pidIndex]], labels[pidIndex].getLabel());
 				} else if (endPacketStep > startPacketStep) {
-					categoryTableXYDataset.add(startPacketStep,((pidcount[used_pids[pidIndex]])*transportStream.getBitRate()) / (endPacketStep - startPacketStep),labels[pidIndex].getLabel());
+					categoryTableXYDataset.add(startPacketStep, ((pidcount[used_pids[pidIndex]]) * transportStream.getBitRate())	/ (endPacketStep - startPacketStep), labels[pidIndex].getLabel());
 				}
 			}
 		}
@@ -231,8 +231,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param endPacketStep
 	 * @return
 	 */
-	private static int[] countPidOccurrencesInStep(final TransportStream transportStream, final int startPacketStep,
-			final int endPacketStep) {
+	private static int[] countPidOccurrencesInStep(final TransportStream transportStream, final int startPacketStep, final int endPacketStep) {
 		final int [] pidcount = new int [8192];
 		for(int r = startPacketStep; r< endPacketStep;r++ ){
 			final int pid_current_packet=transportStream.getPacket_pid(r);
