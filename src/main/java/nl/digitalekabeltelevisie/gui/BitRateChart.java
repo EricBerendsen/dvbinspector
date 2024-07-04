@@ -208,10 +208,9 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
 
+		int startPacketStep = getFirstPacketNoOfStep(viewContext, 0);
 		for (int step = 0; step < numberOfSteps; step++) {
-
-			final int startPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step);
-			final int endPacketStep = getFirstPacketNoOfStep(viewContext, numberOfSteps, step + 1);
+			final int endPacketStep = getFirstPacketNoOfStep(viewContext, step + 1);
 			final int[] pidcount = countPidOccurrencesInStep(transportStream, startPacketStep, endPacketStep);
 
 			for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
@@ -221,6 +220,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 					categoryTableXYDataset.add(startPacketStep, ((pidcount[used_pids[pidIndex]]) * transportStream.getBitRate())	/ (endPacketStep - startPacketStep), labels[pidIndex].getLabel());
 				}
 			}
+			startPacketStep = endPacketStep;
 		}
 		return categoryTableXYDataset;
 	}
@@ -246,9 +246,11 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param step
 	 * @return
 	 */
-	private static int getFirstPacketNoOfStep(final ViewContext viewContext,
-			final int steps, final int step) {
-		return viewContext.getStartPacket() +(int)(((long)step*(long)(viewContext.getEndPacket() - viewContext.getStartPacket()))/steps);
+	private static int getFirstPacketNoOfStep(final ViewContext viewContext, final int step) {
+
+		int steps = viewContext.getGraphSteps();
+		final long packetsInSelectedRange = viewContext.getEndPacket() - viewContext.getStartPacket();
+		return viewContext.getStartPacket() + (int) ((step * packetsInSelectedRange) / steps);
 	}
 
 	private void addLegendRadioButtons() {
