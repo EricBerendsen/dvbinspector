@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
 import static nl.digitalekabeltelevisie.util.Utils.df2pos;
@@ -101,8 +102,6 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
  */
 public class TransportStream implements TreeNode{
 	
-	private static final int AVCHD_PACKET_LENGTH = 192;
-
 	public enum ComponentType{
 		AC3("Dolby Audio (AC3)"),
 		E_AC3("Enhanced Dolby Audio (AC3)"), 
@@ -1241,7 +1240,8 @@ public class TransportStream implements TreeNode{
 	}
 
 	public int getFirstAvchdPacketATS() {
-		return  packetATS[0];
+		return packetATS[0];
 	}
-	
+
+
 }

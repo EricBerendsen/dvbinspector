@@ -28,7 +28,6 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 public final class MPEGConstants {
-
 	/**
 	 * 
 	 */
@@ -37,6 +36,9 @@ public final class MPEGConstants {
 	}
 	public final static byte sync_byte=0x47;
 	public final static int	PAYLOAD_PACKET_LENGTH=188;
+
+	public final static int AVCHD_PACKET_LENGTH = 192;
+
 	public final static int system_clock_frequency=27000000;
 	public final static int NO_PCR_PID=0x1FFF;
 }

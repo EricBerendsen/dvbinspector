@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
+
 import java.awt.BorderLayout;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
@@ -39,6 +41,7 @@ import javax.swing.JRadioButton;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.MPEGConstants;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
@@ -141,8 +144,13 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
 		}else{
-			
-			final CategoryTableXYDataset categoryTableXYDataset = createDataSet(transportStream, viewContext);
+			CategoryTableXYDataset categoryTableXYDataset;
+		
+			if(transportStream.isAVCHD()) {
+				categoryTableXYDataset = createAvchdDataSet(transportStream, viewContext);
+			}else {
+				categoryTableXYDataset = createCbrDataSet(transportStream, viewContext);
+			}
 			//because we want custom colors, can not use ChartFactory.createStackedXYAreaChart(, this is almost literal copy
 
 			final XYPlot plot = createXYPlot(transportStream, viewContext, categoryTableXYDataset);
@@ -195,16 +203,12 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @param noPIDs
 	 * @return
 	 */
-	private static CategoryTableXYDataset createDataSet(final TransportStream transportStream,
+	private static CategoryTableXYDataset createCbrDataSet(final TransportStream transportStream,
 			final ViewContext viewContext) {
 
 		final int noPIDs=viewContext.getShown().size();
-		final short[] used_pids = new short[noPIDs];
-		final ChartLabel[] labels = new ChartLabel[noPIDs];
-		for (int i = 0; i < noPIDs; i++) {
-			labels[i] = viewContext.getShown().get(i);
-			used_pids[i] = viewContext.getShown().get(i).getPid();
-		}
+		final short[] used_pids = createUsedPidsArray(viewContext, noPIDs);
+		final ChartLabel[] labels = createChartLabels(viewContext, noPIDs);
 		final int numberOfSteps = viewContext.getGraphSteps();
 
 		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
@@ -224,6 +228,22 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			startPacketStep = endPacketStep;
 		}
 		return categoryTableXYDataset;
+	}
+
+	private static short[] createUsedPidsArray(final ViewContext viewContext, final int noPIDs) {
+		final short[] used_pids = new short[noPIDs];
+		for (int i = 0; i < noPIDs; i++) {
+			used_pids[i] = viewContext.getShown().get(i).getPid();
+		}
+		return used_pids;
+	}
+
+	private static ChartLabel[] createChartLabels(final ViewContext viewContext, final int noPIDs) {
+		final ChartLabel[] labels = new ChartLabel[noPIDs];
+		for (int i = 0; i < noPIDs; i++) {
+			labels[i] = viewContext.getShown().get(i);
+		}
+		return labels;
 	}
 
 	/**
@@ -282,6 +302,48 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 		buttonPanel.add(onButton);
 		buttonPanel.add(offButton);
+	}
+
+	/**
+	 * @param transportStream
+	 * @param viewContext
+	 * @param noPIDs
+	 * @return
+	 */
+	private static CategoryTableXYDataset createAvchdDataSet(final TransportStream transportStream,
+			final ViewContext viewContext) {
+	
+		final int noPIDs=viewContext.getShown().size();
+		final short[] used_pids = createUsedPidsArray(viewContext, noPIDs);
+		final ChartLabel[] labels = createChartLabels(viewContext, noPIDs);
+		final int numberOfSteps = viewContext.getGraphSteps();
+	
+		final CategoryTableXYDataset categoryTableXYDataset = new CategoryTableXYDataset();
+	
+		long startSelectionTime = transportStream.getAVCHDPacketTime(viewContext.getStartPacket());
+		long endSelectionTime = transportStream.getAVCHDPacketTime(viewContext.getEndPacket() - 1);
+		long selectionDuration = endSelectionTime - startSelectionTime;
+		
+		int packetIndex = viewContext.getStartPacket();
+		long startStepPacketTime = startSelectionTime;
+		for (int step = 0; step < numberOfSteps; step++) {
+			final long endStepPacketTime = startSelectionTime + (selectionDuration * (step + 1) / numberOfSteps);
+			final int [] pidcount = new int [8192];
+			while(packetIndex< viewContext.getEndPacket() && transportStream.getAVCHDPacketTime(packetIndex) <= endStepPacketTime) {
+				final int pid_current_packet=transportStream.getPacket_pid(packetIndex);
+				pidcount[pid_current_packet]++;
+				packetIndex++;
+			}
+	
+			for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
+				if (endStepPacketTime > startStepPacketTime) {
+					final long bitRate = ((pidcount[used_pids[pidIndex]]) * (long) MPEGConstants.system_clock_frequency) * 8 * AVCHD_PACKET_LENGTH	/ (endStepPacketTime - startStepPacketTime) ;
+					categoryTableXYDataset.add(startStepPacketTime, bitRate, labels[pidIndex].getLabel());
+				}
+			}
+			startStepPacketTime = endStepPacketTime;
+		}
+		return categoryTableXYDataset;
 	}
 
 
