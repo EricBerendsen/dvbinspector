@@ -106,8 +106,8 @@ public class PID implements TreeNode{
 	private int dup_found=0; // number of times current packet is duplicated. 
 	private PCR lastPCR;
 	private PCR firstPCR;
-	private long lastPCRpacketNo = -1;
-	private long firstPCRpacketNo =-1;
+	private int lastPCRpacketNo = -1;
+	private int firstPCRpacketNo =-1;
 	private long pcr_count =-1;
 	protected TransportStream parentTransportStream = null;
 
