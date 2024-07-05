@@ -155,6 +155,7 @@ public class TransportStream implements TreeNode{
 	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and Grid View
 	 */
 	private final short [] packet_pid;
+	private int [] packetATS = null;
 
 	private OffsetHelper offsetHelper = null;
 	private RollOverHelper rollOverHelper = null;
@@ -216,6 +217,9 @@ public class TransportStream implements TreeNode{
 		packetLength = determinePacketLengthToUse(file);
 		int max_packets = (int) (len / packetLength);
 		packet_pid = new short [max_packets];
+		if(isAVCHD()) {
+			packetATS = new int [max_packets];
+		}
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
 		rollOverHelper = new RollOverHelper(max_packets);
 
@@ -364,12 +368,14 @@ public class TransportStream implements TreeNode{
 				}
 				offsetHelper.addPacket(no_packets, offset);
 				final AVCHDPacket packet = new AVCHDPacket(buf, count, this,currentRollOver);
-				if(packet.getArrivalTimestamp()<lastArrivalTimeStamp) {
+				final int arrivalTimestamp = packet.getArrivalTimestamp();
+				if (arrivalTimestamp < lastArrivalTimeStamp) {
 					currentRollOver++;
 					packet.setRoll_over(currentRollOver);
 					rollOverHelper.addPacket(count, currentRollOver);
 				}
-				lastArrivalTimeStamp = packet.getArrivalTimestamp();
+				lastArrivalTimeStamp = arrivalTimestamp;
+				packetATS[count] = arrivalTimestamp;
 				processPacket(packet);
 				count++;
 			} else { // something wrong, find next syncbyte. First push back the lot
@@ -398,6 +404,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	private void processPacket(TSPacket packet) {
+		assert(no_packets == packet.packetNo);
 		final short pid = packet.getPID();
 		packet_pid[no_packets]=addPIDFlags(packet, pid);
 		no_packets++;
@@ -1165,6 +1172,15 @@ public class TransportStream implements TreeNode{
 	}
 
 
+	// TODO implement quirks mode for Humax, where last 9 bitss only use values 0-299 (like PCR)
+
+	public long getAVCHDPacketTime(int packetNo) {
+		if(isAVCHD() && packetATS != null) {
+			return (rollOverHelper.getRollOver(packetNo) *  0x4000_0000) + packetATS[packetNo] - packetATS[0];
+		}
+		throw new RuntimeException("Not an AVCHD File!");
+	}
+	
 	public PID getPID(final int p){
 		return pids[p];
 	}
@@ -1222,6 +1238,10 @@ public class TransportStream implements TreeNode{
 			}
 		}
 		return false;
+	}
+
+	public int getFirstAvchdPacketATS() {
+		return  packetATS[0];
 	}
 	
 }

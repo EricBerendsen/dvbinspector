@@ -141,11 +141,11 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
 		}else{
-			final int noPIDs=viewContext.getShown().size();
-			final CategoryTableXYDataset categoryTableXYDataset = createDataSet(transportStream, viewContext, noPIDs);
+			
+			final CategoryTableXYDataset categoryTableXYDataset = createDataSet(transportStream, viewContext);
 			//because we want custom colors, can not use ChartFactory.createStackedXYAreaChart(, this is almost literal copy
 
-			final XYPlot plot = createXYPlot(transportStream, viewContext, noPIDs, categoryTableXYDataset);
+			final XYPlot plot = createXYPlot(transportStream, viewContext, categoryTableXYDataset);
 	        freeChart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, legendVisible);
 			plot.setRangePannable(true);
 			plot.setDomainPannable(true);
@@ -165,8 +165,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @return
 	 */
 	private static XYPlot createXYPlot(final TransportStream transportStream,
-			final ViewContext viewContext, final int noPIDs,
-			final CategoryTableXYDataset categoryTableXYDataset) {
+			final ViewContext viewContext, final CategoryTableXYDataset categoryTableXYDataset) {
 		final NumberAxis xAxis = new NumberAxis("time");
 		xAxis.setAutoRangeIncludesZero(false);
 		xAxis.setLowerMargin(0.0);
@@ -178,6 +177,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 		final StackedXYAreaRenderer2 renderer = new StackedXYAreaRenderer2(
 		        toolTipGenerator, null);
+		final int noPIDs=viewContext.getShown().size();
 		for (int i = 0; i < noPIDs; i++) {
 			renderer.setSeriesPaint(i, viewContext.getShown().get(i).getColor());
 		}
@@ -196,8 +196,9 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @return
 	 */
 	private static CategoryTableXYDataset createDataSet(final TransportStream transportStream,
-			final ViewContext viewContext, final int noPIDs) {
+			final ViewContext viewContext) {
 
+		final int noPIDs=viewContext.getShown().size();
 		final short[] used_pids = new short[noPIDs];
 		final ChartLabel[] labels = new ChartLabel[noPIDs];
 		for (int i = 0; i < noPIDs; i++) {

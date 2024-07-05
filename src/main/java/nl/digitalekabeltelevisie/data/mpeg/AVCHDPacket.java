@@ -43,13 +43,16 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class AVCHDPacket extends TSPacket {
 	
-	static final int bit30 = 0x4000_0000;
 	byte[] tp_extra_header; 
+	// TODO remove, the rollOverHelper In ts can handle all that is needed.
 	long roll_over;
+	
+	int arrivalTimestamp;
 
 	public AVCHDPacket(byte[] buf, int no, TransportStream ts, long roll_over) {
 		super(Arrays.copyOfRange(buf,4,192), no, ts);
 		tp_extra_header = Arrays.copyOf(buf,4);
+		arrivalTimestamp = getInt(tp_extra_header,0,4,MASK_30BITS);
 		this.roll_over = roll_over;
 	}
 
@@ -63,7 +66,7 @@ public class AVCHDPacket extends TSPacket {
 	}
 	
 	public int getArrivalTimestamp() {
-		return getInt(tp_extra_header,0,4,MASK_30BITS);
+		return arrivalTimestamp;
 	}
 	
 	
@@ -74,7 +77,7 @@ public class AVCHDPacket extends TSPacket {
 		final DefaultMutableTreeNode tpHeaderNode = new DefaultMutableTreeNode(new KVP("tp_extra_header",tp_extra_header,null));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Copy_permission_indicator",getCopyPermissionIndicator(),null)));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Roll-over",roll_over,null)));
-		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",getArrivalTimestamp(),printPCRTime(getArrivalTimestamp()))));
+		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",arrivalTimestamp,printPCRTime(arrivalTimestamp))));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Continuous ATS ",getTimeBase(),printPCRTime(getTimeBase()))));
 		t.add(tpHeaderNode);
 		addMainPacketDetails(modus, t);
@@ -144,8 +147,11 @@ public class AVCHDPacket extends TSPacket {
 	// TODO implement quirks mode for Humax, where last 9 bitss only use values 0-299 (like PCR)
 	@Override
 	public long getTimeBase() {
-		return (roll_over * bit30) + getArrivalTimestamp();
+		return transportStream.getAVCHDPacketTime(packetNo);
 	}
 
 
+	public String toString() {
+		return super.toString() + " , arrivalTimestamp: "+arrivalTimestamp + " , roll_over: " + roll_over;
+	}
 }
