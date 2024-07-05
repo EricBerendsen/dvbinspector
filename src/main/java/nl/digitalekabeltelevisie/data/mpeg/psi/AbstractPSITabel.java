@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,6 +31,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 public abstract class AbstractPSITabel implements TreeNode{
 
@@ -56,6 +57,7 @@ public abstract class AbstractPSITabel implements TreeNode{
 	 * @param modus
 	 */
 	public static void addSectionVersionsToJTree(final DefaultMutableTreeNode n, final TableSection tableSection, final int modus) {
+		
 		n.add(tableSection.getJTreeNode(modus));
 		TableSection versions = tableSection.getNextVersion();
 		while(versions!=null){ // even show new versions
@@ -81,7 +83,13 @@ public abstract class AbstractPSITabel implements TreeNode{
 		}
 		if(last.equals(newSection)){ // already have an instance if this section, just update the stats on the existing section
 			int previousPacketNo = last.getLast_packet_no();
-			int distance = newSection.getPacket_no() - previousPacketNo;
+			TransportStream transportStream = newSection.getParentTransportStream();
+			long distance ;
+			if(newSection.getParentTransportStream().isAVCHD()) {
+				distance = transportStream.getAVCHDPacketTime(newSection.getPacket_no()) - transportStream.getAVCHDPacketTime(previousPacketNo);
+			}else {
+				distance = newSection.getPacket_no() - previousPacketNo;
+			}
 			if(distance>last.getMaxPacketDistance()){
 				last.setMaxPacketDistance(distance);
 			}

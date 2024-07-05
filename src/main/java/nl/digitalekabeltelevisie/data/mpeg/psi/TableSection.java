@@ -36,10 +36,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
-import nl.digitalekabeltelevisie.data.mpeg.PID;
-import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -80,8 +77,14 @@ public class TableSection implements TreeNode{
 
 	private int firstPacketNo=-1;
 	private int lastPacketNo=-1;
-	private int minPacketDistance = Integer.MAX_VALUE;
-	private int maxPacketDistance = 0;
+	/**
+	 * min distance between packets, in packets for CBR, in system_ ticks for AVCHD
+	 */
+	private long minPacketDistance = Long.MAX_VALUE;
+	/**
+	 * max distance between packets, in packets for CBR, in system_ ticks for AVCHD
+	 */
+	private long maxPacketDistance = 0;
 	private int occurrenceCount=-1;
 	private int packetNo=-1;
 
@@ -403,10 +406,18 @@ public class TableSection implements TreeNode{
 			t.add(new DefaultMutableTreeNode(new KVP("occurrence_count", occurrenceCount,
 					getRepetitionRate(occurrenceCount, lastPacketNo, firstPacketNo))));
 			if (occurrenceCount >= 2) {
-				t.add(new DefaultMutableTreeNode(
-						new KVP("min_packet_distance", minPacketDistance, getDistanceSecs(minPacketDistance))));
-				t.add(new DefaultMutableTreeNode(
-						new KVP("max_packet_distance", maxPacketDistance, getDistanceSecs(maxPacketDistance))));
+				if(getParentTransportStream().isAVCHD()) {
+					t.add(new DefaultMutableTreeNode(
+							new KVP("min_packet_distance in ticks", minPacketDistance, printPCRTime(minPacketDistance) )));
+					t.add(new DefaultMutableTreeNode(
+							new KVP("max_packet_distance in ticks", maxPacketDistance, printPCRTime(maxPacketDistance))));
+					
+				}else {
+					t.add(new DefaultMutableTreeNode(
+							new KVP("min_packet_distance in packets", minPacketDistance, getDistanceSecs(minPacketDistance))));
+					t.add(new DefaultMutableTreeNode(
+							new KVP("max_packet_distance in packets", maxPacketDistance, getDistanceSecs(maxPacketDistance))));
+				}
 			}
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("table_id", tableId, getTableType(tableId))));
@@ -452,7 +463,13 @@ public class TableSection implements TreeNode{
 		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
 		final long bitrate=parentTransportStream.getBitRate();
 		if((bitrate>0)&&(count>=2)){
-			final float repRate=((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
+			float repRate;
+			if(parentTransportStream.isAVCHD()) {
+				final long timeDiff = parentTransportStream.getAVCHDPacketTime(last) - parentTransportStream.getAVCHDPacketTime(first);
+				repRate = ((float) timeDiff) / MPEGConstants.system_clock_frequency / (count - 1);  
+			}else {
+				repRate = ((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
+			}
 			try (Formatter formatter = new Formatter()){
 				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
 			}
@@ -460,11 +477,11 @@ public class TableSection implements TreeNode{
 		return null;
 	}
 
-	private String getDistanceSecs(final long last) {
+	private String getDistanceSecs(final long distanceInPackets) {
 		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
 		final long bitrate=parentTransportStream.getBitRate();
 		if(bitrate>0){
-			final float repRate=((float)(last)*parentTransportStream.getPacketLenghth()*8)/(bitrate);
+			final float repRate=((float)(distanceInPackets)*parentTransportStream.getPacketLenghth()*8)/(bitrate);
 			try (Formatter formatter = new Formatter()){
 				return "interval: "+formatter.format("%3.3f seconds",repRate);
 			}
@@ -593,19 +610,19 @@ public class TableSection implements TreeNode{
 		return raw_data.equals(other.raw_data);
 	}
 
-	public int getMinPacketDistance() {
+	public long getMinPacketDistance() {
 		return minPacketDistance;
 	}
 
-	public void setMinPacketDistance(int minPacketDistance) {
+	public void setMinPacketDistance(long minPacketDistance) {
 		this.minPacketDistance = minPacketDistance;
 	}
 
-	public int getMaxPacketDistance() {
+	public long getMaxPacketDistance() {
 		return maxPacketDistance;
 	}
 
-	public void setMaxPacketDistance(int maxPacketDistance) {
+	public void setMaxPacketDistance(long maxPacketDistance) {
 		this.maxPacketDistance = maxPacketDistance;
 	}
 

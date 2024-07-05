@@ -30,26 +30,10 @@ package nl.digitalekabeltelevisie.data.mpeg;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
-import static nl.digitalekabeltelevisie.util.Utils.df2pos;
-import static nl.digitalekabeltelevisie.util.Utils.df3pos;
-import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeShortString;
-import static nl.digitalekabeltelevisie.util.Utils.getUTCCalender;
-import static nl.digitalekabeltelevisie.util.Utils.psiOnlyModus;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,12 +63,8 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video266.H266Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
-import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
@@ -1053,8 +1033,11 @@ public class TransportStream implements TreeNode{
 		}
 	}
 
-	public String getPacketTime(final long packetNo){
+	public String getPacketTime(final int packetNo){
 		String r = null;
+		if(isAVCHD()) {
+			return Utils.printPCRTime(getAVCHDPacketTime(packetNo));
+		}
 
 		if(getBitRate()!=-1){ //can't calculate time without a bitrate
 			if(zeroTime==null){

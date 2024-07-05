@@ -92,7 +92,7 @@ public class AVCHDPacket extends TSPacket {
 			s.append("<br>File Offset: ").append(packetOffset);
 		}
 		if(transportStream!=null){
-			//s.append("<br>Time: ").append(transportStream.getPacketTime(packetNo));
+			s.append("<br>Time: ").append(transportStream.getPacketTime(packetNo));
 			final short pid = transportStream.getPacket_pid(packetNo);
 			s.append("<br>").append(escapeHtmlBreakLines(transportStream.getShortLabel(pid))).append("<br>");
 		}
