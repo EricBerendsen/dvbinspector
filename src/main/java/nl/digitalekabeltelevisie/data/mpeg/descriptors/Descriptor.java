@@ -302,6 +302,11 @@ public class Descriptor implements TreeNode {
 
 			// https://professional.dolby.com/siteassets/pdfs/dolby-vision-bitstreams-in-mpeg-2-transport-stream-multiplex-v1.2.pdf
 			case 0xB0 -> "user defined: DOVI_video_stream_descriptor";
+			
+			// https://pub.smpte.org/pub/st2038/st2038-2021.pdf
+			// SMPTE ST 2038:2021
+			case 0xC4 -> "user defined: anc_data_descriptor";
+			
 			case 0xCE -> "user defined: CI Protection Descriptor";
 			case 0xD4 -> "user defined: Ziggo Package Descriptor";
 
