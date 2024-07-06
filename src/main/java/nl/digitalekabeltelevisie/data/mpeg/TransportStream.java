@@ -352,11 +352,10 @@ public class TransportStream implements TreeNode{
 					fileStream.unread(nextBytes,0,next);
 				}
 				offsetHelper.addPacket(no_packets, offset);
-				final AVCHDPacket packet = new AVCHDPacket(buf, count, this,currentRollOver);
+				final AVCHDPacket packet = new AVCHDPacket(buf, count, this);
 				final int arrivalTimestamp = packet.getArrivalTimestamp();
 				if (arrivalTimestamp < lastArrivalTimeStamp) {
 					currentRollOver++;
-					packet.setRoll_over(currentRollOver);
 					rollOverHelper.addPacket(count, currentRollOver);
 				}
 				lastArrivalTimeStamp = arrivalTimestamp;
@@ -1148,7 +1147,7 @@ public class TransportStream implements TreeNode{
 		final int bytesRead = randomAccessFile.read(buf);
 		if(bytesRead==packetLength){
 			if(isAVCHD()) {
-				packet = new AVCHDPacket(buf, packetNo,this,rollOverHelper.getRollOver(packetNo)); 
+				packet = new AVCHDPacket(buf, packetNo,this); 
 			}else {
 				packet = new TSPacket(buf, packetNo,this);
 			}
