@@ -406,6 +406,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		enableM7Fastscan.setSelected(PreferencesManager.isEnableM7Fastscan());
 		settingsMenu.add(enableM7Fastscan);
 		
+		final JCheckBoxMenuItem enableHumaxAtsFix = new JCheckBoxMenuItem(new EnableHumaxAtsFixAction(this));
+		enableHumaxAtsFix.setMnemonic(KeyEvent.VK_H);
+		enableHumaxAtsFix.setSelected(PreferencesManager.isEnableHumaxAtsFix());
+		settingsMenu.add(enableHumaxAtsFix);
 		settingsMenu.addSeparator();
 		
 		final JCheckBoxMenuItem enableGenericPSI = new JCheckBoxMenuItem(new EnableGenericPSIAction(this));

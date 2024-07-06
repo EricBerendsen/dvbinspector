@@ -138,6 +138,11 @@ public class TransportStream implements TreeNode{
 
 	private OffsetHelper offsetHelper = null;
 	private RollOverHelper rollOverHelper = null;
+	
+	/**
+	 * Get value once at creation of TS, because getting it for every call to getAVCHDPacketTime is a bit expensive
+	 */
+	private static boolean enabledHumaxAtsFix = false;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -198,6 +203,7 @@ public class TransportStream implements TreeNode{
 		packet_pid = new short [max_packets];
 		if(isAVCHD()) {
 			packetATS = new int [max_packets];
+			enabledHumaxAtsFix = PreferencesManager.isEnableHumaxAtsFix();
 		}
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
 		rollOverHelper = new RollOverHelper(max_packets);
@@ -1154,13 +1160,35 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	// TODO implement quirks mode for Humax, where last 9 bitss only use values 0-299 (like PCR)
-
+	/**
+	 * returns time (in system ticks) for packet, starting from 0 for begin of file, based on ATS in TP_extra_header
+	 * Only to be called for an AVCHD file
+	 */
 	public long getAVCHDPacketTime(int packetNo) {
-		if(isAVCHD() && packetATS != null) {
-			return (rollOverHelper.getRollOver(packetNo) *  0x4000_0000) + packetATS[packetNo] - packetATS[0];
+		if (isAVCHD() && packetATS != null) {
+			if (enabledHumaxAtsFix) {
+				return (rollOverHelper.getRollOver(packetNo) * ((0x4000_0000 >> 9) + 1) * 300)
+						+ fixHumaxAts(packetATS[packetNo]) - fixHumaxAts(packetATS[0]);
+			}
+			return (rollOverHelper.getRollOver(packetNo) * 0x4000_0000) + packetATS[packetNo] - packetATS[0];
 		}
 		throw new RuntimeException("Not an AVCHD File!");
+	}
+
+	/**
+	 * Humax PVR records partial TS with arrival time stamps in P_extra_header coded as if PCR;
+	 * the last 9 bits are the extension, and have values 0 - 299. 
+	 * Then it roles over into the base. 
+	 * This method corrects the Humax ATS into a normal ATS
+	 * 
+	 * Normal AVCHD files use continuous numbering with 30 bits
+	 *  
+	 */
+	private static int fixHumaxAts(int ats) {
+		int extension = ats & 0b1_1111_1111; // 9 bits
+		int base = (ats & 0x3FFF_FE00) >> 9;
+		
+		return base * 300 + extension;
 	}
 	
 	public PID getPID(final int p){

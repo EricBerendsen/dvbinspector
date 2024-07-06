@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -57,6 +57,7 @@ public class PreferencesManager {
 	private static final String ENABLE_DSMCC = "enable_dsmcc";
 	private static final String ENABLE_PCR_PTS = "enable_pcr_pts";
 	private static final String ENABLE_M7_FASTSCAN = "enable_m7_fastscan";
+	private static final String ENABLE_HUMAX_ATS_FIX = "enable_humax_ats_fix";
 
 	private static final String SELECT_MPEG_FILE_FILTER = "select_mpeg_file_filter";
 	
@@ -125,11 +126,11 @@ public class PreferencesManager {
 	}
 
 	public static int getWindowWidth() {
-		return prefs.getInt(PreferencesManager.WINDOW_WIDTH, 980);
+		return prefs.getInt(WINDOW_WIDTH, 980);
 	}
 
 	public static int getWindowHeight() {
-		return prefs.getInt(PreferencesManager.WINDOW_HEIGHT, 700);
+		return prefs.getInt(WINDOW_HEIGHT, 700);
 	}
 
 	public static void setWindowX(int x) {
@@ -197,6 +198,19 @@ public class PreferencesManager {
 		return getEnableM7Fastscan();
 	}
 
+	public static void setEnableHumaxAtsFix(boolean enabled) {
+		prefs.putBoolean(ENABLE_HUMAX_ATS_FIX, enabled);
+	}
+
+	public static boolean getEnableHumaxAtsFix() {
+		return prefs.getBoolean(ENABLE_HUMAX_ATS_FIX, false);
+	}
+
+	public static boolean isEnableHumaxAtsFix() {
+		return getEnableHumaxAtsFix();
+	}
+
+	
 	public static void setSelectMpegFileFilter(boolean enabled) {
 		prefs.putBoolean(SELECT_MPEG_FILE_FILTER, enabled);
 
