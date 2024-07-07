@@ -230,7 +230,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		return categoryTableXYDataset;
 	}
 
-	private static short[] createUsedPidsArray(final ViewContext viewContext, final int noPIDs) {
+	static short[] createUsedPidsArray(final ViewContext viewContext, final int noPIDs) {
 		final short[] used_pids = new short[noPIDs];
 		for (int i = 0; i < noPIDs; i++) {
 			used_pids[i] = viewContext.getShown().get(i).getPid();
