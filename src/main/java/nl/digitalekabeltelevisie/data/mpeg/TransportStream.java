@@ -28,6 +28,7 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.MAX_PIDS;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
 import static nl.digitalekabeltelevisie.util.Utils.*;
@@ -129,7 +130,7 @@ public class TransportStream implements TreeNode{
 	/**
 	 * after reading a TSPAcket from the file, it is handed over to the respective PID for aggregating into larger PES or PSI sections, and further processing.
 	 */
-	private PID [] pids = new PID [8192];
+	private PID [] pids = new PID [MAX_PIDS];
 	/**
 	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and Grid View
 	 */
@@ -282,7 +283,7 @@ public class TransportStream implements TreeNode{
 		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
 			no_packets = 0;
 
-			pids = new PID[8192];
+			pids = new PID[MAX_PIDS];
 			psi = new PSI();
 			error_packets = 0;
 			bitRate = -1;
@@ -986,12 +987,12 @@ public class TransportStream implements TreeNode{
 	}
 
 	public short [] getUsedPids(){
-		final int no=getNoPIDS();
-		final short [] r = new short[no];
-		int i=0;
-		for(short  pid=0; pid<8192;pid++){
-			if(pids[pid]!=null){
-				r[i++]=pid;
+		final int no = getNoPIDS();
+		final short[] r = new short[no];
+		int i = 0;
+		for (short pid = 0; pid < MAX_PIDS; pid++) {
+			if (pids[pid] != null) {
+				r[i++] = pid;
 			}
 		}
 		return r;

@@ -28,6 +28,8 @@
 package nl.digitalekabeltelevisie.gui;
 
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.MAX_PIDS;
+
 
 import java.awt.BorderLayout;
 import java.text.FieldPosition;
@@ -253,7 +255,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	 * @return
 	 */
 	private static int[] countPidOccurrencesInStep(final TransportStream transportStream, final int startPacketStep, final int endPacketStep) {
-		final int [] pidcount = new int [8192];
+		final int [] pidcount = new int [MAX_PIDS];
 		for(int r = startPacketStep; r< endPacketStep;r++ ){
 			final int pid_current_packet=transportStream.getPacket_pid(r);
 			pidcount[pid_current_packet]++;
@@ -328,7 +330,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		long startStepPacketTime = startSelectionTime;
 		for (int step = 0; step < numberOfSteps; step++) {
 			final long endStepPacketTime = startSelectionTime + (selectionDuration * (step + 1) / numberOfSteps);
-			final int [] pidcount = new int [8192];
+			final int [] pidcount = new int [MAX_PIDS];
 			while(packetIndex< viewContext.getEndPacket() && transportStream.getAVCHDPacketTime(packetIndex) <= endStepPacketTime) {
 				final int pid_current_packet=transportStream.getPacket_pid(packetIndex);
 				pidcount[pid_current_packet]++;

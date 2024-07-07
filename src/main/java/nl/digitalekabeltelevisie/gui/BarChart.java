@@ -28,8 +28,12 @@ package nl.digitalekabeltelevisie.gui;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
 import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.MPEGConstants;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.MAX_PIDS;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -80,31 +84,11 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 		}
 	}
 
-	private static CategoryDataset createDataSet(final TransportStream transportStream, final ViewContext viewContext) {
-
-		final short[] used_pids = BitRateChart.createUsedPidsArray(viewContext, viewContext.getShown().size());
-		final ChartLabel[] labels = createPidChartLabels(transportStream, viewContext, viewContext.getShown().size());
-		final ChartLabel[] avgMinMaxLabels = createAvgMinMaxLabels();
-
-		// AVG
-		final int[] pidCountAvg = new int[8192];
-		for (int r = viewContext.getStartPacket(); r < viewContext.getEndPacket(); r++) {
-			final int pid_current_packet = transportStream.getPacket_pid(r);
-			pidCountAvg[pid_current_packet]++;
-		}
-
-		final double[][] data = createCbrData(transportStream, viewContext, used_pids, pidCountAvg);
-		
-		
-		final CategoryDataset dataSet = DatasetUtils.createCategoryDataset(avgMinMaxLabels, labels, data);
-		return dataSet;
-	}
-
 	private static double[][] createCbrData(final TransportStream transportStream, final ViewContext viewContext,
 			final short[] used_pids, final int[] pidCountAvg) {
 		final int steps = viewContext.getGraphSteps();
 		final double[][] data = new double[3][viewContext.getShown().size()];
-
+	
 		for (int i = 0; i < used_pids.length; i++) {
 			if (transportStream.getBitRate() != -1) {
 				data[0][i] = (pidCountAvg[used_pids[i]] * transportStream.getBitRate()) / (viewContext.getEndPacket() - viewContext.getStartPacket());
@@ -112,20 +96,20 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 				data[0][i] = pidCountAvg[used_pids[i]];
 			}
 		}
-
+	
 		// MIN/MAX
 		// initialize minima at maximum value
 		for (int i = 0; i < used_pids.length; i++) {
 			data[1][i] = Double.MAX_VALUE;
 		}
-
+	
 		for (int t = 0; t < steps; t++) {
-
-			final int[] periodpidcount = new int[8192];
-
+	
+			final int[] periodpidcount = new int[MAX_PIDS];
+	
 			final int startPacketStep = viewContext.getStartPacket() + (int) (((long) t * (long) (viewContext.getEndPacket() - viewContext.getStartPacket())) / steps);
 			final int endPacketStep = viewContext.getStartPacket() + (int) (((long) (t + 1) * (long) (viewContext.getEndPacket() - viewContext.getStartPacket())) / steps);
-
+	
 			for (int r = startPacketStep; r < endPacketStep; r++) {
 				final int pid_current_packet = transportStream.getPacket_pid(r);
 				periodpidcount[pid_current_packet]++;
@@ -145,6 +129,83 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 					data[2][i] = periodCount;
 				}
 			}
+		}
+		return data;
+	}
+
+	private static CategoryDataset createDataSet(final TransportStream transportStream, final ViewContext viewContext) {
+
+		final short[] usedPids = BitRateChart.createUsedPidsArray(viewContext, viewContext.getShown().size());
+		final ChartLabel[] labels = createPidChartLabels(transportStream, viewContext, viewContext.getShown().size());
+		final ChartLabel[] avgMinMaxLabels = createAvgMinMaxLabels();
+
+		// AVG
+		final int[] pidCountAvg = new int[MAX_PIDS];
+		for (int r = viewContext.getStartPacket(); r < viewContext.getEndPacket(); r++) {
+			final int pid_current_packet = transportStream.getPacket_pid(r);
+			pidCountAvg[pid_current_packet]++;
+		}
+
+		final double[][] data;
+		if(transportStream.isAVCHD()) {
+			data = createAvchdData(transportStream, viewContext, usedPids, pidCountAvg);
+		}else {
+			data = createCbrData(transportStream, viewContext, usedPids, pidCountAvg);
+		}
+		
+		
+		final CategoryDataset dataSet = DatasetUtils.createCategoryDataset(avgMinMaxLabels, labels, data);
+		return dataSet;
+	}
+
+	private static double[][] createAvchdData(final TransportStream transportStream, final ViewContext viewContext,
+			final short[] usedPids, final int[] pidCountAvg) {
+		final int steps = viewContext.getGraphSteps();
+		final double[][] data = new double[3][viewContext.getShown().size()];
+
+		long startSelectionTime = transportStream.getAVCHDPacketTime(viewContext.getStartPacket());
+		long endSelectionTime = transportStream.getAVCHDPacketTime(viewContext.getEndPacket() - 1);
+		long selectionDuration = endSelectionTime - startSelectionTime;
+
+		for (int i = 0; i < usedPids.length; i++) {
+				data[0][i] = (pidCountAvg[usedPids[i]] * (double) MPEGConstants.system_clock_frequency) * 8 * AVCHD_PACKET_LENGTH	/ selectionDuration;
+		}
+
+		// MIN/MAX
+		// initialize minima at maximum value
+		for (int i = 0; i < usedPids.length; i++) {
+			data[1][i] = Double.MAX_VALUE;
+		}
+
+
+		int packetIndex = viewContext.getStartPacket();
+		long startStepPacketTime = startSelectionTime;
+		
+		for (int step = 0; step < steps; step++) {
+			final long endStepPacketTime = startSelectionTime + (selectionDuration * (step + 1) / steps);
+
+			final int[] periodpidcount = new int[MAX_PIDS];
+
+
+			while(packetIndex< viewContext.getEndPacket() && transportStream.getAVCHDPacketTime(packetIndex) <= endStepPacketTime) {
+				final int pid_current_packet=transportStream.getPacket_pid(packetIndex);
+				periodpidcount[pid_current_packet]++;
+				packetIndex++;
+			}
+			
+			for (int i = 0; i < usedPids.length; i++) {
+				if (endStepPacketTime > startStepPacketTime) {
+					final double bitRate = ((periodpidcount[usedPids[i]]) * (double) MPEGConstants.system_clock_frequency) * 8 * AVCHD_PACKET_LENGTH	/ (endStepPacketTime - startStepPacketTime) ;
+					if (bitRate < data[1][i]) { // new min found
+						data[1][i] = bitRate;
+					}
+					if (bitRate > data[2][i]) { // new max found
+						data[2][i] = bitRate;
+					}
+				}
+			}
+			startStepPacketTime = endStepPacketTime;
+
 		}
 		return data;
 	}
