@@ -356,7 +356,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, "auto (Recommended)", 0);
 		 
 		for(int i: TransportStream.ALLOWED_PACKET_LENGTHS) {
-			addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, ""+i, i);
+			addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, i + (i==192?" (AVCHD/Blu-ray)":""), i);
 		}
 		settingsMenu.add(packetLengthSubMenu);
 
