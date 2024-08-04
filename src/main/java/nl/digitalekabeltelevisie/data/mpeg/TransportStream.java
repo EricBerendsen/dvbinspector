@@ -205,9 +205,9 @@ public class TransportStream implements TreeNode{
 		if(isAVCHD()) {
 			packetATS = new int [max_packets];
 			enabledHumaxAtsFix = PreferencesManager.isEnableHumaxAtsFix();
+			rollOverHelper = new RollOverHelper(max_packets);
 		}
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
-		rollOverHelper = new RollOverHelper(max_packets);
 
 	}
 	
