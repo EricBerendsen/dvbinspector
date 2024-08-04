@@ -163,7 +163,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 			try {
 				final TransportStream ts = new TransportStream(filename);
 				inspector.transportStream = ts;
-				inspector.transportStream.parseStream();
+				inspector.transportStream.parseStream(null);
 								
 				if (args.length >= 2) {
 					final Map<Integer, GeneralPidHandler> pidHandlerMap = determinePidHandlers(args, ts);
@@ -356,7 +356,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, "auto (Recommended)", 0);
 		 
 		for(int i: TransportStream.ALLOWED_PACKET_LENGTHS) {
-			addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, ""+i, i);
+			addPacketLengthMenuItem(packetLengthSubMenu, packetLengthMenuGroup, i + (i==192?" (AVCHD/Blu-ray)":""), i);
 		}
 		settingsMenu.add(packetLengthSubMenu);
 
@@ -406,6 +406,10 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		enableM7Fastscan.setSelected(PreferencesManager.isEnableM7Fastscan());
 		settingsMenu.add(enableM7Fastscan);
 		
+		final JCheckBoxMenuItem enableHumaxAtsFix = new JCheckBoxMenuItem(new EnableHumaxAtsFixAction(this));
+		enableHumaxAtsFix.setMnemonic(KeyEvent.VK_H);
+		enableHumaxAtsFix.setSelected(PreferencesManager.isEnableHumaxAtsFix());
+		settingsMenu.add(enableHumaxAtsFix);
 		settingsMenu.addSeparator();
 		
 		final JCheckBoxMenuItem enableGenericPSI = new JCheckBoxMenuItem(new EnableGenericPSIAction(this));
@@ -713,6 +717,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
 
+	@Override
 	public void stateChanged(final ChangeEvent e) {
 		enableViewMenus();
 	}
@@ -741,6 +746,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	 * called when "exit" is selected in menu.
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
+	@Override
 	public void actionPerformed(final ActionEvent e) {
 		saveWindowState();
 		System.exit(0);

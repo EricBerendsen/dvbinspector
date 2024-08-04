@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -95,7 +95,7 @@ PropertyChangeListener, ListSelectionListener {
 	private final PacketSelectionPanel packetSelectionStart;
 	private final PacketSelectionPanel packetSelectionEnd;
 	private final JComboBox<Integer> stepsChooser;
-	public static final Integer[] STEP_OPTIONS = {1,2,5,10,20,50,100,200,500};
+	public static final Integer[] STEP_OPTIONS = {1,2,5,10,20,50,100,200,500,1000};
 
 
 	public  void enableButtons(){
@@ -125,7 +125,8 @@ PropertyChangeListener, ListSelectionListener {
 			 super(text);
 
 		 }
-		 public void actionPerformed(final ActionEvent e) {
+		 @Override
+		public void actionPerformed(final ActionEvent e) {
 			 final Enumeration<ChartLabel> el = leftListModel.elements();
 			 while(el.hasMoreElements()){
 				 rightListModel.addElement(el.nextElement());
@@ -144,6 +145,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 
 			final int index = leftList.getSelectedIndex();
@@ -169,6 +171,7 @@ PropertyChangeListener, ListSelectionListener {
 		public SwitchAction(final String text) {
 			super(text);
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final DefaultListModel<ChartLabel> tmp = leftListModel;
 			leftListModel = rightListModel;
@@ -190,6 +193,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -218,6 +222,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final Enumeration<ChartLabel> el = rightListModel.elements();
 			while(el.hasMoreElements()){
@@ -237,6 +242,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -260,6 +266,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -283,6 +290,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -311,6 +319,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -335,6 +344,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final int index = rightList.getSelectedIndex();
 
@@ -358,6 +368,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final List<ChartLabel> shown = new ArrayList<>();
 
@@ -413,6 +424,7 @@ PropertyChangeListener, ListSelectionListener {
 			super(text);
 
 		}
+		@Override
 		public void actionPerformed(final ActionEvent e) {
 			clearAndHide();
 
@@ -451,6 +463,7 @@ PropertyChangeListener, ListSelectionListener {
 
 		}
 		rightList = new JList<>(rightListModel);
+		rightList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 
 		final JPanel buttonPanel = new JPanel();
@@ -558,8 +571,8 @@ PropertyChangeListener, ListSelectionListener {
 		pidPanel.add(sortButtonPanel);
 		pidPanel.add(Box.createRigidArea(new Dimension(10, 10)));
 
-		packetSelectionStart = new PacketSelectionPanel("Start", 0, viewContext.getMaxPacket(), 0,viewContext.getTransportStream());
-		packetSelectionEnd = new PacketSelectionPanel("End",0, viewContext.getMaxPacket(), viewContext.getMaxPacket(),viewContext.getTransportStream());
+		packetSelectionStart = new PacketSelectionPanel("Start packet", 0, viewContext.getMaxPacket(), 0);
+		packetSelectionEnd = new PacketSelectionPanel("End packet",0, viewContext.getMaxPacket(), viewContext.getMaxPacket());
 
 		packetPanel.setLayout(new BoxLayout(packetPanel, BoxLayout.Y_AXIS));
 		packetPanel.add(packetSelectionStart);
@@ -607,6 +620,7 @@ PropertyChangeListener, ListSelectionListener {
 	}
 
 	/** This method handles events for the steps choosr field. */
+	@Override
 	public void actionPerformed(final ActionEvent e) {
 
 		// EMPTY
@@ -615,11 +629,13 @@ PropertyChangeListener, ListSelectionListener {
 
 
 
+	@Override
 	public void propertyChange(final PropertyChangeEvent evt) {
 		enableButtons();
 
 	}
 
+	@Override
 	public void valueChanged(final ListSelectionEvent e) {
 		enableButtons();
 
@@ -644,8 +660,8 @@ PropertyChangeListener, ListSelectionListener {
 			rightListModel.addElement(label);
 		}
 
-		packetSelectionStart.setRangeValue(0, viewContex.getMaxPacket()-1, viewContex.getStartPacket(),viewContex.getTransportStream());
-		packetSelectionEnd.setRangeValue(1, viewContex.getMaxPacket(), viewContex.getEndPacket(),viewContex.getTransportStream());
+		packetSelectionStart.setRangeValue(0, viewContex.getMaxPacket()-1, viewContex.getStartPacket());
+		packetSelectionEnd.setRangeValue(1, viewContex.getMaxPacket(), viewContex.getEndPacket());
 
 		for(int i=0; i<stepsChooser.getItemCount();i++ ){
 			if(viewContex.getGraphSteps()==stepsChooser.getItemAt(i)){

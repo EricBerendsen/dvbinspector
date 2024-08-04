@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,9 @@
 
 package nl.digitalekabeltelevisie.util;
 
+/**
+ * Keeps track of at which position in file packets start. 
+ */
 public class OffsetHelper {
 
 	private RangeHashMap<Integer, Long> rangeHashMap = new RangeHashMap<>();

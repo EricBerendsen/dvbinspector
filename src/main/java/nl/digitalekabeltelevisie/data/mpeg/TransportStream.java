@@ -27,28 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
+import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.MAX_PIDS;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.sync_byte;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
-import static nl.digitalekabeltelevisie.util.Utils.df2pos;
-import static nl.digitalekabeltelevisie.util.Utils.df3pos;
-import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeShortString;
-import static nl.digitalekabeltelevisie.util.Utils.getUTCCalender;
-import static nl.digitalekabeltelevisie.util.Utils.psiOnlyModus;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,12 +64,8 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video264.Video14496Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video266.H266Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
-import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable;
-import nl.digitalekabeltelevisie.data.mpeg.psi.NIT;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
-import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
@@ -148,13 +130,20 @@ public class TransportStream implements TreeNode{
 	/**
 	 * after reading a TSPAcket from the file, it is handed over to the respective PID for aggregating into larger PES or PSI sections, and further processing.
 	 */
-	private PID [] pids = new PID [8192];
+	private PID [] pids = new PID [MAX_PIDS];
 	/**
 	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and Grid View
 	 */
 	private final short [] packet_pid;
+	private int [] packetATS = null;
 
 	private OffsetHelper offsetHelper = null;
+	private RollOverHelper rollOverHelper = null;
+	
+	/**
+	 * Get value once at creation of TS, because getting it for every call to getAVCHDPacketTime is a bit expensive
+	 */
+	private static boolean enabledHumaxAtsFix = false;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -189,7 +178,7 @@ public class TransportStream implements TreeNode{
 
 	private int packetLength = 188;
 
-	public static final int [] ALLOWED_PACKET_LENGTHS = {188,192,204,208};
+	public static final int [] ALLOWED_PACKET_LENGTHS = {188,AVCHD_PACKET_LENGTH,204,208};
 	
 
 	/**
@@ -213,6 +202,11 @@ public class TransportStream implements TreeNode{
 		packetLength = determinePacketLengthToUse(file);
 		int max_packets = (int) (len / packetLength);
 		packet_pid = new short [max_packets];
+		if(isAVCHD()) {
+			packetATS = new int [max_packets];
+			enabledHumaxAtsFix = PreferencesManager.isEnableHumaxAtsFix();
+			rollOverHelper = new RollOverHelper(max_packets);
+		}
 		offsetHelper = new OffsetHelper(max_packets,packetLength);
 
 	}
@@ -285,59 +279,105 @@ public class TransportStream implements TreeNode{
 	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
 	 * @throws IOException
 	 */
-	public void parseStream() throws IOException {
-		parsePSITables(null);
-	}
-
-
-	/**
-	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
-	 * @throws IOException
-	 */
-	public void parsePSITables(final java.awt.Component component) throws IOException {
+	public void parseStream(final java.awt.Component component) throws IOException {
 		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
-			final byte[] buf = new byte[packetLength];
-			int count = 0;
 			no_packets = 0;
 
-			pids = new PID[8192];
+			pids = new PID[MAX_PIDS];
 			psi = new PSI();
 			error_packets = 0;
 			bitRate = -1;
 			bitRateTDT = -1;
 
-			int bytes_read = 0;
-			int lastHandledSyncErrorPacket = -1;
-			do {
-				final long offset = fileStream.getPosition();
-				bytes_read = fileStream.read(buf, 0, packetLength);
-				final int next = fileStream.read();
-				if ((bytes_read == packetLength) && (buf[0] == MPEGConstants.sync_byte)
-						&& ((next == -1) || (next == MPEGConstants.sync_byte))) {
-					// always push back first byte of next packet
-					if ((next != -1)) {
-						fileStream.unread(next);
-					}
-					offsetHelper.addPacket(no_packets, offset);
-					processPacket(new TSPacket(buf, count, this));
-					count++;
-				} else { // something wrong, find next syncbyte. First push back the lot
-					if ((next != -1)) {
-						if (lastHandledSyncErrorPacket != no_packets) {
-							sync_errors++;
-							logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
-									no_packets));
-							lastHandledSyncErrorPacket = no_packets;
-						}
-						fileStream.unread(next);
-						fileStream.unread(buf, 0, bytes_read);
-						// now read 1 byte and restart all
-						fileStream.read(); // ignore result
-					}
-				}
-			} while (bytes_read == packetLength);
+			if(isAVCHD()) {
+				readAVCHDPackets(fileStream);
+			} else {
+				readPackets(fileStream);
+			}
 		}
 		postProcess();
+	}
+
+	private void readPackets(PositionPushbackInputStream fileStream) throws IOException {
+		int count = 0;
+		int bytes_read = 0;
+		int lastHandledSyncErrorPacket = -1;
+		final byte[] buf = new byte[packetLength];
+		do {
+			final long offset = fileStream.getPosition();
+			bytes_read = fileStream.read(buf, 0, packetLength);
+			final int next = fileStream.read();
+			if ((bytes_read == packetLength) && (buf[0] == MPEGConstants.sync_byte)
+					&& ((next == -1) || (next == MPEGConstants.sync_byte))) {
+				// always push back first byte of next packet
+				if ((next != -1)) {
+					fileStream.unread(next);
+				}
+				offsetHelper.addPacket(no_packets, offset);
+				processPacket(new TSPacket(buf, count, this));
+				count++;
+			} else { // something wrong, find next syncbyte. First push back the lot
+				if ((next != -1)) {
+					if (lastHandledSyncErrorPacket != no_packets) {
+						sync_errors++;
+						logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
+								no_packets));
+						lastHandledSyncErrorPacket = no_packets;
+					}
+					fileStream.unread(next);
+					fileStream.unread(buf, 0, bytes_read);
+					// now read 1 byte and restart all
+					fileStream.read(); // ignore result
+				}
+			}
+		} while (bytes_read == packetLength);
+	}
+
+	private void readAVCHDPackets(PositionPushbackInputStream fileStream) throws IOException {
+		int count = 0;
+		int bytes_read = 0;
+		int lastHandledSyncErrorPacket = -1;
+		final byte[] buf = new byte[AVCHD_PACKET_LENGTH];
+		
+		int lastArrivalTimeStamp = Integer.MAX_VALUE;
+		long currentRollOver = -1L;
+		do {
+			final long offset = fileStream.getPosition();
+			bytes_read = fileStream.read(buf, 0, AVCHD_PACKET_LENGTH);
+			final byte[] nextBytes =new byte[5];
+			final int next = fileStream.read(nextBytes,0,5);
+			if ((bytes_read == packetLength) && (buf[4] == MPEGConstants.sync_byte)
+					&& ((next != 5) || (nextBytes[4] == MPEGConstants.sync_byte))) {
+				// always push back first byte of next packet
+				if ((next != -1)) {
+					fileStream.unread(nextBytes,0,next);
+				}
+				offsetHelper.addPacket(no_packets, offset);
+				final AVCHDPacket packet = new AVCHDPacket(buf, count, this);
+				final int arrivalTimestamp = packet.getArrivalTimestamp();
+				if (arrivalTimestamp < lastArrivalTimeStamp) {
+					currentRollOver++;
+					rollOverHelper.addPacket(count, currentRollOver);
+				}
+				lastArrivalTimeStamp = arrivalTimestamp;
+				packetATS[count] = arrivalTimestamp;
+				processPacket(packet);
+				count++;
+			} else { // something wrong, find next syncbyte. First push back the lot
+				if ((next != -1)) {
+					if (lastHandledSyncErrorPacket != no_packets) {
+						sync_errors++;
+						logger.severe(String.format("Did not find sync byte, resyncing at offset:%d, packet_no:%d", offset,
+								no_packets));
+						lastHandledSyncErrorPacket = no_packets;
+					}
+					fileStream.unread(nextBytes,0,next);
+					fileStream.unread(buf, 0, bytes_read);
+					// now read 1 byte and restart all
+					fileStream.read(); // ignore result
+				}
+			}
+		} while (bytes_read == packetLength);
 	}
 
 	public void postProcess() {
@@ -349,6 +389,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	private void processPacket(TSPacket packet) {
+		assert(no_packets == packet.packetNo);
 		final short pid = packet.getPID();
 		packet_pid[no_packets]=addPIDFlags(packet, pid);
 		no_packets++;
@@ -946,12 +987,12 @@ public class TransportStream implements TreeNode{
 	}
 
 	public short [] getUsedPids(){
-		final int no=getNoPIDS();
-		final short [] r = new short[no];
-		int i=0;
-		for(short  pid=0; pid<8192;pid++){
-			if(pids[pid]!=null){
-				r[i++]=pid;
+		final int no = getNoPIDS();
+		final short[] r = new short[no];
+		int i = 0;
+		for (short pid = 0; pid < MAX_PIDS; pid++) {
+			if (pids[pid] != null) {
+				r[i++] = pid;
 			}
 		}
 		return r;
@@ -998,8 +1039,11 @@ public class TransportStream implements TreeNode{
 		}
 	}
 
-	public String getPacketTime(final long packetNo){
+	public String getPacketTime(final int packetNo){
 		String r = null;
+		if(isAVCHD()) {
+			return Utils.printPCRTime(getAVCHDPacketTime(packetNo));
+		}
 
 		if(getBitRate()!=-1){ //can't calculate time without a bitrate
 			if(zeroTime==null){
@@ -1041,7 +1085,10 @@ public class TransportStream implements TreeNode{
 	}
 
 	public String getShortPacketTime(final long packetNo){
-		String r = null;
+		
+		if(isAVCHD()) {
+			return Utils.printPCRTime(packetNo);
+		}
 
 		if(getBitRate()!=-1){ //can't calculate time  without a bitrate
 			Calendar now;
@@ -1054,12 +1101,14 @@ public class TransportStream implements TreeNode{
 			}
 			now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
 			// return only the hours/min,secs and millisecs. Not TS recording will last days
-			r = now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
+			return now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
 
-		}else{ // no bitrate
-			r = packetNo +" (packetNo)";
-		}
-		return r;
+		} // no bitrate
+		return packetNo +" (packetNo)";
+	}
+
+	public boolean isAVCHD() {
+		return packetLength == AVCHD_PACKET_LENGTH;
 	}
 
 	public PMTsection getPMTforPID(final int thisPID) {
@@ -1098,7 +1147,11 @@ public class TransportStream implements TreeNode{
 		final byte [] buf = new byte[packetLength];
 		final int bytesRead = randomAccessFile.read(buf);
 		if(bytesRead==packetLength){
-			packet = new TSPacket(buf, packetNo,this);
+			if(isAVCHD()) {
+				packet = new AVCHDPacket(buf, packetNo,this); 
+			}else {
+				packet = new TSPacket(buf, packetNo,this);
+			}
 			packet.setPacketOffset(offset);
 		}else{
 			logger.warning(String.format("read less then packetLenghth (%d) bytes, actual read: %d", packetLength, bytesRead));
@@ -1107,6 +1160,37 @@ public class TransportStream implements TreeNode{
 	}
 
 
+	/**
+	 * returns time (in system ticks) for packet, starting from 0 for begin of file, based on ATS in TP_extra_header
+	 * Only to be called for an AVCHD file
+	 */
+	public long getAVCHDPacketTime(int packetNo) {
+		if (isAVCHD() && packetATS != null) {
+			if (enabledHumaxAtsFix) {
+				return (rollOverHelper.getRollOver(packetNo) * ((0x4000_0000 >> 9) + 1) * 300)
+						+ fixHumaxAts(packetATS[packetNo]) - fixHumaxAts(packetATS[0]);
+			}
+			return (rollOverHelper.getRollOver(packetNo) * 0x4000_0000) + packetATS[packetNo] - packetATS[0];
+		}
+		throw new RuntimeException("Not an AVCHD File!");
+	}
+
+	/**
+	 * Humax PVR records partial TS with arrival time stamps in P_extra_header coded as if PCR;
+	 * the last 9 bits are the extension, and have values 0 - 299. 
+	 * Then it roles over into the base. 
+	 * This method corrects the Humax ATS into a normal ATS
+	 * 
+	 * Normal AVCHD files use continuous numbering with 30 bits
+	 *  
+	 */
+	private static int fixHumaxAts(int ats) {
+		int extension = ats & 0b1_1111_1111; // 9 bits
+		int base = (ats & 0x3FFF_FE00) >> 9;
+		
+		return base * 300 + extension;
+	}
+	
 	public PID getPID(final int p){
 		return pids[p];
 	}
@@ -1165,5 +1249,10 @@ public class TransportStream implements TreeNode{
 		}
 		return false;
 	}
-	
+
+	public int getFirstAvchdPacketATS() {
+		return packetATS[0];
+	}
+
+
 }

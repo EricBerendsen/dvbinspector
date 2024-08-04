@@ -2,7 +2,7 @@
  *  
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl) 
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl) 
  * 
  *  This file is part of DVB Inspector.
  *  
@@ -28,7 +28,6 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 public final class MPEGConstants {
-
 	/**
 	 * 
 	 */
@@ -37,6 +36,11 @@ public final class MPEGConstants {
 	}
 	public final static byte sync_byte=0x47;
 	public final static int	PAYLOAD_PACKET_LENGTH=188;
+
+	public final static int AVCHD_PACKET_LENGTH = 192;
+
 	public final static int system_clock_frequency=27000000;
+	
 	public final static int NO_PCR_PID=0x1FFF;
+	public static final int MAX_PIDS = 8192;
 }

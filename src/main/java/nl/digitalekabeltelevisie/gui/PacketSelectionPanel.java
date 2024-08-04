@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,14 +38,12 @@ import javax.swing.BoundedRangeModel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.NumberFormatter;
 
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 
 /**
@@ -63,18 +61,14 @@ PropertyChangeListener {
 	private JSlider slider;
 	private BoundedRangeModel boundedRangeModel;
 
-	private final JLabel timeLabel = new JLabel();
 	private NumberFormat numberFormat;
-	private TransportStream transportStream;
 
 
-	PacketSelectionPanel( final String myTitle, final int low, final int upper, final int value, final TransportStream tStream) {
+	PacketSelectionPanel( final String myTitle, final int low, final int upper, final int value) {
 		super();
 		setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder(myTitle),
 				BorderFactory.createEmptyBorder(5,5,5,5)));
-
-		transportStream = tStream;
 
 
 		//Create the text field format, and then the text field.
@@ -126,7 +120,6 @@ PropertyChangeListener {
 		final JPanel timePanel = new JPanel();
 		timePanel.setLayout(new BoxLayout(timePanel,
 				BoxLayout.PAGE_AXIS));
-		timePanel.add(timeLabel);
 
 		//Put everything together.
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -146,6 +139,7 @@ PropertyChangeListener {
 
 
 	/** Updates the text field when the main data model is updated. */
+	@Override
 	public void stateChanged(final ChangeEvent e) {
 		final NumberFormatter formatter = (NumberFormatter)textField.getFormatter();
 
@@ -156,9 +150,6 @@ PropertyChangeListener {
 		formatter.setMinimum(min);
 		formatter.setMaximum(max);
 		textField.setValue(val);
-		if(transportStream!=null){
-			timeLabel.setText(transportStream.getShortPacketTime(val));
-		}
 	}
 
 
@@ -166,6 +157,7 @@ PropertyChangeListener {
 	 * Detects when the value of the text field (not necessarily the same
 	 * number as you'd get from getText) changes.
 	 */
+	@Override
 	public void propertyChange(final PropertyChangeEvent e) {
 		if ("value".equals(e.getPropertyName())) {
 			final Number value = (Number)e.getNewValue();
@@ -173,15 +165,11 @@ PropertyChangeListener {
 		}
 	}
 
-	public void setRangeValue(final int min, final int max, final int val,final TransportStream ts){
+	public void setRangeValue(final int min, final int max, final int val){
 		slider.setMinimum(min);
 		slider.setMaximum(max);
 		slider.setValue(val);
 		textField.setValue(val);
-		transportStream = ts;
-		if(transportStream!=null){
-			timeLabel.setText(transportStream.getShortPacketTime(val));
-		}
 	}
 
 	public int getValue(){

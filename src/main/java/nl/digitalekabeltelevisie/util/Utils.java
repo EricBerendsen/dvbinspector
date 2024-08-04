@@ -118,7 +118,9 @@ public final class Utils {
 	public static final int MASK_20BITS=0xF_FFFF;
 	public static final int MASK_22BITS=0x3F_FFFF;
 	public static final int MASK_24BITS=0xFF_FFFF;
-	public static final int MASK_31BITS=0x7FF_FFFFF;
+	public static final int MASK_30BITS=0x3FFF_FFFF;
+
+	public static final int MASK_31BITS=0x7FFF_FFFF;
 
 	public static final int MASK_32BITS=0xFFFF_FFFF;
 	public static final long MASK_33BITS=0x1_FFFF_FFFFL;

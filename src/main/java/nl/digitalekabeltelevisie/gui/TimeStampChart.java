@@ -171,6 +171,13 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	private JCheckBox temiOptionCheckBox = new JCheckBox("enable");
 	private JPanel seriesSelectionPanel;
 
+	// TODO disable when packetsize == 192, means not CBR
+
+	private JRadioButton timeButton;
+	// TODO disable when packetsize == 192, means not CBR
+
+	private JRadioButton packetNoButton;
+
 
 	/**
 	 * Creates a new TimeStampChart
@@ -252,6 +259,12 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			temiOptionCheckBox.setEnabled(false);
 			
 		}else{
+			
+			timeButton.setEnabled(!transportStream.isAVCHD());
+			packetNoButton.setEnabled(!transportStream.isAVCHD());
+			if(transportStream.isAVCHD()) {
+				usepacketTime = true;
+			}
 			final PMTs streamPmts = transportStream.getPsi().getPmts();
 			if(streamPmts.getPmts().isEmpty()){
 				chartPanel.setChart(GuiUtils.createTitleOnlyChart("No PMTs found, nothing to display in this graph"));
@@ -471,7 +484,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	private void addTimePacketNoRadioButtons(JPanel buttonPanel) {
 		final JLabel typeLabel = new JLabel("X-Axis:");
 		buttonPanel.add(typeLabel);
-		final JRadioButton timeButton = new JRadioButton("Time");
+		timeButton = new JRadioButton("Time");
 		timeButton.addActionListener(e -> {
 			if(!usepacketTime){
 				usepacketTime = true;
@@ -480,7 +493,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 				}
 			}
 		});
-		final JRadioButton packetNoButton = new JRadioButton("Packet No.");
+		packetNoButton = new JRadioButton("Packet No.");
 		packetNoButton.addActionListener(e -> {
 			if(usepacketTime){
 				usepacketTime = false;
