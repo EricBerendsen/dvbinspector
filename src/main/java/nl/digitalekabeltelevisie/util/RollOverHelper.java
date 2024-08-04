@@ -28,7 +28,7 @@
 package nl.digitalekabeltelevisie.util;
 
 /**
- * Keeps track of at roll-over for AVCHD packets (192 bytes) 
+ * Keeps track of ats roll-over for AVCHD/Blu-ray packets (192 bytes) 
  */
 public class RollOverHelper {
 

@@ -39,7 +39,11 @@ import nl.digitalekabeltelevisie.util.RangeHashMap;
 import nl.digitalekabeltelevisie.util.Utils;
 
 /**
- * 
+ *  AVCHD and Blu-ray use same format for 192 byte TS packets, first 4 bytes are tp_extra_header. 
+ *  See Table 3-34 TP_extra_header. in "Advanced Access Content System (AACS) Blu-ray Disc Pre-recorded Book" (AACS_Spec_BD_Prerecorded_Final_0.951.pdf)
+ *  
+ *  See <a href="https://stackoverflow.com/questions/32354754/how-to-use-timestamps-for-seeking-in-m2ts-files">https://stackoverflow.com/questions/32354754/how-to-use-timestamps-for-seeking-in-m2ts-files</a>
+ *  
  */
 public class AVCHDPacket extends TSPacket {
 	
