@@ -48,6 +48,18 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 
 List of the most important changes between releases.
 
+### Release 1.19.0
+Release date: 4/08/2024
+
+* added: support for DSMCCStreamEventPayloadBinary in StreamEventDescriptor
+* changed: use default lookAndFeel, improve hiDPI scaling and windows startup speed
+* fixed: millisecond padding in getPacketShortTime. Thanks to David Evans
+* updates from Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
+* added: Australian logical channel descriptor
+* added: mpeg copyright descriptor
+* added: ServiceProminenceDescriptor
+* added: support for AVCHD/Blu-ray 192 byte TS-files
+
 ### Release 1.18.0
 Release date: 3/07/2023
 
