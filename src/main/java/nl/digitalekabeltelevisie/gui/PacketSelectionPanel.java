@@ -44,7 +44,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.NumberFormatter;
 
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 
 /**
@@ -140,6 +139,7 @@ PropertyChangeListener {
 
 
 	/** Updates the text field when the main data model is updated. */
+	@Override
 	public void stateChanged(final ChangeEvent e) {
 		final NumberFormatter formatter = (NumberFormatter)textField.getFormatter();
 
@@ -157,6 +157,7 @@ PropertyChangeListener {
 	 * Detects when the value of the text field (not necessarily the same
 	 * number as you'd get from getText) changes.
 	 */
+	@Override
 	public void propertyChange(final PropertyChangeEvent e) {
 		if ("value".equals(e.getPropertyName())) {
 			final Number value = (Number)e.getNewValue();
@@ -164,7 +165,7 @@ PropertyChangeListener {
 		}
 	}
 
-	public void setRangeValue(final int min, final int max, final int val,final TransportStream ts){
+	public void setRangeValue(final int min, final int max, final int val){
 		slider.setMinimum(min);
 		slider.setMaximum(max);
 		slider.setValue(val);
