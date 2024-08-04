@@ -12,7 +12,7 @@ DVB inspector requires java 17 or higher.
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.18.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.19.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 ### Directory structure
 
@@ -24,13 +24,13 @@ Unzip DVBinspector-1.18.0-dist.zip to a directory of your choice. It will create
 *    dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default.
 *    dvb.sh Bash script to start the program using Linux.
 *    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
-*    DVBinspector-1.18.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
+*    DVBinspector-1.19.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 ## Usage
 
-### DVBinspector-1.18.0.jar
+### DVBinspector-1.19.0.jar
 
-There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.18.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.18.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.18.0.jar".
+There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.19.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.19.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.19.0.jar".
 
 ### dvb.bat 
 
@@ -47,6 +47,12 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 ## Changelog
 
 List of the most important changes between releases.
+
+### Release 1.19.1 (bug fix release)
+Release date: 4/08/2024
+
+* fixed: dvb.sh and dvb.bat to use correct dependencies
+
 
 ### Release 1.19.0
 Release date: 4/08/2024
