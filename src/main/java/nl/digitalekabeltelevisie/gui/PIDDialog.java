@@ -660,8 +660,8 @@ PropertyChangeListener, ListSelectionListener {
 			rightListModel.addElement(label);
 		}
 
-		packetSelectionStart.setRangeValue(0, viewContex.getMaxPacket()-1, viewContex.getStartPacket(),viewContex.getTransportStream());
-		packetSelectionEnd.setRangeValue(1, viewContex.getMaxPacket(), viewContex.getEndPacket(),viewContex.getTransportStream());
+		packetSelectionStart.setRangeValue(0, viewContex.getMaxPacket()-1, viewContex.getStartPacket());
+		packetSelectionEnd.setRangeValue(1, viewContex.getMaxPacket(), viewContex.getEndPacket());
 
 		for(int i=0; i<stepsChooser.getItemCount();i++ ){
 			if(viewContex.getGraphSteps()==stepsChooser.getItemAt(i)){
