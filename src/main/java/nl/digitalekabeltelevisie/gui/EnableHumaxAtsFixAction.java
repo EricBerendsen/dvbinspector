@@ -37,7 +37,7 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
 public class EnableHumaxAtsFixAction extends AbstractSetPreferenceAction {
 
 	public EnableHumaxAtsFixAction(final DVBinspector controller) {
-		super(controller, "Enable Humax ATS Fix");
+		super(controller, "Enable Humax ATS Fix for 192 byte AVCHD/Blu-ray packets");
 		contr = controller;
 	}
 
