@@ -34,8 +34,7 @@ package nl.digitalekabeltelevisie.gui;
  *
  */
 
-@FunctionalInterface
-public interface HTMLSource extends DetailSource{
+public non-sealed interface HTMLSource extends DetailSource{
 
 	/**
 	 * @return a HTML fragment, without the start and end &lt;html&gt; tags. This way several fragments can be concatenated.

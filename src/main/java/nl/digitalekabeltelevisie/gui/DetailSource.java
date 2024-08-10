@@ -31,6 +31,6 @@ package nl.digitalekabeltelevisie.gui;
  * @author Eric
  *
  */
-public interface DetailSource {
+sealed public interface DetailSource permits HTMLSource, ImageSource, TableSource, XMLSource {
 
 }

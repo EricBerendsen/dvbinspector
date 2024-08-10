@@ -29,8 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import java.awt.image.BufferedImage;
 
-@FunctionalInterface
-public interface ImageSource extends DetailSource{
+public non-sealed interface ImageSource extends DetailSource{
 
 	BufferedImage getImage();
 }
