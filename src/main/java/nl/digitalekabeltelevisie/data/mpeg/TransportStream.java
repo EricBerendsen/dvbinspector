@@ -1056,7 +1056,9 @@ public class TransportStream implements TreeNode{
 
 			}else{
 				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
+				// calculation in long, intermediate results can be > Integer.MAX_VALUE
+				final int timeDiff = (int)(((long)packetNo * packetLength * 8 * 1000)/getBitRate());
+				now.add(Calendar.MILLISECOND, timeDiff);
 
 				r = getFormattedDate(now)+ " "+getFormattedTime(now);
 			}

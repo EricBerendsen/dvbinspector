@@ -48,6 +48,11 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 
 List of the most important changes between releases.
 
+### Release 1.19.2 (bug fix release)
+Release date: 11/08/2024
+
+* fixed: displayed time of packets was wrong
+
 ### Release 1.19.1 (bug fix release)
 Release date: 4/08/2024
 

@@ -84,5 +84,21 @@ public class TransportStreamTest {
 		assertEquals("continuity_counter",8, packet328081.getContinuityCounter());
 		assertEquals("file offset",61679228, packet328081.getPacketOffset());
 	}
+	
+	@Test
+	public void testPacketTime(){
+		assertEquals("PacketTime packet 1","2009/6/30 17h43m54:962",transportStream.getPacketTime(1));
+		assertEquals("PacketTime packet 123432","2009/6/30 17h44m07:396",transportStream.getPacketTime(123432));
+		assertEquals("PacketTimepacket 343551","2009/6/30 17h44m29:571",transportStream.getPacketTime(343551));
+
+	}
+
+	@Test
+	public void testShortPacketTime(){
+		assertEquals("ShortPacketTime packet 1","17h43m54:962",transportStream.getShortPacketTime(1));
+		assertEquals("ShortPacketTime packet 123432","17h44m07:396",transportStream.getShortPacketTime(123432));
+		assertEquals("ShortPacketTime packet 343551","17h44m29:571",transportStream.getShortPacketTime(343551));
+
+	}
 
 }
