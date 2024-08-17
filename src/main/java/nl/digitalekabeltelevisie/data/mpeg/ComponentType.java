@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -24,13 +24,28 @@
  *  than anything and is not required.
  *
  */
+package nl.digitalekabeltelevisie.data.mpeg;
 
-package nl.digitalekabeltelevisie.gui;
+public enum ComponentType {
+    AC3("Dolby Audio (AC3)"),
+    E_AC3("Enhanced Dolby Audio (AC3)"),
+    VBI("VBI Data"),
+    TELETEXT("Teletext"),
+    DVB_SUBTITLING("DVB subtitling"),
+    AIT("Application Information Table (AIT)"),
+    RCT("Related Content Table (RCT)"),
+    T2MI("T2-MI"),
+    TTML("TTML subtitling"),
+    AC4("Dolby AC-4 Audio"),
+    SMPTE2038("SMPTE 2038");
 
-/**
- * @author Eric
- *
- */
-sealed public interface DetailSource permits HTMLSource, ImageSource, TableSource, XMLSource {
+    private final String description;
 
+    ComponentType(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

@@ -34,8 +34,7 @@ package nl.digitalekabeltelevisie.gui;
  *
  */
 
-@FunctionalInterface
-public interface XMLSource extends DetailSource{
+public non-sealed interface XMLSource extends DetailSource{
 
 	/**
 	 * @return a XML string

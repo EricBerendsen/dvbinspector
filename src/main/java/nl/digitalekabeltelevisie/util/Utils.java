@@ -1203,7 +1203,9 @@ public final class Utils {
 			} else {
 				final KVP kvp = new KVP(label + ": " + itemCollection.size() + " entries");
 				kvp.setCrumb(label);
-				kvp.addTableSource(tableSource, label);
+				if (tableSource != null) {
+					kvp.addTableSource(tableSource, label);
+				}
 				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
 				addToList(descriptorListNode, itemCollection, modus);
 				parent.add(descriptorListNode);

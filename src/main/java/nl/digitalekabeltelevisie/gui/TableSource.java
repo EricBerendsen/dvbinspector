@@ -29,7 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import javax.swing.table.TableModel;
 
-public interface TableSource extends DetailSource{
+public non-sealed interface TableSource extends DetailSource{
 	TableModel getTableModel();
 
 }

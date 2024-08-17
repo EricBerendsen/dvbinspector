@@ -29,10 +29,7 @@ package nl.digitalekabeltelevisie.gui;
 
 import static nl.digitalekabeltelevisie.util.Utils.toHexStringUnformatted;
 
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
@@ -277,9 +274,9 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		
 		detailPanel.setUI(new BasicTabbedPaneUI() {  
 		    @Override  
-		    protected int calculateTabAreaHeight(int tab_placement, int run_count, int max_tab_height) {  
+		    protected int calculateTabAreaHeight(int tabPlacement, int horizRunCount, int maxTabHeight) {
 		        if (detailPanel.getTabCount() > 1) {
-		            return super.calculateTabAreaHeight(tab_placement, run_count, max_tab_height); 
+		            return super.calculateTabAreaHeight(tabPlacement, horizRunCount, maxTabHeight);
 		        }
 	            return 0;  
 		    }  
@@ -320,17 +317,14 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @return
 	 */
 	private MutableTreeNode findNodeByTrail(String trail, DefaultTreeModel treeModel) {
-		if(trail ==null || 
-				trail.isEmpty() || 
-				!trail.startsWith("root") || 
-				tree == null) {
+		if(trail == null ||
+                !trail.startsWith("root") ||
+                tree == null) {
 			return null;
 		}
 		
 		List<String> pathList = Arrays.asList(trail.split("/"));
 		return searchNode(pathList,(DefaultMutableTreeNode)treeModel.getRoot());
-		
-		
 	}
 
 	/**
@@ -344,23 +338,27 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		}
 		if (node.getUserObject() instanceof KVP kvp) {
 			String crumbFound = kvp.getCrumb();
-			if (crumbTrail.get(0).equalsIgnoreCase(crumbFound)) {
+			if (crumbTrail.getFirst().equalsIgnoreCase(crumbFound)) {
 				if (crumbTrail.size() == 1) {
 					return node;
 				}
 				List<String> subList = crumbTrail.subList(1, crumbTrail.size());
 				for (Enumeration<TreeNode> e = node.children(); e.hasMoreElements();) {
 					TreeNode nextChild = e.nextElement();
-					MutableTreeNode res;
-					if (nextChild instanceof DefaultMutableTreeNode dmtn) {
-						res = searchNode(subList, dmtn);
-						if (res != null) {
-							return res;
-						}
-					} else if (nextChild instanceof JTreeLazyList.RangeNode rangeNode
-							&& subList.get(0).equalsIgnoreCase(rangeNode.getLabel().trim())) {
-						return rangeNode.findChildForActual(Integer.parseInt(subList.get(1)));
-					}
+
+					switch(nextChild){
+						case DefaultMutableTreeNode dmtn:
+							MutableTreeNode res = searchNode(subList, dmtn);
+							if (res != null) {
+								return res;
+							}
+							break;
+						case JTreeLazyList.RangeNode rangeNode when subList.get(0).equalsIgnoreCase(rangeNode.getLabel().trim()):
+							return rangeNode.findChildForActual(Integer.parseInt(subList.get(1)));
+                        default:
+                            // EMPTY
+                    }
+
 				}
 			}
 			// name does not match
@@ -377,7 +375,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param transportStream stream to be displayed (can be {@code null})
 	 * @param viewContext ignored, required by {@link TransportStreamView}
 
-	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
+	 * @see TransportStreamView#setTransportStream(TransportStream, ViewContext)
 	 */
 	@Override
 	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
@@ -441,7 +439,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 
 	private void rebuildTree(){
 		if(ts!=null){
-			model = new DefaultTreeModel(ts.getJTreeNode(this.mod));
+			model = new DefaultTreeModel(ts.getJTreeNode(mod));
 			tree.setModel(model);
 		} else {
 			tree.setModel(null);
@@ -451,15 +449,15 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	
 	
 	/**
-	 * 
-	 * Retrieves the expansion state as a String, defined by a comma delimited list
-	 * of each row node that is expanded.
-	 * 
-	 * Based on {@link http://www.algosome.com/articles/save-jtree-expand-state.html}
-	 * 
-	 * @return the expansion state as a String, defined by a comma delimited list
-	 * 
-	 */
+     *
+     * Retrieves the expansion state as a String, defined by a comma delimited list
+     * of each row node that is expanded.
+     *
+     * Based on {@link <a href="http://www.algosome.com/articles/save-jtree-expand-state.html">...</a>}
+     *
+     * @return the expansion state as a String, defined by a comma delimited list
+     *
+     */
 
 	private String getExpansionState() {
 		StringBuilder sb = new StringBuilder();
@@ -475,13 +473,13 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	
 
 	/**
-	 * Sets the expansion state based upon a comma delimited list of row indexes that 
-	 * are expanded. 
-	 * 
-	 * Based on {@link http://www.algosome.com/articles/save-jtree-expand-state.html}
-	 * 
-	 * @param s the expansion state based upon a comma delimited list of row indexes that need to be expanded
-	 */
+     * Sets the expansion state based upon a comma delimited list of row indexes that
+     * are expanded.
+     *
+     * Based on {@link <a href="http://www.algosome.com/articles/save-jtree-expand-state.html">...</a>}
+     *
+     * @param s the expansion state based upon a comma delimited list of row indexes that need to be expanded
+     */
 
 	private void setExpansionState(String s) {
 		String[] indexes = s.split(",");
@@ -512,9 +510,11 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 				if(detailViews.isEmpty()) {
 					return;
 				}
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				for(DetailView view : detailViews) {
 					createTabForView(view);
 				}
+				setCursor(Cursor.getDefaultCursor());
 			}
 			return;
 		}
@@ -525,46 +525,45 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	private void createTabForView(DetailView view) {
 		DetailSource detailSource = view.detailSource();
 		String label = view.label();
-		if(detailSource instanceof ImageSource imageSource){
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			BufferedImage img;
-			try {
-				img = imageSource.getImage();
-			} catch (RuntimeException e1) {
-				logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
-				img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
-			}
-			setCursor(Cursor.getDefaultCursor());
-			if(img != null){
-				ImagePanel imagePanel = new ImagePanel();
-				imagePanel.setImage(img);
-				detailPanel.addTab(label, imagePanel);
-			}
-		} else if(detailSource instanceof HTMLSource htmlSource){
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			HtmlPanel htmlPanel = new HtmlPanel(controller, this, htmlSource.getHTML());
-			setCursor(Cursor.getDefaultCursor());
-			detailPanel.addTab(label, new JScrollPane(htmlPanel));
-		} else if(detailSource instanceof XMLSource xmlSource){
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			XmlPanel xmlPanel = new XmlPanel();
-			// hack to reset
-			xmlPanel.setDocument(xmlPanel.getEditorKit().createDefaultDocument());
-			xmlPanel.setText(xmlSource.getXML());
-			xmlPanel.setCaretPosition(0);
-			setCursor(Cursor.getDefaultCursor());
-			detailPanel.addTab(label, new JScrollPane(xmlPanel));
-		} else if(detailSource instanceof TableSource tableSource){
-			try {
-				TableModel tableModel = tableSource.getTableModel();
-				if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
-					TablePanel tablePanel = new TablePanel(new JTable());
-					tablePanel.setModel(tableModel);
-					detailPanel.addTab(label, tablePanel);
+
+		switch(detailSource){
+			case ImageSource imageSource:
+				BufferedImage img;
+				try {
+					img = imageSource.getImage();
+				} catch (RuntimeException e1) {
+					logger.log(Level.WARNING, "could not create image from getImageSource():", e1);
+					img = GuiUtils.getErrorImage("Ooops.\n\n" + "Something went wrong generating this image.\n\n"  + GuiUtils.getImproveMsg());
 				}
-			}catch (RuntimeException e2) {
-				logger.log(Level.WARNING, "could not create table:", e2);
-			}
+				if(img != null){
+					ImagePanel imagePanel = new ImagePanel();
+					imagePanel.setImage(img);
+					detailPanel.addTab(label, imagePanel);
+				}
+				break;
+			case HTMLSource htmlSource:
+				HtmlPanel htmlPanel = new HtmlPanel(controller, this, htmlSource.getHTML());
+				detailPanel.addTab(label, new JScrollPane(htmlPanel));
+				break;
+			case XMLSource xmlSource:
+				XmlPanel xmlPanel = new XmlPanel();
+				// hack to reset
+				xmlPanel.setDocument(xmlPanel.getEditorKit().createDefaultDocument());
+				xmlPanel.setText(xmlSource.getXML());
+				xmlPanel.setCaretPosition(0);
+				detailPanel.addTab(label, new JScrollPane(xmlPanel));
+				break;
+			case TableSource tableSource:
+				try {
+					TableModel tableModel = tableSource.getTableModel();
+					if(tableModel.getColumnCount()>0 && tableModel.getRowCount()>0) {
+						TablePanel tablePanel = new TablePanel(new JTable());
+						tablePanel.setModel(tableModel);
+						detailPanel.addTab(label, tablePanel);
+					}
+				}catch (RuntimeException e2) {
+					logger.log(Level.WARNING, "could not create table:", e2);
+				}
 		}
 	}
 
@@ -572,54 +571,31 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
-	public void actionPerformed(final ActionEvent ae) {
+	public void actionPerformed(final ActionEvent actionEvent) {
 
 		final TreePath path = tree.getSelectionPath();
 		if(path!=null){
-
 			DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 			final KVP kvp = (KVP)dmtn.getUserObject();
-			if (ae.getActionCommand().equals(EXPAND)) {
-				expandItem();
-			}
-			if (ae.getActionCommand().equals(EXPAND_ALL)) {
-				expandAllItems(dmtn);
-			}
-			if (ae.getActionCommand().equals(COPY)) {
-				copyItemToClipboard(kvp);
-			}
-			if (ae.getActionCommand().equals(COPY_TREE)){
-				copyEntireSubTreeToClipboard(dmtn);
-			}
-			if (ae.getActionCommand().equals(VIEW)){
-				copyVisibleSubTreeToClipboard(dmtn, path, kvp);
-			}
-			if (ae.getActionCommand().equals(PARSE)){
-				parsePid(dmtn, kvp);
-			}
-			if (ae.getActionCommand().equals(SAVE)){
-				saveDsmccFile(kvp);
-			}
-			if (ae.getActionCommand().equals(EXPORT)){
-				saveDsmccTree(kvp);
-			}
-			if (ae.getActionCommand().equals(PLAY)){
-				playAudio138183(kvp);
-			}
-			if (ae.getActionCommand().equals(STOP)){
-				stopAudio138183(kvp);
-			}
-			if (ae.getActionCommand().equals(T2MI)){
-				saveT2miTs(kvp);
-			}
-			if (ae.getActionCommand().equals(T42)){
-				saveT42File(kvp);
-			}
-			if (ae.getActionCommand().equals(SAVE_BYTES)){
-				saveBytes(kvp);
+			String actionCommand = actionEvent.getActionCommand();
+			switch (actionCommand){
+				case EXPAND -> expandItem();
+				case EXPAND_ALL ->expandAllItems(dmtn);
+				case COPY -> copyItemToClipboard(kvp);
+				case COPY_TREE -> copyEntireSubTreeToClipboard(dmtn);
+				case VIEW -> copyVisibleSubTreeToClipboard(dmtn, path, kvp);
+				case PARSE -> parsePid(dmtn, kvp);
+				case SAVE -> saveDsmccFile(kvp);
+				case EXPORT -> saveDsmccTree(kvp);
+				case PLAY -> playAudio138183(kvp);
+				case STOP -> stopAudio138183(kvp);
+				case T2MI -> saveT2miTs(kvp);
+				case T42 -> saveT42File(kvp);
+				case SAVE_BYTES -> saveBytes(kvp);
 			}
 		}
 	}
+
 	/**
 	 * @param dmtn start node from where to expand
 	 */
@@ -723,18 +699,17 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	
 	private void saveT42File(final KVP kvp) {
 		Object owner = kvp.getOwner();
-		if (owner instanceof SaveAble savable) {
-			if (savable instanceof SubPage subPage) {
-				String fileName = "Page" + subPage.getMagazineNo() + toHexStringUnformatted(subPage.getPageNo(), 2) + "-"
-						+ toHexStringUnformatted(subPage.getSubPageNo(), 4) + ".t42";
-				selectFileAndSave(fileName, savable);
-
-			} else if (savable instanceof EBUTeletextHandler txtHandler) {
-				String fileName = "Txt Service.t42";
-				selectFileAndSave(fileName, savable);
-
-			}
-		}
+			switch(owner){
+				case SubPage subPage:
+					String fileName = "Page" + subPage.getMagazineNo() + toHexStringUnformatted(subPage.getPageNo(), 2) + "-"
+							+ toHexStringUnformatted(subPage.getSubPageNo(), 4) + ".t42";
+					selectFileAndSave(fileName, subPage);
+					break;
+				case EBUTeletextHandler txtHandler:
+                    selectFileAndSave("Txt Service.t42", txtHandler);
+					break;
+                default:
+            }
 	}
 
 	/**
@@ -744,45 +719,45 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	private void parsePid(DefaultMutableTreeNode dmtn, final KVP kvp) {
 		final PID p = (PID) kvp.getOwner();
 		final int pid = p.getPid();
-		GeneralPidHandler pesH = p.getPidHandler();
-		if(!pesH.isInitialized()){ // prevent double click
-			Map<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
-			handlerMap.put(pid, pesH);
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		GeneralPidHandler generalPidHandler = p.getPidHandler();
+		if(generalPidHandler.isInitialized()) return; // prevent double click
 
-			try {
-				ts.parsePidStreams(handlerMap);
-			} catch (final IOException e) {
-				logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
-				setCursor(Cursor.getDefaultCursor());
-			}catch (RuntimeException e) {
-				logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+pesH.getClass().getName(),e);
-				if((pesH.getClass() != GeneralPesHandler.class) &&
-					(pesH.getClass() != GeneralPsiTableHandler.class)){ // only if specialized subclass of GeneralPesHandler
-					logger.log(Level.WARNING,"trying again with GeneralPesHandler");
-					JOptionPane.showMessageDialog(this,
-							"Error parsing PID PES Packets for "+p.getLabelMaker()+", falling back to general PES packets",
-							"DVB Inspector",
-							JOptionPane.WARNING_MESSAGE);
-					p.setPidHandler(new GeneralPesHandler());
-					pesH = p.getPidHandler();
-					handlerMap = new HashMap<>();
-					handlerMap.put(pid, pesH);
-					try {
-						ts.parsePidStreams(handlerMap);
-					} catch (IOException e1) {
-						logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
-					}
-					setCursor(Cursor.getDefaultCursor());
-				}
-			}
-			final DefaultMutableTreeNode node = p.getPidHandler().getJTreeNode(mod);
-			// https://www.java-tips.org/java-se-tips-100019/15-javax-swing/2393-have-a-popup-attached-to-a-jtree.html
-			// thanks to Yong Zhang for the tip for refreshing the tree structure.
-			dmtn.add(node);
-			((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);
+		Map<Integer, GeneralPidHandler> handlerMap = new HashMap<>();
+		handlerMap.put(pid, generalPidHandler);
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+		try {
+			ts.parsePidStreams(handlerMap);
+		} catch (final IOException e) {
+			logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
 			setCursor(Cursor.getDefaultCursor());
+		}catch (RuntimeException e) {
+			logger.log(Level.WARNING,"could not parse PID "+pid+" using handler "+generalPidHandler.getClass().getName(),e);
+			if((generalPidHandler.getClass() != GeneralPesHandler.class) &&
+				(generalPidHandler.getClass() != GeneralPsiTableHandler.class)){ // only if specialized subclass of GeneralPesHandler
+				logger.log(Level.WARNING,"trying again with GeneralPesHandler");
+				JOptionPane.showMessageDialog(this,
+						"Error parsing PID PES Packets for "+p.getLabelMaker()+", falling back to general PES packets",
+						"DVB Inspector",
+						JOptionPane.WARNING_MESSAGE);
+				p.setPidHandler(new GeneralPesHandler());
+				generalPidHandler = p.getPidHandler();
+				handlerMap = new HashMap<>();
+				handlerMap.put(pid, generalPidHandler);
+				try {
+					ts.parsePidStreams(handlerMap);
+				} catch (IOException e1) {
+					logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES again with general PESHandler",e1);
+				}
+				setCursor(Cursor.getDefaultCursor());
+			}
 		}
+		final DefaultMutableTreeNode node = p.getPidHandler().getJTreeNode(mod);
+		// https://www.java-tips.org/java-se-tips-100019/15-javax-swing/2393-have-a-popup-attached-to-a-jtree.html
+		// thanks to Yong Zhang for the tip for refreshing the tree structure.
+		dmtn.add(node);
+		((DefaultTreeModel )tree.getModel()).nodeStructureChanged(dmtn);
+		setCursor(Cursor.getDefaultCursor());
 	}
 
 	/**
@@ -827,11 +802,10 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 */
 
 	public static StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
-		final StringBuilder res = new StringBuilder();
-		@SuppressWarnings("rawtypes")
-		final Enumeration children = dmtn.children();
+		StringBuilder res = new StringBuilder();
+		Enumeration<TreeNode> children = dmtn.children();
 		while(children.hasMoreElements()){
-			Object next = children.nextElement();
+			TreeNode next = children.nextElement();
 			if(next instanceof final DefaultMutableTreeNode child){
 				Object userObject = child.getUserObject();
 				if(userObject instanceof final KVP chKVP) {
@@ -858,11 +832,10 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 
 	private StringBuilder getViewTree(final DefaultMutableTreeNode dmtn,final String preFix,final TreePath path) {
 		final StringBuilder res = new StringBuilder();
-		@SuppressWarnings("rawtypes")
-		final Enumeration children = dmtn.children();
+		Enumeration<TreeNode> children = dmtn.children();
 		while(children.hasMoreElements()){
 
-			Object next = children.nextElement();
+			TreeNode next = children.nextElement();
 			if(next instanceof final DefaultMutableTreeNode child){
 				final TreePath childPath = path.pathByAddingChild(child);
 				if(tree.isVisible(childPath)){
@@ -888,7 +861,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		final TreePath path = tree.getSelectionPath();
 		
 		
-		 MenuElement[] subs = popup.getSubElements();
+		MenuElement[] subs = popup.getSubElements();
 		for (MenuElement sub : subs) {
 			JMenuItem menuElement = (JMenuItem) sub;
 			menuElement.setEnabled(path != null);
@@ -901,12 +874,9 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		}
 
 		//		add optional menu
-		DefaultMutableTreeNode dmtn;
 
 		if(path!=null){
-			MutableTreeNode node= (MutableTreeNode)path.getLastPathComponent();
-			if((node instanceof DefaultMutableTreeNode)){
-				dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
+            if(((MutableTreeNode)path.getLastPathComponent() instanceof DefaultMutableTreeNode dmtn)){
 				final KVP kvp=(KVP)dmtn.getUserObject();
 				JMenuItem subMenu = kvp.getSubMenu();
 				if(subMenu!=null){
@@ -925,7 +895,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 				}else{
 					if(kvp.getFieldType()== KVP.FIELD_TYPE_BYTES){
 						final JMenuItem bytesMenu = new JMenuItem("Save bytes as...");
-						
+
 						bytesMenu.setActionCommand(SAVE_BYTES);
 						bytesMenu.addActionListener(this);
 						popup.add(bytesMenu);
@@ -942,8 +912,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 			}
 		}
 
-
-		popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
+		popup.show((Component) e.getSource(), e.getX(), e.getY() );
 	}
 
 	/* (non-Javadoc)
@@ -965,8 +934,8 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
         return false;
 	}
 
-	private void showNode(MutableTreeNode node) {
-		javax.swing.tree.TreeNode[] nodes = model.getPathToRoot(node);
+	private void showNode(TreeNode node) {
+		TreeNode[] nodes = model.getPathToRoot(node);
 		TreePath path = new TreePath(nodes);
 		
 		tree.scrollPathToVisible(path);
@@ -1036,11 +1005,11 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		boolean write=true;
 		if(file.exists()){
 			logger.log(Level.INFO, "file {} already exists.", file);
-			final int n = JOptionPane.showConfirmDialog(
+			final int option = JOptionPane.showConfirmDialog(
 					this, "File "+file+" already exists, want to overwrite?",
 					"File already exists",
 					JOptionPane.YES_NO_OPTION);
-			if (n == JOptionPane.NO_OPTION) {
+			if (JOptionPane.NO_OPTION == option) {
 				write=false;
 				logger.info("User canceled overwrite");
 			}else{
