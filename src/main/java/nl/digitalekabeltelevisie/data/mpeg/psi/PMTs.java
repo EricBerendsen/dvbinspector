@@ -48,8 +48,8 @@ import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.ComponentType;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream.ComponentType;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ApplicationSignallingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ISO639LanguageDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.StreamIdentifierDescriptor;
@@ -65,49 +65,49 @@ import nl.digitalekabeltelevisie.util.tablemodel.cellrenderer.StreamTypeTableCel
 public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
 
-	public PMTs(final PSI parentPSI) {
+	public PMTs(PSI parentPSI) {
 		super(parentPSI);
 
 	}
 
-	private Map<Integer, PMTsection []> pmts = new HashMap<>();
+	private final Map<Integer, PMTsection []> pmts = new HashMap<>();
 
-	public void update(final PMTsection section){
+	public void update(PMTsection section){
 
-		final int programNumber = section.getProgramNumber();
+		int programNumber = section.getProgramNumber();
 		PMTsection[] sections = pmts.computeIfAbsent(programNumber, k -> new PMTsection[section.getSectionLastNumber() + 1]);
 
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PMTs"));
-		final TreeSet<Integer> s = new TreeSet<>(pmts.keySet());
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PMTs"));
+		Iterable<Integer> serviceIds = new TreeSet<>(pmts.keySet());
 
-		for (Integer programNumber : s) {
-			final PMTsection[] sections = pmts.get(programNumber);
+		for (Integer programNumber : serviceIds) {
+			PMTsection[] sections = pmts.get(programNumber);
 			KVP kvp = new KVP("program", programNumber, getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber));
 			kvp.addTableSource(() -> getTableForProgram(programNumber),"Components");
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
-			for (final PMTsection pmtSection : sections) {
+			DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(kvp);
+			for (PMTsection pmtSection : sections) {
 				if (pmtSection != null) {
 					if (Utils.simpleModus(modus)) {
 						// keep it simple
-						n.add(new DefaultMutableTreeNode(new KVP("PCR_PID", pmtSection.getPcrPid(), null)));
-						addListJTree(n, pmtSection.getDescriptorList(), modus, "program_info");
-						addListJTree(n, pmtSection.getComponentenList(), modus, "components");
+						treeNode.add(new DefaultMutableTreeNode(new KVP("PCR_PID", pmtSection.getPcrPid(), null)));
+						addListJTree(treeNode, pmtSection.getDescriptorList(), modus, "program_info");
+						addListJTree(treeNode, pmtSection.getComponentenList(), modus, "components");
 					} else { // show all details
-						addSectionVersionsToJTree(n, pmtSection, modus);
+						addSectionVersionsToJTree(treeNode, pmtSection, modus);
 					}
 				}
 			}
-			t.add(n);
+			t.add(treeNode);
 
 		}
 		return t;
@@ -120,9 +120,9 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
 				addOptionalRowColumn("stream type", Component::getStreamtype, StreamTypeTableCellRenderer.class).
 				addOptionalRowColumn("usage",
-						c ->  determineComponentType(c.getComponentDescriptorList()).
+						component ->  determineComponentType(component.getComponentDescriptorList()).
 							map(ComponentType::getDescription).
-							orElse(getStreamTypeShortString(c.getStreamtype())),
+							orElse(getStreamTypeShortString(component.getStreamtype())),
 						String.class).
 				addOptionalRowColumn("elementary PID", Component::getElementaryPID, Integer.class).
 
@@ -148,7 +148,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
 									stream().
-									map(l->getAudioTypeString(l.getAudioType())).
+									map(language->getAudioTypeString(language.getAudioType())).
 									collect(Collectors.toList())),
 						String.class,
 						"iso").
@@ -214,7 +214,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		FlexTableModel<PMTsection,Component> tableModel =  new FlexTableModel<>(buildPmtTableHeader());
 		PMTsection[] sections = pmts.get(programNumber);
 		
-		for (final PMTsection pmtSection : sections) {
+		for (PMTsection pmtSection : sections) {
 			if(pmtSection!= null){
 				tableModel.addData(pmtSection, pmtSection.getComponentenList());
 			}
@@ -224,8 +224,8 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		return tableModel;
 	}
 
-	public int getPmtPID(final int programNumber){
-		final PMTsection [] sections = pmts.get(programNumber);
+	public int getPmtPID(int programNumber){
+		PMTsection [] sections = pmts.get(programNumber);
 		for (PMTsection section : sections) {
 			if(section!= null){
 				return section.getParentPID().getPid();
@@ -235,13 +235,13 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 	}
 	
 	public List<PMTsection>findPMTsFromComponentPID(int pid){
-		ArrayList<PMTsection> result = new ArrayList<>();
+		List<PMTsection> result = new ArrayList<>();
 		for(PMTsection[] pmtArray: pmts.values()){
 			PMTsection p = pmtArray[0];
 			for(Component component:p.getComponentenList()){
 				if(component.getElementaryPID()==pid){
 					result.add(p);
-					break; // every PMT is included once, even if more components wold point to same PID (which is illegal)
+					break; // every PMT is included once, even if more components would point to same PID (which is illegal)
 				}
 			}
 		}
@@ -250,7 +250,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
 	// PMT is always one section per program
 
-	public PMTsection getPmt(final int programNumber){
+	public PMTsection getPmt(int programNumber){
 		return pmts.get(programNumber)[0];
 	}
 
@@ -260,10 +260,6 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
 	public Map<Integer, PMTsection[]> getPmts() {
 		return pmts;
-	}
-
-	public void setPmts(final Map<Integer, PMTsection[]> pmts) {
-		this.pmts = pmts;
 	}
 
 
