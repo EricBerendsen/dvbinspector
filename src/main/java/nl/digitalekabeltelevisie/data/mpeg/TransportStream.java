@@ -78,7 +78,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 
 /**
- * TransportStream is responsible for parsing a file containing a transport stream, dividing it into 188 byte {@link TSPackets}, and handing them over to the correct PID.
+ * TransportStream is responsible for parsing a file containing a transport stream, dividing it into 188 byte TSPackets, and handing them over to the correct PID.
  *
  */
 public class TransportStream implements TreeNode{
@@ -126,7 +126,7 @@ public class TransportStream implements TreeNode{
 	/**
 	 * File containing data of this TransportStream
 	 */
-	private File file;
+	private final File file;
 	/**
 	 * after reading a TSPAcket from the file, it is handed over to the respective PID for aggregating into larger PES or PSI sections, and further processing.
 	 */
@@ -135,15 +135,15 @@ public class TransportStream implements TreeNode{
 	 * for every TSPacket read, store it's packet_id. Used for bit rate calculations, and Grid View
 	 */
 	private final short [] packet_pid;
-	private int [] packetATS = null;
+	private int [] packetATS;
 
-	private OffsetHelper offsetHelper = null;
-	private RollOverHelper rollOverHelper = null;
+	private OffsetHelper offsetHelper;
+	private RollOverHelper rollOverHelper;
 	
 	/**
 	 * Get value once at creation of TS, because getting it for every call to getAVCHDPacketTime is a bit expensive
 	 */
-	private static boolean enabledHumaxAtsFix = false;
+	private boolean enabledHumaxAtsFix;
 	/**
 	 * Starting point for all the PSI information in this TransportStream
 	 */
@@ -151,30 +151,30 @@ public class TransportStream implements TreeNode{
 	/**
 	 * how many TSPackets have bean read.
 	 */
-	private int no_packets = 0;
+	private int no_packets;
 	/**
 	 * number of TSPackets that had Transport Error Indicator set.
 	 */
-	private int error_packets = 0;
+	private int error_packets;
 	/**
 	 * Bitrate based on the average of all PIDs that contain a PCR. This is the most accurate way to calculate the bit rate.
 	 */
-	private long bitRate = -1;
+	private long bitRate = -1L;
 	/**
 	 * for streams that have no PIDS with PCRs (empty transport streams) this value is calculated based on the number of bytes between different occurences of the TDT table
 	 */
-	private long bitRateTDT = -1;
+	private long bitRateTDT = -1L;
 	/**
 	 * time at which this transportStream started. Calculated by calculating backwards from first TDT, using bitrate. null if no TDT found
 	 */
-	private Calendar zeroTime = null;
+	private Calendar zeroTime;
 
 	private final long len;
 	
 	/**
 	 * number of times sync was lost
 	 */
-	private int sync_errors = 0;
+	private int sync_errors;
 
 	private int packetLength = 188;
 
@@ -186,7 +186,7 @@ public class TransportStream implements TreeNode{
 	 * Creates a new Transport stream based on the supplied file. After construction the TransportStream is not complete, first parseStream() has to be called!
 	 * @param fileName name of the file to be read (null not permitted).
 	 */
-	public TransportStream(final String fileName) throws NotAnMPEGFileException,IOException {
+	public TransportStream(String fileName) throws NotAnMPEGFileException,IOException {
 		this(new File(fileName));
 	}
 
@@ -196,7 +196,7 @@ public class TransportStream implements TreeNode{
 	 * @param file the file to be read (null not permitted). Don't enable TSPackets by default.
 	 */
 
-	public TransportStream(final File file) throws NotAnMPEGFileException,IOException{
+	public TransportStream(File file) throws NotAnMPEGFileException,IOException{
 		this.file = file;
 		len = file.length();
 		packetLength = determinePacketLengthToUse(file);
@@ -211,7 +211,7 @@ public class TransportStream implements TreeNode{
 
 	}
 	
-	private static int determinePacketLengthToUse(final File file) throws NotAnMPEGFileException, IOException {
+	private static int determinePacketLengthToUse(File file) throws NotAnMPEGFileException, IOException {
 		int packetLengthModus = PreferencesManager.getPacketLengthModus();
 		if(packetLengthModus == 0) { // auto
 			return determineActualPacketLength(file);
@@ -224,12 +224,12 @@ public class TransportStream implements TreeNode{
 	 * @param file
 	 * @return
 	 */
-	private static int determineActualPacketLength(final File file) throws NotAnMPEGFileException,IOException{
-		if(file.length()< 752) {
+	private static int determineActualPacketLength(File file) throws NotAnMPEGFileException,IOException{
+		if(file.length() < 752L) {
 			throw new NotAnMPEGFileException("File too short to determine packet length automatic. File should have at least 5 consecutive packets.\n\nTry setting packet length manual.");
 		}
-		try(final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
-			for(final int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
+		try(RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
+			for(int possiblePacketLength:ALLOWED_PACKET_LENGTHS){
 				logger.log(Level.INFO, "Trying for packetLength {0}",possiblePacketLength);
 	
 				if(usesPacketLength(possiblePacketLength, randomAccessFile)){
@@ -238,9 +238,14 @@ public class TransportStream implements TreeNode{
 				}
 			}
 		}
-		throw new NotAnMPEGFileException("DVB Inspector could not determine packetsize for this file. \n" +
-				"DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.\n\n " +
-		"Are you sure this file contains a valid MPEG Transport Stream?\n\n ");
+		throw new NotAnMPEGFileException("""
+                DVB Inspector could not determine packetsize for this file.\s
+                DVB Inspector supports packet sizes of 188, 192, 204 and 208 bytes.
+
+                 \
+                Are you sure this file contains a valid MPEG Transport Stream?
+
+                \s""");
 	}
 
 	/**
@@ -249,7 +254,7 @@ public class TransportStream implements TreeNode{
 	 * @return
 	 * @throws IOException
 	 */
-	private static boolean usesPacketLength(final int possiblePacketLength, final RandomAccessFile randomAccessFile) throws IOException {
+	private static boolean usesPacketLength(int possiblePacketLength, RandomAccessFile randomAccessFile) throws IOException {
 		int startPos = 0;
 		do{
 			logger.log(Level.INFO, "starting at position {0}",startPos);
@@ -263,9 +268,9 @@ public class TransportStream implements TreeNode{
 			// found a sync byte, try to find next 4 sync bytes
 			boolean seqFound = true;
 			for (int i = 1; (i < CONSECUTIVE_PACKETS) && seqFound; i++) {
-				randomAccessFile.seek((long)startPos + (i * possiblePacketLength));
+				randomAccessFile.seek(startPos + ((long)i * possiblePacketLength));
 				logger.log(Level.INFO, "found {0} sequence syncs at pos {1}",new Object[]{i,startPos + (i * possiblePacketLength)});
-				seqFound &= (randomAccessFile.read() == sync_byte);
+				seqFound = (randomAccessFile.read() == sync_byte);
 			}
 			if(seqFound){
 				return true;
@@ -279,15 +284,15 @@ public class TransportStream implements TreeNode{
 	 * read the file, and parse it. Packets are counted, bitrate calculated, etc. Used for initial construction. PES data is not analyzed.
 	 * @throws IOException
 	 */
-	public void parseStream(final java.awt.Component component) throws IOException {
+	public void parseStream(java.awt.Component component) throws IOException {
 		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
 			no_packets = 0;
 
 			pids = new PID[MAX_PIDS];
 			psi = new PSI();
 			error_packets = 0;
-			bitRate = -1;
-			bitRateTDT = -1;
+			bitRate = -1L;
+			bitRateTDT = -1L;
 
 			if(isAVCHD()) {
 				readAVCHDPackets(fileStream);
@@ -302,13 +307,13 @@ public class TransportStream implements TreeNode{
 		int count = 0;
 		int bytes_read = 0;
 		int lastHandledSyncErrorPacket = -1;
-		final byte[] buf = new byte[packetLength];
+		byte[] buf = new byte[packetLength];
 		do {
-			final long offset = fileStream.getPosition();
+			long offset = fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, packetLength);
-			final int next = fileStream.read();
-			if ((bytes_read == packetLength) && (buf[0] == MPEGConstants.sync_byte)
-					&& ((next == -1) || (next == MPEGConstants.sync_byte))) {
+			int next = fileStream.read();
+			if ((bytes_read == packetLength) && (buf[0] == sync_byte)
+					&& ((next == -1) || (next == sync_byte))) {
 				// always push back first byte of next packet
 				if ((next != -1)) {
 					fileStream.unread(next);
@@ -337,24 +342,24 @@ public class TransportStream implements TreeNode{
 		int count = 0;
 		int bytes_read = 0;
 		int lastHandledSyncErrorPacket = -1;
-		final byte[] buf = new byte[AVCHD_PACKET_LENGTH];
+		byte[] buf = new byte[AVCHD_PACKET_LENGTH];
 		
 		int lastArrivalTimeStamp = Integer.MAX_VALUE;
 		long currentRollOver = -1L;
 		do {
-			final long offset = fileStream.getPosition();
+			long offset = fileStream.getPosition();
 			bytes_read = fileStream.read(buf, 0, AVCHD_PACKET_LENGTH);
-			final byte[] nextBytes =new byte[5];
-			final int next = fileStream.read(nextBytes,0,5);
-			if ((bytes_read == packetLength) && (buf[4] == MPEGConstants.sync_byte)
-					&& ((next != 5) || (nextBytes[4] == MPEGConstants.sync_byte))) {
+			byte[] nextBytes =new byte[5];
+			int next = fileStream.read(nextBytes,0,5);
+			if ((bytes_read == packetLength) && (buf[4] == sync_byte)
+					&& ((next != 5) || (nextBytes[4] == sync_byte))) {
 				// always push back first byte of next packet
 				if ((next != -1)) {
 					fileStream.unread(nextBytes,0,next);
 				}
 				offsetHelper.addPacket(no_packets, offset);
-				final AVCHDPacket packet = new AVCHDPacket(buf, count, this);
-				final int arrivalTimestamp = packet.getArrivalTimestamp();
+				AVCHDPacket packet = new AVCHDPacket(buf, count, this);
+				int arrivalTimestamp = packet.getArrivalTimestamp();
 				if (arrivalTimestamp < lastArrivalTimeStamp) {
 					currentRollOver++;
 					rollOverHelper.addPacket(count, currentRollOver);
@@ -389,8 +394,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	private void processPacket(TSPacket packet) {
-		assert(no_packets == packet.packetNo);
-		final short pid = packet.getPID();
+		short pid = packet.getPID();
 		packet_pid[no_packets]=addPIDFlags(packet, pid);
 		no_packets++;
 		if(pids[pid]==null) {
@@ -403,7 +407,7 @@ public class TransportStream implements TreeNode{
 		}
 	}
 
-	private static short addPIDFlags(TSPacket packet, final short pid) {
+	private static short addPIDFlags(TSPacket packet, short pid) {
 		short pidFlags = pid;
 		if(packet.hasAdaptationField()){
 			pidFlags = (short) (pidFlags | ADAPTATION_FIELD_FLAG);
@@ -423,15 +427,15 @@ public class TransportStream implements TreeNode{
 	 * @param toParsePids Map with an entry for each PID that should be parsed, and a handler that knows how to interpret the data
 	 * @throws IOException
 	 */
-	public void parsePidStreams(final Map<Integer,GeneralPidHandler> toParsePids) throws IOException {
+	public void parsePidStreams(Map<Integer,GeneralPidHandler> toParsePids) throws IOException {
 		if((toParsePids==null)||(toParsePids.isEmpty())){
 			return;
 		}
 		
-		try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
+		try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
 			for(int t=0; t<no_packets;t++){
 				int pid = getPacket_pid(t);
-				final GeneralPidHandler handler = toParsePids.get(pid);
+				GeneralPidHandler handler = toParsePids.get(pid);
 				if(handler!=null){
 					TSPacket packet = readPacket(t, randomAccessFile);
 					handler.processTSPacket(packet);
@@ -444,9 +448,9 @@ public class TransportStream implements TreeNode{
 	}
 
 
-	private PositionPushbackInputStream getInputStream(final java.awt.Component component) throws IOException{
-		final InputStream is = new FileInputStream(file);
-		final long expectedSize=file.length();
+	private PositionPushbackInputStream getInputStream(java.awt.Component component) throws IOException{
+		InputStream is = new FileInputStream(file);
+		long expectedSize=file.length();
 		if(component==null){
 			return new PositionPushbackInputStream(new BufferedInputStream(is),300);
 		}
@@ -458,13 +462,13 @@ public class TransportStream implements TreeNode{
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder();
+		StringBuilder buf = new StringBuilder();
 		buf.append("Transportstream :").append(file.getName()).append('\n');
 		for (int i = 0; i < pids.length; i++) {
-			final PID pid = pids[i];
+			PID pid = pids[i];
 			if(pid!=null)
 			{
-				buf.append("  PID :").append(i).append(", ").append(pid.toString()).append(" packets, ").append((pid.getPackets() * 100) / no_packets).append("%, duplicate packets:").append(pid.getDup_packets()).append("\n");
+				buf.append("  PID :").append(i).append(", ").append(pid).append(" packets, ").append((pid.getPackets() * 100) / no_packets).append("%, duplicate packets:").append(pid.getDup_packets()).append("\n");
 			}
 		}
 
@@ -474,10 +478,6 @@ public class TransportStream implements TreeNode{
 
 	public File getFile() {
 		return file;
-	}
-
-	public void setFile(final File file) {
-		this.file = file;
 	}
 
 	/**
@@ -495,11 +495,11 @@ public class TransportStream implements TreeNode{
 		return psi;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final KVP tsKvp = new KVP("Transport Stream "+psi.getPat().getTransportStreamId());
+		KVP tsKvp = new KVP("Transport Stream "+psi.getPat().getTransportStreamId());
 		tsKvp.setCrumb("root");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(tsKvp);
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(tsKvp);
 
 		t.add(new DefaultMutableTreeNode(new KVP("file",file.getPath(),null)));
 		t.add(new DefaultMutableTreeNode(new KVP("size",file.length(),null)));
@@ -508,34 +508,34 @@ public class TransportStream implements TreeNode{
 		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLength,PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)")));
 		t.add(new DefaultMutableTreeNode(new KVP("Error packets",error_packets,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("Sync Errors",sync_errors,null)));
-		if(bitRate!=-1){
+		if(bitRate!= -1L){
 			t.add(new DefaultMutableTreeNode(new KVP("bitrate",bitRate,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()*8)/bitRate,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()* 8L)/bitRate,null)));
 		}
-		if(bitRateTDT!=-1){
+		if(bitRateTDT!= -1L){
 			t.add(new DefaultMutableTreeNode(new KVP("bitrate based on TDT",bitRateTDT,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()*8)/bitRateTDT,null)));
+			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()* 8L)/bitRateTDT,null)));
 		}
 
 		t.add(psi.getJTreeNode(modus));
 		if(!psiOnlyModus(modus)){
 			KVP kvp = new KVP("PIDs");
 			kvp.addTableSource(this::getTableModel,"PIDs");
-			final DefaultMutableTreeNode pidTreeNode = new DefaultMutableTreeNode(kvp);
+			DefaultMutableTreeNode pidTreeNode = new DefaultMutableTreeNode(kvp);
 			t.add(pidTreeNode);
-			for (final PID pid : pids) {
+			for (PID pid : pids) {
 				if((pid)!=null){
 					pidTreeNode.add(pid.getJTreeNode(modus));
 				}
 
 			}
 			// TSPackets
-			if(getNo_packets()!=0) {
-				final JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this,modus));
-				t.add(list.getJTreeNode(modus, "Transport packets "));
-			}else {
-				t.add(new DefaultMutableTreeNode(new KVP("Transport packets ")));
-			}
+            if (no_packets == 0) {
+                t.add(new DefaultMutableTreeNode(new KVP("Transport packets ")));
+            } else {
+                JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this, modus));
+                t.add(list.getJTreeNode(modus, "Transport packets "));
+            }
 		}
 
 		return t;
@@ -566,7 +566,7 @@ public class TransportStream implements TreeNode{
 		return tableModel;
 	}
 
-	private void setLabelMakerBase(final int pidNo, final String base)
+	private void setLabelMakerBase(int pidNo, String base)
 	{
 		if(pids[pidNo]!=null){
 			pids[pidNo].getLabelMaker().setBase(base);
@@ -574,7 +574,7 @@ public class TransportStream implements TreeNode{
 
 	}
 
-	private void addLabelMakerComponent(final int pidNo, final String type, final String serviceName)
+	private void addLabelMakerComponent(int pidNo, String type, String serviceName)
 	{
 		if(pids[pidNo]!=null){
 			pids[pidNo].getLabelMaker().addComponent(type, serviceName);
@@ -588,7 +588,7 @@ public class TransportStream implements TreeNode{
 	 * @param pid
 	 * @return
 	 */
-	private static String getFixedLabel(final short pid){
+	private static String getFixedLabel(short pid){
 		switch (pid) {
 		case 0:
 			return "PAT";
@@ -647,17 +647,17 @@ public class TransportStream implements TreeNode{
 
 		// now the streams referenced from the CAT
 		if(pids[1]!=null){
-			for(CADescriptor caDescriptor:findGenericDescriptorsInList(getPsi().getCat().getDescriptorList(), CADescriptor.class)){
-				addLabelMakerComponent(caDescriptor.getCaPID(), "EMM", "CA_ID:"+ caDescriptor.getCaSystemID()+ " ("+Utils.getCASystemIDString(caDescriptor.getCaSystemID())+")");
+			for(CADescriptor caDescriptor:findGenericDescriptorsInList(psi.getCat().getDescriptorList(), CADescriptor.class)){
+				addLabelMakerComponent(caDescriptor.getCaPID(), "EMM", "CA_ID:"+ caDescriptor.getCaSystemID()+ " ("+ getCASystemIDString(caDescriptor.getCaSystemID())+")");
 			}
 		}
 
 		// now all services, starting with PMTs themselves, then referenced ES
-		for(final PMTsection[] pmt:getPsi().getPmts()){
+		for(PMTsection[] pmt: psi.getPmts()){
 			PMTsection pmtSection = pmt[0];
 			while(pmtSection!=null){
-				final int service_id=pmtSection.getProgramNumber();
-				String service_name = getPsi().getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
+				int service_id=pmtSection.getProgramNumber();
+				String service_name = psi.getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
 
 				labelPmtForProgram(pmtSection, service_name);
 				labelEcmForProgram(pmtSection, service_name);
@@ -679,9 +679,9 @@ public class TransportStream implements TreeNode{
 
 	private void setGeneralPsiTableHandlers() {
 		if(PreferencesManager.isEnableGenericPSI()) {
-			for (final PID pid : pids) {
+			for (PID pid : pids) {
 				if((pid!=null)&&(pid.getType()==PID.PSI)) {
-						final GeneralPSITable psiData = pid.getPsi();
+						GeneralPSITable psiData = pid.getPsi();
 						if (((!psiData.getLongSections().isEmpty())|| 
 								(!psiData.getSimpleSectionsd().isEmpty())) && pid.getPidHandler()==null) {
 							GeneralPsiTableHandler generalPsiTableHandler = new GeneralPsiTableHandler();
@@ -699,7 +699,7 @@ public class TransportStream implements TreeNode{
 	 */
 	private void labelM7FastscanTables() {
 		
-		M7Fastscan fastScan = getPsi().getM7fastscan();
+		M7Fastscan fastScan = psi.getM7fastscan();
 		labelM7FastscanONT(fastScan);
 		labelM7FastscanFstFnt(fastScan);
 	}
@@ -709,20 +709,20 @@ public class TransportStream implements TreeNode{
 		for (Integer operatorId : new TreeSet<>(operators.keySet())) {
 			Map<Integer, OperatorFastscan> operatorsInPid = operators.get(operatorId);
 			for (Integer pid : new TreeSet<>(operatorsInPid.keySet())) {
-				String name = "M7 FastScan operator "+fastScan.getOperatorName(operatorId);
+				StringBuilder name = new StringBuilder("M7 FastScan operator ").append(fastScan.getOperatorName(operatorId));
 				
 				OperatorFastscan operatorFastscan = operatorsInPid.get(pid);
 				if(operatorFastscan.getOperatorSubListName()!=null) {
-					name += " " + operatorFastscan.getOperatorSubListName();
+					name.append(" ").append(operatorFastscan.getOperatorSubListName());
 				}
 				if(operatorFastscan.getFntSections() != null){
-					name += " FNT";
+					name.append(" FNT");
 				}
 				if(operatorFastscan.getFstSections() != null){
-					name += " FST";
+					name.append(" FST");
 				}
 				if(pids[pid]!=null){
-					pids[pid].getLabelMaker().setBase(name);
+					pids[pid].getLabelMaker().setBase(name.toString());
 				}
 			}
 		}
@@ -730,7 +730,7 @@ public class TransportStream implements TreeNode{
 
 	private static void labelM7FastscanONT(M7Fastscan fastScan) {
 		ONTSection[] sections = fastScan.getOntSections();
-		if((sections != null) && (sections.length >0)) {
+		if(sections != null) {
 			for(ONTSection section:sections) {
 				if(section != null) {
 					section.getParentPID().getLabelMaker().setBase("M7 FastScan ONT");
@@ -752,7 +752,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	private void labelPcrForProgram(PMTsection pmtSection, String service_name) {
-		final int PCR_pid = pmtSection.getPcrPid();
+		int PCR_pid = pmtSection.getPcrPid();
 		boolean pcrInComponent = false;
 		for(Component component:pmtSection.getComponentenList()) {
 			if (PCR_pid == component.getElementaryPID()) {
@@ -768,7 +768,7 @@ public class TransportStream implements TreeNode{
 
 	private void labelComponentsForProgram(PMTsection pmtSection, String service_name) {
 		for(Component component:pmtSection.getComponentenList()) {
-			final int streamType = component.getStreamtype();
+			int streamType = component.getStreamtype();
 			GeneralPidHandler generalPidHandler = determinePesHandlerByStreamType(component,streamType);
 
 			Optional<ComponentType> componentType = determineComponentType(component.getComponentDescriptorList());
@@ -783,10 +783,7 @@ public class TransportStream implements TreeNode{
 				case DVB_SUBTITLING:
 					generalPidHandler = new DVBSubtitleHandler();
 					break;
-				case TELETEXT:
-					generalPidHandler = new EBUTeletextHandler();
-					break;
-				case VBI:
+				case TELETEXT, VBI:
 					generalPidHandler = new EBUTeletextHandler();
 					break;
 				case AC3:
@@ -798,11 +795,9 @@ public class TransportStream implements TreeNode{
 				case E_AC3:
 					generalPidHandler = new EAC3Handler();
 					break;
-				case AIT:
+				case AIT, RCT:
 					break;
-				case RCT:
-					break;
-				case T2MI:
+                case T2MI:
 					generalPidHandler = new T2miPidHandler();
 					break;
 				case TTML:
@@ -816,14 +811,14 @@ public class TransportStream implements TreeNode{
 				}
 			}
 
-			final PID pid = pids[component.getElementaryPID()];
+			PID pid = pids[component.getElementaryPID()];
 			if (pid!=null && generalPidHandler!=null) {
 				generalPidHandler.setTransportStream(this);
 				generalPidHandler.setPID(pid);
 				pid.setPidHandler(generalPidHandler);
 			}
 			
-			final List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
+			List<CADescriptor> caDescriptorList =findGenericDescriptorsInList(component.getComponentDescriptorList(), CADescriptor.class);
 			for(CADescriptor cad: caDescriptorList) {
 				addLabelMakerComponent(cad.getCaPID(), "ECM", "CA_ID:"+ cad.getCaSystemID()+ " ("+service_name+")");
 
@@ -837,76 +832,70 @@ public class TransportStream implements TreeNode{
 	
 	private static ComponentType findComponentType(List<Descriptor> componentDescriptorList) {
 		
-		for(Descriptor d:componentDescriptorList){
-			if(d instanceof SubtitlingDescriptor) {
-				return ComponentType.DVB_SUBTITLING;
-			}else if(d instanceof TeletextDescriptor) {
-				return ComponentType.TELETEXT;
-			}else if(d instanceof VBIDataDescriptor) {
-				return ComponentType.VBI;
-			}else if(d instanceof AC3Descriptor){
-				return ComponentType.AC3;
-			}else if(d instanceof AC4Descriptor){
-				return ComponentType.AC4;
-			}else if(d instanceof RegistrationDescriptor registrationDescriptor){
-				byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
-				if (Arrays.equals(formatIdentifier, RegistrationDescriptor.AC_3)) {
+		for(Descriptor descriptor:componentDescriptorList){
+			switch (descriptor) {
+				case SubtitlingDescriptor ignored:
+					return ComponentType.DVB_SUBTITLING;
+				case TeletextDescriptor ignored:
+					return ComponentType.TELETEXT;
+				case VBIDataDescriptor ignored:
+					return ComponentType.VBI;
+				case AC3Descriptor ignored:
 					return ComponentType.AC3;
-				}
-				if (Arrays.equals(formatIdentifier, RegistrationDescriptor.SMPTE_2038)) {
-					return ComponentType.SMPTE2038;
-				}
-			}else if(d instanceof EnhancedAC3Descriptor){
-				return ComponentType.E_AC3;
-			}else if(d instanceof ApplicationSignallingDescriptor){
-				return ComponentType.AIT;
-			}else if(d instanceof RelatedContentDescriptor){
-				return ComponentType.RCT;
-			}else if(d instanceof T2MIDescriptor){
-				return ComponentType.T2MI;
-			}else if(d instanceof TtmlSubtitlingDescriptor){
-				return ComponentType.TTML;
+				case AC4Descriptor ignored:
+					return ComponentType.AC4;
+				case RegistrationDescriptor registrationDescriptor:
+					byte[] formatIdentifier = registrationDescriptor.getFormatIdentifier();
+					if (Arrays.equals(formatIdentifier, RegistrationDescriptor.AC_3)) {
+						return ComponentType.AC3;
+					}
+					if (Arrays.equals(formatIdentifier, RegistrationDescriptor.SMPTE_2038)) {
+						return ComponentType.SMPTE2038;
+					}
+					break;
+				case EnhancedAC3Descriptor ignored:
+					return ComponentType.E_AC3;
+				case ApplicationSignallingDescriptor ignored:
+					return ComponentType.AIT;
+				case RelatedContentDescriptor ignored:
+					return ComponentType.RCT;
+				case T2MIDescriptor ignored:
+					return ComponentType.T2MI;
+				case TtmlSubtitlingDescriptor ignored:
+					return ComponentType.TTML;
+				default:
 			}
 		}
 
 		return null;
 	}
 
-	private GeneralPidHandler determinePesHandlerByStreamType(final Component component,
-			final int streamType) {
-		int comp_pid = component.getElementaryPID();
-		GeneralPidHandler abstractPidHandler = null;
-		if((pids[comp_pid]!=null)&&(!pids[comp_pid].isScrambled())&&(pids[comp_pid].getType()==PID.PES)){
-			if((streamType==1)||(streamType==2)){
-				abstractPidHandler = new Video138182Handler();
-			}else if((streamType==3)||(streamType==4)){
-				abstractPidHandler = new Audio138183Handler(getAncillaryDataIdentifier(component));
-			}else if(streamType==0x11){
-				abstractPidHandler = new Audio144963Handler();
-			}else if(streamType==0x1B){
-				abstractPidHandler = new Video14496Handler();
-			}else if(streamType==0x20){ //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
-				abstractPidHandler = new Video14496Handler();
-			}else if(streamType==0x24){
-				abstractPidHandler = new H265Handler();
-			}else if(streamType==0x33){
-				abstractPidHandler = new H266Handler();
-			}else if(streamType==0x32){
-				abstractPidHandler = new JpegXsHandler();
-			}else{
-				abstractPidHandler = new GeneralPesHandler();
-			}
+	private GeneralPidHandler determinePesHandlerByStreamType(Component component,
+                                                              int streamType) {
+		int componentElementaryPID = component.getElementaryPID();
+		PID pid = pids[componentElementaryPID];
+		if ((pid != null) && (!pid.isScrambled()) && (pid.getType() == PID.PES)){
+			return switch(streamType){
+				case 1,2 -> new Video138182Handler();
+				case 3,4 -> new Audio138183Handler(getAncillaryDataIdentifier(component));
+				case 0x11 -> new Audio144963Handler();
+				case 0x1B -> new Video14496Handler();
+				case 0x20 -> new Video14496Handler(); //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
+				case 0x24 -> new H265Handler();
+				case 0x33 -> new H266Handler();
+				case 0x32 -> new JpegXsHandler();
+				default -> new GeneralPesHandler();
+			};
 		}
-		return abstractPidHandler;
+		return null;
 	}
 
-	private static int getAncillaryDataIdentifier(final Component component) {
-		int ancillaryData = 0;
-		final List<AncillaryDataDescriptor> ancillaryDataDescriptors = findGenericDescriptorsInList(component.getComponentDescriptorList(), AncillaryDataDescriptor.class);
+	private static int getAncillaryDataIdentifier(Component component) {
+		List<AncillaryDataDescriptor> ancillaryDataDescriptors = findGenericDescriptorsInList(component.getComponentDescriptorList(), AncillaryDataDescriptor.class);
 		if(!ancillaryDataDescriptors.isEmpty()){
-			ancillaryData = ancillaryDataDescriptors.get(0).getAncillaryDataIdentifier();
+			return ancillaryDataDescriptors.getFirst().getAncillaryDataIdentifier();
 		}
-		return ancillaryData;
+		return 0;
 	}
 
 
@@ -920,31 +909,31 @@ public class TransportStream implements TreeNode{
 
 		int teller=0;
 		long totBitrate= 0L;
-		for(final PID pid:pids){
-			if((pid!=null)&&(pid.getBitRate()!=-1)){
+		for (PID pid : pids) {
+			if ((pid != null) && (pid.getBitRate() != -1L)) {
 				teller++;
-				totBitrate+=pid.getBitRate();
+				totBitrate += pid.getBitRate();
 			}
 		}
-		if(teller!=0){
+		if (teller != 0) {
 			bitRate = totBitrate / teller;
 		}
 	}
 
 	private void calculateBitrateTDT() {
 		// calculate bitrate based on TDT sections. Need at least 2
-		if(getPsi().getTdt()!=null){
-			final List<TDTsection> tdtSectionList  = getPsi().getTdt().getTdtSectionList();
+		if(psi.getTdt()!=null){
+			List<TDTsection> tdtSectionList  = psi.getTdt().getTdtSectionList();
 			if(tdtSectionList.size()>=2){
-				final TDTsection first = tdtSectionList.get(0);
-				final TDTsection last = tdtSectionList.get(tdtSectionList.size()-1);
-				final long diffPacket = (long)last.getPacket_no() - first.getPacket_no();
-				final Calendar utcCalenderLast = getUTCCalender(last.getUTC_time());
-				final Calendar utcCalenderFirst = getUTCCalender(first.getUTC_time());
+				TDTsection first = tdtSectionList.getFirst();
+				TDTsection last = tdtSectionList.getLast();
+				long diffPacket = (long)last.getPacket_no() - first.getPacket_no();
+				Calendar utcCalenderLast = getUTCCalender(last.getUTC_time());
+				Calendar utcCalenderFirst = getUTCCalender(first.getUTC_time());
 				// getUTCCalender might fail if not correct BCD, then will return null.
 				if((utcCalenderLast!=null)&&(utcCalenderFirst!=null)){
-					final long timeDiffMills =   utcCalenderLast.getTimeInMillis()- utcCalenderFirst.getTimeInMillis();
-					if(timeDiffMills>0){ // shit happens... capture.guangdong  has 10 with same timestamp....
+					long timeDiffMills =   utcCalenderLast.getTimeInMillis()- utcCalenderFirst.getTimeInMillis();
+					if(timeDiffMills> 0L){ // shit happens... capture.guangdong  has 10 with same timestamp....
 						bitRateTDT = (diffPacket * packetLength * 8 * 1000)/timeDiffMills;
 					}
 				}
@@ -953,14 +942,14 @@ public class TransportStream implements TreeNode{
 	}
 
 	private void calculateZeroTime() {
-		if((getPsi().getTdt()!=null)&&(getBitRate()!=-1)){
-			final List<TDTsection> tdtSectionList  = getPsi().getTdt().getTdtSectionList();
-			if(!tdtSectionList.isEmpty()){
-				final TDTsection first = tdtSectionList.get(0);
-				final Calendar firstTime = getUTCCalender(first.getUTC_time());
-				if(firstTime!=null){
-					final long millsIntoStream= (first.getPacket_no() *packetLength * 8 * 1000)/getBitRate();
-					firstTime.add(Calendar.MILLISECOND, (int)-millsIntoStream);
+		if ((psi.getTdt() != null) && (getBitRate() != -1L)) {
+			List<TDTsection> tdtSectionList = psi.getTdt().getTdtSectionList();
+			if (!tdtSectionList.isEmpty()) {
+				TDTsection first = tdtSectionList.getFirst();
+				Calendar firstTime = getUTCCalender(first.getUTC_time());
+				if (firstTime != null) {
+					long millsIntoStream = ((long) first.getPacket_no() * packetLength * 8 * 1000) / getBitRate();
+					firstTime.add(Calendar.MILLISECOND, (int) -millsIntoStream);
 					zeroTime = firstTime;
 				}
 			}
@@ -978,7 +967,7 @@ public class TransportStream implements TreeNode{
 	{
 		int t=0;
 
-		for(final PID pid:pids){
+		for(PID pid:pids){
 			if(pid!=null){
 				t++;
 			}
@@ -987,8 +976,8 @@ public class TransportStream implements TreeNode{
 	}
 
 	public short [] getUsedPids(){
-		final int no = getNoPIDS();
-		final short[] r = new short[no];
+		int no = getNoPIDS();
+		short[] r = new short[no];
 		int i = 0;
 		for (short pid = 0; pid < MAX_PIDS; pid++) {
 			if (pids[pid] != null) {
@@ -998,16 +987,16 @@ public class TransportStream implements TreeNode{
 		return r;
 	}
 
-	public short getPacket_pid(final int t) {
+	public short getPacket_pid(int t) {
 		return (short) (0x1fff & packet_pid[t]);
 	}
 
-	public short getPacketPidFlags(final int t) {
+	public short getPacketPidFlags(int t) {
 		return  packet_pid[t];
 	}
 
 	
-	public String getShortLabel(final short pid){
+	public String getShortLabel(short pid){
 		if(pids[pid]!=null){
 			return pids[pid].getLabelMaker().toString();
 		}
@@ -1018,104 +1007,103 @@ public class TransportStream implements TreeNode{
 	 * @return the bitrate based on PCRs if available, else bitrate based on TDTs (if available). -1 if we have no idea what the bitrate could be.
 	 */
 	public long getBitRate() {
-		if(bitRate!=-1){
+		if(bitRate!= -1L){
 			return bitRate;
-		}else if(bitRateTDT!=-1){
+		}else if(bitRateTDT!= -1L){
 			return bitRateTDT;
 		}
-		return -1;
+		return -1L;
 	}
 
 	/**
 	 * @return the length of the stream in seconds, based on PCRs bitrate if available, else based on bitrate based on TDTs (if available). -1 if we have no idea what the length could be.
 	 */
 	public double getLength(){
-		if(bitRate!=-1){
+		if(bitRate!= -1L){
 			return ((double)file.length()*8)/bitRate;
-		}else if(bitRateTDT!=-1){
+		}else if(bitRateTDT!= -1L){
 			return ((double)file.length()*8)/bitRateTDT;
 		}else{
-			return -1;
+			return -1.0;
 		}
 	}
 
-	public String getPacketTime(final int packetNo){
-		String r = null;
+	public String getPacketTime(int packetNo){
 		if(isAVCHD()) {
-			return Utils.printPCRTime(getAVCHDPacketTime(packetNo));
+			return printPCRTime(getAVCHDPacketTime(packetNo));
 		}
 
-		if(getBitRate()!=-1){ //can't calculate time without a bitrate
-			if(zeroTime==null){
-				final Calendar now=new GregorianCalendar();
-				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-				now.setTimeInMillis(0);
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
-				// return only the hours/min,secs and millisecs. Not TS recording will last days
-				r = getFormattedTime(now);
-
-			}else{
-				final Calendar now=(Calendar)zeroTime.clone();
-				now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
-
-				r = getFormattedDate(now)+ " "+getFormattedTime(now);
-			}
-		}else{ // no bitrate, return packet number
-			r = packetNo +" (packetNo)";
+        if (getBitRate() == -1L) { // no bitrate, return packet number
+           return packetNo + " (packetNo)";
+        }
+		if (zeroTime == null) {
+			Calendar calendar = new GregorianCalendar();
+			calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+			calendar.setTimeInMillis(0L);
+			calendar.add(Calendar.MILLISECOND, getTimeFromStartInMilliSecs(packetNo));
+			// return only the hours/min,secs and millisecs. Not TS recording will last days
+			return getFormattedTime(calendar);
 		}
-		return r;
+		Calendar calendar = (Calendar) zeroTime.clone();
+		// calculation in long, intermediate results can be > Integer.MAX_VALUE
+
+        calendar.add(Calendar.MILLISECOND, getTimeFromStartInMilliSecs( packetNo));
+		return getFormattedDateTime(calendar);
 	}
 
-	private static String getFormattedDate(final Calendar now) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(now.get(Calendar.YEAR)).append("/").
-			append(now.get(Calendar.MONTH)+1).append("/").
-			append(now.get(Calendar.DAY_OF_MONTH));
-		return sb.toString();
+	private int getTimeFromStartInMilliSecs(int packetNo) {
+		return (int) (((long) packetNo * packetLength * 8 * 1000) / getBitRate());
 	}
 
-	private static String getFormattedTime(final Calendar now) {
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append(df2pos.format(now.get(Calendar.HOUR_OF_DAY))).append("h").
-			append(df2pos.format(now.get(Calendar.MINUTE))).append("m").
-			append(df2pos.format(now.get(Calendar.SECOND))).append(":").
-			append(df3pos.format(now.get(Calendar.MILLISECOND)));
-		return sb.toString();
+	private static String getFormattedDateTime(Calendar calendar) {
+		return(String.format("%1$tY/%1$tm/%1$td %1$tHh%1$tMm%1$tS:%1$tL", calendar));
 	}
 
-	public String getShortPacketTime(final long packetNo){
+	private static String getFormattedTime(Calendar calendar) {
+
+		return(String.format("%1$tHh%1$tMm%1$tS:%1$tL", calendar));
+	}
+
+	/**
+	 * TODO the parameter packetNoOrPCR has two different meaning, because BitRateChat and TimeStampChart use different X-axis for aVCHD/DVB Full stream
+	 * This should be fixed somewhere else ???
+	 * @param packetNoOrPCR when stream is a AVCHD stream, this is time in PCR ticks, otherwise this is packetNo (which will be converted into time.
+	 *                      packetNo is always in range int, pcr value is long.
+	 * @return
+	 */
+	public String getShortPacketTime(long packetNoOrPCR){
 		
 		if(isAVCHD()) {
-			return Utils.printPCRTime(packetNo);
+			return printPCRTime(packetNoOrPCR);
 		}
 
 		if(getBitRate()!=-1){ //can't calculate time  without a bitrate
-			Calendar now;
+			Calendar calendar;
 			if(zeroTime==null){
-				now = new GregorianCalendar();
-				now.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-				now.setTimeInMillis(0);
+				calendar = new GregorianCalendar();
+				calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+				calendar.setTimeInMillis(0);
 			}else{
-				now = (Calendar)zeroTime.clone();
+				calendar = (Calendar)zeroTime.clone();
 			}
-			now.add(Calendar.MILLISECOND, (int)((packetNo * packetLength * 8 * 1000)/getBitRate()));
-			// return only the hours/min,secs and millisecs. Not TS recording will last days
-			return now.get(Calendar.HOUR_OF_DAY)+"h"+df2pos.format(now.get(Calendar.MINUTE))+"m"+df2pos.format(now.get(Calendar.SECOND))+":"+df3pos.format(now.get(Calendar.MILLISECOND));
+			calendar.add(Calendar.MILLISECOND, getTimeFromStartInMilliSecs((int)packetNoOrPCR));
+			// return only the hours/min,secs and millisecs. No TS recording will last days
+
+			return getFormattedTime(calendar);
 
 		} // no bitrate
-		return packetNo +" (packetNo)";
+		return packetNoOrPCR +" (packetNo)";
 	}
 
-	public boolean isAVCHD() {
+	public final boolean isAVCHD() {
 		return packetLength == AVCHD_PACKET_LENGTH;
 	}
 
-	public PMTsection getPMTforPID(final int thisPID) {
-		final PMTs pmts = getPsi().getPmts();
-		for (final PMTsection[] pmTsections : pmts) {
-			final PMTsection pmt = pmTsections[0];
-			for(final Component component :pmt.getComponentenList()){
+	public PMTsection getPMTforPID(int thisPID) {
+		PMTs pmts = psi.getPmts();
+		for (PMTsection[] pmTsections : pmts) {
+			PMTsection pmt = pmTsections[0];
+			for(Component component :pmt.getComponentenList()){
 				if(component.getElementaryPID()==thisPID){
 					return pmt;
 				}
@@ -1125,12 +1113,12 @@ public class TransportStream implements TreeNode{
 	}
 
 	// TODO handle FileNotFoundException more elegant, show some msg in GUI  
-	public TSPacket getTSPacket(final int packetNo){
+	public TSPacket getTSPacket(int packetNo){
 		TSPacket packet = null;
 		if(offsetHelper.getMaxPacket()>packetNo){
-			try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
+			try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")){
 				packet = readPacket(packetNo,randomAccessFile);
-			} catch (final IOException e) {
+			} catch (IOException e) {
 				logger.warning("IOException:"+e);
 			}
 		}else{
@@ -1139,13 +1127,13 @@ public class TransportStream implements TreeNode{
 		return packet;
 	}
 
-	private TSPacket readPacket(final int packetNo, final RandomAccessFile randomAccessFile)
+	private TSPacket readPacket(int packetNo, RandomAccessFile randomAccessFile)
 			throws IOException {
 		TSPacket packet = null;
-		final long offset = offsetHelper.getOffset(packetNo);
+		long offset = offsetHelper.getOffset(packetNo);
 		randomAccessFile.seek(offset);
-		final byte [] buf = new byte[packetLength];
-		final int bytesRead = randomAccessFile.read(buf);
+		byte [] buf = new byte[packetLength];
+		int bytesRead = randomAccessFile.read(buf);
 		if(bytesRead==packetLength){
 			if(isAVCHD()) {
 				packet = new AVCHDPacket(buf, packetNo,this); 
@@ -1191,7 +1179,7 @@ public class TransportStream implements TreeNode{
 		return base * 300 + extension;
 	}
 	
-	public PID getPID(final int p){
+	public PID getPID(int p){
 		return pids[p];
 	}
 
@@ -1207,38 +1195,30 @@ public class TransportStream implements TreeNode{
 		return sync_errors;
 	}
 
-	public void setSync_errors(int sync_errors) {
-		this.sync_errors = sync_errors;
-	}
-
 	public int getError_packets() {
 		return error_packets;
-	}
-
-	public void setError_packets(int error_packets) {
-		this.error_packets = error_packets;
 	}
 
 	/**
 	 * @return
 	 */
 	List<LinkageDescriptor> getLinkageDescriptorsFromNitNetworkLoop() {
-		final NIT nit = getPsi().getNit();
-		final int actualNetworkID = nit.getActualNetworkID();
-		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
-		return Descriptor.findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
+		NIT nit = psi.getNit();
+		int actualNetworkID = nit.getActualNetworkID();
+		List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
+		return findGenericDescriptorsInList(descriptors, LinkageDescriptor.class);
 	}
 
 	public boolean isONTSection(int pid) {
-		final NIT nit = getPsi().getNit();
-		final int actualNetworkID = nit.getActualNetworkID();
-		final List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptorsFromNitNetworkLoop();
+		NIT nit = psi.getNit();
+		int actualNetworkID = nit.getActualNetworkID();
+		List<LinkageDescriptor> linkageDescriptors = getLinkageDescriptorsFromNitNetworkLoop();
 	
 		int streamID = getStreamID();
 	
-		final int originalNetworkID = nit.getOriginalNetworkID(actualNetworkID, streamID);
+		int originalNetworkID = nit.getOriginalNetworkID(actualNetworkID, streamID);
 	
-		for (final LinkageDescriptor ld : linkageDescriptors) {
+		for (LinkageDescriptor ld : linkageDescriptors) {
 			if (ld.getLinkageType() == 0x8D 
 					&& ld.getTransportStreamId() == streamID
 					&& ld.getOriginalNetworkId() == originalNetworkID 
