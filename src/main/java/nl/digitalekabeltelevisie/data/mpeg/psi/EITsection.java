@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -81,21 +81,22 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return descriptorList;
 		}
 
-		public void setDescriptorList(final List<Descriptor> descriptorList) {
+		public void setDescriptorList(List<Descriptor> descriptorList) {
 			this.descriptorList = descriptorList;
 		}
+
 		public int getEventID() {
 			return eventID;
 		}
 
-		public void setEventID(final int transportStreamID) {
-			this.eventID = transportStreamID;
+		public void setEventID(int eventID) {
+			this.eventID = eventID;
 		}
 
 		@Override
 		public String toString(){
-			final StringBuilder b = new StringBuilder("Event, ID=");
-			b.append(getEventID()).
+			StringBuilder b = new StringBuilder("Event, ID=");
+			b.append(eventID).
 			append(", start_time:").
 			append(Utils.getEITStartTimeAsString(startTime)).
 			append(", duration:").
@@ -121,11 +122,11 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 		}
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+		public DefaultMutableTreeNode getJTreeNode(int modus){
 
-			final KVP kvp = new KVP("event",eventID,Utils.getEITStartTimeAsString(startTime)+" "+getEventName());
+			KVP kvp = new KVP("event",eventID,Utils.getEITStartTimeAsString(startTime)+" "+getEventName());
 			kvp.addHTMLSource(this,"Event details");
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
+			DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 			t.add(new DefaultMutableTreeNode(new KVP("event_id",eventID,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("start_time",startTime,Utils.getEITStartTimeAsString(startTime))));
@@ -143,7 +144,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return descriptorsLoopLength;
 		}
 
-		public void setDescriptorsLoopLength(final int descriptorsLoopLength) {
+		public void setDescriptorsLoopLength(int descriptorsLoopLength) {
 			this.descriptorsLoopLength = descriptorsLoopLength;
 		}
 
@@ -151,7 +152,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return duration;
 		}
 
-		public void setDuration(final String duration) {
+		public void setDuration(String duration) {
 			this.duration = duration;
 		}
 
@@ -159,7 +160,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return freeCAMode;
 		}
 
-		public void setFreeCAMode(final int freeCAMode) {
+		public void setFreeCAMode(int freeCAMode) {
 			this.freeCAMode = freeCAMode;
 		}
 
@@ -167,7 +168,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return runningStatus;
 		}
 
-		public void setRunningStatus(final int runningStatus) {
+		public void setRunningStatus(int runningStatus) {
 			this.runningStatus = runningStatus;
 		}
 
@@ -175,7 +176,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return startTime;
 		}
 
-		public void setStartTime(final byte[] startTime) {
+		public void setStartTime(byte[] startTime) {
 			this.startTime = startTime;
 		}
 
@@ -185,13 +186,13 @@ public class EITsection extends TableSectionExtendedSyntax{
 		 */
 		@Override
 		public String getHTML() {
-			final StringBuilder r1 = new StringBuilder();
+			StringBuilder r1 = new StringBuilder();
 			r1.append("Start:&nbsp;").
 				append(Utils.getEITStartTimeAsString(getStartTime())).
 				append("&nbsp;Duration: ").
-				append(formatDuration(getDuration())).
+				append(formatDuration(duration)).
 				append("<br><hr><br>");
-			final List<Descriptor> descList = getDescriptorList();
+			List<Descriptor> descList = descriptorList;
 			
 			addTimeShiftDetails(r1, Descriptor.findGenericDescriptorsInList(descList, TimeShiftedEventDescriptor.class));
 			
@@ -220,7 +221,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			return r1.toString();
 		}
 
-		private static void addTimeShiftDetails(final StringBuilder r1, List<TimeShiftedEventDescriptor> timeShiftedEventDescriptorList) {
+		private static void addTimeShiftDetails(StringBuilder r1, List<TimeShiftedEventDescriptor> timeShiftedEventDescriptorList) {
 			for(TimeShiftedEventDescriptor timeShiftedEventDescriptor:timeShiftedEventDescriptorList) {
 				r1.append("Event is a time shifted copy of other event; service_id:").
 					append(timeShiftedEventDescriptor.getReference_service_id()).
@@ -230,10 +231,10 @@ public class EITsection extends TableSectionExtendedSyntax{
 			}
 		}
 
-		private static void addParentalRatingDetails(final StringBuilder r1, final List<ParentalRatingDescriptor> ratingDescList) {
-			for(final ParentalRatingDescriptor ratingDesc :ratingDescList){
-				final List<Rating> ratingList = ratingDesc.getRatingList();
-				for(final Rating c:ratingList){
+		private static void addParentalRatingDetails(StringBuilder r1, List<ParentalRatingDescriptor> ratingDescList) {
+			for(ParentalRatingDescriptor ratingDesc :ratingDescList){
+				List<Rating> ratingList = ratingDesc.getRatingList();
+				for(Rating c:ratingList){
 					r1.append("Rating: ").
 						append(c.getCountryCode()).
 						append(": ").
@@ -244,11 +245,11 @@ public class EITsection extends TableSectionExtendedSyntax{
 			}
 		}
 
-		private static void addContentDetails(final StringBuilder r1, final List<ContentDescriptor> contentDescList) {
+		private static void addContentDetails(StringBuilder r1, List<ContentDescriptor> contentDescList) {
 			if(!contentDescList.isEmpty()){
-				for(final ContentDescriptor contentDesc : contentDescList){
-					final List<ContentItem> contentList = contentDesc.getContentList();
-					for(final ContentItem c:contentList){
+				for(ContentDescriptor contentDesc : contentDescList){
+					List<ContentItem> contentList = contentDesc.getContentList();
+					for(ContentItem c:contentList){
 						r1.append("Content type: ").
 							append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1())).
 							append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).
@@ -260,7 +261,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			}
 		}
 
-		private static void addComponentDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
+		private static void addComponentDetails(StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
 			List<ComponentDescriptor> componentDescriptorList = Descriptor.findGenericDescriptorsInList(languageList, ComponentDescriptor.class);
 			for(ComponentDescriptor componentDescriptor:componentDescriptorList) {
 				r1.append("Component: ").
@@ -273,15 +274,15 @@ public class EITsection extends TableSectionExtendedSyntax{
 			}
 		}
 
-		private static void addShortEventDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
-			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(languageList, ShortEventDescriptor.class);
+		private static void addShortEventDetails(StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
+			List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(languageList, ShortEventDescriptor.class);
 			if(!shortDesc.isEmpty()){
-				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
+				for(ShortEventDescriptor shortEventDescriptor : shortDesc){
 					
 					r1.append("Event name: <b>").
 						append(shortEventDescriptor.getEventName().toEscapedHTML()).
 						append("</b><br>");
-					final String shortText = shortEventDescriptor.getText().toEscapedHTML();
+					String shortText = shortEventDescriptor.getText().toEscapedHTML();
 					if((shortText!=null)&&!shortText.isEmpty()){
 						r1.append("Short description: ").
 							append(shortText).
@@ -292,14 +293,14 @@ public class EITsection extends TableSectionExtendedSyntax{
 			}
 		}
 
-		private static void addExtendedEventDetails(final StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
-			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(languageList, ExtendedEventDescriptor.class);
-			final ArrayList<DVBString> extendedEventStrings = new ArrayList<>();
-			for(final ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
+		private static void addExtendedEventDetails(StringBuilder r1, ArrayList<LanguageDependentEitDescriptor> languageList) {
+			List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(languageList, ExtendedEventDescriptor.class);
+			ArrayList<DVBString> extendedEventStrings = new ArrayList<>();
+			for(ExtendedEventDescriptor extEvent: extendedDesc){ // no check whether we have all extended event descriptors
 
 				if(!extEvent.getItemList().isEmpty()){ // this extended Event has items
 					r1.append("<br><table>");
-					for(final ExtendedEventDescriptor.Item item :extEvent.getItemList()){
+					for(ExtendedEventDescriptor.Item item :extEvent.getItemList()){
 						r1.append("<tr><td>").
 							append(item.getItemDescription().toEscapedHTML()).
 							append("</td><td>").
@@ -317,7 +318,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			}
 		}
 
-		private static LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> mapDescriptorsByLanguage(final List<Descriptor> descList) {
+		private static LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> mapDescriptorsByLanguage(List<Descriptor> descList) {
 			LinkedHashMap<String, ArrayList<LanguageDependentEitDescriptor>> languageDependentDescriptorsMap = new LinkedHashMap<>();
 			
 			for(Descriptor d:descList) {
@@ -334,7 +335,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 
 
-	public EITsection(final PsiSectionData raw_data, final PID parent){
+	public EITsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 
 		transportStreamID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
@@ -352,10 +353,10 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("EITsection section=");
+		StringBuilder b = new StringBuilder("EITsection section=");
 		b.append(getSectionNumber())
-		.append(", OrgNetworkId=").append(getOriginalNetworkID())
-		.append(", TransportStreamID=").append(getTransportStreamID())
+		.append(", OrgNetworkId=").append(originalNetworkID)
+		.append(", TransportStreamID=").append(transportStreamID)
 		.append(", ServiceD=").append(getServiceID())
 		.append(", tableType=").append(getTableType(getTableId()))
 		.append(", lastSection=").append(getSectionLastNumber());
@@ -373,8 +374,8 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 
 	public void setEventList(
-			final List<Event> transportStreamList) {
-		this.eventList = transportStreamList;
+			List<Event> eventList) {
+		this.eventList = eventList;
 	}
 
 	public int noEvents() {
@@ -382,11 +383,11 @@ public class EITsection extends TableSectionExtendedSyntax{
 	}
 
 
-	private List<Event> buildEventList(final byte[] data, final int offset, final int programInfoLength) {
-		final List<Event> r = new ArrayList<>();
+	private List<Event> buildEventList(byte[] data, int offset, int programInfoLength) {
+		List<Event> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
-			final Event c = new Event();
+			Event c = new Event();
 			c.setEventID(Utils.getInt(data, offset+t, 2, Utils.MASK_16BITS));
 			c.setStartTime(Arrays.copyOfRange(data,offset+t+2,offset+t+7));
 			c.setDuration(Utils.getBCD(data, (offset+t+7)*2,6));
@@ -403,9 +404,9 @@ public class EITsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
 
 		KVP kvp = (KVP)t.getUserObject();
 		kvp.addHTMLSource(()->getHtmlForEit(modus), "List");
@@ -426,7 +427,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 	 * @return
 	 */
 	String getHtmlForEit(int modus) {
-		final StringBuilder b = new StringBuilder();
+		StringBuilder b = new StringBuilder();
 		b.append("<code>");
 		b.append(getHTMLLines(modus));
 		b.append("</code>");
@@ -441,16 +442,16 @@ public class EITsection extends TableSectionExtendedSyntax{
 	}
 
 	public StringBuilder getHTMLLines(int modus){
-		final StringBuilder b = new StringBuilder();
-		for(final Event event:eventList){
+		StringBuilder b = new StringBuilder();
+		for(Event event:eventList){
 			b.append(Utils.escapeHTML(Utils.getEITStartTimeAsString(event.getStartTime()))).
 				append("&nbsp;").
 				append(formatDuration(event.getDuration())).
 				append("&nbsp;");
-			final List<Descriptor> descList = event.getDescriptorList();
-			final List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
+			List<Descriptor> descList = event.getDescriptorList();
+			List<ShortEventDescriptor> shortDesc = Descriptor.findGenericDescriptorsInList(descList, ShortEventDescriptor.class);
 			if(!shortDesc.isEmpty()){
-				for(final ShortEventDescriptor shortEventDescriptor : shortDesc){
+				for(ShortEventDescriptor shortEventDescriptor : shortDesc){
 					b.append("<b><span style=\"background-color: white\">").
 					append("<a href=\"root/psi/eit/original_network_id:").
 					append(originalNetworkID).
@@ -475,8 +476,8 @@ public class EITsection extends TableSectionExtendedSyntax{
 					append(Utils.escapeHTML(shortEventDescriptor.getText().toString()));
 				}
 			}
-			final List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
-			for(final ExtendedEventDescriptor extEvent: extendedDesc){
+			List<ExtendedEventDescriptor> extendedDesc = Descriptor.findGenericDescriptorsInList(descList, ExtendedEventDescriptor.class);
+			for(ExtendedEventDescriptor extEvent: extendedDesc){
 				b.append(Utils.escapeHTML(extEvent.getText().toString()));
 			}
 
@@ -505,7 +506,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 	public TableModel getTableModel() {
 		FlexTableModel<EITsection,Event> tableModel =  new FlexTableModel<>(EIT.buildEitTableHeader());
 
-		tableModel.addData(this, getEventList());
+		tableModel.addData(this, eventList);
 
 		tableModel.process();
 		return tableModel;

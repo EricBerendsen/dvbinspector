@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.util;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2013 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -27,62 +27,18 @@ package nl.digitalekabeltelevisie.util;
 *
 */
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Represents a time interval (period of time).
  * @author Eric
  *
  */
-public class Interval {
+public record Interval(LocalDateTime start, LocalDateTime end) {
 
-	private Date start;
-	private Date end;
-
-	/**
-	 * @param start
-	 * @param end
-	 */
-	public Interval(Date start, Date end) {
-		super();
-		this.start = start;
-		this.end = end;
-	}
-
-	/**
-	 * @param start
-	 * @param duration milliseconds
-	 */
-	public Interval(Date start, long duration) {
-		super();
-		this.start = start;
-		this.end = new Date(start.getTime()+duration);
-	}
-
-	/**
-	 * @return start
-	 */
-	public Date getStart() {
-		return start;
-	}
-
-	public void setStart(Date start) {
-		this.start = start;
-	}
-
-	public Date getEnd() {
-		return end;
-	}
-
-	public void setEnd(Date end) {
-		this.end = end;
-	}
-
-	/**
-	 * @return length of interval in milliseconds
-	 */
-	public long getDuration(){
-		return end.getTime() - start.getTime();
+		public long getDuration(){
+		return start.until(end, ChronoUnit.MILLIS);
 	}
 
 }

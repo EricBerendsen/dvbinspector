@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui;
 
-import static nl.digitalekabeltelevisie.util.Utils.getDurationMillis;
-import static nl.digitalekabeltelevisie.util.Utils.getUTCCalender;
-import static nl.digitalekabeltelevisie.util.Utils.getUTCDate;
+import static nl.digitalekabeltelevisie.util.Utils.getDurationSeconds;
+import static nl.digitalekabeltelevisie.util.Utils.getUTCLocalDateTime;
 import static nl.digitalekabeltelevisie.util.Utils.isUndefined;
 import static nl.digitalekabeltelevisie.util.Utils.roundHourDown;
 import static nl.digitalekabeltelevisie.util.Utils.roundHourUp;
@@ -45,9 +44,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -60,7 +59,6 @@ import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
-import nl.digitalekabeltelevisie.controller.ViewContext;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
@@ -86,20 +84,19 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	private static final long DEFAULT_MILLI_SECS_PER_PIXEL = 30*1000;
 	private static final int SERVICE_NAME_WIDTH = 150;
 	private static final int LEGEND_HEIGHT = 40;
+	private static final String TIME_FORMAT = "%1$tH:%1$tM:%1$tS";
+	private static final String DATE_FORMAT = "%1$tY/%1$tm/%1$td";
 
 
 	private EIT eit;
 	private long milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
-	private Map<ServiceIdentification, EITsection[]> servicesTable;
-	private SortedSet<ServiceIdentification> serviceOrder;
+	private Map<ServiceIdentification, EITsection[]> servicesTable = null;
+	private SortedSet<ServiceIdentification> serviceOrder = null;
 	private Interval interval;
 	private boolean selectedSchedule = true;
 
-	private final SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-	private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-
-	private int translatedX;
-	private int translatedY;
+	private int translatedX = 0;
+	private int translatedY = 0;
 
 
 	/**
@@ -121,14 +118,12 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * Constructor for use from EITPanel, for use as JPanel
 	 *
 	 * @param stream
-	 * @param viewContext
-	 */
-	public EITableImage(final TransportStream stream, final ViewContext viewContext) {
-		super();
-		this.addComponentListener(this);
+     */
+	public EITableImage(TransportStream stream) {
+        this.addComponentListener(this);
 		this.milliSecsPerPixel =15*1000L; // default for Jpanel, zoomlevel = 2
 
-		setTransportStream(stream, viewContext);
+		setTransportStream(stream);
 		setToolTipText("");
 		revalidate();
 
@@ -137,9 +132,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	/**
 	 * To load a new TransportStream, forces update
 	 * @param stream
-	 * @param viewContext
-	 */
-	public final void setTransportStream(final TransportStream stream, final ViewContext viewContext) {
+     */
+	public final void setTransportStream(TransportStream stream) {
 
 		if(stream!=null){
 			eit = stream.getPsi().getEit();
@@ -172,11 +166,11 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		}
 
 		// Round up/down to nearest hour
-		Date startDate = roundHourDown(interval.getStart());
-		Date endDate = roundHourUp(interval.getEnd());
+		LocalDateTime startDate = roundHourDown(interval.start());
+		LocalDateTime endDate = roundHourUp(interval.end());
 
 		int height = (serviceOrder.size()*LINE_HEIGHT)+1 + LEGEND_HEIGHT;
-		int legendWidth = (int)((endDate.getTime() - startDate.getTime())/milliSecsPerPixel);
+		int legendWidth = (int) (startDate.until(endDate,ChronoUnit.SECONDS) *1000L /milliSecsPerPixel);
 		int width = 1+SERVICE_NAME_WIDTH + legendWidth;
 		
 		long size = (long)width * height;
@@ -186,14 +180,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		}
 		
 		
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		final Graphics2D gd = img.createGraphics();
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D gd = img.createGraphics();
 		gd.setColor(Color.BLUE);
 		gd.fillRect(0, 0, width, height);
 		gd.setColor(Color.WHITE);
 
-		final Font font = new Font(FONT_NAME, Font.PLAIN, 14);
-		final Font nameFont = new Font(FONT_NAME, Font.BOLD, 14);
+		Font font = new Font(FONT_NAME, Font.PLAIN, 14);
+		Font nameFont = new Font(FONT_NAME, Font.BOLD, 14);
 		gd.setFont(font);
 
 		BasicStroke basicStroke = new BasicStroke( 3.0f);
@@ -212,10 +206,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		drawLabels(gd, serviceOrder, nameFont, 0, offset, char_descend);
 
 		// draw grid
-		offset=LEGEND_HEIGHT;
-
 		gd.setFont(font);
-		for(final ServiceIdentification serviceNo : serviceOrder){
+		for(ServiceIdentification serviceNo : serviceOrder){
 			EITsection[] eiTsections = servicesTable.get(serviceNo);
 			drawServiceEvents(gd, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
 			offset+=LINE_HEIGHT;
@@ -234,9 +226,9 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param char_descend
 	 * @param eiTsections
 	 */
-	private void drawServiceEvents(final Graphics2D gd, Date startDate, int x, int y, int char_descend,
-			EITsection[] eiTsections) {
-		for(final EITsection section :eiTsections){
+	private void drawServiceEvents(Graphics2D gd, LocalDateTime startDate, int x, int y, int char_descend,
+                                   EITsection[] eiTsections) {
+		for(EITsection section :eiTsections){
 			if(section!= null){
 				List<Event> eventList = section.getEventList();
 				for(Event event:eventList){
@@ -257,16 +249,16 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param y
 	 * @param char_descend
 	 */
-	private void drawEvent(final Graphics2D gd, Date startDate, Event event, int x, int y, int char_descend) {
-		final byte[] startTime = event.getStartTime();
+	private void drawEvent(Graphics2D gd, LocalDateTime startDate, Event event, int x, int y, int char_descend) {
+		byte[] startTime = event.getStartTime();
 		if(isUndefined(startTime)){
 			return;
 		}
-		Date eventStart = getUTCDate( startTime);
+		LocalDateTime eventStart = getUTCLocalDateTime(startTime);
 
 		try{
-		int w = (int)(getDurationMillis(event.getDuration())/milliSecsPerPixel);
-			int eventX = x+(int)((eventStart.getTime()-startDate.getTime())/milliSecsPerPixel);
+		int w = (int)(getDurationSeconds(event.getDuration())*1000L/milliSecsPerPixel);
+			int eventX = x+(int)(startDate.until(eventStart, ChronoUnit.MILLIS)/milliSecsPerPixel);
 			String eventName= event.getEventName();
 
 			// FIll gray
@@ -304,12 +296,12 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param y
 	 * @param char_descend
 	 */
-	private void drawLabels(final Graphics2D gd, final SortedSet<ServiceIdentification> serviceSet, final Font nameFont,
-			int x,  int y, int char_descend) {
+	private void drawLabels(Graphics2D gd, SortedSet<ServiceIdentification> serviceSet, Font nameFont,
+                            int x, int y, int char_descend) {
 		int labelY = y; 
 		gd.setFont(nameFont);
 
-		for(final ServiceIdentification serviceNo : serviceSet){
+		for(ServiceIdentification serviceNo : serviceSet){
 			String serviceName = this.eit.
 					getParentPSI().
 					getSdt().
@@ -339,17 +331,16 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param y
 	 * @param legendHeight
 	 */
-	private void drawActualTime(final Graphics2D gd, Date startDate,int x, int y, int legendHeight) {
+	private void drawActualTime(Graphics2D gd, LocalDateTime startDate, int x, int y, int legendHeight) {
 		// do we have a current time in the TDT?
 		if(this.eit.getParentPSI().getTdt()!=null){
-			final List<TDTsection> tdtSectionList  = this.eit.getParentPSI().getTdt().getTdtSectionList();
+			List<TDTsection> tdtSectionList  = this.eit.getParentPSI().getTdt().getTdtSectionList();
 			if(!tdtSectionList.isEmpty()){
-				final TDTsection first = tdtSectionList.get(0);
-				final Calendar utcCalender = getUTCCalender(first.getUTC_time());
-				if(utcCalender!=null){
-					final Date startTime = utcCalender.getTime();
+				TDTsection first = tdtSectionList.getFirst();
+				LocalDateTime sectionStart = getUTCLocalDateTime(first.getUTC_time());
+				if(sectionStart!=null){
 					gd.setColor(Color.RED);
-					int labelX = x+(int)((startTime.getTime()-startDate.getTime())/milliSecsPerPixel);
+					int labelX = x+(int)(startDate.until(sectionStart,ChronoUnit.SECONDS) * 1000L/milliSecsPerPixel);
 					gd.drawLine(labelX, y, labelX, (y+legendHeight)-1);
 				}
 			}
@@ -367,23 +358,23 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param y position on image
 	 * @param legendHeight height of bar
 	 */
-	private void drawLegend(final Graphics2D gd, Date startDate, Date endDate, int x, int y, int legendHeight) {
+	private void drawLegend(Graphics2D gd, LocalDateTime startDate, LocalDateTime endDate, int x, int y, int legendHeight) {
 		gd.setColor(Color.BLACK);
-		int w = (int)((endDate.getTime() - startDate.getTime())/milliSecsPerPixel);
+		int w = (int)(startDate.until(endDate,ChronoUnit.SECONDS) *1000L/milliSecsPerPixel);
 		gd.fillRect(x, y, w, legendHeight);
 
 		gd.setColor(Color.WHITE);
 
-		Date hourMark = new Date(startDate.getTime());
-		while(hourMark.before(endDate)){
-			int labelX = x+(int)((hourMark.getTime()-startDate.getTime())/milliSecsPerPixel);
+		LocalDateTime hourMark = startDate;
+		while(hourMark.isBefore(endDate)){
+			int labelX = x+(int)(startDate.until(hourMark,ChronoUnit.SECONDS) *1000L/milliSecsPerPixel);
 			gd.drawLine(labelX, y, labelX, (legendHeight-1)+y);
-			String timeString =   tf.format(hourMark);
-			String dateString =   df.format(hourMark);
 
+			String timeString =   String.format(TIME_FORMAT,hourMark);
+			String dateString =   String.format(DATE_FORMAT,hourMark);
 			gd.drawString(dateString, labelX+5, y+ 17);
 			gd.drawString(timeString, labelX+5, y+ 37);
-			hourMark = new Date(hourMark.getTime() + (1000L*60*60)); //advance 1 hour
+			hourMark = hourMark.plusHours(1);
 		}
 	}
 
@@ -395,12 +386,12 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	public final Dimension getDimension(){
 		if((eit!=null)&&(interval!=null)){
 			// Round up/down to nearest hour
-			Date startDate = roundHourDown(interval.getStart());
-			Date endDate = roundHourUp(interval.getEnd());
+			LocalDateTime startDate = roundHourDown(interval.start());
+			LocalDateTime endDate = roundHourUp(interval.end());
 
 			int legendHeight = 40;
 			int height = (serviceOrder.size()*LINE_HEIGHT)+1 + legendHeight;
-			int width = 1+SERVICE_NAME_WIDTH + (int)((endDate.getTime() - startDate.getTime())/milliSecsPerPixel);
+			int width = 1+SERVICE_NAME_WIDTH + (int)(startDate.until(endDate,ChronoUnit.SECONDS) * 1000L/milliSecsPerPixel);
 			return new Dimension(width,height);
 		}
 		return new Dimension(0,0);
@@ -421,11 +412,11 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	}
 
 	@Override
-	public String getToolTipText(final MouseEvent e){
+	public String getToolTipText(MouseEvent e){
 		StringBuilder r1=new StringBuilder();
 		if((eit!=null)&&(interval!=null)){
-			final int x=e.getX();
-			final int y=e.getY();
+			int x=e.getX();
+			int y=e.getY();
 			if( y>(translatedY+LEGEND_HEIGHT)){ // mouse not over legend?
 
 				int row = (y-LEGEND_HEIGHT)/LINE_HEIGHT;
@@ -440,14 +431,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 								map(DVBString::toEscapedHTML).
 								orElse("Service "+serviceIdent.serviceId());
 						r1.append(name).append("</b><br><br>");
-	
-						Date thisDate = new Date(roundHourDown(interval.getStart()).getTime()+(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH)));
+						LocalDateTime thisDate =roundHourDown(interval.start()).plusSeconds(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH) / 1000L);
 						Event event = findEvent(serviceIdent, thisDate);
 						if(event!=null){
 							r1.append(event.getHTML());
 						}else{ // NO event found, just display time
-							String timeString =   tf.format(thisDate);
-							String dateString =   df.format(thisDate);
+							String timeString =   String.format(TIME_FORMAT,thisDate);
+							String dateString =   String.format(DATE_FORMAT,thisDate);
+
 							r1.append(dateString).append("&nbsp;").append(timeString);
 						}
 					}else { // over service names
@@ -478,7 +469,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param date
 	 * @return
 	 */
-	private Event findEvent(ServiceIdentification serviceID, Date date){
+	private Event findEvent(ServiceIdentification serviceID, LocalDateTime date){
 		EITsection[] list = servicesTable.get(serviceID);
 		for(EITsection section:list){
 			if(section!=null){
@@ -486,10 +477,10 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 				for(Event event: eventList){
 					byte[] startTime = event.getStartTime();
 					if(!isUndefined(startTime)) {
-						Date eventStart = getUTCDate(startTime);
-						if(date.after(eventStart)||date.equals(eventStart)){
-							Date eventEnd = new Date(eventStart.getTime()+ getDurationMillis(event.getDuration()));
-							if(eventEnd.after(date)){
+						LocalDateTime eventStart = getUTCLocalDateTime(startTime);
+						if(date.isAfter(eventStart)||date.equals(eventStart)){
+							LocalDateTime eventEnd = eventStart.plusSeconds(getDurationSeconds(event.getDuration()));
+							if(eventEnd.isAfter(date)){
 								return event;
 							}
 						}
@@ -505,7 +496,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
 	 */
-	public void componentHidden(final ComponentEvent e) {
+	public void componentHidden(ComponentEvent e) {
 		// empty block
 
 	}
@@ -513,21 +504,21 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
 	 */
-	public void componentMoved(final ComponentEvent e) {
+	public void componentMoved(ComponentEvent e) {
 		repaint();
 	}
 
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
 	 */
-	public void componentResized(final ComponentEvent e) {
+	public void componentResized(ComponentEvent e) {
 		repaint();
 	}
 
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
 	 */
-	public void componentShown(final ComponentEvent e) {
+	public void componentShown(ComponentEvent e) {
 		repaint();
 	}
 
@@ -537,7 +528,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
 	 */
 	@Override
-	public void paintComponent(final Graphics g) {
+	public void paintComponent(Graphics g) {
 		setBackground(Color.BLUE);
 		super.paintComponent(g);    // paints background
 
@@ -551,13 +542,13 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		int viewHeight = rect.height;
 
 		if((eit!=null)&&(interval!=null)){ // there are services in the EIT
-			Date startDate = roundHourDown(interval.getStart());
-			Date endDate = roundHourUp(interval.getEnd());
+			LocalDateTime startDate = roundHourDown(interval.start());
+			LocalDateTime endDate = roundHourUp(interval.end());
 
 			gd.setColor(Color.WHITE);
 
-			final Font font = new Font(FONT_NAME, Font.PLAIN, 14);
-			final Font nameFont = new Font(FONT_NAME, Font.BOLD, 14);
+			Font font = new Font(FONT_NAME, Font.PLAIN, 14);
+			Font nameFont = new Font(FONT_NAME, Font.BOLD, 14);
 			gd.setFont(font);
 
 			BasicStroke basicStroke = new BasicStroke( 3.0f);
@@ -579,14 +570,13 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			gd.fillRect(translatedX, translatedY, SERVICE_NAME_WIDTH, LEGEND_HEIGHT);
 
 			// draw grid
-			offset=LEGEND_HEIGHT;
 			Graphics2D gd2 = (Graphics2D)gd.create();
 
 			gd2.setFont(font);
 			gd2.clipRect(translatedX+SERVICE_NAME_WIDTH, translatedY+LEGEND_HEIGHT, viewWidth -SERVICE_NAME_WIDTH, viewHeight - LEGEND_HEIGHT);
 
 			SortedSet<ServiceIdentification> order = serviceOrder;
-			for(final ServiceIdentification serviceNo : order){
+			for(ServiceIdentification serviceNo : order){
 				EITsection[] eiTsections = servicesTable.get(serviceNo);
 				drawServiceEvents(gd2, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
 				offset+=LINE_HEIGHT;
@@ -596,7 +586,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 
 		}else{
 			gd.setColor(Color.WHITE);
-			final Font nameFont = new Font(FONT_NAME, Font.BOLD, 14);
+			Font nameFont = new Font(FONT_NAME, Font.BOLD, 14);
 			gd.setFont(nameFont);
 			gd.drawString("No EIT present (or empty)", 20, 20);
 		}
@@ -687,12 +677,12 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
 		if (orientation == SwingConstants.HORIZONTAL){
 			//
-			final int w = (int)getVisibleRect().getWidth()-SERVICE_NAME_WIDTH;
+			int w = (int)getVisibleRect().getWidth()-SERVICE_NAME_WIDTH;
 			// round down to integer number of hours, at least 1 hour
 			int pixelsHour = (int) ((60 * 60 * 1000) / milliSecsPerPixel);
 			return Math.max(pixelsHour, w-(w%pixelsHour));
 		}
-		final int h = (int)getVisibleRect().getHeight()-LEGEND_HEIGHT;
+		int h = (int)getVisibleRect().getHeight()-LEGEND_HEIGHT;
 		// round down to integer number of services
 		return h-(h%LINE_HEIGHT);
 	}

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -42,16 +42,16 @@ import nl.digitalekabeltelevisie.gui.utils.WrapLayout;
  */
 public class EITView extends JPanel implements TransportStreamView{
 
-	final EITableImage eitPanel;
+	private final EITableImage eitPanel;
 	private final JPanel toolbar = new JPanel(new WrapLayout(FlowLayout.LEFT));
 
 	/**
 	 * @param transportStream
 	 * @param viewContext
 	 */
-	public EITView(final TransportStream transportStream, final ViewContext viewContext) {
+	public EITView(TransportStream transportStream, ViewContext viewContext) {
 		super(new BorderLayout());
-		eitPanel = new EITableImage(transportStream,viewContext);
+		eitPanel = new EITableImage(transportStream);
 		/**
 		 *
 		 */
@@ -74,14 +74,14 @@ public class EITView extends JPanel implements TransportStreamView{
 
 		ImageCopyAction copyAction = new ImageCopyAction(this, "Copy", eitPanel);
 		JButton copyButton = new JButton(copyAction);
-		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,Event.CTRL_MASK);
+		KeyStroke copyKey = KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_MASK);
 		getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(copyKey, "copy");
 		getActionMap().put("copy", copyAction);
 		toolbar.add(copyButton);
 
 		ImageSaveAction saveAction = new ImageSaveAction(this, "Save As...",eitPanel);
 		JButton saveButton = new JButton(saveAction);
-		KeyStroke saveKey = KeyStroke.getKeyStroke(KeyEvent.VK_S,Event.CTRL_MASK);
+		KeyStroke saveKey = KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.CTRL_MASK);
 		getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(saveKey, "save");
 		getActionMap().put("save", saveAction);
 		toolbar.add(saveButton);
@@ -130,9 +130,9 @@ public class EITView extends JPanel implements TransportStreamView{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
-	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext) {
+	public void setTransportStream(TransportStream transportStream, ViewContext viewContext) {
 
-		eitPanel.setTransportStream(transportStream,viewContext);
+		eitPanel.setTransportStream(transportStream);
 		validate();
 		repaint();
 

@@ -40,6 +40,8 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -168,75 +170,75 @@ public final class Utils {
 	}
 
 	
-	private static void readOIUCsv(final String fileName, final Map<Integer,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
+	private static void readOIUCsv(String fileName, Map<Integer,String> m) {
+		try (CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
 
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
 				// value[0] is MA-L
-				final int key = Integer.parseInt(nextLine[1],16);
-				final String name = nextLine[2]; //Organization Name
+				int key = Integer.parseInt(nextLine[1],16);
+				String name = nextLine[2]; //Organization Name
 				m.put(key,name);
 
 			}
 
-		}catch(final IOException | CsvValidationException e){
+		}catch(IOException | CsvValidationException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
 		}
 	}
 	
 
-	private static void readCSVIdString(final String fileName, final RangeHashMap<Integer,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
+	private static void readCSVIdString(String fileName, RangeHashMap<Integer,String> m) {
+		try (CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
 
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
-				final int lower = decode(nextLine[0]);
-				final int upper = decode(nextLine[1]);
+				int lower = decode(nextLine[0]);
+				int upper = decode(nextLine[1]);
 
 				m.put(lower, upper, nextLine[2]);
 
 			}
 
-		}catch(final IOException | CsvValidationException e){
+		}catch(IOException | CsvValidationException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
 		}
 	}
 
-	private static int decode(final String text) {
+	private static int decode(String text) {
 		return (text.startsWith("0b")||text.startsWith("0B")) ? Integer.parseInt(text.substring(2), 2)
 				: Integer.decode(text);
 	}
 
-	private static void readCSVIdLongString(final String fileName, final RangeHashMap<Long,String> m) {
-		try (final CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
+	private static void readCSVIdLongString(String fileName, RangeHashMap<Long,String> m) {
+		try (CSVReader reader = new CSVReader(new InputStreamReader(classL.getResourceAsStream(fileName), StandardCharsets.UTF_8))){
 			String [] nextLine;
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
-				final long lower = Long.decode(nextLine[0]);
-				final long upper = Long.decode(nextLine[1]);
+				long lower = Long.decode(nextLine[0]);
+				long upper = Long.decode(nextLine[1]);
 
 				m.put(lower, upper, nextLine[2]);
 
 			}
-		}catch(final IOException | NumberFormatException | CsvValidationException e){
+		}catch(IOException | NumberFormatException | CsvValidationException e){
 			logger.severe("There was a problem reading file: \""+fileName +"\", exception:"+ e);
 		}
 	}
 
-	public static Image readIconImage(final String fileName) {
+	public static Image readIconImage(String fileName) {
 		Image image = null;
 		try(InputStream fileInputStream = classL.getResourceAsStream(fileName)){
 			image = ImageIO.read(fileInputStream);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			logger.log(Level.WARNING, "Error reading icon image: exception:", e);
 		}
 		return image;
 	}
 
-	public static String getOUIString(final int i) {
+	public static String getOUIString(int i) {
 		String r = oui.get(i);
 		if (r==null){
 			r="unknown";
@@ -244,7 +246,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getBouquetIDString(final int i) {
+	public static String getBouquetIDString(int i) {
 		String r = bat.find(i);
 		if (r==null){
 			r="unknown";
@@ -253,7 +255,7 @@ public final class Utils {
 	}
 
 
-	public static String getDataBroadCastIDString(final int i) {
+	public static String getDataBroadCastIDString(int i) {
 		String r = dataBroadcast.find(i);
 		if (r==null){
 			r="unknown";
@@ -261,7 +263,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getCASystemIDString(final int i) {
+	public static String getCASystemIDString(int i) {
 		String r = ca_system_id.find(i);
 		if (r==null){
 			r="unknown";
@@ -269,7 +271,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getOriginalNetworkIDString(final int i) {
+	public static String getOriginalNetworkIDString(int i) {
 		String r = original_network_id.find(i);
 		if (r==null){
 			r="unknown";
@@ -277,7 +279,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getPlatformIDString(final int i) {
+	public static String getPlatformIDString(int i) {
 		String r = platform_id.find(i);
 		if (r==null){
 			r="unknown";
@@ -285,7 +287,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getPrivateDataSpecString(final long l) {
+	public static String getPrivateDataSpecString(long l) {
 		String r = private_data_spec_id.find(l);
 		if (r==null){
 			r="unknown";
@@ -293,7 +295,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getNIString(final int l) {
+	public static String getNIString(int l) {
 		String r = cni.find(l);
 		if (r==null){
 			r="unknown";
@@ -301,7 +303,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getAppTypeIDString(final int i) {
+	public static String getAppTypeIDString(int i) {
 		String r = app_type_id.find(i);
 		if (r==null){
 			r="unknown";
@@ -309,7 +311,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getItu35CountryCodeString(final int i) {
+	public static String getItu35CountryCodeString(int i) {
 		String r = itu35_country_code.find(i);
 		if (r==null){
 			r="unknown";
@@ -317,7 +319,7 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getMHPOrganistionIdString(final long i) {
+	public static String getMHPOrganistionIdString(long i) {
 		String r = mhp_organisation_id.find(i);
 		if (r==null){
 			r="unknown";
@@ -325,24 +327,24 @@ public final class Utils {
 		return r;
 	}
 
-	public static String getActionTypeString(final int actionType) {
+	public static String getActionTypeString(int actionType) {
 
-		switch (actionType) {
-		case 0x00: return "reserved";
-		case 0x01: return "location of IP/MAC streams in DVB networks";
-		default: return "reserved for future use";
-		}
+        return switch (actionType) {
+            case 0x00 -> "reserved";
+            case 0x01 -> "location of IP/MAC streams in DVB networks";
+            default -> "reserved for future use";
+        };
 	}
 
-	public static String getUNTActionTypeString(final int actionType) {
+	public static String getUNTActionTypeString(int actionType) {
 
-		switch (actionType) {
-		case 0x00: return "reserved";
-		case 0x01: return "System Software Update";
-		default: return "reserved for future use";
-		}
+        return switch (actionType) {
+            case 0x00 -> "reserved";
+            case 0x01 -> "System Software Update";
+            default -> "reserved for future use";
+        };
 	}
-	public static String getUNTProcessingOrderString(final int p) {
+	public static String getUNTProcessingOrderString(int p) {
 
 		if((p>=0x01)&&(p<=0xfe)){
 			return "subsequent actions (ascending)";
@@ -355,8 +357,8 @@ public final class Utils {
 	/**
 	 * Converts a byte array to hex string
 	 */
-	public static String toHexString(final byte[] block) {
-		final StringBuilder buf = new StringBuilder();
+	public static String toHexString(byte[] block) {
+		StringBuilder buf = new StringBuilder();
 		if(block==null){
 			return buf.toString();
 		}
@@ -371,20 +373,20 @@ public final class Utils {
 		return buf.toString();
 	}
 
-	public static String toHexString(final long l, final int pos){
+	public static String toHexString(long l, int pos){
 		String r ="0000000000000000"+ Long.toHexString(l);
 		r="0x"+ r.substring(r.length()-pos);
 		return r;
 	}
 
-	public static String toHexStringUnformatted(final long l, final int pos){
+	public static String toHexStringUnformatted(long l, int pos){
 		String r ="0000000000000000"+ Long.toHexString(l);
 		r = r.substring(r.length()-pos);
 		return r;
 	}
 
-	public static String toHexString(final byte[] block, final int l) {
-		final StringBuilder buf = new StringBuilder();
+	public static String toHexString(byte[] block, int l) {
+		StringBuilder buf = new StringBuilder();
 		if(block==null){
 			return buf.toString();
 		}
@@ -399,14 +401,14 @@ public final class Utils {
 		return buf.toString();
 	}
 
-	public static String toHexString(final byte[] block,final int offset, final int l) {
-		final StringBuilder buf = new StringBuilder();
+	public static String toHexString(byte[] block, int offset, int l) {
+		StringBuilder buf = new StringBuilder();
 		if(block==null){
 			return buf.toString();
 		}
 		int high = 0;
 		int low = 0;
-		final int end = Math.min(block.length, offset+l);
+		int end = Math.min(block.length, offset+l);
 		for (int i = offset; i < end; i++) {
 			high = ((block[i] & 0xf0) >> 4);
 			low = (block[i] & 0x0f);
@@ -417,7 +419,7 @@ public final class Utils {
 	}
 
 	
-	public static String toBinaryString(final long l, final int pos){
+	public static String toBinaryString(long l, int pos){
 		String r ="00000000000000000000000000000000"+ Long.toBinaryString(l);
 		r="0b"+ r.substring(r.length()-pos);
 		return r;
@@ -430,7 +432,7 @@ public final class Utils {
 	 * @return
 	 */
 
-	public static byte getInt2UnsignedByte(final int b){
+	public static byte getInt2UnsignedByte(int b){
 		if(b<=127){
 			return (byte)b;
 		}
@@ -447,7 +449,7 @@ public final class Utils {
 	 * @param mask bitmask to select which bits to use
 	 * @return
 	 */
-	public static int getInt(final byte[] bytes, final int offset, final int len, final int mask){
+	public static int getInt(byte[] bytes, int offset, int len, int mask){
 		int r=0;
 		for (int i = 0; i < len; i++) {
 			r = (r<<8) | toUnsignedInt(bytes[offset+i]);
@@ -462,7 +464,7 @@ public final class Utils {
 	 * @param mask used to remove unwanted bits
 	 * @return
 	 */
-	public static long getLong(final byte[] bytes, final int offset, final int len, final long mask){
+	public static long getLong(byte[] bytes, int offset, int len, long mask){
 		long r=0;
 		for (int i = 0; i < len; i++) {
 			r = (r<<8) | toUnsignedInt(bytes[offset+i]);
@@ -470,7 +472,7 @@ public final class Utils {
 		return (r&mask);
 	}
 	
-	public static BigInteger getBigInteger(final byte[] bytes, final int offset, final int len){
+	public static BigInteger getBigInteger(byte[] bytes, int offset, int len){
 		return new BigInteger(1,Arrays.copyOfRange(bytes,offset,offset+len));
 		
 	}
@@ -483,7 +485,7 @@ public final class Utils {
 	 * @param i position of bit in byte, start from 1 up to 8
 	 * @return 0 or 1 bit value
 	 */
-	public static int getBit(final byte b, final int i) {
+	public static int getBit(byte b, int i) {
 		return (( b & (0x80 >> (i-1))));
 	}
 
@@ -496,7 +498,7 @@ public final class Utils {
 	 * @example To get bit 3 and 4 call as getBits(b, 3, 2)
 	 *
 	 */
-	public static int getBits(final byte b, final int i, final int len) {
+	public static int getBits(byte b, int i, int len) {
 		int mask = 0x00;
 
 		for(int pos = i; pos < (i+len); ++pos)
@@ -517,11 +519,11 @@ public final class Utils {
 	 * @param len number of nibbles needed
 	 * @return String with length len
 	 */
-	public static String getBCD(final byte[] b, final int startNibbleNo, final int len) {
-		final StringBuilder buf =  new StringBuilder();
+	public static String getBCD(byte[] b, int startNibbleNo, int len) {
+		StringBuilder buf =  new StringBuilder();
 		for (int i = 0; i < len; i++) {
-			final int byteNo=(startNibbleNo+i)/2;
-			final boolean shift=((startNibbleNo+i)%2)==0;
+			int byteNo=(startNibbleNo+i)/2;
+			boolean shift=((startNibbleNo+i)%2)==0;
 			int t;
 			if(shift){
 				t= (toUnsignedInt(b[byteNo]) & 0xF0)>>4;
@@ -543,12 +545,12 @@ public final class Utils {
 	 * @param len
 	 * @return
 	 */
-	public static byte[] getBytes(final byte[] b, final int offset, final int len) {
+	public static byte[] getBytes(byte[] b, int offset, int len) {
 		return Arrays.copyOfRange(b, offset, offset+len);
 	}
 
 
-	public static String getEscapedHTML(final List<DVBString> dvbStrings, final int maxWidth){
+	public static String getEscapedHTML(List<DVBString> dvbStrings, int maxWidth){
 		StringBuilder raw = new StringBuilder();
 		for(DVBString str:dvbStrings) {
 			raw.append(str.toRawString());
@@ -566,11 +568,11 @@ public final class Utils {
 				plainSection.append(rawString.charAt(i));
 				i++;
 			}
-			final StringTokenizer st = new StringTokenizer(plainSection.toString());
+			StringTokenizer st = new StringTokenizer(plainSection.toString());
 
 			// append words to sb as long as lineLen < max
 			while (st.hasMoreTokens()) {
-				final String s = st.nextToken();
+				String s = st.nextToken();
 				if((maxWidth!=0)&& ((currentLineLength+s.length())>maxWidth)){
 					sb.append("<br>").append(escapeHTML(s));
 					currentLineLength=s.length();
@@ -580,15 +582,17 @@ public final class Utils {
 				}
 			}
 			// now the special chars 0x80 - 0x97 (or EOF)
-			while ((i < rawLength) && (isControlCharacter(rawString.charAt(i)))) { 
-				if(rawString.charAt(i)==0x8A){ // 0x8A, CR/LF
-					sb.append("<br>");
-					currentLineLength=0;
-				}else if(rawString.charAt(i) == 0x86){ // 0x86, character emphasis on
-					sb.append("<em>");
-				}else if(rawString.charAt(i) == 0x87){ // 0x87, character emphasis off
-					sb.append("</em>");
-				}
+			while ((i < rawLength) && (isControlCharacter(rawString.charAt(i)))) {
+                switch (rawString.charAt(i)) {
+                    case 0x8A -> {
+                        sb.append("<br>");
+                        currentLineLength = 0;  // 0x8A, CR/LF
+                    }
+                    case 0x86 ->  // 0x86, character emphasis on
+                            sb.append("<em>");
+                    case 0x87 ->  // 0x87, character emphasis off
+                            sb.append("</em>");
+                }
 				i++;
 			}
 
@@ -608,7 +612,7 @@ public final class Utils {
 	 * @param len number of bytes to be parsed
 	 * @return a java String, according to ETSI EN 300 468 V1.11.1 Annex A,
 	 */
-	public static String getString(final byte[] b, final int off, final int len) {
+	public static String getString(byte[] b, int off, int len) {
 		String decoded = getCharDecodedStringWithControls(b, off, len);
 		return removeControlChars(decoded);
 
@@ -625,7 +629,7 @@ public final class Utils {
 		StringBuilder result = new StringBuilder();
 		
 		for (int i = 0; i < decoded.length(); i++) {
-			final char c = decoded.charAt(i);
+			char c = decoded.charAt(i);
 			if(!isControlCharacter(c)) {
 				result.append(c);
 			}
@@ -635,19 +639,19 @@ public final class Utils {
 	}
 
 
-	private static boolean isControlCharacter(final char c) {
+	private static boolean isControlCharacter(char c) {
 		return (c >= 0x80) && (c <= 0x9f);
 	}
 
 
-	public static String getCharDecodedStringWithControls(final byte[] b, final int off, final int len) {
+	public static String getCharDecodedStringWithControls(byte[] b, int off, int len) {
 		int length = len;
 		int offset = off;
 		if(length<=0){
 			return "";
 		}
-		final Charset charset = getCharSet(b, offset, length);
-		final int charSetLen = getCharSetLen(b, offset);
+		Charset charset = getCharSet(b, offset, length);
+		int charSetLen = getCharSetLen(b, offset);
 
 		length -= charSetLen;
 		offset += charSetLen;
@@ -663,10 +667,10 @@ public final class Utils {
 	}
 
 
-	public static Charset getCharSet(final byte[] b, final int offset, final int length){
+	public static Charset getCharSet(byte[] b, int offset, int length){
 		Charset charset = null;
 		if((length>0)&&(b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
-			final int selectorByte=b[offset];
+			int selectorByte=b[offset];
 			try {
 				if((selectorByte>0)&&(selectorByte<=0x0b)){
 					charset = Charset.forName("ISO-8859-"+(selectorByte+4));
@@ -692,10 +696,10 @@ public final class Utils {
 		return charset;
 	}
 
-	private static int getCharSetLen(final byte[] b, final int offset){
+	private static int getCharSetLen(byte[] b, int offset){
 		int charsetLen = 0;
 		if((b[offset]<0x20)&&(b[offset]>=0)){ //Selection of character table
-			final int selectorByte=b[offset];
+			int selectorByte=b[offset];
 			if((selectorByte>0)&&(selectorByte<=0x0b)){
 				charsetLen = 1;
 			}else if((selectorByte==0x10)){
@@ -716,7 +720,7 @@ public final class Utils {
 	}
 
 
-	public static String getISO8859_1String(final byte[] b, final int offset, final int length) {
+	public static String getISO8859_1String(byte[] b, int offset, int length) {
 		if(length<=0){
 			return "";
 		}
@@ -724,8 +728,8 @@ public final class Utils {
 	}
 
 
-	public static String toCodePointString(final String in){
-		final StringBuilder b = new StringBuilder();
+	public static String toCodePointString(String in){
+		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < in.length(); i++) {
 			b.append( Integer.toHexString(in.codePointAt(i))).append(" ");
 		}
@@ -733,26 +737,11 @@ public final class Utils {
 	}
 
 
-	public static String getUTCFormattedString(final byte[] UTC_time) {
-		final long mjd = getLong(UTC_time, 0, 2, 0xFFFF);
-		final String hours = getBCD(UTC_time, 4, 2);
-		final String minutes = getBCD(UTC_time, 6, 2);
-		final String secs= getBCD(UTC_time, 8, 2);
-
-		// algo: ETSI EN 300 468 - ANNEX C
-
-		long y =  (long) ((mjd  - 15078.2) / 365.25);
-		long m =  (long) ((mjd - 14956.1 - (long)(y * 365.25) ) / 30.6001);
-		final long d =  (mjd - 14956 - (long)(y * 365.25) - (long)(m * 30.6001));
-		final long k =  ((m == 14) || (m == 15)) ? 1 : 0;
-		y = y + k + 1900;
-		m = m - 1 - (k*12);
-
-
-		return y +"/"+df2pos.format(m)+"/"+df2pos.format(d)+" "+hours+":"+minutes+":"+secs;
+	public static String getUTCFormattedString(byte[] UTC_time) {
+        return String.format("%1$tY/%1$tm/%1$td %1$tH:%1$tM:%1$tS", getUTCLocalDateTime(UTC_time));
 	}
 	
-	public static String getEITStartTimeAsString(final byte[] UTC_time) {
+	public static String getEITStartTimeAsString(byte[] UTC_time) {
 		if(isUndefined(UTC_time)){
 			return "undefined";
 		}
@@ -776,49 +765,41 @@ public final class Utils {
 	}
 
 
-
-	public static Date getUTCDate(final byte[] UTC_time) {
-		final Calendar t = getUTCCalender(UTC_time);
-		if(t!=null){
-			return t.getTime();
-		}
-		return null;
-	}
-
-	public static long getDurationMillis(final String eventDuration){
-		final int hours = Integer.parseInt(eventDuration.substring(0, 2));
-		final int minutes = Integer.parseInt(eventDuration.substring(2, 4));
-		final int seconds = Integer.parseInt(eventDuration.substring(4, 6));
-		return 1000*(((( hours*60) +minutes)* 60) + seconds);
+	public static long getDurationSeconds(String eventDuration){
+		int hours = Integer.parseInt(eventDuration.substring(0, 2));
+		int minutes = Integer.parseInt(eventDuration.substring(2, 4));
+		int seconds = Integer.parseInt(eventDuration.substring(4, 6));
+		return ((( hours*60L) +minutes)* 60L) + seconds;
 	}
 
 	/**
-	 * create Calender from time as specified in ETSI EN 300 468 - ANNEX C 
+	 * create LocalDateTime from time as specified in ETSI EN 300 468 - ANNEX C
+	 *
 	 * @param UTC_time
-	 * @return  Calender from time as specified in ETSI EN 300 468 - ANNEX C, null if parsing failed (incorrect BCD)
+	 * @return LocalDateTime from time as specified in ETSI EN 300 468 - ANNEX C, null if parsing failed (incorrect BCD)
 	 */
-	public static Calendar getUTCCalender(final byte[] UTC_time) {
-		final long mjd = getLong(UTC_time, 0, 2, 0xFFFF);
-		final String hours = getBCD(UTC_time, 4, 2);
-		final String minutes = getBCD(UTC_time, 6, 2);
-		final String secs= getBCD(UTC_time, 8, 2);
+	public static LocalDateTime getUTCLocalDateTime(byte[] UTC_time) {
+		long mjd = getLong(UTC_time, 0, 2, 0xFFFF);
+		String hours = getBCD(UTC_time, 4, 2);
+		String minutes = getBCD(UTC_time, 6, 2);
+		String secs= getBCD(UTC_time, 8, 2);
 
 		// algo: ETSI EN 300 468 - ANNEX C
 
 		long y =  (long) ((mjd  - 15078.2) / 365.25);
 		long m =  (long) ((mjd - 14956.1 - (long)(y * 365.25) ) / 30.6001);
-		final long d =  (mjd - 14956 - (long)(y * 365.25) - (long)(m * 30.6001));
-		final long k =  ((m == 14) || (m == 15)) ? 1 : 0;
+		long d =  (mjd - 14956 - (long)(y * 365.25) - (long)(m * 30.6001));
+		long k =  ((m == 14) || (m == 15)) ? 1 : 0;
 		y = y + k + 1900;
 		m = m - 1 - (k*12);
 
 		try{
-			final int h= Integer.parseInt(hours);
-			final int mins = Integer.parseInt(minutes);
-			final int s =Integer.parseInt(secs);
-			return new GregorianCalendar((int)y, (int)m-1, (int)d, h, mins, s);
+			int h= Integer.parseInt(hours);
+			int mins = Integer.parseInt(minutes);
+			int s =Integer.parseInt(secs);
+			return  LocalDateTime.of ((int)y, (int)m, (int)d, h, mins, s);
 
-		}catch(final NumberFormatException ne)
+		}catch(NumberFormatException ne)
 		{
 			logger.log(Level.WARNING, "error parsing calendar:", ne);
 			return null;
@@ -828,7 +809,7 @@ public final class Utils {
 	}
 
 
-	public static String getStreamTypeString(final int tag){
+	public static String getStreamTypeString(int tag){
 		switch (tag) {
 		case 0x00: return"ITU-T | ISO/IEC Reserved";
 		case 0x01: return"ISO/IEC 11172 Video";
@@ -952,7 +933,7 @@ public final class Utils {
 
 
 	// ETSI EN 300 706 V1.2.1 §11.3.3 Page Function Coding
-	public static String getMIPPageFunctionString(final int pageCode){
+	public static String getMIPPageFunctionString(int pageCode){
 		if((0x02<=pageCode)&&(pageCode<=0x4f)){
 			return "Normal page, #sub pages "+pageCode;
 		}
@@ -975,53 +956,57 @@ public final class Utils {
 			return "Engineering Test pages";
 		}
 
-		switch (pageCode) {
-		case 0x00: return"Page not in transmission";
-		case 0x01: return"Single normal page";
-		case 0x50: return"Normal page, multi-page set Sub-pages in the range 80 to 2^12-1";
-		case 0x51: return"Normal page, multi-page set Sub-pages in the range 2^12 to 2^13-2";
-		case 0x78: return"Subtitle Menu Page";
-		case 0x79: return"Page not following normal sub-code rules";
-		case 0x7a: return"TV programme related warning page";
-		case 0x7b: return"Current TV Programme information, multi-page set";
-		case 0x7c: return"Current TV Programme information, single page";
-		case 0x7d: return"\"Now and Next\" TV Programmes";
-		case 0x7e: return"Index page to TV-related pages, multi-page set";
-		case 0x7f: return"Index page to TV-related pages, single page";
-		case 0x80: return"Page transmitted but NOT part of the public service";
-		case 0x81: return"Single Page containing TV schedule information";
-		case 0xd0: return"TV schedule pages, multi-page set, Sub-pages in the range 80 to 2^12-1";
-		case 0xd1: return"TV schedule pages, multi-page set, Sub-pages in the range 2^12 to 2^13-2";
-		case 0xe0: return"Page Format - CA - data broadcasting page, Sub-pages in the range 1 to 2^12-1";
-		case 0xe1: return"Page Format - CA - data broadcasting page, Sub-pages in the range 2^12 to 2^13-2";
-		case 0xe2: return"Page Format - CA - data broadcasting page, Number of sub-pages not defined in packets with Y = 15 to Y = 24";
-		case 0xe3: return"Page Format - Clear data broadcasting page including EPG data";
-		case 0xe4: return"Page Format - Clear data broadcasting page but not carrying EPG data";
-		case 0xe5: return"DRCS page (use not defined)";
-		case 0xe6: return"Object page (use not defined)";
-		case 0xe7: return"Systems page without displayable element. Function defined by page number";
-		case 0xe8: return"DRCS page referenced in the MOT for this magazine";
-		case 0xe9: return"DRCS page referenced in the MOT for this magazine but not required by a page in this magazine";
-		case 0xea: return"DRCS page referenced in the MOT for a different magazine but not required by a page in this magazine";
-		case 0xeb: return"DRCS page not referenced in the MOT for a different magazine and required by a page in another magazine";
-		case 0xec: return"Object page referenced in the MOT for this magazine";
-		case 0xed: return"Object page referenced in the MOT for this magazine but not required by a page in this magazine";
-		case 0xee: return"Object page referenced in the MOT for a different magazine but not required by a page in this magazine";
-		case 0xef: return"Object page not referenced in the MOT for a different magazine and required by a page in another magazine";
-		case 0xf7: return"Systems page with displayable element. Function defined by page number";
-		case 0xf8: return"Keyword Search list page, multi-page set";
-		case 0xf9: return"Keyword Search list page, single page";
-		case 0xfc: return"Trigger message page";
-		case 0xfd: return"Automatic Channel Installation (ACI)";
-		case 0xfe: return"TOP page (BTT, AIT, MPT or MPT-EX)";
-
-
-		default:
-			return "Reserved";
-		}
+        return switch (pageCode) {
+            case 0x00 -> "Page not in transmission";
+            case 0x01 -> "Single normal page";
+            case 0x50 -> "Normal page, multi-page set Sub-pages in the range 80 to 2^12-1";
+            case 0x51 -> "Normal page, multi-page set Sub-pages in the range 2^12 to 2^13-2";
+            case 0x78 -> "Subtitle Menu Page";
+            case 0x79 -> "Page not following normal sub-code rules";
+            case 0x7a -> "TV programme related warning page";
+            case 0x7b -> "Current TV Programme information, multi-page set";
+            case 0x7c -> "Current TV Programme information, single page";
+            case 0x7d -> "\"Now and Next\" TV Programmes";
+            case 0x7e -> "Index page to TV-related pages, multi-page set";
+            case 0x7f -> "Index page to TV-related pages, single page";
+            case 0x80 -> "Page transmitted but NOT part of the public service";
+            case 0x81 -> "Single Page containing TV schedule information";
+            case 0xd0 -> "TV schedule pages, multi-page set, Sub-pages in the range 80 to 2^12-1";
+            case 0xd1 -> "TV schedule pages, multi-page set, Sub-pages in the range 2^12 to 2^13-2";
+            case 0xe0 -> "Page Format - CA - data broadcasting page, Sub-pages in the range 1 to 2^12-1";
+            case 0xe1 -> "Page Format - CA - data broadcasting page, Sub-pages in the range 2^12 to 2^13-2";
+            case 0xe2 ->
+                    "Page Format - CA - data broadcasting page, Number of sub-pages not defined in packets with Y = 15 to Y = 24";
+            case 0xe3 -> "Page Format - Clear data broadcasting page including EPG data";
+            case 0xe4 -> "Page Format - Clear data broadcasting page but not carrying EPG data";
+            case 0xe5 -> "DRCS page (use not defined)";
+            case 0xe6 -> "Object page (use not defined)";
+            case 0xe7 -> "Systems page without displayable element. Function defined by page number";
+            case 0xe8 -> "DRCS page referenced in the MOT for this magazine";
+            case 0xe9 ->
+                    "DRCS page referenced in the MOT for this magazine but not required by a page in this magazine";
+            case 0xea ->
+                    "DRCS page referenced in the MOT for a different magazine but not required by a page in this magazine";
+            case 0xeb ->
+                    "DRCS page not referenced in the MOT for a different magazine and required by a page in another magazine";
+            case 0xec -> "Object page referenced in the MOT for this magazine";
+            case 0xed ->
+                    "Object page referenced in the MOT for this magazine but not required by a page in this magazine";
+            case 0xee ->
+                    "Object page referenced in the MOT for a different magazine but not required by a page in this magazine";
+            case 0xef ->
+                    "Object page not referenced in the MOT for a different magazine and required by a page in another magazine";
+            case 0xf7 -> "Systems page with displayable element. Function defined by page number";
+            case 0xf8 -> "Keyword Search list page, multi-page set";
+            case 0xf9 -> "Keyword Search list page, single page";
+            case 0xfc -> "Trigger message page";
+            case 0xfd -> "Automatic Channel Installation (ACI)";
+            case 0xfe -> "TOP page (BTT, AIT, MPT or MPT-EX)";
+            default -> "Reserved";
+        };
 	}
 
-	public static String getStreamTypeShortString(final int tag){
+	public static String getStreamTypeShortString(int tag){
 		switch (tag) {
 		case 0x00: return"ITU-T | ISO/IEC Reserved";
 		case 0x01: return"Video MPEG1";
@@ -1151,7 +1136,7 @@ public final class Utils {
 	 * @param dataId
 	 * @return
 	 */
-	public static String getDataIDString(final int dataId){
+	public static String getDataIDString(int dataId){
 
 		if((0x00<=dataId)&&(dataId<=0x0f)){
 			return "Reserved";
@@ -1172,14 +1157,12 @@ public final class Utils {
 			return "user defined";
 		}
 
-		switch (dataId) {
-		case 0x20: return"DVB subtitling EN 300 743";
-		case 0x21: return"DVB synchronous data stream";
-		case 0x22: return"DVB synchronized data stream";
-
-		default:
-			return "illegal value";
-		}
+        return switch (dataId) {
+            case 0x20 -> "DVB subtitling EN 300 743";
+            case 0x21 -> "DVB synchronous data stream";
+            case 0x22 -> "DVB synchronized data stream";
+            default -> "illegal value";
+        };
 	}
 
 
@@ -1190,23 +1173,23 @@ public final class Utils {
 	 * @param modus
 	 * @param label
 	 */
-	public static void addListJTree(final DefaultMutableTreeNode parent,final Collection<? extends TreeNode> itemList, final int modus, final String label) {
+	public static void addListJTree(DefaultMutableTreeNode parent, Collection<? extends TreeNode> itemList, int modus, String label) {
 		addListJTree(parent, itemList, modus, label, null);
 	}
 
 	
-	public static void addListJTree(final DefaultMutableTreeNode parent,
-			final Collection<? extends TreeNode> itemCollection, final int modus, final String label, TableSource tableSource) {
+	public static void addListJTree(DefaultMutableTreeNode parent,
+                                    Collection<? extends TreeNode> itemCollection, int modus, String label, TableSource tableSource) {
 		if ((itemCollection != null) && (!itemCollection.isEmpty())) {
 			if (simpleModus(modus)) { // simple layout
 				addToList(parent, itemCollection, modus);
 			} else {
-				final KVP kvp = new KVP(label + ": " + itemCollection.size() + " entries");
+				KVP kvp = new KVP(label + ": " + itemCollection.size() + " entries");
 				kvp.setCrumb(label);
 				if (tableSource != null) {
 					kvp.addTableSource(tableSource, label);
 				}
-				final DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
+				DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
 				addToList(descriptorListNode, itemCollection, modus);
 				parent.add(descriptorListNode);
 			}
@@ -1214,19 +1197,19 @@ public final class Utils {
 	}
 
 
-	public static void addToList(final DefaultMutableTreeNode parent,
-			final Collection<? extends TreeNode> itemCollection, final int modus) {
+	public static void addToList(DefaultMutableTreeNode parent,
+                                 Collection<? extends TreeNode> itemCollection, int modus) {
 		if(countListModus(modus)){
 			int count = 0;
-			for (final TreeNode treeNode : itemCollection) {
-				final DefaultMutableTreeNode node = treeNode.getJTreeNode(modus);
+			for (TreeNode treeNode : itemCollection) {
+				DefaultMutableTreeNode node = treeNode.getJTreeNode(modus);
 				if (node.getUserObject() instanceof KVP kvp) {
 					kvp.appendLabel(" ["+ count++ +"]");
 				}
 				parent.add(node);
 			}
 		}else{
-			for (final TreeNode treeNode  : itemCollection) {
+			for (TreeNode treeNode  : itemCollection) {
 				parent.add(treeNode.getJTreeNode(modus));
 			}
 		}
@@ -1237,8 +1220,8 @@ public final class Utils {
 	 * @param block
 	 * @return
 	 */
-	public static String toSafeString(final byte[] block) {
-		final StringBuilder buf = new StringBuilder();
+	public static String toSafeString(byte[] block) {
+		StringBuilder buf = new StringBuilder();
 		if(block==null){
 			return buf.toString();
 		}
@@ -1260,14 +1243,14 @@ public final class Utils {
 	 * @param len
 	 * @return
 	 */
-	public static String toSafeString(final byte[] block, final int offset, final int len) {
-		final StringBuilder buf = new StringBuilder();
+	public static String toSafeString(byte[] block, int offset, int len) {
+		StringBuilder buf = new StringBuilder();
 		if(block==null){
 			return buf.toString();
 		}
-		final int end = Math.min(block.length, offset+len);
+		int end = Math.min(block.length, offset+len);
 		for (int i = offset; i < end; i++) {
-			final byte b=block[i];
+			byte b=block[i];
 			if((32<=toUnsignedInt(b))&&(toUnsignedInt(b)<127)){
 				buf.append((char)(b));
 			}else{
@@ -1286,7 +1269,7 @@ public final class Utils {
 	 * @return
 	 */
 	@Deprecated
-	public static byte[] copyOfRange(final byte[] original, final int from, final int to) {
+	public static byte[] copyOfRange(byte[] original, int from, int to) {
 		return Arrays.copyOfRange(original, from, to);
 	}
 
@@ -1298,14 +1281,14 @@ public final class Utils {
 	 * @param s
 	 * @return
 	 */
-	public static String escapeSimpleHTML(final String s){
-		final StringBuilder sb = new StringBuilder();
+	public static String escapeSimpleHTML(String s){
+		StringBuilder sb = new StringBuilder();
 		if(s==null){
 			return "";
 		}
-		final int n = s.length();
+		int n = s.length();
 		for (int i = 0; i < n; i++) {
-			final char c = s.charAt(i);
+			char c = s.charAt(i);
 			switch (c) {
 			case '<': sb.append("&lt;"); break;
 			case '>': sb.append("&gt;"); break;
@@ -1323,14 +1306,14 @@ public final class Utils {
 	 * @param s
 	 * @return
 	 */
-	public static String escapeHTML(final String s){
-		final StringBuilder sb = new StringBuilder();
+	public static String escapeHTML(String s){
+		StringBuilder sb = new StringBuilder();
 		if(s==null){
 			return "&nbsp;";
 		}
-		final int n = s.length();
+		int n = s.length();
 		for (int i = 0; i < n; i++) {
-			final char c = s.charAt(i);
+			char c = s.charAt(i);
 			switch (c) {
 			case ' ': sb.append("&nbsp;"); break;
 			case '<': sb.append("&lt;"); break;
@@ -1637,33 +1620,33 @@ public final class Utils {
 	}
 
 
-	public static boolean simpleModus(final int m){
+	public static boolean simpleModus(int m){
 		return ((m & DVBtree.SIMPLE_MODUS )!=0);
 	}
 
-	public static boolean psiOnlyModus(final int m){
+	public static boolean psiOnlyModus(int m){
 		return ((m&DVBtree.PSI_ONLY_MODUS)!=0);
 	}
 
-	public static boolean packetModus(final int m){
+	public static boolean packetModus(int m){
 		return ((m&DVBtree.PACKET_MODUS)!=0);
 	}
 
-	public static boolean countListModus(final int m){
+	public static boolean countListModus(int m){
 		return ((m&DVBtree.COUNT_LIST_ITEMS_MODUS)!=0);
 	}
 
-	public static boolean showPtsModus(final int m){
+	public static boolean showPtsModus(int m){
 		return ((m&DVBtree.SHOW_PTS_MODUS)!=0);
 	}
 
 
-	public static boolean showVersionModus(final int m){
+	public static boolean showVersionModus(int m){
 		return ((m&DVBtree.SHOW_VERSION_MODUS)!=0);
 	}
 
-	public static String stripLeadingZeros(final String s) {
-		final int len = s.length()-1; // leave at least one zero if that is the only char
+	public static String stripLeadingZeros(String s) {
+		int len = s.length()-1; // leave at least one zero if that is the only char
 		int st = 0;
 
 		while ((st < len) && (s.charAt(st)=='0')&&(s.charAt(st+1)!='.')) {
@@ -1678,8 +1661,8 @@ public final class Utils {
 	 * @param ip byte[] of any length, so ready for IP6 (or 8 or ...) can not be <code>null</code>
 	 * @return
 	 */
-	public static String formatIPNumber(final byte[] ip){
-		final StringBuilder r = new StringBuilder();
+	public static String formatIPNumber(byte[] ip){
+		StringBuilder r = new StringBuilder();
 		if(ip.length>0){
 			r.append(toUnsignedInt(ip[0]));
 		}
@@ -1696,14 +1679,14 @@ public final class Utils {
 	 * @param program_clock_reference
 	 * @return
 	 */
-	public static String printPCRTime(final long program_clock_reference) {
+	public static String printPCRTime(long program_clock_reference) {
 
 		long  h,m,s;
 		long  u;
-		final long  p = program_clock_reference/27;
+		long  p = program_clock_reference/27;
 		final long  fa = 1000000;
 
-		final long allSecs = p / fa;
+		long allSecs = p / fa;
 
 		//  following lines basically taken from "dvbtextsubs  Dave Chapman"
 		h=(p/(fa*60*60));
@@ -1712,9 +1695,9 @@ public final class Utils {
 		u=p-(h*fa*60*60)-(m*fa*60)-(s*fa);
 
 		if(PreferencesManager.isEnableSecondsTimestamp()) {
-			return allSecs+"."+f6.format(u);
+			return String.format("%1$d.%2$06d",allSecs,u);
 		}
-		return h+":"+f2.format(m)+":"+f2.format(s)+"."+f6.format(u);
+		return String.format("%1$d:%2$02d:%3$02d.%4$06d",h,m,s,u);
 	}
 
 	/**
@@ -1724,13 +1707,13 @@ public final class Utils {
 	 * @return
 	 *
 	 */
-	public static String printTimebase90kHz(final long ts) {
+	public static String printTimebase90kHz(long ts) {
 
 		long  h,m,s;
 		long  u;
-		final long  p = ts/9;
+		long  p = ts/9;
 
-		final long allSecs = ts / 90_000L;
+		long allSecs = ts / 90_000L;
 		
 		//  following lines basically taken from "dvbtextsubs  Dave Chapman"
 		h=(p/(10000L*60*60));
@@ -1745,8 +1728,8 @@ public final class Utils {
 		return h+":"+f2.format(m)+":"+f2.format(s)+"."+f4.format(u);
 	}
 
-	public static int getHammingReverseByte(final byte b){
-		final int t= toUnsignedInt(b);
+	public static int getHammingReverseByte(byte b){
+		int t= toUnsignedInt(b);
 		int r = (t & 0x40)>>6;
 		r |= (t & 0x10)>>3;
 		r |= (t & 0x04);
@@ -1755,8 +1738,8 @@ public final class Utils {
 
 	}
 
-	public static int getHammingByte(final byte b){
-		final int t= toUnsignedInt(b);
+	public static int getHammingByte(byte b){
+		int t= toUnsignedInt(b);
 		int r = (t & 0x40)>>3;
 		r |= (t & 0x10)>>2;
 			r |= (t & 0x04)>>1;
@@ -1766,11 +1749,11 @@ public final class Utils {
 	}
 
 
-	public static int getHamming24_8Byte(final byte[] b,final int offset){
+	public static int getHamming24_8Byte(byte[] b, int offset){
 
-		final int lsb = ((b[offset] & 0x20)<<2)|((b[offset] & 0x0e)<<3)|((b[offset+1] & 0xF0)>>4); // 8 lowest bits
-		final int msb = ((b[offset+1] & 0x0E)<<4)|((b[offset+2] & 0xF8)>>3); // 8 medium bits
-		final int hsb = ((b[offset+2] & 0x06)<<5); // 2 highest bits, shift to left, after inv they are to the right.
+		int lsb = ((b[offset] & 0x20)<<2)|((b[offset] & 0x0e)<<3)|((b[offset+1] & 0xF0)>>4); // 8 lowest bits
+		int msb = ((b[offset+1] & 0x0E)<<4)|((b[offset+2] & 0xF8)>>3); // 8 medium bits
+		int hsb = ((b[offset+2] & 0x06)<<5); // 2 highest bits, shift to left, after inv they are to the right.
 
 		return (65536*invtab[hsb])+ (256*invtab[msb])+ invtab[lsb];
 
@@ -1824,12 +1807,12 @@ public final class Utils {
 	 * @param fromIndex index to start search from
 	 * @return -1 if not found, else starting position
 	 */
-	public static int indexOf(final byte[] source,  final byte[]target, final int fromIndex){
+	public static int indexOf(byte[] source, byte[]target, int fromIndex){
 		if (fromIndex >= source.length) {
 			return  -1;
 		}
-		final byte first  = target[0];
-		final int max = source.length - target.length;
+		byte first  = target[0];
+		int max = source.length - target.length;
 
 		for (int i = fromIndex; i < max; i++) {
 			/* Look for first byte. */
@@ -1843,7 +1826,7 @@ public final class Utils {
 			/* Found first byte, now look at the rest of v2 */
 			if (i <= max) {
 				int j = i + 1;
-				final int end = (j + target.length) - 1;
+				int end = (j + target.length) - 1;
 				for (int k =  1; (j < end) && (source[j] ==
 						target[k]); j++, k++){
 					// EMPTY BLOCK
@@ -1861,59 +1844,22 @@ public final class Utils {
 	}
 
 
-	public static final DecimalFormat df2pos = new DecimalFormat("00");
-
-
-	public static DecimalFormat df3pos = new DecimalFormat("000");
-
-
-	/**
-	 * Compare two byte[] with each other
-	 * @param data_block
-	 * @param offset
-	 * @param len
-	 * @param data_block2
-	 * @param offset2
-	 * @param len2
-	 * @return
-	 */
-	public static boolean equals(final byte[] data_block, final int offset, final int len, final byte[] data_block2, final int offset2, final int len2) {
-
-		if ((data_block==null) || (data_block2==null)) {
-			return false;
-		}
-
-		if (len != len2) {
-			return false;
-		}
-
-		for (int i=0; i<len; i++){
-			if (data_block[i+offset] != data_block2[i+offset2]){
-				return false;
-			}
-		}
-
-		return true;
-
+	public static boolean equals(byte[] data_block, int offset, int len, byte[] data_block2, int offset2, int len2) {
+		return Arrays.equals(data_block,offset,offset+len,data_block2,offset2,offset2+len2);
 	}
 
 
 
-	public static String getAspectRatioInformationString(final int s) {
+	public static String getAspectRatioInformationString(int s) {
 
-		switch (s) {
-		case 0: return "forbidden";
-		case 1: return "1,0 (Square Sample)";
-		case 2:
-			return "3÷4";
-		case 3:
-			return "9÷16";
-		case 4:
-			return "1÷2,21";
-
-		default:
-			return "reserved";
-		}
+        return switch (s) {
+            case 0 -> "forbidden";
+            case 1 -> "1,0 (Square Sample)";
+            case 2 -> "3÷4";
+            case 3 -> "9÷16";
+            case 4 -> "1÷2,21";
+            default -> "reserved";
+        };
 	}
 
 
@@ -1924,38 +1870,38 @@ public final class Utils {
 	 * @param len
 	 * @return
 	 */
-	public static String getHTMLHexviewColored(final byte [] byteValue, final int offset, final int len, final RangeHashMap<Integer, Color> coloring) {
+	public static String getHTMLHexviewColored(byte [] byteValue, int offset, int len, RangeHashMap<Integer, Color> coloring) {
 
-		final StringBuilder b= new StringBuilder();
+		StringBuilder b= new StringBuilder();
 		b.append("<pre>");
 		// header line
 		b.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0001 0203 0405 0607 0809 0A0B 0C0D 0E0F 0123456789ABCDEF<br>");
-		final int lines=1+((len-1)/16);
+		int lines=1+((len-1)/16);
 		for (int l = 0; l < lines; l++) {
-			final int start=l*16;
-			b.append(Utils.toHexString(start,6));
+			int start=l*16;
+			b.append(toHexString(start,6));
 			b.append("&nbsp;");
 			b.append("<span>");
-			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
+			int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
 
 			Color currentColor = coloring.find(l*16);
 			if(currentColor!=null){
-				b.append("<span style=\"color:").append(Utils.toHexString(currentColor)).append("\">");
+				b.append("<span style=\"color:").append(toHexString(currentColor)).append("\">");
 			}
 			// show byte as hex
 			for (int i = 0; i < 16; i++) {
 				if(i<lineLen){
-					b.append(Utils.toHexString(byteValue,  offset+(l*16)+i, 1));
+					b.append(toHexString(byteValue,  offset+(l*16)+i, 1));
 				}else{
 					b.append("&nbsp;&nbsp;");
 				}
-				final Color nextColor=coloring.find((l*16)+i+1);
+				Color nextColor=coloring.find((l*16)+i+1);
 				// disadvantage, at end of line maybe ampty span.
 				if((currentColor!=null)&&!currentColor.equals(nextColor)){ // color change
 					b.append("</span>"); //always close current
 				}
 				if((nextColor!=null)&&!nextColor.equals(currentColor)){
-					b.append("<span style=\"color:").append(Utils.toHexString(nextColor)).append("\">");
+					b.append("<span style=\"color:").append(toHexString(nextColor)).append("\">");
 				}
 				currentColor=nextColor;
 				// after every second byte insert space
@@ -1968,7 +1914,7 @@ public final class Utils {
 			}
 
 			// string representation at end of line
-			b.append(Utils.escapeHTML(Utils.toSafeString(byteValue, offset+(l*16), lineLen))).append("</span><br>");
+			b.append(escapeHTML(toSafeString(byteValue, offset+(l*16), lineLen))).append("</span><br>");
 		}
 
 		b.append("</pre>");
@@ -1977,9 +1923,9 @@ public final class Utils {
 
 
 
-	public static int findMPEG2VideoPid(final PMTsection pmt) {
+	public static int findMPEG2VideoPid(PMTsection pmt) {
 		int videoPID=0;
-		for(final Component component :pmt.getComponentenList()){
+		for(Component component :pmt.getComponentenList()){
 			if(component.getStreamtype()==0x02){ //
 
 				videoPID= component.getElementaryPID();
@@ -1992,35 +1938,22 @@ public final class Utils {
 
 
 	/**
-	 * @param date
+	 * @param time
 	 * @return
 	 */
-	public static Date roundHourUp(final Date date) {
-		final Calendar c2 = new GregorianCalendar();
-		c2.setTime(date);
-		if((c2.get(Calendar.SECOND)!=0) || (c2.get(Calendar.MINUTE)!=0)){ //  no need to round if xx:00:00
-			c2.set(Calendar.SECOND, 0);
-			c2.set(Calendar.MINUTE, 0);
-			c2.add(Calendar.HOUR, 1);
-		}
+	public static LocalDateTime roundHourUp(LocalDateTime time) {
 
-
-		return c2.getTime();
+		return time.plusMinutes(59).plusSeconds(59).plusNanos(999999).truncatedTo(ChronoUnit.HOURS);
 	}
 
 
 
 	/**
-	 * @param date
+	 * @param time
 	 * @return
 	 */
-	public static Date roundHourDown(final Date date) {
-		final Calendar c = new GregorianCalendar();
-		c.setTime(date);
-		c.set(Calendar.SECOND, 0);
-		c.set(Calendar.MINUTE, 0);
-
-		return c.getTime();
+	public static LocalDateTime roundHourDown(LocalDateTime time) {
+		return time.truncatedTo(ChronoUnit.HOURS);
 	}
 
 
@@ -2034,12 +1967,12 @@ public final class Utils {
 	 * @param t
 	 * @return
 	 */
-	public static String escapeHtmlBreakLines(final String t) {
-		final StringTokenizer st = new StringTokenizer(t);
+	public static String escapeHtmlBreakLines(String t) {
+		StringTokenizer st = new StringTokenizer(t);
 		int len = 0;
-		final StringBuilder res = new StringBuilder();
+		StringBuilder res = new StringBuilder();
 		while (st.hasMoreTokens()) {
-			final String s = st.nextToken();
+			String s = st.nextToken();
 			if((len+s.length())>80){
 				res.append("<br>").append(escapeHTML(s));
 				len=s.length();
@@ -2051,23 +1984,23 @@ public final class Utils {
 		return res.toString();
 	}
 
-	public static String getHexAndDecimalFormattedString(final int intValue){
-		final StringBuilder b = new StringBuilder();
+	public static String getHexAndDecimalFormattedString(int intValue){
+		StringBuilder b = new StringBuilder();
 		b.append("0x").append(Integer.toHexString(intValue).toUpperCase()).append(" (").append(intValue)
 		.append(")");
 		return b.toString();
 	}
 
-	public static String getHexAndDecimalFormattedString(final long longValue){
-		final StringBuilder b = new StringBuilder();
+	public static String getHexAndDecimalFormattedString(long longValue){
+		StringBuilder b = new StringBuilder();
 		b.append("0x").append(Long.toHexString(longValue).toUpperCase()).append(" (").append(longValue)
 		.append(")");
 		return b.toString();
 	}
 
-	public static String getHexAndDecimalFormattedString(final BigInteger bigIntValue){
-		final StringBuilder b = new StringBuilder();
-		b.append("0x").append(bigIntValue.toString(16).toUpperCase()).append(" (").append(bigIntValue.toString())
+	public static String getHexAndDecimalFormattedString(BigInteger bigIntValue){
+		StringBuilder b = new StringBuilder();
+		b.append("0x").append(bigIntValue.toString(16).toUpperCase()).append(" (").append(bigIntValue)
 		.append(")");
 		return b.toString();
 	}
@@ -2080,7 +2013,7 @@ public final class Utils {
 	 * @param i position of bit in byte, start from 1 up to 8
 	 * @return boolen true if bit is set
 	 */
-	public static boolean getBitAsBoolean(final byte b, final int i) {
+	public static boolean getBitAsBoolean(byte b, int i) {
 		return (( b & (0x80 >> (i-1))) != 0);
 	}
 
@@ -2090,7 +2023,7 @@ public final class Utils {
 	 * @param b
 	 * @return
 	 */
-	public static int getBooleanAsInt(final boolean b) {
+	public static int getBooleanAsInt(boolean b) {
 		return b?1:0;
 	}
 
@@ -2103,24 +2036,24 @@ public final class Utils {
 	 * @param len
 	 * @return
 	 */
-	public static String getHTMLHexview(final byte [] byteValue, final int offset, final int len) {
+	public static String getHTMLHexview(byte [] byteValue, int offset, int len) {
 
-		final StringBuilder b= new StringBuilder();
+		StringBuilder b= new StringBuilder();
 		b.append("<pre>");
 		// header line
 		b.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0001 0203 0405 0607 0809 0A0B 0C0D 0E0F 0123456789ABCDEF<br>");
-		final int lines=1+((len-1)/16);
+		int lines=1+((len-1)/16);
 		for (int l = 0; l < lines; l++) {
-			final int start=l*16;
-			b.append(Utils.toHexString(start,6));
+			int start=l*16;
+			b.append(toHexString(start,6));
 			b.append("&nbsp;");
 			b.append("<span style=\"color:black; background-color: white;\">");
-			final int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
+			int lineLen=(l==(lines-1))?(len-(l*16)):16; // if last line calculate bytes left, else 16
 
 			// show byte as hex
 			for (int i = 0; i < 16; i++) {
 				if(i<lineLen){
-					b.append(Utils.toHexString(byteValue,  offset+(l*16)+i, 1));
+					b.append(toHexString(byteValue,  offset+(l*16)+i, 1));
 				}else{
 					b.append("&nbsp;&nbsp;");
 				}
@@ -2131,7 +2064,7 @@ public final class Utils {
 			}
 
 			// string representation at end of line
-			b.append(Utils.escapeHTML(Utils.toSafeString(byteValue, offset+(l*16), lineLen))).append("</span><br>");
+			b.append(escapeHTML(toSafeString(byteValue, offset+(l*16), lineLen))).append("</span><br>");
 		}
 
 		b.append("</pre>");
@@ -2139,7 +2072,7 @@ public final class Utils {
 	}
 
 
-	public static String toHexString ( final Color c ){
+	public static String toHexString ( Color c ){
 
 		String s = Integer.toHexString( c.getRGB() & 0xffffff );
 
@@ -2150,15 +2083,14 @@ public final class Utils {
 
 	}
 
-	public static StringBuilder getChildrenAsHTML(final DefaultMutableTreeNode dmtn) {
+	public static StringBuilder getChildrenAsHTML(DefaultMutableTreeNode dmtn) {
 		final String lineSep = "<br>";
-		final StringBuilder res = new StringBuilder();
-		@SuppressWarnings("rawtypes")
-		final Enumeration children = dmtn.children();
+		StringBuilder res = new StringBuilder();
+		Enumeration<javax.swing.tree.TreeNode> children = dmtn.children();
 		while(children.hasMoreElements()){
-			final Object next = children.nextElement();
+			Object next = children.nextElement();
 			if(next instanceof DefaultMutableTreeNode child){
-				final KVP chKVP = (KVP)child.getUserObject();
+				KVP chKVP = (KVP)child.getUserObject();
 				res.append(chKVP.toString(KVP.STRING_DISPLAY_HTML_FRAGMENTS, KVP.NUMBER_DISPLAY_BOTH)).append(lineSep);
 				if(!child.isLeaf()){
 					res.append(getChildrenAsHTML(child));
@@ -2185,10 +2117,10 @@ public final class Utils {
 	 */
 	public static String extractTextFromHTML(String htmlString) {
 		Reader reader = new StringReader(htmlString);
-	    final ArrayList<String> list = new ArrayList<>();
+	    List<String> list = new ArrayList<>();
 	
 	    HTMLEditorKit.ParserCallback parserCallback = new HTMLEditorKit.ParserCallback() {
-	        public void handleText(final char[] data, final int pos) {
+	        public void handleText(char[] data, int pos) {
 	            list.add(new String(data));
 	        }
 	
@@ -2196,23 +2128,23 @@ public final class Utils {
 	        	// ignore
 	        }
 	
-	        public void handleEndTag(HTML.Tag t, final int pos) {
+	        public void handleEndTag(HTML.Tag t, int pos) {
 	        	if (t.equals(HTML.Tag.P)) {
 	                list.add("\n");
 	            }
 	        }
 	
-	        public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, final int pos) {
+	        public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos) {
 	            if (t.equals(HTML.Tag.BR)) {
 	                list.add("\n");
 	            }
 	        }
 	
-	        public void handleComment(final char[] data, final int pos) {
+	        public void handleComment(char[] data, int pos) {
 	        	// ignore
 	        }
 	
-	        public void handleError(final String errMsg, final int pos) {
+	        public void handleError(String errMsg, int pos) {
 	        	// ignore
 	        }
 	    };
@@ -2257,7 +2189,7 @@ public final class Utils {
 	 * @param headerString
 	 * @param color
 	 */
-	public static void appendHeader(final StringBuilder s, final String headerString, final Color color) {
+	public static void appendHeader(StringBuilder s, String headerString, Color color) {
 		s.append("<br><span style=\"color:").append(toHexString(color)).append("\"><b>");
 		s.append(headerString);
 		s.append("</b><br>");

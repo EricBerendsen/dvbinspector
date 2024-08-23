@@ -34,6 +34,10 @@ import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGen
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.io.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,7 +147,7 @@ public class TransportStream implements TreeNode{
 	/**
 	 * time at which this transportStream started. Calculated by calculating backwards from first TDT, using bitrate. null if no TDT found
 	 */
-	private Calendar zeroTime;
+	private LocalDateTime zeroTime;
 
 	private final long len;
 	
@@ -904,11 +908,11 @@ public class TransportStream implements TreeNode{
 				TDTsection first = tdtSectionList.getFirst();
 				TDTsection last = tdtSectionList.getLast();
 				long diffPacket = (long)last.getPacket_no() - first.getPacket_no();
-				Calendar utcCalenderLast = getUTCCalender(last.getUTC_time());
-				Calendar utcCalenderFirst = getUTCCalender(first.getUTC_time());
+				LocalDateTime utcCalenderLast = getUTCLocalDateTime(last.getUTC_time());
+				LocalDateTime utcCalenderFirst = getUTCLocalDateTime(first.getUTC_time());
 				// getUTCCalender might fail if not correct BCD, then will return null.
 				if((utcCalenderLast!=null)&&(utcCalenderFirst!=null)){
-					long timeDiffMills =   utcCalenderLast.getTimeInMillis()- utcCalenderFirst.getTimeInMillis();
+					long timeDiffMills =   utcCalenderFirst.until(utcCalenderLast, ChronoUnit.MILLIS);
 					if(timeDiffMills> 0L){ // shit happens... capture.guangdong  has 10 with same timestamp....
 						bitRateTDT = (diffPacket * packetLength * 8 * 1000)/timeDiffMills;
 					}
@@ -922,11 +926,10 @@ public class TransportStream implements TreeNode{
 			List<TDTsection> tdtSectionList = psi.getTdt().getTdtSectionList();
 			if (!tdtSectionList.isEmpty()) {
 				TDTsection first = tdtSectionList.getFirst();
-				Calendar firstTime = getUTCCalender(first.getUTC_time());
+				LocalDateTime firstTime = getUTCLocalDateTime(first.getUTC_time());
 				if (firstTime != null) {
 					long millsIntoStream = ((long) first.getPacket_no() * packetLength * 8 * 1000) / getBitRate();
-					firstTime.add(Calendar.MILLISECOND, (int) -millsIntoStream);
-					zeroTime = firstTime;
+					zeroTime = firstTime.minus (millsIntoStream, ChronoUnit.MILLIS);
 				}
 			}
 		}
@@ -1013,32 +1016,33 @@ public class TransportStream implements TreeNode{
            return packetNo + " (packetNo)";
         }
 		if (zeroTime == null) {
-			Calendar calendar = new GregorianCalendar();
-			calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
-			calendar.setTimeInMillis(0L);
-			calendar.add(Calendar.MILLISECOND, getTimeFromStartInMilliSecs(packetNo));
 			// return only the hours/min,secs and millisecs. Not TS recording will last days
-			return getFormattedTime(calendar);
-		}
-		Calendar calendar = (Calendar) zeroTime.clone();
-		// calculation in long, intermediate results can be > Integer.MAX_VALUE
 
-        calendar.add(Calendar.MILLISECOND, getTimeFromStartInMilliSecs( packetNo));
-		return getFormattedDateTime(calendar);
+			Instant instant = Instant.ofEpochMilli(getTimeFromStartInMilliSecs(packetNo));
+			LocalDateTime ldt = instant.atZone(ZoneId.of("Z")).toLocalDateTime();
+			return getFormattedTime(ldt);
+		}
+		// calculation in long, intermediate results can be > Integer.MAX_VALUE
+		LocalDateTime packetTime =  zeroTime.plusNanos(1_000_000L * getTimeFromStartInMilliSecs( packetNo));
+
+		return getFormattedDateTime(packetTime);
 	}
 
 	private int getTimeFromStartInMilliSecs(int packetNo) {
-		return (int) (((long) packetNo * packetLength * 8 * 1000) / getBitRate());
+		// calculation in long, intermediate results can be > Integer.MAX_VALUE
+		return (int) ((((long) packetNo) * packetLength * 8 * 1000L) / getBitRate());
 	}
 
-	private static String getFormattedDateTime(Calendar calendar) {
+
+	private static String getFormattedDateTime(LocalDateTime calendar) {
 		return(String.format("%1$tY/%1$tm/%1$td %1$tHh%1$tMm%1$tS:%1$tL", calendar));
 	}
 
-	private static String getFormattedTime(Calendar calendar) {
+	private static String getFormattedTime(LocalDateTime calendar) {
 
 		return(String.format("%1$tHh%1$tMm%1$tS:%1$tL", calendar));
 	}
+
 
 	/**
 	 * TODO the parameter packetNoOrPCR has two different meaning, because BitRateChat and TimeStampChart use different X-axis for aVCHD/DVB Full stream
@@ -1054,18 +1058,12 @@ public class TransportStream implements TreeNode{
 		}
 
 		if(getBitRate()!=-1){ //can't calculate time  without a bitrate
-			Calendar calendar;
 			if(zeroTime==null){
-				calendar = new GregorianCalendar();
-				calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
-				calendar.setTimeInMillis(0);
-			}else{
-				calendar = (Calendar)zeroTime.clone();
+				Instant instant = Instant.ofEpochMilli(getTimeFromStartInMilliSecs((int)packetNoOrPCR));
+				return getFormattedTime(instant.atZone(ZoneId.of("Z")).toLocalDateTime());
 			}
-			calendar.add(Calendar.MILLISECOND, getTimeFromStartInMilliSecs((int)packetNoOrPCR));
-			// return only the hours/min,secs and millisecs. No TS recording will last days
 
-			return getFormattedTime(calendar);
+			return getFormattedTime(zeroTime.plusNanos(1_000_000L * getTimeFromStartInMilliSecs((int) packetNoOrPCR)));
 
 		} // no bitrate
 		return packetNoOrPCR +" (packetNo)";
