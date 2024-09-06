@@ -77,7 +77,7 @@ public final class Utils {
 	 * Helper int[] to reverse order of bits in a National Option Set 
 	 */
 
-	public static int[] invNationalOptionSet = {
+	public static final int[] invNationalOptionSet = {
 			0b000, 
 			0b100,
 			0b010, 
@@ -336,24 +336,6 @@ public final class Utils {
         };
 	}
 
-	public static String getUNTActionTypeString(int actionType) {
-
-        return switch (actionType) {
-            case 0x00 -> "reserved";
-            case 0x01 -> "System Software Update";
-            default -> "reserved for future use";
-        };
-	}
-	public static String getUNTProcessingOrderString(int p) {
-
-		if((p>=0x01)&&(p<=0xfe)){
-			return "subsequent actions (ascending)";
-		}else if(p == 0x00){
-			return "first action";
-		}else{
-			return "reserved for future use";
-		}
-	}
 	/**
 	 * Converts a byte array to hex string
 	 */
@@ -808,203 +790,6 @@ public final class Utils {
 
 	}
 
-
-	public static String getStreamTypeString(int tag){
-		switch (tag) {
-		case 0x00: return"ITU-T | ISO/IEC Reserved";
-		case 0x01: return"ISO/IEC 11172 Video";
-		case 0x02: return"ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream";
-		case 0x03: return"ISO/IEC 11172 Audio";
-		case 0x04: return"ISO/IEC 13818-3 Audio";
-		case 0x05: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 private_sections";
-		case 0x06: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data";
-		case 0x07: return"ISO/IEC 13522 MHEG";
-		case 0x08: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Annex A DSM-CC";
-		case 0x09: return"ITU-T Rec. H.222.1";
-		case 0x0A: return"Multi-protocol Encapsulation";
-		case 0x0B: return"DSM-CC U-N Messages";
-		case 0x0C: return"DSM-CC Stream Descriptors";
-		case 0x0D: return"DSM-CC Sections (any type, including private data)";
-		case 0x0E: return"ITU-T Rec. H.222.0 | ISO/IEC 13818-1 auxiliary";
-		case 0x0F: return"ISO/IEC 13818-7 Audio with ADTS transport syntax";
-		case 0x10: return"ISO/IEC 14496-2 Visual";
-		case 0x11: return"ISO/IEC 14496-3 Audio with the LATM transport syntax as defined in ISO/IEC 14496-3 / AMD 1";
-		case 0x12: return"ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in PES packets";
-		case 0x13: return"ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in ISO/IEC14496_sections.";
-		case 0x14: return"DSM-CC Synchronized Download Protocol";
-
-		// 29n9184t.doc Text of ISO/IEC 13818-1:2007/FPDAM 3.2 - Transport of Scalable Video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
-		// Amendment 3: Transport of Scalable Video over ITU-T Rec H.222.0 | ISO/IEC 13818-1
-		// ISO/IEC 13818-1:2007/FPDAM 3.2
-
-		case 0x15: return"Metadata carried in PES packets";
-		case 0x16: return"Metadata carried in metadata_sections";
-		case 0x17: return"Metadata carried in ISO/IEC 13818-6 Data Carousel";
-		case 0x18: return"Metadata carried in ISO/IEC 13818-6 Object Carousel";
-		case 0x19: return"Metadata carried in ISO/IEC 13818-6 Synchronized Download Protocol";
-		case 0x1A: return"IPMP stream (defined in ISO/IEC 13818-11, MPEG-2 IPMP)";
-		case 0x1B: return"AVC video stream as defined in ITU-T Rec. H.264 | ISO/IEC 14496-10 Video, or AVC base layer of an HEVC video stream as defined in ITU-T H.265 | ISO/IEC 23008-2 ";
-		case 0x1C: return"ISO/IEC 14496-3 Audio, without using any additional transport syntax, such as DST, ALS and SLS";
-		case 0x1D: return"ISO/IEC 14496-17 Text";
-		case 0x1E: return"Auxiliary video stream as defined in ISO/IEC 23002-3";
-		case 0x1F: return"SVC video sub-bitstream of a video stream as defined in the Annex G of ITU-T Rec. H.264 | ISO/IEC 14496-10 Video";
-
-		case 0x20: return"MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10";
-		case 0x21: return"J2K Video stream conforming to one or more profiles as defined in ITU-T Rec T.800 | ISO/IEC 15444-1";
-		case 0x22: return"Additional view Rec. ITU-T H.262 | ISO/IEC 13818-2 video stream for service-compatible stereoscopic 3D services";
-		case 0x23: return"Additional view Rec. ITU-T H.264 | ISO/IEC 14496-10 video stream conforming to one or more profiles defined in Annex A for service-compatible stereoscopic 3D services";
-		case 0x24: return"ITU-T H.265 | ISO/IEC 23008-2 video stream or an HEVC temporal video sub-bitstream";
-		case 0x25: return"HEVC temporal video subset of an HEVC video stream conforming to one or more profiles defined in Annex A of Rec. ITU-T H.265 | ISO/IEC 23008-2";
-		case 0x26: return "TMVCD video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex I of Rec. ITU-T H.264 | ISO/IEC 14496-10";
-		// ISO/IEC 13818-1:2015/Amd.1:2015 (E) /R ec. ITU-T H.222.0 (2014)/Amd.1 (04/2015)
-		case 0x27: return "Timeline and External Media Information Stream"; 
-		// ISO/IEC 13818-1:2015/Amd.2:2016 (E) / Rec. ITU-T H.222.0 (2014)/Amd.2 (12/2015)
-		case 0x28: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NALs units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2 ";
-		case 0x29: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex G of Rec. ITU-T H.265 | ISO/IEC 23008-2";
-		case 0x2a: return "HEVC enhancement sub-partition which includes TemporalId 0 of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
-		case 0x2b: return "HEVC temporal enhancement sub-partition of an HEVC video stream where all NAL units contained in the stream conform to one or more profiles defined in Annex H of Rec. ITU-T H.265 | ISO/IEC 23008-2";
-		
-		
-		//ISO/IEC 13818-1:2018 (E)
-		case 0x2c: return "Green access units carried in MPEG-2 sections";
-		case 0x2d: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – main stream";
-		case 0x2e: return "ISO/IEC 23008-3 Audio with MHAS transport syntax – auxiliary stream";
-		case 0x2f: return "Quality access units carried in sections";
-		//ISO/IEC 13818-1:2019/Amd.1:2020(E)
-		case 0x30: return "Media Orchestration Access Units carried in sections";
-		case 0x31: return "Substream of a Rec. ITU-T H.265 | ISO/IEC 23008 2 video stream that contains a Motion Constrained Tile Set, parameter sets, slice headers or a combination thereof.";
-		case 0x32: return "JPEG XS video stream conforming to one or more profiles as defined in ISO/IEC 21122-2";
-
-
-		case 0x33: return "H.266 VVC video stream or a VVC temporal video sub-bitstream";
-		case 0x34: return "H.266 VVC temporal video subset of a VVC video stream";
-		case 0x35: return "EVC video stream or an EVC temporal video sub-bitstream";
-		case 0x36: return "LCEVC video stream conforming to one or more profiles defined in ISO/IEC 23094-2"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
-
-		case 0x7f: return"IPMP stream";
-
-		// sources https://www.wikiwand.com/en/Program-specific_information
-		// https://fossies.org/linux/MediaInfo_CLI/MediaInfoLib/Source/MediaInfo/Multiple/File_Mpeg_Psi.cpp
-		
-		case 0x80: return"User Private / MPEG Video (ATSC) / PCM (HDMV)";
-		case 0x81: return"User Private / AC-3 (ATSC/HDMV)";
-		case 0x82: return"User Private / SCTE-27 subtitling / DTS 6 ch (HDMV)";
-		case 0x83: return"User Private / Isochronous Data (SCTE) / AC-3 (TrueHD) (HDMV)";
-		case 0x84: return"User Private / E-AC-3 up to 16 ch. (HDMV)";
-		case 0x85: return"User Private / Program Identifier (SCTE) / DTS 8 ch.(HD-HRA) (HDMV)";
-		case 0x86: return"User Private / SCTE-35 splice_info_section / DTS 8 ch. (HD-MA) (HDMV)";
-		case 0x87: return"User Private / E-AC-3 (ATSC)";
-
-		case 0x88: return"User Private / Microsoft Windows Media Video 9 (VC-1) (lower bit-rate video)";
-
-		case 0x90: return"User Private / Time Slicing - MPE-FEC (DVB) / Presentation Graphic Stream (subtitling) (HDMV)";
-		case 0x91: return"User Private / Presentation Graphic Stream (subtitling) (HDMV)";
-		case 0x92: return"User Private / Subtitle text (TEXTST) (HDMV)";
-
-		case 0x95: return"User Private / Data Service Table, Network Resources Table (ATSC)";
-
-		case 0xA1: return"User Private / AC-3 (HDMV)";
-		case 0xA2: return"User Private / DTS (HDMV)";
-		
-		case 0xC0: return"User Private / DigiCipher II text";
-		
-		case 0xC1: return"User Private / Dolby Digital (AC-3) up to six channel audio with AES-128-CBC data encryption";
-		case 0xC2: return"User Private / DSM CC synchronous data (ATSC) / Dolby Digital Plus up to 16 channel audio with AES-128-CBC data encryption";
-		case 0xCF: return"User Private / ISO/IEC 13818-7 ADTS AAC with AES-128-CBC frame encryption";
-		case 0xD1: return"User Private / BBC Dirac (Ultra HD video)";
-		case 0xD4: return"User Private / AVS3 Video";
-		case 0xDB: return"User Private / ITU-T Rec. H.264 and ISO/IEC 14496-10 with AES-128-CBC slice encryption";
-		case 0xEA: return"User Private / Microsoft Windows Media Video 9 (VC-1) (lower bit-rate video)";
-		
-
-		default:
-			if((0x2c<=tag)&&(tag<=0x7e)){
-				return "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Reserved";
-			}
-
-			if((0x80<=tag)&&(tag<=0xFF)){
-				return "User Private";
-			}
-
-			
-			return "illegal/unknown value";
-		}
-	}
-
-
-	// ETSI EN 300 706 V1.2.1 §11.3.3 Page Function Coding
-	public static String getMIPPageFunctionString(int pageCode){
-		if((0x02<=pageCode)&&(pageCode<=0x4f)){
-			return "Normal page, #sub pages "+pageCode;
-		}
-
-		if((0x52<=pageCode)&&(pageCode<=0x6f)){
-			return "Reserved";
-		}
-
-
-		if((0x70<=pageCode)&&(pageCode<=0x77)){
-			return "Subtitle page";
-		}
-		if((0x82<=pageCode)&&(pageCode<=0xcf)){
-			return "TV schedule pages, multi-page set, #sub pages "+(pageCode-0x80);
-		}
-		if((0xf0<=pageCode)&&(pageCode<=0xf3)){
-			return "Systems Pages for Broadcasters use (downstream processing)";
-		}
-		if((0xf4<=pageCode)&&(pageCode<=0xf6)){
-			return "Engineering Test pages";
-		}
-
-        return switch (pageCode) {
-            case 0x00 -> "Page not in transmission";
-            case 0x01 -> "Single normal page";
-            case 0x50 -> "Normal page, multi-page set Sub-pages in the range 80 to 2^12-1";
-            case 0x51 -> "Normal page, multi-page set Sub-pages in the range 2^12 to 2^13-2";
-            case 0x78 -> "Subtitle Menu Page";
-            case 0x79 -> "Page not following normal sub-code rules";
-            case 0x7a -> "TV programme related warning page";
-            case 0x7b -> "Current TV Programme information, multi-page set";
-            case 0x7c -> "Current TV Programme information, single page";
-            case 0x7d -> "\"Now and Next\" TV Programmes";
-            case 0x7e -> "Index page to TV-related pages, multi-page set";
-            case 0x7f -> "Index page to TV-related pages, single page";
-            case 0x80 -> "Page transmitted but NOT part of the public service";
-            case 0x81 -> "Single Page containing TV schedule information";
-            case 0xd0 -> "TV schedule pages, multi-page set, Sub-pages in the range 80 to 2^12-1";
-            case 0xd1 -> "TV schedule pages, multi-page set, Sub-pages in the range 2^12 to 2^13-2";
-            case 0xe0 -> "Page Format - CA - data broadcasting page, Sub-pages in the range 1 to 2^12-1";
-            case 0xe1 -> "Page Format - CA - data broadcasting page, Sub-pages in the range 2^12 to 2^13-2";
-            case 0xe2 ->
-                    "Page Format - CA - data broadcasting page, Number of sub-pages not defined in packets with Y = 15 to Y = 24";
-            case 0xe3 -> "Page Format - Clear data broadcasting page including EPG data";
-            case 0xe4 -> "Page Format - Clear data broadcasting page but not carrying EPG data";
-            case 0xe5 -> "DRCS page (use not defined)";
-            case 0xe6 -> "Object page (use not defined)";
-            case 0xe7 -> "Systems page without displayable element. Function defined by page number";
-            case 0xe8 -> "DRCS page referenced in the MOT for this magazine";
-            case 0xe9 ->
-                    "DRCS page referenced in the MOT for this magazine but not required by a page in this magazine";
-            case 0xea ->
-                    "DRCS page referenced in the MOT for a different magazine but not required by a page in this magazine";
-            case 0xeb ->
-                    "DRCS page not referenced in the MOT for a different magazine and required by a page in another magazine";
-            case 0xec -> "Object page referenced in the MOT for this magazine";
-            case 0xed ->
-                    "Object page referenced in the MOT for this magazine but not required by a page in this magazine";
-            case 0xee ->
-                    "Object page referenced in the MOT for a different magazine but not required by a page in this magazine";
-            case 0xef ->
-                    "Object page not referenced in the MOT for a different magazine and required by a page in another magazine";
-            case 0xf7 -> "Systems page with displayable element. Function defined by page number";
-            case 0xf8 -> "Keyword Search list page, multi-page set";
-            case 0xf9 -> "Keyword Search list page, single page";
-            case 0xfc -> "Trigger message page";
-            case 0xfd -> "Automatic Channel Installation (ACI)";
-            case 0xfe -> "TOP page (BTT, AIT, MPT or MPT-EX)";
-            default -> "Reserved";
-        };
-	}
 
 	public static String getStreamTypeShortString(int tag){
 		switch (tag) {
@@ -1658,7 +1443,7 @@ public final class Utils {
 
 	/**
 	 * Format a byte[] a an formatted IP number for display (decimal, separated with dots)
-	 * @param ip byte[] of any length, so ready for IP6 (or 8 or ...) can not be <code>null</code>
+	 * @param ip byte[] of any length, so ready for IP6 (or 8 or ...) can not be {@code null}
 	 * @return
 	 */
 	public static String formatIPNumber(byte[] ip){

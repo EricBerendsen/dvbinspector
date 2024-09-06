@@ -30,8 +30,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +58,26 @@ public class UNTsection extends TableSectionExtendedSyntax {
 	private final int					common_descriptor_loop_length;
 
 	private final List<Descriptor>	common_descriptor_loop;
+
+	public static String getUNTActionTypeString(int actionType) {
+
+        return switch (actionType) {
+            case 0x00 -> "reserved";
+            case 0x01 -> "System Software Update";
+            default -> "reserved for future use";
+        };
+	}
+
+	public static String getUNTProcessingOrderString(int p) {
+
+		if((p>=0x01)&&(p<=0xfe)){
+			return "subsequent actions (ascending)";
+		}else if(p == 0x00){
+			return "first action";
+		}else{
+			return "reserved for future use";
+		}
+	}
 
 	public static class PlatformLoop implements TreeNode {
 
@@ -212,7 +230,7 @@ public class UNTsection extends TableSectionExtendedSyntax {
 	}
 
 	private List<TargetLoop> buildTargetLoopList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<TargetLoop> r = new ArrayList<>();
+		final List<TargetLoop> r = new ArrayList<>();
 		int t = 0;
 		while (t < programInfoLength) {
 			final TargetLoop c = new TargetLoop();

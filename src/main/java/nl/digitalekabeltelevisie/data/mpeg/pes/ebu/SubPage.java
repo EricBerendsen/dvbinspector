@@ -121,6 +121,80 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 	}
 
+	// ETSI EN 300 706 V1.2.1 §11.3.3 Page Function Coding
+	public static String getMIPPageFunctionString(int pageCode){
+		if((0x02<=pageCode)&&(pageCode<=0x4f)){
+			return "Normal page, #sub pages "+pageCode;
+		}
+
+		if((0x52<=pageCode)&&(pageCode<=0x6f)){
+			return "Reserved";
+		}
+
+
+		if((0x70<=pageCode)&&(pageCode<=0x77)){
+			return "Subtitle page";
+		}
+		if((0x82<=pageCode)&&(pageCode<=0xcf)){
+			return "TV schedule pages, multi-page set, #sub pages "+(pageCode-0x80);
+		}
+		if((0xf0<=pageCode)&&(pageCode<=0xf3)){
+			return "Systems Pages for Broadcasters use (downstream processing)";
+		}
+		if((0xf4<=pageCode)&&(pageCode<=0xf6)){
+			return "Engineering Test pages";
+		}
+
+        return switch (pageCode) {
+            case 0x00 -> "Page not in transmission";
+            case 0x01 -> "Single normal page";
+            case 0x50 -> "Normal page, multi-page set Sub-pages in the range 80 to 2^12-1";
+            case 0x51 -> "Normal page, multi-page set Sub-pages in the range 2^12 to 2^13-2";
+            case 0x78 -> "Subtitle Menu Page";
+            case 0x79 -> "Page not following normal sub-code rules";
+            case 0x7a -> "TV programme related warning page";
+            case 0x7b -> "Current TV Programme information, multi-page set";
+            case 0x7c -> "Current TV Programme information, single page";
+            case 0x7d -> "\"Now and Next\" TV Programmes";
+            case 0x7e -> "Index page to TV-related pages, multi-page set";
+            case 0x7f -> "Index page to TV-related pages, single page";
+            case 0x80 -> "Page transmitted but NOT part of the public service";
+            case 0x81 -> "Single Page containing TV schedule information";
+            case 0xd0 -> "TV schedule pages, multi-page set, Sub-pages in the range 80 to 2^12-1";
+            case 0xd1 -> "TV schedule pages, multi-page set, Sub-pages in the range 2^12 to 2^13-2";
+            case 0xe0 -> "Page Format - CA - data broadcasting page, Sub-pages in the range 1 to 2^12-1";
+            case 0xe1 -> "Page Format - CA - data broadcasting page, Sub-pages in the range 2^12 to 2^13-2";
+            case 0xe2 ->
+                    "Page Format - CA - data broadcasting page, Number of sub-pages not defined in packets with Y = 15 to Y = 24";
+            case 0xe3 -> "Page Format - Clear data broadcasting page including EPG data";
+            case 0xe4 -> "Page Format - Clear data broadcasting page but not carrying EPG data";
+            case 0xe5 -> "DRCS page (use not defined)";
+            case 0xe6 -> "Object page (use not defined)";
+            case 0xe7 -> "Systems page without displayable element. Function defined by page number";
+            case 0xe8 -> "DRCS page referenced in the MOT for this magazine";
+            case 0xe9 ->
+                    "DRCS page referenced in the MOT for this magazine but not required by a page in this magazine";
+            case 0xea ->
+                    "DRCS page referenced in the MOT for a different magazine but not required by a page in this magazine";
+            case 0xeb ->
+                    "DRCS page not referenced in the MOT for a different magazine and required by a page in another magazine";
+            case 0xec -> "Object page referenced in the MOT for this magazine";
+            case 0xed ->
+                    "Object page referenced in the MOT for this magazine but not required by a page in this magazine";
+            case 0xee ->
+                    "Object page referenced in the MOT for a different magazine but not required by a page in this magazine";
+            case 0xef ->
+                    "Object page not referenced in the MOT for a different magazine and required by a page in another magazine";
+            case 0xf7 -> "Systems page with displayable element. Function defined by page number";
+            case 0xf8 -> "Keyword Search list page, multi-page set";
+            case 0xf9 -> "Keyword Search list page, single page";
+            case 0xfc -> "Trigger message page";
+            case 0xfd -> "Automatic Channel Installation (ACI)";
+            case 0xfe -> "TOP page (BTT, AIT, MPT or MPT-EX)";
+            default -> "Reserved";
+        };
+	}
+
 	public int getNationalOptionCharSubset(boolean useSecondaryG0set) {
 		int r = 0; // sane default
 		
@@ -481,12 +555,6 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		}
 	}
 
-	/**
-	 * @param i
-	 * @param t
-	 * @param j
-	 * @param activeObjectEven
-	 */
 	private void addObjectPointer(final int i, final DefaultMutableTreeNode t, final int objPointer, final String label,final int modus) {
 		if (objPointer != 0x1FF) {
 			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(label + " " + i, objPointer, null));
@@ -760,8 +828,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	private static void addMIPPageDetailsToTree(final DefaultMutableTreeNode mot, final int lowerNibble, final int upperNibble, final int mipPageNo) {
 		final int pagecode = (16 * upperNibble) + lowerNibble;
 		if (pagecode != 0) {
-			mot.add(new DefaultMutableTreeNode(new KVP("Page " + toHexString(mipPageNo, 2), pagecode, Utils
-					.getMIPPageFunctionString(pagecode))));
+			mot.add(new DefaultMutableTreeNode(new KVP("Page " + toHexString(mipPageNo, 2), pagecode, getMIPPageFunctionString(pagecode))));
 		}
 	}
 
@@ -835,7 +902,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 
 	private static List<DRCSLink> getDRCSLinks(final TxtDataField txtDataField) {
-		final ArrayList<DRCSLink> res = new ArrayList<>();
+		final List<DRCSLink> res = new ArrayList<>();
 		if (txtDataField != null) {
 			final DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
 			res.add(gpop);
