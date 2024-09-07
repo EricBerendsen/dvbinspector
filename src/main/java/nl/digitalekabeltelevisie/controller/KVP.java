@@ -1,28 +1,28 @@
 /**
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- *
+ * <p>
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * <p>
  *  This file is part of DVB Inspector.
- *
+ * <p>
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *
+ * <p>
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * <p>
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
- *
+ * <p>
  * Change log:
  * - Feb 8th 2022: Added constructor supporting boolean value
  */
@@ -49,16 +49,16 @@ import nl.digitalekabeltelevisie.gui.*;
  * <p>
  * For usage in JTree the method toString returns the presentation string.
  * <p>
- * Most simple form is <code>KVP kvp = KVP("label");</code>, this will create a KVP with no data value. Is used as parent for grouping descendants.<br>
- * Normal usage is   <code>KVP kvp = KVP("label", 11);</code>,  this will create a KVP with data of type int, and value 11. When  numberDisplay == NUMBER_DISPLAY_BOTH it will be shown in both decimal and hexadecimal, so the output of toString will be "label: 0xB (11)".<br>
- * Extended usage is   <code>KVP kvp = KVP("label", 23,"explanation");</code>,  this will create a KVP with data of type int, and value 23. When  numberDisplay == NUMBER_DISPLAY_BOTH it will be shown in both decimal and hexadecimal, so the output of toString will be "label: 0x17 (23) => explanation".<br>
+ * Most simple form is {@code KVP kvp = KVP("label");}, this will create a KVP with no data value. Is used as parent for grouping descendants.<br>
+ * Normal usage is   {@code KVP kvp = KVP("label", 11);},  this will create a KVP with data of type int, and value 11. When  numberDisplay == NUMBER_DISPLAY_BOTH it will be shown in both decimal and hexadecimal, so the output of toString will be "label: 0xB (11)".<br>
+ * Extended usage is   {@code KVP kvp = KVP("label", 23,"explanation");},  this will create a KVP with data of type int, and value 23. When  numberDisplay == NUMBER_DISPLAY_BOTH it will be shown in both decimal and hexadecimal, so the output of toString will be "label: 0x17 (23) => explanation".<br>
  * <p>
  * Data type can be none, or one of String, int, long, byte[], DVBString.
  * <p>
  * Can also be used to associate some other attributes with the label/value, like a {@link HTMLSource} or a {@link ImageSource}
  * If either one of these fields is not null, it means there is extra data (HTML text and/or image) available for display. In DVB Inspector it is shown in the right panel.
  * <p>
- * Also there can be a <code>JMenuItem</code> and owner associated with the KVP (always together).
+ * Also there can be a {@code JMenuItem} and owner associated with the KVP (always together).
  * This is used by DVB Inspector to show a sub menu for some items, and associate it with a handler (owner)
  *
  *
@@ -66,6 +66,7 @@ import nl.digitalekabeltelevisie.gui.*;
  *
  */
 public class KVP{
+
 
 	public record DetailView(DetailSource detailSource, String label) {}
 
@@ -103,50 +104,38 @@ public class KVP{
 	public static final byte	STRING_DISPLAY_HTML_FRAGMENTS	= 3;
 	public static final byte	STRING_DISPLAY_HTML_AWT		= 4;
 
-	private byte		fieldType					= 1;	// 1 - string, 2
-	// byte[], 3 int, 4
-	// long,
+	private FIELD_TYPE		fieldType					= FIELD_TYPE.STRING;
 
-	public static final byte	FIELD_TYPE_STRING			= 1;
-	public static final byte	FIELD_TYPE_BYTES			= 2;
-	public static final byte	FIELD_TYPE_INT				= 3;
-	public static final byte	FIELD_TYPE_LONG				= 4;
-	/**
-	 * used for a node that has no value associated with it
-	 */
-	public static final byte	FIELD_TYPE_LABEL			= 5;
-	public static final byte	FIELD_TYPE_DVBSTRING		= 6;
-	/**
-	 * 	used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
-	 * 	DO NOT confuse this with the KVP having a htmlSource, that is completely unrelated.
-	 *  The FIELD_TYPE_HTML is used for presentation in the JTREE, and serves as enhancement to the plain String label.
-	 *  For example, when presenting teletext lines, the label can show the plain ascii version of the line, while the value can have the same line as HTML fragment with colors
-	 * 	both label and value should have the same semantics, only one of them will be presented.
+	public enum FIELD_TYPE {
+		STRING,
+		BYTES,
+		INT,
+		LONG,
 
-	 */
-	public static final byte	FIELD_TYPE_HTML				= 7;
-	public static final byte	FIELD_TYPE_BIGINT 			= 8;
+		LABEL, //used for a node that has no value associated with it
+		DVBSTRING,
+		HTML, // used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
+
+		BIGINT
+
+	}
 
 
-	
-	/**
-	 * 
-	 */
-	private List<DetailView> detailViews = new ArrayList<>();
+    private List<DetailView> detailViews = new ArrayList<>();
 	
 
 	/**
 	 * crumb's are used to be able to jump to any place in the tree, based on a url-like
 	 * string. The crumb for each node defaults to its label, with any int or long value 
 	 * appended to it separated by a ':'. 
-	 * 
+	 * <p>
 	 * This is called a trail of crumbs te prevent confusion with the Path used in JTree. 
 	 * That is not text based, so can not be used in creating hyperlinks in HTMLEditor
 	 */
 	private String crumb;
 
 	@Deprecated
-	public void setHtmlSource(final HTMLSource htmlSource) {
+	public void setHtmlSource(HTMLSource htmlSource) {
 		detailViews.add(new DetailView(htmlSource, ""));
 	}
 
@@ -154,55 +143,50 @@ public class KVP{
 	private Object owner;
 	private String labelAppend = "";
 
-	public KVP(final String label) {
-		super();
-		this.label = label;
-		this.fieldType = FIELD_TYPE_LABEL;
+	public KVP(String label) {
+        this.label = label;
+		this.fieldType = FIELD_TYPE.LABEL;
 	}
 
-	public KVP(final String label,final ImageSource imageSource) {
-		super();
-		this.label = label;
-		this.fieldType = FIELD_TYPE_LABEL;
+	public KVP(String label, ImageSource imageSource) {
+        this.label = label;
+		this.fieldType = FIELD_TYPE.LABEL;
 		detailViews.add(new DetailView(imageSource,""));
 	}
-	public KVP(final String label, final String value, final String description) {
-		super();
-		this.label = label;
+	public KVP(String label, String value, String description) {
+        this.label = label;
 		if(value==null){ // just a label
-			this.fieldType = FIELD_TYPE_LABEL;
+			this.fieldType = FIELD_TYPE.LABEL;
 		}else{
 			this.value = value;
 			this.description = description;
-			this.fieldType = FIELD_TYPE_STRING;
+			this.fieldType = FIELD_TYPE.STRING;
+
 		}
 	}
 
-	public KVP(final String label, final int value, final String description) {
-		super();
-		this.label = label;
+	public KVP(String label, int value, String description) {
+        this.label = label;
 		this.intValue = value;
 		this.description = description;
-		this.fieldType = FIELD_TYPE_INT;
+		this.fieldType = FIELD_TYPE.INT;
 	}
 
-	public KVP(final String label, final long value, final String description) {
-		super();
-		this.label = label;
+	public KVP(String label, long value, String description) {
+        this.label = label;
 		this.longValue = value;
 		this.description = description;
-		this.fieldType = FIELD_TYPE_LONG;
+		this.fieldType = FIELD_TYPE.LONG;
 	}
 
-	public KVP(final String label, final boolean value, final String description) {
+	public KVP(String label, boolean value, String description) {
 		this(label, value ? 1 : 0, description);
 	}
 
-	public KVP(final String html, final String label) {
-		super();
-		this.value = html;
+	public KVP(String html, String label) {
+        this.value = html;
 		this.label = label; // text representation of the HTML string
-		this.fieldType = FIELD_TYPE_HTML;
+		this.fieldType = FIELD_TYPE.HTML;
 	}
 
 
@@ -212,49 +196,44 @@ public class KVP{
 	 * @param value
 	 * @param description
 	 */
-	public KVP(final String label, final byte[] value, final String description) {
-		super();
-		this.label = label;
+	public KVP(String label, byte[] value, String description) {
+        this.label = label;
 		this.byteValue = value;
 		this.byteStart = 0;
 		this.byteLen = value.length;
 		this.description = description;
-		this.fieldType = FIELD_TYPE_BYTES;
+		this.fieldType = FIELD_TYPE.BYTES;
 		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
 	}
 
-	public KVP(final String label, final byte[] value, final int offset, final int len, final String description) {
-		super();
-		this.label = label;
+	public KVP(String label, byte[] value, int offset, int len, String description) {
+        this.label = label;
 		this.byteValue = value;
 		this.byteStart = offset;
 		this.byteLen = len;
 		this.description = description;
-		this.fieldType = FIELD_TYPE_BYTES;
+		this.fieldType = FIELD_TYPE.BYTES;
 		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
 	}
 
-	public KVP(final String label, final DVBString value, final String description) {
-		super();
-		this.label = label;
+	public KVP(String label, DVBString value, String description) {
+        this.label = label;
 		this.dvbStringValue = value;
 		this.description = description;
-		this.fieldType = FIELD_TYPE_DVBSTRING;
+		this.fieldType = FIELD_TYPE.DVBSTRING;
 	}
 
-	public KVP(final String string, final HTMLSource htmlSource) {
-		super();
-		this.label = string;
-		this.fieldType = FIELD_TYPE_LABEL;
+	public KVP(String label, HTMLSource htmlSource) {
+        this.label = label;
+		this.fieldType = FIELD_TYPE.LABEL;
 		detailViews.add(new DetailView(htmlSource,""));
 	}
 
-	public KVP(final String string, final BigInteger value, final String description) {
-		
-		super();
-		this.label = string;
+	public KVP(String label, BigInteger value, String description) {
+
+        this.label = label;
 		this.bigIntegerValue = value;
-		this.fieldType = FIELD_TYPE_BIGINT;
+		this.fieldType = FIELD_TYPE.BIGINT;
 		this.description = description;
 	}
 
@@ -262,7 +241,7 @@ public class KVP{
 		return description;
 	}
 
-	public void setDescription(final String description) {
+	public void setDescription(String description) {
 		this.description = description;
 	}
 
@@ -270,12 +249,12 @@ public class KVP{
 		return label;
 	}
 
-	public void setLabel(final String label) {
+	public void setLabel(String label) {
 		this.label = label;
 	}
 
 	// put appends in separate String, so original label is constant and available for path
-	public void appendLabel(final String labelAppend) {
+	public void appendLabel(String labelAppend) {
 		this.labelAppend  = this.labelAppend + labelAppend;
 	}
 
@@ -283,7 +262,7 @@ public class KVP{
 		return value;
 	}
 
-	public void setValue(final String value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 
@@ -292,16 +271,16 @@ public class KVP{
 		return toString(stringDisplay,numberDisplay);
 	}
 
-	public String toString(final byte stringFormat, final byte numberFormat) {
+	public String toString(byte stringFormat, byte numberFormat) {
 		StringBuilder b = new StringBuilder(label);
 		if(!labelAppend.isEmpty()) {
 			b.append(labelAppend);
 		}
 
-		if ((fieldType != FIELD_TYPE_LABEL)&&(fieldType != FIELD_TYPE_HTML)) {
+		if ((fieldType != FIELD_TYPE.LABEL)&&(fieldType != FIELD_TYPE.HTML)) {
 			appendValueAfterLabel(numberFormat, b);
 		}
-		if((fieldType==FIELD_TYPE_HTML)&&(STRING_DISPLAY_PLAIN!=stringFormat)){
+		if((fieldType==FIELD_TYPE.HTML)&&(STRING_DISPLAY_PLAIN!=stringFormat)){
 			b = replacePlainLabelWithHTML(stringFormat);
 		}
 		if (stringFormat == STRING_DISPLAY_JAVASCRIPT) {
@@ -310,12 +289,8 @@ public class KVP{
 		return b.toString();
 	}
 
-	/**
-	 * @param stringFormat
-	 * @param b
-	 * @return
-	 */
-	private StringBuilder replacePlainLabelWithHTML(final byte stringFormat) {
+
+	private StringBuilder replacePlainLabelWithHTML(byte stringFormat) {
 		if(stringFormat==STRING_DISPLAY_HTML_AWT){
 			return new StringBuilder("<html>").append(value).append("</html>");
 		}else if(stringFormat==STRING_DISPLAY_HTML_FRAGMENTS){
@@ -328,19 +303,25 @@ public class KVP{
 	 * @param numberFormat
 	 * @param b
 	 */
-	private void appendValueAfterLabel(final byte numberFormat, final StringBuilder b) {
+	private void appendValueAfterLabel(byte numberFormat, StringBuilder b) {
 		b.append(": ");
-		if (fieldType == FIELD_TYPE_STRING) {
-			appendString(b);
-		} else if (fieldType == FIELD_TYPE_INT) {
-			appendInteger(numberFormat, b);
-		} else if (fieldType == FIELD_TYPE_LONG) {
-			appendLong(numberFormat, b);
-		} else if (fieldType == FIELD_TYPE_BYTES) {
-			appendHexBytes(b);
-		} else if (fieldType == FIELD_TYPE_DVBSTRING) {
-			appendDVBString(b);
-		} else if (fieldType == FIELD_TYPE_BIGINT) {
+		switch (fieldType){
+			case STRING:
+				appendString(b);
+				break;
+			case INT:
+				appendInteger(numberFormat, b);
+				break;
+			case LONG:
+				appendLong(numberFormat, b);
+				break;
+			case BYTES:
+				appendHexBytes(b);
+				break;
+			case DVBSTRING:
+				appendDVBString(b);
+				break;
+			case BIGINT:
 			appendBigInteger(numberFormat, b);	
 		}
 		if (description != null) {
@@ -351,7 +332,7 @@ public class KVP{
 	/**
 	 * @param b
 	 */
-	private void appendDVBString(final StringBuilder b) {
+	private void appendDVBString(StringBuilder b) {
 		// TODO make distinction between plain text, and HTML view,
 		// to support character emphasis on A.1 Control codes ETSI EN 300 468 V1.11.1 (2010-04)
 		b.append(dvbStringValue.toString());
@@ -360,7 +341,7 @@ public class KVP{
 	/**
 	 * @param b
 	 */
-	private void appendHexBytes(final StringBuilder b) {
+	private void appendHexBytes(StringBuilder b) {
 		if (byteLen == 0) {
 			b.append('-');
 
@@ -368,7 +349,7 @@ public class KVP{
 			if(byteLen > BYTE_DATA_MAX_LEN) {
 				b.append("[truncated] ");
 			}
-			final int showLen=Math.min(byteLen,BYTE_DATA_MAX_LEN);
+			int showLen=Math.min(byteLen,BYTE_DATA_MAX_LEN);
 			b.append("0x").append(toHexString(byteValue, byteStart, showLen)).append(" \"").append(
 					toSafeString(byteValue, byteStart, showLen)).append("\"");
 		}
@@ -377,7 +358,7 @@ public class KVP{
 	/**
 	 * @param b
 	 */
-	private void appendString(final StringBuilder b) {
+	private void appendString(StringBuilder b) {
 		b.append(value);
 	}
 
@@ -385,7 +366,7 @@ public class KVP{
 	 * @param numberFormat
 	 * @param b
 	 */
-	private void appendLong(final byte numberFormat, final StringBuilder b) {
+	private void appendLong(byte numberFormat, StringBuilder b) {
 		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
 			b.append(longValue);
 		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
@@ -400,7 +381,7 @@ public class KVP{
 	 * @param numberFormat
 	 * @param b
 	 */
-	private void appendInteger(final byte numberFormat, final StringBuilder b) {
+	private void appendInteger(byte numberFormat, StringBuilder b) {
 		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
 			b.append(intValue);
 		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
@@ -410,7 +391,7 @@ public class KVP{
 		}
 	}
 
-	private void appendBigInteger(final byte numberFormat, final StringBuilder b) {
+	private void appendBigInteger(byte numberFormat, StringBuilder b) {
 		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
 			b.append(bigIntegerValue.toString());
 		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
@@ -425,11 +406,11 @@ public class KVP{
 		return numberDisplay;
 	}
 
-	public static void setNumberDisplay(final byte intDiplay) {
-		KVP.numberDisplay = intDiplay;
+	public static void setNumberDisplay(byte intDisplay) {
+		numberDisplay = intDisplay;
 	}
 
-	public static String formatInt(final int intValue) {
+	public static String formatInt(int intValue) {
 		if (numberDisplay == NUMBER_DISPLAY_DECIMAL) {
 			return Integer.toString(intValue);
 		} else if (numberDisplay == NUMBER_DISPLAY_HEX) {
@@ -443,14 +424,14 @@ public class KVP{
 		return stringDisplay;
 	}
 
-	public static void setStringDisplay(final byte stringDisplay) {
+	public static void setStringDisplay(byte stringDisplay) {
 		KVP.stringDisplay = stringDisplay;
 	}
 	/**
 	 * @param imageSource the imageSource to set
 	 */
 	@Deprecated
-	public void setImageSource(final ImageSource imageSource) {
+	public void setImageSource(ImageSource imageSource) {
 		detailViews.add(new DetailView(imageSource,""));
 	}
 
@@ -471,7 +452,7 @@ public class KVP{
 	 * @param subMenu the subMenu to set
 	 * @param owner the owner to set
 	 */
-	public void setSubMenuAndOwner(final JMenuItem subMenu,final Object owner) {
+	public void setSubMenuAndOwner(JMenuItem subMenu, Object owner) {
 		this.subMenu = subMenu;
 		this.owner = owner;
 	}
@@ -479,7 +460,7 @@ public class KVP{
 	/**
 	 * @param subMenu the subMenu to set
 	 */
-	public void setSubMenu(final JMenuItem subMenu) {
+	public void setSubMenu(JMenuItem subMenu) {
 		this.subMenu = subMenu;
 	}
 
@@ -491,12 +472,13 @@ public class KVP{
 	}
 
 
-	public byte getFieldType() {
-		return fieldType;
+	public boolean  isBytes(){
+		return fieldType == FIELD_TYPE.BYTES;
 	}
-	
+
+
 	public byte[] getByteValue() {
-		if(fieldType == FIELD_TYPE_BYTES){
+		if(fieldType == FIELD_TYPE.BYTES){
 			return copyOfRange(byteValue, byteStart, byteStart+byteLen);
 		}
 		
@@ -520,16 +502,13 @@ public class KVP{
 		if(crumb!=null) {
 			return crumb;
 		}
-		if(fieldType==FIELD_TYPE_LABEL) {
-			return label;
-		}
-		if(fieldType==FIELD_TYPE_INT) {
-			return label+":"+intValue;
-		}
-		if(fieldType==FIELD_TYPE_LONG) {
-			return label+":"+longValue;
-		}
-		return null;
+
+		return switch (fieldType){
+			case LABEL -> label;
+			case INT -> label+":"+intValue;
+			case LONG -> label+":"+longValue;
+			default -> null;
+		};
 
 	}
 	

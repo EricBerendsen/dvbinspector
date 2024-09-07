@@ -1,24 +1,24 @@
 /**
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
- *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
- *
+ * <p>
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ * <p>
  *  This file is part of DVB Inspector.
- *
+ * <p>
  *  DVB Inspector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *
+ * <p>
  *  DVB Inspector is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
+ * <p>
  *  You should have received a copy of the GNU General Public License
  *  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * <p>
  *  The author requests that he be notified of any application, applet, or
  *  other binary that makes use of this code, but that's more out of curiosity
  *  than anything and is not required.
@@ -127,10 +127,10 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			final TreePath path = tree.getSelectionPath();
+			TreePath path = tree.getSelectionPath();
 			if (path != null 
 					&& path.getLastPathComponent() instanceof DefaultMutableTreeNode dmtn
-					&& dmtn.getUserObject() instanceof final KVP kvp) {
+					&& dmtn.getUserObject() instanceof KVP kvp) {
 				copyItemToClipboard(kvp);
 			}
 		}
@@ -159,7 +159,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			final TreePath path = tree.getSelectionPath();
+			TreePath path = tree.getSelectionPath();
 			if (path != null && path.getLastPathComponent() instanceof DefaultMutableTreeNode dmtn) {
 				expandAllItems(dmtn);
 			}
@@ -193,7 +193,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param transportStream stream to be displayed (can be {@code null})
 	 * @param modus determines options of JTree, (like simple view, number list items, etc.)
 	 */
-	public DVBtree(final TransportStream transportStream, final int modus, DVBinspector controller) {
+	public DVBtree(TransportStream transportStream, int modus, DVBinspector controller) {
 		super(new GridLayout(1,0));
 		this.mod=modus;
 		this.ts=transportStream;
@@ -241,13 +241,13 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		tree.addMouseListener(
 				new MouseAdapter() {
 					@Override
-					public void mouseReleased( final MouseEvent e ) {
+					public void mouseReleased( MouseEvent e ) {
 						if ( e.isPopupTrigger()) {
 							showContextMenu(e);
 						}
 					}
 					@Override
-					public void mousePressed(final MouseEvent e) {
+					public void mousePressed(MouseEvent e) {
 						if ( e.isPopupTrigger()) {
 							showContextMenu(e);
 						}
@@ -256,7 +256,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 				});
 
 		//Create the scroll pane and add the tree to it.
-		final JScrollPane treeView = new JScrollPane(tree);
+		JScrollPane treeView = new JScrollPane(tree);
 
 		InputMap inputMap = tree.getInputMap();
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_DOWN_MASK);
@@ -290,7 +290,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerSize(12);
 
-		final Dimension minimumSize = new Dimension(300, 670);
+		Dimension minimumSize = new Dimension(300, 670);
 		treeView.setMinimumSize(minimumSize);
 		treeView.setPreferredSize(new Dimension(980, 670));
 		splitPane.setDividerLocation(500);
@@ -378,7 +378,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @see TransportStreamView#setTransportStream(TransportStream, ViewContext)
 	 */
 	@Override
-	public void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
+	public void setTransportStream(TransportStream transportStream, ViewContext viewContext){
 		ts=transportStream;
 		if(ts!=null){
 			model=new DefaultTreeModel(ts.getJTreeNode(mod));
@@ -405,7 +405,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param modus mask of bit to be set
 	 * @return true if bit(s) was set as result of this operation
 	 */
-	public boolean toggleMod(final int modus) {
+	public boolean toggleMod(int modus) {
 
 		mod = mod ^ modus;
 
@@ -433,7 +433,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param modus
 	 * @return true when toggling this modus will not change the number of nodes in the tree, or the structure of it
 	 */
-	private static boolean isNotStructuralChange(final int modus) {
+	private static boolean isNotStructuralChange(int modus) {
 		return (modus != SIMPLE_MODUS) && (modus != PSI_ONLY_MODUS) && (modus != PACKET_MODUS);
 	}
 
@@ -452,7 +452,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
      *
      * Retrieves the expansion state as a String, defined by a comma delimited list
      * of each row node that is expanded.
-     *
+     * <p>
      * Based on {@link <a href="http://www.algosome.com/articles/save-jtree-expand-state.html">...</a>}
      *
      * @return the expansion state as a String, defined by a comma delimited list
@@ -475,7 +475,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	/**
      * Sets the expansion state based upon a comma delimited list of row indexes that
      * are expanded.
-     *
+     * <p>
      * Based on {@link <a href="http://www.algosome.com/articles/save-jtree-expand-state.html">...</a>}
      *
      * @param s the expansion state based upon a comma delimited list of row indexes that need to be expanded
@@ -494,9 +494,9 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
 	 */
 	@Override
-	public void valueChanged(final TreeSelectionEvent e) {
+	public void valueChanged(TreeSelectionEvent e) {
 		// node1 is either a DefaultMutableTreeNode (most normal items) or a MutableTreeNode (for LazyList)
-		final MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
+		MutableTreeNode node1 = (MutableTreeNode)tree.getLastSelectedPathComponent();
 		detailPanel.removeAll();
 
 		if (node1 == null){
@@ -505,7 +505,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		// not always a DefaultMutableTreeNode
 		if(node1 instanceof DefaultMutableTreeNode node){
 
-			if (node.getUserObject() instanceof final KVP kvp) {
+			if (node.getUserObject() instanceof KVP kvp) {
 				List<DetailView> detailViews = kvp.getDetailViews();
 				if(detailViews.isEmpty()) {
 					return;
@@ -571,12 +571,12 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
-	public void actionPerformed(final ActionEvent actionEvent) {
+	public void actionPerformed(ActionEvent actionEvent) {
 
-		final TreePath path = tree.getSelectionPath();
+		TreePath path = tree.getSelectionPath();
 		if(path!=null){
 			DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
-			final KVP kvp = (KVP)dmtn.getUserObject();
+			KVP kvp = (KVP)dmtn.getUserObject();
 			String actionCommand = actionEvent.getActionCommand();
 			switch (actionCommand){
 				case EXPAND -> expandItem();
@@ -609,13 +609,13 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param dmtn start node from where to expand
 	 * @param end time (System.currentTimeMillis()) when this should stop expanding, to prevent long responses in the AWT Event thread
 	 */
-	private void expandAllItemsRecursive(final DefaultMutableTreeNode dmtn, long end) {
+	private void expandAllItemsRecursive(DefaultMutableTreeNode dmtn, long end) {
 		if (System.currentTimeMillis() > end) {
 			return;
 		}
 
 		tree.expandPath(new TreePath(dmtn.getPath()));
-		final Enumeration<?> children = dmtn.children();
+		Enumeration<?> children = dmtn.children();
 
 		while (children.hasMoreElements()) {
 			if (children.nextElement() instanceof DefaultMutableTreeNode child && !child.isLeaf()) {
@@ -640,36 +640,36 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	/**
 	 * @param kvp
 	 */
-	private static void stopAudio138183(final KVP kvp) {
-		final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
+	private static void stopAudio138183(KVP kvp) {
+		Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
 		audioHandler.stop();
 	}
 
 	/**
 	 * @param kvp
 	 */
-	private static void playAudio138183(final KVP kvp) {
-		final Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
+	private static void playAudio138183(KVP kvp) {
+		Audio138183Handler audioHandler = (Audio138183Handler) kvp.getOwner();
 		audioHandler.play();
 	}
 
 	/**
 	 * @param kvp
 	 */
-	private void saveDsmccTree(final KVP kvp) {
-		final DSMFile dsmFile = (DSMFile) kvp.getOwner();
+	private void saveDsmccTree(KVP kvp) {
+		DSMFile dsmFile = (DSMFile) kvp.getOwner();
 
-		final JFileChooser chooser = createFileChooserDefaultSaveDir();
+		JFileChooser chooser = createFileChooserDefaultSaveDir();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		final int returnVal = chooser.showSaveDialog(this);
+		int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File file = chooser.getSelectedFile();
+			File file = chooser.getSelectedFile();
 			PreferencesManager.setSaveDir(file.getAbsolutePath());
 
 			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath());
 			// start at selected directory, first create new subFolder with name "label"
-			final File newDir = new File(file, dsmFile.getLabel());
+			File newDir = new File(file, dsmFile.getLabel());
 			confirmOverwriteIfExisting(newDir, dsmFile);
 		} else {
 			logger.info("Open command cancelled by user.");
@@ -677,10 +677,10 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	}
 
 	private static JFileChooser createFileChooserDefaultSaveDir() {
-		final String defaultDir = PreferencesManager.getSaveDir();
-		final JFileChooser chooser = new JFileChooser();
+		String defaultDir = PreferencesManager.getSaveDir();
+		JFileChooser chooser = new JFileChooser();
 		if(defaultDir!=null){
-			final File defDir = new File(defaultDir);
+			File defDir = new File(defaultDir);
 			chooser.setCurrentDirectory(defDir);
 		}
 		return chooser;
@@ -689,15 +689,15 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	/**
 	 * @param kvp
 	 */
-	private void saveDsmccFile(final KVP kvp) {
-		final DSMFile dsmFile = (DSMFile) kvp.getOwner();
+	private void saveDsmccFile(KVP kvp) {
+		DSMFile dsmFile = (DSMFile) kvp.getOwner();
 		String fileName = dsmFile.getLabel();
 
 		selectFileAndSave(fileName, dsmFile);
 	}
 
 	
-	private void saveT42File(final KVP kvp) {
+	private void saveT42File(KVP kvp) {
 		Object owner = kvp.getOwner();
 			switch(owner){
 				case SubPage subPage:
@@ -716,9 +716,9 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param dmtn
 	 * @param kvp
 	 */
-	private void parsePid(DefaultMutableTreeNode dmtn, final KVP kvp) {
-		final PID p = (PID) kvp.getOwner();
-		final int pid = p.getPid();
+	private void parsePid(DefaultMutableTreeNode dmtn, KVP kvp) {
+		PID p = (PID) kvp.getOwner();
+		int pid = p.getPid();
 		GeneralPidHandler generalPidHandler = p.getPidHandler();
 		if(generalPidHandler.isInitialized()) return; // prevent double click
 
@@ -728,7 +728,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 
 		try {
 			ts.parsePidStreams(handlerMap);
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.WARNING,"could not read file "+ts.getFile().getName()+" while parsing PES",e);
 			setCursor(Cursor.getDefaultCursor());
 		}catch (RuntimeException e) {
@@ -752,7 +752,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 				setCursor(Cursor.getDefaultCursor());
 			}
 		}
-		final DefaultMutableTreeNode node = p.getPidHandler().getJTreeNode(mod);
+		DefaultMutableTreeNode node = p.getPidHandler().getJTreeNode(mod);
 		// https://www.java-tips.org/java-se-tips-100019/15-javax-swing/2393-have-a-popup-attached-to-a-jtree.html
 		// thanks to Yong Zhang for the tip for refreshing the tree structure.
 		dmtn.add(node);
@@ -765,12 +765,12 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param path
 	 * @param kvp
 	 */
-	private void copyVisibleSubTreeToClipboard(DefaultMutableTreeNode dmtn, final TreePath path, final KVP kvp) {
+	private void copyVisibleSubTreeToClipboard(DefaultMutableTreeNode dmtn, TreePath path, KVP kvp) {
 
 		String res = kvp.getPlainText() + System.lineSeparator() +
 				getViewTree(dmtn, "", path);
-		final StringSelection stringSelection = new StringSelection(res);
-		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection stringSelection = new StringSelection(res);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
 	}
 
@@ -782,17 +782,17 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		String treeString = kvp.getPlainText() + System.lineSeparator() +
 				getEntireTree(dmtn, "");
 
-		final StringSelection stringSelection = new StringSelection( treeString );
-		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection stringSelection = new StringSelection( treeString );
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
 	}
 
 	/**
 	 * @param kvp
 	 */
-	private void copyItemToClipboard(final KVP kvp) {
-		final StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
-		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	private void copyItemToClipboard(KVP kvp) {
+		StringSelection stringSelection = new StringSelection( kvp.getPlainText() );
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents( stringSelection, this );
 	}
 
@@ -801,14 +801,14 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @return
 	 */
 
-	public static StringBuilder getEntireTree(final DefaultMutableTreeNode dmtn,final String preFix) {
+	public static StringBuilder getEntireTree(DefaultMutableTreeNode dmtn, String preFix) {
 		StringBuilder res = new StringBuilder();
 		Enumeration<TreeNode> children = dmtn.children();
 		while(children.hasMoreElements()){
 			TreeNode next = children.nextElement();
-			if(next instanceof final DefaultMutableTreeNode child){
+			if(next instanceof DefaultMutableTreeNode child){
 				Object userObject = child.getUserObject();
-				if(userObject instanceof final KVP chKVP) {
+				if(userObject instanceof KVP chKVP) {
 					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(System.lineSeparator());
 					if(!child.isLeaf()){
 						if (child == dmtn.getLastChild()) { // lastChild
@@ -830,16 +830,16 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @return
 	 */
 
-	private StringBuilder getViewTree(final DefaultMutableTreeNode dmtn,final String preFix,final TreePath path) {
-		final StringBuilder res = new StringBuilder();
+	private StringBuilder getViewTree(DefaultMutableTreeNode dmtn, String preFix, TreePath path) {
+		StringBuilder res = new StringBuilder();
 		Enumeration<TreeNode> children = dmtn.children();
 		while(children.hasMoreElements()){
 
 			TreeNode next = children.nextElement();
-			if(next instanceof final DefaultMutableTreeNode child){
-				final TreePath childPath = path.pathByAddingChild(child);
+			if(next instanceof DefaultMutableTreeNode child){
+				TreePath childPath = path.pathByAddingChild(child);
 				if(tree.isVisible(childPath)){
-					final KVP chKVP = (KVP)child.getUserObject();
+					KVP chKVP = (KVP)child.getUserObject();
 					res.append(preFix).append("+-").append(chKVP.getPlainText()).append(System.lineSeparator());
 					if(!child.isLeaf()){
 						if (child == dmtn.getLastChild()) { // lastChild
@@ -857,8 +857,8 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	/**
 	 * @param e
 	 */
-	private void showContextMenu(final MouseEvent e) {
-		final TreePath path = tree.getSelectionPath();
+	private void showContextMenu(MouseEvent e) {
+		TreePath path = tree.getSelectionPath();
 		
 		
 		MenuElement[] subs = popup.getSubElements();
@@ -877,12 +877,12 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 
 		if(path!=null){
             if(((MutableTreeNode)path.getLastPathComponent() instanceof DefaultMutableTreeNode dmtn)){
-				final KVP kvp=(KVP)dmtn.getUserObject();
+				KVP kvp=(KVP)dmtn.getUserObject();
 				JMenuItem subMenu = kvp.getSubMenu();
 				if(subMenu!=null){
-					final Object owner =  kvp.getOwner();
-					if(owner instanceof final PID p){ // if PID has a owner, it is a PES that maybe has not been parsed yet.
-						final GeneralPidHandler pesH = p.getPidHandler();
+					Object owner =  kvp.getOwner();
+					if(owner instanceof PID p){ // if PID has a owner, it is a PES that maybe has not been parsed yet.
+						GeneralPidHandler pesH = p.getPidHandler();
 						if(!pesH.isInitialized()){
 							subMenu.addActionListener(this);
 							popup.add(subMenu);
@@ -893,8 +893,8 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 						popup.add(subMenu);
 					}
 				}else{
-					if(kvp.getFieldType()== KVP.FIELD_TYPE_BYTES){
-						final JMenuItem bytesMenu = new JMenuItem("Save bytes as...");
+					if(kvp.isBytes()){
+						JMenuItem bytesMenu = new JMenuItem("Save bytes as...");
 
 						bytesMenu.setActionCommand(SAVE_BYTES);
 						bytesMenu.addActionListener(this);
@@ -919,7 +919,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
 	 */
 	@Override
-	public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
+	public void lostOwnership(Clipboard clipboard, Transferable contents) {
 		// empty block, we don't care
 
 	}
@@ -962,7 +962,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 
 	private void saveBytes(KVP kvp) {
 
-		if(kvp.getFieldType()!= KVP.FIELD_TYPE_BYTES) {
+		if(! kvp.isBytes()) {
 			return;
 		}
 		SaveAble saveAble = file -> {
@@ -981,13 +981,13 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param saveAble
 	 */
 	private void selectFileAndSave(String fileName, SaveAble saveAble) {
-		final JFileChooser chooser = createFileChooserDefaultSaveDir();
+		JFileChooser chooser = createFileChooserDefaultSaveDir();
 
 		chooser.setSelectedFile(new File(fileName));
 
-		final int returnVal = chooser.showSaveDialog(this);
+		int returnVal = chooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File file = chooser.getSelectedFile();
+			File file = chooser.getSelectedFile();
 			PreferencesManager.setSaveDir(file.getParent());
 
 			logger.info("Preparing to save as: " + file.getName() + ", path:" + file.getAbsolutePath() );
@@ -1001,11 +1001,11 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param file
 	 * @param saveAble
 	 */
-	private void confirmOverwriteIfExisting(final File file, SaveAble saveAble) {
+	private void confirmOverwriteIfExisting(File file, SaveAble saveAble) {
 		boolean write=true;
 		if(file.exists()){
 			logger.log(Level.INFO, "file {} already exists.", file);
-			final int option = JOptionPane.showConfirmDialog(
+			int option = JOptionPane.showConfirmDialog(
 					this, "File "+file+" already exists, want to overwrite?",
 					"File already exists",
 					JOptionPane.YES_NO_OPTION);
