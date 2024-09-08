@@ -80,7 +80,7 @@ public class Segment implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus, final ImageSource imgSource) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Segment (" +DVBSubtitlingPESDataField.getSegmentTypeString(getSegmentType())+")", imgSource));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Segment (" +DVBSubtitlingPESDataField.getSegmentTypeString(getSegmentType())+")").addImageSource(imgSource, "Segment"));
 		s.add(new DefaultMutableTreeNode(new KVP("raw_data",data_block,offset,getSegmentLength()+6,null)));
 		s.add(new DefaultMutableTreeNode(new KVP("segment_type",getSegmentType(),DVBSubtitlingPESDataField.getSegmentTypeString(getSegmentType()))));
 		s.add(new DefaultMutableTreeNode(new KVP("page_id",getPageID(),null)));

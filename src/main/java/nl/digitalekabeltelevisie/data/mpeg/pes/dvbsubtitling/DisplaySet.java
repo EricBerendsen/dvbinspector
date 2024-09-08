@@ -68,7 +68,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t=new DefaultMutableTreeNode(new KVP("Display Set",this));
+		final DefaultMutableTreeNode t=new DefaultMutableTreeNode(new KVP("Display Set").addImageSource(this, "Display Set"));
 		t.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
 		addListJTree(t, segments, modus, "segments");
 

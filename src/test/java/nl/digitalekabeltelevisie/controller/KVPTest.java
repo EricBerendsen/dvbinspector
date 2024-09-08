@@ -55,11 +55,11 @@ public class KVPTest {
                 return null;
             }
         };
-        KVP kvp = new KVP("Plaatje", imgSource);
+        KVP kvp = new KVP("Plaatje").addImageSource(imgSource, "label3");
         assertEquals("Plaatje", kvp.toString());
         assertEquals(1, kvp.getDetailViews().size());
         assertEquals(imgSource, kvp.getDetailViews().getFirst().detailSource());
-        assertEquals("", kvp.getDetailViews().getFirst().label());
+        assertEquals("label3", kvp.getDetailViews().getFirst().label());
     }
 
     @Test
@@ -176,7 +176,8 @@ public class KVPTest {
                 return html;
             }
         };
-        KVP kvp = new KVP("htmlfragment",htmlSource);
+        KVP kvp = new KVP("htmlfragment");
+        kvp.addHTMLSource(htmlSource, "htmlfragment");
 
         kvp.appendLabel(" [1]");
         assertEquals("htmlfragment [1]",kvp.toString());

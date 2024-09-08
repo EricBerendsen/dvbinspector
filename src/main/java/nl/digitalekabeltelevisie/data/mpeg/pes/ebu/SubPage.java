@@ -298,7 +298,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp = new KVP("SubPage " + toHexString(subPageNo, 4), this);
+		final KVP kvp = new KVP("SubPage " + toHexString(subPageNo, 4)).addImageSource(this, "Sub Page");
 		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(kvp);
 
 		final JMenuItem objectMenu = new JMenuItem("Save Page as .t42");

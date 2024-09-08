@@ -282,7 +282,9 @@ public class Construct implements TreeNode, HTMLSource{
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("construct",this));
+		KVP kvp = new KVP("construct");
+		kvp.addHTMLSource(this, "Construct");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		t.add(new DefaultMutableTreeNode(new KVP("one_bit",one_bit,"shall be '1' to maintain backwards compatibility with previous versions of CEA-708-C")));
 		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("cc_valid",cc_valid,cc_valid==1?"the two closed caption data bytes that follow are valid":"the two data bytes are invalid")));

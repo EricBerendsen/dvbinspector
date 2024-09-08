@@ -139,11 +139,6 @@ public class KVP extends DefaultMutableTreeNode{
 		this.fieldType = FIELD_TYPE.LABEL;
 	}
 
-	public KVP(String label, ImageSource imageSource) {
-        this.label = label;
-		this.fieldType = FIELD_TYPE.LABEL;
-		detailViews.add(new DetailView(imageSource,""));
-	}
 	public KVP(String label, String value, String description) {
         this.label = label;
 		if(value==null){ // just a label
@@ -212,12 +207,6 @@ public class KVP extends DefaultMutableTreeNode{
 		this.dvbStringValue = value;
 		this.description = description;
 		this.fieldType = FIELD_TYPE.DVBSTRING;
-	}
-
-	public KVP(String label, HTMLSource htmlSource) {
-        this.label = label;
-		this.fieldType = FIELD_TYPE.LABEL;
-		detailViews.add(new DetailView(htmlSource,""));
 	}
 
 	public KVP(String label, BigInteger value, String description) {

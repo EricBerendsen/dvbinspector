@@ -114,7 +114,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			}
 			type.append(")");
 		}
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video PES Packet"+type,this));
+		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video PES Packet"+type).addImageSource(this, "Frame"));
 		addListJTree(s,sections,modus,"Sections");
 		return s;
 	}

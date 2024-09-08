@@ -92,7 +92,7 @@ public class Page implements TreeNode{
 						}
 					}
 
-					t.setUserObject(new KVP(titel.toString().trim(),subPage));
+					t.setUserObject(new KVP(titel.toString().trim()).addImageSource(subPage, titel.toString().trim()));
 					treeNode.add(t);
 				}
 			}

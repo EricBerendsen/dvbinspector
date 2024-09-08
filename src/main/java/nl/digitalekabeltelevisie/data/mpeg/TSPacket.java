@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -354,7 +354,9 @@ public class TSPacket implements HTMLSource, TreeNode{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(buildNodeLabel(), this));
+		KVP kvp = new KVP(buildNodeLabel());
+		kvp.addHTMLSource(this, "TS Packet");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		addMainPacketDetails(modus, t);
 		if(buffer.length>PAYLOAD_PACKET_LENGTH){
 			t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
