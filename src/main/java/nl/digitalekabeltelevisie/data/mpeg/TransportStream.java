@@ -43,7 +43,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -475,33 +474,30 @@ public class TransportStream implements TreeNode{
 		return psi;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	@Override
+	public KVP getJTreeNode(int modus){
 
-		KVP tsKvp = new KVP("Transport Stream "+psi.getPat().getTransportStreamId());
-		tsKvp.setCrumb("root");
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(tsKvp);
+		KVP t = new KVP("Transport Stream "+psi.getPat().getTransportStreamId()).setCrumb("root");
 
-		t.add(new DefaultMutableTreeNode(new KVP("file",file.getPath(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("size",file.length(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("modified",new Date(file.lastModified()).toString(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("TS packets",no_packets,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("packet size",packetLength,PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)")));
-		t.add(new DefaultMutableTreeNode(new KVP("Error packets",error_packets,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("Sync Errors",sync_errors,null)));
+		t.add(new KVP("file",file.getPath(),null));
+		t.add(new KVP("size",file.length(),null));
+		t.add(new KVP("modified",new Date(file.lastModified()).toString(),null));
+		t.add(new KVP("TS packets",no_packets,null));
+		t.add(new KVP("packet size",packetLength,PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)"));
+		t.add(new KVP("Error packets",error_packets,null));
+		t.add(new KVP("Sync Errors",sync_errors,null));
 		if(bitRate!= -1L){
-			t.add(new DefaultMutableTreeNode(new KVP("bitrate",bitRate,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()* 8L)/bitRate,null)));
+			t.add(new KVP("bitrate",bitRate,null));
+			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRate,null));
 		}
 		if(bitRateTDT!= -1L){
-			t.add(new DefaultMutableTreeNode(new KVP("bitrate based on TDT",bitRateTDT,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("length (secs)",(file.length()* 8L)/bitRateTDT,null)));
+			t.add(new KVP("bitrate based on TDT",bitRateTDT,null));
+			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRateTDT,null));
 		}
 
 		t.add(psi.getJTreeNode(modus));
 		if(!psiOnlyModus(modus)){
-			KVP kvp = new KVP("PIDs");
-			kvp.addTableSource(this::getTableModel,"PIDs");
-			DefaultMutableTreeNode pidTreeNode = new DefaultMutableTreeNode(kvp);
+			KVP pidTreeNode = new KVP("PIDs").addTableSource(this::getTableModel,"PIDs");
 			t.add(pidTreeNode);
 			for (PID pid : pids) {
 				if((pid)!=null){
@@ -511,7 +507,7 @@ public class TransportStream implements TreeNode{
 			}
 			// TSPackets
             if (no_packets == 0) {
-                t.add(new DefaultMutableTreeNode(new KVP("Transport packets ")));
+                t.add(new KVP("Transport packets "));
             } else {
                 JTreeLazyList list = new JTreeLazyList(new TSPacketGetter(this, modus));
                 t.add(list.getJTreeNode(modus, "Transport packets "));
