@@ -352,17 +352,10 @@ public class Descriptor implements TreeNode {
 				Utils.toSafeString(privateData, privateDataOffset, descriptorLength) + "\"";
 	}
 
+
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		return getJTreeNode(modus, null);
 
-	}
-	
-	public DefaultMutableTreeNode getJTreeNode(final int modus, TableSource tableSource) {
-
-		final KVP kvp = new KVP("Descriptor: " + getDescriptorname(), descriptorTag, null);
-		kvp.addTableSource(tableSource,"");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-
+        DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Descriptor: " + getDescriptorname(), descriptorTag, null));
 		addGeneralDescriptorInfo(modus, t);
 		return t;
 	}

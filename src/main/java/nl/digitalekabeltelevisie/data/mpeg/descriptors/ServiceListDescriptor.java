@@ -165,7 +165,10 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus, this);
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		if (t.getUserObject() instanceof KVP kvp) {
+			kvp.addTableSource(this, "service_list");
+		}
 		addListJTree(t,serviceList,modus,"service_list",this);
 		return t;
 	}

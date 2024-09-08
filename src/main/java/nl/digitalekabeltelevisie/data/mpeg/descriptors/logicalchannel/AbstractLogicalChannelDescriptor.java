@@ -133,7 +133,11 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus, this);
+		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		if (t.getUserObject() instanceof KVP kvp) {
+			kvp.addTableSource(this, "logical_channels");
+		}
+
 		addListJTree(t,channelList,modus,"logical_channels",this);
 		return t;
 	}
