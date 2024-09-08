@@ -129,11 +129,6 @@ public class KVP{
 	 */
 	private String crumb;
 
-	@Deprecated
-	public void setHtmlSource(HTMLSource htmlSource) {
-		detailViews.add(new DetailView(htmlSource, ""));
-	}
-
 	private JMenuItem subMenu;
 	private Object owner;
 	private String labelAppend = "";
@@ -422,13 +417,6 @@ public class KVP{
 	public static void setStringDisplay(STRING_DISPLAY stringDisplay) {
 		KVP.stringDisplay = stringDisplay;
 	}
-	/**
-	 * @param imageSource the imageSource to set
-	 */
-	@Deprecated
-	public void setImageSource(ImageSource imageSource) {
-		detailViews.add(new DetailView(imageSource,""));
-	}
 
 	public String getPlainText(){
 		return toString(STRING_DISPLAY.PLAIN, NUMBER_DISPLAY.BOTH);
@@ -480,18 +468,6 @@ public class KVP{
 		return new byte[0];
 	}
 
-
-
-	@Deprecated
-	public void setTableSource(TableSource tableSource) {
-		detailViews.add(new DetailView(tableSource,""));
-	}
-
-
-	@Deprecated
-	public void setXmlSource(XMLSource xmlSource) {
-		detailViews.add(new DetailView(xmlSource,""));
-	}
 
 	public String getCrumb() {
 		if(crumb!=null) {

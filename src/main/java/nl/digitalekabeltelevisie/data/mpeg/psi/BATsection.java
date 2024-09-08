@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -117,7 +117,7 @@ public class BATsection extends TableSectionExtendedSyntax{
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
 		if(!transportStreamList.isEmpty()) {
-			kvp.setTableSource(this::getTableModel);
+			kvp.addTableSource(this::getTableModel, "bat");
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_lengt", getNetworkDescriptorsLength(), null)));
 		Utils.addListJTree(t, networkDescriptorList, modus, "network_descriptors");

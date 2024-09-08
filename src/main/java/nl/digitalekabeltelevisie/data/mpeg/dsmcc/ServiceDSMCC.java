@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -206,7 +206,7 @@ public class ServiceDSMCC implements TreeNode {
 			if(biopMessage instanceof BIOPDirectoryMessage){
 				final BIOPDirectoryMessage dir = (BIOPDirectoryMessage) biopMessage;
 				final DSMFile dsmFile = new DSMFile(dir,label);
-				kvp.setHtmlSource(dsmFile);
+				kvp.addHTMLSource(dsmFile,"directory_message");
 
 				final JMenuItem objectMenu = new JMenuItem("Export (sub)tree...");
 				objectMenu.setActionCommand(DVBtree.EXPORT);
@@ -224,13 +224,13 @@ public class ServiceDSMCC implements TreeNode {
 				final JMenuItem objectMenu = new JMenuItem("Save as...");
 				objectMenu.setActionCommand(DVBtree.SAVE);
 				final DSMFile dsmFile = new DSMFile(biopMessage,label);
-				kvp.setHtmlSource(dsmFile);
+				kvp.addHTMLSource(dsmFile,"file_message");
 
 				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
 
 			}else if(biopMessage instanceof BIOPStreamEventMessage){
 				final DSMFile dsmFile = new DSMFile(biopMessage,label);
-				kvp.setHtmlSource(dsmFile);
+				kvp.addHTMLSource(dsmFile,"stream_event_message");
 			}
 			return treeNode;
 		}

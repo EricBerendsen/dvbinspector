@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -160,7 +160,7 @@ public class M7Fastscan implements TreeNode {
 		if(ontSections!=null) {
 			KVP kvp = new KVP("ONT");
 			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(kvp);
-			kvp.setTableSource(this::getTableModelOnt);
+			kvp.addTableSource(this::getTableModelOnt, "ONT");
 			for (final ONTSection ontSection : ontSections) {
 				if(ontSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(ont, ontSection, modus);

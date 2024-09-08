@@ -79,11 +79,11 @@ public class OperatorFastscan implements TreeNode{
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		final KVP networkKVP = new KVP("Pid",pid,getOperatorSubListName());
 		if(fntSections==null){
-			networkKVP.setHtmlSource(() -> "FNT Missing");
+			networkKVP.addHTMLSource(() -> "FNT Missing", "FNT Missing");
 		}else if(fstSections==null){
-			networkKVP.setHtmlSource(() -> "FST Missing");
+			networkKVP.addHTMLSource(() -> "FST Missing","FST Missing");
 		}else {
-			networkKVP.setTableSource(this::getTableModel);
+			networkKVP.addTableSource(this::getTableModel, "Operator Fastscan");
 		}
 		
 		final DefaultMutableTreeNode n = new DefaultMutableTreeNode(networkKVP);
@@ -91,7 +91,7 @@ public class OperatorFastscan implements TreeNode{
 		if(fstSections!=null) {
 			KVP fstKvp = new KVP("FST");
 			DefaultMutableTreeNode fst = new DefaultMutableTreeNode(fstKvp);
-			fstKvp.setTableSource(this::getFstTableModel);
+			fstKvp.addTableSource(this::getFstTableModel, "FST");
 			for (final FSTsection fstSection : fstSections) {
 				if(fstSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(fst, fstSection, modus);
@@ -104,7 +104,7 @@ public class OperatorFastscan implements TreeNode{
 		if (fntSections != null) {
 			KVP fntKvp = new KVP("FNT");
 			DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(fntKvp);
-			fntKvp.setTableSource(this::getFntTableModel);
+			fntKvp.addTableSource(this::getFntTableModel, "FNT");
 			for (final FNTsection fntSection : fntSections) {
 				if (fntSection != null) {
 					AbstractPSITabel.addSectionVersionsToJTree(fnt, fntSection, modus);

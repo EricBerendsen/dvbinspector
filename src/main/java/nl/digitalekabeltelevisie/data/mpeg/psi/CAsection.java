@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -64,7 +64,7 @@ public class CAsection extends TableSectionExtendedSyntax implements TableSource
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		if(!descriptorList.isEmpty()) {
 			KVP kvp = (KVP) t.getUserObject();
-			kvp.setTableSource(this);
+			kvp.addTableSource(this, "cat");
 		}
 		Utils.addListJTree(t, descriptorList, modus, "descriptors");
 		return t;

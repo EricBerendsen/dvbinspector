@@ -144,7 +144,7 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this);
+		kvp.addTableSource(this, "PAT");
 
 		Utils.addListJTree(t,programs,modus,"programs");
 		return t;

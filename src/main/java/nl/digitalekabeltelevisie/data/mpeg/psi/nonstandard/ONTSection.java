@@ -171,7 +171,7 @@ public class ONTSection extends TableSectionExtendedSyntax {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this::getTableModel);
+		kvp.addTableSource(this::getTableModel, "ONT Section");
 
 		t.add(new DefaultMutableTreeNode(new KVP("bouquet_descriptors_loop_length",bouquet_descriptors_loop_length,null)));
 		Utils.addListJTree(t,bouquetDescriptorList,modus,"bouquet_descriptors");

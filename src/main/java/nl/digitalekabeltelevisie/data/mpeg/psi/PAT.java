@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -100,7 +100,7 @@ public class PAT extends AbstractPSITabel{
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		if (pat != null) {
-			kvp.setTableSource(this::getTableModel);
+			kvp.addTableSource(this::getTableModel, "PAT");
 			for (PATsection element : pat) {
 				if(element!= null){
 					if(!Utils.simpleModus(modus)){ // show all versions

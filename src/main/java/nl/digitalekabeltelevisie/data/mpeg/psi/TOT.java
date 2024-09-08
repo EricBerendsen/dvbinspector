@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -60,7 +60,7 @@ public class TOT extends AbstractPSITabel{
 
 		KVP kvp = new KVP("TOT");
 		if(!totSectionList.isEmpty()) {
-			kvp.setTableSource(this::getTableModel);
+			kvp.addTableSource(this::getTableModel, "TOT");
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 

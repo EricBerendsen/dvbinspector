@@ -83,7 +83,7 @@ public class TOTsection extends TableSection {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP)t.getUserObject();
-		kvp.setTableSource(this::getTableModel);
+		kvp.addTableSource(this::getTableModel, "TOT Section");
 		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
 		if(!Utils.simpleModus(modus)){
 			t.add(new DefaultMutableTreeNode(new KVP("descriptors_loop_length",descriptorsLoopLength,null)));

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -56,7 +56,7 @@ public class TDT extends AbstractPSITabel{
 		KVP kvp = new KVP("TDT");
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		if(!tdtSectionList.isEmpty()) {
-			kvp.setTableSource(this::getTableModel);
+			kvp.addTableSource(this::getTableModel, "TDT");
 		}
 
 		for (TDTsection tdTsection : tdtSectionList) {

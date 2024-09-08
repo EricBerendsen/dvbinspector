@@ -402,11 +402,12 @@ public class Cea608 {
 		for( Entry<Integer, Map<Long, List<Construct>>> typeEntry:allCcData.entrySet()) {
 			final Map<Long, List<Construct>> typeEntryValue = typeEntry.getValue();
 			final KVP typeNodeKvp = new KVP("type",typeEntry.getKey(),Construct.cc_type_list.get(typeEntry.getKey()));
-			typeNodeKvp.setHtmlSource(() -> typeEntryValue.values().
+			typeNodeKvp.addHTMLSource(() -> typeEntryValue.values().
 					stream().
 					flatMap(Collection::stream).
 					map(HTMLSource::getHTML).
-					collect(Collectors.joining("<br>"))
+					collect(Collectors.joining("<br>")),
+					"cc_data"
 					);
 			DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeNodeKvp);
 			ccDataTree.add(typeNode);
@@ -414,9 +415,10 @@ public class Cea608 {
 			for(Entry<Long, List<Construct>> ptsEntry: typeEntryValue.entrySet()) {
 				final List<Construct> constructList = ptsEntry.getValue();
 				final KVP kvp = new KVP("pts",ptsEntry.getKey(),printTimebase90kHz(ptsEntry.getKey()));
-				kvp.setHtmlSource(() -> constructList.stream().
+				kvp.addHTMLSource(() -> constructList.stream().
 								map(HTMLSource::getHTML).
-								collect(Collectors.joining("<br>"))
+								collect(Collectors.joining("<br>")),
+								"pts"
 								);
 				
 				

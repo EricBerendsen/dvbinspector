@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -94,7 +94,7 @@ public class SDT extends AbstractPSITabel{
 
 		KVP sdtKvp = new KVP("SDT");
 		if(!networks.isEmpty()) {
-			sdtKvp.setTableSource(this::getTableForSdt);
+			sdtKvp.addTableSource(this::getTableForSdt, "SDT");
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(sdtKvp);
 
@@ -103,7 +103,7 @@ public class SDT extends AbstractPSITabel{
 			final Map<Integer, SDTsection[]> networkSections = networks.get(orgNetworkId);
 
 			KVP kvpOrgNetwork = new KVP("original_network_id", orgNetworkId, Utils.getOriginalNetworkIDString(orgNetworkId));
-			kvpOrgNetwork.setTableSource(() -> getTableForOriginalNetwork(orgNetworkId));
+			kvpOrgNetwork.addTableSource(() -> getTableForOriginalNetwork(orgNetworkId), "SDT original_network_id: " + orgNetworkId);
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvpOrgNetwork);
 			t.add(n);
 
@@ -112,7 +112,7 @@ public class SDT extends AbstractPSITabel{
 				SDTsection[] sections = networkSections.get(transport_stream_id);
 
 				KVP kvpTsId = new KVP("transport_stream_id", transport_stream_id, null);
-				kvpTsId.setTableSource(() -> getTableForTransportStreamID(orgNetworkId, transport_stream_id));
+				kvpTsId.addTableSource(() -> getTableForTransportStreamID(orgNetworkId, transport_stream_id),"SDT transport_stream_id: "+transport_stream_id);
 
 				final DefaultMutableTreeNode m = new DefaultMutableTreeNode(kvpTsId);
 				n.add(m);

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -66,14 +66,14 @@ public class BAT extends AbstractPSITabel{
 
 		KVP kvpBat = new KVP("BAT");
 		if(!networks.isEmpty()) {
-			kvpBat.setTableSource(this::getTableModel);
+			kvpBat.addTableSource(this::getTableModel, "BAT");
 		}
 		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvpBat);
 		for(int bouquetNo:new TreeSet<>(networks.keySet())) {
 
 			KVP kvp = new KVP("bouquet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
 			if(hasTransportStreams(bouquetNo)) {
-				kvp.setTableSource(()->getTableForBouqetID(bouquetNo));
+				kvp.addTableSource(()->getTableForBouqetID(bouquetNo), "bouquet_id "+bouquetNo);
 			}
 			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 			final BATsection [] sections = networks.get(bouquetNo);

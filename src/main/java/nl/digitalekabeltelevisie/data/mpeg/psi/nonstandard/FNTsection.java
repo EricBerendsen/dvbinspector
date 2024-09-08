@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -201,7 +201,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
-		kvp.setTableSource(this::getTableModel);
+		kvp.addTableSource(this::getTableModel, "FNT");
 
 		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_loop_length",network_descriptors_loop_length,null)));
 		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
