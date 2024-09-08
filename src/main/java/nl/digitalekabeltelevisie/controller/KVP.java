@@ -70,6 +70,32 @@ public class KVP{
 
 	public record DetailView(DetailSource detailSource, String label) {}
 
+	public enum NUMBER_DISPLAY {
+		DECIMAL,
+		HEX,
+		BOTH
+	}
+
+	public enum STRING_DISPLAY{
+		PLAIN, // plain
+		JAVASCRIPT, // javascript escaped (quotes removed)
+		HTML_FRAGMENTS, // HTML fragments '<' and '&' escaped,
+		HTML_AWT // AWT HTML (html segments include <html> tag,  otherwise plain text
+	}
+
+	public enum FIELD_TYPE {
+		STRING,
+		BYTES,
+		INT,
+		LONG,
+
+		LABEL, //used for a node that has no value associated with it
+		DVBSTRING,
+		HTML, // used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
+
+		BIGINT
+	}
+
 	/**
 	 * maximum length of byte[] to be shown in JTree, only has meaning in case data is array of byte.
 	 */
@@ -86,43 +112,12 @@ public class KVP{
 	private DVBString	dvbStringValue;
 	private BigInteger 	bigIntegerValue;
 
-	private static byte	numberDisplay				= 1;	// 1 - decimal, 2 -
-	// hex, 3 both
-	// ,example "0xA0
-	// (160)"
-	public static final byte	NUMBER_DISPLAY_DECIMAL		= 1;
-	public static final byte	NUMBER_DISPLAY_HEX			= 2;
-	public static final byte	NUMBER_DISPLAY_BOTH			= 3;
+	private static NUMBER_DISPLAY	numberDisplay				= NUMBER_DISPLAY.DECIMAL;	// 1 - decimal, 2 -
+	private static STRING_DISPLAY	stringDisplay				= STRING_DISPLAY.PLAIN;
 
-	private static byte	stringDisplay				= 1;
-	// 1 - plain,
-	// 2 - javascript escaped (quotes removed),
-	// 3 - HTML fragments '<' and '&' escaped,
-	// 4 - AWT HTML (html segments include <html> tag,  otherwise plain text
-	public static final byte	STRING_DISPLAY_PLAIN		= 1;
-	public static final byte	STRING_DISPLAY_JAVASCRIPT	= 2;
-	public static final byte	STRING_DISPLAY_HTML_FRAGMENTS	= 3;
-	public static final byte	STRING_DISPLAY_HTML_AWT		= 4;
-
-	private FIELD_TYPE		fieldType					= FIELD_TYPE.STRING;
-
-	public enum FIELD_TYPE {
-		STRING,
-		BYTES,
-		INT,
-		LONG,
-
-		LABEL, //used for a node that has no value associated with it
-		DVBSTRING,
-		HTML, // used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
-
-		BIGINT
-
-	}
-
+	private FIELD_TYPE		fieldType;
 
     private List<DetailView> detailViews = new ArrayList<>();
-	
 
 	/**
 	 * crumb's are used to be able to jump to any place in the tree, based on a url-like
@@ -271,7 +266,7 @@ public class KVP{
 		return toString(stringDisplay,numberDisplay);
 	}
 
-	public String toString(byte stringFormat, byte numberFormat) {
+	public String toString(STRING_DISPLAY stringFormat, NUMBER_DISPLAY numberFormat) {
 		StringBuilder b = new StringBuilder(label);
 		if(!labelAppend.isEmpty()) {
 			b.append(labelAppend);
@@ -280,20 +275,20 @@ public class KVP{
 		if ((fieldType != FIELD_TYPE.LABEL)&&(fieldType != FIELD_TYPE.HTML)) {
 			appendValueAfterLabel(numberFormat, b);
 		}
-		if((fieldType==FIELD_TYPE.HTML)&&(STRING_DISPLAY_PLAIN!=stringFormat)){
+		if((fieldType==FIELD_TYPE.HTML)&&(STRING_DISPLAY.PLAIN!=stringFormat)){
 			b = replacePlainLabelWithHTML(stringFormat);
 		}
-		if (stringFormat == STRING_DISPLAY_JAVASCRIPT) {
+		if (stringFormat == STRING_DISPLAY.JAVASCRIPT) {
 			return  b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
 		}
 		return b.toString();
 	}
 
 
-	private StringBuilder replacePlainLabelWithHTML(byte stringFormat) {
-		if(stringFormat==STRING_DISPLAY_HTML_AWT){
+	private StringBuilder replacePlainLabelWithHTML(STRING_DISPLAY stringFormat) {
+		if(stringFormat==STRING_DISPLAY.HTML_AWT){
 			return new StringBuilder("<html>").append(value).append("</html>");
-		}else if(stringFormat==STRING_DISPLAY_HTML_FRAGMENTS){
+		}else if(stringFormat==STRING_DISPLAY.HTML_FRAGMENTS){
 			return new StringBuilder(value);
 		}
 		return new StringBuilder();
@@ -303,7 +298,7 @@ public class KVP{
 	 * @param numberFormat
 	 * @param b
 	 */
-	private void appendValueAfterLabel(byte numberFormat, StringBuilder b) {
+	private void appendValueAfterLabel(NUMBER_DISPLAY numberFormat, StringBuilder b) {
 		b.append(": ");
 		switch (fieldType){
 			case STRING:
@@ -366,10 +361,10 @@ public class KVP{
 	 * @param numberFormat
 	 * @param b
 	 */
-	private void appendLong(byte numberFormat, StringBuilder b) {
-		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
+	private void appendLong(NUMBER_DISPLAY numberFormat, StringBuilder b) {
+		if (numberFormat == NUMBER_DISPLAY.DECIMAL) {
 			b.append(longValue);
-		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
+		} else if (numberFormat == NUMBER_DISPLAY.HEX) {
 			b.append("0x").append(Long.toHexString(longValue).toUpperCase());
 		} else { // assume both to be safe
 			b.append("0x").append(Long.toHexString(longValue).toUpperCase()).append(" (").append(longValue)
@@ -381,20 +376,20 @@ public class KVP{
 	 * @param numberFormat
 	 * @param b
 	 */
-	private void appendInteger(byte numberFormat, StringBuilder b) {
-		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
+	private void appendInteger(NUMBER_DISPLAY numberFormat, StringBuilder b) {
+		if (numberFormat == NUMBER_DISPLAY.DECIMAL) {
 			b.append(intValue);
-		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
+		} else if (numberFormat == NUMBER_DISPLAY.HEX) {
 			b.append("0x").append(Integer.toHexString(intValue).toUpperCase());
 		} else { // assume both to be safe
 			b.append(getHexAndDecimalFormattedString(intValue));
 		}
 	}
 
-	private void appendBigInteger(byte numberFormat, StringBuilder b) {
-		if (numberFormat == NUMBER_DISPLAY_DECIMAL) {
+	private void appendBigInteger(NUMBER_DISPLAY numberFormat, StringBuilder b) {
+		if (numberFormat == NUMBER_DISPLAY.DECIMAL) {
 			b.append(bigIntegerValue.toString());
-		} else if (numberFormat == NUMBER_DISPLAY_HEX) {
+		} else if (numberFormat == NUMBER_DISPLAY.HEX) {
 			b.append("0x").append(bigIntegerValue.toString(16).toUpperCase());
 		} else { // assume both to be safe
 			b.append(getHexAndDecimalFormattedString(bigIntegerValue));
@@ -402,29 +397,29 @@ public class KVP{
 	}
 
 	
-	public static byte getNumberDisplay() {
+	public static NUMBER_DISPLAY getNumberDisplay() {
 		return numberDisplay;
 	}
 
-	public static void setNumberDisplay(byte intDisplay) {
+	public static void setNumberDisplay(NUMBER_DISPLAY intDisplay) {
 		numberDisplay = intDisplay;
 	}
 
 	public static String formatInt(int intValue) {
-		if (numberDisplay == NUMBER_DISPLAY_DECIMAL) {
+		if (numberDisplay == NUMBER_DISPLAY.DECIMAL) {
 			return Integer.toString(intValue);
-		} else if (numberDisplay == NUMBER_DISPLAY_HEX) {
+		} else if (numberDisplay == NUMBER_DISPLAY.HEX) {
 			return ("0x") + Integer.toHexString(intValue).toUpperCase();
 		} else { // assume both to be safe
-			return ("0x" + Integer.toHexString(intValue).toUpperCase()) + " (" + Integer.toString(intValue) + (")");
+			return ("0x" + Integer.toHexString(intValue).toUpperCase()) + " (" + intValue + (")");
 		}
 	}
 
-	public static byte getStringDisplay() {
+	public static STRING_DISPLAY getStringDisplay() {
 		return stringDisplay;
 	}
 
-	public static void setStringDisplay(byte stringDisplay) {
+	public static void setStringDisplay(STRING_DISPLAY stringDisplay) {
 		KVP.stringDisplay = stringDisplay;
 	}
 	/**
@@ -436,7 +431,7 @@ public class KVP{
 	}
 
 	public String getPlainText(){
-		return toString(STRING_DISPLAY_PLAIN, NUMBER_DISPLAY_BOTH);
+		return toString(STRING_DISPLAY.PLAIN, NUMBER_DISPLAY.BOTH);
 	}
 
 

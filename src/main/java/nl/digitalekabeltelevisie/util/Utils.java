@@ -2001,7 +2001,7 @@ public final class Utils {
 			Object next = children.nextElement();
 			if(next instanceof DefaultMutableTreeNode child){
 				KVP chKVP = (KVP)child.getUserObject();
-				res.append(chKVP.toString(KVP.STRING_DISPLAY_HTML_FRAGMENTS, KVP.NUMBER_DISPLAY_BOTH)).append(lineSep);
+				res.append(chKVP.toString(KVP.STRING_DISPLAY.HTML_FRAGMENTS, KVP.NUMBER_DISPLAY.BOTH)).append(lineSep);
 				if(!child.isLeaf()){
 					res.append(getChildrenAsHTML(child));
 				}

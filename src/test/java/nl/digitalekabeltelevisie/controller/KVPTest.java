@@ -71,11 +71,11 @@ public class KVPTest {
     @Test
     public void testKVPStringIntString() {
         KVP kvp = new KVP("LabelForInt",42,"Explanation");
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_DECIMAL);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
         assertEquals("LabelForInt: 42 => Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
         assertEquals("LabelForInt: 0x2A (42) => Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_HEX);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
         assertEquals("LabelForInt: 0x2A => Explanation",kvp.toString());
 
         assertEquals("LabelForInt:42",kvp.getCrumb());
@@ -84,44 +84,44 @@ public class KVPTest {
     @Test
     public void testKVPStringLongString() {
         KVP kvp = new KVP("LabelForLong",142L,"Loooooong Explanation");
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_DECIMAL);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
         assertEquals("LabelForLong: 142 => Loooooong Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
         assertEquals("LabelForLong: 0x8E (142) => Loooooong Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_HEX);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
         assertEquals("LabelForLong: 0x8E => Loooooong Explanation",kvp.toString());
         kvp = new KVP("LabelForLong",142L,null);
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_DECIMAL);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
         assertEquals("LabelForLong: 142",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
         assertEquals("LabelForLong: 0x8E (142)",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_HEX);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
         assertEquals("LabelForLong: 0x8E",kvp.toString());
     }
 
     @Test
     public void testKVPStringBooleanString() {
         KVP kvp = new KVP("BooleanLabel",true,"Boooolean Explanation");
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_HEX);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
         assertEquals("BooleanLabel: 0x1 => Boooolean Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
         assertEquals("BooleanLabel: 0x1 (1) => Boooolean Explanation",kvp.toString());
         kvp = new KVP("BooleanLabel",false,"Boooolean false Explanation");
         assertEquals("BooleanLabel: 0x0 (0) => Boooolean false Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_DECIMAL);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
         assertEquals("BooleanLabel: 0 => Boooolean false Explanation",kvp.toString());
     }
 
     @Test
     public void testHtmlLabelString() {
         KVP kvp = new KVP("<h1>Head</h1>","<b>bold label?</b>");
-        KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
+        KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_AWT);
         assertEquals("<html><h1>Head</h1></html>",kvp.toString());
-        KVP.setStringDisplay(KVP.STRING_DISPLAY_PLAIN);
+        KVP.setStringDisplay(KVP.STRING_DISPLAY.PLAIN);
         assertEquals("<b>bold label?</b>",kvp.toString());
-        KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_FRAGMENTS);
+        KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_FRAGMENTS);
         assertEquals("<h1>Head</h1>",kvp.toString());
-        KVP.setStringDisplay(KVP.STRING_DISPLAY_JAVASCRIPT);
+        KVP.setStringDisplay(KVP.STRING_DISPLAY.JAVASCRIPT);
         assertEquals("",kvp.toString());
     }
 
@@ -200,18 +200,18 @@ public class KVPTest {
         BigInteger bg = new BigInteger(biggy);
 
         KVP kvp = new KVP("Big Number",bg,null);
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_DECIMAL);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
 
         assertEquals("Big Number: "+biggy, kvp.toString());
 
         // test non global formatting
-        assertEquals("Big Number: 0x18EE90FF6C4FE9FCDC157A600", kvp.toString(KVP.STRING_DISPLAY_PLAIN,KVP.NUMBER_DISPLAY_HEX));
-        assertEquals("Big Number: 0x18EE90FF6C4FE9FCDC157A600 ("+biggy +")" , kvp.toString(KVP.STRING_DISPLAY_PLAIN,KVP.NUMBER_DISPLAY_BOTH));
+        assertEquals("Big Number: 0x18EE90FF6C4FE9FCDC157A600", kvp.toString(KVP.STRING_DISPLAY.PLAIN,KVP.NUMBER_DISPLAY.HEX));
+        assertEquals("Big Number: 0x18EE90FF6C4FE9FCDC157A600 ("+biggy +")" , kvp.toString(KVP.STRING_DISPLAY.PLAIN,KVP.NUMBER_DISPLAY.BOTH));
 
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_HEX);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
         assertEquals("Big Number: 0x18EE90FF6C4FE9FCDC157A600", kvp.toString());
 
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
+        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
         assertEquals("Big Number: 0x18EE90FF6C4FE9FCDC157A600 ("+biggy +")" , kvp.toString());
     }
 

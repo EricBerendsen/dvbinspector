@@ -216,8 +216,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 
 	public void run() {
 
-		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY_BOTH);
-		KVP.setStringDisplay(KVP.STRING_DISPLAY_HTML_AWT);
+		KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
+		KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_AWT);
 		javax.swing.SwingUtilities.invokeLater(() -> createAndShowGUI(transportStream));
 
 	}
@@ -661,8 +661,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private void updatePIDLists(final TransportStream tStream, final PIDDialog pDialog){
 
 		final ViewContext viewConfig = new ViewContext();
-		final ArrayList<ChartLabel> used = new ArrayList<>();
-		final ArrayList<ChartLabel> notUsed = new ArrayList<>();
+		final List<ChartLabel> used = new ArrayList<>();
+		final List<ChartLabel> notUsed = new ArrayList<>();
 
 		if(tStream!=null){
 			final short[] used_pids=tStream.getUsedPids();
