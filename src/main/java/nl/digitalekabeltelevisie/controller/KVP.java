@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenuItem;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.gui.*;
 
@@ -65,7 +66,7 @@ import nl.digitalekabeltelevisie.gui.*;
  * @author Eric Berendsen
  *
  */
-public class KVP{
+public class KVP extends DefaultMutableTreeNode{
 
 
 	public record DetailView(DetailSource detailSource, String label) {}
@@ -231,16 +232,18 @@ public class KVP{
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public KVP setDescription(String description) {
 		this.description = description;
+		return this;
 	}
 
 	public String getLabel() {
 		return label;
 	}
 
-	public void setLabel(String label) {
+	public KVP setLabel(String label) {
 		this.label = label;
+		return this;
 	}
 
 	// put appends in separate String, so original label is constant and available for path
@@ -248,13 +251,6 @@ public class KVP{
 		this.labelAppend  = this.labelAppend + labelAppend;
 	}
 
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 
 	@Override
 	public String toString() {
@@ -435,16 +431,18 @@ public class KVP{
 	 * @param subMenu the subMenu to set
 	 * @param owner the owner to set
 	 */
-	public void setSubMenuAndOwner(JMenuItem subMenu, Object owner) {
+	public KVP setSubMenuAndOwner(JMenuItem subMenu, Object owner) {
 		this.subMenu = subMenu;
 		this.owner = owner;
+		return this;
 	}
 
 	/**
 	 * @param subMenu the subMenu to set
 	 */
-	public void setSubMenu(JMenuItem subMenu) {
+	public KVP setSubMenu(JMenuItem subMenu) {
 		this.subMenu = subMenu;
+		return this;
 	}
 
 	/**
@@ -485,28 +483,40 @@ public class KVP{
 	
 	
 
-	public void setCrumb(String path) {
+	public KVP setCrumb(String path) {
 		this.crumb = path;
+		return this;
 	}
 
 	public List<DetailView> getDetailViews() {
 		return detailViews;
 	}
 	
-	public void addHTMLSource(HTMLSource htmlSource, String label) {
+	public KVP addHTMLSource(HTMLSource htmlSource, String label) {
 		detailViews.add(new DetailView(htmlSource, label));
+		return this;
 	}
 
-	public void addImageSource(ImageSource imageSource, String label) {
+	public KVP addImageSource(ImageSource imageSource, String label) {
 		detailViews.add(new DetailView(imageSource, label));
+		return this;
 	}
 
-	public void addTableSource(TableSource tableSource, String label) {
+	public KVP addTableSource(TableSource tableSource, String label) {
 		detailViews.add(new DetailView(tableSource, label));
+		return this;
 	}
 
-	public void addXMLSource(XMLSource xmlSource, String label) {
+	public KVP addXMLSource(XMLSource xmlSource, String label) {
 		detailViews.add(new DetailView(xmlSource, label));
+		return this;
 	}
 
+	@Override
+    public Object getUserObject() {
+        return this;
+    }
+
+
+	
 }
