@@ -92,7 +92,6 @@ public class KVP extends DefaultMutableTreeNode{
 
 		LABEL, //used for a node that has no value associated with it
 		DVBSTRING,
-		HTML, // used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
 
 		BIGINT
 	}
@@ -133,6 +132,7 @@ public class KVP extends DefaultMutableTreeNode{
 	private JMenuItem subMenu;
 	private Object owner;
 	private String labelAppend = "";
+	private String htmlLabel;
 
 	public KVP(String label) {
         this.label = label;
@@ -151,6 +151,7 @@ public class KVP extends DefaultMutableTreeNode{
 		}
 	}
 
+	
 	public KVP(String label, int value, String description) {
         this.label = label;
 		this.intValue = value;
@@ -169,10 +170,11 @@ public class KVP extends DefaultMutableTreeNode{
 		this(label, value ? 1 : 0, description);
 	}
 
+	@Deprecated
 	public KVP(String html, String label) {
-        this.value = html;
+        this.setHtmlLabel(html);
 		this.label = label; // text representation of the HTML string
-		this.fieldType = FIELD_TYPE.HTML;
+		this.fieldType = FIELD_TYPE.LABEL;
 	}
 
 
@@ -247,32 +249,28 @@ public class KVP extends DefaultMutableTreeNode{
 	}
 
 	public String toString(STRING_DISPLAY stringFormat, NUMBER_DISPLAY numberFormat) {
-		StringBuilder b = new StringBuilder(label);
+		StringBuilder b = new StringBuilder();
+		if ((htmlLabel != null) && (STRING_DISPLAY.PLAIN != stringFormat)) {
+			b.append(htmlLabel);
+		} else {
+			b.append(label);
+		}
 		if(!labelAppend.isEmpty()) {
 			b.append(labelAppend);
 		}
 
-		if ((fieldType != FIELD_TYPE.LABEL)&&(fieldType != FIELD_TYPE.HTML)) {
+		if (fieldType != FIELD_TYPE.LABEL) {
 			appendValueAfterLabel(numberFormat, b);
 		}
-		if((fieldType==FIELD_TYPE.HTML)&&(STRING_DISPLAY.PLAIN!=stringFormat)){
-			b = replacePlainLabelWithHTML(stringFormat);
-		}
 		if (stringFormat == STRING_DISPLAY.JAVASCRIPT) {
-			return  b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
+			return b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
+		}
+		if ((htmlLabel != null) && (stringFormat == STRING_DISPLAY.HTML_AWT)) {
+			return new StringBuilder("<html>").append(b).append("</html>").toString();
 		}
 		return b.toString();
 	}
 
-
-	private StringBuilder replacePlainLabelWithHTML(STRING_DISPLAY stringFormat) {
-		if(stringFormat==STRING_DISPLAY.HTML_AWT){
-			return new StringBuilder("<html>").append(value).append("</html>");
-		}else if(stringFormat==STRING_DISPLAY.HTML_FRAGMENTS){
-			return new StringBuilder(value);
-		}
-		return new StringBuilder();
-	}
 
 	/**
 	 * @param numberFormat
@@ -505,6 +503,11 @@ public class KVP extends DefaultMutableTreeNode{
     public Object getUserObject() {
         return this;
     }
+
+	public KVP setHtmlLabel(String htmlLabel) {
+		this.htmlLabel = htmlLabel;
+		return this;
+	}
 
 
 	

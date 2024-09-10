@@ -114,7 +114,8 @@ public class KVPTest {
 
     @Test
     public void testHtmlLabelString() {
-        KVP kvp = new KVP("<h1>Head</h1>","<b>bold label?</b>");
+        //KVP kvp = new KVP("<h1>Head</h1>","<b>bold label?</b>");
+        KVP kvp = new KVP("<b>bold label?</b>").setHtmlLabel("<h1>Head</h1>");
         KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_AWT);
         assertEquals("<html><h1>Head</h1></html>",kvp.toString());
         KVP.setStringDisplay(KVP.STRING_DISPLAY.PLAIN);
@@ -122,7 +123,7 @@ public class KVPTest {
         KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_FRAGMENTS);
         assertEquals("<h1>Head</h1>",kvp.toString());
         KVP.setStringDisplay(KVP.STRING_DISPLAY.JAVASCRIPT);
-        assertEquals("",kvp.toString());
+        assertEquals("<h1>Head</h1>",kvp.toString());
     }
 
     @Test
