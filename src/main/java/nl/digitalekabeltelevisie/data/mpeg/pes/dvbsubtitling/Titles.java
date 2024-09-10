@@ -54,7 +54,6 @@ public class Titles implements TreeNode {
 
 	// TODO this does not correctly handle if the first PESpacket is not the start of a DisplaySegment
 
-	@SuppressWarnings("unchecked")
 	public void add(DVBSubtitlingPESDataField title) {
 		List<Segment> segmentList = title.getSegmentList();
 		if((segmentList!=null)&&(!segmentList.isEmpty())){
@@ -62,7 +61,7 @@ public class Titles implements TreeNode {
 				if(current!=null){
 					if(currentEpoch!=null){
 						currentEpoch.add(current);
-						current.setEpoch((ArrayList<DisplaySet>) currentEpoch.clone());
+						current.setEpoch(new ArrayList<DisplaySet>(currentEpoch));
 					}
 					displaySets.add(current);
 					current = null;
@@ -82,7 +81,7 @@ public class Titles implements TreeNode {
 					if(segment.getSegmentType()==0x80){ // end of display set segment
 						if(currentEpoch!=null){
 							currentEpoch.add(current);
-							current.setEpoch((ArrayList<DisplaySet>) currentEpoch.clone());
+							current.setEpoch(new ArrayList<DisplaySet>(currentEpoch));
 						}
 						displaySets.add(current);
 						current = null;
