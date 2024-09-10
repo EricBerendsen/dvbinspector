@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -35,13 +35,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
 
-public class CLUTDefinitionSegment extends Segment implements TreeNode {
+public class CLUTDefinitionSegment extends Segment{
 
 	private int CLUT_2bit[];
 	private int CLUT_4bit[];
@@ -113,7 +112,6 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 				final int clut_flag_4_bit_entry, final int clut_flag_8_bit_entry,
 				final int full_range_flag, final int y_value, final int cr_value, final int cb_value,
 				final int t_value) {
-			super();
 			CLUT_entry_id = clut_entry_id;
 			CLUT_flag_2_bit_entry = clut_flag_2_bit_entry;
 			CLUT_flag_4_bit_entry = clut_flag_4_bit_entry;
@@ -125,7 +123,8 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 			this.t_value = t_value;
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		@Override
+		public KVP getJTreeNode(final int modus) {
 			int r, g, b;
 			float y, cr, cb;
 			if (full_range_flag == 1) {
@@ -163,107 +162,66 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 			final String bgColor = "#" + Utils.toHexStringUnformatted(r, 2)
 					+ Utils.toHexStringUnformatted(g, 2)
 					+ Utils.toHexStringUnformatted(b, 2);
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("CLUT_entry id "+ CLUT_entry_id).setHtmlLabel("CLUT_entry <code><span style=\"background-color: "+ bgColor
-					+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>"));  
-			s.add(new DefaultMutableTreeNode(new KVP("CLUT_entry_id",
-					CLUT_entry_id, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("2-bit/entry_CLUT_flag",
-					CLUT_flag_2_bit_entry, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("4-bit/entry_CLUT_flag",
-					CLUT_flag_4_bit_entry, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("8-bit/entry_CLUT_flag",
-					CLUT_flag_8_bit_entry, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("full_range_flag",
-					full_range_flag, null)));
-			s
-			.add(new DefaultMutableTreeNode(new KVP("Y-value", y_value,
-					null)));
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Cr-value", cr_value, null)));
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Cb-value", cb_value, null)));
-			s
-			.add(new DefaultMutableTreeNode(new KVP("T-value", t_value,
-					null)));
+			final KVP s = new KVP("CLUT_entry id "+ CLUT_entry_id).setHtmlLabel("CLUT_entry <code><span style=\"background-color: "+ bgColor
+					+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>");
+			s.add(new KVP("CLUT_entry_id", CLUT_entry_id));
+			s.add(new KVP("2-bit/entry_CLUT_flag", CLUT_flag_2_bit_entry));
+			s.add(new KVP("4-bit/entry_CLUT_flag", CLUT_flag_4_bit_entry));
+			s.add(new KVP("8-bit/entry_CLUT_flag", CLUT_flag_8_bit_entry));
+			s.add(new KVP("full_range_flag", full_range_flag));
+			s.add(new KVP("Y-value", y_value, null));
+			s.add(new KVP("Cr-value", cr_value));
+			s.add(new KVP("Cb-value", cb_value));
+			s.add(new KVP("T-value", t_value));
 			return s;
 		}
 
-		/**
-		 * @param r
-		 * @return
-		 */
+
 		private static int boundRange(final int r) {
 			return r < 0 ? 0 : (r > 0xFF ? 0xFF : r);
 		}
 
 
-		/**
-		 * @return the cb_value
-		 */
 		public int getCb_value() {
 			return cb_value;
 		}
 
 
-		/**
-		 * @return the cLUT_entry_id
-		 */
 		public int getCLUT_entry_id() {
 			return CLUT_entry_id;
 		}
 
 
-		/**
-		 * @return the cLUT_flag_2_bit_entry
-		 */
 		public int getCLUT_flag_2_bit_entry() {
 			return CLUT_flag_2_bit_entry;
 		}
 
 
-		/**
-		 * @return the cLUT_flag_4_bit_entry
-		 */
 		public int getCLUT_flag_4_bit_entry() {
 			return CLUT_flag_4_bit_entry;
 		}
 
 
-		/**
-		 * @return the cLUT_flag_8_bit_entry
-		 */
 		public int getCLUT_flag_8_bit_entry() {
 			return CLUT_flag_8_bit_entry;
 		}
 
 
-		/**
-		 * @return the cr_value
-		 */
 		public int getCr_value() {
 			return cr_value;
 		}
 
 
-		/**
-		 * @return the full_range_flag
-		 */
 		public int getFull_range_flag() {
 			return full_range_flag;
 		}
 
 
-		/**
-		 * @return the t_value
-		 */
 		public int getT_value() {
 			return t_value;
 		}
 
 
-		/**
-		 * @return the y_value
-		 */
 		public int getY_value() {
 			return y_value;
 		}
@@ -337,30 +295,24 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		final KVP s = super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("CLUT-id", getCLUTId(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("CLUT_version_number",	getCLUTVersionNumber(), null)));
+		s.add(new KVP("CLUT-id", getCLUTId()));
+		s.add(new KVP("CLUT_version_number",	getCLUTVersionNumber()));
 		addListJTree(s, getCLUTEntries(), modus, "CLUTEntries");
 
 		return s;
 	}
 
-	/**
-	 * @return
-	 */
+
 	public int getCLUTVersionNumber() {
 		return getInt(data_block, offset + 7, 1, 0xF0) >> 4;
 	}
 
-	/**
-	 * @return
-	 */
+
 	public int getCLUTId() {
 		return getInt(data_block, offset + 6, 1, MASK_8BITS);
 	}
 
-	/**
-	 * @return
-	 */
+
 	public final List<CLUTEntry> getCLUTEntries() {
 		final List<CLUTEntry> clutEntries = new ArrayList<>();
 		int t = 0;
@@ -406,17 +358,12 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	}
 
 	public static IndexColorModel getDefaultColorModel(final int regionDepth){
-
-		switch (regionDepth) {
-		case 1: // 2 bit
-			return getDefault_CLUT_2bitColorModel();
-		case 2: // 4 bit
-			return getDefault_CLUT_4bitColorModel();
-		case 3:
-			return getDefault_CLUT_8bitColorModel();
-		default:
-			return null;
-		}
+		return switch (regionDepth) {
+		case 1 -> getDefault_CLUT_2bitColorModel();
+		case 2 -> getDefault_CLUT_4bitColorModel();
+		case 3 -> getDefault_CLUT_8bitColorModel();
+		default -> null;
+		};
 	}
 
 

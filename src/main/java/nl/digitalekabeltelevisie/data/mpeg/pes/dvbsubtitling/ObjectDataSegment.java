@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -59,8 +58,8 @@ public class ObjectDataSegment extends Segment implements ImageSource {
 
 
 	// for coding of pixels
-	private final List<PixelDataSubBlock> topFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
-	private List<PixelDataSubBlock> bottomFieldDataBlocks = new ArrayList<PixelDataSubBlock>();
+	private final List<PixelDataSubBlock> topFieldDataBlocks = new ArrayList<>();
+	private List<PixelDataSubBlock> bottomFieldDataBlocks = new ArrayList<>();
 
 	// For coded as a string of characters
 	private int number_of_codes;
@@ -101,27 +100,27 @@ public class ObjectDataSegment extends Segment implements ImageSource {
 			dataType = getInt(data_block,offset, 1, MASK_8BITS);
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("pixel-data_sub-block "+getDataTypeString(dataType)));
-			s.add(new DefaultMutableTreeNode(new KVP("data_type",dataType,getDataTypeString(dataType))));
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("pixel-data_sub-block "+getDataTypeString(dataType));
+			s.add(new KVP("data_type",dataType).setDescription(getDataTypeString(dataType)));
 			if((dataType >=0x10 )&&(dataType <= 0x12)){ // pixels
-				s.add(new DefaultMutableTreeNode(new KVP("no_pixels",no_pixels,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("pixels",pixels,0,no_pixels,null)));
+				s.add(new KVP("no_pixels",no_pixels));
+				s.add(new KVP("pixels",pixels,0,no_pixels));
 			}else if(dataType ==0x20 ){ // 2_to_4_bit_map_table data
 				if(table_2_to_4_bit_map_table!=null){
 					for (int i = 0; i < table_2_to_4_bit_map_table.length; i++) {
-						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_2_to_4_bit_map_table[i],null)));
+						s.add(new KVP("entry ["+i+"]",table_2_to_4_bit_map_table[i]));
 					}
 				}
 			}else if(dataType ==0x21 ){ // 2_to_8-bit_map-table data data
 				if(table_2_to_8_bit_map_table!=null){
 					for (int i = 0; i < table_2_to_8_bit_map_table.length; i++) {
-						s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_2_to_8_bit_map_table[i],null)));
+						s.add(new KVP("entry ["+i+"]",table_2_to_8_bit_map_table[i]));
 					}
 				}
 			}else if((dataType ==0x22)&& (table_4_to_8_bit_map_table!=null)){// 4_to_8-bit_map-table data
 				for (int i = 0; i < table_4_to_8_bit_map_table.length; i++) {
-					s.add(new DefaultMutableTreeNode(new KVP("entry ["+i+"]",table_4_to_8_bit_map_table[i],null)));
+					s.add(new KVP("entry ["+i+"]",table_4_to_8_bit_map_table[i]));
 				}
 			}
 
@@ -470,21 +469,21 @@ public class ObjectDataSegment extends Segment implements ImageSource {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		final KVP s = super.getJTreeNode(modus).addImageSource(this, "Object Data Segment");
-		s.add(new DefaultMutableTreeNode(new KVP("object_id", getObjectId(), null)));
-		s.add(new DefaultMutableTreeNode(new KVP("object_version_number", getObjectVersionNumber(), null)));
-		s.add(new DefaultMutableTreeNode(new KVP("object_coding_method", getObjectCodingMethod(), getObjectCodingMethodString(getObjectCodingMethod()))));
-		s.add(new DefaultMutableTreeNode(new KVP("non_modifying_colour_flag", getNonModifyingColourFlag(), null)));
+		s.add(new KVP("object_id", getObjectId()));
+		s.add(new KVP("object_version_number", getObjectVersionNumber()));
+		s.add(new KVP("object_coding_method", getObjectCodingMethod()).setDescription(getObjectCodingMethodString(getObjectCodingMethod())));
+		s.add(new KVP("non_modifying_colour_flag", getNonModifyingColourFlag()));
 		if(getObjectCodingMethod()==0){
-			s.add(new DefaultMutableTreeNode(new KVP("top_field_data_block_length", getTopFieldDataBlockLength(), null)));
-			s.add(new DefaultMutableTreeNode(new KVP("bottom_field_data_block_length", getBottomFieldDataBlockLength(), null)));
+			s.add(new KVP("top_field_data_block_length", getTopFieldDataBlockLength()));
+			s.add(new KVP("bottom_field_data_block_length", getBottomFieldDataBlockLength()));
 			addListJTree(s, topFieldDataBlocks,modus,"top field pixel-data_sub-block");
 			if(getBottomFieldDataBlockLength()!=0){
 				addListJTree(s, bottomFieldDataBlocks,modus,"bottom field pixel-data_sub-block");
 			}
 
 		}else if(getObjectCodingMethod()==1){
-			s.add(new DefaultMutableTreeNode(new KVP("number_of_codes", number_of_codes, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("character_codes", character_code_string, null)));
+			s.add(new KVP("number_of_codes", number_of_codes));
+			s.add(new KVP("character_codes", character_code_string));
 
 		}
 

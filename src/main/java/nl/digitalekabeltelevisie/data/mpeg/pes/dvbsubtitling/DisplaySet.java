@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,7 +36,6 @@ import java.awt.image.*;
 import java.util.*;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
@@ -45,7 +44,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 public class DisplaySet implements TreeNode, ImageSource {
 
 
-	private List<Segment>  segments = new ArrayList<Segment>();
+	private List<Segment>  segments = new ArrayList<>();
 	// all sets up to and including this one from start of epoch ("mode change" or "acquisition point")
 	// so all we need to draw image
 	private List<DisplaySet> epoch = null;
@@ -67,9 +66,9 @@ public class DisplaySet implements TreeNode, ImageSource {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t=new DefaultMutableTreeNode(new KVP("Display Set").addImageSource(this, "Display Set"));
-		t.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = new KVP("Display Set").addImageSource(this, "Display Set");
+		t.add(new KVP("pts", pts).setDescription(printTimebase90kHz(pts)));
 		addListJTree(t, segments, modus, "segments");
 
 		return t;
@@ -106,13 +105,13 @@ public class DisplaySet implements TreeNode, ImageSource {
 			final CLUTDefinitionSegment cluts[] = new CLUTDefinitionSegment[256];
 			final DisplaySet initDisplaySet = epoch.get(0);
 			final List<Segment> initDisplaySegments = initDisplaySet.getSegments();
-			final Map<Integer, ObjectDataSegment> objects = new HashMap<Integer,ObjectDataSegment>();
+			final Map<Integer, ObjectDataSegment> objects = new HashMap<>();
 			DisplayDefinitionSegment displayDefinitionSegment = null;
 			PageCompositionSegment lastPCS = null;
 
 			// which segment are we processing
 
-			List<RegionCompositionSegment> localRegions = new ArrayList<RegionCompositionSegment>();
+			List<RegionCompositionSegment> localRegions = new ArrayList<>();
 			for (final Segment segment : initDisplaySegments) {
 
 				if(segment.getSegmentType()==0x14){ // display definition segment
@@ -170,9 +169,10 @@ public class DisplaySet implements TreeNode, ImageSource {
 			// now loop over other sets
 			int k=1;
 			while(k< epoch.size()){
-				final DisplaySet displaySet = epoch.get(k++);
+				final DisplaySet displaySet = epoch.get(k);
+				k++;
 				// used to remember which regions are in this set, because we need to update them with the objects later
-				localRegions = new ArrayList<RegionCompositionSegment>();
+				localRegions = new ArrayList<>();
 				final List<Segment> segmentList = displaySet.getSegments();
 				for (final Segment segment : segmentList) {
 					if(segment.getSegmentType()==0x10 ){// page composition segment,
@@ -227,9 +227,8 @@ public class DisplaySet implements TreeNode, ImageSource {
 			}
 
 			return res;
-		}else{ // no epoch
-			return null;
 		}
+		return null;
 	}
 
 	private static void paintObjectsOnRegions(final Map<Integer, ObjectDataSegment> objects,

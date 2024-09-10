@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -52,7 +52,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
  *
  */
 
-public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode, ImageSource {
+public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSource {
 
 	/**
 	 *
@@ -63,9 +63,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	private int subtitle_stream_id;
 
 	private DisplayDefinitionSegment displayDefinitionSegment = null;
-	private final Map<Integer, RegionCompositionSegment> regionCompositionsSegments = new HashMap<Integer, RegionCompositionSegment>();
-	private final Map<Integer, CLUTDefinitionSegment> clutDefinitions= new HashMap<Integer, CLUTDefinitionSegment>();
-	private final Map<Integer, ObjectDataSegment> objects= new HashMap<Integer, ObjectDataSegment>();
+	private final Map<Integer, RegionCompositionSegment> regionCompositionsSegments = new HashMap<>();
+	private final Map<Integer, CLUTDefinitionSegment> clutDefinitions= new HashMap<>();
+	private final Map<Integer, ObjectDataSegment> objects= new HashMap<>();
 	public static BufferedImage bgImage576;
 	public static BufferedImage bgImage720;
 	public static BufferedImage bgImage1080;
@@ -93,7 +93,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	/**
 	 *
 	 */
-	private final List<Segment> segmentList = new ArrayList<Segment>();
+	private final List<Segment> segmentList = new ArrayList<>();
 
 
 	/**
@@ -108,11 +108,11 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 		final int offset = getPesDataStart();
 		if(pesDataLen>0) { // PES packet with more than just header
-		data_identifier = getInt(data, offset, 1, MASK_8BITS);
+			data_identifier = getInt(data, offset, 1, MASK_8BITS);
 			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
 				subtitle_stream_id = getInt(data, offset + 1, 1, MASK_8BITS);
-	
-	
+
+
 				int t = 2;
 				while (data[offset + t] == 0x0f) { // sync byte
 					Segment segment;
@@ -140,12 +140,12 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 						segment = new DisplayDefinitionSegment(data, offset + t);
 						displayDefinitionSegment = (DisplayDefinitionSegment)segment;
 						break;
-	
+
 					default:
 						segment = new Segment(data, offset + t);
 						break;
 					}
-	
+
 					segmentList.add(segment);
 					t += 6 + getInt(data, offset + t + 4, 2, MASK_16BITS);
 				}
@@ -163,9 +163,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 
 		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("DVBSubtitlingSegments").addImageSource(this, "DVBSubtitlingSegments"));
 		if(pesDataLen>0) { // PES packet with more than just header
-			s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier, getDataIDString(data_identifier))));
+			s.add(new KVP("data_identifier",data_identifier).setDescription(getDataIDString(data_identifier)));
 			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
-				s.add(new DefaultMutableTreeNode(new KVP("subtitle_stream_id",subtitle_stream_id, null)));
+				s.add(new KVP("subtitle_stream_id",subtitle_stream_id));
 				addListJTree(s, segmentList, modus, "segments");
 			}
 		}
@@ -186,6 +186,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 * This is different from the getImage in DisplaySet as this draws directly on the background, not on regions.
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
+	@Override
 	public BufferedImage getImage() {
 		final PesHeader pesHeader = getPesHeader();
 		if((data_identifier==0x20)&& // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
@@ -311,29 +312,18 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 		if ((0x81 <= type) && (type <= 0xef)) {
 			return "private data";
 		}
-		switch (type) {
-
-		case 0x10:
-			return "page composition segment";
-		case 0x11:
-			return "region composition segment";
-		case 0x12:
-			return "CLUT definition segment";
-		case 0x13:
-			return "object data segment";
-		case 0x14:
-			return "display definition segment";
-		case 0x15:
-			return "disparity signalling segment";
-		case 0x16:
-			return "alternative_CLUT_segment";
-		case 0x80:
-			return "end of display set segment";
-		case 0xFF:
-			return "stuffing";
-		default:
-			return "reserved for future use";
-		}
+		return switch (type) {
+		case 0x10 -> "page composition segment";
+		case 0x11 -> "region composition segment";
+		case 0x12 -> "CLUT definition segment";
+		case 0x13 -> "object data segment";
+		case 0x14 -> "display definition segment";
+		case 0x15 -> "disparity signalling segment";
+		case 0x16 -> "alternative_CLUT_segment";
+		case 0x80 -> "end of display set segment";
+		case 0xFF -> "stuffing";
+		default -> "reserved for future use";
+		};
 	}
 
 	/**
@@ -342,19 +332,13 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements TreeNode
 	 */
 	public static String getPageStateString(final int type) {
 
-		switch (type) {
-
-		case 0x0:
-			return "normal case - The display set contains only the subtitle elements that are changed from the previous page instance.";
-		case 0x1:
-			return "acquisition point - The display set contains all subtitle elements needed to display the next page instance.";
-		case 0x2:
-			return "mode change - The display set contains all subtitle elements needed to display the new page.";
-		case 0x3:
-			return "reserved";
-		default:
-			return "Illegal value";
-		}
+		return switch (type) {
+		case 0x0 -> "normal case - The display set contains only the subtitle elements that are changed from the previous page instance.";
+		case 0x1 -> "acquisition point - The display set contains all subtitle elements needed to display the next page instance.";
+		case 0x2 -> "mode change - The display set contains all subtitle elements needed to display the new page.";
+		case 0x3 -> "reserved";
+		default -> "Illegal value";
+		};
 	}
 
 }
