@@ -479,20 +479,21 @@ public class TransportStream implements TreeNode{
 
 		KVP t = new KVP("Transport Stream "+psi.getPat().getTransportStreamId()).setCrumb("root");
 
-		t.add(new KVP("file",file.getPath(),null));
-		t.add(new KVP("size",file.length(),null));
-		t.add(new KVP("modified",new Date(file.lastModified()).toString(),null));
-		t.add(new KVP("TS packets",no_packets,null));
-		t.add(new KVP("packet size",packetLength,PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)"));
-		t.add(new KVP("Error packets",error_packets,null));
-		t.add(new KVP("Sync Errors",sync_errors,null));
+		t.add(new KVP("file",file.getPath()));
+		t.add(new KVP("size",file.length()));
+
+		t.add(new KVP("modified",String.format("%1$tc", file.lastModified())));
+		t.add(new KVP("TS packets",no_packets));
+		t.add(new KVP("packet size",packetLength).setDescription(PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)"));
+		t.add(new KVP("Error packets",error_packets));
+		t.add(new KVP("Sync Errors",sync_errors));
 		if(bitRate!= -1L){
-			t.add(new KVP("bitrate",bitRate,null));
-			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRate,null));
+			t.add(new KVP("bitrate",bitRate));
+			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRate));
 		}
 		if(bitRateTDT!= -1L){
-			t.add(new KVP("bitrate based on TDT",bitRateTDT,null));
-			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRateTDT,null));
+			t.add(new KVP("bitrate based on TDT",bitRateTDT));
+			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRateTDT));
 		}
 
 		t.add(psi.getJTreeNode(modus));
