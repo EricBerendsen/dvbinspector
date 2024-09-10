@@ -264,7 +264,13 @@ public class TransportStream implements TreeNode{
 	 * @throws IOException
 	 */
 	public void parseStream(java.awt.Component component) throws IOException {
-		try (PositionPushbackInputStream fileStream = getInputStream(component)) {
+		try (InputStream is = new FileInputStream(file);
+				PositionPushbackInputStream fileStream = (component==null) ? 
+						new PositionPushbackInputStream(new BufferedInputStream(is),300): 
+						new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
+						"Reading file \"" + file.getPath() +"\"",is, file.length())),300)
+	
+				) {
 			no_packets = 0;
 
 			pids = new PID[MAX_PIDS];
@@ -425,18 +431,6 @@ public class TransportStream implements TreeNode{
 			}
 		}
 	}
-
-
-	private PositionPushbackInputStream getInputStream(java.awt.Component component) throws IOException{
-		InputStream is = new FileInputStream(file);
-		long expectedSize=file.length();
-		if(component==null){
-			return new PositionPushbackInputStream(new BufferedInputStream(is),300);
-		}
-		return new PositionPushbackInputStream(new BufferedInputStream(new ProgressMonitorLargeInputStream(component,
-				"Reading file \"" + file.getPath() +"\"",is, expectedSize)),300);
-	}
-
 
 
 	@Override
