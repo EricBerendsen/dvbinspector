@@ -76,13 +76,13 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 
 
 	static {
-		try {
-			InputStream fileInputStream = classLoader.getResourceAsStream("monitors576.jpg");
-			bgImage576 = ImageIO.read(fileInputStream);
-			fileInputStream = classLoader.getResourceAsStream("monitors720.jpg");
-			bgImage720 = ImageIO.read(fileInputStream);
-			fileInputStream = classLoader.getResourceAsStream("monitors1080.jpg");
-			bgImage1080 = ImageIO.read(fileInputStream);
+		try (InputStream fileInputStream576 = classLoader.getResourceAsStream("monitors576.jpg");
+				InputStream fileInputStream720 = classLoader.getResourceAsStream("monitors720.jpg");
+				InputStream fileInputStream1080 = classLoader.getResourceAsStream("monitors1080.jpg");
+				){
+			bgImage576 = ImageIO.read(fileInputStream576);
+			bgImage720 = ImageIO.read(fileInputStream720);
+			bgImage1080 = ImageIO.read(fileInputStream1080);
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "error reading image ", e);
 		}

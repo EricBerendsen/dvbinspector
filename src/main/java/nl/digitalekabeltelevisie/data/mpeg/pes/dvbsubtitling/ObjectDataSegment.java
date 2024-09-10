@@ -46,7 +46,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 import nl.digitalekabeltelevisie.util.BitSource;
-import nl.digitalekabeltelevisie.util.Utils;
+
 
 /**
  * @author Eric Berendsen

@@ -61,7 +61,7 @@ public class Titles implements TreeNode {
 				if(current!=null){
 					if(currentEpoch!=null){
 						currentEpoch.add(current);
-						current.setEpoch(new ArrayList<DisplaySet>(currentEpoch));
+						current.setEpoch(new ArrayList<>(currentEpoch));
 					}
 					displaySets.add(current);
 					current = null;
@@ -81,7 +81,7 @@ public class Titles implements TreeNode {
 					if(segment.getSegmentType()==0x80){ // end of display set segment
 						if(currentEpoch!=null){
 							currentEpoch.add(current);
-							current.setEpoch(new ArrayList<DisplaySet>(currentEpoch));
+							current.setEpoch(new ArrayList<>(currentEpoch));
 						}
 						displaySets.add(current);
 						current = null;
