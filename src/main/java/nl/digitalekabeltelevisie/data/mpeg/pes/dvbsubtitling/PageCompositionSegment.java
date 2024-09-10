@@ -44,7 +44,7 @@ public class PageCompositionSegment extends Segment{
 		private int region_horizontal_address;
 		private int region_vertical_address;
 
-		public Region(final int region_id, final int reserved, final int region_horizontal_address, final int region_vertical_address) {
+		public Region(int region_id, int reserved, int region_horizontal_address, int region_vertical_address) {
 			super();
 			this.region_id = region_id;
 			this.reserved = reserved;
@@ -53,8 +53,8 @@ public class PageCompositionSegment extends Segment{
 		}
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("Region");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("Region");
 			s.add(new KVP("region_id",region_id));
 			s.add(new KVP("reserved",reserved));
 			s.add(new KVP("region_horizontal_address",region_horizontal_address));
@@ -96,13 +96,13 @@ public class PageCompositionSegment extends Segment{
 
 	}
 
-	public PageCompositionSegment(final byte[] data,final int offset) {
+	public PageCompositionSegment(byte[] data, int offset) {
 		super(data,offset);
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
 		s.add(new KVP("page_time_out",getPageTimeOut()));
 		s.add(new KVP("page_version_number",getPageVersionNumber()));
 		s.add(new KVP("page_state",getPageState()).setDescription(DVBSubtitlingPESDataField.getPageStateString(getPageState())));
@@ -137,13 +137,13 @@ public class PageCompositionSegment extends Segment{
 	 * @return
 	 */
 	public List<Region> getRegions() {
-		final List<Region> regions = new ArrayList<>();
+		List<Region> regions = new ArrayList<>();
 		int t = 0;
 		while((t+2)<getSegmentLength()){
-			final int region = getInt(data_block, offset+8+t, 1, MASK_8BITS);
-			final int res = getInt(data_block, offset+9+t, 1, MASK_8BITS);
-			final int hor = getInt(data_block, offset+10+t, 2, MASK_16BITS);
-			final int ver = getInt(data_block, offset+12+t, 2, MASK_16BITS);
+			int region = getInt(data_block, offset+8+t, 1, MASK_8BITS);
+			int res = getInt(data_block, offset+9+t, 1, MASK_8BITS);
+			int hor = getInt(data_block, offset+10+t, 2, MASK_16BITS);
+			int ver = getInt(data_block, offset+12+t, 2, MASK_16BITS);
 			regions.add(new Region(region,res,hor,ver));
 			t+=6;
 		}

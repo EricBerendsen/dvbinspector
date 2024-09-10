@@ -57,7 +57,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	/**
 	 *
 	 */
-	private final static Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
+    private static final Logger logger = Logger.getLogger(DVBSubtitlingPESDataField.class.getName());
 
 	private int data_identifier;
 	private int subtitle_stream_id;
@@ -83,7 +83,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 			bgImage720 = ImageIO.read(fileInputStream);
 			fileInputStream = classLoader.getResourceAsStream("monitors1080.jpg");
 			bgImage1080 = ImageIO.read(fileInputStream);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			logger.log(Level.WARNING, "error reading image ", e);
 		}
 
@@ -96,17 +96,12 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	private final List<Segment> segmentList = new ArrayList<>();
 
 
-	/**
-	 * @param data
-	 * @param offset
-	 * @param len
-	 * @param pts
-	 */
-	public DVBSubtitlingPESDataField(final PesPacketData pesPacket){
+
+	public DVBSubtitlingPESDataField(PesPacketData pesPacket){
 
 		super(pesPacket);
 
-		final int offset = getPesDataStart();
+		int offset = getPesDataStart();
 		if(pesDataLen>0) { // PES packet with more than just header
 			data_identifier = getInt(data, offset, 1, MASK_8BITS);
 			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
@@ -116,23 +111,23 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 				int t = 2;
 				while (data[offset + t] == 0x0f) { // sync byte
 					Segment segment;
-					final int segment_type = getInt(data, offset + t + 1, 1, MASK_8BITS);
+					int segment_type = getInt(data, offset + t + 1, 1, MASK_8BITS);
 					switch (segment_type) {
 					case 0x10:
 						segment = new PageCompositionSegment(data, offset + t);
 						break;
 					case 0x11:
-						final RegionCompositionSegment rc = new RegionCompositionSegment(data, offset + t);
+						RegionCompositionSegment rc = new RegionCompositionSegment(data, offset + t);
 						segment = rc;
 						regionCompositionsSegments.put(rc.getRegionId(), rc);
 						break;
 					case 0x12:
-						final CLUTDefinitionSegment cl = new CLUTDefinitionSegment(data, offset + t);
+						CLUTDefinitionSegment cl = new CLUTDefinitionSegment(data, offset + t);
 						segment = cl;
 						clutDefinitions.put(cl.getCLUTId(), cl);
 						break;
 					case 0x13:
-						final ObjectDataSegment obj = new ObjectDataSegment(data, offset + t);
+						ObjectDataSegment obj = new ObjectDataSegment(data, offset + t);
 						segment = obj;
 						objects.put(obj.getObjectId(), obj);
 						break;
@@ -159,9 +154,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("DVBSubtitlingSegments").addImageSource(this, "DVBSubtitlingSegments"));
+		DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("DVBSubtitlingSegments").addImageSource(this, "DVBSubtitlingSegments"));
 		if(pesDataLen>0) { // PES packet with more than just header
 			s.add(new KVP("data_identifier",data_identifier).setDescription(getDataIDString(data_identifier)));
 			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
@@ -184,11 +179,10 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	 * <li>nice to have; emulate decoder pixel depths of 2, 4 and 8 bits.</li>
 	 * </ol>
 	 * This is different from the getImage in DisplaySet as this draws directly on the background, not on regions.
-	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
-	 */
+     */
 	@Override
 	public BufferedImage getImage() {
-		final PesHeader pesHeader = getPesHeader();
+		PesHeader pesHeader = getPesHeader();
 		if((data_identifier==0x20)&& // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20
 				(pesHeader.getPts_dts_flags()>=2)){ //Is this a packet that has PTS? If not, it is not meant for display.
 			int width=720;
@@ -204,48 +198,48 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 
 				}
 			}
-			final BufferedImage bgImage = pesHandler.getBGImage(height, width,pesHeader.getPts());
-			final BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-			final Graphics2D gd = img.createGraphics();
+			BufferedImage bgImage = pesHandler.getBGImage(height, width,pesHeader.getPts());
+			BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+			Graphics2D gd = img.createGraphics();
 			gd.drawImage(bgImage, 0, 0,null);
-			for (final Segment element: segmentList) {
+			for (Segment element: segmentList) {
 				if(element.getSegmentType()==0x10 ){// page composition segment)
-					final PageCompositionSegment pcSegment = (PageCompositionSegment)element;
-					for(final PageCompositionSegment.Region region :pcSegment.getRegions()){
-						final RegionCompositionSegment regionCompositionSegment = regionCompositionsSegments.get(region.getRegion_id());
+					PageCompositionSegment pcSegment = (PageCompositionSegment)element;
+					for(PageCompositionSegment.Region region :pcSegment.getRegions()){
+						RegionCompositionSegment regionCompositionSegment = regionCompositionsSegments.get(region.getRegion_id());
 						if(regionCompositionSegment!=null){
-							final int clutId = regionCompositionSegment.getCLUTId();
-							final CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
+							int clutId = regionCompositionSegment.getCLUTId();
+							CLUTDefinitionSegment clutDefinitionSegment = clutDefinitions.get(clutId);
 
 							//fill the region
 							if((regionCompositionSegment.getRegionFillFlag()==1)&&(clutDefinitionSegment!=null)){
-								final int index = getPixelCode(regionCompositionSegment);
+								int index = getPixelCode(regionCompositionSegment);
 
-								final IndexColorModel colorModel = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
-								final int rgb = colorModel.getRGB(index);
-								final Color bgColor = new Color(rgb,true);
+								IndexColorModel colorModel = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
+								int rgb = colorModel.getRGB(index);
+								Color bgColor = new Color(rgb,true);
 								gd.setColor(bgColor);
-								final Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), regionCompositionSegment.getRegionWidth(), regionCompositionSegment.getRegionHeight());
+								Rectangle rect = new Rectangle(region.getRegion_horizontal_address(), region.getRegion_vertical_address(), regionCompositionSegment.getRegionWidth(), regionCompositionSegment.getRegionHeight());
 								gd.fill(rect);
 							}
-							for(final RegionCompositionSegment.RegionObject regionObject: regionCompositionSegment.getRegionObjects()){
+							for(RegionCompositionSegment.RegionObject regionObject: regionCompositionSegment.getRegionObjects()){
 								if(clutDefinitionSegment!=null){
 									// This is the colorModel for this region composition segment
-									final IndexColorModel cm = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
+									IndexColorModel cm = clutDefinitionSegment.getColorModel(regionCompositionSegment.getRegionDepth());
 
-									final int object_id = regionObject.getObject_id();
-									final ObjectDataSegment objectDataSegment = objects.get(object_id);
+									int object_id = regionObject.getObject_id();
+									ObjectDataSegment objectDataSegment = objects.get(object_id);
 
 									if(objectDataSegment != null){
 										if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
-											final WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
-											final BufferedImage i = new BufferedImage(cm, raster, false, null);
+											WritableRaster raster = objectDataSegment.getRaster(regionCompositionSegment.getRegionDepth());
+											BufferedImage i = new BufferedImage(cm, raster, false, null);
 											gd.drawImage(i, region.getRegion_horizontal_address()+regionObject.getObject_horizontal_position()+x_offset, region.getRegion_vertical_address()+regionObject.getObject_vertical_position()+y_offset, null);
 										}else if(objectDataSegment.getObjectCodingMethod()==1){
-											final BufferedImage i = new BufferedImage(regionCompositionSegment.getRegionWidth(),regionCompositionSegment.getRegionHeight(),BufferedImage.TYPE_BYTE_INDEXED,cm);
-											final Graphics2D graphics = i.createGraphics();
+											BufferedImage i = new BufferedImage(regionCompositionSegment.getRegionWidth(),regionCompositionSegment.getRegionHeight(),BufferedImage.TYPE_BYTE_INDEXED,cm);
+											Graphics2D graphics = i.createGraphics();
 											// Font type/size is never defined in standard, this looks OK.
-											final Font font = new Font("Arial", Font.BOLD,30);
+											Font font = new Font("Arial", Font.BOLD,30);
 											graphics.setFont(font);
 											graphics.setColor(new Color(cm.getRGB(regionObject.getForeground_pixel_code())));
 											graphics.setBackground(new Color(cm.getRGB(regionObject.getBackground_pixel_code())));
@@ -268,21 +262,14 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	 * @param regionCompositionSegment
 	 * @return
 	 */
-	public int getPixelCode(final RegionCompositionSegment regionCompositionSegment) {
-		int index = 0;
-		switch (regionCompositionSegment.getRegionDepth()) {
-		case 1: // 2 bit
-			index = regionCompositionSegment.getRegion2BitPixelCode();
-			break;
-		case 2: // 4 bit. TODO  if the region depth is 8 bit while the region_level_of_compatibility specifies that a 4-bit CLUT is within the minimum requirements.
-			// ETSI EN 300 743 V1.3.1 (2006-11) P 25 bottom.
-			index = regionCompositionSegment.getRegion4BitPixelCode();
-			break;
-		case 3:
-			index = regionCompositionSegment.getRegion8BitPixelCode();
-			break;
-		}
-		return index;
+	public static int getPixelCode(RegionCompositionSegment regionCompositionSegment) {
+		int index = switch (regionCompositionSegment.getRegionDepth()) {
+            case 1 -> regionCompositionSegment.getRegion2BitPixelCode(); // 2 bit
+            case 2 -> regionCompositionSegment.getRegion4BitPixelCode(); // 4 bit. TODO  if the region depth is 8 bit while the region_level_of_compatibility specifies that a 4-bit CLUT is within the minimum requirements. ETSI EN 300 743 V1.3.1 (2006-11) P 25 bottom.
+            case 3 -> regionCompositionSegment.getRegion8BitPixelCode();
+            default -> 0;
+        };
+        return index;
 	}
 
 	/**
@@ -304,7 +291,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	 * @param type
 	 * @return
 	 */
-	public static String getSegmentTypeString(final int type) {
+	public static String getSegmentTypeString(int type) {
 
 		if ((0x40 <= type) && (type <= 0x7f)) {
 			return "reserved for future use";
@@ -330,7 +317,7 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	 * @param type
 	 * @return
 	 */
-	public static String getPageStateString(final int type) {
+	public static String getPageStateString(int type) {
 
 		return switch (type) {
 		case 0x0 -> "normal case - The display set contains only the subtitle elements that are changed from the previous page instance.";

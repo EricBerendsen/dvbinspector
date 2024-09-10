@@ -35,13 +35,13 @@ import nl.digitalekabeltelevisie.controller.KVP;
 
 public class DisplayDefinitionSegment extends Segment{
 
-	public DisplayDefinitionSegment(final byte[] data,final int offset) {
+	public DisplayDefinitionSegment(byte[] data, int offset) {
 		super(data,offset);
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
 		s.add(new KVP("dds_version_number",getDDSVersionNumber()));
 		s.add(new KVP("display_window_flag",getDisplayWindowFlag()));
 		s.add(new KVP("display_width",getDisplayWidth()).setDescription("("+(getDisplayWidth()+1)+")"));

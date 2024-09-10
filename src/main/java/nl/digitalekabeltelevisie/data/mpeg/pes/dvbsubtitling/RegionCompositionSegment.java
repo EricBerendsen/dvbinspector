@@ -50,10 +50,10 @@ public class RegionCompositionSegment extends Segment {
 		private int background_pixel_code = 0;
 
 
-		public RegionObject(final int object_id, final int object_type,
-				final int object_provider_flag, final int object_horizontal_position,
-				final int object_vertical_position, final int foreground_pixel_code,
-				final int background_pixel_code) {
+		public RegionObject(int object_id, int object_type,
+                            int object_provider_flag, int object_horizontal_position,
+                            int object_vertical_position, int foreground_pixel_code,
+                            int background_pixel_code) {
 			this.object_id = object_id;
 			this.object_type = object_type;
 			this.object_provider_flag = object_provider_flag;
@@ -65,8 +65,8 @@ public class RegionCompositionSegment extends Segment {
 
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("Object");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("Object");
 			s.add(new KVP("object_id", object_id));
 			s.add(new KVP("object_type", object_type).setDescription(getObjectTypeString(object_type)));
 			s.add(new KVP("object_provider_flag", object_provider_flag)
@@ -110,13 +110,13 @@ public class RegionCompositionSegment extends Segment {
 
 	}
 
-	public RegionCompositionSegment(final byte[] data, final int offset) {
+	public RegionCompositionSegment(byte[] data, int offset) {
 		super(data, offset);
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
 		s.add(new KVP("region_id", getRegionId()));
 		s.add(new KVP("region_version_number", getRegionVersionNumber()));
 		s.add(new KVP("region_fill_flag", getRegionFillFlag()));
@@ -179,23 +179,20 @@ public class RegionCompositionSegment extends Segment {
 		return getInt(data_block, offset + 6, 1, MASK_8BITS);
 	}
 
-	/**
-	 * @return
-	 */
-	/**
+    /**
 	 * @return
 	 */
 	public List<RegionObject> getRegionObjects() {
-		final ArrayList<RegionObject> regions = new ArrayList<>();
+		List<RegionObject> regions = new ArrayList<>();
 		int t = 0;
 		while ((t + 10) < getSegmentLength()) {
-			final int object_id = getInt(data_block, offset + 16 + t, 2, MASK_16BITS);
-			final int object_type = getInt(data_block, offset + 18 + t, 1, 0xC0) >> 6;
-		final int object_provider_flag = getInt(data_block, offset + 18 + t, 1,
+			int object_id = getInt(data_block, offset + 16 + t, 2, MASK_16BITS);
+			int object_type = getInt(data_block, offset + 18 + t, 1, 0xC0) >> 6;
+		int object_provider_flag = getInt(data_block, offset + 18 + t, 1,
 				0x30) >> 4;
-				final int object_horizontal_position = getInt(data_block,
+				int object_horizontal_position = getInt(data_block,
 						offset + 18 + t, 2, MASK_12BITS);
-				final int object_vertical_position = getInt(data_block, offset + 20 + t,
+				int object_vertical_position = getInt(data_block, offset + 20 + t,
 						2, MASK_12BITS);
 				int foreground_pixel_code = 0;
 				int background_pixel_code = 0;
@@ -215,20 +212,14 @@ public class RegionCompositionSegment extends Segment {
 		return regions;
 	}
 
-	/**
-	 * @return
-	 */
-	/**
+    /**
 	 * @return
 	 */
 	public int getRegionDepth() {
 		return getInt(data_block, offset + 12, 1, 0x1C) >> 2;
 	}
 
-	/**
-	 * @return
-	 */
-	/**
+    /**
 	 * @return
 	 */
 	public int getRegionLevelOfCompatibility() {
@@ -239,7 +230,7 @@ public class RegionCompositionSegment extends Segment {
 	 * @param type
 	 * @return
 	 */
-	public static String getRegionLevelOfCompatibilityString(final int type) {
+	public static String getRegionLevelOfCompatibilityString(int type) {
 
 		return switch (type) {
 		case 0x0 -> "reserved";
@@ -254,7 +245,7 @@ public class RegionCompositionSegment extends Segment {
 	 * @param type
 	 * @return
 	 */
-	public static String getRegionDepthString(final int type) {
+	public static String getRegionDepthString(int type) {
 
 		return switch (type) {
 		case 0x0 -> "reserved";
@@ -269,7 +260,7 @@ public class RegionCompositionSegment extends Segment {
 	 * @param type
 	 * @return
 	 */
-	public static String getObjectTypeString(final int type) {
+	public static String getObjectTypeString(int type) {
 
 		return switch (type) {
 		case 0x0 -> "basic_object, bitmap";
@@ -284,7 +275,7 @@ public class RegionCompositionSegment extends Segment {
 	 * @param type
 	 * @return
 	 */
-	public static String getObjectProviderString(final int type) {
+	public static String getObjectProviderString(int type) {
 
 		return switch (type) {
 		case 0x0 -> "provided in the subtitling stream";

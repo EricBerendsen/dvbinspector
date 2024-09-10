@@ -42,21 +42,21 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class CLUTDefinitionSegment extends Segment{
 
-	private int CLUT_2bit[];
-	private int CLUT_4bit[];
-	private int CLUT_8bit[];
+	private int[] CLUT_2bit;
+	private int[] CLUT_4bit;
+	private int[] CLUT_8bit;
 
-	private static final int default_CLUT_2bit[] = {
+	private static final int[] default_CLUT_2bit = {
 		0, 0xFFFFFFFF, 0xFF000000, 0xFF808080
 	};
 
-	private static final int default_CLUT_4bit[] = {
+	private static final int[] default_CLUT_4bit = {
 		0, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000FF, 0xFFFF00FF,
 		0xFF00FFFF, 0xFFFFFFFF, 0xFF000000, 0xFF800000, 0xFF008000,
 		0xFF808000, 0xFF000080, 0xFF800080, 0xFF008080, 0xFF808080
 	};
 
-	private static final int	default_CLUT_8bit[]	= { 0x0, 0x40ff0000, 0x4000ff00, 0x40ffff00, 0x400000ff,
+	private static final int[] default_CLUT_8bit = { 0x0, 0x40ff0000, 0x4000ff00, 0x40ffff00, 0x400000ff,
 		0x40ff00ff, 0x4000ffff, 0x40ffffff, 0x80000000, 0x80550000, 0x80005500, 0x80555500, 0x80000055, 0x80550055,
 		0x80005555, 0x80555555, 0xffaa0000, 0xffff0000, 0xffaa5500, 0xffff5500, 0xffaa0055, 0xffff0055, 0xffaa5555,
 		0xffff5555, 0x80aa0000, 0x80ff0000, 0x80aa5500, 0x80ff5500, 0x80aa0055, 0x80ff0055, 0x80aa5555, 0x80ff5555,
@@ -108,10 +108,10 @@ public class CLUTDefinitionSegment extends Segment{
 
 		private final int t_value;
 
-		public CLUTEntry(final int clut_entry_id, final int clut_flag_2_bit_entry,
-				final int clut_flag_4_bit_entry, final int clut_flag_8_bit_entry,
-				final int full_range_flag, final int y_value, final int cr_value, final int cb_value,
-				final int t_value) {
+		public CLUTEntry(int clut_entry_id, int clut_flag_2_bit_entry,
+                         int clut_flag_4_bit_entry, int clut_flag_8_bit_entry,
+                         int full_range_flag, int y_value, int cr_value, int cb_value,
+                         int t_value) {
 			CLUT_entry_id = clut_entry_id;
 			CLUT_flag_2_bit_entry = clut_flag_2_bit_entry;
 			CLUT_flag_4_bit_entry = clut_flag_4_bit_entry;
@@ -124,7 +124,7 @@ public class CLUTDefinitionSegment extends Segment{
 		}
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 			int r, g, b;
 			float y, cr, cb;
 			if (full_range_flag == 1) {
@@ -159,10 +159,10 @@ public class CLUTDefinitionSegment extends Segment{
 			//			g = (int) ((y - 16) * 1.164 - (0.813 * (cr - 128)) - 0.391 * (cb - 128));
 			//			b = (int) ((y - 16) * 1.164 + (2.018 * (cb - 128)));
 
-			final String bgColor = "#" + Utils.toHexStringUnformatted(r, 2)
-					+ Utils.toHexStringUnformatted(g, 2)
-					+ Utils.toHexStringUnformatted(b, 2);
-			final KVP s = new KVP("CLUT_entry id "+ CLUT_entry_id).setHtmlLabel("CLUT_entry <code><span style=\"background-color: "+ bgColor
+			String bgColor = "#" + toHexStringUnformatted(r, 2)
+					+ toHexStringUnformatted(g, 2)
+					+ toHexStringUnformatted(b, 2);
+			KVP s = new KVP("CLUT_entry id "+ CLUT_entry_id).setHtmlLabel("CLUT_entry <code><span style=\"background-color: "+ bgColor
 					+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>");
 			s.add(new KVP("CLUT_entry_id", CLUT_entry_id));
 			s.add(new KVP("2-bit/entry_CLUT_flag", CLUT_flag_2_bit_entry));
@@ -177,8 +177,8 @@ public class CLUTDefinitionSegment extends Segment{
 		}
 
 
-		private static int boundRange(final int r) {
-			return r < 0 ? 0 : (r > 0xFF ? 0xFF : r);
+		private static int boundRange(int r) {
+			return (Math.clamp(r, 0, 0xFF));
 		}
 
 
@@ -262,9 +262,9 @@ public class CLUTDefinitionSegment extends Segment{
 		}
 	}
 
-	public CLUTDefinitionSegment(final byte[] data, final int offset) {
+	public CLUTDefinitionSegment(byte[] data, int offset) {
 		super(data, offset);
-		for(final CLUTEntry clutEntry : getCLUTEntries()){
+		for(CLUTEntry clutEntry : getCLUTEntries()){
 			if(clutEntry.getCLUT_flag_2_bit_entry()==1){
 				if(CLUT_2bit==null){
 					CLUT_2bit=Arrays.copyOf(default_CLUT_2bit, default_CLUT_2bit.length);
@@ -293,8 +293,8 @@ public class CLUTDefinitionSegment extends Segment{
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
 		s.add(new KVP("CLUT-id", getCLUTId()));
 		s.add(new KVP("CLUT_version_number",	getCLUTVersionNumber()));
 		addListJTree(s, getCLUTEntries(), modus, "CLUTEntries");
@@ -313,16 +313,16 @@ public class CLUTDefinitionSegment extends Segment{
 	}
 
 
-	public final List<CLUTEntry> getCLUTEntries() {
-		final List<CLUTEntry> clutEntries = new ArrayList<>();
+	public List<CLUTEntry> getCLUTEntries() {
+		List<CLUTEntry> clutEntries = new ArrayList<>();
 		int t = 0;
 		while ((t + 2) < getSegmentLength()) {
-			final int CLUT_entry_id = getInt(data_block, offset + 8 + t, 1,
+			int CLUT_entry_id = getInt(data_block, offset + 8 + t, 1,
 					MASK_8BITS);
-			final int flag_2bit = getInt(data_block, offset + 9 + t, 1, 0x80) >> 7;
-			final int flag_4bit = getInt(data_block, offset + 9 + t, 1, 0x40) >> 6;
-			final int flag_8bit = getInt(data_block, offset + 9 + t, 1, 0x20) >> 5;
-			final int full_range_flag = getInt(data_block, offset + 9 + t, 1, 0x01);
+			int flag_2bit = getInt(data_block, offset + 9 + t, 1, 0x80) >> 7;
+			int flag_4bit = getInt(data_block, offset + 9 + t, 1, 0x40) >> 6;
+			int flag_8bit = getInt(data_block, offset + 9 + t, 1, 0x20) >> 5;
+			int full_range_flag = getInt(data_block, offset + 9 + t, 1, 0x01);
 			int y_value, cr_value, cb_value, t_value;
 			if (full_range_flag == 1) {
 				y_value = getInt(data_block, offset + 10 + t, 1, MASK_8BITS);
@@ -357,7 +357,7 @@ public class CLUTDefinitionSegment extends Segment{
 		return getIndexColorModel(8,256,default_CLUT_8bit, 0,true,0,DataBuffer.TYPE_BYTE);
 	}
 
-	public static IndexColorModel getDefaultColorModel(final int regionDepth){
+	public static IndexColorModel getDefaultColorModel(int regionDepth){
 		return switch (regionDepth) {
 		case 1 -> getDefault_CLUT_2bitColorModel();
 		case 2 -> getDefault_CLUT_4bitColorModel();
@@ -367,7 +367,7 @@ public class CLUTDefinitionSegment extends Segment{
 	}
 
 
-	public IndexColorModel getColorModel(final int regionDepth){
+	public IndexColorModel getColorModel(int regionDepth){
 
 		switch (regionDepth) {
 		case 1: // 2 bit
@@ -406,17 +406,17 @@ public class CLUTDefinitionSegment extends Segment{
 	 * @param transferType
 	 * @return
 	 */
-	private static IndexColorModel getIndexColorModel(final int bits, final int size, final int cmap[], final int start, final boolean hasalpha, final int trans, final int transferType) {
-		final byte[] r =new byte[cmap.length];
-		final byte[] g =new byte[cmap.length];
-		final byte[] b =new byte[cmap.length];
-		final byte[] a =new byte[cmap.length];
+	private static IndexColorModel getIndexColorModel(int bits, int size, int[] cmap, int start, boolean hasalpha, int trans, int transferType) {
+		byte[] r =new byte[cmap.length];
+		byte[] g =new byte[cmap.length];
+		byte[] b =new byte[cmap.length];
+		byte[] a =new byte[cmap.length];
 
 		for (int i = 0; i < cmap.length; i++) {
-			r[i] = Utils.getInt2UnsignedByte((cmap[i]& 0xFF0000)>>16);
-			g[i] = Utils.getInt2UnsignedByte((cmap[i]& 0x00FF00)>>8);
-			b[i] = Utils.getInt2UnsignedByte((cmap[i]& 0x0000FF));
-			a[i] = Utils.getInt2UnsignedByte((cmap[i]& 0xFF000000)>>>24);
+			r[i] = getInt2UnsignedByte((cmap[i]& 0xFF0000)>>16);
+			g[i] = getInt2UnsignedByte((cmap[i]& 0x00FF00)>>8);
+			b[i] = getInt2UnsignedByte((cmap[i]& 0x0000FF));
+			a[i] = getInt2UnsignedByte((cmap[i]& 0xFF000000)>>>24);
 		}
 		return new IndexColorModel(bits,size,r,g,b,a);
 	}

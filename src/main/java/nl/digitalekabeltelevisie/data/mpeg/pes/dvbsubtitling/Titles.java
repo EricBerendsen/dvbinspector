@@ -47,7 +47,7 @@ public class Titles implements TreeNode {
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		final KVP t = new KVP("Titles");
+		KVP t = new KVP("Titles");
 		addListJTree(t,displaySets,modus,"DisplaySets");
 		return t;
 	}
@@ -57,8 +57,8 @@ public class Titles implements TreeNode {
 	@SuppressWarnings("unchecked")
 	public void add(DVBSubtitlingPESDataField title) {
 		List<Segment> segmentList = title.getSegmentList();
-		if((segmentList!=null)&&(segmentList.size()>0)){
-			if(segmentList.get(0).getSegmentType()==0xFF){ //stuffing, may end current set
+		if((segmentList!=null)&&(!segmentList.isEmpty())){
+			if(segmentList.getFirst().getSegmentType()==0xFF){ //stuffing, may end current set
 				if(current!=null){
 					if(currentEpoch!=null){
 						currentEpoch.add(current);

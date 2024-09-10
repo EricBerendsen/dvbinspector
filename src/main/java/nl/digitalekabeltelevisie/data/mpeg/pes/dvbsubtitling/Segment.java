@@ -50,21 +50,21 @@ public class Segment implements TreeNode{
 	}
 
 
-	private int getSegmentType(final int localOffset) {
+	private int getSegmentType(int localOffset) {
 
 		return getInt(data_block, offset+ localOffset, 1, MASK_8BITS);
 	}
 
 
-	public Segment(final byte[] data,final int offset) {
+	public Segment(byte[] data, int offset) {
 		data_block = data;
 		this.offset = offset;
 	}
 
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP s=new KVP("Segment (" +DVBSubtitlingPESDataField.getSegmentTypeString(getSegmentType())+")");
+	public KVP getJTreeNode(int modus) {
+		KVP s=new KVP("Segment (" + getSegmentTypeString(getSegmentType())+")");
 		s.add(new KVP("raw_data",data_block,offset,getSegmentLength()+6));
 		s.add(new KVP("segment_type",getSegmentType()).setDescription(getSegmentTypeString(getSegmentType())));
 		s.add(new KVP("page_id",getPageID()));
