@@ -101,7 +101,7 @@ public class KVP extends DefaultMutableTreeNode{
 	 */
 	private static final int BYTE_DATA_MAX_LEN = 100;
 	private String		label;
-	private String		value;
+	private String		stringValue;
 	private String		description;
 
 	private int			intValue;
@@ -139,31 +139,39 @@ public class KVP extends DefaultMutableTreeNode{
 		this.fieldType = FIELD_TYPE.LABEL;
 	}
 
-	public KVP(String label, String value, String description) {
+	public KVP(String label, String stringValue) {
         this.label = label;
-		if(value==null){ // just a label
-			this.fieldType = FIELD_TYPE.LABEL;
-		}else{
-			this.value = value;
-			this.description = description;
-			this.fieldType = FIELD_TYPE.STRING;
+        this.stringValue = stringValue;
+		this.fieldType = FIELD_TYPE.STRING;
 
-		}
 	}
 
+	public KVP(String label, String stringValue, String description) {
+		this(label,stringValue);
+		setDescription(description);
+ 
+	}
 	
-	public KVP(String label, int value, String description) {
+	public KVP(String label, int intValue) {
         this.label = label;
-		this.intValue = value;
-		this.description = description;
+		this.intValue = intValue;
 		this.fieldType = FIELD_TYPE.INT;
 	}
 
-	public KVP(String label, long value, String description) {
+	public KVP(String label, int intValue, String description) {
+        this(label,intValue);
+		setDescription(description);
+	}
+
+	public KVP(String label, long longValue) {
         this.label = label;
-		this.longValue = value;
-		this.description = description;
+		this.longValue = longValue;
 		this.fieldType = FIELD_TYPE.LONG;
+	}
+
+	public KVP(String label, long longValue, String description) {
+        this(label,longValue);
+		setDescription(description);
 	}
 
 	public KVP(String label, boolean value, String description) {
@@ -171,46 +179,58 @@ public class KVP extends DefaultMutableTreeNode{
 	}
 
 
-	/**
-	 * @param label
-	 * @param value
-	 * @param description
-	 */
-	public KVP(String label, byte[] value, String description) {
-        this.label = label;
-		this.byteValue = value;
+	public KVP(String label, byte[] byteArray) {
+		this.label = label;
+		this.byteValue = byteArray;
 		this.byteStart = 0;
-		this.byteLen = value.length;
-		this.description = description;
+		this.byteLen = byteArray.length;
 		this.fieldType = FIELD_TYPE.BYTES;
-		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
+		detailViews.add(new DetailView((HTMLSource) () -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View"));
 	}
 
-	public KVP(String label, byte[] value, int offset, int len, String description) {
-        this.label = label;
-		this.byteValue = value;
+	public KVP(String label, byte[] byteArray, String description) {
+		this(label, byteArray);
+		setDescription(description);
+	}
+
+	public KVP(String label, byte[] byteArray, int offset, int len) {
+		this.label = label;
+		this.byteValue = byteArray;
 		this.byteStart = offset;
 		this.byteLen = len;
-		this.description = description;
 		this.fieldType = FIELD_TYPE.BYTES;
-		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
+		detailViews.add(new DetailView((HTMLSource) () -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View"));
 	}
 
-	public KVP(String label, DVBString value, String description) {
+	public KVP(String label, byte[] byteArray, int offset, int len, String description) {
+		this(label, byteArray, offset, len);
+		setDescription(description);
+	}
+
+	public KVP(String label, DVBString dvbStringValue) {
         this.label = label;
-		this.dvbStringValue = value;
-		this.description = description;
+		this.dvbStringValue = dvbStringValue;
 		this.fieldType = FIELD_TYPE.DVBSTRING;
 	}
 
-	public KVP(String label, BigInteger value, String description) {
-
-        this.label = label;
-		this.bigIntegerValue = value;
-		this.fieldType = FIELD_TYPE.BIGINT;
-		this.description = description;
+	public KVP(String label, DVBString dvbStringValue, String description) {
+        this(label,dvbStringValue);
+		setDescription(description);
 	}
 
+	
+	public KVP(String label, BigInteger bigIntegerValue) {
+
+        this.label = label;
+		this.bigIntegerValue = bigIntegerValue;
+		this.fieldType = FIELD_TYPE.BIGINT;
+	}
+
+	public KVP(String label, BigInteger bigIntegerValue, String description) {
+        this(label, bigIntegerValue);
+		setDescription(description);
+	}
+	
 	public String getDescription() {
 		return description;
 	}
@@ -324,7 +344,7 @@ public class KVP extends DefaultMutableTreeNode{
 	 * @param b
 	 */
 	private void appendString(StringBuilder b) {
-		b.append(value);
+		b.append(stringValue);
 	}
 
 	/**
