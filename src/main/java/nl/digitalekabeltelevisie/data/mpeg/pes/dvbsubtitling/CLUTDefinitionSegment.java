@@ -163,9 +163,8 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 			final String bgColor = "#" + Utils.toHexStringUnformatted(r, 2)
 					+ Utils.toHexStringUnformatted(g, 2)
 					+ Utils.toHexStringUnformatted(b, 2);
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("CLUT_entry <code><span style=\"background-color: "+ bgColor
-					+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>",
-					"CLUT_entry id "+ CLUT_entry_id));  // plain text alternative
+			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("CLUT_entry id "+ CLUT_entry_id).setHtmlLabel("CLUT_entry <code><span style=\"background-color: "+ bgColor
+					+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>"));  
 			s.add(new DefaultMutableTreeNode(new KVP("CLUT_entry_id",
 					CLUT_entry_id, null)));
 			s.add(new DefaultMutableTreeNode(new KVP("2-bit/entry_CLUT_flag",
@@ -336,8 +335,8 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus) {
+		final KVP s = super.getJTreeNode(modus);
 		s.add(new DefaultMutableTreeNode(new KVP("CLUT-id", getCLUTId(),null)));
 		s.add(new DefaultMutableTreeNode(new KVP("CLUT_version_number",	getCLUTVersionNumber(), null)));
 		addListJTree(s, getCLUTEntries(), modus, "CLUTEntries");
@@ -363,7 +362,7 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 	 * @return
 	 */
 	public final List<CLUTEntry> getCLUTEntries() {
-		final ArrayList<CLUTEntry> clutEntries = new ArrayList<CLUTEntry>();
+		final List<CLUTEntry> clutEntries = new ArrayList<>();
 		int t = 0;
 		while ((t + 2) < getSegmentLength()) {
 			final int CLUT_entry_id = getInt(data_block, offset + 8 + t, 1,
@@ -427,21 +426,18 @@ public class CLUTDefinitionSegment extends Segment implements TreeNode {
 		case 1: // 2 bit
 			if(CLUT_2bit==null){
 				return getDefault_CLUT_2bitColorModel();
-			}else{
-				return getIndexColorModel(2,4,CLUT_2bit, 0,true,-1,DataBuffer.TYPE_BYTE);
 			}
+			return getIndexColorModel(2,4,CLUT_2bit, 0,true,-1,DataBuffer.TYPE_BYTE);
 		case 2: // 4 bit
 			if(CLUT_4bit==null){
 				return getDefault_CLUT_4bitColorModel();
-			}else{
-				return getIndexColorModel(4,16,CLUT_4bit,0,true,-1,DataBuffer.TYPE_BYTE);
 			}
+			return getIndexColorModel(4,16,CLUT_4bit,0,true,-1,DataBuffer.TYPE_BYTE);
 		case 3:
 			if(CLUT_8bit==null){
 				return getDefault_CLUT_8bitColorModel();
-			}else{
-				return getIndexColorModel(8,256,CLUT_8bit, 0,true,-1,DataBuffer.TYPE_BYTE);
 			}
+			return getIndexColorModel(8,256,CLUT_8bit, 0,true,-1,DataBuffer.TYPE_BYTE);
 		default:
 			return null;
 		}

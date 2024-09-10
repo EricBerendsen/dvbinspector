@@ -204,8 +204,8 @@ public class RegionCompositionSegment extends Segment implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.Segment#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus) {
+		final KVP s = super.getJTreeNode(modus);
 		s.add(new DefaultMutableTreeNode(new KVP("region_id", getRegionId(), null)));
 		s.add(new DefaultMutableTreeNode(new KVP("region_version_number", getRegionVersionNumber(), null)));
 		s.add(new DefaultMutableTreeNode(new KVP("region_fill_flag", getRegionFillFlag(), null)));

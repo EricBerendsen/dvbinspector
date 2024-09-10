@@ -468,8 +468,8 @@ public class ObjectDataSegment extends Segment implements ImageSource {
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.Segment#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,this);
+	public KVP getJTreeNode(final int modus) {
+		final KVP s = super.getJTreeNode(modus).addImageSource(this, "Object Data Segment");
 		s.add(new DefaultMutableTreeNode(new KVP("object_id", getObjectId(), null)));
 		s.add(new DefaultMutableTreeNode(new KVP("object_version_number", getObjectVersionNumber(), null)));
 		s.add(new DefaultMutableTreeNode(new KVP("object_coding_method", getObjectCodingMethod(), getObjectCodingMethodString(getObjectCodingMethod()))));

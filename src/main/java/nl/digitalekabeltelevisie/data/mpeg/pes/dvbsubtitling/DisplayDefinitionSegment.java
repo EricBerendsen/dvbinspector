@@ -41,8 +41,8 @@ public class DisplayDefinitionSegment extends Segment implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus) {
+		final KVP s = super.getJTreeNode(modus);
 		s.add(new DefaultMutableTreeNode(new KVP("dds_version_number",getDDSVersionNumber(),null)));
 		s.add(new DefaultMutableTreeNode(new KVP("display_window_flag",getDisplayWindowFlag(),null)));
 		s.add(new DefaultMutableTreeNode(new KVP("display_width",getDisplayWidth(),"("+(getDisplayWidth()+1)+")")));

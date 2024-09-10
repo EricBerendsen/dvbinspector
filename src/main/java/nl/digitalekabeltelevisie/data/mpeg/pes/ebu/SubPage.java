@@ -310,7 +310,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			if (pageLine != null) {
 				s.add(pageLine.getHTMLJTreeNode(modus));
 			} else {
-				s.add(new DefaultMutableTreeNode(new KVP(TxtDataField.BLACK_HTML_LINE, "")));
+				s.add(new DefaultMutableTreeNode(new KVP( "").setHtmlLabel(TxtDataField.BLACK_HTML_LINE)));
 			}
 		}
 		for (final TxtDataField txtDatafield : packetx_26) {

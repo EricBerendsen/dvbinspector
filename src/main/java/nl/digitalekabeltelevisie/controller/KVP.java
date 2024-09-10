@@ -170,14 +170,6 @@ public class KVP extends DefaultMutableTreeNode{
 		this(label, value ? 1 : 0, description);
 	}
 
-	@Deprecated
-	public KVP(String html, String label) {
-        this.setHtmlLabel(html);
-		this.label = label; // text representation of the HTML string
-		this.fieldType = FIELD_TYPE.LABEL;
-	}
-
-
 
 	/**
 	 * @param label

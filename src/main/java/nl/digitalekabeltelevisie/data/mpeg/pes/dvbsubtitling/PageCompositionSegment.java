@@ -101,8 +101,8 @@ public class PageCompositionSegment extends Segment implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus) {
+		final KVP s = super.getJTreeNode(modus);
 		s.add(new DefaultMutableTreeNode(new KVP("page_time_out",getPageTimeOut(),null)));
 		s.add(new DefaultMutableTreeNode(new KVP("page_version_number",getPageVersionNumber(),null)));
 		s.add(new DefaultMutableTreeNode(new KVP("page_state",getPageState(),DVBSubtitlingPESDataField.getPageStateString(getPageState()))));
