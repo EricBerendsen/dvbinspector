@@ -45,11 +45,12 @@ public class ServiceRelocatedDescriptor extends DVBExtensionDescriptor {
 
 	public ServiceRelocatedDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
-		old_original_network_id = getInt(b, privateDataOffset, 2, MASK_16BITS);
-		privateDataOffset += 2;
-		old_transport_stream_id = getInt(b, privateDataOffset, 2, MASK_16BITS);
-		privateDataOffset += 2;
-		old_service_id = getInt(b, privateDataOffset, 2, MASK_16BITS);
+		int localOffset = PRIVATE_DATA_OFFSET;
+		old_original_network_id = getInt(b, localOffset, 2, MASK_16BITS);
+		localOffset += 2;
+		old_transport_stream_id = getInt(b, localOffset, 2, MASK_16BITS);
+		localOffset += 2;
+		old_service_id = getInt(b, localOffset, 2, MASK_16BITS);
 	}
 
 
@@ -57,9 +58,9 @@ public class ServiceRelocatedDescriptor extends DVBExtensionDescriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("old_original_network_id",old_original_network_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("old_transport_stream_id",old_transport_stream_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("old_service_id",old_service_id,null)));
+		t.add(new KVP("old_original_network_id", old_original_network_id));
+		t.add(new KVP("old_transport_stream_id", old_transport_stream_id));
+		t.add(new KVP("old_service_id", old_service_id));
 
 		return t;
 	}

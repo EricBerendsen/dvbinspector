@@ -552,7 +552,7 @@ public final class DescriptorFactory {
 		case 0x13:
 			return new URILinkageDescriptor(data, 0, tableSection);
 		case 0x14:
-			return new CIAncillaryDataDescriptor(data, 0, tableSection);
+			return new CIAncillaryDataDescriptor(data, tableSection);
 		case 0x15:
 			return new AC4Descriptor(data, 0, tableSection);
 		case 0x17:
@@ -560,7 +560,7 @@ public final class DescriptorFactory {
 		case 0x19:
 			return new AudioPreselectionDescriptor(data, 0, tableSection);
 		case 0x20:
-			return new TtmlSubtitlingDescriptor(data, 0, tableSection);
+			return new TtmlSubtitlingDescriptor(data, tableSection);
 		case 0x22:
 			return new ServiceProminenceDescriptor(data, 0, tableSection);
 		case 0x23:

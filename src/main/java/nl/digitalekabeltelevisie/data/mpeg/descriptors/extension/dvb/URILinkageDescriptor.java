@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -53,18 +54,19 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 
 
 	public URILinkageDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		uri_linkage_type = getInt(b, privateDataOffset++, 1, MASK_8BITS);
-		uri_length = getInt(b, privateDataOffset++, 1, MASK_8BITS);
-		uri_char = copyOfRange(b, privateDataOffset,privateDataOffset + uri_length);
-		privateDataOffset += uri_length; 
+		super(b, parent);
+		int localOffset = PRIVATE_DATA_OFFSET;
+		uri_linkage_type = getInt(b, localOffset++, 1, MASK_8BITS);
+		uri_length = getInt(b, localOffset++, 1, MASK_8BITS);
+		uri_char = copyOfRange(b, localOffset, localOffset + uri_length);
+		localOffset += uri_length; 
 		
 		if ((uri_linkage_type == 0x00) || (uri_linkage_type == 0x01)) {
-				min_polling_interval = getInt(b, privateDataOffset, 2, MASK_16BITS);
-				privateDataOffset += 2;
+				min_polling_interval = getInt(b, localOffset, 2, MASK_16BITS);
+				localOffset += 2;
 		}
-		if ((offset + 2 + descriptorLength) < privateDataOffset) {
-			private_data_byte = copyOfRange(b, privateDataOffset, privateDataOffset + descriptorLength + 2);
+		if ((PRIVATE_DATA_OFFSET + descriptorLength) < localOffset) {
+			private_data_byte = copyOfRange(b, localOffset, localOffset + descriptorLength + 2);
 		}
 	}
 
@@ -72,15 +74,14 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(
-				new KVP("uri_linkage_type", uri_linkage_type, getURILinkageTypeString(uri_linkage_type))));
-		t.add(new DefaultMutableTreeNode(new KVP("uri_length", uri_length, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("uri_char", uri_char, null)));
+		t.add(new KVP("uri_linkage_type", uri_linkage_type).setDescription(getURILinkageTypeString(uri_linkage_type)));
+		t.add(new KVP("uri_length", uri_length));
+		t.add(new KVP("uri_char", uri_char));
 		if ((uri_linkage_type == 0x00) || (uri_linkage_type == 0x01)) {
-			t.add(new DefaultMutableTreeNode(new KVP("min_polling_interval", min_polling_interval, null)));
+			t.add(new KVP("min_polling_interval", min_polling_interval));
 		}
 		if (private_data_byte != null) {
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte", private_data_byte, null)));
+			t.add(new KVP("private_data_byte", private_data_byte));
 		}
 		return t;
 	}

@@ -38,7 +38,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.*;
 
 /**
@@ -57,12 +56,14 @@ public class Descriptor implements TreeNode {
 			add(0x0102,0xFFFE,"User defined").
 			add(0xFFFF,"Defined by the metadata_application_format_identifier field").
 			build();
+	
 	private static final LookUpList mpeg_carriage_flags_list = new LookUpList.Builder().
 			add(0,"Carriage in the same transport stream where this metadata pointer descriptor is carried.").
 			add(1,"Carriage in a different transport stream from where this metadata pointer descriptor is carried.").
 			add(2,"Carriage in a program stream. This may or may not be the same program stream in which this metadata pointer descriptor is carried.").
 			add(3,"may be used if there is no relevant metadata carried on the DVB network. In this case the metadata locator record shall be present").
 			build();
+
 	private static final LookUpList metadata_format_list = new LookUpList.Builder().
 			add(0,0x0f,"Reserved").
 			add(0x10,"ISO/IEC 15938-1 TeM").
@@ -75,14 +76,13 @@ public class Descriptor implements TreeNode {
 			add(0xf8,0xfe,"User Defined").
 			add(0xff,"Defined by metadata_format_identifier field").
 			build();
-	protected final int			descriptorTag;
-	protected final int			descriptorLength;
 
-	protected final byte[]	privateData;
-	private final int		descriptorOffset;
-	protected int			privateDataOffset;
+	public static final int PRIVATE_DATA_OFFSET = 2;
 
-	protected final TableSection	parentTableSection;
+	protected final int descriptorTag;
+	protected final int descriptorLength;
+	protected final byte[] privateData;
+	protected final TableSection parentTableSection;
 
 
 	/**
@@ -90,14 +90,16 @@ public class Descriptor implements TreeNode {
 	 * @param offset
 	 * @param parent
 	 */
-	public Descriptor(final byte[] b, final int offset, final TableSection parent) {
+	public Descriptor(final byte[] b, final TableSection parent) {
 		privateData = b;
-		descriptorOffset = offset;
-		privateDataOffset = offset + 2;
 
-		descriptorTag = toUnsignedInt(b[offset]);
-		descriptorLength = toUnsignedInt(b[offset + 1]);
+		descriptorTag = toUnsignedInt(b[0]);
+		descriptorLength = toUnsignedInt(b[1]);
 		parentTableSection = parent;
+	}
+
+	public Descriptor(final byte[] b, final int offset, final TableSection parent) {
+		this(b, parent);
 	}
 
 	public int getDescriptorLength() {
@@ -348,14 +350,19 @@ public class Descriptor implements TreeNode {
 	}
 
 	public String getRawDataString() {
-		return "0x" + Utils.toHexString(privateData, privateDataOffset, descriptorLength) + " \"" +
-				Utils.toSafeString(privateData, privateDataOffset, descriptorLength) + "\"";
+		return "0x" + Utils.toHexString(privateData, PRIVATE_DATA_OFFSET, descriptorLength) + " \"" +
+				Utils.toSafeString(privateData, PRIVATE_DATA_OFFSET, descriptorLength) + "\"";
 	}
 
 
+
+	/**
+	 * This will always return a KVP, but to not break interface it still is declared as DefaultMutableTreeNode
+	 */
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-        DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Descriptor: " + getDescriptorname(), descriptorTag, null));
+		KVP t = new  KVP("Descriptor: " + getDescriptorname(), descriptorTag, null);
 		addGeneralDescriptorInfo(modus, t);
 		return t;
 	}
@@ -367,12 +374,12 @@ public class Descriptor implements TreeNode {
 	protected void addGeneralDescriptorInfo(final int modus, final DefaultMutableTreeNode t) {
 		if (!Utils.simpleModus(modus)) { // not simple layout, so show
 			// details
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_tag", descriptorTag, getDescriptorname())));
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_length", descriptorLength, null)));
+			t.add(new KVP("descriptor_tag", descriptorTag, getDescriptorname()));
+			t.add(new KVP("descriptor_length", descriptorLength));
 		}
-		if ((getClass().equals(Descriptor.class)) || (!Utils.simpleModus(modus))) { // not simple layout, so show details
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_data", privateData, descriptorOffset + 2,
-					descriptorLength, null)));
+		if ((getClass().equals(Descriptor.class)) || (!Utils.simpleModus(modus))) { // not simple layout, so show
+																					// details
+			t.add(new KVP("descriptor_data", privateData, 2, descriptorLength));
 		}
 	}
 
@@ -962,8 +969,6 @@ public class Descriptor implements TreeNode {
 				"descriptorTag=" + descriptorTag +
 				", descriptorLength=" + descriptorLength +
 				", privateData=" + Arrays.toString(privateData) +
-				", descriptorOffset=" + descriptorOffset +
-				", privateDataOffset=" + privateDataOffset +
 				", parentTableSection=" + parentTableSection +
 				'}';
 	}

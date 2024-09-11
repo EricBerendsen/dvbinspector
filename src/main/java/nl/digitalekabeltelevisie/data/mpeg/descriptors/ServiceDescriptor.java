@@ -43,9 +43,8 @@ public class ServiceDescriptor extends Descriptor{
 	public ServiceDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset,parent);
 		serviceType = getInt(b, offset+2, 1, 0xFF);
-		final int serviceProviderNameLength = getInt(b, offset+3, 1, 0xFF);
 		serviceProviderName = new DVBString(b,offset+3);
-		serviceName = new DVBString(b,offset+4+serviceProviderNameLength);
+		serviceName = new DVBString(b,offset+4+serviceProviderName.getLength());
 	}
 
 	public DVBString getServiceProviderName() {

@@ -32,8 +32,12 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class DVBExtensionDescriptor extends ExtensionDescriptor {
 
-	public DVBExtensionDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public DVBExtensionDescriptor(byte[] b, int offset, TableSection parent) {
+		super(b, parent);
+	}
+
+	public DVBExtensionDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 	}
 
 	public static String getDescriptorTagString(final int descriptor_tag_extension) {

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -39,22 +39,26 @@ public abstract class ExtensionDescriptor extends Descriptor {
 	protected final int descriptor_tag_extension;
 	protected final byte[] selector_byte;
 
-	public ExtensionDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		descriptor_tag_extension = getInt(b, privateDataOffset++, 1, MASK_8BITS);
-		selector_byte=getBytes(b, privateDataOffset, descriptorLength-1);
+	public ExtensionDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		descriptor_tag_extension = getInt(b, PRIVATE_DATA_OFFSET, 1, MASK_8BITS);
+		selector_byte=getBytes(b, PRIVATE_DATA_OFFSET + 1, descriptorLength-1);
 	}
 
+	/**
+	 * This will always return a KVP, but to not break interface it still is declared as DefaultMutableTreeNode
+	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("descriptor_tag_extension",descriptor_tag_extension,getDescriptorTagString())));
-		t.add(new DefaultMutableTreeNode(new KVP("selector_byte",selector_byte,null)));
+		KVP t = (KVP) super.getJTreeNode(modus);
+		t.add(new KVP("descriptor_tag_extension",descriptor_tag_extension).setDescription(getDescriptorTagString()));
+		t.add(new KVP("selector_byte",selector_byte));
 
 		return t;
 	}
 
+	@Override
 	public String getDescriptorname() {
 		return getDescriptorname(descriptorTag, parentTableSection)+" ("+getDescriptorTagString()+")";
 	}

@@ -33,7 +33,11 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class MPEGExtensionDescriptor extends ExtensionDescriptor {
 
 	public MPEGExtensionDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+		super(b, parent);
+	}
+
+	public MPEGExtensionDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 	}
 
 	public static String getDescriptorTagString(final int descriptor_tag_extension) {
