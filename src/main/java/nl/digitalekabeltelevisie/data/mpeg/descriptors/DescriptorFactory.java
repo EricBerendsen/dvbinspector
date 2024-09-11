@@ -388,11 +388,11 @@ public final class DescriptorFactory {
 		switch(descriptor_tag_extension){
 		
 		case 0x03:
-			return new HEVCTimingAndHRDDescriptor(data, 0, tableSection);
+			return new HEVCTimingAndHRDDescriptor(data, tableSection);
 		case 0x14:
-			return new JpegXsVideoDescriptor(data, 0, tableSection);
+			return new JpegXsVideoDescriptor(data, tableSection);
 		default:
-			MPEGExtensionDescriptor d = new MPEGExtensionDescriptor(data, 0, tableSection);
+			MPEGExtensionDescriptor d = new MPEGExtensionDescriptor(data, tableSection);
 			logger.warning("unimplemented MPEGExtensionDescriptor:" +
 					d.getDescriptorTagString() +
 					", TableSection:" + tableSection);
