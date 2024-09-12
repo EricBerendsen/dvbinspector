@@ -99,18 +99,6 @@ public class KVPTest {
         assertEquals("LabelForLong: 0x8E",kvp.toString());
     }
 
-    @Test
-    public void testKVPStringBooleanString() {
-        KVP kvp = new KVP("BooleanLabel",true,"Boooolean Explanation");
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
-        assertEquals("BooleanLabel: 0x1 => Boooolean Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
-        assertEquals("BooleanLabel: 0x1 (1) => Boooolean Explanation",kvp.toString());
-        kvp = new KVP("BooleanLabel",false,"Boooolean false Explanation");
-        assertEquals("BooleanLabel: 0x0 (0) => Boooolean false Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
-        assertEquals("BooleanLabel: 0 => Boooolean false Explanation",kvp.toString());
-    }
 
     @Test
     public void testHtmlLabelString() {

@@ -52,9 +52,9 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     private final long colour_primaries;
     private final long transfer_characteristics;
     private final long matrix_coefficients;
-    private final boolean video_full_range_flag;
-    private final boolean still_mode;
-    private final boolean mdm_flag;
+    private final int video_full_range_flag;
+    private final int still_mode;
+    private final int mdm_flag;
     private final byte[] private_data;
 	private final int zero_bits;
 	private int x_c0;
@@ -87,13 +87,13 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
         colour_primaries = reader.readBitsLong(8);
         transfer_characteristics = reader.readBitsLong(8);
         matrix_coefficients = reader.readBitsLong(8);
-        video_full_range_flag = reader.readBits(1) == 1;
+        video_full_range_flag = reader.readBits(1);
         reader.skiptoByteBoundary();
-        still_mode = reader.readBits(1) == 1;
-        mdm_flag = reader.readBits(1) == 1;
+        still_mode = reader.readBits(1);
+        mdm_flag = reader.readBits(1);
         
         zero_bits = reader.readBits(6);
-        if(mdm_flag) {
+        if(mdm_flag == 1) {
         	
         	x_c0 = reader.readBits(16);
         	y_c0 = reader.readBits(16);
@@ -132,12 +132,12 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
         t.add(new KVP("colour_primaries", colour_primaries));
         t.add(new KVP("transfer_characteristics", transfer_characteristics));
         t.add(new KVP("matrix_coefficients", matrix_coefficients));
-        t.add(new KVP("video_full_range_flag", video_full_range_flag, null));
-        t.add(new KVP("still_mode", still_mode, null));
-        t.add(new KVP("mdm_flag", mdm_flag, null));
+        t.add(new KVP("video_full_range_flag", video_full_range_flag));
+        t.add(new KVP("still_mode", still_mode));
+        t.add(new KVP("mdm_flag", mdm_flag));
         t.add(new KVP("zero_bits", zero_bits));
  
-        if(mdm_flag) {
+        if(mdm_flag == 1) {
             t.add(new KVP("X_c0", x_c0));
             t.add(new KVP("Y_c0", y_c0));
             t.add(new KVP("X_c1", x_c1));

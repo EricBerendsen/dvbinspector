@@ -174,11 +174,6 @@ public class KVP extends DefaultMutableTreeNode{
 		setDescription(description);
 	}
 
-	public KVP(String label, boolean value, String description) {
-		this(label, value ? 1 : 0, description);
-	}
-
-
 	public KVP(String label, byte[] byteArray) {
 		this.label = label;
 		this.byteValue = byteArray;
