@@ -429,13 +429,13 @@ public final class DescriptorFactory {
 		case 0x4C:
 			return new TimeShiftedServiceDescriptor(data, 0, tableSection);
 		case 0x4D:
-			return new ShortEventDescriptor(data, 0, tableSection);
+			return new ShortEventDescriptor(data, tableSection);
 		case 0x4E:
-			return new ExtendedEventDescriptor(data, 0, tableSection);
+			return new ExtendedEventDescriptor(data, tableSection);
 		case 0x4F:
 			return new TimeShiftedEventDescriptor(data, 0, tableSection);
 		case 0x50:
-			return new ComponentDescriptor(data, 0, tableSection);
+			return new ComponentDescriptor(data, tableSection);
 		case 0x51:
 			return new MosaicDescriptor(data, 0, tableSection);
 		case 0x52:

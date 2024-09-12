@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -54,33 +52,27 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 		public DVBString getItem() {
 			return item;
 		}
-		public void setItem(final DVBString item) {
-			this.item = item;
-		}
 		public DVBString getItemDescription() {
 			return itemDescription;
 		}
-		public void setItemDescription(final DVBString itemDescription) {
-			this.itemDescription = itemDescription;
-		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			DefaultMutableTreeNode s;
-			if(simpleModus(modus)){
-				s=new DefaultMutableTreeNode(new KVP("item",itemDescription+": "+item,null));
-			}else{
-				s=new DefaultMutableTreeNode(new KVP("item"));
-				s.add(new DefaultMutableTreeNode(new KVP("item_description_encoding",itemDescription.getEncodingString(),null)));
-				s.add(new DefaultMutableTreeNode(new KVP("item_description_length",itemDescription.getLength(),null)));
-				s.add(new DefaultMutableTreeNode(new KVP("item_description",itemDescription,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("item_encoding",item.getEncodingString(),null)));
-				s.add(new DefaultMutableTreeNode(new KVP("item_length",item.getLength(),null)));
-				s.add(new DefaultMutableTreeNode(new KVP("item",item,null)));
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			KVP s;
+			if (simpleModus(modus)) {
+				s = new KVP("item", itemDescription + ": " + item, null);
+			} else {
+				s = new KVP("item");
+				s.add(new KVP("item_description_encoding", itemDescription.getEncodingString()));
+				s.add(new KVP("item_description_length", itemDescription.getLength()));
+				s.add(new KVP("item_description", itemDescription));
+				s.add(new KVP("item_encoding", item.getEncodingString()));
+				s.add(new KVP("item_length", item.getLength()));
+				s.add(new KVP("item", item));
 			}
 
 			return s;
 		}
-
 
 	}
 
@@ -88,19 +80,19 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 	private final int lastDescriptorNumber;
 	private String  iso639LanguageCode;
 	private final int lengthOfItems;
-	private final List<Item> itemList = new ArrayList<Item>();
+	private final List<Item> itemList = new ArrayList<>();
 
 	private final DVBString text;
 
-	public ExtendedEventDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		descriptorNumber = getInt(b, offset+2, 1, 0xF0)>>4;
-		lastDescriptorNumber = getInt(b, offset+2, 1, MASK_4BITS);
-		iso639LanguageCode = getISO8859_1String(b,offset+3,3);
-		lengthOfItems= getInt(b, offset+6, 1, MASK_8BITS);
+	public ExtendedEventDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		descriptorNumber = getInt(b, 2, 1, 0xF0)>>4;
+		lastDescriptorNumber = getInt(b, 2, 1, MASK_4BITS);
+		iso639LanguageCode = getISO8859_1String(b, 3,3);
+		lengthOfItems= getInt(b, 6, 1, MASK_8BITS);
 
-		int t=offset+7;
-		while (t<(lengthOfItems+offset+7)) {
+		int t=7;
+		while (t<(lengthOfItems + 7)) {
 			final int item_description_length = getInt(b, t, 1, MASK_8BITS);
 			final DVBString item_descripton=new DVBString(b, t);
 			final int item_length = getInt(b, t+1+item_description_length, 1, MASK_8BITS);
@@ -111,16 +103,13 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 			t+=2+item_description_length+item_length;
 		}
 
-		text = new DVBString(b,offset+7 +lengthOfItems);
+		text = new DVBString(b, 7 +lengthOfItems);
 
 	}
 
+	@Override
 	public String getIso639LanguageCode() {
 		return iso639LanguageCode;
-	}
-
-	public void setIso639LanguageCode(final String networkName) {
-		this.iso639LanguageCode = networkName;
 	}
 
 	@Override
@@ -129,24 +118,23 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		if(simpleModus(modus)){
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode ,null)));
-			addListJTree(t,itemList, modus, "items");
-			if(text.getLength()>0){
-				t.add(new DefaultMutableTreeNode(new KVP("text",text,null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		if (simpleModus(modus)) {
+			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			addListJTree(t, itemList, modus, "items");
+			if (text.getLength() > 0) {
+				t.add(new KVP("text", text));
 			}
-		}else{
-
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_number",descriptorNumber ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("last_descriptor_number",lastDescriptorNumber ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("length_of_items",lengthOfItems,null)));
-			addListJTree(t,itemList, modus, "items");
-			t.add(new DefaultMutableTreeNode(new KVP("text_encoding",text.getEncodingString(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("text_length",text.getLength(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("text",text,null)));
+		} else {
+			t.add(new KVP("descriptor_number", descriptorNumber));
+			t.add(new KVP("last_descriptor_number", lastDescriptorNumber));
+			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			t.add(new KVP("length_of_items", lengthOfItems));
+			addListJTree(t, itemList, modus, "items");
+			t.add(new KVP("text_encoding", text.getEncodingString()));
+			t.add(new KVP("text_length", text.getLength()));
+			t.add(new KVP("text", text));
 		}
 
 		return t;

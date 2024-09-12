@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 /**
@@ -39,10 +40,15 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  */
 public abstract class LanguageDependentEitDescriptor extends Descriptor{
 	
-	public LanguageDependentEitDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public LanguageDependentEitDescriptor(byte[] b, TableSection parent) {
+		super(b,  parent);
 	}
 
+
+	@Override
+	public KVP getJTreeNode(final int modus){
+		return (KVP) super.getJTreeNode(modus);
+	}
 
 	public abstract String getIso639LanguageCode();
 
