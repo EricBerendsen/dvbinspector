@@ -378,7 +378,7 @@ public class TableSection implements TreeNode{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(getSectionKVP(modus));
+		final KVP t = getSectionKVP(modus);
 		addTableDetails(modus, t);
 		return t;
 	}

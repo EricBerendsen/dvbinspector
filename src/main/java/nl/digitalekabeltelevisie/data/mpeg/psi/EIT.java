@@ -41,7 +41,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -107,11 +106,10 @@ public class EIT extends AbstractPSITabel{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 
 		// need this KVP at end of loop to set ImageSource
-		KVP eitKVP = new KVP("EIT");
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(eitKVP);
+		KVP t = new KVP("EIT");
 		
 		Map<ServiceIdentification, EITsection[]> allEitImageMap = new TreeMap<>();
 		
@@ -120,8 +118,8 @@ public class EIT extends AbstractPSITabel{
 			SortedMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> networkSections = network.getValue();
 			
 			// need this KVP at end of loop to set ImageSource
-			KVP networkNodeKVP = new KVP("original_network_id", orgNetworkId,Utils.getOriginalNetworkIDString(orgNetworkId));
-			DefaultMutableTreeNode networkNode = new DefaultMutableTreeNode(networkNodeKVP);
+			KVP networkNode = new KVP("original_network_id", orgNetworkId).setDescription(Utils.getOriginalNetworkIDString(orgNetworkId));
+			
 			t.add(networkNode);
 			
 			Map<ServiceIdentification, EITsection[]> networkImageMap = new TreeMap<>();
@@ -130,9 +128,7 @@ public class EIT extends AbstractPSITabel{
 				Integer transport_stream_id = netWorkSection.getKey();
 				SortedMap<Integer, TreeMap<Integer, EITsection[]>> streams = netWorkSection.getValue();
 
-				// need this KVP at end of loop to set ImageSource
-				KVP streamNodeKVP = new KVP("transport_stream_id", transport_stream_id,null);
-				DefaultMutableTreeNode streamNode = new DefaultMutableTreeNode(streamNodeKVP);
+				KVP streamNode = new KVP("transport_stream_id", transport_stream_id);
 				networkNode.add(streamNode);
 
 				TreeMap<ServiceIdentification, EITsection[]> streamImageMap = new TreeMap<>();
@@ -144,10 +140,9 @@ public class EIT extends AbstractPSITabel{
 					// for EITImage, sections of this service with tableID >80
 					EITsection[] serviceSections = new EITsection[0];
 				
-					KVP serviceNodeKVP = new KVP("service_id", serviceId,getParentPSI().getSdt().getServiceName(orgNetworkId, transport_stream_id, serviceId));
-					DefaultMutableTreeNode serviceNode = new DefaultMutableTreeNode(serviceNodeKVP);
+					KVP serviceNode = new KVP("service_id", serviceId).setDescription(getParentPSI().getSdt().getServiceName(orgNetworkId, transport_stream_id, serviceId));
 										
-					serviceNodeKVP.addHTMLSource(() -> service.entrySet().
+					serviceNode.addHTMLSource(() -> service.entrySet().
 							stream().
 							filter(s -> s.getKey()>=80).
 							map(Entry::getValue).
@@ -157,7 +152,7 @@ public class EIT extends AbstractPSITabel{
 							collect(Collectors.joining("","<b>Schedule</b><br><br>","")),
 							"List");
 					
-					serviceNodeKVP.addTableSource(() -> getTableModelForService(service.entrySet()), EVENTS_SCHEDULE_TITLE);
+					serviceNode.addTableSource(() -> getTableModelForService(service.entrySet()), EVENTS_SCHEDULE_TITLE);
 					
 					streamNode.add(serviceNode);
 				
@@ -165,16 +160,15 @@ public class EIT extends AbstractPSITabel{
 						Integer tableId = serviceEntry.getKey();
 						EITsection[] sections = serviceEntry.getValue();
 
-						KVP tableNodeKVP = new KVP("tableid", tableId,TableSection.getTableType(tableId));
-						tableNodeKVP.addHTMLSource(() -> Arrays.stream(sections).
+						KVP tableNode = new KVP("tableid", tableId).setDescription(TableSection.getTableType(tableId));
+						tableNode.addHTMLSource(() -> Arrays.stream(sections).
 								filter(Objects::nonNull).
 								map(e -> e.getHtmlForEit(modus)).
 								collect(Collectors.joining()),
 								"List"
 								);
 
-						tableNodeKVP.addTableSource(()->getTableModel(sections), "Events");
-						DefaultMutableTreeNode tableNode = new DefaultMutableTreeNode(tableNodeKVP);
+						tableNode.addTableSource(()->getTableModel(sections), "Events");
 						serviceNode.add(tableNode);
 
 						if(tableId>=80) {
@@ -195,17 +189,17 @@ public class EIT extends AbstractPSITabel{
 					// now all sections for service are in serviceSections
 					streamImageMap.put(new ServiceIdentification(orgNetworkId, transport_stream_id, serviceId), serviceSections);
 				}
-				streamNodeKVP.addImageSource(new EITableImage(this, streamImageMap),EVENT_GRID_TITLE);
-				streamNodeKVP.addTableSource(() ->getTableModelForStream(streamImageMap.values()),EVENTS_SCHEDULE_TITLE);
+				streamNode.addImageSource(new EITableImage(this, streamImageMap),EVENT_GRID_TITLE);
+				streamNode.addTableSource(() ->getTableModelForStream(streamImageMap.values()),EVENTS_SCHEDULE_TITLE);
 				
 				networkImageMap.putAll(streamImageMap);
 			}
-			networkNodeKVP.addImageSource(new EITableImage(this, networkImageMap),EVENT_GRID_TITLE);
-			networkNodeKVP.addTableSource(() ->getTableModelForStream(networkImageMap.values()),EVENTS_SCHEDULE_TITLE);
+			networkNode.addImageSource(new EITableImage(this, networkImageMap),EVENT_GRID_TITLE);
+			networkNode.addTableSource(() ->getTableModelForStream(networkImageMap.values()),EVENTS_SCHEDULE_TITLE);
 			allEitImageMap.putAll(networkImageMap);
 		}
-		eitKVP.addImageSource(new EITableImage(this, allEitImageMap),EVENT_GRID_TITLE);
-		eitKVP.addTableSource(() ->getTableModelForStream(allEitImageMap.values()),EVENTS_SCHEDULE_TITLE);
+		t.addImageSource(new EITableImage(this, allEitImageMap),EVENT_GRID_TITLE);
+		t.addTableSource(() ->getTableModelForStream(allEitImageMap.values()),EVENTS_SCHEDULE_TITLE);
 		return t;
 
 	}

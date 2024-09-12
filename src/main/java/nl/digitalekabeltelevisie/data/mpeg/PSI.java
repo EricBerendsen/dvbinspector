@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
@@ -67,9 +65,9 @@ public class PSI {
 	private final M7Fastscan m7fastscan = new M7Fastscan(this);
 	
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PSI"));
+		final KVP t = new  KVP("PSI");
 		t.add(pat.getJTreeNode(modus));
 		t.add(cat.getJTreeNode(modus));
 		t.add(bat.getJTreeNode(modus));

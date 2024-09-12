@@ -26,8 +26,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import static nl.digitalekabeltelevisie.util.Utils.formatDuration;
-import static nl.digitalekabeltelevisie.util.Utils.getEscapedHTML;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,7 +97,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 			StringBuilder b = new StringBuilder("Event, ID=");
 			b.append(eventID).
 			append(", start_time:").
-			append(Utils.getEITStartTimeAsString(startTime)).
+			append(getEITStartTimeAsString(startTime)).
 			append(", duration:").
 			append(formatDuration(duration));
 			for (Descriptor d : descriptorList) {
@@ -122,18 +121,17 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 		}
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus){
+		public KVP getJTreeNode(int modus){
 
-			KVP kvp = new KVP("event",eventID,Utils.getEITStartTimeAsString(startTime)+" "+getEventName());
-			kvp.addHTMLSource(this,"Event details");
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-
-			t.add(new DefaultMutableTreeNode(new KVP("event_id",eventID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("start_time",startTime,Utils.getEITStartTimeAsString(startTime))));
-			t.add(new DefaultMutableTreeNode(new KVP("duration",duration,formatDuration(duration))));
-			t.add(new DefaultMutableTreeNode(new KVP("running_status",runningStatus,getRunningStatusString(runningStatus))));
-			t.add(new DefaultMutableTreeNode(new KVP("free_CA_mode",freeCAMode,getFreeCAmodeString(freeCAMode))));
-			t.add(new DefaultMutableTreeNode(new KVP("descriptors_loop_length",descriptorsLoopLength,null)));
+			KVP t = new KVP("event",eventID).setDescription(getEITStartTimeAsString(startTime)+" "+getEventName());
+			t.addHTMLSource(this,"Event details");
+			
+			t.add(new KVP("event_id", eventID));
+			t.add(new KVP("start_time", startTime).setDescription(getEITStartTimeAsString(startTime)));
+			t.add(new KVP("duration", duration).setDescription(formatDuration(duration)));
+			t.add(new KVP("running_status", runningStatus).setDescription(getRunningStatusString(runningStatus)));
+			t.add(new KVP("free_CA_mode", freeCAMode).setDescription(getFreeCAmodeString(freeCAMode)));
+			t.add(new KVP("descriptors_loop_length", descriptorsLoopLength));
 
 			Utils.addListJTree(t,descriptorList,modus,"event_descriptors");
 
@@ -188,7 +186,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 		public String getHTML() {
 			StringBuilder r1 = new StringBuilder();
 			r1.append("Start:&nbsp;").
-				append(Utils.getEITStartTimeAsString(getStartTime())).
+				append(getEITStartTimeAsString(getStartTime())).
 				append("&nbsp;Duration: ").
 				append(formatDuration(duration)).
 				append("<br><hr><br>");
@@ -338,10 +336,10 @@ public class EITsection extends TableSectionExtendedSyntax{
 	public EITsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 
-		transportStreamID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
-		originalNetworkID = Utils.getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
-		segmentLastSectionNumber= Utils.getInt(raw_data.getData(), 12, 1, Utils.MASK_8BITS);
-		lastTableID= Utils.getInt(raw_data.getData(), 13, 1, Utils.MASK_8BITS);
+		transportStreamID = getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
+		originalNetworkID = getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
+		segmentLastSectionNumber= getInt(raw_data.getData(), 12, 1, Utils.MASK_8BITS);
+		lastTableID= getInt(raw_data.getData(), 13, 1, Utils.MASK_8BITS);
 
 		eventList = buildEventList(raw_data.getData(), 14, sectionLength-14-4); //start and CRC(4)
 	}
@@ -385,17 +383,17 @@ public class EITsection extends TableSectionExtendedSyntax{
 
 	private List<Event> buildEventList(byte[] data, int offset, int programInfoLength) {
 		List<Event> r = new ArrayList<>();
-		int t =0;
-		while(t<programInfoLength){
+		int t = 0;
+		while (t < programInfoLength) {
 			Event c = new Event();
-			c.setEventID(Utils.getInt(data, offset+t, 2, Utils.MASK_16BITS));
-			c.setStartTime(Arrays.copyOfRange(data,offset+t+2,offset+t+7));
-			c.setDuration(Utils.getBCD(data, (offset+t+7)*2,6));
-			c.setRunningStatus(Utils.getInt(data, offset+t+10, 1, 0xE0)>>5);
-			c.setFreeCAMode(Utils.getInt(data, offset+t+10, 1, 0x10)>>4);
-			c.setDescriptorsLoopLength(Utils.getInt(data, offset+t+10, 2, Utils.MASK_12BITS));
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,offset+t+12,c.getDescriptorsLoopLength(),this));
-			t+=12+c.getDescriptorsLoopLength();
+			c.setEventID(getInt(data, offset + t, 2, Utils.MASK_16BITS));
+			c.setStartTime(Arrays.copyOfRange(data, offset + t + 2, offset + t + 7));
+			c.setDuration(getBCD(data, (offset + t + 7) * 2, 6));
+			c.setRunningStatus(getInt(data, offset + t + 10, 1, 0xE0) >> 5);
+			c.setFreeCAMode(getInt(data, offset + t + 10, 1, 0x10) >> 4);
+			c.setDescriptorsLoopLength(getInt(data, offset + t + 10, 2, Utils.MASK_12BITS));
+			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data, offset + t + 12, c.getDescriptorsLoopLength(), this));
+			t += 12 + c.getDescriptorsLoopLength();
 			r.add(c);
 
 		}
@@ -411,11 +409,11 @@ public class EITsection extends TableSectionExtendedSyntax{
 		KVP kvp = (KVP)t.getUserObject();
 		kvp.addHTMLSource(()->getHtmlForEit(modus), "List");
 		kvp.addTableSource(this::getTableModel, "Events");
-		t.add(new DefaultMutableTreeNode(new KVP("service_id",getServiceID(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamID,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID))));
-		t.add(new DefaultMutableTreeNode(new KVP("segment_last_section_number",segmentLastSectionNumber,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("last_table_id",lastTableID,null)));
+		t.add(new KVP("service_id",getServiceID()));
+		t.add(new KVP("transport_stream_id",transportStreamID));
+		t.add(new KVP("original_network_id",originalNetworkID).setDescription(Utils.getOriginalNetworkIDString(originalNetworkID)));
+		t.add(new KVP("segment_last_section_number",segmentLastSectionNumber));
+		t.add(new KVP("last_table_id",lastTableID));
 
 		Utils.addListJTree(t,eventList,modus,"events");
 
@@ -444,7 +442,7 @@ public class EITsection extends TableSectionExtendedSyntax{
 	public StringBuilder getHTMLLines(int modus){
 		StringBuilder b = new StringBuilder();
 		for(Event event:eventList){
-			b.append(Utils.escapeHTML(Utils.getEITStartTimeAsString(event.getStartTime()))).
+			b.append(Utils.escapeHTML(getEITStartTimeAsString(event.getStartTime()))).
 				append("&nbsp;").
 				append(formatDuration(event.getDuration())).
 				append("&nbsp;");
