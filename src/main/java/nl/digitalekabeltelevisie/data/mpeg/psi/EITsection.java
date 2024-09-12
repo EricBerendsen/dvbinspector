@@ -249,8 +249,8 @@ public class EITsection extends TableSectionExtendedSyntax{
 					List<ContentItem> contentList = contentDesc.getContentList();
 					for(ContentItem c:contentList){
 						r1.append("Content type: ").
-							append(ContentDescriptor.getContentNibbleLevel1String(c.getContentNibbleLevel1())).
-							append(ContentDescriptor.getContentNibbleLevel2String(c.getContentNibbleLevel1(),c.getContentNibbleLevel2())).
+							append(ContentDescriptor.getContentNibbleLevel1String(c.contentNibbleLevel1())).
+							append(ContentDescriptor.getContentNibbleLevel2String(c.contentNibbleLevel1(),c.contentNibbleLevel2())).
 							append("<br>");
 					}
 				}

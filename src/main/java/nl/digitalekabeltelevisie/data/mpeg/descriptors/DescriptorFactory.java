@@ -443,7 +443,7 @@ public final class DescriptorFactory {
 		case 0x53:
 			return new CAIdentifierDescriptor(data, 0, tableSection);
 		case 0x54:
-			return new ContentDescriptor(data, 0, tableSection);
+			return new ContentDescriptor(data, tableSection);
 		case 0x55:
 			return new ParentalRatingDescriptor(data, 0, tableSection);
 		case 0x56:
