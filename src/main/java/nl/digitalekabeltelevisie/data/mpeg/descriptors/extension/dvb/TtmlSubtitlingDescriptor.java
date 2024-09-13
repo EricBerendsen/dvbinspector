@@ -237,8 +237,6 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 			addListJTree(t,fontList,modus,"font_list");
 		}
 
-		t.add(new KVP("text_encoding",text.getEncodingString()));
-		t.add(new KVP("text_length",text.getLength()));
 		t.add(new KVP("text",text));
 		
 		

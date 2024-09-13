@@ -74,11 +74,7 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 			}
 		} else {
 			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
-			t.add(new KVP("event_name_encoding", eventName.getEncodingString()));
-			t.add(new KVP("event_name_length", eventName.getLength()));
 			t.add(new KVP("event_name", eventName));
-			t.add(new KVP("text_encoding", text.getEncodingString()));
-			t.add(new KVP("text_length", text.getLength()));
 			t.add(new KVP("text", text));
 		}
 		return t;

@@ -206,6 +206,8 @@ public class KVP extends DefaultMutableTreeNode{
         this.label = label;
 		this.dvbStringValue = dvbStringValue;
 		this.fieldType = FIELD_TYPE.DVBSTRING;
+		this.add(new KVP("encoding", dvbStringValue.getEncodingString()));
+		this.add(new KVP("length", dvbStringValue.getLength()));
 	}
 
 	public KVP(String label, DVBString dvbStringValue, String description) {

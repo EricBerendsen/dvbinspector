@@ -39,23 +39,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 
-	public static class Item implements TreeNode{
-		private DVBString itemDescription;
-		private DVBString item;
-
-
-		public Item(final DVBString itemDescription, final DVBString item) {
-			super();
-			this.itemDescription = itemDescription;
-			this.item = item;
-		}
-		public DVBString getItem() {
-			return item;
-		}
-		public DVBString getItemDescription() {
-			return itemDescription;
-		}
-
+	public static record Item(DVBString itemDescription, DVBString item) implements TreeNode{
 		@Override
 		public KVP getJTreeNode(final int modus) {
 			KVP s;
@@ -63,11 +47,7 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 				s = new KVP("item", itemDescription + ": " + item, null);
 			} else {
 				s = new KVP("item");
-				s.add(new KVP("item_description_encoding", itemDescription.getEncodingString()));
-				s.add(new KVP("item_description_length", itemDescription.getLength()));
 				s.add(new KVP("item_description", itemDescription));
-				s.add(new KVP("item_encoding", item.getEncodingString()));
-				s.add(new KVP("item_length", item.getLength()));
 				s.add(new KVP("item", item));
 			}
 
@@ -132,8 +112,6 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 			t.add(new KVP("length_of_items", lengthOfItems));
 			addListJTree(t, itemList, modus, "items");
-			t.add(new KVP("text_encoding", text.getEncodingString()));
-			t.add(new KVP("text_length", text.getLength()));
 			t.add(new KVP("text", text));
 		}
 
