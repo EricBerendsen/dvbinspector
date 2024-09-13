@@ -96,7 +96,7 @@ public class LinkageDescriptor extends Descriptor {
 		public KVP getJTreeNode(final int modus) {
 			final KVP s = new KVP("platform_name");
 			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
-			s.add(new KVP("platform_name", platformName, null));
+			s.add(new KVP("platform_name", platformName));
 			return s;
 		}
 	}

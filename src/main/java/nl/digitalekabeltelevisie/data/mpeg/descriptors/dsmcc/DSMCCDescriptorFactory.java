@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 import static java.lang.Byte.toUnsignedInt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -49,14 +50,17 @@ public final class DSMCCDescriptorFactory {
 
 
 	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {
-		final List<Descriptor> r = new ArrayList<Descriptor>();
+		final List<Descriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
 
+			int descriptorLen = toUnsignedInt(data[offset + t+ 1]);
+			byte[] descriptorData = Arrays.copyOfRange(data, offset + t, offset + t + descriptorLen + 2);
+
 			Descriptor d;
 			try {
-				d = getDSMCCDescriptor(data, offset,t);
+				d = getDSMCCDescriptor(descriptorData);
 
 			} catch (final RuntimeException iae) {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
@@ -74,40 +78,40 @@ public final class DSMCCDescriptorFactory {
 		return r;
 	}
 
-	private static Descriptor getDSMCCDescriptor(final byte[] data, final int offset, final int t) {
+	private static Descriptor getDSMCCDescriptor(byte[] data) {
 		Descriptor d;
-		switch (toUnsignedInt(data[t + offset])) {
+		switch (toUnsignedInt(data[0])) {
 		case 0x02:
-			d = new NameDescriptor(data, t + offset);
+			d = new NameDescriptor(data);
 			break;
 		case 0x04:
-			d = new ModuleLinkDescriptor(data, t + offset);
+			d = new ModuleLinkDescriptor(data, 0);
 			break;
 		case 0x05:
-			d = new CRC32Descriptor(data, t + offset);
+			d = new CRC32Descriptor(data,0);
 			break;
 
 		case 0x09:
-			d = new CompressedModuleDescriptor(data, t + offset);
+			d = new CompressedModuleDescriptor(data, 0);
 			break;
 
 
 		case 0x0A:
-			d = new SSUModuleTypeDescriptor(data, t + offset);
+			d = new SSUModuleTypeDescriptor(data, 0);
 			break;
 
 		case 0x70:
-			d = new LabelDescriptor(data, t + offset);
+			d = new LabelDescriptor(data, 0);
 			break;
 
 		case 0x71:
-			d = new CachingPriorityDescriptor(data, t + offset);
+			d = new CachingPriorityDescriptor(data, 0);
 			break;
 
 		default:
-			d = new DSMCCDescriptor(data, t + offset);
-			logger.info("Not implemented DSMCCDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
-					+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
+			d = new DSMCCDescriptor(data, 0);
+			logger.info("Not implemented DSMCCDescriptor:" + toUnsignedInt(data[0]) + " ("
+					+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[0]))
 					+ ",) data=" + d.getRawDataString());
 			break;
 		}

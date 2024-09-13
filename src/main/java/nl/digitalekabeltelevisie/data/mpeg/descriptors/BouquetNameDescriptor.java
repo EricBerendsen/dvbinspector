@@ -37,9 +37,9 @@ public class BouquetNameDescriptor extends Descriptor{
 
 	private final DVBString  bouquetName;
 
-	public BouquetNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		bouquetName = new DVBString(b,offset+1);
+	public BouquetNameDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		bouquetName = new DVBString(b,1);
 	}
 
 	public DVBString getBouquetName() {
@@ -56,7 +56,7 @@ public class BouquetNameDescriptor extends Descriptor{
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("bouquet_name",bouquetName ,null)));
+		t.add(new KVP("bouquet_name",bouquetName));
 		return t;
 	}
 

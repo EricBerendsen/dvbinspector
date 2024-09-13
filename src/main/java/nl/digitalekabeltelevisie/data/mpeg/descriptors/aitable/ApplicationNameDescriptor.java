@@ -44,82 +44,32 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  *
  */
 public class ApplicationNameDescriptor extends AITDescriptor {
-	private List<ApplicationName> applicationNames= new ArrayList<ApplicationName>();
+	private List<ApplicationName> applicationNames= new ArrayList<>();
 
 
 	public List<ApplicationName> getApplicationNames() {
 		return applicationNames;
 	}
 
-	public static class ApplicationName implements TreeNode{
-		/**
-		 *
-		 */
-		private String iso639LanguageCode;
-		/**
-		 *
-		 */
-		private final int application_name_length;
-		private final DVBString application_name;
-
-
-		public ApplicationName(final String lCode, final int application_name_length, final DVBString application_name){
-			iso639LanguageCode = lCode;
-			this.application_name_length = application_name_length;
-			this.application_name = application_name;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("application_name: "+application_name));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("application_name_length",application_name_length,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("application_name_encoding",application_name.getEncodingString(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("application_name",application_name,null)));
+	public static record ApplicationName(String iso639LanguageCode, DVBString application_name) implements TreeNode{
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("application_name: " + application_name);
+			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			s.add(new KVP("application_name", application_name));
 			return s;
 		}
-
-
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
-
-		public void setIso639LanguageCode(final String iso639LanguageCode) {
-			this.iso639LanguageCode = iso639LanguageCode;
-		}
-
-		@Override
-		public String toString(){
-			return "code:'"+iso639LanguageCode+"', application_name:"+application_name;
-		}
-
-
-		public int getApplication_name_length() {
-			return application_name_length;
-		}
-
-
-		public DVBString getApplication_name() {
-			return application_name;
-		}
-
-
 	}
 
-	public ApplicationNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final String languageCode=getISO8859_1String(b, offset+t+2, 3);
-
-			final int application_name_length = getInt(b, offset+t+5, 1, MASK_8BITS);
-			final DVBString application_name =new DVBString(b, offset+t+5);
-
-			final ApplicationName s = new ApplicationName(languageCode, application_name_length,application_name);
-			applicationNames.add(s);
-			t+=4+application_name_length;
+	public ApplicationNameDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			final String languageCode = getISO8859_1String(b, t + 2, 3);
+			final DVBString application_name = new DVBString(b, t + 5);
+			final ApplicationName applicationName = new ApplicationName(languageCode, application_name);
+			applicationNames.add(applicationName);
+			t += 4 + application_name.getLength();
 		}
 	}
 

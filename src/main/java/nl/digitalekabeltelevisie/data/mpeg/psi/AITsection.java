@@ -83,7 +83,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 				final List<ApplicationName> appNames = appNameDesc.getApplicationNames();
 				if((appNames!=null)&&(appNames.size()>0)){
 					final ApplicationName appName = appNames.get(0);
-					label.append(" (").append(appName.getApplication_name().toString()).append(")");
+					label.append(" (").append(appName.application_name().toString()).append(")");
 				}
 			}
 

@@ -41,7 +41,7 @@ public class DSMCCDescriptor extends Descriptor {
 	 * @param parent
 	 */
 	public DSMCCDescriptor(final byte[] b, final int offset) {
-		super(b, offset, null);
+		super(b, null);
 	}
 
 	@Override

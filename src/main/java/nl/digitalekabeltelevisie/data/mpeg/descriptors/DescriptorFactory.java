@@ -417,7 +417,7 @@ public final class DescriptorFactory {
 		case 0x46: // semantics for the VBI teletext descriptor is the same as defined for the teletext descriptor
 			return new TeletextDescriptor(data, 0, tableSection);
 		case 0x47:
-			return new BouquetNameDescriptor(data, 0, tableSection);
+			return new BouquetNameDescriptor(data, tableSection);
 		case 0x48:
 			return new ServiceDescriptor(data, tableSection);
 		case 0x49:
@@ -564,7 +564,7 @@ public final class DescriptorFactory {
 		case 0x22:
 			return new ServiceProminenceDescriptor(data, 0, tableSection);
 		case 0x23:
-			return new VvcSubpicturesDescriptor(data, 0, tableSection);
+			return new VvcSubpicturesDescriptor(data, tableSection);
 
 		default:
 			DVBExtensionDescriptor d = new DVBExtensionDescriptor(data, 0, tableSection);
@@ -633,7 +633,7 @@ public final class DescriptorFactory {
 		case 0x00:
 			return new ApplicationDescriptor(data, 0, tableSection);
 		case 0x01:
-			return new ApplicationNameDescriptor(data, 0, tableSection);
+			return new ApplicationNameDescriptor(data, tableSection);
 		case 0x02:
 			return new TransportProtocolDescriptor(data, 0, tableSection);
 		case 0x03:
