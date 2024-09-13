@@ -300,9 +300,9 @@ public class EITsection extends TableSectionExtendedSyntax{
 					r1.append("<br><table>");
 					for(ExtendedEventDescriptor.Item item :extEvent.getItemList()){
 						r1.append("<tr><td>").
-							append(item.getItemDescription().toEscapedHTML()).
+							append(item.itemDescription().toEscapedHTML()).
 							append("</td><td>").
-							append(item.getItem().toEscapedHTML()).
+							append(item.item().toEscapedHTML()).
 							append("</td></tr>");
 					}
 					r1.append("</table>");
