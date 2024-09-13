@@ -419,11 +419,11 @@ public final class DescriptorFactory {
 		case 0x47:
 			return new BouquetNameDescriptor(data, 0, tableSection);
 		case 0x48:
-			return new ServiceDescriptor(data, 0, tableSection);
+			return new ServiceDescriptor(data, tableSection);
 		case 0x49:
 			return new CountryAvailabilityDescriptor(data, 0, tableSection);
 		case 0x4A:
-			return new LinkageDescriptor(data, 0, tableSection);
+			return new LinkageDescriptor(data, tableSection);
 		case 0x4B:
 			return new NVODReferenceDescriptor(data, 0, tableSection);
 		case 0x4C:
@@ -455,11 +455,11 @@ public final class DescriptorFactory {
 		case 0x5A:
 			return new TerrestrialDeliverySystemDescriptor(data, 0, tableSection);
 		case 0x5B:
-			return new MultilingualNetworkNameDescriptor(data, 0, tableSection);
+			return new MultilingualNetworkNameDescriptor(data, tableSection);
 		case 0x5C:
-			return new MultilingualBouquetNameDescriptor(data, 0, tableSection);
+			return new MultilingualBouquetNameDescriptor(data, tableSection);
 		case 0x5D:
-			return new MultilingualServiceNameDescriptor(data, 0, tableSection);
+			return new MultilingualServiceNameDescriptor(data, tableSection);
 		case 0x5F:
 			return new PrivateDataSpecifierDescriptor(data, 0, tableSection);
 		case 0x62:
@@ -487,7 +487,7 @@ public final class DescriptorFactory {
 		case 0x70:
 			return new AdaptationFieldDataDescriptor(data, 0, tableSection);
 		case 0x71:
-			return new ServiceIdentifierDescriptor(data, 0, tableSection);
+			return new ServiceIdentifierDescriptor(data, tableSection);
 		case 0x72:
 			return new ServiceAvailabilityDescriptor(data, 0, tableSection);
 		case 0x73:

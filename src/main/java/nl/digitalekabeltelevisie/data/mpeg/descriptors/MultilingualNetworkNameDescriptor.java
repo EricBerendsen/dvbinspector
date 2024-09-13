@@ -40,74 +40,31 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class MultilingualNetworkNameDescriptor extends Descriptor {
 
-	private final List<NetworkName> networkNameList = new ArrayList<NetworkName>();
+	private final List<NetworkName> networkNameList = new ArrayList<>();
 
 
-	public static class NetworkName implements TreeNode{
-		/**
-		 *
-		 */
-		private final String iso639LanguageCode;
-		private final DVBString network_name ;
+	public static record NetworkName(String iso639LanguageCode, DVBString network_name) implements TreeNode{
 
-
-
-
-		/**
-		 * @param languageCode
-		 * @param service_provider_name2
-		 * @param service_name2
-		 */
-		public NetworkName(String languageCode, DVBString service_name2) {
-			iso639LanguageCode = languageCode;
-			network_name = service_name2;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("network_name"));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("network_name_encoding",network_name.getEncodingString(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("network_name_length",network_name.getLength(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("network_name",network_name,null)));
+		@Override
+		public KVP getJTreeNode(final int modus){
+			final KVP s = new KVP("network_name");
+			s.add(new KVP("ISO_639_language_code",iso639LanguageCode));
+			s.add(new KVP("network_name",network_name));
 			return s;
 		}
 
-
-
-		@Override
-		public String toString(){
-			return "code:'"+iso639LanguageCode;
-		}
-
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
-
-
-		public DVBString getNetwork_name() {
-			return network_name;
-		}
-
-
-
-
-
 	}
 
-	public MultilingualNetworkNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=offset+2;
-		while (t<(descriptorLength+offset+2)) {
-			final String languageCode=Utils.getISO8859_1String(b, t, 3);
-			int network_name_length = Utils.getInt(b, t+3, 1, Utils.MASK_8BITS);;
-			DVBString network_name = new DVBString(b, t+3);
+	public MultilingualNetworkNameDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		int t = 2;
+		while (t < (descriptorLength + 2)) {
+			final String languageCode = Utils.getISO8859_1String(b, t, 3);
+			int network_name_length = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
+			DVBString network_name = new DVBString(b, t + 3);
 			final NetworkName s = new NetworkName(languageCode, network_name);
 			networkNameList.add(s);
-			t+=4+network_name_length;
+			t += 4 + network_name_length;
 		}
 	}
 
@@ -117,8 +74,6 @@ public class MultilingualNetworkNameDescriptor extends Descriptor {
 		for (NetworkName serviceName : networkNameList) {
 			buf.append(serviceName.toString());
 		}
-
-
 		return buf.toString();
 	}
 

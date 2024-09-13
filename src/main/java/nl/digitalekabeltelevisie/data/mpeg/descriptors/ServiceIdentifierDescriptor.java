@@ -44,9 +44,9 @@ public class ServiceIdentifierDescriptor extends Descriptor {
 
 	private final DVBString textual_service_identifier_bytes;
 
-	public ServiceIdentifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		textual_service_identifier_bytes = new DVBString(b,offset+1);
+	public ServiceIdentifierDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		textual_service_identifier_bytes = new DVBString(b, 1);
 	}
 
 	public String getNetworkNameAsString()
@@ -62,9 +62,7 @@ public class ServiceIdentifierDescriptor extends Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("textual_service_identifier_bytes_encoding",textual_service_identifier_bytes.getEncodingString() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("textual_service_identifier_bytes_length",textual_service_identifier_bytes.getLength() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("textual_service_identifier_bytes",textual_service_identifier_bytes ,null)));
+		t.add(new KVP("textual_service_identifier_bytes",textual_service_identifier_bytes));
 		return t;
 	}
 
