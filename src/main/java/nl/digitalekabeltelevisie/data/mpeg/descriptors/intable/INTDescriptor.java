@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.intable;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -47,8 +48,8 @@ public class INTDescriptor extends Descriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public INTDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public INTDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 	}
 
 	@Override
@@ -56,7 +57,13 @@ public class INTDescriptor extends Descriptor {
 		return INTDescriptor.getDescriptorname(descriptorTag, parentTableSection);
 	}
 
-	public static String getDescriptorname(final int tag, final TableSection tableSection){
+	@Override
+	public KVP getJTreeNode(int modus){
+		return (KVP)super.getJTreeNode(modus);
+	}
+	
+	
+	public static String getDescriptorname(int tag, TableSection tableSection){
 
 
 

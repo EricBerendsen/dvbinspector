@@ -27,23 +27,17 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
-import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.psi.SCTE35;
 import nl.digitalekabeltelevisie.data.mpeg.psi.SpliceInfoSection;
-
-import static nl.digitalekabeltelevisie.util.Utils.*;
 
 
 /**
@@ -62,7 +56,6 @@ public class DSMCCStreamEventPayloadBinary implements TreeNode {
 	private int private_data_length;
 	private long private_data_specifier;
 	private byte[] private_data_byte;
-	private int carousel_object_name_length;
 	private DVBString carousel_object_name;
 	
 	SpliceInfoSection scte35_section;
@@ -98,9 +91,8 @@ public class DSMCCStreamEventPayloadBinary implements TreeNode {
 			}
 			
 			if (event_type == 1) {
-				carousel_object_name_length  = getInt(binary, offset++, 1, MASK_8BITS);
-				carousel_object_name = new DVBString(binary, offset, carousel_object_name_length);
-				offset += carousel_object_name_length;
+				carousel_object_name = new DVBString(binary, offset);
+				offset += 1 + carousel_object_name.getLength();
 				
 			}
 	
@@ -115,31 +107,30 @@ public class DSMCCStreamEventPayloadBinary implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC_stream_event_payload_binary"));
-		t.add(new DefaultMutableTreeNode(new KVP("binary", binary, null)));
+	public KVP getJTreeNode(int modus) {
+		final KVP t = new KVP("DSM-CC_stream_event_payload_binary");
+		t.add(new KVP("binary", binary));
 		if (binary.length > 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("DVB_data_length", dvb_data_length, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use", reserved_zero_future_use, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("event_type", event_type, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("timeline_type", timeline_type, null)));
+			t.add(new KVP("DVB_data_length", dvb_data_length));
+			t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use));
+			t.add(new KVP("event_type", event_type));
+			t.add(new KVP("timeline_type", timeline_type));
 
 			if (timeline_type == 0x2) {
-				t.add(new DefaultMutableTreeNode(new KVP("temi_component_tag", temi_component_tag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("temi_timeline_id", temi_timeline_id, null)));
+				t.add(new KVP("temi_component_tag", temi_component_tag));
+				t.add(new KVP("temi_timeline_id", temi_timeline_id));
 			}
 			if(reserved_zero_future_use2 != null) {
-				t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use", reserved_zero_future_use2, null)));
+				t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use2));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_length", private_data_length, null)));
+			t.add(new KVP("private_data_length", private_data_length));
 			
 			if (private_data_length > 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("private_data_specifier", private_data_specifier, getPrivateDataSpecString(private_data_specifier))));
-				t.add(new DefaultMutableTreeNode(new KVP("private_data_byte", private_data_byte, null)));
+				t.add(new KVP("private_data_specifier", private_data_specifier).setDescription(getPrivateDataSpecString(private_data_specifier)));
+				t.add(new KVP("private_data_byte", private_data_byte));
 			}
 			if (event_type == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("carousel_object_name_length", carousel_object_name_length, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("carousel_object_name", carousel_object_name, null)));
+				t.add(new KVP("carousel_object_name", carousel_object_name));
 			}
 			if (event_type == 0) {
 				t.add(scte35_section.getJTreeNode(2));

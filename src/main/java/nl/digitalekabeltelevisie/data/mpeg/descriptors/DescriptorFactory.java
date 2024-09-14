@@ -584,22 +584,21 @@ public final class DescriptorFactory {
 
 		switch (toUnsignedInt(data[0])) {
 		case 0x0C:
-			return new IPMACPlatformNameDescriptor(data, 0, tableSection);
+			return new IPMACPlatformNameDescriptor(data, tableSection);
 		case 0x0D:
-			return new IPMACPlatformProviderNameDescriptor(data, 0, tableSection);
+			return new IPMACPlatformProviderNameDescriptor(data, tableSection);
 		case 0x0F:
-			return new TargetIPSlashDescriptor(data, 0, tableSection);
+			return new TargetIPSlashDescriptor(data, tableSection);
 		case 0x13:
-			return new IPMACStreamLocationDescriptor(data, 0, tableSection);
+			return new IPMACStreamLocationDescriptor(data, tableSection);
 		default:
-			Descriptor d = new INTDescriptor(data, 0, tableSection);
+			Descriptor d = new INTDescriptor(data, tableSection);
 			logger.info("Not implemented IntDescriptor:" + toUnsignedInt(data[0]) + " ("
-					+ INTDescriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
-					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
-					+ ",) data=" + d.getRawDataString());
+					+ INTDescriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection) + ")in section "
+					+ TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data=" + d.getRawDataString());
 			return d;
 		}
-		
+
 	}
 
 	private static Descriptor getUNTDescriptor(final byte[] data, final TableSection tableSection) {

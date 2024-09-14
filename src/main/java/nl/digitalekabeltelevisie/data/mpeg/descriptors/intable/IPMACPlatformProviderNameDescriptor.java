@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.intable;
 
 import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -49,20 +47,19 @@ public class IPMACPlatformProviderNameDescriptor extends INTDescriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public IPMACPlatformProviderNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		iso639LanguageCode = getISO8859_1String(b, offset + 2, 3);
-		text = new DVBString(b, offset + 5, descriptorLength - 3);
+	public IPMACPlatformProviderNameDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		iso639LanguageCode = getISO8859_1String(b, 2, 3);
+		text = new DVBString(b, 5, descriptorLength - 3);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code", iso639LanguageCode, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("platform name", text, null)));
+	public KVP getJTreeNode(int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+		t.add(new KVP("platform name", text));
 		return t;
 	}
-
 
 }
