@@ -260,7 +260,7 @@ public final class DescriptorFactory {
 			case 0x83:
 				return new NordigLogicalChannelDescriptorV1(data, 0, tableSection, descriptorContext);
 			case 0x87:
-				return new NordigLogicalChannelDescriptorV2(data, 0, tableSection, descriptorContext);
+				return new NordigLogicalChannelDescriptorV2(data, tableSection, descriptorContext);
 			}
 
 
@@ -272,7 +272,7 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0xa4) { // Canal + International
 			switch (descriptor_tag) {
 			case 0x80:
-				return new CosBatSelectionDescriptor (data, 0, tableSection);
+				return new CosBatSelectionDescriptor (data, tableSection);
 			case 0x81:
 				return new CosInformationParametersDescriptor(data, 0, tableSection);
 			case 0x83:
@@ -287,7 +287,7 @@ public final class DescriptorFactory {
 			case 0x86:
 				return new ServiceAttributeDescriptor(data, 0, tableSection);
 			case 0x89:
-				return new GuidanceDescriptor(data, 0, tableSection);
+				return new GuidanceDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier >= 0x00003200 && private_data_specifier <= 0x0000320F ) { // FREE TV AUSTRALIA OPERATIONAL PRACTICE OP-40
 			switch (descriptor_tag) {
@@ -610,7 +610,7 @@ public final class DescriptorFactory {
 		case 0x03:
 			return new SSULocationDescriptor(data, 0, tableSection);
 		case 0x04:
-			return new MessageDescriptor(data, 0, tableSection);
+			return new MessageDescriptor(data, tableSection);
 		case 0x05:
 			return new SSUEventNameDescriptor(data, 0, tableSection);
 		case 0x06:

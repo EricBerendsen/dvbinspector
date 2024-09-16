@@ -180,7 +180,7 @@ public class KVP extends DefaultMutableTreeNode{
 		this.byteStart = 0;
 		this.byteLen = byteArray.length;
 		this.fieldType = FIELD_TYPE.BYTES;
-		detailViews.add(new DetailView((HTMLSource) () -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View"));
+		addHTMLSource(() -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View");
 	}
 
 	public KVP(String label, byte[] byteArray, String description) {
@@ -194,7 +194,7 @@ public class KVP extends DefaultMutableTreeNode{
 		this.byteStart = offset;
 		this.byteLen = len;
 		this.fieldType = FIELD_TYPE.BYTES;
-		detailViews.add(new DetailView((HTMLSource) () -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View"));
+		addHTMLSource(() -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View");
 	}
 
 	public KVP(String label, byte[] byteArray, int offset, int len, String description) {
@@ -208,11 +208,11 @@ public class KVP extends DefaultMutableTreeNode{
 		this.fieldType = FIELD_TYPE.DVBSTRING;
 		this.add(new KVP("encoding", dvbStringValue.getEncodingString()));
 		this.add(new KVP("length", dvbStringValue.getLength()));
-	}
-
-	public KVP(String label, DVBString dvbStringValue, String description) {
-        this(label,dvbStringValue);
-		setDescription(description);
+		this.addHTMLSource(
+				() ->"<b>Encoding:</b> " + dvbStringValue.getEncodingString() 
+						+ "<br><br><b>Data:</b><br>" + getHTMLHexview(dvbStringValue.getData(), dvbStringValue.getOffset() + 1, dvbStringValue.getLength())
+						+ "<br><b>Formatted:</b><br>" + dvbStringValue.toEscapedHTML(),
+				"DVB String");
 	}
 
 	

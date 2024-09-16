@@ -49,26 +49,25 @@ public class MessageDescriptor extends UNTDescriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public MessageDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public MessageDescriptor(byte[] b, TableSection parent) {
+		super(b, 0, parent);
 
-		descriptorNumber = Utils.getInt(b, offset + 2, 1, 0xF0)>>4;
-		lastDescriptorNumber = Utils.getInt(b, offset + 2, 1, Utils.MASK_4BITS);
-		iso639LanguageCode = getISO8859_1String(b, offset + 3, 3);
-		text = new DVBString(b, offset + 6, descriptorLength - 4);
+		descriptorNumber = Utils.getInt(b, 2, 1, 0xF0)>>4;
+		lastDescriptorNumber = Utils.getInt(b,2, 1, Utils.MASK_4BITS);
+		iso639LanguageCode = getISO8859_1String(b,  3, 3);
+		text = new DVBString(b, 6, descriptorLength - 4);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("descriptor_number", descriptorNumber, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("last_descriptor_number", lastDescriptorNumber, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code", iso639LanguageCode, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("platform name", text, null)));
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		t.add(new KVP("descriptor_number", descriptorNumber));
+		t.add(new KVP("last_descriptor_number", lastDescriptorNumber));
+		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+		t.add(new KVP("platform name", text));
 		return t;
 	}
 

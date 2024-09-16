@@ -38,13 +38,13 @@ public class M7OperatorNameDescriptor extends M7Descriptor {
 	
 	public M7OperatorNameDescriptor(byte[] b, int offset, TableSection parent) {
 		super(b, offset, parent);
-		operatorName = new DVBString(b,offset+1);
+		operatorName = new DVBString(b,1);
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("operator_name",operatorName ,null)));
+		t.add(new KVP("operator_name",operatorName));
 		return t;
 	}
 

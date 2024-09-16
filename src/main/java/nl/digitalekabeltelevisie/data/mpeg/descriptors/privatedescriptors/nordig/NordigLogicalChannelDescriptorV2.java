@@ -49,41 +49,18 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 //based on NorDig Unified ver 2.3  12.2.9.3 NorDig private; Logical Channel Descriptor (version 2)
 public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDescriptor {
 
-
-
 	private List<ChannelList> channelLists = new ArrayList<>();
-	public static class ChannelList implements TreeNode{
-		/**
-		 * @param channel_list_id
-		 * @param channel_list_name
-		 * @param service_loop_length
-		 * @param logicalChannelList
-		 */
-		private ChannelList(int channel_list_id, DVBString channel_list_name,String country_code,
-				int service_loop_length, List<LogicalChannel> logicalChannelList) {
-			super();
-			this.channel_list_id = channel_list_id;
-			this.channel_list_name = channel_list_name;
-			this.country_code = country_code;
-			this.service_loop_length = service_loop_length;
-			this.logicalChannelList = logicalChannelList;
-		}
 
+	public static record ChannelList(int channel_list_id, DVBString channel_list_name, String country_code, int service_loop_length,
+			List<LogicalChannel> logicalChannelList) implements TreeNode {
 
-		private int channel_list_id;
-		private DVBString channel_list_name;
-		private final String country_code;
-		private int service_loop_length;
-		private List<LogicalChannel> logicalChannelList = new ArrayList<>();
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Channel List ("+channel_list_name+")"));
-			s.add(new DefaultMutableTreeNode(new KVP("channel_list_id",channel_list_id,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("channel_list_name_length",channel_list_name.getLength(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("channel_list_name",channel_list_name,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("country_code",country_code,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_loop_length",service_loop_length,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("Channel List (" + channel_list_name + ")");
+			s.add(new KVP("channel_list_id", channel_list_id));
+			s.add(new KVP("channel_list_name", channel_list_name));
+			s.add(new KVP("country_code", country_code));
+			s.add(new KVP("service_loop_length", service_loop_length));
 
 			addListJTree(s, logicalChannelList, modus, "Logical Channels");
 			return s;
@@ -93,50 +70,46 @@ public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDesc
 
 	public class LogicalChannel extends AbstractLogicalChannel{
 
-
-		public LogicalChannel(final int service_id, final int visible_service, final int reserved, final int logical_channel_number){
+		public LogicalChannel(int service_id, int visible_service, int reserved, int logical_channel_number){
 			super(service_id, visible_service, reserved, logical_channel_number);
 		}
 
-
-
 	}
 
-	public NordigLogicalChannelDescriptorV2(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset,parent, descriptorContext);
-		int t=0;
-		while (t<descriptorLength) {
-			final int channel_list_id=getInt(b, offset+2+t,1,MASK_8BITS);
-			DVBString channel_list_name = new DVBString(b,offset+t+3);
-			t+=2+channel_list_name.getLength();
-			String country_code = getISO8859_1String(b, offset+t+2, 3);
-			t+=3;
-			int service_loop_length=getInt(b, offset+2+t,1,MASK_8BITS);
-			t+=1;
+	public NordigLogicalChannelDescriptorV2(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, 0 , parent, descriptorContext);
+		int t = 0;
+		while (t < descriptorLength) {
+			final int channel_list_id = getInt(b, 2 + t, 1, MASK_8BITS);
+			DVBString channel_list_name = new DVBString(b, t + 3);
+			t += 2 + channel_list_name.getLength();
+			String country_code = getISO8859_1String(b, t + 2, 3);
+			t += 3;
+			int service_loop_length = getInt(b, 2 + t, 1, MASK_8BITS);
+			t += 1;
 			List<LogicalChannel> channelList = new ArrayList<>();
-			int s=0;
-			while (s<service_loop_length) {
-				final int serviceId=getInt(b, offset+2+t+s,2,MASK_16BITS);
-				final int visible = getInt(b,offset+t+4+s,1,0x80) >>7;
-				final int reserved = getInt(b,offset+t+4+s,1,0x7C) >>2; // 5 bits
+			int s = 0;
+			while (s < service_loop_length) {
+				final int serviceId = getInt(b, 2 + t + s, 2, MASK_16BITS);
+				final int visible = getInt(b, t + 4 + s, 1, 0x80) >> 7;
+				final int reserved = getInt(b, t + 4 + s, 1, 0x7C) >> 2; // 5 bits
 				// chNumber is 10 bits in Nordig specs V2
-				final int chNumber=getInt(b, offset+t+4+s,2,MASK_10BITS);
+				final int chNumber = getInt(b, t + 4 + s, 2, MASK_10BITS);
 				final LogicalChannel lc = new LogicalChannel(serviceId, visible, reserved, chNumber);
 				channelList.add(lc);
-				s+=4;
+				s += 4;
 			}
-			t+=s;
-			ChannelList chList = new ChannelList(channel_list_id, channel_list_name,country_code,service_loop_length,channelList);
+			t += s;
+			ChannelList chList = new ChannelList(channel_list_id, channel_list_name, country_code, service_loop_length, channelList);
 			channelLists.add(chList);
 		}
 	}
 
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		addListJTree(t,channelLists,modus,"Channel Lists");
 		return t;
 	}
