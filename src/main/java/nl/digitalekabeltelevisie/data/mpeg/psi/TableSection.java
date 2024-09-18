@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,11 +38,10 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.util.Utils;
 
 public class TableSection implements TreeNode{
 
-	protected PsiSectionData raw_data = null;
+	protected PsiSectionData raw_data;
 
 	private PID parentPID;
 
@@ -69,14 +68,14 @@ public class TableSection implements TreeNode{
 	/* used if b_syntax_indicator is true */
 	protected long crc; /*!< CRC_32 */
 
-	protected boolean crc_error=false;
+	protected boolean crc_error;
 
-	protected TableSection nextVersion = null;
+	protected TableSection nextVersion;
 
 	/* non DVB fields */
 
-	private int firstPacketNo=-1;
-	private int lastPacketNo=-1;
+	private int firstPacketNo;
+	private int lastPacketNo;
 	/**
 	 * min distance between packets, in packets for CBR, in system_ ticks for AVCHD
 	 */
@@ -84,20 +83,19 @@ public class TableSection implements TreeNode{
 	/**
 	 * max distance between packets, in packets for CBR, in system_ ticks for AVCHD
 	 */
-	private long maxPacketDistance = 0;
-	private int occurrenceCount=-1;
-	private int packetNo=-1;
+	private long maxPacketDistance;
+	private int occurrenceCount;
+	private int packetNo;
 
-	public TableSection(final PsiSectionData raw_data, final PID parent){
-		super();
-		this.raw_data = raw_data;
+	public TableSection(PsiSectionData raw_data, PID parent){
+        this.raw_data = raw_data;
 		this.packetNo= raw_data.getPacket_no();
 		this.firstPacketNo= raw_data.getPacket_no();
 		this.lastPacketNo= raw_data.getPacket_no();
 		this.occurrenceCount = 1;
 
 		parentPID = parent;
-		final byte[] bytes=raw_data.getData(); // just for convenience
+		byte[] bytes=raw_data.getData(); // just for convenience
 
 		tableId = getInt(bytes, 0, 1, MASK_8BITS);
 
@@ -112,15 +110,15 @@ public class TableSection implements TreeNode{
 			sectionNumber = getInt(bytes,6,1,MASK_8BITS);
 			sectionLastNumber = getInt(bytes,7,1,MASK_8BITS);
 
-			final int startCRC = sectionLength -1 ; // +3 - 4, first 3 bytes not included, skip back 4 bytes till begin CRC
+			int startCRC = sectionLength -1 ; // +3 - 4, first 3 bytes not included, skip back 4 bytes till begin CRC
 			crc = (((long)toUnsignedInt(bytes[startCRC]))<<24) |
 					(((long)toUnsignedInt(bytes[startCRC+1]))<<16) |
 					(((long)toUnsignedInt(bytes[startCRC+2]))<<8) |
 					(toUnsignedInt(bytes[startCRC+3]));
 
 			if (tableId != 0x72) {  //stuffing_section 
-				final long res = CRCcheck.crc32(bytes, sectionLength + 3);
-				if (res != 0) {
+				long res = CRCcheck.crc32(bytes, sectionLength + 3);
+				if (res != 0L) {
 					crc_error = true;
 					throw new RuntimeException("CRC Error in packet for pid:" + parent.getPid() + ",tableID:" + tableId
 							+ ",tableIdExtension:" + tableIdExtension + ",CRC=" + crc + ", packetNo=" + packetNo
@@ -135,7 +133,7 @@ public class TableSection implements TreeNode{
 		return crc;
 	}
 
-	public void setCrc(final long crc) {
+	public void setCrc(long crc) {
 		this.crc = crc;
 	}
 
@@ -144,7 +142,7 @@ public class TableSection implements TreeNode{
 		return tableIdExtension;
 	}
 
-	public void setTableIdExtension(final int extension) {
+	public void setTableIdExtension(int extension) {
 		this.tableIdExtension = extension;
 	}
 
@@ -152,7 +150,7 @@ public class TableSection implements TreeNode{
 		return sectionLastNumber;
 	}
 
-	public void setSectionLastNumber(final int lastNumber) {
+	public void setSectionLastNumber(int lastNumber) {
 		this.sectionLastNumber = lastNumber;
 	}
 
@@ -160,7 +158,7 @@ public class TableSection implements TreeNode{
 		return sectionLength;
 	}
 
-	public void setSectionLength(final int length) {
+	public void setSectionLength(int length) {
 		this.sectionLength = length;
 	}
 
@@ -168,7 +166,7 @@ public class TableSection implements TreeNode{
 		return sectionNumber;
 	}
 
-	public void setSectionNumber(final int number) {
+	public void setSectionNumber(int number) {
 		this.sectionNumber = number;
 	}
 
@@ -178,7 +176,7 @@ public class TableSection implements TreeNode{
 		return tableId;
 	}
 
-	public void setTableId(final int tableId) {
+	public void setTableId(int tableId) {
 		this.tableId = tableId;
 	}
 
@@ -186,7 +184,7 @@ public class TableSection implements TreeNode{
 		return version;
 	}
 
-	public void setVersion(final int version) {
+	public void setVersion(int version) {
 		this.version = version;
 	}
 
@@ -194,11 +192,11 @@ public class TableSection implements TreeNode{
 		return raw_data;
 	}
 
-	public void setRaw_data(final PsiSectionData raw_data) {
+	public void setRaw_data(PsiSectionData raw_data) {
 		this.raw_data = raw_data;
 	}
 
-	public static String getTableType(final int tableId){
+	public static String getTableType(int tableId){
 
 		switch (tableId) {
 		case 0x00: return "program_association_section";
@@ -316,10 +314,6 @@ public class TableSection implements TreeNode{
 				return "reserved for future use";
 			}
 
-			if((0x4B<=tableId)&&(tableId<=0x4D)){
-				return "reserved for future use";
-			}
-
 			if((0x50<=tableId)&&(tableId<=0x5F)){
 				return "event_information_section - actual_transport_stream, schedule";
 			}
@@ -346,59 +340,51 @@ public class TableSection implements TreeNode{
 
 
 
-	public static String getRunningStatusString(final int runningStatus) {
+	public static String getRunningStatusString(int runningStatus) {
 
-		switch (runningStatus) {
-		case 0: return "undefined";
-		case 1: return "not running";
-		case 2: return "starts in a few seconds (e.g. for video recording)";
-		case 3: return "pausing";
-		case 4: return "running";
-		case 5: return "service off-air";
-		case 6: return "reserved for future use";
-		case 7: return "reserved for future use";
-
-		default:
-			return "Illegal value";
-		}
+        return switch (runningStatus) {
+            case 0 -> "undefined";
+            case 1 -> "not running";
+            case 2 -> "starts in a few seconds (e.g. for video recording)";
+            case 3 -> "pausing";
+            case 4 -> "running";
+            case 5 -> "service off-air";
+            case 6 -> "reserved for future use";
+            case 7 -> "reserved for future use";
+            default -> "Illegal value";
+        };
 
 	}
 
-	public static String getFreeCAmodeString(final int freeCAmode) {
+	public static String getFreeCAmodeString(int freeCAmode) {
 
-		switch (freeCAmode) {
-		case 0: return "clear";
-		case 1: return "one or more streams scrambled";
-
-		default:
-			return "Illegal value";
-		}
+        return switch (freeCAmode) {
+            case 0 -> "clear";
+            case 1 -> "one or more streams scrambled";
+            default -> "Illegal value";
+        };
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final KVP t = getSectionKVP(modus);
+		KVP t = getSectionKVP(modus);
 		addTableDetails(modus, t);
 		return t;
 	}
 
-	/**
-	 * @param modus
-	 * @return
-	 */
-	private KVP getSectionKVP(final int modus) {
-		KVP kvp = new KVP("TableType: "+getTableType(getTableId())+" ("+getSectionNumber()+"/"+getSectionLastNumber()+")");
-		if(Utils.showVersionModus(modus)&&(sectionSyntaxIndicator==1)){
+	private KVP getSectionKVP(int modus) {
+		KVP kvp = new KVP("TableType: "+getTableType(tableId)+" ("+ sectionNumber +"/"+ sectionLastNumber +")");
+		if(showVersionModus(modus)&&(sectionSyntaxIndicator==1)){
 			kvp.appendLabel(" <version "+version+">");
 
 		}
-		kvp.setCrumb("tablesection:"+getSectionNumber());
+		kvp.setCrumb("tablesection:"+ sectionNumber);
 		return kvp;
 	}
 
-	protected void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
-		if (Utils.packetModus(modus)) {
+	protected void addTableDetails(int modus, DefaultMutableTreeNode t) {
+		if (packetModus(modus)) {
 			t.add(new KVP("first_packet_no", firstPacketNo).setDescription(parentPID.getParentTransportStream().getPacketTime(firstPacketNo)));
 			t.add(new KVP("last_packet_no", lastPacketNo).setDescription(parentPID.getParentTransportStream().getPacketTime(lastPacketNo)));
 			t.add(new KVP("occurrence_count", occurrenceCount).setDescription(getRepetitionRate(occurrenceCount, lastPacketNo, firstPacketNo)));
@@ -448,19 +434,16 @@ public class TableSection implements TreeNode{
 	}
 
 
-	/**
-	 * @return
-	 */
-	private String getRepetitionRate(final int count,final int last, final int  first) {
-		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
-		final long bitrate=parentTransportStream.getBitRate();
-		if((bitrate>0)&&(count>=2)){
+	private String getRepetitionRate(int count, int last, int  first) {
+		TransportStream parentTransportStream = parentPID.getParentTransportStream();
+		long bitrate=parentTransportStream.getBitRate();
+		if((bitrate> 0L)&&(count>=2)){
 			float repRate;
 			if(parentTransportStream.isAVCHD()) {
-				final long timeDiff = parentTransportStream.getAVCHDPacketTime(last) - parentTransportStream.getAVCHDPacketTime(first);
+				long timeDiff = parentTransportStream.getAVCHDPacketTime(last) - parentTransportStream.getAVCHDPacketTime(first);
 				repRate = ((float) timeDiff) / MPEGConstants.system_clock_frequency / (count - 1);  
 			}else {
-				repRate = ((float)(last-first)*parentTransportStream.getPacketLenghth()*8)/((count-1)*bitrate);
+				repRate = ((float)(last-first)*parentTransportStream.getPacketLenghth()* 8.0F)/((count-1)*bitrate);
 			}
 			try (Formatter formatter = new Formatter()){
 				return "repetition rate: "+formatter.format("%3.3f seconds",repRate);
@@ -469,11 +452,11 @@ public class TableSection implements TreeNode{
 		return null;
 	}
 
-	private String getDistanceSecs(final long distanceInPackets) {
-		TransportStream parentTransportStream = getParentPID().getParentTransportStream();
-		final long bitrate=parentTransportStream.getBitRate();
-		if(bitrate>0){
-			final float repRate=((float)(distanceInPackets)*parentTransportStream.getPacketLenghth()*8)/(bitrate);
+	private String getDistanceSecs(long distanceInPackets) {
+		TransportStream parentTransportStream = parentPID.getParentTransportStream();
+		long bitrate=parentTransportStream.getBitRate();
+		if(bitrate> 0L){
+			float repRate=((float)(distanceInPackets)*parentTransportStream.getPacketLenghth()* 8.0F)/(bitrate);
 			try (Formatter formatter = new Formatter()){
 				return "interval: "+formatter.format("%3.3f seconds",repRate);
 			}
@@ -485,12 +468,12 @@ public class TableSection implements TreeNode{
 		return parentPID;
 	}
 
-	public void setParentPID(final PID parentPID) {
+	public void setParentPID(PID parentPID) {
 		this.parentPID = parentPID;
 	}
 
 	public TransportStream getParentTransportStream(){
-		return getParentPID().getParentTransportStream();
+		return parentPID.getParentTransportStream();
 	}
 
 	public PSI getPSI(){
@@ -501,7 +484,7 @@ public class TableSection implements TreeNode{
 		return currentNext;
 	}
 
-	public void setCurrentNext(final int currentNext) {
+	public void setCurrentNext(int currentNext) {
 		this.currentNext = currentNext;
 	}
 
@@ -509,7 +492,7 @@ public class TableSection implements TreeNode{
 		return privateIndicator;
 	}
 
-	public void setPrivateIndicator(final int privateIndicator) {
+	public void setPrivateIndicator(int privateIndicator) {
 		this.privateIndicator = privateIndicator;
 	}
 
@@ -517,7 +500,7 @@ public class TableSection implements TreeNode{
 		return sectionSyntaxIndicator;
 	}
 
-	public void setSectionSyntaxIndicator(final int sectionSyntaxIndicator) {
+	public void setSectionSyntaxIndicator(int sectionSyntaxIndicator) {
 		this.sectionSyntaxIndicator = sectionSyntaxIndicator;
 	}
 
@@ -525,7 +508,7 @@ public class TableSection implements TreeNode{
 		return crc_error;
 	}
 
-	public void setCrc_error(final boolean crc_error) {
+	public void setCrc_error(boolean crc_error) {
 		this.crc_error = crc_error;
 	}
 
@@ -533,7 +516,7 @@ public class TableSection implements TreeNode{
 		return nextVersion;
 	}
 
-	public void setNextVersion(final TableSection next) {
+	public void setNextVersion(TableSection next) {
 		this.nextVersion = next;
 	}
 
@@ -541,7 +524,7 @@ public class TableSection implements TreeNode{
 		return firstPacketNo;
 	}
 
-	public void setFirst_packet_no(final int first_packet_no) {
+	public void setFirst_packet_no(int first_packet_no) {
 		this.firstPacketNo = first_packet_no;
 	}
 
@@ -549,7 +532,7 @@ public class TableSection implements TreeNode{
 		return lastPacketNo;
 	}
 
-	public void setLast_packet_no(final int last_packet_no) {
+	public void setLast_packet_no(int last_packet_no) {
 		this.lastPacketNo = last_packet_no;
 	}
 
@@ -557,7 +540,7 @@ public class TableSection implements TreeNode{
 		return occurrenceCount;
 	}
 
-	public void setOccurrence_count(final int occurrence_count) {
+	public void setOccurrence_count(int occurrence_count) {
 		this.occurrenceCount = occurrence_count;
 	}
 
@@ -585,7 +568,7 @@ public class TableSection implements TreeNode{
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -595,7 +578,7 @@ public class TableSection implements TreeNode{
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final TableSection other = (TableSection) obj;
+		TableSection other = (TableSection) obj;
 		if (raw_data == null) {
 			return other.raw_data == null;
 		}

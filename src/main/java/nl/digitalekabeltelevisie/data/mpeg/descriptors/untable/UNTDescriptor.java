@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -43,48 +43,39 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class UNTDescriptor extends Descriptor {
 
-
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public UNTDescriptor(final byte[] b, final int offset, final TableSection parent) {
+	public UNTDescriptor(byte[] b, int offset, TableSection parent) {
 		super(b, offset, parent);
 	}
 
 	@Override
 	public String getDescriptorname(){
-		return UNTDescriptor.getDescriptorname(descriptorTag, parentTableSection);
+		return getDescriptorname(descriptorTag, parentTableSection);
 	}
 
-	public static String getDescriptorname(final int tag, final TableSection tableSection){
+	public static String getDescriptorname(int tag, TableSection tableSection){
 
 
-		if((tag>=0x0C)&&(tag<=0x3f)){
+		if((tag>=0x0E)&&(tag<=0x3f)){
 			return "reserved for future SSU use";
 		}
 
-		switch (tag) {
-		case 0x00: return "reserved";
-		case 0x01: return "scheduling_descriptor";
-		case 0x02: return "update_descriptor";
-		case 0x03: return "ssu_location_descriptor";
-		case 0x04: return "message_descriptor";
-		case 0x05: return "ssu_event_name_descriptor";
-		case 0x06: return "target_smartcard_descriptor";
-		case 0x07: return "target_MAC_address_descriptor";
-		case 0x08: return "target_serial_number_descriptor";
-		case 0x09: return "target_IP_address_descriptor";
-		case 0x0A: return "target_IPv6_address_descriptor";
-		case 0x0B: return "ssu_subgroup_association_descriptor";
-		case 0x0C: return "enhanced_message_descriptor";
-		case 0x0D: return "ssu_uri_descriptor";
-		default:
-
-			return "illegal descriptor tag value in UNT";
-
-		}
+        return switch (tag) {
+            case 0x00 -> "reserved";
+            case 0x01 -> "scheduling_descriptor";
+            case 0x02 -> "update_descriptor";
+            case 0x03 -> "ssu_location_descriptor";
+            case 0x04 -> "message_descriptor";
+            case 0x05 -> "ssu_event_name_descriptor";
+            case 0x06 -> "target_smartcard_descriptor";
+            case 0x07 -> "target_MAC_address_descriptor";
+            case 0x08 -> "target_serial_number_descriptor";
+            case 0x09 -> "target_IP_address_descriptor";
+            case 0x0A -> "target_IPv6_address_descriptor";
+            case 0x0B -> "ssu_subgroup_association_descriptor";
+            case 0x0C -> "enhanced_message_descriptor";
+            case 0x0D -> "ssu_uri_descriptor";
+            default -> "illegal descriptor tag value in UNT";
+        };
 	}
 
 

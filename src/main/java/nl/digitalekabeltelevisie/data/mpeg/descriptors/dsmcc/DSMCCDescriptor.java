@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -35,51 +35,43 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 public class DSMCCDescriptor extends Descriptor {
 
 
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public DSMCCDescriptor(final byte[] b, final int offset) {
+	public DSMCCDescriptor(byte[] b, int offset) {
 		super(b, null);
 	}
 
 	@Override
 	public String getDescriptorname(){
-		return DSMCCDescriptor.getDescriptorname(descriptorTag);
+		return getDescriptorname(descriptorTag);
 	}
 
-	public static String getDescriptorname(final int tag){
+	public static String getDescriptorname(int tag){
 
 
-		if((tag>=0x72)&&(tag<=0x7f)){
+		if((tag>=0x73)&&(tag<=0x7f)){
 			return "reserved MHP";
 		}
 		if((tag>=0x80)&&(tag<=0xff)){
 			return "private_descriptor";
 		}
 
-		switch (tag) {
-		case 0x00: return "reserved";
-		case 0x01: return "type_descriptor";
-		case 0x02: return "name_descriptor";
-		case 0x03: return "info_descriptor";
-		case 0x04: return "module_link_descriptor";
-		case 0x05: return "CRC32_descriptor";
-		case 0x06: return "location_descriptor";
-		case 0x07: return "estimated_download_time_descriptor";
-		case 0x08: return "group_link_descriptor";
-		case 0x09: return "compressed_module_descriptor";
-		case 0x0A: return "SSU_module_type"; // was "subgroup_association_descriptor". looks like DVBSnoop made a mistake in dsmcc_str.c;
-		case 0x0B: return "subgroup_association_descriptor"; // was "reserved for future use by DVB";
-		case 0x70: return "label_descriptor";		// MHP
-		case 0x71: return "caching_priority_descriptor";	// MHP
-		case 0x72: return "content_type_descriptor";	// ETSI TS 102 809 V1.3.1 (2017-06) B.2.3.4 Content type descriptor Table B.17:
-		default:
-
-			return "illegal descriptor tag value in DSM-CC";
-
-		}
+        return switch (tag) {
+            case 0x00 -> "reserved";
+            case 0x01 -> "type_descriptor";
+            case 0x02 -> "name_descriptor";
+            case 0x03 -> "info_descriptor";
+            case 0x04 -> "module_link_descriptor";
+            case 0x05 -> "CRC32_descriptor";
+            case 0x06 -> "location_descriptor";
+            case 0x07 -> "estimated_download_time_descriptor";
+            case 0x08 -> "group_link_descriptor";
+            case 0x09 -> "compressed_module_descriptor";
+            case 0x0A -> "SSU_module_type"; // was "subgroup_association_descriptor". looks like DVBSnoop made a mistake in dsmcc_str.c;
+            case 0x0B -> "subgroup_association_descriptor"; // was "reserved for future use by DVB";
+            case 0x70 -> "label_descriptor";        // MHP
+            case 0x71 -> "caching_priority_descriptor";    // MHP
+            case 0x72 -> "content_type_descriptor";    // ETSI TS 102 809 V1.3.1 (2017-06) B.2.3.4 Content type descriptor Table B.17:
+            default -> "illegal descriptor tag value in DSM-CC";
+        };
 	}
 
 
