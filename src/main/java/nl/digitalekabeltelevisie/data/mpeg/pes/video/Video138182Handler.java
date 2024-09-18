@@ -158,7 +158,7 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("13818-2 PES Data",this));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("13818-2 PES Data").addImageSource(this, "Frames"));
 		addListJTree(s,pesPackets,modus,"PES Packets");
 		addCCDataToTree(modus, s);
 		

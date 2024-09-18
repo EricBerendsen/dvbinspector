@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,13 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
+import static nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitlingPESDataField.getSegmentTypeString;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.gui.ImageSource;
+
 
 /**
  * @author Eric Berendsen
@@ -41,69 +40,45 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
  */
 public class Segment implements TreeNode{
 
-	/**
-	 *
-	 */
 	protected byte[] data_block;
 
-	/**
-	 *
-	 */
 	protected int offset;
 
-	/**
-	 * @return
-	 */
+
 	public int getSegmentType(){
 		return getSegmentType(1);
 	}
 
-	/**
-	 * @param localOffset
-	 * @return
-	 */
-	private int getSegmentType(final int localOffset) {
+
+	private int getSegmentType(int localOffset) {
 
 		return getInt(data_block, offset+ localOffset, 1, MASK_8BITS);
 	}
 
-	/**
-	 * @param data
-	 * @param offset
-	 */
-	public Segment(final byte[] data,final int offset) {
+
+	public Segment(byte[] data, int offset) {
 		data_block = data;
 		this.offset = offset;
 	}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final ImageSource imgSource) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Segment (" +DVBSubtitlingPESDataField.getSegmentTypeString(getSegmentType())+")", imgSource));
-		s.add(new DefaultMutableTreeNode(new KVP("raw_data",data_block,offset,getSegmentLength()+6,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("segment_type",getSegmentType(),DVBSubtitlingPESDataField.getSegmentTypeString(getSegmentType()))));
-		s.add(new DefaultMutableTreeNode(new KVP("page_id",getPageID(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("segment_length",getSegmentLength(),null)));
+
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s=new KVP("Segment (" + getSegmentTypeString(getSegmentType())+")");
+		s.add(new KVP("raw_data",data_block,offset,getSegmentLength()+6));
+		s.add(new KVP("segment_type",getSegmentType()).setDescription(getSegmentTypeString(getSegmentType())));
+		s.add(new KVP("page_id",getPageID()));
+		s.add(new KVP("segment_length",getSegmentLength()));
 
 		return s;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		return getJTreeNode(modus, null);
-	}
-
-	/**
-	 * @return
-	 */
 	public int getPageID() {
 		return getInt(data_block, offset+2, 2, MASK_16BITS);
 	}
 
-	/**
-	 * @return
-	 */
+
 	public int getSegmentLength() {
 		return getInt(data_block, offset+4, 2, MASK_16BITS);
 	}

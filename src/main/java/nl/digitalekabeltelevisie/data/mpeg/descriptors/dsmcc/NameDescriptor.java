@@ -37,15 +37,15 @@ public class NameDescriptor extends DSMCCDescriptor {
 
 	private final DVBString text_char;
 
-	public NameDescriptor(byte[] b, int offset) {
-		super(b, offset);
-		text_char = new DVBString(b,offset+1);
+	public NameDescriptor(byte[] b) {
+		super(b, 0);
+		text_char = new DVBString(b, 1);
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("text_char",text_char ,null)));
+		t.add(new KVP("text_char",text_char));
 		return t;
 	}
 

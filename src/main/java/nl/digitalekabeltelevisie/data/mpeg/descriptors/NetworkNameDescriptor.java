@@ -56,9 +56,7 @@ public class NetworkNameDescriptor extends Descriptor {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("network_name_encoding",networkName.getEncodingString() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("network_name_length",networkName.getLength() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("network_name",networkName ,null)));
+		t.add(new KVP("network_name",networkName));
 		return t;
 	}
 

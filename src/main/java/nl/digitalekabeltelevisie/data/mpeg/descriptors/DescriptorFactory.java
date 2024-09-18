@@ -260,7 +260,7 @@ public final class DescriptorFactory {
 			case 0x83:
 				return new NordigLogicalChannelDescriptorV1(data, 0, tableSection, descriptorContext);
 			case 0x87:
-				return new NordigLogicalChannelDescriptorV2(data, 0, tableSection, descriptorContext);
+				return new NordigLogicalChannelDescriptorV2(data, tableSection, descriptorContext);
 			}
 
 
@@ -272,7 +272,7 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0xa4) { // Canal + International
 			switch (descriptor_tag) {
 			case 0x80:
-				return new CosBatSelectionDescriptor (data, 0, tableSection);
+				return new CosBatSelectionDescriptor (data, tableSection);
 			case 0x81:
 				return new CosInformationParametersDescriptor(data, 0, tableSection);
 			case 0x83:
@@ -287,7 +287,7 @@ public final class DescriptorFactory {
 			case 0x86:
 				return new ServiceAttributeDescriptor(data, 0, tableSection);
 			case 0x89:
-				return new GuidanceDescriptor(data, 0, tableSection);
+				return new GuidanceDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier >= 0x00003200 && private_data_specifier <= 0x0000320F ) { // FREE TV AUSTRALIA OPERATIONAL PRACTICE OP-40
 			switch (descriptor_tag) {
@@ -388,11 +388,11 @@ public final class DescriptorFactory {
 		switch(descriptor_tag_extension){
 		
 		case 0x03:
-			return new HEVCTimingAndHRDDescriptor(data, 0, tableSection);
+			return new HEVCTimingAndHRDDescriptor(data, tableSection);
 		case 0x14:
-			return new JpegXsVideoDescriptor(data, 0, tableSection);
+			return new JpegXsVideoDescriptor(data, tableSection);
 		default:
-			MPEGExtensionDescriptor d = new MPEGExtensionDescriptor(data, 0, tableSection);
+			MPEGExtensionDescriptor d = new MPEGExtensionDescriptor(data, tableSection);
 			logger.warning("unimplemented MPEGExtensionDescriptor:" +
 					d.getDescriptorTagString() +
 					", TableSection:" + tableSection);
@@ -417,25 +417,25 @@ public final class DescriptorFactory {
 		case 0x46: // semantics for the VBI teletext descriptor is the same as defined for the teletext descriptor
 			return new TeletextDescriptor(data, 0, tableSection);
 		case 0x47:
-			return new BouquetNameDescriptor(data, 0, tableSection);
+			return new BouquetNameDescriptor(data, tableSection);
 		case 0x48:
-			return new ServiceDescriptor(data, 0, tableSection);
+			return new ServiceDescriptor(data, tableSection);
 		case 0x49:
 			return new CountryAvailabilityDescriptor(data, 0, tableSection);
 		case 0x4A:
-			return new LinkageDescriptor(data, 0, tableSection);
+			return new LinkageDescriptor(data, tableSection);
 		case 0x4B:
 			return new NVODReferenceDescriptor(data, 0, tableSection);
 		case 0x4C:
 			return new TimeShiftedServiceDescriptor(data, 0, tableSection);
 		case 0x4D:
-			return new ShortEventDescriptor(data, 0, tableSection);
+			return new ShortEventDescriptor(data, tableSection);
 		case 0x4E:
-			return new ExtendedEventDescriptor(data, 0, tableSection);
+			return new ExtendedEventDescriptor(data, tableSection);
 		case 0x4F:
 			return new TimeShiftedEventDescriptor(data, 0, tableSection);
 		case 0x50:
-			return new ComponentDescriptor(data, 0, tableSection);
+			return new ComponentDescriptor(data, tableSection);
 		case 0x51:
 			return new MosaicDescriptor(data, 0, tableSection);
 		case 0x52:
@@ -443,7 +443,7 @@ public final class DescriptorFactory {
 		case 0x53:
 			return new CAIdentifierDescriptor(data, 0, tableSection);
 		case 0x54:
-			return new ContentDescriptor(data, 0, tableSection);
+			return new ContentDescriptor(data, tableSection);
 		case 0x55:
 			return new ParentalRatingDescriptor(data, 0, tableSection);
 		case 0x56:
@@ -455,11 +455,11 @@ public final class DescriptorFactory {
 		case 0x5A:
 			return new TerrestrialDeliverySystemDescriptor(data, 0, tableSection);
 		case 0x5B:
-			return new MultilingualNetworkNameDescriptor(data, 0, tableSection);
+			return new MultilingualNetworkNameDescriptor(data, tableSection);
 		case 0x5C:
-			return new MultilingualBouquetNameDescriptor(data, 0, tableSection);
+			return new MultilingualBouquetNameDescriptor(data, tableSection);
 		case 0x5D:
-			return new MultilingualServiceNameDescriptor(data, 0, tableSection);
+			return new MultilingualServiceNameDescriptor(data, tableSection);
 		case 0x5F:
 			return new PrivateDataSpecifierDescriptor(data, 0, tableSection);
 		case 0x62:
@@ -487,7 +487,7 @@ public final class DescriptorFactory {
 		case 0x70:
 			return new AdaptationFieldDataDescriptor(data, 0, tableSection);
 		case 0x71:
-			return new ServiceIdentifierDescriptor(data, 0, tableSection);
+			return new ServiceIdentifierDescriptor(data, tableSection);
 		case 0x72:
 			return new ServiceAvailabilityDescriptor(data, 0, tableSection);
 		case 0x73:
@@ -552,7 +552,7 @@ public final class DescriptorFactory {
 		case 0x13:
 			return new URILinkageDescriptor(data, 0, tableSection);
 		case 0x14:
-			return new CIAncillaryDataDescriptor(data, 0, tableSection);
+			return new CIAncillaryDataDescriptor(data, tableSection);
 		case 0x15:
 			return new AC4Descriptor(data, 0, tableSection);
 		case 0x17:
@@ -560,11 +560,11 @@ public final class DescriptorFactory {
 		case 0x19:
 			return new AudioPreselectionDescriptor(data, 0, tableSection);
 		case 0x20:
-			return new TtmlSubtitlingDescriptor(data, 0, tableSection);
+			return new TtmlSubtitlingDescriptor(data, tableSection);
 		case 0x22:
 			return new ServiceProminenceDescriptor(data, 0, tableSection);
 		case 0x23:
-			return new VvcSubpicturesDescriptor(data, 0, tableSection);
+			return new VvcSubpicturesDescriptor(data, tableSection);
 
 		default:
 			DVBExtensionDescriptor d = new DVBExtensionDescriptor(data, 0, tableSection);
@@ -584,22 +584,21 @@ public final class DescriptorFactory {
 
 		switch (toUnsignedInt(data[0])) {
 		case 0x0C:
-			return new IPMACPlatformNameDescriptor(data, 0, tableSection);
+			return new IPMACPlatformNameDescriptor(data, tableSection);
 		case 0x0D:
-			return new IPMACPlatformProviderNameDescriptor(data, 0, tableSection);
+			return new IPMACPlatformProviderNameDescriptor(data, tableSection);
 		case 0x0F:
-			return new TargetIPSlashDescriptor(data, 0, tableSection);
+			return new TargetIPSlashDescriptor(data, tableSection);
 		case 0x13:
-			return new IPMACStreamLocationDescriptor(data, 0, tableSection);
+			return new IPMACStreamLocationDescriptor(data, tableSection);
 		default:
-			Descriptor d = new INTDescriptor(data, 0, tableSection);
+			Descriptor d = new INTDescriptor(data, tableSection);
 			logger.info("Not implemented IntDescriptor:" + toUnsignedInt(data[0]) + " ("
-					+ INTDescriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
-					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
-					+ ",) data=" + d.getRawDataString());
+					+ INTDescriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection) + ")in section "
+					+ TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data=" + d.getRawDataString());
 			return d;
 		}
-		
+
 	}
 
 	private static Descriptor getUNTDescriptor(final byte[] data, final TableSection tableSection) {
@@ -611,7 +610,7 @@ public final class DescriptorFactory {
 		case 0x03:
 			return new SSULocationDescriptor(data, 0, tableSection);
 		case 0x04:
-			return new MessageDescriptor(data, 0, tableSection);
+			return new MessageDescriptor(data, tableSection);
 		case 0x05:
 			return new SSUEventNameDescriptor(data, 0, tableSection);
 		case 0x06:
@@ -633,7 +632,7 @@ public final class DescriptorFactory {
 		case 0x00:
 			return new ApplicationDescriptor(data, 0, tableSection);
 		case 0x01:
-			return new ApplicationNameDescriptor(data, 0, tableSection);
+			return new ApplicationNameDescriptor(data, tableSection);
 		case 0x02:
 			return new TransportProtocolDescriptor(data, 0, tableSection);
 		case 0x03:

@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -43,21 +43,17 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 	private final DVBString eventName;
 	private DVBString text;
 
-	public ShortEventDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		iso639LanguageCode = getISO8859_1String(b,offset+2,3);
-		final int eventNameLength = getInt(b, offset+5, 1, MASK_8BITS);
-		eventName = new DVBString(b,offset+5);
-		text = new DVBString(b,offset+6 +eventNameLength);
-
+	public ShortEventDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		iso639LanguageCode = getISO8859_1String(b, 2, 3);
+		final int eventNameLength = getInt(b, 5, 1, MASK_8BITS);
+		eventName = new DVBString(b, 5);
+		text = new DVBString(b, 6 + eventNameLength);
 	}
 
+	@Override
 	public String getIso639LanguageCode() {
 		return iso639LanguageCode;
-	}
-
-	public void setIso639LanguageCode(final String networkName) {
-		this.iso639LanguageCode = networkName;
 	}
 
 	@Override
@@ -66,25 +62,20 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		if(Utils.simpleModus(modus)){
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode ,null)));
-			if(eventName.getLength()>0){
-				t.add(new DefaultMutableTreeNode(new KVP("event_name",eventName ,null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		if (Utils.simpleModus(modus)) {
+			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			if (eventName.getLength() > 0) {
+				t.add(new KVP("event_name", eventName));
 			}
-			if(text.getLength()>0){
-				t.add(new DefaultMutableTreeNode(new KVP("text",text,null)));
+			if (text.getLength() > 0) {
+				t.add(new KVP("text", text));
 			}
-		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("event_name_encoding",eventName.getEncodingString(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("event_name_length",eventName.getLength(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("event_name",eventName ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("text_encoding",text.getEncodingString(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("text_length",text.getLength(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("text",text,null)));
-
+		} else {
+			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			t.add(new KVP("event_name", eventName));
+			t.add(new KVP("text", text));
 		}
 		return t;
 	}
@@ -95,10 +86,6 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 
 	public DVBString getText() {
 		return text;
-	}
-
-	public void setText(final DVBString text) {
-		this.text = text;
 	}
 
 }

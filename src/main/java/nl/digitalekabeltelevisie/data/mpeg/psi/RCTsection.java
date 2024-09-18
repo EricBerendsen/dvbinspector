@@ -80,32 +80,12 @@ public class RCTsection extends TableSectionExtendedSyntax {
 
 	public class LinkInfo implements TreeNode {
 
-		public class PromotionalText implements TreeNode {
-
-			private final String iso639LanguageCode;
-			private final DVBString promotional_text;
-
-			/**
-			 * @param iso639LanguageCode
-			 * @param promotional_text
-			 */
-			private PromotionalText(String iso639LanguageCode,
-					DVBString promotional_text) {
-				super();
-				this.iso639LanguageCode = iso639LanguageCode;
-				this.promotional_text = promotional_text;
-			}
-
-			/* (non-Javadoc)
-			 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-			 */
+		public record PromotionalText(String iso639LanguageCode, DVBString promotional_text) implements TreeNode {
 			@Override
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
-				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("promotional_text"));
-				t.add(new DefaultMutableTreeNode(new KVP("ISO 639-2_language_code", iso639LanguageCode,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("promotional_text_encoding",promotional_text.getEncodingString(),null)));
-				t.add(new DefaultMutableTreeNode(new KVP("promotional_text_length",promotional_text.getLength(),null)));
-				t.add(new DefaultMutableTreeNode(new KVP("promotional_text",promotional_text,null)));
+			public KVP getJTreeNode(int modus) {
+				final KVP t = new KVP("promotional_text");
+				t.add(new KVP("ISO 639-2_language_code", iso639LanguageCode));
+				t.add(new KVP("promotional_text",promotional_text));
 
 				return t;
 			}
@@ -166,22 +146,24 @@ public class RCTsection extends TableSectionExtendedSyntax {
 
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("link_info"));
-			t.add(new DefaultMutableTreeNode(new KVP("link_info_length", len,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("link_type", link_type, link_type_list.get(link_type))));
-			t.add(new DefaultMutableTreeNode(new KVP("how_related_classification_scheme_id", how_related_classification_scheme_id, how_related_classification_scheme_id_list.get(how_related_classification_scheme_id))));
-			t.add(new DefaultMutableTreeNode(new KVP("term_id", term_id, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("group_id", group_id, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("precedence", precedence, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("media_uri_length", media_uri_length, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("media_uri_byte", media_uri_byte, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("number_items", number_items, null)));
-			Utils.addListJTree(t,promotional_items,modus,"Promotional text Items");
-			t.add(new DefaultMutableTreeNode(new KVP("default_icon_flag", default_icon_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("icon_id", icon_id, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length", descriptor_loop_length, null)));
-			Utils.addListJTree(t,descriptor_loop,modus,"descriptor_loop");
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP t = new KVP("link_info");
+			t.add(new KVP("link_info_length", len));
+			t.add(new KVP("link_type", link_type).setDescription(link_type_list.get(link_type)));
+			t.add(new KVP("how_related_classification_scheme_id", how_related_classification_scheme_id)
+					.setDescription(how_related_classification_scheme_id_list.get(how_related_classification_scheme_id)));
+			t.add(new KVP("term_id", term_id));
+			t.add(new KVP("group_id", group_id));
+			t.add(new KVP("precedence", precedence));
+			t.add(new KVP("media_uri_length", media_uri_length));
+			t.add(new KVP("media_uri_byte", media_uri_byte));
+			t.add(new KVP("number_items", number_items));
+			Utils.addListJTree(t, promotional_items, modus, "Promotional text Items");
+			t.add(new KVP("default_icon_flag", default_icon_flag));
+			t.add(new KVP("icon_id", icon_id));
+			t.add(new KVP("descriptor_loop_length", descriptor_loop_length));
+			Utils.addListJTree(t, descriptor_loop, modus, "descriptor_loop");
 
 			return t;
 		}
@@ -221,10 +203,10 @@ public class RCTsection extends TableSectionExtendedSyntax {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("year_offset", year_offset, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("link_count", link_count, null)));
+		t.add(new KVP("year_offset", year_offset));
+		t.add(new KVP("link_count", link_count));
 		Utils.addListJTree(t,links,modus,"link_infos");
-		t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length", descriptor_loop_length, null)));
+		t.add(new KVP("descriptor_loop_length", descriptor_loop_length));
 		Utils.addListJTree(t,descriptor_loop,modus,"descriptor_loop");
 		return t;
 	}

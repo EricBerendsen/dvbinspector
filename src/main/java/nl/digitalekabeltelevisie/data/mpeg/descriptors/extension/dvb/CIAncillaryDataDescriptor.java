@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static java.util.Arrays.copyOfRange;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -38,16 +38,16 @@ public class CIAncillaryDataDescriptor extends DVBExtensionDescriptor {
 
 	private final byte[] ancillary_data_byte;
 
-	public CIAncillaryDataDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		ancillary_data_byte = copyOfRange(b, privateDataOffset, privateDataOffset + descriptorLength - 1);
+	public CIAncillaryDataDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		ancillary_data_byte = copyOfRange(b, PRIVATE_DATA_OFFSET, PRIVATE_DATA_OFFSET + descriptorLength - 1);
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("ancillary_data_byte", ancillary_data_byte, null)));
+		t.add(new KVP("ancillary_data_byte", ancillary_data_byte));
 		return t;
 	}
 

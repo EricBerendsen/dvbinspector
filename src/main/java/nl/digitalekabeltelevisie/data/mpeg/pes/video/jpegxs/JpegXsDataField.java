@@ -49,7 +49,7 @@ public class JpegXsDataField extends PesPacketData {
     private final long color_primaries;
     private final long transfer_characteristics;
     private final long matrix_coefficients;
-    private final boolean video_full_range_flag;
+    private final int video_full_range_flag;
     private final long tcod;
 
     public JpegXsDataField(PesPacketData pesPacket) {
@@ -66,29 +66,29 @@ public class JpegXsDataField extends PesPacketData {
         color_primaries = reader.readBitsLong(8);
         transfer_characteristics = reader.readBitsLong(8);
         matrix_coefficients = reader.readBitsLong(8);
-        video_full_range_flag = reader.readBits(1) == 1;
+        video_full_range_flag = reader.readBits(1);
         reader.skiptoByteBoundary();
         tcod = reader.readBitsLong(4);
     }
 
     @Override
-    public DefaultMutableTreeNode getJTreeNode(final int modus) {
-        final DefaultMutableTreeNode jxes_node = new DefaultMutableTreeNode("JPEG-XS payload");
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("JXES Length", jxes_length, null)));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("JXES Box Code", jxes_box_code, "\"jxes\"")));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("brat", brat, "Bit Rate (MBits/s)")));
-        jxes_node.add(JpegXsVideoDescriptor.buildFratNode(frat));
-        jxes_node.add(JpegXsVideoDescriptor.buildScharNode(schar));
-        jxes_node.add(JpegXsVideoDescriptor.buildPpihNode(ppih));
-        jxes_node.add(JpegXsVideoDescriptor.buildPlevNode(plev));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("colour_primaries", color_primaries, null)));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("transfer_characteristics", transfer_characteristics, null)));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("matrix_coefficients", matrix_coefficients, null)));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("video_full_range_flag", video_full_range_flag, null)));
-        jxes_node.add(new DefaultMutableTreeNode(new KVP("tcod", tcod, null)));
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		final KVP jxes_node = new KVP("JPEG-XS payload");
+		jxes_node.add(new KVP("JXES Length", jxes_length));
+		jxes_node.add(new KVP("JXES Box Code", jxes_box_code).setDescription("\"jxes\""));
+		jxes_node.add(new KVP("brat", brat, "Bit Rate (MBits/s)"));
+		jxes_node.add(JpegXsVideoDescriptor.buildFratNode(frat));
+		jxes_node.add(JpegXsVideoDescriptor.buildScharNode(schar));
+		jxes_node.add(JpegXsVideoDescriptor.buildPpihNode(ppih));
+		jxes_node.add(JpegXsVideoDescriptor.buildPlevNode(plev));
+		jxes_node.add(new KVP("colour_primaries", color_primaries));
+		jxes_node.add(new KVP("transfer_characteristics", transfer_characteristics));
+		jxes_node.add(new KVP("matrix_coefficients", matrix_coefficients));
+		jxes_node.add(new KVP("video_full_range_flag", video_full_range_flag));
+		jxes_node.add(new KVP("tcod", tcod));
 
-        final DefaultMutableTreeNode parent_node = super.getJTreeNode(modus, new KVP("JPEG-XS PES Packet"));
-        parent_node.add(jxes_node);
-        return parent_node;
-    }
+		final DefaultMutableTreeNode parent_node = super.getJTreeNode(modus, new KVP("JPEG-XS PES Packet"));
+		parent_node.add(jxes_node);
+		return parent_node;
+	}
 }

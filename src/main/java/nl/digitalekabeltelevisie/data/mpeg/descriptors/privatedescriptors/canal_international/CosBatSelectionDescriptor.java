@@ -46,19 +46,18 @@ public class CosBatSelectionDescriptor extends Descriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public CosBatSelectionDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		bouquet_id = getInt(b, offset+2,2,MASK_16BITS);
-		selector_type = getInt(b, offset+4,1,MASK_8BITS);
-		if (selector_type == 0x01) { 
-			usage_id = getInt(b, offset+5,1,MASK_8BITS);
-		}else if (selector_type == 0x02) { 
-			region_name = new DVBString (b,offset+5);
-		}else if (selector_type != 0x03) { 
-			databyte = getBytes(b, offset+5, descriptorLength -3);
+	public CosBatSelectionDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		bouquet_id = getInt(b, 2, 2, MASK_16BITS);
+		selector_type = getInt(b, 4, 1, MASK_8BITS);
+		if (selector_type == 0x01) {
+			usage_id = getInt(b, 5, 1, MASK_8BITS);
+		} else if (selector_type == 0x02) {
+			region_name = new DVBString(b, 5);
+		} else if (selector_type != 0x03) {
+			databyte = getBytes(b, 5, descriptorLength - 3);
 		}
 	}
 
@@ -68,21 +67,19 @@ public class CosBatSelectionDescriptor extends Descriptor {
 	}
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("bouquet_id",bouquet_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("selector_type",selector_type,getSelectorTypeString(selector_type))));
-		if (selector_type == 0x01) { 
-			t.add(new DefaultMutableTreeNode(new KVP("usage_id",usage_id,null)));
-		}else if (selector_type == 0x02) { 
-			t.add(new DefaultMutableTreeNode(new KVP("region_name_length",region_name.getLength(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("region_name",region_name,null)));
-		}else if (selector_type != 0x03) { 
-			t.add(new DefaultMutableTreeNode(new KVP("databyte",databyte,null)));
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		t.add(new KVP("bouquet_id", bouquet_id));
+		t.add(new KVP("selector_type", selector_type).setDescription(getSelectorTypeString(selector_type)));
+		if (selector_type == 0x01) {
+			t.add(new KVP("usage_id", usage_id));
+		} else if (selector_type == 0x02) {
+			t.add(new KVP("region_name", region_name));
+		} else if (selector_type != 0x03) {
+			t.add(new KVP("databyte", databyte));
 
 		}
-
 
 		return t;
 	}

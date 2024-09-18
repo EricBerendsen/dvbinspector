@@ -41,73 +41,29 @@ public class ContentDescriptor extends Descriptor {
 
 	private List<ContentItem> contentList = new ArrayList<>();
 
+	public static record ContentItem(int contentNibbleLevel1, int contentNibbleLevel2, int user_byte) implements TreeNode{
 
-	public static class ContentItem implements TreeNode{
-		/**
-		 *
-		 */
-		private final int contentNibbleLevel1 ;
-		private final int contentNibbleLevel2 ;
-		private final int user_byte ;
-
-
-
-		public ContentItem(final int contentNibbleLevel1, final int contentNibbleLevel2, final int user_byte) {
-			super();
-			this.contentNibbleLevel1 = contentNibbleLevel1;
-			this.contentNibbleLevel2 = contentNibbleLevel2;
-			this.user_byte = user_byte;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("content type"));
-			s.add(new DefaultMutableTreeNode(new KVP("content_nibble_level_1",contentNibbleLevel1,getContentNibbleLevel1String(contentNibbleLevel1))));
-			s.add(new DefaultMutableTreeNode(new KVP("content_nibble_level_2",contentNibbleLevel2,getContentNibbleLevel2String(contentNibbleLevel1, contentNibbleLevel2))));
-			s.add(new DefaultMutableTreeNode(new KVP("user_byte",user_byte,null)));
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("content type");
+			s.add(new KVP("content_nibble_level_1", contentNibbleLevel1).setDescription(getContentNibbleLevel1String(contentNibbleLevel1)));
+			s.add(new KVP("content_nibble_level_2", contentNibbleLevel2).setDescription(getContentNibbleLevel2String(contentNibbleLevel1, contentNibbleLevel2)));
+			s.add(new KVP("user_byte", user_byte));
 			return s;
 		}
 
-
-
-		@Override
-		public String toString(){
-			return "content_nibble_level_1:"+contentNibbleLevel1 + ", content_nibble_level_2:"+contentNibbleLevel2;
-		}
-
-
-
-		public int getContentNibbleLevel1() {
-			return contentNibbleLevel1;
-		}
-
-
-
-		public int getContentNibbleLevel2() {
-			return contentNibbleLevel2;
-		}
-
-
-
-		public int getUserByte() {
-			return user_byte;
-		}
-
-
-
 	}
 
-	public ContentDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public ContentDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int t = 0;
 		while (t < descriptorLength) {
-			final int cNibble1 = Utils.getInt(b, offset + t + 2, 1, 0xF0) >> 4;
-			final int cNnibble2 = Utils.getInt(b, offset + t + 2, 1, Utils.MASK_4BITS);
-			final int user_byte = Utils.getInt(b, offset + t + 3, 1, Utils.MASK_8BITS);
-			final ContentItem s = new ContentItem(cNibble1, cNnibble2, user_byte);
-			contentList.add(s);
-			t += 2;
+			final int cNibble1 = Utils.getInt(b, t + 2, 1, 0xF0) >> 4;
+		final int cNnibble2 = Utils.getInt(b, t + 2, 1, Utils.MASK_4BITS);
+		final int user_byte = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
+		final ContentItem s = new ContentItem(cNibble1, cNnibble2, user_byte);
+		contentList.add(s);
+		t += 2;
 		}
 	}
 
@@ -123,173 +79,176 @@ public class ContentDescriptor extends Descriptor {
 	}
 
 	public static String getContentNibbleLevel1String(final int nibble1) {
-		switch (nibble1) {
-		case 0x0: return "undefined content";
-		case 0x1: return "Movie/Drama:";
-		case 0x2: return "News/Current affairs:";
-		case 0x3: return "Show/Game show:";
-		case 0x4: return "Sports:";
-		case 0x5: return "Children's/Youth programmes:";
-		case 0x6: return "Music/Ballet/Dance:";
-		case 0x7: return "Arts/Culture (without music):";
-		case 0x8: return "Social/Political issues/Economics:";
-		case 0x9: return "Education/Science/Factual topics:";
-		case 0xA: return "Leisure hobbies:";
-		case 0xB: return "Special characteristics:";
-		case 0xC: return "Adult:";
-		case 0xF: return "user defined";
-		default: return "reserved for future use:";
-		}
+		return switch (nibble1) {
+		case 0x0 -> "undefined content";
+		case 0x1 -> "Movie/Drama:";
+		case 0x2 -> "News/Current affairs:";
+		case 0x3 -> "Show/Game show:";
+		case 0x4 -> "Sports:";
+		case 0x5 -> "Children's/Youth programmes:";
+		case 0x6 -> "Music/Ballet/Dance:";
+		case 0x7 -> "Arts/Culture (without music):";
+		case 0x8 -> "Social/Political issues/Economics:";
+		case 0x9 -> "Education/Science/Factual topics:";
+		case 0xA -> "Leisure hobbies:";
+		case 0xB -> "Special characteristics:";
+		case 0xC -> "Adult:";
+		case 0xF -> "user defined";
+		default -> "reserved for future use:";
+		};
 	}
 
 	public static String getContentNibbleLevel2String(final int nibble1,final int nibble2) {
-		switch (nibble1) {
-		case 0x0: return "";
+		return switch (nibble1) {
+		case 0x0:
+			yield "";
 		case 0x1: // Movie/Drama:
-			switch (nibble2) {
-			case 0x0: return "movie/drama (general)";
-			case 0x1: return "detective/thriller";
-			case 0x2: return "adventure/western/war";
-			case 0x3: return "science fiction/fantasy/horror";
-			case 0x4: return "comedy";
-			case 0x5: return "soap/melodrama/folkloric";
-			case 0x6: return "romance";
-			case 0x7: return "serious/classical/religious/historical movie/drama";
-			case 0x8: return "adult movie/drama";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "movie/drama (general)";
+						case 0x1 -> "detective/thriller";
+						case 0x2 -> "adventure/western/war";
+						case 0x3 -> "science fiction/fantasy/horror";
+						case 0x4 -> "comedy";
+						case 0x5 -> "soap/melodrama/folkloric";
+						case 0x6 -> "romance";
+						case 0x7 -> "serious/classical/religious/historical movie/drama";
+						case 0x8 -> "adult movie/drama";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x2: // News/Current affairs:
-			switch (nibble2) {
-			case 0x0: return "news/current affairs (general)";
-			case 0x1: return "news/weather report";
-			case 0x2: return "news magazine";
-			case 0x3: return "documentary";
-			case 0x4: return "discussion/interview/debate";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "news/current affairs (general)";
+						case 0x1 -> "news/weather report";
+						case 0x2 -> "news magazine";
+						case 0x3 -> "documentary";
+						case 0x4 -> "discussion/interview/debate";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x3: // Show/Game show:
-			switch (nibble2) {
-			case 0x0 : return "show/game show (general)";
-			case 0x1 : return "game show/quiz/contest";
-			case 0x2 : return "variety show";
-			case 0x3 : return "talk show";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "show/game show (general)";
+						case 0x1 -> "game show/quiz/contest";
+						case 0x2 -> "variety show";
+						case 0x3 -> "talk show";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x4: // Sports:
-			switch (nibble2) {
-			case 0x0 : return "sports (general)";
-			case 0x1 : return "special events (Olympic Games, World Cup, etc.)";
-			case 0x2 : return "sports magazines";
-			case 0x3 : return "football/soccer";
-			case 0x4 : return "tennis/squash";
-			case 0x5 : return "team sports (excluding football)";
-			case 0x6 : return "athletics";
-			case 0x7 : return "motor sport";
-			case 0x8 : return "water sport";
-			case 0x9 : return "winter sports";
-			case 0xA : return "equestrian";
-			case 0xB : return "martial sports";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "sports (general)";
+						case 0x1 -> "special events (Olympic Games, World Cup, etc.)";
+						case 0x2 -> "sports magazines";
+						case 0x3 -> "football/soccer";
+						case 0x4 -> "tennis/squash";
+						case 0x5 -> "team sports (excluding football)";
+						case 0x6 -> "athletics";
+						case 0x7 -> "motor sport";
+						case 0x8 -> "water sport";
+						case 0x9 -> "winter sports";
+						case 0xA -> "equestrian";
+						case 0xB -> "martial sports";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x5: // Children's/Youth programmes:
-			switch (nibble2) {
-			case 0x0 : return "children's/youth programmes (general)";
-			case 0x1 : return "pre-school children's programmes";
-			case 0x2 : return "entertainment programmes for 6 to14";
-			case 0x3 : return "entertainment programmes for 10 to 16";
-			case 0x4 : return "informational/educational/school programmes";
-			case 0x5 : return "cartoons/puppets";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "children's/youth programmes (general)";
+						case 0x1 -> "pre-school children's programmes";
+						case 0x2 -> "entertainment programmes for 6 to14";
+						case 0x3 -> "entertainment programmes for 10 to 16";
+						case 0x4 -> "informational/educational/school programmes";
+						case 0x5 -> "cartoons/puppets";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x6: // Music/Ballet/Dance:
-			switch (nibble2) {
-			case 0x0 : return "music/ballet/dance (general)";
-			case 0x1 : return "rock/pop";
-			case 0x2 : return "serious music/classical music";
-			case 0x3 : return "folk/traditional music";
-			case 0x4 : return "jazz";
-			case 0x5 : return "musical/opera";
-			case 0x6 : return "ballet";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "music/ballet/dance (general)";
+						case 0x1 -> "rock/pop";
+						case 0x2 -> "serious music/classical music";
+						case 0x3 -> "folk/traditional music";
+						case 0x4 -> "jazz";
+						case 0x5 -> "musical/opera";
+						case 0x6 -> "ballet";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x7: // Arts/Culture (without music):
-			switch (nibble2) {
-			case 0x0 : return "arts/culture (without music, general)";
-			case 0x1 : return "performing arts";
-			case 0x2 : return "fine arts";
-			case 0x3 : return "religion";
-			case 0x4 : return "popular culture/traditional arts";
-			case 0x5 : return "literature";
-			case 0x6 : return "film/cinema";
-			case 0x7 : return "experimental film/video";
-			case 0x8 : return "broadcasting/press";
-			case 0x9 : return "new media";
-			case 0xA : return "arts/culture magazines";
-			case 0xB : return "fashion";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "arts/culture (without music, general)";
+						case 0x1 -> "performing arts";
+						case 0x2 -> "fine arts";
+						case 0x3 -> "religion";
+						case 0x4 -> "popular culture/traditional arts";
+						case 0x5 -> "literature";
+						case 0x6 -> "film/cinema";
+						case 0x7 -> "experimental film/video";
+						case 0x8 -> "broadcasting/press";
+						case 0x9 -> "new media";
+						case 0xA -> "arts/culture magazines";
+						case 0xB -> "fashion";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x8: // Social/Political issues/Economics:
-			switch (nibble2) {
-			case 0x0 : return "social/political issues/economics (general)";
-			case 0x1 : return "magazines/reports/documentary";
-			case 0x2 : return "economics/social advisory";
-			case 0x3 : return "remarkable people";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "social/political issues/economics (general)";
+						case 0x1 -> "magazines/reports/documentary";
+						case 0x2 -> "economics/social advisory";
+						case 0x3 -> "remarkable people";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0x9: // Education/Science/Factual topics:
-			switch (nibble2) {
-			case 0x0 : return "education/science/factual topics (general)";
-			case 0x1 : return "nature/animals/environment";
-			case 0x2 : return "technology/natural sciences";
-			case 0x3 : return "medicine/physiology/psychology";
-			case 0x4 : return "foreign countries/expeditions";
-			case 0x5 : return "social/spiritual sciences";
-			case 0x6 : return "further education";
-			case 0x7 : return "languages";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "education/science/factual topics (general)";
+						case 0x1 -> "nature/animals/environment";
+						case 0x2 -> "technology/natural sciences";
+						case 0x3 -> "medicine/physiology/psychology";
+						case 0x4 -> "foreign countries/expeditions";
+						case 0x5 -> "social/spiritual sciences";
+						case 0x6 -> "further education";
+						case 0x7 -> "languages";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0xA: // Leisure hobbies:
-			switch (nibble2) {
-			case 0x0 : return "leisure hobbies (general)";
-			case 0x1 : return "tourism/travel";
-			case 0x2 : return "handicraft";
-			case 0x3 : return "motoring";
-			case 0x4 : return "fitness and health";
-			case 0x5 : return "cooking";
-			case 0x6 : return "advertisement/shopping";
-			case 0x7 : return "gardening";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "leisure hobbies (general)";
+						case 0x1 -> "tourism/travel";
+						case 0x2 -> "handicraft";
+						case 0x3 -> "motoring";
+						case 0x4 -> "fitness and health";
+						case 0x5 -> "cooking";
+						case 0x6 -> "advertisement/shopping";
+						case 0x7 -> "gardening";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0xB: // Special characteristics:
-			switch (nibble2) {
-			case 0x0 : return "original language";
-			case 0x1 : return "black and white";
-			case 0x2 : return "unpublished";
-			case 0x3 : return "live broadcast";
-			case 0x4 : return "plano-stereoscopic";
-			case 0x5 : return "local or regional";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
+			yield switch (nibble2) {
+						case 0x0 -> "original language";
+						case 0x1 -> "black and white";
+						case 0x2 -> "unpublished";
+						case 0x3 -> "live broadcast";
+						case 0x4 -> "plano-stereoscopic";
+						case 0x5 -> "local or regional";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
 		case 0xC: // Adult:
-			switch (nibble2) {
-			case 0x0 : return "adult (general)";
-			case 0xF: return "user defined";
-			default: return "reserved for future use";
-			}
-		case 0xF: return "";
-		default: return "reserved for future use";
-		}
+			yield switch (nibble2) {
+						case 0x0 -> "adult (general)";
+						case 0xF -> "user defined";
+						default -> "reserved for future use";
+						};
+		case 0xF:
+			yield "";
+		default:
+			yield "reserved for future use";
+		};
 	}
 
 	@Override

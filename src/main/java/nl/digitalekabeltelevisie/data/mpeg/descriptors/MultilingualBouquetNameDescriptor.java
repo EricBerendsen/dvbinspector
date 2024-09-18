@@ -40,66 +40,31 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class MultilingualBouquetNameDescriptor extends Descriptor {
 
-	private final List<BouquetName> bouquetNameList = new ArrayList<BouquetName>();
+	private final List<BouquetName> bouquetNameList = new ArrayList<>();
 
 
-	public static class BouquetName implements TreeNode{
-		/**
-		 *
-		 */
-		private final String iso639LanguageCode;
-		private final DVBString bouquet_name ;
+	public static record BouquetName(String iso639LanguageCode, DVBString bouquet_name) implements TreeNode{
 
-
-
-
-		/**
-		 * @param languageCode
-		 * @param bouquet_name
-		 */
-		public BouquetName(String languageCode, DVBString bouquet_name) {
-			iso639LanguageCode = languageCode;
-			this.bouquet_name = bouquet_name;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("bouquet_name"));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("network_name_encoding",bouquet_name.getEncodingString(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("network_name_length",bouquet_name.getLength(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("network_name",bouquet_name,null)));
+		@Override
+		public KVP getJTreeNode(final int modus){
+			final KVP s=new KVP("bouquet_name");
+			s.add(new KVP("ISO_639_language_code",iso639LanguageCode));
+			s.add(new KVP("network_name",bouquet_name));
 			return s;
 		}
 
-
-		@Override
-		public String toString(){
-			return "code:'"+iso639LanguageCode;
-		}
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
-		public DVBString getBouquet_name() {
-			return bouquet_name;
-		}
-
-
 	}
 
-	public MultilingualBouquetNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=offset+2;
-		while (t<(descriptorLength+offset+2)) {
-			final String languageCode=Utils.getISO8859_1String(b, t, 3);
-			int bouquet_name_length = Utils.getInt(b, t+3, 1, Utils.MASK_8BITS);;
-			DVBString bouquet_name = new DVBString(b, t+3);
+	public MultilingualBouquetNameDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		int t = 2;
+		while (t < (descriptorLength + 2)) {
+			final String languageCode = Utils.getISO8859_1String(b, t, 3);
+			int bouquet_name_length = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
+			DVBString bouquet_name = new DVBString(b, t + 3);
 			final BouquetName s = new BouquetName(languageCode, bouquet_name);
 			bouquetNameList.add(s);
-			t+=4+bouquet_name_length;
+			t += 4 + bouquet_name_length;
 		}
 	}
 

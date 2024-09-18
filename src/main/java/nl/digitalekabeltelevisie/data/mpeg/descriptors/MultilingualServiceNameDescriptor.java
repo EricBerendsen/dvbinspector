@@ -40,87 +40,33 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class MultilingualServiceNameDescriptor extends Descriptor {
 
-	private final List<ServiceName> serviceNameList = new ArrayList<ServiceName>();
+	private final List<ServiceName> serviceNameList = new ArrayList<>();
 
 
-	public static class ServiceName implements TreeNode{
-		/**
-		 *
-		 */
-		private final String iso639LanguageCode;
-		private final DVBString service_provider_name ;
-		private final DVBString service_name ;
-
-
-
-
-		/**
-		 * @param languageCode
-		 * @param service_provider_name2
-		 * @param service_name2
-		 */
-		public ServiceName(String languageCode, DVBString service_provider_name2, DVBString service_name2) {
-			iso639LanguageCode = languageCode;
-			service_provider_name = service_provider_name2;
-			service_name = service_name2;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("service_name"));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_provider_name_encoding",service_provider_name.getEncodingString(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_provider_name_length",service_provider_name.getLength(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_provider_name",service_provider_name,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_name_encoding",service_name.getEncodingString(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_name_length",service_name.getLength(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_name",service_name,null)));
+	public static record ServiceName(String iso639LanguageCode, DVBString service_provider_name, DVBString service_name) implements TreeNode{
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("service_name");
+			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			s.add(new KVP("service_provider_name", service_provider_name));
+			s.add(new KVP("service_name", service_name));
 			return s;
 		}
 
-
-
-		@Override
-		public String toString(){
-			return "code:'"+iso639LanguageCode;
-		}
-
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
-
-
-		public DVBString getService_provider_name() {
-			return service_provider_name;
-		}
-
-
-
-		public DVBString getService_name() {
-			return service_name;
-		}
-
-
-
-
-
 	}
 
-	public MultilingualServiceNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=offset+2;
-		while (t<(descriptorLength+offset+2)) {
-			final String languageCode=Utils.getISO8859_1String(b, t, 3);
-			int service_provider_name_length = Utils.getInt(b, t+3, 1, Utils.MASK_8BITS);;
-			DVBString service_provider_name = new DVBString(b, t+3);
-			int service_name_length = Utils.getInt(b, t+4+service_provider_name_length, 1, Utils.MASK_8BITS);;
-			DVBString service_name = new DVBString(b, t+4+service_provider_name_length);
-			final ServiceName s = new ServiceName(languageCode, service_provider_name,service_name);
+	public MultilingualServiceNameDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		int t = 2;
+		while (t < (descriptorLength + 2)) {
+			final String languageCode = Utils.getISO8859_1String(b, t, 3);
+			int service_provider_name_length = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
+			DVBString service_provider_name = new DVBString(b, t + 3);
+			int service_name_length = Utils.getInt(b, t + 4 + service_provider_name_length, 1, Utils.MASK_8BITS);
+			DVBString service_name = new DVBString(b, t + 4 + service_provider_name_length);
+			final ServiceName s = new ServiceName(languageCode, service_provider_name, service_name);
 			serviceNameList.add(s);
-			t+=5+service_provider_name_length+service_name_length;
+			t += 5 + service_provider_name_length + service_name_length;
 		}
 	}
 

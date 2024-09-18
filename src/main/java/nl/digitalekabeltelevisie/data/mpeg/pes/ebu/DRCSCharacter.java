@@ -104,7 +104,7 @@ public class DRCSCharacter implements TreeNode, ImageSource {
 	 */
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		return new DefaultMutableTreeNode(new KVP("DRCS Character "+drcsNumber+", mode="+mode +" (" +getDRCSModeString(mode)+")",this));
+		return new DefaultMutableTreeNode(new KVP("DRCS Character "+drcsNumber+", mode="+mode +" (" +getDRCSModeString(mode)+")").addImageSource(this, "DRCS Character"));
 	}
 
 	/* (non-Javadoc)

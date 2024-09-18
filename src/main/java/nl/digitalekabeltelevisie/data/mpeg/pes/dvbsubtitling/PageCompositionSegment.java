@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,12 +32,11 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
-public class PageCompositionSegment extends Segment implements TreeNode{
+public class PageCompositionSegment extends Segment{
 
 	public static class Region implements TreeNode{
 		private int region_id;
@@ -45,7 +44,7 @@ public class PageCompositionSegment extends Segment implements TreeNode{
 		private int region_horizontal_address;
 		private int region_vertical_address;
 
-		public Region(final int region_id, final int reserved, final int region_horizontal_address, final int region_vertical_address) {
+		public Region(int region_id, int reserved, int region_horizontal_address, int region_vertical_address) {
 			super();
 			this.region_id = region_id;
 			this.reserved = reserved;
@@ -53,12 +52,13 @@ public class PageCompositionSegment extends Segment implements TreeNode{
 			this.region_vertical_address = region_vertical_address;
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("Region"));
-			s.add(new DefaultMutableTreeNode(new KVP("region_id",region_id,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("region_horizontal_address",region_horizontal_address,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("region_vertical_address",region_vertical_address,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("Region");
+			s.add(new KVP("region_id",region_id));
+			s.add(new KVP("reserved",reserved));
+			s.add(new KVP("region_horizontal_address",region_horizontal_address));
+			s.add(new KVP("region_vertical_address",region_vertical_address));
 			return s;
 		}
 
@@ -96,16 +96,16 @@ public class PageCompositionSegment extends Segment implements TreeNode{
 
 	}
 
-	public PageCompositionSegment(final byte[] data,final int offset) {
+	public PageCompositionSegment(byte[] data, int offset) {
 		super(data,offset);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("page_time_out",getPageTimeOut(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("page_version_number",getPageVersionNumber(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("page_state",getPageState(),DVBSubtitlingPESDataField.getPageStateString(getPageState()))));
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		s.add(new KVP("page_time_out",getPageTimeOut()));
+		s.add(new KVP("page_version_number",getPageVersionNumber()));
+		s.add(new KVP("page_state",getPageState()).setDescription(DVBSubtitlingPESDataField.getPageStateString(getPageState())));
 
 		addListJTree(s, getRegions(),modus,"regions");
 
@@ -137,13 +137,13 @@ public class PageCompositionSegment extends Segment implements TreeNode{
 	 * @return
 	 */
 	public List<Region> getRegions() {
-		final ArrayList<Region> regions = new ArrayList<Region>();
+		List<Region> regions = new ArrayList<>();
 		int t = 0;
 		while((t+2)<getSegmentLength()){
-			final int region = getInt(data_block, offset+8+t, 1, MASK_8BITS);
-			final int res = getInt(data_block, offset+9+t, 1, MASK_8BITS);
-			final int hor = getInt(data_block, offset+10+t, 2, MASK_16BITS);
-			final int ver = getInt(data_block, offset+12+t, 2, MASK_16BITS);
+			int region = getInt(data_block, offset+8+t, 1, MASK_8BITS);
+			int res = getInt(data_block, offset+9+t, 1, MASK_8BITS);
+			int hor = getInt(data_block, offset+10+t, 2, MASK_16BITS);
+			int ver = getInt(data_block, offset+12+t, 2, MASK_16BITS);
 			regions.add(new Region(region,res,hor,ver));
 			t+=6;
 		}

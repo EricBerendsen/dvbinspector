@@ -48,37 +48,27 @@ public class SSUEventNameDescriptor extends UNTDescriptor {
 
 	private final DVBString name;
 
-	private final int textLength;
-
 	private final DVBString text;
 
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public SSUEventNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
+	public SSUEventNameDescriptor(byte[] b, int offset, TableSection parent) {
 		super(b, offset, parent);
-		iso639LanguageCode = getISO8859_1String(b, offset + 2, 3);
-		nameLength = getInt(b, offset + 5, 1, MASK_8BITS);
-		// TS 102 006 V1.4.1 does not explicitly say this field uses coding as described in ETSI EN 300 468 [4], annex A. 
-		name = new DVBString(b, offset + 5);
-
-		textLength = getInt(b, offset + 6+nameLength, 1, MASK_8BITS);
-		text = new DVBString(b, offset + 6+nameLength);
+		iso639LanguageCode = getISO8859_1String(b, 2, 3);
+		nameLength = getInt(b, 5, 1, MASK_8BITS);
+		// TS 102 006 V1.4.1 does not explicitly say this field uses coding as described
+		// in ETSI EN 300 468 [4], annex A.
+		name = new DVBString(b, 5);
+		text = new DVBString(b, 6 + nameLength);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code", iso639LanguageCode, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("name_length", nameLength, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("name", name, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("text_length", textLength, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("text", text, null)));
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+		t.add(new KVP("name_length", nameLength));
+		t.add(new KVP("name", name));
+		t.add(new KVP("text", text));
 		return t;
 	}
-
 
 }

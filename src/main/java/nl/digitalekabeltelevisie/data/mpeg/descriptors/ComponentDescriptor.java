@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -27,9 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -53,14 +54,14 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 
 	private final DVBString text;
 
-	public ComponentDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		streamContentExt = getInt(b, offset + 2, 1, 0xF0) >> 4;
-		streamContent = getInt(b, offset + 2, 1, MASK_4BITS);
-		componentType = getInt(b, offset + 3, 1, MASK_8BITS);
-		componentTag = getInt(b, offset + 4, 1, MASK_8BITS);
-		iso639LanguageCode = getISO8859_1String(b, offset + 5, 3);
-		text =  new DVBString(b, offset + 8, descriptorLength - 6);
+	public ComponentDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		streamContentExt = getInt(b, 2, 1, 0xF0) >> 4;
+		streamContent = getInt(b, 2, 1, MASK_4BITS);
+		componentType = getInt(b, 3, 1, MASK_8BITS);
+		componentTag = getInt(b, 4, 1, MASK_8BITS);
+		iso639LanguageCode = getISO8859_1String(b, 5, 3);
+		text =  new DVBString(b, 8, descriptorLength - 6);
 	}
 
 	@Override
@@ -69,14 +70,14 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("stream_content_ext", streamContentExt, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("stream_content", streamContent, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("component_type", componentType, getStreamTypeString())));
-		t.add(new DefaultMutableTreeNode(new KVP("component_tag", componentTag,	null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code", iso639LanguageCode, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("text", text, null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("stream_content_ext", streamContentExt));
+		t.add(new KVP("stream_content", streamContent));
+		t.add(new KVP("component_type", componentType).setDescription(getStreamTypeString()));
+		t.add(new KVP("component_tag", componentTag));
+		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+		t.add(new KVP("text", text));
 		return t;
 	}
 
@@ -88,16 +89,8 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 		return streamContent;
 	}
 
-	public void setStreamContent(final int maximumBitrate) {
-		this.streamContent = maximumBitrate;
-	}
-
 	public int getReserved() {
 		return streamContentExt;
-	}
-
-	public void setReserved(final int reserverd) {
-		this.streamContentExt = reserverd;
 	}
 
 	public int getStreamContentExt() {

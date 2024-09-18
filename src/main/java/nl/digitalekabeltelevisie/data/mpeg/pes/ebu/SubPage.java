@@ -298,7 +298,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp = new KVP("SubPage " + toHexString(subPageNo, 4), this);
+		final KVP kvp = new KVP("SubPage " + toHexString(subPageNo, 4)).addImageSource(this, "Sub Page");
 		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(kvp);
 
 		final JMenuItem objectMenu = new JMenuItem("Save Page as .t42");
@@ -310,7 +310,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			if (pageLine != null) {
 				s.add(pageLine.getHTMLJTreeNode(modus));
 			} else {
-				s.add(new DefaultMutableTreeNode(new KVP(TxtDataField.BLACK_HTML_LINE, "")));
+				s.add(new DefaultMutableTreeNode(new KVP( "").setHtmlLabel(TxtDataField.BLACK_HTML_LINE)));
 			}
 		}
 		for (final TxtDataField txtDatafield : packetx_26) {

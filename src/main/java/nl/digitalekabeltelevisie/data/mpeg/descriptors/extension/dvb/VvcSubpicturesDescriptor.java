@@ -64,9 +64,9 @@ public class VvcSubpicturesDescriptor extends DVBExtensionDescriptor {
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("sub_picture"));
-			t.add(new DefaultMutableTreeNode(new KVP("component_tag",component_tag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("vvc_subpicture_id",vvc_subpicture_id,null)));
+			final KVP t = new KVP("sub_picture");
+			t.add(new KVP("component_tag",component_tag));
+			t.add(new KVP("vvc_subpicture_id",vvc_subpicture_id));
 
 			return t;
 		}
@@ -83,14 +83,14 @@ public class VvcSubpicturesDescriptor extends DVBExtensionDescriptor {
 	private int processing_mode;
 	private DVBString service_description;
 
-	public VvcSubpicturesDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public VvcSubpicturesDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		
-		default_service_mode = getInt(b, offset + 3, 1, 0b1000_0000) >> 7;
-		service_description_present = getInt(b, offset + 3, 1, 0b0100_0000) >> 6;
-		number_of_vvc_subpictures = getInt(b, offset + 3, 1, Utils.MASK_6BITS);
+		default_service_mode = getInt(b,  3, 1, 0b1000_0000) >> 7;
+		service_description_present = getInt(b, 3, 1, 0b0100_0000) >> 6;
+		number_of_vvc_subpictures = getInt(b,  3, 1, Utils.MASK_6BITS);
 		
-		int localOffset = offset+4;
+		int localOffset = 4;
 		
 		for (int i=0;i<number_of_vvc_subpictures;i++) {
 			int component_tag = getInt(b, localOffset++, 1, Utils.MASK_6BITS);
@@ -110,17 +110,17 @@ public class VvcSubpicturesDescriptor extends DVBExtensionDescriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("default_service_mode",default_service_mode,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_description_present",service_description_present,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("number_of_vvc_subpictures",number_of_vvc_subpictures,null)));
+		t.add(new KVP("default_service_mode",default_service_mode));
+		t.add(new KVP("service_description_present",service_description_present));
+		t.add(new KVP("number_of_vvc_subpictures",number_of_vvc_subpictures));
 
 		Utils.addListJTree(t, subPicturesList, modus, "subpictures");
 
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("processing_mode",processing_mode,processing_mode_list.get(processing_mode))));
+		t.add(new KVP("reserved_zero_future_use",reserved_zero_future_use));
+		t.add(new KVP("processing_mode",processing_mode).setDescription(processing_mode_list.get(processing_mode)));
 
 		if(service_description_present == 0b1) {
-			t.add(new DefaultMutableTreeNode(new KVP("service_description",service_description,null)));
+			t.add(new KVP("service_description",service_description));
 		}
 
 		return t;

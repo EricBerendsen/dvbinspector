@@ -77,11 +77,11 @@ public final class GuiUtils {
 	public static KVP getNotImplementedKVP(final String feature){
 		final StringBuilder message = new StringBuilder();
 		message.append(feature).append(" not implemented. ").append(getImproveMsg());
-		return new KVP("<span style=\"color: red;\">"+ message +"</span>",message.toString());
+		return new KVP(message.toString()).setHtmlLabel("<span style=\"color: red;\">"+ message +"</span>");
 	}
 
 	public static KVP getErrorKVP(final String message){
-		return new KVP("<span style=\"color: red;\">"+ message +"</span>", message);
+		return new KVP( message).setHtmlLabel("<span style=\"color: red;\">"+ message +"</span>");
 	}
 
 	public static String getImproveMsg() {

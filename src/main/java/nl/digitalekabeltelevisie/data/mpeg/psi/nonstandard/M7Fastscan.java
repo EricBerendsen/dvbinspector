@@ -125,15 +125,15 @@ public class M7Fastscan implements TreeNode {
 			 LinkageDescriptor homeTP_location_descriptor = optionalHomeTP_location_descriptor.get();
 			 Optional<BrandHomeTransponder> optionalBrandHomeTransponder = homeTP_location_descriptor.getM7BrandHomeTransponderList()
 			 	.stream()
-			 	.filter(k -> k.getOperator_network_id() == operatorNetworkId)
-			 	.filter(k -> k.getFst_pid() == fstPid)
+			 	.filter(k -> k.operator_network_id() == operatorNetworkId)
+			 	.filter(k -> k.fst_pid() == fstPid)
 			 	.findFirst();
 			 
 
 			 
 			if (optionalBrandHomeTransponder.isPresent()) {
 				BrandHomeTransponder brandHomeTransponder = optionalBrandHomeTransponder.get();
-				int sublist_id = brandHomeTransponder.getOperator_sublist_id();
+				int sublist_id = brandHomeTransponder.operator_sublist_id();
 				r = "sublist_id: " + sublist_id;
 				if(ontSections!=null) {
 					for(ONTSection ontSection:ontSections) {

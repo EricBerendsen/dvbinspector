@@ -55,11 +55,11 @@ public class KVPTest {
                 return null;
             }
         };
-        KVP kvp = new KVP("Plaatje", imgSource);
+        KVP kvp = new KVP("Plaatje").addImageSource(imgSource, "label3");
         assertEquals("Plaatje", kvp.toString());
         assertEquals(1, kvp.getDetailViews().size());
         assertEquals(imgSource, kvp.getDetailViews().getFirst().detailSource());
-        assertEquals("", kvp.getDetailViews().getFirst().label());
+        assertEquals("label3", kvp.getDetailViews().getFirst().label());
     }
 
     @Test
@@ -99,22 +99,11 @@ public class KVPTest {
         assertEquals("LabelForLong: 0x8E",kvp.toString());
     }
 
-    @Test
-    public void testKVPStringBooleanString() {
-        KVP kvp = new KVP("BooleanLabel",true,"Boooolean Explanation");
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.HEX);
-        assertEquals("BooleanLabel: 0x1 => Boooolean Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.BOTH);
-        assertEquals("BooleanLabel: 0x1 (1) => Boooolean Explanation",kvp.toString());
-        kvp = new KVP("BooleanLabel",false,"Boooolean false Explanation");
-        assertEquals("BooleanLabel: 0x0 (0) => Boooolean false Explanation",kvp.toString());
-        KVP.setNumberDisplay(KVP.NUMBER_DISPLAY.DECIMAL);
-        assertEquals("BooleanLabel: 0 => Boooolean false Explanation",kvp.toString());
-    }
 
     @Test
     public void testHtmlLabelString() {
-        KVP kvp = new KVP("<h1>Head</h1>","<b>bold label?</b>");
+        //KVP kvp = new KVP("<h1>Head</h1>","<b>bold label?</b>");
+        KVP kvp = new KVP("<b>bold label?</b>").setHtmlLabel("<h1>Head</h1>");
         KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_AWT);
         assertEquals("<html><h1>Head</h1></html>",kvp.toString());
         KVP.setStringDisplay(KVP.STRING_DISPLAY.PLAIN);
@@ -122,7 +111,7 @@ public class KVPTest {
         KVP.setStringDisplay(KVP.STRING_DISPLAY.HTML_FRAGMENTS);
         assertEquals("<h1>Head</h1>",kvp.toString());
         KVP.setStringDisplay(KVP.STRING_DISPLAY.JAVASCRIPT);
-        assertEquals("",kvp.toString());
+        assertEquals("<h1>Head</h1>",kvp.toString());
     }
 
     @Test
@@ -146,23 +135,62 @@ public class KVPTest {
 
 
     @Test
-    public void testKVPStringDVBStringString() {
+    public void testKVPStringDVBString() {
         final byte []rawString = {0x5,0x44,13,0x44,0x56,0x42,0x20,0x49,0x6e,0x73,0x70,0x65,0x63,0x74,0x6f,0x72,0x21,0x55};
         final byte []rawStringExtendedAsci = {0x5,0x44,5,-92,-68,-67,-66,-45};
 
+        byte[] realisateur = HexFormat.of().parseHex("0E10000252E9616C69736174657572"); 
 
         DVBString dvbString = new DVBString(rawString, 2);
 
-        KVP kvp = new KVP("DVBStringTest",dvbString,"description");
+        KVP kvp = new KVP("DVBStringTest",dvbString).setDescription("description");
 
         assertEquals("DVBStringTest: DVB Inspector => description", kvp.toString());
 
+        // two children, length and encoding
+        assertEquals(2, kvp.getChildCount());
+        assertTrue(kvp.getChildAt(0) instanceof KVP);
+        
+        assertEquals("encoding: default (ISO 6937, latin)", ((KVP)kvp.getChildAt(0)).toString());
+        assertEquals("length: 0xD (13)", ((KVP)kvp.getChildAt(1)).toString(KVP.STRING_DISPLAY.HTML_AWT, KVP.NUMBER_DISPLAY.BOTH));
+               
 
         dvbString = new DVBString(rawStringExtendedAsci, 2);
 
-        kvp = new KVP("quarter",dvbString,"half");
+        kvp = new KVP("quarter",dvbString).setDescription("half");
         assertEquals("quarter: €¼½¾© => half", kvp.toString());
+        
+        DVBString dvbStringRealisateur  = new DVBString(realisateur, 0);
+        kvp = new KVP("French",dvbStringRealisateur);
+        
+        assertEquals("French: Réalisateur", kvp.toString());
+
+        // two children, length and encoding
+        assertEquals(2, kvp.getChildCount());
+        assertTrue(kvp.getChildAt(0) instanceof KVP);
+        assertEquals("encoding: ISO/IEC 8859-2", ((KVP)kvp.getChildAt(0)).toString());
+        assertEquals("length: 14", ((KVP)kvp.getChildAt(1)).toString(KVP.STRING_DISPLAY.HTML_AWT, KVP.NUMBER_DISPLAY.DECIMAL));
+        
+		byte[] testHtml = HexFormat.of().parseHex("113c68313e263c62723e418A428643448744");
+		 
+		DVBString tst = new DVBString(testHtml,0);
+		kvp = new KVP("test html",tst);
+		
+		assertEquals("test html: <h1>&<br>ABCDD", kvp.toString());
+
+        assertEquals(2, kvp.getChildCount());
+        assertTrue(kvp.getChildAt(0) instanceof KVP);
+        assertEquals("encoding: default (ISO 6937, latin)", ((KVP)kvp.getChildAt(0)).toString());
+        assertEquals("length: 17", ((KVP)kvp.getChildAt(1)).toString(KVP.STRING_DISPLAY.HTML_AWT, KVP.NUMBER_DISPLAY.DECIMAL));
+        
+        assertEquals(1 ,kvp.getDetailViews().size());
+
+        assertEquals("DVB String",kvp.getDetailViews().getFirst().label());
+        assertTrue(kvp.getDetailViews().getFirst().detailSource()  instanceof HTMLSource);
+        
+        assertEquals("<b>Encoding:</b> default (ISO 6937, latin)<br><br><b>Data:</b><br><pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0001 0203 0405 0607 0809 0A0B 0C0D 0E0F 0123456789ABCDEF<br>0x000000&nbsp;<span style=\"color:black; background-color: white;\">3C68&nbsp;313E&nbsp;263C&nbsp;6272&nbsp;3E41&nbsp;8A42&nbsp;8643&nbsp;4487&nbsp;&lt;h1&gt;&amp;&lt;br&gt;A.B.CD.</span><br>0x000010&nbsp;<span style=\"color:black; background-color: white;\">44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D</span><br></pre><br><b>Formatted:</b><br> &lt;h1&gt;&amp;&lt;br&gt;A<br> B<em> CD</em> D",((HTMLSource)kvp.getDetailViews().getFirst().detailSource()).getHTML()); 
     }
+    
 
     @Test
     public void testKVPStringHTMLSource() {
@@ -176,7 +204,8 @@ public class KVPTest {
                 return html;
             }
         };
-        KVP kvp = new KVP("htmlfragment",htmlSource);
+        KVP kvp = new KVP("htmlfragment");
+        kvp.addHTMLSource(htmlSource, "htmlfragment");
 
         kvp.appendLabel(" [1]");
         assertEquals("htmlfragment [1]",kvp.toString());

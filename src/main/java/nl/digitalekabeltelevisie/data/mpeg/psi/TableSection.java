@@ -378,7 +378,7 @@ public class TableSection implements TreeNode{
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(getSectionKVP(modus));
+		final KVP t = getSectionKVP(modus);
 		addTableDetails(modus, t);
 		return t;
 	}
@@ -399,41 +399,33 @@ public class TableSection implements TreeNode{
 
 	protected void addTableDetails(final int modus, final DefaultMutableTreeNode t) {
 		if (Utils.packetModus(modus)) {
-			t.add(new DefaultMutableTreeNode(new KVP("first_packet_no", firstPacketNo,
-					parentPID.getParentTransportStream().getPacketTime(firstPacketNo))));
-			t.add(new DefaultMutableTreeNode(new KVP("last_packet_no", lastPacketNo,
-					parentPID.getParentTransportStream().getPacketTime(lastPacketNo))));
-			t.add(new DefaultMutableTreeNode(new KVP("occurrence_count", occurrenceCount,
-					getRepetitionRate(occurrenceCount, lastPacketNo, firstPacketNo))));
+			t.add(new KVP("first_packet_no", firstPacketNo).setDescription(parentPID.getParentTransportStream().getPacketTime(firstPacketNo)));
+			t.add(new KVP("last_packet_no", lastPacketNo).setDescription(parentPID.getParentTransportStream().getPacketTime(lastPacketNo)));
+			t.add(new KVP("occurrence_count", occurrenceCount).setDescription(getRepetitionRate(occurrenceCount, lastPacketNo, firstPacketNo)));
 			if (occurrenceCount >= 2) {
 				if(getParentTransportStream().isAVCHD()) {
-					t.add(new DefaultMutableTreeNode(
-							new KVP("min_packet_distance in ticks", minPacketDistance, printPCRTime(minPacketDistance) )));
-					t.add(new DefaultMutableTreeNode(
-							new KVP("max_packet_distance in ticks", maxPacketDistance, printPCRTime(maxPacketDistance))));
+					t.add(new KVP("min_packet_distance in ticks", minPacketDistance).setDescription(printPCRTime(minPacketDistance)));
+					t.add(new KVP("max_packet_distance in ticks", maxPacketDistance).setDescription(printPCRTime(maxPacketDistance)));
 					
 				}else {
-					t.add(new DefaultMutableTreeNode(
-							new KVP("min_packet_distance in packets", minPacketDistance, getDistanceSecs(minPacketDistance))));
-					t.add(new DefaultMutableTreeNode(
-							new KVP("max_packet_distance in packets", maxPacketDistance, getDistanceSecs(maxPacketDistance))));
+					t.add(new KVP("min_packet_distance in packets", minPacketDistance).setDescription(getDistanceSecs(minPacketDistance)));
+					t.add(new KVP("max_packet_distance in packets", maxPacketDistance).setDescription(getDistanceSecs(maxPacketDistance)));
 				}
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("table_id", tableId, getTableType(tableId))));
-		t.add(new DefaultMutableTreeNode(new KVP("section_syntax_indicator", sectionSyntaxIndicator, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("private_indicator", privateIndicator, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("section_length", sectionLength, null)));
+		t.add(new KVP("table_id", tableId, getTableType(tableId)));
+		t.add(new KVP("section_syntax_indicator", sectionSyntaxIndicator));
+		t.add(new KVP("private_indicator", privateIndicator));
+		t.add(new KVP("section_length", sectionLength));
 		if ((sectionSyntaxIndicator == 1)&&(tableId!=0x72)) { // long format, but not stuffing
-			t.add(new DefaultMutableTreeNode(new KVP(getTableIdExtensionLabel(), tableIdExtension, getTableIdExtensionDescription(tableIdExtension))));
-			t.add(new DefaultMutableTreeNode(new KVP("version", version, null)));
-			t.add(new DefaultMutableTreeNode(
-					new KVP("current_next_indicator", currentNext, (currentNext == 1) ? "current" : "next")));
-			t.add(new DefaultMutableTreeNode(new KVP("section_number", sectionNumber, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("last_section_number", sectionLastNumber, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("private_data", raw_data.getData(), 8, sectionLength - 5, null)));
+			t.add(new KVP(getTableIdExtensionLabel(), tableIdExtension).setDescription( getTableIdExtensionDescription(tableIdExtension)));
+			t.add(new KVP("version", version));
+			t.add(new KVP("current_next_indicator", currentNext).setDescription((currentNext == 1) ? "current" : "next"));
+			t.add(new KVP("section_number", sectionNumber));
+			t.add(new KVP("last_section_number", sectionLastNumber));
+			t.add(new KVP("private_data", raw_data.getData(), 8, sectionLength - 5));
 		} else {
-			t.add(new DefaultMutableTreeNode(new KVP("private_data", raw_data.getData(), 3, sectionLength, null)));
+			t.add(new KVP("private_data", raw_data.getData(), 3, sectionLength));
 		}
 	}
 

@@ -160,7 +160,7 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 	 */
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.265 PES Data",this));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.265 PES Data").addImageSource(this, "Frames"));
 		addListJTree(s,pesPackets,modus,"PES Packets");
 		addCCDataToTree(modus, s);
 

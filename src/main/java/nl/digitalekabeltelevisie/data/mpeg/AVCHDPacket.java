@@ -74,7 +74,9 @@ public class AVCHDPacket extends TSPacket {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(buildNodeLabel(),this));
+		final KVP kvp = new KVP(buildNodeLabel());
+		kvp.addHTMLSource(this, "AVCHD Packet");
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		final DefaultMutableTreeNode tpHeaderNode = new DefaultMutableTreeNode(new KVP("tp_extra_header",tp_extra_header,null));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Copy_permission_indicator",getCopyPermissionIndicator(),null)));
 		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",arrivalTimestamp,printPCRTime(arrivalTimestamp))));

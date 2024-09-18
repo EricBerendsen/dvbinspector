@@ -40,12 +40,11 @@ public class ServiceDescriptor extends Descriptor{
 	private final DVBString  serviceProviderName;
 	private final DVBString  serviceName;
 
-	public ServiceDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		serviceType = getInt(b, offset+2, 1, 0xFF);
-		final int serviceProviderNameLength = getInt(b, offset+3, 1, 0xFF);
-		serviceProviderName = new DVBString(b,offset+3);
-		serviceName = new DVBString(b,offset+4+serviceProviderNameLength);
+	public ServiceDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		serviceType = getInt(b, 2, 1, 0xFF);
+		serviceProviderName = new DVBString(b, 3);
+		serviceName = new DVBString(b, 4 + serviceProviderName.getLength());
 	}
 
 	public DVBString getServiceProviderName() {
@@ -55,19 +54,15 @@ public class ServiceDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		return super.toString() + " service_type"+serviceType + "("+ getServiceTypeString(serviceType)+"), serviceProviderName="+getServiceProviderName()+ "serviceName="+getServiceName();
+		return super.toString() + " service_type"+serviceType + "("+ getServiceTypeString(serviceType)+"), serviceProviderName="+serviceProviderName+ "serviceName="+serviceName;
 	}
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("service_type",serviceType ,getServiceTypeString(serviceType))));
-		t.add(new DefaultMutableTreeNode(new KVP("service_provider_name_encoding",serviceProviderName.getEncodingString() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_provider_name_length",serviceProviderName.getLength() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_provider_name",serviceProviderName ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_name_encoding",serviceName.getEncodingString() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_name_length",serviceName.getLength() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("service_name",serviceName ,null)));
+		t.add(new KVP("service_type",serviceType).setDescription(getServiceTypeString(serviceType)));
+		t.add(new KVP("service_provider_name",serviceProviderName));
+		t.add(new KVP("service_name",serviceName));
 		return t;
 	}
 
@@ -77,15 +72,6 @@ public class ServiceDescriptor extends Descriptor{
 
 	public int getServiceType() {
 		return serviceType;
-	}
-
-	public int getServiceNameLength() {
-		return serviceName.getLength();
-	}
-
-
-	public int getServiceProviderNameLength() {
-		return serviceProviderName.getLength();
 	}
 
 }

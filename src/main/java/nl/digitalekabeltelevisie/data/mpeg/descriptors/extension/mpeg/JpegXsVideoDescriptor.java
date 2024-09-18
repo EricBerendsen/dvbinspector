@@ -30,7 +30,6 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.BitSource;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Class responsible for decoding a JPEG-XS video descriptor from a byte array
@@ -53,9 +52,9 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     private final long colour_primaries;
     private final long transfer_characteristics;
     private final long matrix_coefficients;
-    private final boolean video_full_range_flag;
-    private final boolean still_mode;
-    private final boolean mdm_flag;
+    private final int video_full_range_flag;
+    private final int still_mode;
+    private final int mdm_flag;
     private final byte[] private_data;
 	private final int zero_bits;
 	private int x_c0;
@@ -71,10 +70,10 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
 	private int maxcll;
 	private int maxfall;
 
-    public JpegXsVideoDescriptor(byte[] b, int offset, TableSection parent) {
-        super(b, offset, parent);
+    public JpegXsVideoDescriptor(byte[] b, TableSection parent) {
+        super(b, parent);
 
-        BitSource reader = new BitSource(b, offset + 3);
+        BitSource reader = new BitSource(b, 3);
         descriptor_version = reader.readBitsLong(8);
         horizontal_size = reader.readBitsLong(16);
         vertical_size = reader.readBitsLong(16);
@@ -88,13 +87,13 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
         colour_primaries = reader.readBitsLong(8);
         transfer_characteristics = reader.readBitsLong(8);
         matrix_coefficients = reader.readBitsLong(8);
-        video_full_range_flag = reader.readBits(1) == 1;
+        video_full_range_flag = reader.readBits(1);
         reader.skiptoByteBoundary();
-        still_mode = reader.readBits(1) == 1;
-        mdm_flag = reader.readBits(1) == 1;
+        still_mode = reader.readBits(1);
+        mdm_flag = reader.readBits(1);
         
         zero_bits = reader.readBits(6);
-        if(mdm_flag) {
+        if(mdm_flag == 1) {
         	
         	x_c0 = reader.readBits(16);
         	y_c0 = reader.readBits(16);
@@ -117,103 +116,102 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     }
 
     @Override
-    public DefaultMutableTreeNode getJTreeNode(int modus) {
-        final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("JPEG-XS Descriptor"));
-        t.add(new DefaultMutableTreeNode(new KVP("descriptor_version", descriptor_version, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("horizontal_size", horizontal_size, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("vertical_size", vertical_size, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("brat", brat, "Bit Rate (MBits/s)")));
+    public KVP getJTreeNode(int modus) {
+		final KVP t = super.getJTreeNode(modus);
+
+        t.add(new KVP("descriptor_version", descriptor_version));
+        t.add(new KVP("horizontal_size", horizontal_size));
+        t.add(new KVP("vertical_size", vertical_size));
+        t.add(new KVP("brat", brat, "Bit Rate (MBits/s)"));
         t.add(buildFratNode(frat));
         t.add(buildScharNode(schar));
         t.add(buildPpihNode(ppih));
         t.add(buildPlevNode(plev));
-        t.add(new DefaultMutableTreeNode(new KVP("max_buffer_size", max_buffer_size, "Maximum buffer size (Mbits/s)")));
-        t.add(new DefaultMutableTreeNode(new KVP("buffer_model_type", buffer_model_type, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("colour_primaries", colour_primaries, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("transfer_characteristics", transfer_characteristics, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("matrix_coefficients", matrix_coefficients, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("video_full_range_flag", video_full_range_flag, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("still_mode", still_mode, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("mdm_flag", mdm_flag, null)));
-        t.add(new DefaultMutableTreeNode(new KVP("zero_bits", zero_bits, null)));
+        t.add(new KVP("max_buffer_size", max_buffer_size, "Maximum buffer size (Mbits/s)"));
+        t.add(new KVP("buffer_model_type", buffer_model_type));
+        t.add(new KVP("colour_primaries", colour_primaries));
+        t.add(new KVP("transfer_characteristics", transfer_characteristics));
+        t.add(new KVP("matrix_coefficients", matrix_coefficients));
+        t.add(new KVP("video_full_range_flag", video_full_range_flag));
+        t.add(new KVP("still_mode", still_mode));
+        t.add(new KVP("mdm_flag", mdm_flag));
+        t.add(new KVP("zero_bits", zero_bits));
  
-        if(mdm_flag) {
-            t.add(new DefaultMutableTreeNode(new KVP("X_c0", x_c0, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("Y_c0", y_c0, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("X_c1", x_c1, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("Y_c1", y_c1, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("X_c2", x_c2, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("Y_c2", y_c2, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("X_wp", x_wp, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("Y_wp", y_wp, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("L_max", l_max, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("L_min", l_min, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("MaxCLL", maxcll, null)));
-            t.add(new DefaultMutableTreeNode(new KVP("MaxFALL", maxfall, null)));
+        if(mdm_flag == 1) {
+            t.add(new KVP("X_c0", x_c0));
+            t.add(new KVP("Y_c0", y_c0));
+            t.add(new KVP("X_c1", x_c1));
+            t.add(new KVP("Y_c1", y_c1));
+            t.add(new KVP("X_c2", x_c2));
+            t.add(new KVP("Y_c2", y_c2));
+            t.add(new KVP("X_wp", x_wp));
+            t.add(new KVP("Y_wp", y_wp));
+            t.add(new KVP("L_max", l_max));
+            t.add(new KVP("L_min", l_min));
+            t.add(new KVP("MaxCLL", maxcll));
+            t.add(new KVP("MaxFALL", maxfall));
         	
         }
         	 
         
-        t.add(new DefaultMutableTreeNode(new KVP("private_data", private_data, null)));
-        final DefaultMutableTreeNode parentNode = super.getJTreeNode(modus);
-        parentNode.add(t);
-        return parentNode;
+        t.add(new KVP("private_data", private_data));
+        return t;
     }
 
-    public static DefaultMutableTreeNode buildFratNode(long frat) {
-        final DefaultMutableTreeNode fratNode = new DefaultMutableTreeNode(new KVP("frat", frat, "Frame rate"));
+    public static KVP buildFratNode(long frat) {
+        final KVP fratNode = new KVP("frat", frat, "Frame rate");
 
         final long interlaceMode = (frat >> 30) & 0x3;
         final String interlaceText = interlaceMode == 0 ? "Progressive frame (frame contains one full-height picture)"
                 : interlaceMode == 1 ? "Interlaced frame (picture is first video field)"
                 : interlaceMode == 2 ? "Interlaced frame (picture is second video field)"
                 : "Reserved";
-        fratNode.add(new DefaultMutableTreeNode(new KVP("interlace_mode", interlaceMode, interlaceText)));
+        fratNode.add(new KVP("interlace_mode", interlaceMode, interlaceText));
 
         final long framerateDenominator = (frat >> 24) & 0x3F;
         final String denominatorText = framerateDenominator == 1 ? "Value=1.000"
                 : framerateDenominator == 2 ? "Value=1.001"
                 : "Reserved";
-        fratNode.add(new DefaultMutableTreeNode(new KVP("framerate_denominator", framerateDenominator, denominatorText)));
+        fratNode.add(new KVP("framerate_denominator", framerateDenominator, denominatorText));
 
         final long framerateNumerator = frat & 0xFFFF;
         final String numeratorText = "Frames/sec";
-        fratNode.add(new DefaultMutableTreeNode(new KVP("framerate_numerator", framerateNumerator, numeratorText)));
+        fratNode.add(new KVP("framerate_numerator", framerateNumerator, numeratorText));
 
         return fratNode;
     }
 
-    public static DefaultMutableTreeNode buildScharNode(long schar) {
-        final DefaultMutableTreeNode scharNode = new DefaultMutableTreeNode(new KVP("schar", schar, "Sampling characteristics"));
+    public static KVP buildScharNode(long schar) {
+        final KVP scharNode = new KVP("schar", schar, "Sampling characteristics");
 
         final long validFlag = (schar >> 15) & 0x1;
         final String validText = validFlag == 0 ? "Invalid" : "Valid";
-        scharNode.add(new DefaultMutableTreeNode(new KVP("valid_flag", validFlag, validText)));
+        scharNode.add(new KVP("valid_flag", validFlag, validText));
 
         final long sampleBitDepth = (schar >> 4) & 0xF;
-        scharNode.add(new DefaultMutableTreeNode(new KVP("sample_bitdepth", sampleBitDepth, null)));
+        scharNode.add(new KVP("sample_bitdepth", sampleBitDepth));
 
         final long samplingStructure = schar & 0xF;
         final String samplingStructureText = samplingStructureToString(samplingStructure);
-        scharNode.add(new DefaultMutableTreeNode(new KVP("sampling_structure", samplingStructure, samplingStructureText)));
+        scharNode.add(new KVP("sampling_structure", samplingStructure, samplingStructureText));
 
         return scharNode;
     }
 
-    public static DefaultMutableTreeNode buildPpihNode(long ppih) {
-        return new DefaultMutableTreeNode(new KVP("ppih", ppih, ppihToString(ppih)));
+    public static KVP buildPpihNode(long ppih) {
+        return new KVP("ppih", ppih, ppihToString(ppih));
     }
 
-    public static DefaultMutableTreeNode buildPlevNode(long plev) {
-        DefaultMutableTreeNode plevNode = new DefaultMutableTreeNode(new KVP("plev", plev, null));
+    public static KVP buildPlevNode(long plev) {
+    	KVP plevNode = new KVP("plev", plev);
 
         final long level = (plev >> 8) & 0xFF;
         final String levelText = getLevelText(level);
-        plevNode.add(new DefaultMutableTreeNode(new KVP("level", level, levelText)));
+        plevNode.add(new KVP("level", level, levelText));
 
         final long subLevel = plev & 0xFF;
         final String subLevelText = getSubLevelText(subLevel);
-        plevNode.add(new DefaultMutableTreeNode(new KVP("sub_level", subLevel, subLevelText)));
+        plevNode.add(new KVP("sub_level", subLevel, subLevelText));
 
         return plevNode;
     }

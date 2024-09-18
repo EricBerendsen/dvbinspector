@@ -42,8 +42,8 @@ public class DVBSubtitleHandler extends GeneralPesHandler{
 
 
 	@Override
-	protected void processPesDataBytes(final PesPacketData pesData) {
-		final DVBSubtitlingPESDataField titlePesPacket = new DVBSubtitlingPESDataField(pesData);
+	protected void processPesDataBytes(PesPacketData pesData) {
+		DVBSubtitlingPESDataField titlePesPacket = new DVBSubtitlingPESDataField(pesData);
 		pesPackets.add(titlePesPacket);
 		if((titlePesPacket.getPesStreamID()==0xBD)// "private_stream_1". 
 				&&(titlePesPacket.getData_identifier()==0x20) // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20.
@@ -63,8 +63,8 @@ public class DVBSubtitleHandler extends GeneralPesHandler{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
+		DefaultMutableTreeNode s=super.getJTreeNode(modus);
 
 		if(titles!=null){
 			s.add(titles.getJTreeNode(modus));

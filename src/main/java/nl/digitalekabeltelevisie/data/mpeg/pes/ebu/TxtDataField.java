@@ -60,7 +60,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 		super.addDetailsToJTree(s,modus);
 		addDetailsToJTree(s,modus);
 		if((getPacketNo()>=0)&&(getPacketNo()<=25)){
-			s.add(new DefaultMutableTreeNode(new KVP(getTeletextHTML(),getTeletextPlain())));
+			s.add(new DefaultMutableTreeNode(new KVP(getTeletextPlain()).setHtmlLabel(getTeletextHTML())));
 		}
 		return s;
 	}
@@ -156,7 +156,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	 * @return
 	 */
 	public List<TxtTriplet> getTxtTripletList() {
-		final ArrayList<TxtTriplet> tripletList = new ArrayList<TxtTriplet>();
+		final List<TxtTriplet> tripletList = new ArrayList<>();
 		for (int i = 1; i <= 13; i++) {
 			final TxtTriplet tr = new TxtTriplet(data_block,offset+4+(i*3));
 			tripletList.add(tr);
@@ -196,7 +196,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 			final Triplet tr2 = tripletList.get(1);
 			final int secondCharset = (tr1.getVal()&0b11_1100_0000_0000_0000)>>14 | ((tr2.getVal() & 0b0111)<<4);
 			s.add(new DefaultMutableTreeNode(
-					new KVP("Second G0 Set Designation and National Option Selection",secondCharset,null)));;
+					new KVP("Second G0 Set Designation and National Option Selection",secondCharset,null)));
 			final int leftSidePanel = (tr2.getVal() & 0x08) >> 3;
 			final int rightSidePanel = (tr2.getVal() & 0x10) >> 4;
 			final int sidePanelStatusFlag = (tr2.getVal() & 0x20) >> 5;
@@ -241,10 +241,10 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 				final String bgColor = "#" + Utils.toHexStringUnformatted(r_byte, 2)
 						+ Utils.toHexStringUnformatted(g_byte, 2) + Utils.toHexStringUnformatted(b_byte, 2);
-				final DefaultMutableTreeNode cmapEntry = new DefaultMutableTreeNode(new KVP(
+				final DefaultMutableTreeNode cmapEntry = new DefaultMutableTreeNode(new KVP("Colour Map entry " + i).setHtmlLabel(
 						"Colour Map entry " + i + " <code><span style=\"background-color: " + bgColor
-								+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>",
-						"Colour Map entry " + i));
+								+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>"
+						));
 				cmapEntry.add(new DefaultMutableTreeNode(new KVP("R", r, null)));
 				cmapEntry.add(new DefaultMutableTreeNode(new KVP("G", g, null)));
 				cmapEntry.add(new DefaultMutableTreeNode(new KVP("B", b, null)));
@@ -275,7 +275,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 	 * @return
 	 */
 	protected List<Triplet> getTripletList() {
-		final ArrayList<Triplet> tripletList = new ArrayList<Triplet>();
+		final List<Triplet> tripletList = new ArrayList<>();
 		for (int i = 1; i <= 13; i++) {
 			final Triplet tr = new Triplet(data_block, offset + 4 + (i * 3));
 			tripletList.add(tr);
@@ -413,7 +413,7 @@ public class TxtDataField extends EBUDataField implements TreeNode{
 
 
 	public DefaultMutableTreeNode getHTMLJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(getTeletextHTML(),getTeletextPlain()));
+		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(getTeletextPlain()).setHtmlLabel(getTeletextHTML()));
 		super.addDetailsToJTree(s, modus);
 		addDetailsToJTree(s,modus);
 		return s;

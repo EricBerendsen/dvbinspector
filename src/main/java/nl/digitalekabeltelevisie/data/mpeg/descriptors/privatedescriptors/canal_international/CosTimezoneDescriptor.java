@@ -47,16 +47,15 @@ public class CosTimezoneDescriptor extends Descriptor {
 	
 	private List<TimezoneName> timezoneNames = new ArrayList<>();
 	
-	public record TimezoneName(String country_code, int country_region_id, int reserved, DVBString region_name) implements TreeNode{
+	public record TimezoneName(String country_code, int country_region_id, int reserved, DVBString region_name) implements TreeNode {
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("TimezoneName"));
-			s.add(new DefaultMutableTreeNode(new KVP("country_code",country_code,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("country_region_id",country_region_id,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("region_name_length",region_name.getLength(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("region_name",region_name,null)));
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("TimezoneName");
+			s.add(new KVP("country_code", country_code));
+			s.add(new KVP("country_region_id", country_region_id));
+			s.add(new KVP("reserved", reserved, null));
+			s.add(new KVP("region_name", region_name));
 			return s;
 		}
 	}

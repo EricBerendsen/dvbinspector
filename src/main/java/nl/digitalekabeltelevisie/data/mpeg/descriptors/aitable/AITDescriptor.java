@@ -37,15 +37,14 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class AITDescriptor extends Descriptor {
 
 
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public AITDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public AITDescriptor(byte[] b, int offset, TableSection parent) {
+		super(b, parent);
 	}
 
+
+	public AITDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+	}
 	@Override
 	public String getDescriptorname(){
 		return AITDescriptor.getDescriptorname(descriptorTag, parentTableSection);

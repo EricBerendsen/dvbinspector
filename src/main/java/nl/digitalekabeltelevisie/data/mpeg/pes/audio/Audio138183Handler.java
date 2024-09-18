@@ -123,7 +123,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 	}
 
 	private byte[] rdsData=new byte[0];
-	private final List<AudioAccessUnit> audioAccessUnits = new ArrayList<AudioAccessUnit>();
+	private final List<AudioAccessUnit> audioAccessUnits = new ArrayList<>();
 
 	private SwingPlayer swPlayer = null;
 	private KVP kvp = null;
@@ -150,7 +150,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 
 		copyIntoBuf(audioPes);
 
-		final List<AudioAccessUnit> accessUnits = new ArrayList<AudioAccessUnit>();
+		final List<AudioAccessUnit> accessUnits = new ArrayList<>();
 		int i = bufStart;
 
 		while ((i < (bufEnd)) && (i >= 0)) {
@@ -209,7 +209,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
-		kvp = new KVP("PES Data",this);
+		kvp = new KVP("PES Data").addImageSource(this, "audio");
 		if(swPlayer==null){
 			JMenuItem objectMenu = new JMenuItem("Play Audio");
 			objectMenu.setActionCommand(DVBtree.PLAY);

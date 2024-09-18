@@ -50,40 +50,41 @@ public class GuidanceDescriptor extends Descriptor  {
 	byte[] reserved_for_future_use;
 
 
-	public GuidanceDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		reserved = getInt(b, offset+2, 1, 0xFC)>>2;
-		guidance_type = getInt(b, offset+2, 1, MASK_2BITS);
+	public GuidanceDescriptor( byte[] b, TableSection parent) {
+		super(b, parent);
+		reserved = getInt(b, 2, 1, 0xFC)>>2;
+		guidance_type = getInt(b, 2, 1, MASK_2BITS);
 		if(guidance_type==0){
-			iso_639_language_code=getISO8859_1String(b, offset+3, 3);
-			guidance_char = new DVBString(b, offset+6, descriptorLength-4);
+			iso_639_language_code=getISO8859_1String(b, 3, 3);
+			guidance_char = new DVBString(b, 6, descriptorLength-4);
 		}else if(guidance_type==1){
-			reserved2 = getInt(b, offset+3, 1, 0xFE)>>1;
-			guidance_mode = getInt(b, offset+3, 1, MASK_1BIT);
-			iso_639_language_code=getISO8859_1String(b, offset+4, 3);
-			guidance_char = new DVBString(b, offset+7, descriptorLength-5);
+			reserved2 = getInt(b, 3, 1, 0xFE)>>1;
+			guidance_mode = getInt(b, 3, 1, MASK_1BIT);
+			iso_639_language_code=getISO8859_1String(b, 4, 3);
+			guidance_char = new DVBString(b, 7, descriptorLength-5);
 		}else{
-			reserved_for_future_use = getBytes(b, offset+3, descriptorLength-3);
+			reserved_for_future_use = getBytes(b, 3, descriptorLength-3);
 		}
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("guidance_type",guidance_type,null)));
-		if(guidance_type==0){
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso_639_language_code,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("guidance_char",guidance_char,null)));
-		}else if(guidance_type==1){
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("guidance_mode",guidance_mode,(guidance_mode==1)?"guidance for content unsuitable for broadcast until after the watershed is appropriate.":null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso_639_language_code,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("guidance_char",guidance_char,null)));
-		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_for_future_use",reserved_for_future_use,null)));
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		t.add(new KVP("reserved", reserved));
+		t.add(new KVP("guidance_type", guidance_type));
+		if (guidance_type == 0) {
+			t.add(new KVP("ISO_639_language_code", iso_639_language_code));
+			t.add(new KVP("guidance_char", guidance_char));
+		} else if (guidance_type == 1) {
+			t.add(new KVP("reserved", reserved2));
+			t.add(new KVP("guidance_mode", guidance_mode)
+					.setDescription((guidance_mode == 1) ? "guidance for content unsuitable for broadcast until after the watershed is appropriate." : null));
+			t.add(new KVP("ISO_639_language_code", iso_639_language_code));
+			t.add(new KVP("guidance_char", guidance_char));
+		} else {
+			t.add(new KVP("reserved_for_future_use", reserved_for_future_use));
 		}
 
 		return t;

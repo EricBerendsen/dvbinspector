@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenuItem;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.gui.*;
 
@@ -65,7 +66,7 @@ import nl.digitalekabeltelevisie.gui.*;
  * @author Eric Berendsen
  *
  */
-public class KVP{
+public class KVP extends DefaultMutableTreeNode{
 
 
 	public record DetailView(DetailSource detailSource, String label) {}
@@ -91,7 +92,6 @@ public class KVP{
 
 		LABEL, //used for a node that has no value associated with it
 		DVBSTRING,
-		HTML, // used for a node that has no separate value associated with , but a HTML fragment as value  for presentation where possible, has to have a plain text alternative
 
 		BIGINT
 	}
@@ -101,7 +101,7 @@ public class KVP{
 	 */
 	private static final int BYTE_DATA_MAX_LEN = 100;
 	private String		label;
-	private String		value;
+	private String		stringValue;
 	private String		description;
 
 	private int			intValue;
@@ -132,115 +132,118 @@ public class KVP{
 	private JMenuItem subMenu;
 	private Object owner;
 	private String labelAppend = "";
+	private String htmlLabel;
 
 	public KVP(String label) {
         this.label = label;
 		this.fieldType = FIELD_TYPE.LABEL;
 	}
 
-	public KVP(String label, ImageSource imageSource) {
+	public KVP(String label, String stringValue) {
         this.label = label;
-		this.fieldType = FIELD_TYPE.LABEL;
-		detailViews.add(new DetailView(imageSource,""));
-	}
-	public KVP(String label, String value, String description) {
-        this.label = label;
-		if(value==null){ // just a label
-			this.fieldType = FIELD_TYPE.LABEL;
-		}else{
-			this.value = value;
-			this.description = description;
-			this.fieldType = FIELD_TYPE.STRING;
+        this.stringValue = stringValue;
+		this.fieldType = FIELD_TYPE.STRING;
 
-		}
 	}
 
-	public KVP(String label, int value, String description) {
+	public KVP(String label, String stringValue, String description) {
+		this(label,stringValue);
+		setDescription(description);
+ 
+	}
+	
+	public KVP(String label, int intValue) {
         this.label = label;
-		this.intValue = value;
-		this.description = description;
+		this.intValue = intValue;
 		this.fieldType = FIELD_TYPE.INT;
 	}
 
-	public KVP(String label, long value, String description) {
+	public KVP(String label, int intValue, String description) {
+        this(label,intValue);
+		setDescription(description);
+	}
+
+	public KVP(String label, long longValue) {
         this.label = label;
-		this.longValue = value;
-		this.description = description;
+		this.longValue = longValue;
 		this.fieldType = FIELD_TYPE.LONG;
 	}
 
-	public KVP(String label, boolean value, String description) {
-		this(label, value ? 1 : 0, description);
+	public KVP(String label, long longValue, String description) {
+        this(label,longValue);
+		setDescription(description);
 	}
 
-	public KVP(String html, String label) {
-        this.value = html;
-		this.label = label; // text representation of the HTML string
-		this.fieldType = FIELD_TYPE.HTML;
-	}
-
-
-
-	/**
-	 * @param label
-	 * @param value
-	 * @param description
-	 */
-	public KVP(String label, byte[] value, String description) {
-        this.label = label;
-		this.byteValue = value;
+	public KVP(String label, byte[] byteArray) {
+		this.label = label;
+		this.byteValue = byteArray;
 		this.byteStart = 0;
-		this.byteLen = value.length;
-		this.description = description;
+		this.byteLen = byteArray.length;
 		this.fieldType = FIELD_TYPE.BYTES;
-		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
+		addHTMLSource(() -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View");
 	}
 
-	public KVP(String label, byte[] value, int offset, int len, String description) {
-        this.label = label;
-		this.byteValue = value;
+	public KVP(String label, byte[] byteArray, String description) {
+		this(label, byteArray);
+		setDescription(description);
+	}
+
+	public KVP(String label, byte[] byteArray, int offset, int len) {
+		this.label = label;
+		this.byteValue = byteArray;
 		this.byteStart = offset;
 		this.byteLen = len;
-		this.description = description;
 		this.fieldType = FIELD_TYPE.BYTES;
-		detailViews.add(new DetailView((HTMLSource)() -> getHTMLHexview(byteValue, byteStart, byteLen),"Hex View"));
+		addHTMLSource(() -> getHTMLHexview(byteValue, byteStart, byteLen), "Hex View");
 	}
 
-	public KVP(String label, DVBString value, String description) {
+	public KVP(String label, byte[] byteArray, int offset, int len, String description) {
+		this(label, byteArray, offset, len);
+		setDescription(description);
+	}
+
+	public KVP(String label, DVBString dvbStringValue) {
         this.label = label;
-		this.dvbStringValue = value;
-		this.description = description;
+		this.dvbStringValue = dvbStringValue;
 		this.fieldType = FIELD_TYPE.DVBSTRING;
+		this.add(new KVP("encoding", dvbStringValue.getEncodingString()));
+		this.add(new KVP("length", dvbStringValue.getLength()));
+		this.addHTMLSource(
+				() ->"<b>Encoding:</b> " + dvbStringValue.getEncodingString() 
+						+ "<br><br><b>Data:</b><br>" + getHTMLHexview(dvbStringValue.getData(), dvbStringValue.getOffset() + 1, dvbStringValue.getLength())
+						+ "<br><b>Formatted:</b><br>" + dvbStringValue.toEscapedHTML(),
+				"DVB String");
 	}
 
-	public KVP(String label, HTMLSource htmlSource) {
-        this.label = label;
-		this.fieldType = FIELD_TYPE.LABEL;
-		detailViews.add(new DetailView(htmlSource,""));
-	}
-
-	public KVP(String label, BigInteger value, String description) {
+	
+	public KVP(String label, BigInteger bigIntegerValue) {
 
         this.label = label;
-		this.bigIntegerValue = value;
+		this.bigIntegerValue = bigIntegerValue;
 		this.fieldType = FIELD_TYPE.BIGINT;
-		this.description = description;
 	}
 
+	public KVP(String label, BigInteger bigIntegerValue, String description) {
+        this(label, bigIntegerValue);
+		setDescription(description);
+	}
+	
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public KVP setDescription(String description) {
 		this.description = description;
+		return this;
 	}
 
 	public String getLabel() {
 		return label;
 	}
 
-	public void setLabel(String label) {
+	public KVP setLabel(String label) {
 		this.label = label;
+		return this;
 	}
 
 	// put appends in separate String, so original label is constant and available for path
@@ -248,13 +251,6 @@ public class KVP{
 		this.labelAppend  = this.labelAppend + labelAppend;
 	}
 
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 
 	@Override
 	public String toString() {
@@ -262,32 +258,28 @@ public class KVP{
 	}
 
 	public String toString(STRING_DISPLAY stringFormat, NUMBER_DISPLAY numberFormat) {
-		StringBuilder b = new StringBuilder(label);
+		StringBuilder b = new StringBuilder();
+		if ((htmlLabel != null) && (STRING_DISPLAY.PLAIN != stringFormat)) {
+			b.append(htmlLabel);
+		} else {
+			b.append(label);
+		}
 		if(!labelAppend.isEmpty()) {
 			b.append(labelAppend);
 		}
 
-		if ((fieldType != FIELD_TYPE.LABEL)&&(fieldType != FIELD_TYPE.HTML)) {
+		if (fieldType != FIELD_TYPE.LABEL) {
 			appendValueAfterLabel(numberFormat, b);
 		}
-		if((fieldType==FIELD_TYPE.HTML)&&(STRING_DISPLAY.PLAIN!=stringFormat)){
-			b = replacePlainLabelWithHTML(stringFormat);
-		}
 		if (stringFormat == STRING_DISPLAY.JAVASCRIPT) {
-			return  b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
+			return b.toString().replace("\"", "\\\"").replace("\'", "\\\'");
+		}
+		if ((htmlLabel != null) && (stringFormat == STRING_DISPLAY.HTML_AWT)) {
+			return new StringBuilder("<html>").append(b).append("</html>").toString();
 		}
 		return b.toString();
 	}
 
-
-	private StringBuilder replacePlainLabelWithHTML(STRING_DISPLAY stringFormat) {
-		if(stringFormat==STRING_DISPLAY.HTML_AWT){
-			return new StringBuilder("<html>").append(value).append("</html>");
-		}else if(stringFormat==STRING_DISPLAY.HTML_FRAGMENTS){
-			return new StringBuilder(value);
-		}
-		return new StringBuilder();
-	}
 
 	/**
 	 * @param numberFormat
@@ -349,7 +341,7 @@ public class KVP{
 	 * @param b
 	 */
 	private void appendString(StringBuilder b) {
-		b.append(value);
+		b.append(stringValue);
 	}
 
 	/**
@@ -435,16 +427,18 @@ public class KVP{
 	 * @param subMenu the subMenu to set
 	 * @param owner the owner to set
 	 */
-	public void setSubMenuAndOwner(JMenuItem subMenu, Object owner) {
+	public KVP setSubMenuAndOwner(JMenuItem subMenu, Object owner) {
 		this.subMenu = subMenu;
 		this.owner = owner;
+		return this;
 	}
 
 	/**
 	 * @param subMenu the subMenu to set
 	 */
-	public void setSubMenu(JMenuItem subMenu) {
+	public KVP setSubMenu(JMenuItem subMenu) {
 		this.subMenu = subMenu;
+		return this;
 	}
 
 	/**
@@ -485,28 +479,45 @@ public class KVP{
 	
 	
 
-	public void setCrumb(String path) {
+	public KVP setCrumb(String path) {
 		this.crumb = path;
+		return this;
 	}
 
 	public List<DetailView> getDetailViews() {
 		return detailViews;
 	}
 	
-	public void addHTMLSource(HTMLSource htmlSource, String label) {
+	public KVP addHTMLSource(HTMLSource htmlSource, String label) {
 		detailViews.add(new DetailView(htmlSource, label));
+		return this;
 	}
 
-	public void addImageSource(ImageSource imageSource, String label) {
+	public KVP addImageSource(ImageSource imageSource, String label) {
 		detailViews.add(new DetailView(imageSource, label));
+		return this;
 	}
 
-	public void addTableSource(TableSource tableSource, String label) {
+	public KVP addTableSource(TableSource tableSource, String label) {
 		detailViews.add(new DetailView(tableSource, label));
+		return this;
 	}
 
-	public void addXMLSource(XMLSource xmlSource, String label) {
+	public KVP addXMLSource(XMLSource xmlSource, String label) {
 		detailViews.add(new DetailView(xmlSource, label));
+		return this;
 	}
 
+	@Override
+    public Object getUserObject() {
+        return this;
+    }
+
+	public KVP setHtmlLabel(String htmlLabel) {
+		this.htmlLabel = htmlLabel;
+		return this;
+	}
+
+
+	
 }

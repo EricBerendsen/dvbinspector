@@ -53,9 +53,8 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 		final int font_id;
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			
-			return new DefaultMutableTreeNode(new KVP("font_id",font_id,null));
+		public KVP getJTreeNode(int modus) {
+			return new KVP("font_id",font_id);
 		}
 
 	}
@@ -108,14 +107,14 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 		private final int reserved_zero_future_use;
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("qualifier",qualifier,null));
-			t.add(new DefaultMutableTreeNode(new KVP("size", size, size_lookup_list.get(size))));
-			t.add(new DefaultMutableTreeNode(new KVP("cadence", cadence, cadence_lookup_list.get(cadence))));
-			t.add(new DefaultMutableTreeNode(new KVP("monochrome_flag", monochrome_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("enhanced_accessibility_contrast_flag", enhanced_accessibility_contrast_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("position", position, position_lookup_list.get(position))));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use", reserved_zero_future_use, null)));
+		public KVP getJTreeNode(int modus) {
+			final KVP t = new KVP("qualifier",qualifier);
+			t.add(new KVP("size", size).setDescription(size_lookup_list.get(size)));
+			t.add(new KVP("cadence", cadence).setDescription(cadence_lookup_list.get(cadence)));
+			t.add(new KVP("monochrome_flag", monochrome_flag));
+			t.add(new KVP("enhanced_accessibility_contrast_flag", enhanced_accessibility_contrast_flag));
+			t.add(new KVP("position", position).setDescription(position_lookup_list.get(position)));
+			t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use));
 			return t;
 		}
 		
@@ -139,10 +138,8 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 		private final int dvb_ttml_profile;
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			
-			
-			return new DefaultMutableTreeNode(new KVP("dvb_ttml_profile",dvb_ttml_profile,dvb_ttml_profile_lookup_list.get(dvb_ttml_profile)));
+		public KVP getJTreeNode(int modus) {
+			return new KVP("dvb_ttml_profile",dvb_ttml_profile).setDescription(dvb_ttml_profile_lookup_list.get(dvb_ttml_profile));
 		}
 	
 	}
@@ -186,34 +183,35 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 			add(0x3 ,"reserved for future use").
 			build(); 
 
-	public TtmlSubtitlingDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		iso639LanguageCode = Utils.getISO8859_1String(b, privateDataOffset, 3);
-		privateDataOffset +=3;
-		subtitle_purpose = getInt(b, privateDataOffset, 1, 0b1111_1100)>>2;
-		tts_suitability = getInt(b, privateDataOffset++, 1, MASK_2BITS);
-		essential_font_usage_flag  = getInt(b, privateDataOffset, 1, 0b1000_0000)>>7;
-		qualifier_present_flag  = getInt(b, privateDataOffset, 1, 0b0100_0000)>>6;
-		reserved_zero_future_use = getInt(b, privateDataOffset, 1, 0b0011_0000)>>4;
-		dvb_ttml_profile_count = getInt(b, privateDataOffset++, 1, MASK_4BITS);
+	public TtmlSubtitlingDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		int localOffset = PRIVATE_DATA_OFFSET;
+		iso639LanguageCode = Utils.getISO8859_1String(b, localOffset, 3);
+		localOffset +=3;
+		subtitle_purpose = getInt(b, localOffset, 1, 0b1111_1100)>>2;
+		tts_suitability = getInt(b, localOffset++, 1, MASK_2BITS);
+		essential_font_usage_flag  = getInt(b, localOffset, 1, 0b1000_0000)>>7;
+		qualifier_present_flag  = getInt(b, localOffset, 1, 0b0100_0000)>>6;
+		reserved_zero_future_use = getInt(b, localOffset, 1, 0b0011_0000)>>4;
+		dvb_ttml_profile_count = getInt(b, localOffset++, 1, MASK_4BITS);
 		for (int i = 0; i < dvb_ttml_profile_count; i++) {
-			DvbTtmlProfile profile = new DvbTtmlProfile(getInt(b, privateDataOffset++, 1, MASK_8BITS));
+			DvbTtmlProfile profile = new DvbTtmlProfile(getInt(b, localOffset++, 1, MASK_8BITS));
 			profileList.add(profile);
 		}
 		if(qualifier_present_flag == 1) {
-			qualifier = getLong(b, privateDataOffset, 4, MASK_32BITS);
-			privateDataOffset += 4;
+			qualifier = getLong(b, localOffset, 4, MASK_32BITS);
+			localOffset += 4;
 		}
 		if (essential_font_usage_flag == 1){
-			 font_count = getInt(b, privateDataOffset++, 1, MASK_8BITS);
+			 font_count = getInt(b, localOffset++, 1, MASK_8BITS);
 			 for(int i=0; i<font_count; i++){
-				 int f  = getInt(b, privateDataOffset++, 1, MASK_8BITS);
+				 int f  = getInt(b, localOffset++, 1, MASK_8BITS);
 				 Font font = new Font(f);
 				 fontList.add(font);
 			 }
 		}
 		
-		text = new DVBString(b, privateDataOffset);
+		text = new DVBString(b, localOffset);
 		
 	}
 
@@ -221,13 +219,13 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("iso639LanguageCode", iso639LanguageCode, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("subtitle_purpose", subtitle_purpose, subtitle_purpose_list.get(subtitle_purpose))));
-		t.add(new DefaultMutableTreeNode(new KVP("TTS_suitability", tts_suitability, tts_suitability_list.get(tts_suitability))));
-		t.add(new DefaultMutableTreeNode(new KVP("essential_font_usage_flag", essential_font_usage_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("qualifier_present_flag", qualifier_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use", reserved_zero_future_use,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("dvb_ttml_profile_count", dvb_ttml_profile_count,null)));
+		t.add(new KVP("iso639LanguageCode", iso639LanguageCode));
+		t.add(new KVP("subtitle_purpose", subtitle_purpose).setDescription(subtitle_purpose_list.get(subtitle_purpose)));
+		t.add(new KVP("TTS_suitability", tts_suitability).setDescription(tts_suitability_list.get(tts_suitability)));
+		t.add(new KVP("essential_font_usage_flag", essential_font_usage_flag));
+		t.add(new KVP("qualifier_present_flag", qualifier_present_flag));
+		t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use));
+		t.add(new KVP("dvb_ttml_profile_count", dvb_ttml_profile_count));
 		addListJTree(t,profileList,modus,"dvb_ttml_profile_list");
 		
 		if(qualifier_present_flag == 1) {
@@ -235,13 +233,11 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 		}
 		
 		if (essential_font_usage_flag == 1){
-			t.add(new DefaultMutableTreeNode(new KVP("font_count", font_count,null)));
+			t.add(new KVP("font_count", font_count));
 			addListJTree(t,fontList,modus,"font_list");
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("text_encoding",text.getEncodingString(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("text_length",text.getLength(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("text",text,null)));
+		t.add(new KVP("text",text));
 		
 		
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,7 +36,6 @@ import java.awt.image.*;
 import java.util.*;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
@@ -45,7 +44,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 public class DisplaySet implements TreeNode, ImageSource {
 
 
-	private List<Segment>  segments = new ArrayList<Segment>();
+	private List<Segment>  segments = new ArrayList<>();
 	// all sets up to and including this one from start of epoch ("mode change" or "acquisition point")
 	// so all we need to draw image
 	private List<DisplaySet> epoch = null;
@@ -53,7 +52,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 
 	private long pts = 0;
 
-	public DisplaySet(final GeneralPesHandler pesHandler, final long pts) {
+	public DisplaySet(GeneralPesHandler pesHandler, long pts) {
 		this.pesHandler = pesHandler;
 		this.pts = pts;
 	}
@@ -62,14 +61,14 @@ public class DisplaySet implements TreeNode, ImageSource {
 		return pts;
 	}
 
-	public void setPts(final long pts) {
+	public void setPts(long pts) {
 		this.pts = pts;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t=new DefaultMutableTreeNode(new KVP("Display Set",this));
-		t.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Display Set").addImageSource(this, "Display Set");
+		t.add(new KVP("pts", pts).setDescription(printTimebase90kHz(pts)));
 		addListJTree(t, segments, modus, "segments");
 
 		return t;
@@ -101,19 +100,19 @@ public class DisplaySet implements TreeNode, ImageSource {
 	public BufferedImage getImage() {
 		BufferedImage res = null;
 		if(epoch!=null){
-			final RegionCompositionSegment regions[] = new RegionCompositionSegment [256];
-			final WritableRaster regionRaster[] = new WritableRaster[256];
-			final CLUTDefinitionSegment cluts[] = new CLUTDefinitionSegment[256];
-			final DisplaySet initDisplaySet = epoch.get(0);
-			final List<Segment> initDisplaySegments = initDisplaySet.getSegments();
-			final Map<Integer, ObjectDataSegment> objects = new HashMap<Integer,ObjectDataSegment>();
+			RegionCompositionSegment[] regions = new RegionCompositionSegment [256];
+			WritableRaster[] regionRaster = new WritableRaster[256];
+			CLUTDefinitionSegment[] cluts = new CLUTDefinitionSegment[256];
+			DisplaySet initDisplaySet = epoch.getFirst();
+			List<Segment> initDisplaySegments = initDisplaySet.getSegments();
+			Map<Integer, ObjectDataSegment> objects = new HashMap<>();
 			DisplayDefinitionSegment displayDefinitionSegment = null;
 			PageCompositionSegment lastPCS = null;
 
 			// which segment are we processing
 
-			List<RegionCompositionSegment> localRegions = new ArrayList<RegionCompositionSegment>();
-			for (final Segment segment : initDisplaySegments) {
+			List<RegionCompositionSegment> localRegions = new ArrayList<>();
+			for (Segment segment : initDisplaySegments) {
 
 				if(segment.getSegmentType()==0x14){ // display definition segment
 					displayDefinitionSegment = (DisplayDefinitionSegment)segment;
@@ -121,43 +120,36 @@ public class DisplaySet implements TreeNode, ImageSource {
 
 
 				if(segment.getSegmentType()==0x10 ){// page composition segment, should be present at start of epoch
-					final PageCompositionSegment pcSegment = (PageCompositionSegment)segment;
-					lastPCS = pcSegment;
+                    lastPCS = (PageCompositionSegment)segment;
 				}
 				if(segment.getSegmentType()==0x11){ // region composition
-					final RegionCompositionSegment rcs = (RegionCompositionSegment)segment;
+					RegionCompositionSegment rcs = (RegionCompositionSegment)segment;
 					regions[rcs.getRegionId()] = rcs;
 					localRegions.add(rcs);
 				}
 				if(segment.getSegmentType()==0x12){ // CLUT
-					final CLUTDefinitionSegment cds = (CLUTDefinitionSegment)segment;
+					CLUTDefinitionSegment cds = (CLUTDefinitionSegment)segment;
 					cluts[cds.getCLUTId()] = cds;
 
 				}
 				if(segment.getSegmentType()==0x13){ // object data segment
-					final ObjectDataSegment ods = (ObjectDataSegment)segment;
+					ObjectDataSegment ods = (ObjectDataSegment)segment;
 					objects.put(ods.getObjectId(), ods);
 				}
 			}
 			// create raster for all regions, and fill immediately
 			for (int j = 0; j < regions.length; j++) {
-				final RegionCompositionSegment rcs = regions[j];
+				RegionCompositionSegment rcs = regions[j];
 				if(rcs!=null){
 					//fill the region's, ignore the fill flag, it has to be done anyway
-					int index = 0;
-					switch (rcs.getRegionDepth()) {
-					case 1: // 2 bit
-						index = rcs.getRegion2BitPixelCode();
-						break;
-					case 2: // 4 bit.
-						index = rcs.getRegion4BitPixelCode();
-						break;
-					case 3:
-						index = rcs.getRegion8BitPixelCode();
-						break;
-					}
-					//create new byte[] to fill
-					final byte[] dataArray = new byte[rcs.getRegionHeight() * rcs.getRegionWidth()];
+					int index = switch (rcs.getRegionDepth()) {
+                        case 1 -> rcs.getRegion2BitPixelCode(); // 2 bit
+                        case 2 -> rcs.getRegion4BitPixelCode(); // 4 bit.
+                        case 3 -> rcs.getRegion8BitPixelCode();
+                        default -> 0;
+                    };
+                    //create new byte[] to fill
+					byte[] dataArray = new byte[rcs.getRegionHeight() * rcs.getRegionWidth()];
 					Arrays.fill(dataArray, getInt2UnsignedByte(index));
 					regionRaster[j] = Raster.createInterleavedRaster(new DataBufferByte(dataArray, rcs.getRegionWidth() * rcs.getRegionHeight()),rcs.getRegionWidth(),rcs.getRegionHeight(),rcs.getRegionWidth(),1,new int[]{0},null);
 				}
@@ -170,23 +162,23 @@ public class DisplaySet implements TreeNode, ImageSource {
 			// now loop over other sets
 			int k=1;
 			while(k< epoch.size()){
-				final DisplaySet displaySet = epoch.get(k++);
+				DisplaySet displaySet = epoch.get(k);
+				k++;
 				// used to remember which regions are in this set, because we need to update them with the objects later
-				localRegions = new ArrayList<RegionCompositionSegment>();
-				final List<Segment> segmentList = displaySet.getSegments();
-				for (final Segment segment : segmentList) {
+				localRegions = new ArrayList<>();
+				List<Segment> segmentList = displaySet.getSegments();
+				for (Segment segment : segmentList) {
 					if(segment.getSegmentType()==0x10 ){// page composition segment,
-						final PageCompositionSegment pcSegment = (PageCompositionSegment)segment;
-						lastPCS = pcSegment;
+                        lastPCS = (PageCompositionSegment)segment;
 					}else if(segment.getSegmentType()==0x11){ // region composition
-						final RegionCompositionSegment rcs = (RegionCompositionSegment)segment;
+						RegionCompositionSegment rcs = (RegionCompositionSegment)segment;
 						regions[rcs.getRegionId()] = rcs;
 						localRegions.add(rcs);
 					}else if(segment.getSegmentType()==0x12){ // CLUT
-						final CLUTDefinitionSegment cds = (CLUTDefinitionSegment)segment;
+						CLUTDefinitionSegment cds = (CLUTDefinitionSegment)segment;
 						cluts[cds.getCLUTId()] = cds;
 					}else if(segment.getSegmentType()==0x13){ // object data segment
-						final ObjectDataSegment ods = (ObjectDataSegment)segment;
+						ObjectDataSegment ods = (ObjectDataSegment)segment;
 						objects.put(ods.getObjectId(), ods);
 					}
 				}// got all segments, now update regions
@@ -208,66 +200,65 @@ public class DisplaySet implements TreeNode, ImageSource {
 				}
 
 			}
-			final BufferedImage bgImage = pesHandler.getBGImage(height, width,pts);
+			BufferedImage bgImage = pesHandler.getBGImage(height, width,pts);
 			res = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			final Graphics2D resGraphics = res.createGraphics();
+			Graphics2D resGraphics = res.createGraphics();
 			resGraphics.drawImage(bgImage,0,0,null);
 
 			// do the actual drawing
 			if(lastPCS!=null){
-				for(final PageCompositionSegment.Region region :lastPCS.getRegions()){
-					final RegionCompositionSegment regionCompositionSegment = regions[region.getRegion_id()];
+				for(PageCompositionSegment.Region region :lastPCS.getRegions()){
+					RegionCompositionSegment regionCompositionSegment = regions[region.getRegion_id()];
 					if(regionCompositionSegment!=null){
-						final WritableRaster regionRaste = regionRaster[region.getRegion_id()];
-						final IndexColorModel iColorModel = cluts[regionCompositionSegment.getCLUTId()].getColorModel(regionCompositionSegment.getRegionDepth());
-						final BufferedImage img = new BufferedImage(iColorModel, regionRaste, false, null);
+						WritableRaster regionRaste = regionRaster[region.getRegion_id()];
+						IndexColorModel iColorModel = cluts[regionCompositionSegment.getCLUTId()].getColorModel(regionCompositionSegment.getRegionDepth());
+						BufferedImage img = new BufferedImage(iColorModel, regionRaste, false, null);
 						resGraphics.drawImage(img, region.getRegion_horizontal_address()+x_offset, region.getRegion_vertical_address()+y_offset,null); // no observer
 					}
 				}
 			}
 
 			return res;
-		}else{ // no epoch
-			return null;
 		}
+		return null;
 	}
 
-	private static void paintObjectsOnRegions(final Map<Integer, ObjectDataSegment> objects,
-			final List<RegionCompositionSegment> localRegions,
-			final WritableRaster[] regionRaster) {
-		for (final RegionCompositionSegment rcs : localRegions) {
-			for(final RegionCompositionSegment.RegionObject regionObject: rcs.getRegionObjects()){
-				final int object_id = regionObject.getObject_id();
-				final ObjectDataSegment objectDataSegment = objects.get(object_id);
+	private static void paintObjectsOnRegions(Map<Integer, ObjectDataSegment> objects,
+                                              List<RegionCompositionSegment> localRegions,
+                                              WritableRaster[] regionRaster) {
+		for (RegionCompositionSegment rcs : localRegions) {
+			for(RegionCompositionSegment.RegionObject regionObject: rcs.getRegionObjects()){
+				int object_id = regionObject.getObject_id();
+				ObjectDataSegment objectDataSegment = objects.get(object_id);
 
 				if(objectDataSegment != null){
 					if(objectDataSegment.getObjectCodingMethod()==0){ // if bitmap
-						final WritableRaster raster = objectDataSegment.getRaster(rcs.getRegionDepth());
+						WritableRaster raster = objectDataSegment.getRaster(rcs.getRegionDepth());
 						regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
 					}else if(objectDataSegment.getObjectCodingMethod()==1){ // chars
-						final Font font = new Font("Arial", Font.BOLD,30);
+						Font font = new Font("Arial", Font.BOLD,30);
 						// can not draw on raster directly, create img,draw on it and get its raster
 
 						// first determine needed dimensions of image, so create another tmp image to get size
-						final BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED);
+						BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_INDEXED);
 						Graphics2D g2d = tmp.createGraphics();
 						g2d.setFont(font);
 						g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-						final FontRenderContext fontRenderContext  = g2d.getFontRenderContext();
-						final String txt = objectDataSegment.getCharacter_code_string();
-						final Rectangle2D rect = font.getStringBounds(txt, fontRenderContext);
+						FontRenderContext fontRenderContext  = g2d.getFontRenderContext();
+						String txt = objectDataSegment.getCharacter_code_string();
+						Rectangle2D rect = font.getStringBounds(txt, fontRenderContext);
 
 						// now we can create the image to draw on
 
-						final IndexColorModel icm = CLUTDefinitionSegment.getDefaultColorModel(rcs.getRegionDepth());
-						final BufferedImage tmp2 = new BufferedImage((int)rect.getWidth(),(int)rect.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,icm);
+						IndexColorModel icm = CLUTDefinitionSegment.getDefaultColorModel(rcs.getRegionDepth());
+						BufferedImage tmp2 = new BufferedImage((int)rect.getWidth(),(int)rect.getHeight(),BufferedImage.TYPE_BYTE_INDEXED,icm);
 						g2d = tmp2.createGraphics();
 						g2d.setFont(font);
 						g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 						g2d.setBackground(new Color(icm.getRGB(regionObject.getBackground_pixel_code())));
 						g2d.setColor(new Color(icm.getRGB(regionObject.getForeground_pixel_code())));
 						g2d.drawString(txt, 0, (int)-rect.getY());
-						final WritableRaster raster = tmp2.getRaster();
+						WritableRaster raster = tmp2.getRaster();
 
 						regionRaster[rcs.getRegionId()].setDataElements(regionObject.getObject_horizontal_position(), regionObject.getObject_vertical_position(), raster);
 					}
@@ -276,11 +267,11 @@ public class DisplaySet implements TreeNode, ImageSource {
 		}
 	}
 
-	public void add(final Segment segment) {
+	public void add(Segment segment) {
 		segments.add(segment);
 	}
 
-	public Segment getSegment(final int i) {
+	public Segment getSegment(int i) {
 		return segments.get(i);
 	}
 
@@ -288,7 +279,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 		return epoch;
 	}
 
-	public void setEpoch(final List<DisplaySet> epoch) {
+	public void setEpoch(List<DisplaySet> epoch) {
 		this.epoch = epoch;
 	}
 
@@ -296,7 +287,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 		return pesHandler;
 	}
 
-	public void setPesHandler(final GeneralPesHandler pesHandler) {
+	public void setPesHandler(GeneralPesHandler pesHandler) {
 		this.pesHandler = pesHandler;
 	}
 
@@ -304,7 +295,7 @@ public class DisplaySet implements TreeNode, ImageSource {
 		return segments;
 	}
 
-	public void setSegments(final List<Segment> segments) {
+	public void setSegments(List<Segment> segments) {
 		this.segments = segments;
 	}
 

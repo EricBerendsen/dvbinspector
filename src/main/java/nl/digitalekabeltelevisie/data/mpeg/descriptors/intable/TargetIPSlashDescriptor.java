@@ -43,24 +43,16 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class TargetIPSlashDescriptor extends INTDescriptor {
 
-	private List<IPAdress> ipList = new ArrayList<IPAdress>();
+	private List<IPAdress> ipList = new ArrayList<>();
 
+	public static record IPAdress(byte[] IPv4_addr, int IPv4_slash_mask) implements TreeNode {
 
-	public static class IPAdress implements TreeNode{
-
-		private final byte[]IPv4_addr;
-		private final int IPv4_slash_mask;
-
-		public IPAdress(final byte[] pv4_addr, final int pv4_slash_mask) {
-			super();
-			IPv4_addr = pv4_addr;
-			IPv4_slash_mask = pv4_slash_mask;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("ip-adress(es) "+Utils.formatIPNumber(IPv4_addr)+"/"+IPv4_slash_mask));
-			s.add(new DefaultMutableTreeNode(new KVP("IPv4_addr",IPv4_addr,Utils.formatIPNumber(IPv4_addr))));
-			s.add(new DefaultMutableTreeNode(new KVP("IPv4_slash_mask",IPv4_slash_mask,null)));
+		@Override
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(
+					new KVP("ip-adress(es) " + Utils.formatIPNumber(IPv4_addr) + "/" + IPv4_slash_mask));
+			s.add(new DefaultMutableTreeNode(new KVP("IPv4_addr", IPv4_addr, Utils.formatIPNumber(IPv4_addr))));
+			s.add(new DefaultMutableTreeNode(new KVP("IPv4_slash_mask", IPv4_slash_mask, null)));
 			return s;
 		}
 
@@ -71,12 +63,12 @@ public class TargetIPSlashDescriptor extends INTDescriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public TargetIPSlashDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public TargetIPSlashDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int t = 0;
 		while (t<descriptorLength) {
-			final byte[] adress = Utils.getBytes(b, offset+2+t, 4);
-			final int mask  = Utils.getInt(b, offset+6+t, 1, 0xFF);
+			final byte[] adress = Utils.getBytes(b, 2+t, 4);
+			final int mask  = Utils.getInt(b, 6+t, 1, 0xFF);
 			final IPAdress a = new IPAdress(adress,mask);
 			ipList.add(a);
 			t+=5;
@@ -84,9 +76,9 @@ public class TargetIPSlashDescriptor extends INTDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		final KVP t = super.getJTreeNode(modus);
 		Utils.addListJTree(t,ipList,modus,"ip_list");
 		return t;
 	}

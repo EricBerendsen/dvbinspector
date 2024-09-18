@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,29 +29,28 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 
-public class DisplayDefinitionSegment extends Segment implements TreeNode{
 
-	public DisplayDefinitionSegment(final byte[] data,final int offset) {
+public class DisplayDefinitionSegment extends Segment{
+
+	public DisplayDefinitionSegment(byte[] data, int offset) {
 		super(data,offset);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("dds_version_number",getDDSVersionNumber(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("display_window_flag",getDisplayWindowFlag(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("display_width",getDisplayWidth(),"("+(getDisplayWidth()+1)+")")));
-		s.add(new DefaultMutableTreeNode(new KVP("display_height",getDisplayHeight(),"("+(getDisplayHeight()+1)+")")));
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		s.add(new KVP("dds_version_number",getDDSVersionNumber()));
+		s.add(new KVP("display_window_flag",getDisplayWindowFlag()));
+		s.add(new KVP("display_width",getDisplayWidth()).setDescription("("+(getDisplayWidth()+1)+")"));
+		s.add(new KVP("display_height",getDisplayHeight()).setDescription("("+(getDisplayHeight()+1)+")"));
 		if(getDisplayWindowFlag()==1){
-			s.add(new DefaultMutableTreeNode(new KVP("display_window_horizontal_position_minimum",getDisplayWindowHorizontalPositionMinimum(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("display_window_horizontal_position_maximum",getDisplayWindowHorizontalPositionMaximum(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("display_window_vertical_position_minimum",getDisplayWindowVerticalPositionMinimum(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("display_window_vertical_position_maximum",getDisplayWindowVerticalPositionMaximum(),null)));
+			s.add(new KVP("display_window_horizontal_position_minimum",getDisplayWindowHorizontalPositionMinimum()));
+			s.add(new KVP("display_window_horizontal_position_maximum",getDisplayWindowHorizontalPositionMaximum()));
+			s.add(new KVP("display_window_vertical_position_minimum",getDisplayWindowVerticalPositionMinimum()));
+			s.add(new KVP("display_window_vertical_position_maximum",getDisplayWindowVerticalPositionMaximum()));
 
 		}
 
