@@ -42,8 +42,17 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 			add(0x00,"Online SDT (OSDT) for CI Plus").
 			add(0x01,"DVB-IPTV SD&S").
 			add(0x02,"Material Resolution Server (MRS) for companion screen applications").
-			add(0x03,0x7F,"Reserved for future use").
+			add(0x03,"DVB-I").
+			add(0x04,0x7F,"Reserved for future use").
 			add(0x80,0xFF,"User defined").
+			build();
+
+	private static LookUpList dvb_i_endpoint_type_list = new LookUpList.Builder().
+			add(0x00,"Not used").
+			add(0x01,"DVB-I Serice List").
+			add(0x02,"Service List Registry query").
+			add(0x03,"Named DVB-I Service List").
+			add(0x04,0xFF,"Reserved for future use").
 			build();
 
 	private final int uri_linkage_type;
@@ -52,6 +61,11 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 	private int min_polling_interval;
 	private byte[] private_data_byte = null; 
 
+	private int dvb_i_endpoint_type = 0;
+	private int dvb_i_service_list_name_length = 0;
+	private String dvb_i_service_list_name = "";
+	private int dvb_i_service_list_provider_name_length = 0;
+	private String dvb_i_service_list_provider_name = "";
 
 	public URILinkageDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, parent);
@@ -66,6 +80,17 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 				localOffset += 2;
 		}
 		if ((PRIVATE_DATA_OFFSET + descriptorLength) < localOffset) {
+			if (uri_linkage_type == 0x03) {  // for DVB-I. Refer to clause 5.1.3.3 of DVB A177
+				dvb_i_endpoint_type = getInt(b, localOffset++, 1, MASK_8BITS);
+				if (dvb_i_endpoint_type == 0x03) {
+					dvb_i_service_list_name_length = getInt(b, localOffset++, 1, MASK_8BITS);
+					dvb_i_service_list_name = getString(b, localOffset, dvb_i_service_list_name_length);
+					localOffset += dvb_i_service_list_name_length;
+					dvb_i_service_list_provider_name_length = getInt(b, localOffset++, 1, MASK_8BITS);
+					dvb_i_service_list_provider_name = getString(b, localOffset, dvb_i_service_list_provider_name_length);
+					localOffset += dvb_i_service_list_provider_name_length;
+				}
+			}
 			private_data_byte = copyOfRange(b, localOffset, localOffset + descriptorLength + 2);
 		}
 	}
@@ -80,6 +105,13 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 		if ((uri_linkage_type == 0x00) || (uri_linkage_type == 0x01)) {
 			t.add(new KVP("min_polling_interval", min_polling_interval));
 		}
+		if (uri_linkage_type == 0x03) {
+			t.add(new KVP("dvb-i endpoint_type", dvb_i_endpoint_type).setDescription(getDVBIEndpointType(dvb_i_endpoint_type)));
+			if (dvb_i_endpoint_type == 0x03) {
+				t.add(new KVP("dvb-i service_list_name", dvb_i_service_list_name));
+				t.add(new KVP("dvb-i service_list_provider_name", dvb_i_service_list_provider_name));
+			}
+		}
 		if (private_data_byte != null) {
 			t.add(new KVP("private_data_byte", private_data_byte));
 		}
@@ -88,6 +120,10 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 
 	private static String getURILinkageTypeString(int uri_linkage_type) {
 		return uri_linkage_type_list.get(uri_linkage_type);
+	}
+
+	private static String getDVBIEndpointType(int dvb_i_endpoint_type) {
+		return dvb_i_endpoint_type_list.get(dvb_i_endpoint_type);
 	}
 
 }
