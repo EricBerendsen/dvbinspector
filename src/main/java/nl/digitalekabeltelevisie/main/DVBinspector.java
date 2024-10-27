@@ -377,7 +377,8 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x600, "UPC",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x0000233A, "Independent Television Commission (DTG)",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x3200, "Australian Terrestrial Television Networks",defaultPrivateDataSpecifier);
-		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x41565356, "Audio Video Coding Standard Workgroup of China (AVS3)",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x41565356, "Audio Video Coding Standard Workgroup of China (AVS3 video)",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x41565341, "Audio Video Coding Standard Workgroup of China (AVS3 audio)",defaultPrivateDataSpecifier);
 
 		settingsMenu.add(privateDataSubMenu);
 		

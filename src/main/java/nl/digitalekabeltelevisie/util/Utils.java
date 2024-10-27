@@ -894,6 +894,7 @@ public final class Utils {
 			case 0xCF: return"User Private / ISO/IEC 13818-7 ADTS AAC with AES-128-CBC frame encryption";
 			case 0xD1: return"User Private / BBC Dirac (Ultra HD video)";
 			case 0xD4: return"User Private / AVS3 Video";
+			case 0xD5: return"User Private / AVS3 Audio";
 			case 0xDB: return"User Private / ITU-T Rec. H.264 and ISO/IEC 14496-10 with AES-128-CBC slice encryption";
 			case 0xEA: return"User Private / Microsoft Windows Media Video 9 (VC-1) (lower bit-rate video)";
 
