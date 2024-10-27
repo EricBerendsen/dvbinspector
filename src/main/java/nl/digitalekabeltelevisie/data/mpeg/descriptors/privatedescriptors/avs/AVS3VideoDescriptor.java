@@ -37,8 +37,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-//import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.LookUpList;
+
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
@@ -58,18 +59,27 @@ public class AVS3VideoDescriptor extends Descriptor {
 	private final int transfer_characteristics;			// 8 bits
 	private final int matrix_coefficients;				// 8 bits
 
-	private static final String[] frame_rate_Strings = {"forbidden", "24/1.001", "24", "25", "30/1.001", "30", "50",
-														"60/1.001", "60", "100", "120", "240", "400", "120/1.001", "unknown"};
-	private static final String[] sample_precision_Strings = {"forbidden", "8-bit", "10-bit", "reserved", "reserved", 
-																"reserved", "reserved", "reserved" };
-	private static final String[] chroma_format_Strings = {"forbidden", "4:2:0", "4:2:2", "unknown"};
+	// T/AI 109.2 table XX
+	private static LookUpList frame_rate_Strings = new LookUpList.
+		Builder(new String[]{"forbidden", "24/1.001", "24", "25", "30/1.001", "30", "50", "60/1.001", "60", 
+							 "100", "120", "240", "400", "120/1.001", "unknown"}).
+		build();
+
+	// T/AI 109.2 table XX
+	private static LookUpList sample_precision_Strings = new LookUpList.Builder(new String[]{"forbidden", "8-bit", "10-bit"}).
+		add(0x3, 0x7, "reserved").
+		build();
+
+	// T/AI 109.2 table XX
+	private static LookUpList chroma_format_Strings = new LookUpList.Builder(new String[]{"forbidden", "4:2:0", "4:2:2", "unknown"}).
+		build();
 
 	public AVS3VideoDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
 		profile_id = getInt(b, offset+2, 1, 0xFF);
 		level_id = getInt(b, offset+3, 1, 0xFF);
-		multiple_frame_rate_flag = getInt(b, offset + 4, 1, 0x80) >>> 7;
-		frame_rate_code = getInt(b, offset+4, 1, 0x78) >> 3;
+		multiple_frame_rate_flag = getInt(b, offset+4, 1, 0x80) >>> 7;
+		frame_rate_code = getInt(b, offset+4, 1, 0x78) >>> 3;
 		sample_precision = getInt(b, offset+4, 1, 0x07);
 		chroma_format = getInt(b, offset+5, 1, 0xC0) >>> 6;
 		temporal_id_flag = getInt(b, offset+5, 1, 0x20) >>> 5;
@@ -81,19 +91,19 @@ public class AVS3VideoDescriptor extends Descriptor {
 		matrix_coefficients = getInt(b, offset+8, 1, 0xFF);
 	}
 
-	public static final String profile_id_String(int value) {
-		String res = switch (value) {
+	private static final String profile_id_String(int profile_id) {
+		String res = switch (profile_id) {
 			case 0x20 -> "Main 8-bit Profile";
 			case 0x22 -> "Main 10-bit Profile";
 			case 0x30 -> "High 8-bit Profile";
 			case 0x32 -> "High 10-bit Profile";
-			default -> throw new IllegalArgumentException("Invalid value in profile_id_String:"+value);
+			default -> throw new IllegalArgumentException("Invalid value in profile_id_String:"+profile_id);
 		};
 		return res;
 	}
 
-	public static final String level_id_String(int value) {
-		String res = switch (value) {
+	private static final String level_id_String(int level_id) {
+		String res = switch (level_id) {
 			case 0x10 -> "2.0.15";
 			case 0x12 -> "2.0.30";
 			case 0x14 -> "2.0.60";
@@ -135,27 +145,30 @@ public class AVS3VideoDescriptor extends Descriptor {
 			case 0x6A -> "10.2.120";
 			case 0x69 -> "10.4.120";
 			case 0x6B -> "10.6.120";
-			default -> throw new IllegalArgumentException("Invalid value in level_id_String:"+value);
+			default -> throw new IllegalArgumentException("Invalid value in level_id_String:"+level_id);
 		};
 		return res;
 	}
 
-	public static final String frame_rate_code_String(int value){
-		if (value < 0 || value > 15)
-			throw new IllegalArgumentException("Invalid value in frame_rate_code_String:"+value);
-		return frame_rate_Strings[value];
+	private static final String frame_rate_code_String(int frame_rate_code) {
+		String res =frame_rate_Strings.get(frame_rate_code);
+		if (res != null)
+			return res;
+		throw new IllegalArgumentException("Invalid value in frame_rate_code_String:"+frame_rate_code);
 	}
 
-	public static final String sample_precision_String(int value){
-		if (value < 0 || value > 7)
-			throw new IllegalArgumentException("Invalid value in sample_precision_String:"+value);
-		return sample_precision_Strings[value];
+	private static final String sample_precision_String(int sample_precision) {
+		String res = sample_precision_Strings.get(sample_precision);
+		if (res != null)
+			return res; 
+		throw new IllegalArgumentException("Invalid value in sample_precision_String:"+sample_precision);
 	}
 
-	public static final String chroma_format_String(int value){
-		if (value < 0 || value > 3)
-			throw new IllegalArgumentException("Invalid value in chroma_format_String:"+value);
-		return chroma_format_Strings[value];
+	private static final String chroma_format_String(int chroma_format) {
+		String res = chroma_format_Strings.get(chroma_format);
+		if (res != null)
+			return res;
+		throw new IllegalArgumentException("Invalid value in chroma_format_String:"+chroma_format);
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
