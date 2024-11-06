@@ -192,24 +192,17 @@ public class AVS3AudioDescriptor extends Descriptor {
 		add(2, 7, "reserved").
 		build();
 
-	private static final int MASK_UPPER_1BIT = MASK_1BIT << 7; 
-	private static final int MASK_UPPER_2BITS = MASK_2BITS << 6;
-	private static final int MASK_UPPER_3BITS = MASK_3BITS << 5;
-	private static final int MASK_UPPER_4BITS = MASK_4BITS << 4; 
-	private static final int MASK_UPPER_7BITS = MASK_7BITS << 1; 
-	
-
 	public AVS3AudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
 
-		audio_codec_id = getInt(b, offset+2, 1, MASK_UPPER_4BITS) >>> 4;
+		audio_codec_id = getInt(b, offset+2, 1, 0b11110000) >>> 4;
 		sampling_frequency_index = getInt(b, offset+2, 1, MASK_4BITS);
 		int ofs=offset+3;
 		if (audio_codec_id == GENERAL_HIGH_RATE_CODING) {
-			anc_data_index = getInt(b, ofs, 1, MASK_UPPER_1BIT) >>> 7;
-			coding_profile = getInt(b, ofs, 1, MASK_3BITS << 4) >>> 4;
+			anc_data_index = getInt(b, ofs, 1, 0b10000000) >>> 7;
+			coding_profile = getInt(b, ofs, 1, 0b01110000) >>> 4;
 			bitrate_index = getInt(b, ofs++, 1, MASK_4BITS);
-			bitstream_type = getInt(b, ofs, 1, MASK_UPPER_1BIT) >>> 7;
+			bitstream_type = getInt(b, ofs, 1, 0b10000000) >>> 7;
 			channel_number_index = getInt(b, ofs++, 1, MASK_7BITS);
 			raw_frame_length = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
@@ -219,28 +212,28 @@ public class AVS3AudioDescriptor extends Descriptor {
 				sampling_frequency = getInt(b, ofs, 3, MASK_24BITS);
 				ofs+=3;
 			}
-			anc_data_index = getInt(b, ofs, 1, MASK_UPPER_1BIT) >>> 7;
-			coding_profile = getInt(b, ofs++, 1, MASK_3BITS << 4) >>> 4;
+			anc_data_index = getInt(b, ofs, 1, 0b10000000) >>> 7;
+			coding_profile = getInt(b, ofs++, 1, 0b01110000) >>> 4;
 			channel_number = getInt(b, ofs++, 1, MASK_8BITS);
 		}
 		else if (audio_codec_id == GENERAL_FULL_RATE_CODING) {
-			nn_type = getInt(b, ofs, 1, MASK_UPPER_3BITS) >>> 5;
+			nn_type = getInt(b, ofs, 1, 0b11100000) >>> 5;
 			content_type = getInt(b, ofs++, 1, MASK_4BITS);
 			if (content_type == CHANNEL_SIGNAL)
-				channel_number_index = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
+				channel_number_index = getInt(b, ofs++, 1, 0b11111110) >>> 1;
 			else if (content_type == OBJECT_SIGNAL)
-				object_channel_number = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
+				object_channel_number = getInt(b, ofs++, 1, 0b11111110) >>> 1;
 			else if (content_type == HYBRID_SIGNAL) {
-				channel_number_index = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
-				object_channel_number = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
+				channel_number_index = getInt(b, ofs++, 1, 0b11111110) >>> 1;
+				object_channel_number = getInt(b, ofs++, 1, 0b11111110) >>> 1;
 			}
 			else if (content_type == HOA_SIGNAL)
-				hoa_order = getInt(b, ofs++, 1, MASK_UPPER_4BITS) >>> 4;
+				hoa_order = getInt(b, ofs++, 1, 0b11110000) >>> 4;
 			total_bitrate = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
 
 		}
-		resolution = getInt(b, ofs++, 1, MASK_UPPER_2BITS) >> 6;
+		resolution = getInt(b, ofs++, 1, 0b11000000) >> 6;
 		addition_info = copyOfRange(b, ofs, descriptorLength+2);
 	}
 
