@@ -69,7 +69,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 	private static final int HYBRID_SIGNAL  = 2;
 	private static final int HOA_SIGNAL     = 3;
 
-	// T/AI 109.3 tavle A.8
+	// T/AI 109.3 table A.8
 	private static final LookUpList channel_number_index_Strings = new LookUpList.Builder().
 		add(0x00, "Mono").
 		add(0x01, "Dual channel stereo").
@@ -159,7 +159,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 		add(0x6, 0xF, "reserved").
 		build();
 
-	public static LookUpList[] channel_bitrates = {
+	private static LookUpList[] channel_bitrates = {
 		bitrate_index_Mono_Strings,
 		bitrate_index_Stereo_Strings,
 		bitrate_index_5_1_Strings,
@@ -181,72 +181,78 @@ public class AVS3AudioDescriptor extends Descriptor {
 		build();
 
 	// T/AI 109.3 annex A.2
-	private static LookUpList coding_profile_Strings = new LookUpList.Builder(new String[]{"Basic", "Object Based", "HOA"}).
+	private static LookUpList coding_profile_Strings = new LookUpList.
+		Builder(new String[]{"Basic", "Object Based", "HOA"}).
 		add(3, 7, "reserved").
 		build();
 
 	// T/AI 109.3 annex A.2
-	private static LookUpList nn_type_Strings = new LookUpList.Builder(new String[]{"basic", "low complexity"}).
+	private static LookUpList nn_type_Strings = new LookUpList.
+		Builder(new String[]{"basic", "low complexity"}).
 		add(2, 7, "reserved").
 		build();
+
+	private static final int MASK_UPPER_1BIT = MASK_1BIT << 7; 
+	private static final int MASK_UPPER_2BITS = MASK_2BITS << 6;
+	private static final int MASK_UPPER_3BITS = MASK_3BITS << 5;
+	private static final int MASK_UPPER_4BITS = MASK_4BITS << 4; 
+	private static final int MASK_UPPER_7BITS = MASK_7BITS << 1; 
+	
 
 	public AVS3AudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
 
-		audio_codec_id = getInt(b, offset+2, 1, 0xF0) >>> 4;
-		sampling_frequency_index = getInt(b, offset+2, 1, 0x0F);
+		audio_codec_id = getInt(b, offset+2, 1, MASK_UPPER_4BITS) >>> 4;
+		sampling_frequency_index = getInt(b, offset+2, 1, MASK_4BITS);
 		int ofs=offset+3;
 		if (audio_codec_id == GENERAL_HIGH_RATE_CODING) {
-			anc_data_index = getInt(b, ofs, 1, 0x80) >>> 7;
-			coding_profile = getInt(b, ofs, 1, 0x70) >>> 4;
+			anc_data_index = getInt(b, ofs, 1, MASK_UPPER_1BIT) >>> 7;
+			coding_profile = getInt(b, ofs, 1, MASK_3BITS << 4) >>> 4;
 			bitrate_index = getInt(b, ofs++, 1, MASK_4BITS);
-			bitstream_type = getInt(b, ofs, 1, 0x80) >>> 7;
+			bitstream_type = getInt(b, ofs, 1, MASK_UPPER_1BIT) >>> 7;
 			channel_number_index = getInt(b, ofs++, 1, MASK_7BITS);
 			raw_frame_length = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
 		}
 		else if (audio_codec_id == LOSSLESS_CODING) {
 			if (sampling_frequency_index == 0xF) {
-				sampling_frequency = getInt(b,ofs, 3, MASK_24BITS);
+				sampling_frequency = getInt(b, ofs, 3, MASK_24BITS);
 				ofs+=3;
 			}
-			anc_data_index = getInt(b, ofs, 1, 0x80) >>> 7;
-			coding_profile = getInt(b, ofs++, 1, 0x70) >>> 4;
+			anc_data_index = getInt(b, ofs, 1, MASK_UPPER_1BIT) >>> 7;
+			coding_profile = getInt(b, ofs++, 1, MASK_3BITS << 4) >>> 4;
 			channel_number = getInt(b, ofs++, 1, MASK_8BITS);
 		}
 		else if (audio_codec_id == GENERAL_FULL_RATE_CODING) {
-			nn_type = getInt(b, ofs, 1, 0xE0) >>> 5;
+			nn_type = getInt(b, ofs, 1, MASK_UPPER_3BITS) >>> 5;
 			content_type = getInt(b, ofs++, 1, MASK_4BITS);
 			if (content_type == CHANNEL_SIGNAL)
-				channel_number_index = getInt(b, ofs++, 1, 0xFE) >> 1;
+				channel_number_index = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
 			else if (content_type == OBJECT_SIGNAL)
-				object_channel_number = getInt(b, ofs++, 1, 0xFE) >> 1;
+				object_channel_number = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
 			else if (content_type == HYBRID_SIGNAL) {
-				channel_number_index = getInt(b, ofs++, 1, 0xFE) >> 1;
-				object_channel_number = getInt(b, ofs++, 1, 0xFE) >> 1;
+				channel_number_index = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
+				object_channel_number = getInt(b, ofs++, 1, MASK_UPPER_7BITS) >>> 1;
 			}
 			else if (content_type == HOA_SIGNAL)
-				hoa_order = getInt(b, ofs++, 1, 0xF0) >>> 4;
+				hoa_order = getInt(b, ofs++, 1, MASK_UPPER_4BITS) >>> 4;
 			total_bitrate = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
 
 		}
-		resolution = getInt(b, ofs++, 1, 0xC0) >> 6;
-
+		resolution = getInt(b, ofs++, 1, MASK_UPPER_2BITS) >> 6;
 		addition_info = copyOfRange(b, ofs, descriptorLength+2);
 	}
 
 
-	private static final String audio_codec_id_String(int audio_codec_id)
-	{
+	private static final String audio_codec_id_String(int audio_codec_id) {
 		String rc = audio_codec_id_Strings.get(audio_codec_id);
 		if (rc != null)
 			return rc;
 		throw new IllegalArgumentException("Invalid value for audio_codec_id:"+audio_codec_id);
 	}
 
-	private static final String sampling_frequency_index_String(int sampling_frequency_index)
-	{
+	private static final String sampling_frequency_index_String(int sampling_frequency_index) {
 		String rc = sampling_frequency_index_Strings.get(sampling_frequency_index);
 		if (rc != null)
 			return rc;
@@ -262,53 +268,46 @@ public class AVS3AudioDescriptor extends Descriptor {
 		throw new IllegalArgumentException("Invalid value for bitrate_index:"+bitrate_index);
 		}
 
-	private static final String coding_profile_String(int coding_profile)
-	{
+	private static final String coding_profile_String(int coding_profile) {
 		String rc = coding_profile_Strings.get(coding_profile);
 		if (rc != null)
 			return rc;
 		throw new IllegalArgumentException("Invalid value for coding_profile:"+coding_profile);
 	}
 
-	private static final String bitstream_type_String(int bitstream_type)
-	{
-		String res = switch (bitstream_type) {
+	private static final String bitstream_type_String(int bitstream_type) {
+		return switch (bitstream_type) {
 			case 0 -> "uniform";
 			case 1 -> "non-uniform";
 			default -> throw new IllegalArgumentException("Invalid value for bitstream_type:"+bitstream_type);
-		}
-		return res;
+		};
 	}
 
-	private static final String channel_number_index_String(int value)
-	{
+	private static final String channel_number_index_String(int value) {
 		String rc = channel_number_index_Strings.get(value);
 		if (rc != null)
 			return rc;
 		throw new IllegalArgumentException("Invalid value for channel_number_index:"+value);
 	}
 
-	private static final String nn_type_String(int nn_type)
-	{
+	private static final String nn_type_String(int nn_type) {
 		String rc = nn_type_Strings.get(nn_type);
 		if (rc != null)
 			return rc;
 		throw new IllegalArgumentException("Invalid value for nn_type:"+nn_type);
 	}
 
-	private static final String resolution_String(int resolution)
-	{
-		String res = switch (resolution) {
+	private static final String resolution_String(int resolution) {
+		return switch (resolution) {
 			case 0 -> "8 bits";
 			case 1 -> "10 bits";
 			case 2 -> "12 bits";
 			case 3 -> "reserved";
 			default -> throw new IllegalArgumentException("Invalid value for resolution:"+resolution);
-		}
-		return res;
+		};
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(final int modus) {
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		t.add(new DefaultMutableTreeNode(new KVP("audio_codec_id", audio_codec_id, audio_codec_id_String(audio_codec_id))));
 
@@ -316,6 +315,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency", sampling_frequency, null)));
 		else
 			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency_index", sampling_frequency_index, sampling_frequency_index_String(sampling_frequency_index))));
+
 		if (audio_codec_id == GENERAL_HIGH_RATE_CODING) {
 			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index, null)));
 			t.add(new DefaultMutableTreeNode(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile))));
@@ -347,7 +347,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 	}
 
 	@Override
-	public String getDescriptorname(){
+	public String getDescriptorname() {
 		return "AVS3 Audio Descriptor";
 	}
 }
