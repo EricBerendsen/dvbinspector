@@ -310,28 +310,28 @@ public class AVS3AudioDescriptor extends Descriptor {
 			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency_index", sampling_frequency_index, sampling_frequency_index_String(sampling_frequency_index))));
 
 		if (audio_codec_id == GENERAL_HIGH_RATE_CODING) {
-			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index)));
 			t.add(new DefaultMutableTreeNode(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile))));
 			t.add(new DefaultMutableTreeNode(new KVP("bitrate_index", bitrate_index, bitrate_index_String(channel_number_index, bitrate_index))));
 			t.add(new DefaultMutableTreeNode(new KVP("bitstream_type", bitstream_type, bitstream_type_String(bitstream_type))));
 			t.add(new DefaultMutableTreeNode(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index))));
-			t.add(new DefaultMutableTreeNode(new KVP("raw_frame_length", raw_frame_length, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("raw_frame_length", raw_frame_length)));
 		}
 		else if (audio_codec_id == LOSSLESS_CODING) {
-			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index)));
 			t.add(new DefaultMutableTreeNode(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile))));
-			t.add(new DefaultMutableTreeNode(new KVP("channel_number", channel_number, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("channel_number", channel_number)));
 		}
 		else if (audio_codec_id == GENERAL_FULL_RATE_CODING) {
 			t.add(new DefaultMutableTreeNode(new KVP("nn_type", nn_type, nn_type_String(nn_type))));
-			t.add(new DefaultMutableTreeNode(new KVP("content_type", content_type, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("content_type", content_type)));
 			if (content_type == CHANNEL_SIGNAL || content_type == HYBRID_SIGNAL) 
 				t.add(new DefaultMutableTreeNode(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index))));
 			if (content_type == OBJECT_SIGNAL|| content_type == HYBRID_SIGNAL) 
-				t.add(new DefaultMutableTreeNode(new KVP("object_channel_number", object_channel_number, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("object_channel_number", object_channel_number)));
 			if (content_type == HOA_SIGNAL)
-				t.add(new DefaultMutableTreeNode(new KVP("hoa_order", hoa_order, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("total_bitrate", total_bitrate, null)));	
+				t.add(new DefaultMutableTreeNode(new KVP("hoa_order", hoa_order)));
+			t.add(new DefaultMutableTreeNode(new KVP("total_bitrate", total_bitrate)));	
 		}
 		t.add(new DefaultMutableTreeNode(new KVP("resolution", resolution, resolution_String(resolution))));
 		if (addition_info.length > 0)
