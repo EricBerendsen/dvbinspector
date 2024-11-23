@@ -192,6 +192,13 @@ public class AVS3AudioDescriptor extends Descriptor {
 		add(2, 7, "reserved").
 		build();
 
+	private static LookUpList content_type_Strings = new LookUpList.Builder().
+		add(CHANNEL_SIGNAL, "channels only").	
+		add(OBJECT_SIGNAL, "objects only").
+		add(HYBRID_SIGNAL, "channels and objects").
+		add(HOA_SIGNAL, "HOA").
+		build();
+
 	public AVS3AudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
 		super(b, offset, parent);
 
@@ -276,11 +283,15 @@ public class AVS3AudioDescriptor extends Descriptor {
 		};
 	}
 
-	private static final String channel_number_index_String(int value) {
-		String rc = channel_number_index_Strings.get(value);
+	private static final String channel_number_index_String(int channel_number_index) {
+		String rc = channel_number_index_Strings.get(channel_number_index);
 		if (rc != null)
 			return rc;
-		throw new IllegalArgumentException("Invalid value for channel_number_index:"+value);
+		throw new IllegalArgumentException("Invalid value for channel_number_index:"+channel_number_index);
+	}
+
+	private static final String object_channel_number_String(int object_channel_number) {
+		return new String( Integer.toString(object_channel_number+1) + " object" + (object_channel_number+1 == 1 ? "" : "s") );
 	}
 
 	private static final String nn_type_String(int nn_type) {
@@ -290,11 +301,18 @@ public class AVS3AudioDescriptor extends Descriptor {
 		throw new IllegalArgumentException("Invalid value for nn_type:"+nn_type);
 	}
 
+	private static final String content_type_String(int content_type) {
+		String rc = content_type_Strings.get(content_type);
+		if (rc != null)
+			return rc;
+		throw new IllegalArgumentException("Invalid value for content_type:"+content_type);
+	}
+
 	private static final String resolution_String(int resolution) {
 		return switch (resolution) {
 			case 0 -> "8 bits";
-			case 1 -> "10 bits";
-			case 2 -> "12 bits";
+			case 1 -> "16 bits";
+			case 2 -> "24 bits";
 			case 3 -> "reserved";
 			default -> throw new IllegalArgumentException("Invalid value for resolution:"+resolution);
 		};
@@ -305,7 +323,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 		t.add(new DefaultMutableTreeNode(new KVP("audio_codec_id", audio_codec_id, audio_codec_id_String(audio_codec_id))));
 
 		if (audio_codec_id == LOSSLESS_CODING && sampling_frequency_index == 0xF)
-			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency", sampling_frequency, null)));
+			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency", sampling_frequency)));
 		else
 			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency_index", sampling_frequency_index, sampling_frequency_index_String(sampling_frequency_index))));
 
@@ -324,11 +342,11 @@ public class AVS3AudioDescriptor extends Descriptor {
 		}
 		else if (audio_codec_id == GENERAL_FULL_RATE_CODING) {
 			t.add(new DefaultMutableTreeNode(new KVP("nn_type", nn_type, nn_type_String(nn_type))));
-			t.add(new DefaultMutableTreeNode(new KVP("content_type", content_type)));
+			t.add(new DefaultMutableTreeNode(new KVP("content_type", content_type, content_type_String(content_type))));
 			if (content_type == CHANNEL_SIGNAL || content_type == HYBRID_SIGNAL) 
 				t.add(new DefaultMutableTreeNode(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index))));
 			if (content_type == OBJECT_SIGNAL|| content_type == HYBRID_SIGNAL) 
-				t.add(new DefaultMutableTreeNode(new KVP("object_channel_number", object_channel_number)));
+				t.add(new DefaultMutableTreeNode(new KVP("object_channel_number", object_channel_number, object_channel_number_String(object_channel_number))));
 			if (content_type == HOA_SIGNAL)
 				t.add(new DefaultMutableTreeNode(new KVP("hoa_order", hoa_order)));
 			t.add(new DefaultMutableTreeNode(new KVP("total_bitrate", total_bitrate)));	

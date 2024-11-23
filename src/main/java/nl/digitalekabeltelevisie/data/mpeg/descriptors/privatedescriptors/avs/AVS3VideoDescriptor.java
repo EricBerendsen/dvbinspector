@@ -29,9 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
