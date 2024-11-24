@@ -42,6 +42,12 @@ public class LookUpList {
 			table = new RangeHashMap<Integer,String>();
 		}
 
+		public Builder(String[] init_vals){
+			this();
+			for (int i=0; i<init_vals.length; i++)
+				table.put(i, i, init_vals[i]);
+		}
+
 		public Builder add(int i, String s){
 			table.put(i, i, s);
 			return this;

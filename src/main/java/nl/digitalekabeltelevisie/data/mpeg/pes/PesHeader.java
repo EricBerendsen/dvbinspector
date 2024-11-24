@@ -56,7 +56,8 @@ public class PesHeader implements TreeNode {
 			add(0x40, "private_stream").
 			add(0x41, "AVS3 video sequence stream"). // AVS3 T/AI 109.6—2022 9.2.1 Stream identification
 			add(0x42, "AVS3 video library stream").  // AVS3 T/AI 109.6—2022 9.2.1 Stream identification
-			add(0x43, 0x4f, "may be used by AVS standards in the future"). 
+			add(0x43, 0x4e, "may be used by AVS standards in the future"). 
+			add(0x4f, "AVS3 audio stream").		// T/AI 109.7-2024 clause 8.1.2.1 Stream id
 			add(0x50, 0x7f, "private_stream").
 			build();
 

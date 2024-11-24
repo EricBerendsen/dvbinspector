@@ -607,6 +607,9 @@ public class Descriptor implements TreeNode {
 				case 0x1c -> "DTS-UHD receiver-mix audio description, mono, for the visually impaired ";
 				case 0x1d -> "DTS-UHD receiver-mix audio description, stereo, for the visually impaired ";
 				case 0x1e -> "DTS-UHD NGA Audio";
+				case 0x20 -> "AVS3-P3 Next Generation Audio (NGA)";
+				case 0x21 -> "AVS3-P3 broadcast-mix accessibility components";
+				case 0x22 -> "AVS3-P3 receiver-mix accessibility components";
 				default -> "reserved for future use";
 			};
 			case 0x02 ->
@@ -637,7 +640,7 @@ public class Descriptor implements TreeNode {
 			res.append("content contains spoken subtitles, ");
 		}
 		if((component_type & 0b0000_0100) != 0) {
-			res.append("ccontent contains audio description, ");
+			res.append("content contains audio description, ");
 		}
 		res.append("preferred reproduction channel layout: ");
 		switch (component_type & 0b0000_0011) {

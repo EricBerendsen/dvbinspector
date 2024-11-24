@@ -295,10 +295,16 @@ public final class DescriptorFactory {
 				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.au.LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
 			}
 
-		} else if (private_data_specifier == 0x41565356) { // AVS
+		} else if (private_data_specifier == 0x41565356) { // AVS Video
 			switch (descriptor_tag) {
 				case 0xD1:
 					return new AVS3VideoDescriptor(data, 0, tableSection);
+			}
+		}
+		else if (private_data_specifier == 0x41565341) { // AVS Audio
+			switch (descriptor_tag) {
+				case 0xD2:
+					return new AVS3AudioDescriptor(data, 0, tableSection);
 			}
 		}
 		logger.info("Unimplemented private descriptor, private_data_specifier=" + private_data_specifier
