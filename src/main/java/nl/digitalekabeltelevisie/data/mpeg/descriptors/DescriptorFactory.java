@@ -509,7 +509,7 @@ public final class DescriptorFactory {
 		case 0x7A:
 			return new EnhancedAC3Descriptor(data, 0, tableSection);
 		case 0x7C:
-			return new AACDescriptor(data, 0, tableSection);
+			return new AACDescriptor(data, tableSection);
 		case 0x7E:
 			return new FTAContentManagmentDescriptor(data, 0, tableSection);
 		case 0x7F:
