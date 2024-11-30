@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static java.util.Arrays.copyOfRange;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -40,7 +38,7 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 	// TS 102 809 V1.1.1 Ch.  B.2.8.1 carousel_identifier_descriptor
 
 	private final long carouselId;
-	private final int formatId;
+	private int formatId;
 
 	private byte[] privateDataByte;
 
@@ -55,50 +53,52 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 
 	private byte[] objectKeyData;
 
-	public CarouselIdentifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		carouselId = Utils.getLong(b, offset+2, 4, Utils.MASK_32BITS);
-		formatId = Utils.getInt(b, offset+6, 1, Utils.MASK_8BITS);
-		if(formatId==0x00){
-			privateDataByte = copyOfRange(b, offset+7, offset+descriptorLength+2);
-		}
-		if(formatId==0x01){
-			moduleVersion=Utils.getInt(b, offset+7, 1, Utils.MASK_8BITS);
-			moduleId=Utils.getInt(b, offset+8, 2, Utils.MASK_16BITS);
-			blockSize = Utils.getInt(b, offset+10, 2, Utils.MASK_16BITS);
-			moduleSize  = Utils.getLong(b, offset+12, 4, Utils.MASK_32BITS);
-			compressionMethod = Utils.getInt(b, offset+16, 1, Utils.MASK_8BITS);
-			originalSize = Utils.getLong(b, offset+17, 4, Utils.MASK_32BITS);
-			timeOut = Utils.getInt(b, offset+21, 1, Utils.MASK_8BITS);
-			objectKeyLength = Utils.getInt(b, offset+22, 1, Utils.MASK_8BITS);
-			objectKeyData = copyOfRange(b, offset+23, offset+23+objectKeyLength);
-			privateDataByte = copyOfRange(b, offset+23+objectKeyLength, offset+descriptorLength+2);
+	public CarouselIdentifierDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		carouselId = Utils.getLong(b, 2, 4, Utils.MASK_32BITS);
+		if (descriptorLength > 4) {
+			formatId = Utils.getInt(b, 6, 1, Utils.MASK_8BITS);
+			if (formatId == 0x00) {
+				privateDataByte = copyOfRange(b, 7, descriptorLength + 2);
+			}
+			if (formatId == 0x01) {
+				moduleVersion = Utils.getInt(b, 7, 1, Utils.MASK_8BITS);
+				moduleId = Utils.getInt(b, 8, 2, Utils.MASK_16BITS);
+				blockSize = Utils.getInt(b, 10, 2, Utils.MASK_16BITS);
+				moduleSize = Utils.getLong(b, 12, 4, Utils.MASK_32BITS);
+				compressionMethod = Utils.getInt(b, 16, 1, Utils.MASK_8BITS);
+				originalSize = Utils.getLong(b, 17, 4, Utils.MASK_32BITS);
+				timeOut = Utils.getInt(b, 21, 1, Utils.MASK_8BITS);
+				objectKeyLength = Utils.getInt(b, 22, 1, Utils.MASK_8BITS);
+				objectKeyData = copyOfRange(b, 23, 23 + objectKeyLength);
+				privateDataByte = copyOfRange(b, 23 + objectKeyLength, descriptorLength + 2);
+			}
 		}
 
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("carousel_id",carouselId,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("format_id",formatId,getFormatIDString(formatId))));
-		if(formatId==0x00){
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte,null)));
-		}
-		if(formatId==0x01){
-			t.add(new DefaultMutableTreeNode(new KVP("module_version",moduleVersion,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("module_id",moduleId,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("block_size",blockSize,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("module_size",moduleSize,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("compression_method",compressionMethod,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("Original_size",originalSize,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_out",timeOut,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("object_key_length",objectKeyLength,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("object_key_data",objectKeyData,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte,null)));
+		final KVP t = (KVP) super.getJTreeNode(modus);
+		t.add(new KVP("carousel_id", carouselId));
+		if (descriptorLength > 4) {
+			t.add(new KVP("format_id", formatId, getFormatIDString(formatId)));
+			if (formatId == 0x00) {
+				t.add(new KVP("private_data_byte", privateDataByte));
+			}
+			if (formatId == 0x01) {
+				t.add(new KVP("module_version", moduleVersion));
+				t.add(new KVP("module_id", moduleId));
+				t.add(new KVP("block_size", blockSize));
+				t.add(new KVP("module_size", moduleSize));
+				t.add(new KVP("compression_method", compressionMethod));
+				t.add(new KVP("Original_size", originalSize));
+				t.add(new KVP("time_out", timeOut));
+				t.add(new KVP("object_key_length", objectKeyLength));
+				t.add(new KVP("object_key_data", objectKeyData));
+				t.add(new KVP("private_data_byte", privateDataByte));
+			}
 		}
 		return t;
 	}
