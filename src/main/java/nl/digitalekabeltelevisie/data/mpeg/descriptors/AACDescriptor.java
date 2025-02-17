@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,36 +38,43 @@ public class AACDescriptor extends Descriptor {
 
 
 	private final int profile_and_level;
-	private final int aac_type_flag;
+	private int aac_type_flag = 0;
+	private int saoc_de_flag = 0;
 	private int aac_type;
+	
 	private byte[] additional_info;
 
-
-	public AACDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		profile_and_level = getInt(b, offset+2, 1, MASK_8BITS);
-		aac_type_flag = getInt(b, offset+3, 1, 0x80)>>7;
-		int t=offset+4;
-		if(aac_type_flag==1){
-			aac_type = getInt(b, t++, 1, MASK_8BITS);
-		}
-		if(t<descriptorLength){
-			additional_info=getBytes(b, t, descriptorLength-t);
+	public AACDescriptor(final byte[] b, final TableSection parent) {
+		super(b ,parent);
+		profile_and_level = getInt(b, 2, 1, MASK_8BITS);
+		if(descriptorLength > 1){
+			aac_type_flag = getInt(b, 3, 1, 0b1000_0000)>>7;
+			saoc_de_flag = getInt(b, 3, 1, 0b0100_0000)>>6;
+		
+			int t = 4;
+			if(aac_type_flag==1){
+				aac_type = getInt(b, t++, 1, MASK_8BITS);
+			}
+			if(t<descriptorLength){
+				additional_info=getBytes(b, t, 2 + descriptorLength - t);
+			}
 		}
 	}
-
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
 		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_and_level",profile_and_level,getProfileLevelString(profile_and_level))));
-		t.add(new DefaultMutableTreeNode(new KVP("aac_type_flag",aac_type_flag,null)));
-		if(aac_type_flag==1){
-			t.add(new DefaultMutableTreeNode(new KVP("aac_type",aac_type,getComponentType0x06String(aac_type))));
-		}
-		if(additional_info!=null){
-			t.add(new DefaultMutableTreeNode(new KVP("additional_info",additional_info,null)));
+		t.add(new KVP("profile_and_level",profile_and_level,getProfileLevelString(profile_and_level)));
+		if(descriptorLength > 1){
+			t.add(new KVP("AAC_type_flag",aac_type_flag));
+			t.add(new KVP("SAOC_DE_flag",saoc_de_flag,saoc_de_flag == 1?"SAOC-DE parametric data shall be present":"SAOC-DE parametric data shall not be present"));
+			if(aac_type_flag==1){
+				t.add(new KVP("aac_type",aac_type,getComponentType0x06String(aac_type)));
+			}
+			if(additional_info!=null){
+				t.add(new KVP("additional_info",additional_info));
+			}
 		}
 
 		return t;

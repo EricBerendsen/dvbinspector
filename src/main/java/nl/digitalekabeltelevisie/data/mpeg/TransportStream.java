@@ -68,6 +68,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video265.H265Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video266.H266Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
@@ -472,6 +473,8 @@ public class TransportStream implements TreeNode{
 	public KVP getJTreeNode(int modus){
 
 		KVP t = new KVP("Transport Stream "+psi.getPat().getTransportStreamId()).setCrumb("root");
+		
+		t.addHTMLSource(() ->getSummary(modus), "Summary");
 
 		t.add(new KVP("file",file.getPath()));
 		t.add(new KVP("size",file.length()));
@@ -512,6 +515,96 @@ public class TransportStream implements TreeNode{
 		return t;
 	}
 
+	
+	private String getSummary(int modus) {
+		StringBuilder sb = new StringBuilder();
+		int transportStreamId = psi.getPat().getTransportStreamId();
+		if(transportStreamId != -1) {
+			sb.append("Transport Stream: ").append(transportStreamId).append("<br/>");
+		}
+		
+		Map<Integer, PMTsection[]> pmts = psi.getPmts().getPmts();
+		Iterable<Integer> serviceIds = new TreeSet<>(pmts.keySet());
+
+		sb.append("<ol>");
+
+		for (Integer programNumber : serviceIds) {
+			PMTsection[] sections = pmts.get(programNumber);
+			
+			sb.append("<li>program: ")
+			.append("<a href=\"root/psi/pmts/program:")
+			.append(programNumber)
+			.append("\">")
+			.append(programNumber)
+			.append("</a>");
+			psi.getSdt().getServiceNameForActualTransportStreamOptional(programNumber).ifPresent(s -> sb.append(" (").append(s).append(')'));
+			sb.append("<br/>");
+			
+			PMTsection pmtSection = sections[0];
+			sb.append("<ol>");
+			for(Component component:pmtSection.getComponentenList()) {
+				sb.append("<li>Pid: ");
+				if(!Utils.psiOnlyModus(modus)) {
+					sb.append("<a href=\"root/pids/pid:")
+						.append(component.getElementaryPID())
+						.append("\">");
+				}
+				sb.append(component.getElementaryPID());
+				if(!Utils.psiOnlyModus(modus)) {
+					sb.append("</a>");
+				}
+				sb.append(" Stream type: ")
+				.append(component.getStreamtype())
+				.append(" (")
+				.append(determineComponentType(component.getComponentDescriptorList()).
+						map(ComponentType::getDescription).
+						orElse(getStreamTypeShortString(component.getStreamtype())))
+				.append(")</li>");
+			}
+			sb.append("</ol><br/>");
+
+			
+			EITsection[] pf = psi.getEit().getActualTransportStreamEitPF(programNumber);
+			if(pf.length >0) {
+				
+				sb.append("EIT p/f:<br/>");
+				for(EITsection section:pf) {
+					int sectionNumber = section.getSectionNumber();
+					for(Event event : section.getEventList()) {
+						sb.append(Utils.escapeHTML(getEITStartTimeAsString(event.getStartTime())))
+						.append("&nbsp;")
+						.append(formatDuration(event.getDuration()))
+						.append("&nbsp;")
+						
+						.append("<a href=\"root/psi/eit/original_network_id:")
+						.append(section.getOriginalNetworkID())
+						.append("/transport_stream_id:")
+						.append(section.getTransportStreamID())
+						.append("/service_id:")
+						.append(programNumber)
+						.append("/tableid:78");
+						if(!Utils.simpleModus(modus)) {
+							sb.append("/tablesection:")
+								.append(sectionNumber)
+								.append("/events");
+							
+						}
+						sb.append("/event:")
+						.append(event.getEventID())
+						.append("\">")
+						.append(event.getEventName())
+						.append("</a><br/>");
+					}
+				}
+			}
+			
+			
+			sb.append("<br/></li>");
+		}
+		sb.append("</ol>");
+		
+		return sb.toString();
+	}
 	
 	static TableHeader<TransportStream,PID> buildPidTableHeader() {
 

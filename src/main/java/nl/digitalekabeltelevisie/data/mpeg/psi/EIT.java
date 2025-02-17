@@ -69,8 +69,8 @@ public class EIT extends AbstractPSITabel{
 	private static final String EVENT_GRID_TITLE = "Grid";
 	private static final String EVENTS_SCHEDULE_TITLE = "Events Schedule";
 
-	//     original_network_id,transport_stream_id,  serviceId, table_id 
-	private final Map<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer,EITsection []>>>> newEit = 
+	//              original_network_id,transport_stream_id,  serviceId, table_id 
+	private final Map<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer,EITsection []>>>> eit = 
 			new TreeMap<>();
 	
 	private static final Logger	logger	= Logger.getLogger(EIT.class.getName());
@@ -87,7 +87,7 @@ public class EIT extends AbstractPSITabel{
 		int serviceId = section.getServiceID();
 		int tableId = section.getTableId();
 
-		TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> networkSections = newEit.computeIfAbsent(original_network_id,k -> new TreeMap<>());
+		TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> networkSections = eit.computeIfAbsent(original_network_id,k -> new TreeMap<>());
 		TreeMap<Integer, TreeMap<Integer, EITsection[]>> programStreamSections = networkSections.computeIfAbsent(streamId,k -> new TreeMap<>());
 		TreeMap<Integer, EITsection[]> serviceSections = programStreamSections.computeIfAbsent(serviceId,k -> new TreeMap<>());
 		EITsection[] tableSectionArray = serviceSections.computeIfAbsent(tableId,k -> new EITsection[section.getSectionLastNumber()+1]);
@@ -105,6 +105,26 @@ public class EIT extends AbstractPSITabel{
 		}
 	}
 
+	
+	public EITsection [] getActualTransportStreamEitPF(int serviceId) {
+
+		for(TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> onid:eit.values()) {
+			for(TreeMap<Integer, TreeMap<Integer, EITsection[]>> ts:onid.values()) {
+				TreeMap<Integer, EITsection[]> serviceEit = ts.get(serviceId);
+				if(serviceEit != null) {
+					EITsection[] res = serviceEit.get(0x4E); // TableType: event_information_section - actual_transport_stream, present/following 
+					if(res != null) {
+						return res;
+					}
+				}
+			}
+			
+		}
+		return new EITsection [0];
+		
+	}
+	
+
 	@Override
 	public KVP getJTreeNode(int modus) {
 
@@ -113,7 +133,7 @@ public class EIT extends AbstractPSITabel{
 		
 		Map<ServiceIdentification, EITsection[]> allEitImageMap = new TreeMap<>();
 		
-		for(Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> network:newEit.entrySet()) {
+		for(Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> network:eit.entrySet()) {
 			Integer orgNetworkId= network.getKey();
 			SortedMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> networkSections = network.getValue();
 			
@@ -335,7 +355,7 @@ public class EIT extends AbstractPSITabel{
 	public Map<ServiceIdentification, EITsection[]> getFlatEit(IntPredicate scheduleOrPF) {
 		Map<ServiceIdentification, EITsection[]> result = new TreeMap<>();
 
-		for (Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> networkEntry : newEit.entrySet()) {
+		for (Entry<Integer, TreeMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>>> networkEntry : eit.entrySet()) {
 			int orgNetworkId = networkEntry.getKey();
 			SortedMap<Integer, TreeMap<Integer, TreeMap<Integer, EITsection[]>>> network = networkEntry.getValue();
 

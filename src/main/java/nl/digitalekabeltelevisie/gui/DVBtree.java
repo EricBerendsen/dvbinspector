@@ -933,6 +933,10 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
         }
         return false;
 	}
+	
+	public void showRoot() {
+		 showNode((DefaultMutableTreeNode)model.getRoot());
+	}
 
 	private void showNode(TreeNode node) {
 		TreeNode[] nodes = model.getPathToRoot(node);
