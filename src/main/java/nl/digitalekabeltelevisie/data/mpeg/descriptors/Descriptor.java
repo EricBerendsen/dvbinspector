@@ -534,6 +534,7 @@ public class Descriptor implements TreeNode {
 					case 0x07 -> "SL-HDR2 DMI format";
 					case 0x08 -> "SMPTE ST 2094-40 DMI format";
 					case 0x09 -> "PQ10 HDR";
+					case 0x0A -> "T/UWA 005 DMI format";
 					default -> "reserved for future use";
 				};
 			}else{

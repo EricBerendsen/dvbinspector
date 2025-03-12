@@ -53,6 +53,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.opencable.EBPDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.scte.SCTEAdaptationFieldDataDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.uwa.CUVVVideoStreamDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.MessageDescriptor;
@@ -145,6 +146,10 @@ public final class DescriptorFactory {
 				//
 				
 				return new SCTEAdaptationFieldDataDescriptor(data, 0, tableSection);
+			}
+			if (descriptorTag == 0xF3 && data[2] == 'c' && data[3] == 'u' && data[4] == 'v' && data[5] == 'v' ) {
+				// the CUVV video stream descriptor include 'cuvv' as a watermark
+				return new CUVVVideoStreamDescriptor(data, 0, tableSection); 
 			}
 			if (descriptorTag >= 0x80 && tableSection.getTableId() >= 0xBC && tableSection.getTableId() <= 0xBE
 					&& PreferencesManager.isEnableM7Fastscan()) {
