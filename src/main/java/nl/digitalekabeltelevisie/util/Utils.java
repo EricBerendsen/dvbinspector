@@ -762,6 +762,16 @@ public final class Utils {
 	 */
 	public static LocalDateTime getUTCLocalDateTime(byte[] UTC_time) {
 		long mjd = getLong(UTC_time, 0, 2, 0xFFFF);
+
+		/*
+		 * Update to EN 300 468 to resolev year 2038 rollover
+		 * "To derive the MJD from the 16 lsb of the MJD, if the most significant bit of the 16 lsb of MJD is one, then the 
+		 * 16bits is the MJD, otherwise if the most significant bit of the 16 lsb of MJD is zero, then the MJD is 65536 (0x10000) 
+		 * plus the 16lsb of MJD."
+		 */
+		if ((mjd & 0x8000) == 0) {
+			mjd += 0x10000;
+		}
 		String hours = getBCD(UTC_time, 4, 2);
 		String minutes = getBCD(UTC_time, 6, 2);
 		String secs= getBCD(UTC_time, 8, 2);
