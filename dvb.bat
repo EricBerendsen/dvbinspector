@@ -4,10 +4,10 @@
 
 set JVM_FLAGS=
 
-:: uncomment next line to set maximum head size to 1000 MByte
+:: uncomment next line to set maximum heap size to 1000 MByte
 ::set JVM_FLAGS=-Xmx1000m
 
-:: uncomment next line to set initial and maximum head size to 4 GByte
+:: uncomment next line to set initial and maximum heap size to 4 GByte
 ::set JVM_FLAGS=-Xmx4g -Xms4g
 
-java -classpath .;.\lib\jfreechart-1.5.3.jar;.\lib\opencsv-5.9.jar;.\lib\jlayer-1.0.1.4.jar;.\lib\commons-text-1.9.jar;.\lib\commons-logging-1.2.jar;.\lib\commons-lang3-3.12.0.jar;.\lib\commons-collections4-4.4.jar;.\lib\commons-collections-3.2.2.jar;.\lib\commons-beanutils-1.9.4.jar;.\DVBinspector.jar %JVM_FLAGS% -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector
+java -classpath .;.\lib\jfreechart-1.5.5.jar;.\lib\opencsv-5.10.jar;.\lib\jlayer-1.0.1.4.jar;.\lib\commons-text-1.13.0.jar;.\lib\commons-logging-1.3.4.jar;.\lib\commons-lang3-3.17.0.jar;.\lib\commons-collections4-4.4.jar;.\lib\commons-collections-3.2.2.jar;.\lib\commons-beanutils-1.10.0.jar;.\DVBinspector.jar %JVM_FLAGS% -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector
