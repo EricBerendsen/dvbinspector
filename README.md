@@ -6,13 +6,13 @@
 
 ## Prerequisites
 
-DVB inspector requires java 17 or higher.
+DVB inspector requires java 21 or higher.
 
 ## Installation
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.19.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.20.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 ### Directory structure
 
@@ -24,13 +24,13 @@ Unzip DVBinspector-1.19.0-dist.zip to a directory of your choice. It will create
 *    dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default.
 *    dvb.sh Bash script to start the program using Linux.
 *    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
-*    DVBinspector-1.19.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
+*    DVBinspector-1.20.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 ## Usage
 
-### DVBinspector-1.19.0.jar
+### DVBinspector-1.20.0.jar
 
-There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.19.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.19.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.19.0.jar".
+There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.20.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.20.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.20.0.jar".
 
 ### dvb.bat 
 
@@ -48,11 +48,28 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 
 List of the most important changes between releases.
 
+### Release 1.20.0
+Release date: 21/04/2025
+
+This release requires Java 21 or newer!
+
+* added: show summary when root node is selected
+* changed: update to MJD processing to support 16 bit rollover in 2038. Thanks to Paul Higgs
+* added: description of component_descriptor value for T/UWA 005 (HDR Vivid). Thanks to Paul Higgs
+* fixed: CarouselIdentifierDescriptor, formatID is optional
+* fixed: AACDescriptor, aac_type_flag is optional
+* added: support for AVS3 audio and video. Thanks to Paul Higgs
+* added: HDR Vivid descriptor according to T/UWA 005-2.1. Thanks to Paul Higgs
+* changed: internal refactoring, a.o. KVP now extends DefaultMutableTreeNode so it can be used directly in getJTreeNode()
+
+### Release 1.19.2 (bug fix release)
+Release date: 11/08/2024
+* fixed: displayed time of packets was wrong
+
 ### Release 1.19.1 (bug fix release)
 Release date: 4/08/2024
 
 * fixed: dvb.sh and dvb.bat to use correct dependencies
-
 
 ### Release 1.19.0
 Release date: 4/08/2024
