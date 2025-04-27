@@ -27,6 +27,7 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -37,20 +38,16 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class AITDescriptor extends Descriptor {
 
 
-	public AITDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, parent);
-	}
-
-
 	public AITDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 	}
+
 	@Override
 	public String getDescriptorname(){
 		return AITDescriptor.getDescriptorname(descriptorTag, parentTableSection);
 	}
 
-	public static String getDescriptorname(final int tag, final TableSection tableSection){
+	public static String getDescriptorname(int tag, TableSection tableSection){
 
 		switch (tag) {
 		case 0x00: return "application_descriptor"; //
@@ -84,6 +81,12 @@ public class AITDescriptor extends Descriptor {
 
 		}
 	}
+	
+	@Override
+	public KVP getJTreeNode(int modus) {
+		return (KVP) super.getJTreeNode(modus);
+	}
+
 
 
 }

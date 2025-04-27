@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -47,24 +45,23 @@ public class ApplicationUsageDescriptor extends AITDescriptor {
 	 * ETSI TS 102 809 V1.1.1 (2010-01)
 	 * 
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public ApplicationUsageDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public ApplicationUsageDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		usage_type = Utils.getInt(b, offset+2, 1,Utils.MASK_8BITS);
+		usage_type = Utils.getInt(b, 2, 1,Utils.MASK_8BITS);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("usage_type", usage_type, getUsageTypeString(usage_type))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("usage_type", usage_type, getUsageTypeString(usage_type)));
 		return t;
 	}
 
-	public static String getUsageTypeString(final int usage){
+	public static String getUsageTypeString(int usage){
 		if(usage==0){
 			return "reserved";
 		}

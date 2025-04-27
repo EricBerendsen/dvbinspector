@@ -1110,9 +1110,8 @@ public final class Utils {
 				if (tableSource != null) {
 					kvp.addTableSource(tableSource, label);
 				}
-				DefaultMutableTreeNode descriptorListNode = new DefaultMutableTreeNode(kvp);
-				addToList(descriptorListNode, itemCollection, modus);
-				parent.add(descriptorListNode);
+				addToList(kvp, itemCollection, modus);
+				parent.add(kvp);
 			}
 		}
 	}

@@ -31,10 +31,7 @@ import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -73,18 +70,18 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public TransportProtocolDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		protocol_id = getInt(b, offset + 2, 2, MASK_16BITS);
-		transport_protocol_label = getInt(b, offset + 4, 1, MASK_8BITS);
+	public TransportProtocolDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		protocol_id = getInt(b, 2, 2, MASK_16BITS);
+		transport_protocol_label = getInt(b, 4, 1, MASK_8BITS);
 
-		selector_bytes = copyOfRange(b, offset+5, offset+descriptorLength+2);
+		selector_bytes = copyOfRange(b, 5, descriptorLength+2);
 
 		// 10.8.1.1 Transport via OC ETSI ES 201 812 V1.1.1
 		if(protocol_id==0x01){
-			remote_connection = getInt(b, offset + 5, 1, 0x80)>>7;
-			reserved_future_use = getInt(b, offset + 5, 1, MASK_7BITS);
-			int t=offset + 6;
+			remote_connection = getInt(b, 5, 1, 0x80)>>7;
+			reserved_future_use = getInt(b, 5, 1, MASK_7BITS);
+			int t = 6;
 			if(remote_connection == 1) {
 				original_network_id = getInt(b, t, 2, MASK_16BITS);
 				t+=2;
@@ -98,11 +95,11 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 
 		// HTTP over back channel only
 		if(protocol_id==0x03){
-			url_base_length= getInt(b, offset + 5, 1, MASK_8BITS);
-			url_base_byte = copyOfRange(b, offset + 6,offset + 6 + url_base_length);
-			url_extension_count = getInt(b, offset + 6 + url_base_length, 1, MASK_8BITS);
-			url_extension_byte = new ArrayList<byte[]>();
-			int t=offset + 7 + url_base_length;
+			url_base_length= getInt(b, 5, 1, MASK_8BITS);
+			url_base_byte = copyOfRange(b, 6,6 + url_base_length);
+			url_extension_count = getInt(b, 6 + url_base_length, 1, MASK_8BITS);
+			url_extension_byte = new ArrayList<>();
+			int t = 7 + url_base_length;
 			for (int i = 0; i < url_extension_count; i++) {
 				final int url_extension_length = getInt(b, t, 1, MASK_8BITS);
 				t++;
@@ -117,36 +114,35 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("protocol_id", protocol_id, getTransportProtocolIDString(protocol_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_protocol_label", transport_protocol_label, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("selector_bytes", selector_bytes, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("protocol_id", protocol_id, getTransportProtocolIDString(protocol_id)));
+		t.add(new KVP("transport_protocol_label", transport_protocol_label));
+		t.add(new KVP("selector_bytes", selector_bytes));
 		if(protocol_id==0x01){
-			t.add(new DefaultMutableTreeNode(new KVP("remote_connection",remote_connection,(remote_connection == 1)?"the transport connection is provided by a service that is different to the one carrying the AIT":null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved_future_use,null)));
+			t.add(new KVP("remote_connection",remote_connection,(remote_connection == 1)?"the transport connection is provided by a service that is different to the one carrying the AIT":null));
+			t.add(new KVP("reserved_future_use",reserved_future_use));
 			if(remote_connection == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("original_network_id",original_network_id,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transport_stream_id,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("service_id",service_id,null)));
+				t.add(new KVP("original_network_id",original_network_id));
+				t.add(new KVP("transport_stream_id",transport_stream_id));
+				t.add(new KVP("service_id",service_id));
 
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("component_tag",component_tag,null)));
+			t.add(new KVP("component_tag",component_tag));
 
 		}
 		if(protocol_id==0x03){
-			t.add(new DefaultMutableTreeNode(new KVP("url_base_length",url_base_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("url_base_byte",url_base_byte,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("url_extension_count",url_extension_count,null)));
-			for (final Iterator<byte[]> iter = url_extension_byte.iterator(); iter.hasNext();) {
-				final byte[] url_extension = iter.next();
-				t.add(new DefaultMutableTreeNode(new KVP("url_extension_byte",url_extension,null)));
+			t.add(new KVP("url_base_length",url_base_length));
+			t.add(new KVP("url_base_byte",url_base_byte));
+			t.add(new KVP("url_extension_count",url_extension_count));
+			for (byte[] url_extension: url_extension_byte) {
+				t.add(new KVP("url_extension_byte",url_extension));
 			}
 		}
 		return t;
 	}
 
-	private static String getTransportProtocolIDString(final int protocol_id){
+	private static String getTransportProtocolIDString(int protocol_id){
 		if((protocol_id>=0x0004)&&(protocol_id<=0x00ff)){
 			return "Reserved for use by DVB";
 		}

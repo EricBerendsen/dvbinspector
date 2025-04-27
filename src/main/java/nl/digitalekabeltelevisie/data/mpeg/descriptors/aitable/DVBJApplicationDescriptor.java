@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -46,23 +45,13 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class DVBJApplicationDescriptor extends AITDescriptor {
 
 
-	private List<Parameter> parameterList= new ArrayList<Parameter>();
-	public static class Parameter implements TreeNode{
-		public Parameter(final int parameter_length, final byte[] parameter_byte) {
-			super();
-			this.parameter_length = parameter_length;
-			this.parameter_byte = parameter_byte;
-		}
-
-
-		private final int parameter_length;
-		private final byte[] parameter_byte;
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Parameter"));
-			s.add(new DefaultMutableTreeNode(new KVP("parameter_length",parameter_length,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("parameter_byte",parameter_byte,null)));
+	private List<Parameter> parameterList= new ArrayList<>();
+	public static record Parameter(int parameter_length, byte[] parameter_byte) implements TreeNode{
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("Parameter");
+			s.add(new KVP("parameter_length", parameter_length));
+			s.add(new KVP("parameter_byte", parameter_byte));
 			return s;
 		}
 
@@ -70,25 +59,24 @@ public class DVBJApplicationDescriptor extends AITDescriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public DVBJApplicationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public DVBJApplicationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
 		int t = 0;
 
-		while (t<descriptorLength) {
-			final int parameter_length = getInt(b, offset+t+2, 1, MASK_8BITS);
-			final byte[]parameter_bytes =Arrays.copyOfRange(b, offset+t+3, offset+t+3+parameter_length);
-			parameterList.add(new Parameter(parameter_length,parameter_bytes));
-			t += parameter_length +1;
+		while (t < descriptorLength) {
+			int parameter_length = getInt(b, t + 2, 1, MASK_8BITS);
+			byte[] parameter_bytes = Arrays.copyOfRange(b, t + 3, t + 3 + parameter_length);
+			parameterList.add(new Parameter(parameter_length, parameter_bytes));
+			t += parameter_length + 1;
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,parameterList,modus,"parameters");
 		return t;
 	}

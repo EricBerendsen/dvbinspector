@@ -27,13 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 
 /**
@@ -49,29 +48,30 @@ public class DVBJApplicationLocationDescriptor extends AITDescriptor {
 	private final byte[] initial_class_byte;
 
 
-	public DVBJApplicationLocationDescriptor(final byte[] b, final int offset, final TableSection parent) {
+	public DVBJApplicationLocationDescriptor(byte[] b, TableSection parent) {
 
-		super(b, offset, parent);
+		super(b, parent);
 
-		base_directory_length = getInt(b, offset+2, 1, MASK_8BITS);
-		base_directory_byte = Utils.copyOfRange(b, offset+3, offset+base_directory_length+3);
+		base_directory_length = getInt(b, 2, 1, MASK_8BITS);
+		int from = 3;
+		int to = base_directory_length + 3;
+		base_directory_byte = copyOfRange(b, from, to);
 
-		classpath_extension_length = getInt(b, offset+3+base_directory_length, 1, MASK_8BITS);
-		classpath_extension_byte = Utils.copyOfRange(b, offset+4+base_directory_length, offset+4+base_directory_length+classpath_extension_length);
+		classpath_extension_length = getInt(b, 3 + base_directory_length, 1, MASK_8BITS);
+		classpath_extension_byte = copyOfRange(b, 4 + base_directory_length, 4 + base_directory_length + classpath_extension_length);
 
-		initial_class_byte = Utils.copyOfRange(b, offset+4+base_directory_length+classpath_extension_length,offset+descriptorLength+2);
-
+		initial_class_byte = copyOfRange(b, 4 + base_directory_length + classpath_extension_length, descriptorLength + 2);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("base_directory_length", base_directory_length, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("base_directory_byte", base_directory_byte, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("classpath_extension_length", classpath_extension_length, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("classpath_extension_byte", classpath_extension_byte, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("initial_class_byte", initial_class_byte, null)));
+	public KVP getJTreeNode(int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("base_directory_length", base_directory_length));
+		t.add(new KVP("base_directory_byte", base_directory_byte));
+		t.add(new KVP("classpath_extension_length", classpath_extension_length));
+		t.add(new KVP("classpath_extension_byte", classpath_extension_byte));
+		t.add(new KVP("initial_class_byte", initial_class_byte));
 		return t;
 	}
 }

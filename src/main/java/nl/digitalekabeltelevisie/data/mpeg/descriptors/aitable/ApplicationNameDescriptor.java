@@ -27,12 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -74,8 +73,8 @@ public class ApplicationNameDescriptor extends AITDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
 		addListJTree(t,applicationNames,modus,"application_names");
 		return t;
 	}

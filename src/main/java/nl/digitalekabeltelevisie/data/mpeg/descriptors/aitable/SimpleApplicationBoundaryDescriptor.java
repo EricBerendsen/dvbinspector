@@ -27,13 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -46,60 +46,47 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class SimpleApplicationBoundaryDescriptor extends AITDescriptor {
 
 	private final int boundary_extension_count;
-	private final List<BoundaryExtension> boundaryExtensions= new ArrayList<BoundaryExtension>();
+	private final List<BoundaryExtension> boundaryExtensions= new ArrayList<>();
 
+	public static record BoundaryExtension(int boundary_extension_length, byte[] boundary_extension_byte) implements TreeNode {
 
-	public static class BoundaryExtension implements TreeNode{
-
-		private final int boundary_extension_length;
-		private final byte[] boundary_extension_byte;
-
-
-		public BoundaryExtension(final int boundary_extension_length2,
-				final byte[] boundary_extension_bytes) {
-			this.boundary_extension_length = boundary_extension_length2;
-			this.boundary_extension_byte = boundary_extension_bytes;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("boundary extension"));
-			s.add(new DefaultMutableTreeNode(new KVP("boundary_extension_length",boundary_extension_length,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("boundary_extension_byte",boundary_extension_byte,null)));
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			KVP s = new KVP("boundary extension");
+			s.add(new KVP("boundary_extension_length", boundary_extension_length));
+			s.add(new KVP("boundary_extension_byte", boundary_extension_byte));
 			return s;
 		}
 
 	}
 
 
-
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public SimpleApplicationBoundaryDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public SimpleApplicationBoundaryDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		boundary_extension_count = getInt(b, offset+2, 1, MASK_8BITS);
+		boundary_extension_count = getInt(b, 2, 1, MASK_8BITS);
 		int t = 0;
 		int extension = 0;
-		
-		while (extension<boundary_extension_count) {
 
-			final int boundary_extension_length = getInt(b, offset+t+3, 1, MASK_8BITS);
-			final byte[] boundary_extension_bytes =Arrays.copyOfRange(b, offset+t+4, offset+t+4+boundary_extension_length);
-			boundaryExtensions.add(new BoundaryExtension(boundary_extension_length,boundary_extension_bytes));
-			t += boundary_extension_length +1;
+		while (extension < boundary_extension_count) {
+
+			int boundary_extension_length = getInt(b, t + 3, 1, MASK_8BITS);
+			byte[] boundary_extension_bytes = Arrays.copyOfRange(b, t + 4, t + 4 + boundary_extension_length);
+			boundaryExtensions.add(new BoundaryExtension(boundary_extension_length, boundary_extension_bytes));
+			t += boundary_extension_length + 1;
 			extension++;
 		}
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("boundary_extension_count", boundary_extension_count, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("boundary_extension_count", boundary_extension_count));
 		addListJTree(t,boundaryExtensions,modus,"boundary_extensions");
 		return t;
 	}
