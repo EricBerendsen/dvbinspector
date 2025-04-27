@@ -28,14 +28,18 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
 import static nl.digitalekabeltelevisie.data.mpeg.psi.AITsection.getApplicationIDString;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getMHPOrganistionIdString;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
@@ -46,54 +50,43 @@ public class ExternalApplicationAuthorizationDescriptor extends AITDescriptor {
 
 
 
-	public static class ExternalAuthorization implements TreeNode{
+	record ExternalAuthorization(byte[] application_identifier, int application_priority) implements TreeNode {
 
-		private final byte[] application_identifier ;
-		private final int application_priority ;
-	
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("external authorization");
 
-
-		public ExternalAuthorization(final byte[] application_identifier, final int application_priority){
-			this.application_identifier = application_identifier;
-			this.application_priority = application_priority;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("external authorization"));
-			
 			long organisation_id = Utils.getLong(application_identifier, 0, 4, Utils.MASK_32BITS);
-			int application_id = Utils.getInt(application_identifier, 4, 2, Utils.MASK_16BITS);
-			
-			DefaultMutableTreeNode applicationIdNode = new DefaultMutableTreeNode(new KVP("application_identifier",application_identifier,null));
-			applicationIdNode.add(new DefaultMutableTreeNode(new KVP("organisation_id", organisation_id, getMHPOrganistionIdString(organisation_id))));
-			applicationIdNode.add(new DefaultMutableTreeNode(new KVP("application_id", application_id, getApplicationIDString(application_id))));
+			int application_id = getInt(application_identifier, 4, 2, Utils.MASK_16BITS);
+
+			KVP applicationIdNode = new KVP("application_identifier", application_identifier);
+			applicationIdNode.add(new KVP("organisation_id", organisation_id, getMHPOrganistionIdString(organisation_id)));
+			applicationIdNode.add(new KVP("application_id", application_id, getApplicationIDString(application_id)));
 
 			s.add(applicationIdNode);
-			s.add(new DefaultMutableTreeNode(new KVP("application_priority",application_priority,null)));
+			s.add(new KVP("application_priority", application_priority));
 			return s;
 		}
 
-
 	}
 
-	public ExternalApplicationAuthorizationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			byte [] application_identifier = Arrays.copyOfRange(b, offset+t+2, offset+t+2+6); //  application_identifier = 48 bits
+	public ExternalApplicationAuthorizationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			byte[] application_identifier = Arrays.copyOfRange(b, t + 2, t + 2 + 6); // application_identifier = 48 bits
 
-			final int application_priority = getInt(b, offset+t+2+6+1, 1, MASK_8BITS);
+			int application_priority = getInt(b, t + 2 + 6 + 1, 1, MASK_8BITS);
 
-			final ExternalAuthorization s = new ExternalAuthorization(application_identifier, application_priority);
+			ExternalAuthorization s = new ExternalAuthorization(application_identifier, application_priority);
 			externalAuthorizations.add(s);
-			t+=7;
+			t += 7;
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,externalAuthorizations,modus,"external authorizations");
 		return t;
 	}

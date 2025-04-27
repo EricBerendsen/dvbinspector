@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -156,21 +156,15 @@ public final class DescriptorFactory {
 				return getM7Descriptor(data, tableSection);
 			}
 			if (descriptorTag <= 0x3f) {
-				if (tableSection.getTableId() == 0x4c) {
-					return getINTDescriptor(data, tableSection);
-				}
-				if (tableSection.getTableId() == 0x4b) {
-					return getUNTDescriptor(data, tableSection);
-				}
-				if (tableSection.getTableId() == 0x74) {
-					return getAITDescriptor(data, tableSection);
-				}
-				if (tableSection.getTableId() == 0xFC) {
-					return getSCTE35Descriptor(data, tableSection);
-				}
-				return getMPEGDescriptor(data, tableSection);
-				
-			}
+                return switch (tableSection.getTableId()) {
+                    case 0x4c -> getINTDescriptor(data, tableSection);
+                    case 0x4b -> getUNTDescriptor(data, tableSection);
+                    case 0x74 -> getAITDescriptor(data, tableSection);
+                    case 0xFC -> getSCTE35Descriptor(data, tableSection);
+                    default -> getMPEGDescriptor(data, tableSection);
+                };
+
+            }
 			if (descriptorTag <= 0x7f) {
 				return getDVBSIDescriptor(data, tableSection, descriptorContext);
 			}
@@ -641,27 +635,27 @@ public final class DescriptorFactory {
 	private static Descriptor getAITDescriptor(final byte[] data, final TableSection tableSection) {
 		switch (toUnsignedInt(data[0])) {
 		case 0x00:
-			return new ApplicationDescriptor(data, 0, tableSection);
+			return new ApplicationDescriptor(data, tableSection);
 		case 0x01:
 			return new ApplicationNameDescriptor(data, tableSection);
 		case 0x02:
-			return new TransportProtocolDescriptor(data, 0, tableSection);
+			return new TransportProtocolDescriptor(data, tableSection);
 		case 0x03:
-			return new DVBJApplicationDescriptor(data, 0, tableSection);
+			return new DVBJApplicationDescriptor(data, tableSection);
 		case 0x04:
-			return new DVBJApplicationLocationDescriptor(data, 0, tableSection);
+			return new DVBJApplicationLocationDescriptor(data, tableSection);
 		case 0x05:
-			return new ExternalApplicationAuthorizationDescriptor(data, 0, tableSection);
+			return new ExternalApplicationAuthorizationDescriptor(data, tableSection);
 		case 0x15:
-			return new SimpleApplicationLocationDescriptor(data, 0, tableSection);
+			return new SimpleApplicationLocationDescriptor(data, tableSection);
 		case 0x16:
-			return new ApplicationUsageDescriptor(data, 0, tableSection);
+			return new ApplicationUsageDescriptor(data, tableSection);
 		case 0x17:
-			return new SimpleApplicationBoundaryDescriptor(data, 0, tableSection);
+			return new SimpleApplicationBoundaryDescriptor(data, tableSection);
 		default:
-			Descriptor d = new AITDescriptor(data, 0, tableSection);
+			Descriptor d = new AITDescriptor(data, tableSection);
 			logger.info("Not implemented AITDescriptor:" + toUnsignedInt(data[0]) + " ("
-					+ AITDescriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
+					+ AITDescriptor.getDescriptorname(toUnsignedInt(data[0]))
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			return d;

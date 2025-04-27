@@ -27,11 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable;
 
+import static java.util.Arrays.copyOfRange;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 
 /**
@@ -45,19 +46,18 @@ public class SimpleApplicationLocationDescriptor extends AITDescriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public SimpleApplicationLocationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public SimpleApplicationLocationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		initial_path_bytes = Utils.copyOfRange(b, offset+2, offset+descriptorLength+2);
+		initial_path_bytes = copyOfRange(b, 2, descriptorLength + 2);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new DefaultMutableTreeNode(new KVP("initial_path_bytes", initial_path_bytes, null)));
 		return t;
 	}
