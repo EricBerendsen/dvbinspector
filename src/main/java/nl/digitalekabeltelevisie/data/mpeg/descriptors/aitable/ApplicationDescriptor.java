@@ -49,7 +49,7 @@ public class ApplicationDescriptor extends AITDescriptor {
 	private int application_priority;
 	private List<TransportProtocolLabel>transport_protocol_labels = new ArrayList<>();
 
-	public static record TransportProtocolLabel(int transport_protocol_label) implements TreeNode{
+	record TransportProtocolLabel(int transport_protocol_label) implements TreeNode{
 
 		@Override
 		public KVP getJTreeNode(int modus){
@@ -57,11 +57,11 @@ public class ApplicationDescriptor extends AITDescriptor {
 		}
 	}
 
-	public static record ApplicationProfile(int application_profile, int version_major, int version_minor, int version_micro) implements TreeNode{
+	record ApplicationProfile(int application_profile, int version_major, int version_minor, int version_micro) implements TreeNode{
 
 		@Override
-		public KVP getJTreeNode(final int modus){
-			final KVP s = new KVP("application_profile ("+version_major+"."+version_minor+"."+version_micro+")");
+		public KVP getJTreeNode(int modus){
+			KVP s = new KVP("application_profile ("+version_major+"."+version_minor+"."+version_micro+")");
 			s.add(new KVP("application_profile",application_profile));
 			s.add(new KVP("version_major",version_major));
 			s.add(new KVP("version_minor",version_minor));
@@ -73,9 +73,7 @@ public class ApplicationDescriptor extends AITDescriptor {
 
 
 	/**
-	 * @param b
-	 * @param parent
-	 */
+     */
 	public ApplicationDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 
@@ -104,7 +102,7 @@ public class ApplicationDescriptor extends AITDescriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("application_profiles_length", application_profiles_length));
 		addListJTree(t,applicationProfiles,modus,"application_profiles");
 		t.add(new KVP("service_bound_flag", service_bound_flag, service_bound_flag==1?"the application is only associated with the current service":"application not associated with the current service"));
@@ -115,18 +113,18 @@ public class ApplicationDescriptor extends AITDescriptor {
 		return t;
 	}
 
-	public static String getVisibilityString(final int v){
+	private static String getVisibilityString(int v){
 
-		switch (v) {
-		case 0x00: return "NOT_VISIBLE_ALL (This application shall not be visible either to applications via an application listing API or to users via the navigator)"; //
-		case 0x01: return "NOT_VISIBLE_USERS (This application shall not be visible to users but shall be visible to applications via an application listing API)";//
-		case 0x02: return "reserved_future_use"; //
-		case 0x03: return "VISIBLE_ALL (This application can be visible to users and shall be visible to applications via an application listing API)";
-		default:
-
-			return "illegal value";
-
-		}
+        return switch (v) {
+            case 0x00 ->
+                    "NOT_VISIBLE_ALL (This application shall not be visible either to applications via an application listing API or to users via the navigator)"; //
+            case 0x01 ->
+                    "NOT_VISIBLE_USERS (This application shall not be visible to users but shall be visible to applications via an application listing API)";//
+            case 0x02 -> "reserved_future_use"; //
+            case 0x03 ->
+                    "VISIBLE_ALL (This application can be visible to users and shall be visible to applications via an application listing API)";
+            default -> "illegal value";
+        };
 	}
 
 }

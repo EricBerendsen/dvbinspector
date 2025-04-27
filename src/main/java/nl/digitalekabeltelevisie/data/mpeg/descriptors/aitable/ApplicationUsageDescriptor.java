@@ -61,7 +61,7 @@ public class ApplicationUsageDescriptor extends AITDescriptor {
 		return t;
 	}
 
-	public static String getUsageTypeString(int usage){
+	private static String getUsageTypeString(int usage){
 		if(usage==0){
 			return "reserved";
 		}

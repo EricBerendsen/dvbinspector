@@ -66,7 +66,7 @@ public class DVBJApplicationLocationDescriptor extends AITDescriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("base_directory_length", base_directory_length));
 		t.add(new KVP("base_directory_byte", base_directory_byte));
 		t.add(new KVP("classpath_extension_length", classpath_extension_length));

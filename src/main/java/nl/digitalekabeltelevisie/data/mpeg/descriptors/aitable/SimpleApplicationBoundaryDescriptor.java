@@ -48,10 +48,10 @@ public class SimpleApplicationBoundaryDescriptor extends AITDescriptor {
 	private final int boundary_extension_count;
 	private final List<BoundaryExtension> boundaryExtensions= new ArrayList<>();
 
-	public static record BoundaryExtension(int boundary_extension_length, byte[] boundary_extension_byte) implements TreeNode {
+	public record BoundaryExtension(int boundary_extension_length, byte[] boundary_extension_byte) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 			KVP s = new KVP("boundary extension");
 			s.add(new KVP("boundary_extension_length", boundary_extension_length));
 			s.add(new KVP("boundary_extension_byte", boundary_extension_byte));

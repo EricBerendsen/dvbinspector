@@ -156,21 +156,15 @@ public final class DescriptorFactory {
 				return getM7Descriptor(data, tableSection);
 			}
 			if (descriptorTag <= 0x3f) {
-				if (tableSection.getTableId() == 0x4c) {
-					return getINTDescriptor(data, tableSection);
-				}
-				if (tableSection.getTableId() == 0x4b) {
-					return getUNTDescriptor(data, tableSection);
-				}
-				if (tableSection.getTableId() == 0x74) {
-					return getAITDescriptor(data, tableSection);
-				}
-				if (tableSection.getTableId() == 0xFC) {
-					return getSCTE35Descriptor(data, tableSection);
-				}
-				return getMPEGDescriptor(data, tableSection);
-				
-			}
+                return switch (tableSection.getTableId()) {
+                    case 0x4c -> getINTDescriptor(data, tableSection);
+                    case 0x4b -> getUNTDescriptor(data, tableSection);
+                    case 0x74 -> getAITDescriptor(data, tableSection);
+                    case 0xFC -> getSCTE35Descriptor(data, tableSection);
+                    default -> getMPEGDescriptor(data, tableSection);
+                };
+
+            }
 			if (descriptorTag <= 0x7f) {
 				return getDVBSIDescriptor(data, tableSection, descriptorContext);
 			}
@@ -661,7 +655,7 @@ public final class DescriptorFactory {
 		default:
 			Descriptor d = new AITDescriptor(data, tableSection);
 			logger.info("Not implemented AITDescriptor:" + toUnsignedInt(data[0]) + " ("
-					+ AITDescriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
+					+ AITDescriptor.getDescriptorname(toUnsignedInt(data[0]))
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
 					+ ",) data=" + d.getRawDataString());
 			return d;

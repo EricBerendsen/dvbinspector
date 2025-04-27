@@ -67,7 +67,6 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
 	public TransportProtocolDescriptor(byte[] b, TableSection parent) {
@@ -101,7 +100,7 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 			url_extension_byte = new ArrayList<>();
 			int t = 7 + url_base_length;
 			for (int i = 0; i < url_extension_count; i++) {
-				final int url_extension_length = getInt(b, t, 1, MASK_8BITS);
+				int url_extension_length = getInt(b, t, 1, MASK_8BITS);
 				t++;
 				url_extension_byte.add(copyOfRange(b, t,t + url_extension_length));
 				t += url_extension_length;
@@ -146,21 +145,15 @@ public class TransportProtocolDescriptor extends AITDescriptor {
 		if((protocol_id>=0x0004)&&(protocol_id<=0x00ff)){
 			return "Reserved for use by DVB";
 		}
-		switch (protocol_id) {
-		case 0x00:
-			return "reserved_future_use";
-		case 0x01:
-			return "MHP Object Carousel";
-		case 0x02:
-			return "IP via DVB multiprotocol encapsulation as defined in ETSI EN 301 192 [5], ETSI TR 101 202";
-		case 0x03:  // ETSI TS 102 809 V1.3.1 (2017-06) Table 29: Protocol_id
-			return "HTTP over back channel (i.e. broadband connection).";
-		case 0x0100:
-			return "OpenTV";
-
-		default:
-			return "[subject to registration by DVB]";
-		}
+        return switch (protocol_id) {
+            case 0x00 -> "reserved_future_use";
+            case 0x01 -> "MHP Object Carousel";
+            case 0x02 -> "IP via DVB multiprotocol encapsulation as defined in ETSI EN 301 192 [5], ETSI TR 101 202";
+            case 0x03 ->  // ETSI TS 102 809 V1.3.1 (2017-06) Table 29: Protocol_id
+                    "HTTP over back channel (i.e. broadband connection).";
+            case 0x0100 -> "OpenTV";
+            default -> "[subject to registration by DVB]";
+        };
 
 	}
 }

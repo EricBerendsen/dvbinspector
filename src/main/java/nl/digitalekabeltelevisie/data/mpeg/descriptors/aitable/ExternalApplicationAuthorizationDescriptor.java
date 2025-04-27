@@ -50,14 +50,14 @@ public class ExternalApplicationAuthorizationDescriptor extends AITDescriptor {
 
 
 
-	public static record ExternalAuthorization(byte[] application_identifier, int application_priority) implements TreeNode {
+	record ExternalAuthorization(byte[] application_identifier, int application_priority) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 			KVP s = new KVP("external authorization");
 
 			long organisation_id = Utils.getLong(application_identifier, 0, 4, Utils.MASK_32BITS);
-			int application_id = Utils.getInt(application_identifier, 4, 2, Utils.MASK_16BITS);
+			int application_id = getInt(application_identifier, 4, 2, Utils.MASK_16BITS);
 
 			KVP applicationIdNode = new KVP("application_identifier", application_identifier);
 			applicationIdNode.add(new KVP("organisation_id", organisation_id, getMHPOrganistionIdString(organisation_id)));

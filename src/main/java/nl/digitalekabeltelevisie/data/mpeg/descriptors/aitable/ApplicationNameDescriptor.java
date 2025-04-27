@@ -50,10 +50,10 @@ public class ApplicationNameDescriptor extends AITDescriptor {
 		return applicationNames;
 	}
 
-	public static record ApplicationName(String iso639LanguageCode, DVBString application_name) implements TreeNode{
+	public record ApplicationName(String iso639LanguageCode, DVBString application_name) implements TreeNode{
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("application_name: " + application_name);
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("application_name: " + application_name);
 			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 			s.add(new KVP("application_name", application_name));
 			return s;
@@ -64,17 +64,17 @@ public class ApplicationNameDescriptor extends AITDescriptor {
 		super(b, parent);
 		int t = 0;
 		while (t < descriptorLength) {
-			final String languageCode = getISO8859_1String(b, t + 2, 3);
-			final DVBString application_name = new DVBString(b, t + 5);
-			final ApplicationName applicationName = new ApplicationName(languageCode, application_name);
+			String languageCode = getISO8859_1String(b, t + 2, 3);
+			DVBString application_name = new DVBString(b, t + 5);
+			ApplicationName applicationName = new ApplicationName(languageCode, application_name);
 			applicationNames.add(applicationName);
 			t += 4 + application_name.getLength();
 		}
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,applicationNames,modus,"application_names");
 		return t;
 	}

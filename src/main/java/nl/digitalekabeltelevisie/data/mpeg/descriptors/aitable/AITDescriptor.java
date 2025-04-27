@@ -44,42 +44,39 @@ public class AITDescriptor extends Descriptor {
 
 	@Override
 	public String getDescriptorname(){
-		return AITDescriptor.getDescriptorname(descriptorTag, parentTableSection);
+		return getDescriptorname(descriptorTag);
 	}
 
-	public static String getDescriptorname(int tag, TableSection tableSection){
+	public static String getDescriptorname(int tag){
 
-		switch (tag) {
-		case 0x00: return "application_descriptor"; //
-		case 0x01: return "application_name_descriptor";//
-		case 0x02: return "transport_protocol_descriptor"; //
-		case 0x03: return "DVB-J_application_descriptor";
-		case 0x04: return "DVB-J_application_location_descriptor";
-		case 0x05: return "external_application_authorisation_descriptor"; //
-		case 0x06: return "routing_descriptor_IPv4 / application_recording_descriptor";  //ETSI TS 102 809 V1.1.1
-		case 0x07: return "routing_descriptor_IPv6";
-		case 0x08: return "DVB-HTML_application_descriptor";
-		case 0x09: return "DVB-HTML_application_location_descriptor";
-		case 0x0A: return "DVB-HTML_application_boundary_descriptor";
-		case 0x0B: return "application_icons_descriptor"; //
-		case 0x0C: return "prefetch_descriptor"; //
-		case 0x0D: return "DII_location_descriptor"; //
-		case 0x0E: return "delegated application descriptor";
-		case 0x0F: return "Plug-in descriptor";
-		case 0x10: return "Application storage descriptor";
-		case 0x11: return "ip_signalling_descriptor";//
-		case 0x12: return "provider_export_descriptor";// ETSI TS 101 162 V1.9.1 (2020-07)
-		case 0x13: return "provider_usage_descriptor";//ETSI TS 101 162 V1.9.1 (2020-07)
-		case 0x14: return "graphics_constraints_descriptor"; //ETSI TS 102 809 V1.1.1
-		case 0x15: return "simple_application_location_descriptor"; //ETSI TS 102 809 V1.1.1
-		case 0x16: return "application_usage_descriptor"; //ETSI TS 102 809 V1.1.1
-		case 0x17: return "simple_application_boundary_descriptor"; //ETSI TS 102 809 V1.1.1
-		case 0x5F: return "private_data_specifier_descriptor"; //ETSI TS 101 162 V1.9.1 (2020-07)
-		default:
-
-			return "reserved to MHP";
-
-		}
+        return switch (tag) {
+            case 0x00 -> "application_descriptor"; //
+            case 0x01 -> "application_name_descriptor";//
+            case 0x02 -> "transport_protocol_descriptor"; //
+            case 0x03 -> "DVB-J_application_descriptor";
+            case 0x04 -> "DVB-J_application_location_descriptor";
+            case 0x05 -> "external_application_authorisation_descriptor"; //
+            case 0x06 -> "routing_descriptor_IPv4 / application_recording_descriptor";  //ETSI TS 102 809 V1.1.1
+            case 0x07 -> "routing_descriptor_IPv6";
+            case 0x08 -> "DVB-HTML_application_descriptor";
+            case 0x09 -> "DVB-HTML_application_location_descriptor";
+            case 0x0A -> "DVB-HTML_application_boundary_descriptor";
+            case 0x0B -> "application_icons_descriptor"; //
+            case 0x0C -> "prefetch_descriptor"; //
+            case 0x0D -> "DII_location_descriptor"; //
+            case 0x0E -> "delegated application descriptor";
+            case 0x0F -> "Plug-in descriptor";
+            case 0x10 -> "Application storage descriptor";
+            case 0x11 -> "ip_signalling_descriptor";//
+            case 0x12 -> "provider_export_descriptor";// ETSI TS 101 162 V1.9.1 (2020-07)
+            case 0x13 -> "provider_usage_descriptor";//ETSI TS 101 162 V1.9.1 (2020-07)
+            case 0x14 -> "graphics_constraints_descriptor"; //ETSI TS 102 809 V1.1.1
+            case 0x15 -> "simple_application_location_descriptor"; //ETSI TS 102 809 V1.1.1
+            case 0x16 -> "application_usage_descriptor"; //ETSI TS 102 809 V1.1.1
+            case 0x17 -> "simple_application_boundary_descriptor"; //ETSI TS 102 809 V1.1.1
+            case 0x5F -> "private_data_specifier_descriptor"; //ETSI TS 101 162 V1.9.1 (2020-07)
+            default -> "reserved to MHP";
+        };
 	}
 	
 	@Override

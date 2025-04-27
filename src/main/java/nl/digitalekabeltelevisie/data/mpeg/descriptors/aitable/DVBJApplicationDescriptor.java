@@ -46,10 +46,10 @@ public class DVBJApplicationDescriptor extends AITDescriptor {
 
 
 	private List<Parameter> parameterList= new ArrayList<>();
-	public static record Parameter(int parameter_length, byte[] parameter_byte) implements TreeNode{
+	record Parameter(int parameter_length, byte[] parameter_byte) implements TreeNode{
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("Parameter");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("Parameter");
 			s.add(new KVP("parameter_length", parameter_length));
 			s.add(new KVP("parameter_byte", parameter_byte));
 			return s;
