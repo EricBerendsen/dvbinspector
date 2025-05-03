@@ -77,6 +77,7 @@ public class Magazine implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
+	@Override
 	public KVP getJTreeNode(int modus) {
 		KVP s = new KVP("Magazine "+magazineNo);
 		for(TxtDataField txtDatafield: pageEnhanceMentDataPackes){

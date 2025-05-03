@@ -59,6 +59,7 @@ public class Page implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
+	@Override
 	public KVP getJTreeNode(int modus) {
 
 		if((subPages.size()==1)&&(subPages.get(0) != null)){ //only one subPage, and its number is 0000
@@ -97,48 +98,56 @@ public class Page implements TreeNode{
 
 	private String getPageNumberLabel(){
 		StringBuilder b = new StringBuilder("Page ");
-		b.append(toHexString(pageNo,2));
-		if((pageNo==0xBE)&&(currentSubPage.linesList[0]!=null)&&(currentSubPage.linesList[0].getMagazineNo()==1)){
+		b.append(toHexString(pageNo, 2));
+		if ((pageNo == 0xBE) && isMagazine1()) {
 			b.append(" [Automatic Channel Installation (ACI)]");
 		}
-		if((pageNo==0xDF)&&(currentSubPage.linesList[0]!=null)&&(currentSubPage.linesList[0].getMagazineNo()==1)){
+		if ((pageNo == 0xDF) && isMagazine1()) {
 			b.append(" [Data broadcasting page carrying EPG data as defined in ETSI EN 300 707]");
 		}
 
-		if((pageNo==0xE7)&&(currentSubPage.linesList[0]!=null)&&(currentSubPage.linesList[0].getMagazineNo()==1)){
-			b.append(" [Page carrying trigger messages as defined and coded in IEC/PAS 62297 Edition 1.0 (2002-01): Proposal for introducing a trigger mechanism into TV transmissions]");
+		if ((pageNo == 0xE7) && isMagazine1()) {
+			b.append(
+					" [Page carrying trigger messages as defined and coded in IEC/PAS 62297 Edition 1.0 (2002-01): Proposal for introducing a trigger mechanism into TV transmissions]");
 		}
 
-		if((pageNo>=0xF1)&&(pageNo<=0xF4)&&(currentSubPage.linesList[0]!=null)&&(currentSubPage.linesList[0].getMagazineNo()==1)){
+		if ((pageNo >= 0xF1) && (pageNo <= 0xF4) && isMagazine1()) {
 			b.append(" [TOP data pages: Additional Information Table (AIT), Multi-Page Table (MPT) and Multi-Page Extension Table (MPT-EX)]");
 		}
 
-		if(isBasicTOPTable()){
+		if (isBasicTOPTable()) {
 			b.append(" [Basic TOP Table (BTT)]");
 		}
-		if(pageNo==0xFD){
+		if (pageNo == 0xFD) {
 			b.append(" [Magazine Inventory Page (MIP)]");
 		}
-		if(isMOTTable()){
+		if (isMOTTable()) {
 			b.append(" [Magazine Organization Table (MOT)]");
 		}
-		if(pageNo==0xFF){
+		if (pageNo == 0xFF) {
 			b.append(" [time filling and terminator]");
 		}
 		return b.toString();
 	}
+	
+	private boolean isMagazine1() {
+		return (currentSubPage.linesList[0] != null) && (currentSubPage.linesList[0].getMagazineNo() == 1);
+	}
+
 	/**
 	 * @return
 	 */
 	public boolean isMOTTable() {
-		return pageNo==0xFE;
+		return pageNo == 0xFE;
 	}
+
 	/**
 	 * @return
 	 */
 	private boolean isBasicTOPTable() {
-		return (pageNo==0xF0)&&(currentSubPage.linesList[0]!=null)&&(currentSubPage.linesList[0].getMagazineNo()==1);
+		return (pageNo == 0xF0) && isMagazine1();
 	}
+
 	/**
 	 * @return the pageNo
 	 */

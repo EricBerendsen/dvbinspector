@@ -91,6 +91,7 @@ class DRCSCharacter implements TreeNode, ImageSource {
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
+	@Override
 	public KVP getJTreeNode(int modus) {
 
 		return new KVP("DRCS Character "+drcsNumber+", mode="+mode +" (" +getDRCSModeString(mode)+")").addImageSource(this, "DRCS Character");
@@ -99,6 +100,7 @@ class DRCSCharacter implements TreeNode, ImageSource {
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
+	@Override
 	public BufferedImage getImage() {
 		return fBufferedImage;
 	}

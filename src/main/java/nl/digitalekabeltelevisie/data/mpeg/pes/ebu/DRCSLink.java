@@ -66,6 +66,7 @@ public class DRCSLink implements TreeNode{
 
 	}
 
+	@Override
 	public KVP getJTreeNode(int modus) {
 		return getJTreeNode("DRCS Link");
 	}

@@ -71,6 +71,7 @@ public class ObjectLink implements TreeNode{
 		return s;
 	}
 
+	@Override
 	public KVP getJTreeNode(int modus) {
 		return getJTreeNode("Object Link");
 	}

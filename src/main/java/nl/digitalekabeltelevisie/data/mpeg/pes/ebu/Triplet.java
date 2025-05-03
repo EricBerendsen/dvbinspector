@@ -62,13 +62,7 @@ public class Triplet implements TreeNode{
 	}
 
 
-	/**
-	 * @param val the val to set
-	 */
-	public void setVal(int val) {
-		this.val = val;
-	}
-
+	@Override
 	public KVP getJTreeNode(int modus) {
 		return new KVP("Triplet",val, toBinaryString(val, 18));
 	}

@@ -295,6 +295,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		}
 	}
 
+	@Override
 	public KVP getJTreeNode(int modus) {
 		KVP s = new KVP("SubPage " + toHexString(subPageNo, 4));
 		s.addImageSource(this, "Sub Page");
@@ -329,7 +330,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			}
 		}
 		if ((linesList[0] != null) && (linesList[0].getPageNumber() == 0xFD)) { // MIP Page
-			addMIPPageDetailsToJTree(modus, s);
+			addMIPPageDetailsToJTree(s);
 		}
 		if (isMOTpage()) {
 			addMOTPageDetailsToJTree(modus, s);
@@ -341,22 +342,21 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			addObjectDefinitionPageDetailsToJTree(modus, s);
 		}
 		if(isBTTpage()){
-			addBTTPageDetailsToJTree(modus, s);
+			addBTTPageDetailsToJTree(s);
 		}
 		if(isAITpage()){
-			addAITPageDetailsToJTree(modus, s);
+			addAITPageDetailsToJTree(s);
 		}
 		if(isMPTpage()){
-			addMPTPageDetailsToJTree(modus, s);
+			addMPTPageDetailsToJTree(s);
 		}
 		return s;
 	}
 
 	/**
-	 * @param modus
 	 * @param s
 	 */
-	private void addMPTPageDetailsToJTree(int modus, KVP s) {
+	private void addMPTPageDetailsToJTree(KVP s) {
 		KVP mptPage = new KVP("Multipage Table (MPT) Page");
 		s.add(mptPage);
 
@@ -391,10 +391,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	/**
-	 * @param modus
 	 * @param s
 	 */
-	private void addAITPageDetailsToJTree(int modus, KVP s) {
+	private void addAITPageDetailsToJTree(KVP s) {
 		KVP aitPage = new KVP("Additional Information Tables (AIT) Page");
 		s.add(aitPage);
 
@@ -425,10 +424,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	/**
-	 * @param modus
 	 * @param s
 	 */
-	private void addBTTPageDetailsToJTree(int modus, KVP s) {
+	private void addBTTPageDetailsToJTree(KVP s) {
 		KVP bttPage = new KVP("Basic Top Table (BTT) Page");
 		s.add(bttPage);
 		for (int i = 1; i <= 20; i++) {
@@ -755,11 +753,10 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	/**
-	 * @param modus
 	 * @param s
 	 */
 
-	private void addMIPPageDetailsToJTree(int modus, KVP s) {
+	private void addMIPPageDetailsToJTree(KVP s) {
 		KVP mot = new KVP("MIP Structure");
 		s.add(mot);
 
@@ -931,6 +928,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.gui.ImageSource#getImage()
 	 */
+	@Override
 	public BufferedImage getImage() {
 
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -1156,7 +1154,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 							targetChar1 = ' ';
 						}
 					} else if (ch == 0x1b) { //ESC (or Switch) ("Set-After")
-						useSecondaryG0set =! useSecondaryG0set;
+						useSecondaryG0set = !useSecondaryG0set;
 						targetChar1 = ' ';
 					} else if (ch == 0x1c) { //Black Background ("Set-At")
 						bg = 0;
