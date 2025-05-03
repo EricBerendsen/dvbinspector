@@ -264,6 +264,8 @@ public class TableSection implements TreeNode{
 		case 0x80: return "CA_message_section, ECM 1";
 		case 0x81: return "CA_message_section, ECM 2";
 
+		case 0x91: return "user defined / Astra Service Guide Table (SGT)";
+
 		case 0xBC: return "user defined / M7 Fastscan Network Table (FNT) ";
 		case 0xBD: return "user defined / M7 Fastscan Services Table (FST) ";
 		case 0xBE: return "user defined / M7 Operator Network Table (ONT) ";
