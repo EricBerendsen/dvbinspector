@@ -28,8 +28,6 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -41,9 +39,8 @@ public class Magazine implements TreeNode{
 
 
 	private int magazineNo;
-	private int currentPageNo=-1;
 
-	private final TxtDataField[] pageEnhanceMentDataPackes = new TxtDataField[16]; // lines
+    private final TxtDataField[] pageEnhanceMentDataPackes = new TxtDataField[16]; // lines
 
 	private Page currentPage;
 	private final Page[] pageList = new Page[256];
@@ -51,16 +48,16 @@ public class Magazine implements TreeNode{
 	 * @param mag
 	 * @param service
 	 */
-	public Magazine(final TxtService service, final int mag) {
+	public Magazine(TxtService service, int mag) {
 		txtServiceHandler = service;
 		magazineNo = mag;
 	}
 	/**
 	 * @param txtDataField
 	 */
-	public void addTxtDataField(final TxtDataField txtDataField) {
+	public void addTxtDataField(TxtDataField txtDataField) {
 		if(txtDataField.getPacketNo()==0){
-			currentPageNo = txtDataField.getPageNumber();
+            int currentPageNo = txtDataField.getPageNumber();
 			currentPage = pageList[currentPageNo];
 			if(currentPage==null){
 				currentPage = new Page(this, currentPageNo);
@@ -68,7 +65,7 @@ public class Magazine implements TreeNode{
 			}
 			currentPage.setHeader(txtDataField);
 		}else if(txtDataField.getPacketNo()==29){ // 9.5 Magazine-Related Page Enhancement Data Packets
-			final int designationCode = txtDataField.getDesignationCode();
+			int designationCode = txtDataField.getDesignationCode();
 			pageEnhanceMentDataPackes[designationCode]= txtDataField;
 		}else if(currentPage!=null){
 			currentPage.addLine(txtDataField);
@@ -80,15 +77,15 @@ public class Magazine implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Magazine "+magazineNo));
-		for(final TxtDataField txtDatafield: pageEnhanceMentDataPackes){
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("Magazine "+magazineNo);
+		for(TxtDataField txtDatafield: pageEnhanceMentDataPackes){
 			if(txtDatafield!=null){
 				s.add(txtDatafield.getJTreeNode(modus));
 			}
 		}
 
-		for (final Page p: pageList) {
+		for (Page p: pageList) {
 			if(p!=null){
 				s.add(p.getJTreeNode(modus));
 			}
@@ -96,7 +93,7 @@ public class Magazine implements TreeNode{
 		return s;
 	}
 
-	public Page getPage(final int n){
+	public Page getPage(int n){
 		return pageList[n];
 	}
 
@@ -114,7 +111,7 @@ public class Magazine implements TreeNode{
 		return pageEnhanceMentDataPackes;
 	}
 
-	public TxtDataField getPageEnhanceMentDataPackes(final int destinationCode) {
+	public TxtDataField getPageEnhanceMentDataPackes(int destinationCode) {
 		return pageEnhanceMentDataPackes[destinationCode];
 	}
 

@@ -32,10 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
 
@@ -52,11 +49,11 @@ import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
  * Information (VBI) data in DVB bitstreams
  *
  */
-public class EBUPESDataField extends PesPacketData implements TreeNode {
+public class EBUPESDataField extends PesPacketData {
 
 	private final int data_identifier;
 
-	private final List<EBUDataField> fieldList = new ArrayList<EBUDataField>();
+	private final List<EBUDataField> fieldList = new ArrayList<>();
 
 
 	/*
@@ -64,7 +61,7 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 	  -- EN 300 472  and EN 301 775.
 	 */
 
-	public static String getDataUnitIdString(final int dataUnitId){
+	public static String getDataUnitIdString(int dataUnitId){
 
 		if((0x00<=dataUnitId)&&(dataUnitId<=0x01)){
 			return "Reserved";
@@ -81,47 +78,50 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 		if((0xc7<=dataUnitId)&&(dataUnitId<=0xfe)){
 			return "Reserved";
 		}
-		switch(dataUnitId){
-
-		case 0x02: return   "EBU Teletext non-subtitle data";
-		case 0x03: return    "EBU Teletext subtitle data";
-		case 0xC0: return    "inverted teletext";
-		case 0xC3: return    "VPS (Video Programming System)";
-		case 0xC4: return    "WSS (Wide Screen Signalling)";
-		case 0xC5: return    "CC (Closed Caption)";
-		case 0xC6: return    "monochrome 4:2:2 samples";
-		case 0xFF: return    "data_unit for stuffing" ;
-		default:
-			return "illegal value";
-		}
+        return switch (dataUnitId) {
+            case 0x02 -> "EBU Teletext non-subtitle data";
+            case 0x03 -> "EBU Teletext subtitle data";
+            case 0xC0 -> "inverted teletext";
+            case 0xC3 -> "VPS (Video Programming System)";
+            case 0xC4 -> "WSS (Wide Screen Signalling)";
+            case 0xC5 -> "CC (Closed Caption)";
+            case 0xC6 -> "monochrome 4:2:2 samples";
+            case 0xFF -> "data_unit for stuffing";
+            default -> "illegal value";
+        };
 	}
 
 
-	public EBUPESDataField(final PesPacketData pesData){
+	public EBUPESDataField(PesPacketData pesData){
 		super(pesData);
 
-		final int offset = pesData.getPesDataStart();
+		int offset = pesData.getPesDataStart();
 		int dataUnitId =-1;
-		int dataUnitLen =-1;
+		int dataUnitLen;
 		data_identifier=getInt(data, offset, 1, MASK_8BITS);
 		int t=1;
 		while((t<pesData.getPesDataLen())&&(dataUnitId!=0)){  // should not happen ?
 			dataUnitId = getInt(data, offset+t, 1, MASK_8BITS);
 			dataUnitLen = getInt(data, offset+t+1, 1, MASK_8BITS);
 			if((offset+t+2+0x2C)<=data.length){  // element always assumed to be 0x2c long.
-				if((dataUnitId==0x02)||(dataUnitId==0x03)||(dataUnitId==0xc0)||(dataUnitId==0xc1)){
-					final EBUDataField f = new TxtDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
-					fieldList.add(f);
-				}else if(dataUnitId==0xC4){
-					final EBUDataField f = new WSSDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
-					fieldList.add(f);
-				}else if(dataUnitId==0xC3){
-					final EBUDataField f = new VPSDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
-					fieldList.add(f);
-				}else{
-					final EBUDataField f = new EBUDataField(data,offset+t,dataUnitLen,getPesHeader().getPts());
-					fieldList.add(f);
-				}
+                switch (dataUnitId) {
+                    case 0x02, 0x03, 0xc0, 0xc1 -> {
+                        EBUDataField f = new TxtDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
+                        fieldList.add(f);
+                    }
+                    case 0xC4 -> {
+                        EBUDataField f = new WSSDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
+                        fieldList.add(f);
+                    }
+                    case 0xC3 -> {
+                        EBUDataField f = new VPSDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
+                        fieldList.add(f);
+                    }
+                    default -> {
+                        EBUDataField f = new EBUDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
+                        fieldList.add(f);
+                    }
+                }
 			}else{
 				dataUnitId = 0; // stop constructor
 			}
@@ -133,10 +133,9 @@ public class EBUPESDataField extends PesPacketData implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus, new KVP("EBU PES Packet"));
-		s.add(new DefaultMutableTreeNode(new KVP("data_identifier",data_identifier,getDataIDString(data_identifier))));
-		//s.add(new DefaultMutableTreeNode(new KVP("pts",getPesHeader().getPts(), printTimebase90kHz(getPesHeader().getPts()))));
+	public KVP getJTreeNode(int modus) {
+		KVP s = (KVP) getJTreeNode(modus, new KVP("EBU PES Packet"));
+		s.add(new KVP("data_identifier",data_identifier,getDataIDString(data_identifier)));
 
 		addListJTree(s,fieldList,modus,"fields");
 		return s;

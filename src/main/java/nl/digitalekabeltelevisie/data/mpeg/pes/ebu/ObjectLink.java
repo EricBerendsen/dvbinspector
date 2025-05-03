@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.getHammingReverseByte;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -48,34 +46,33 @@ public class ObjectLink implements TreeNode{
 	 */
 	protected int offset;
 
-	public ObjectLink(final byte[] data,final int offset) {
+	public ObjectLink(byte[] data, int offset) {
 		data_block = data;
 		this.offset = offset;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final String name) {
-		DefaultMutableTreeNode s;
+	public KVP getJTreeNode(String name) {
 		if((getPageTens()==0xff)&&(getPageUnits()==0xf)){
-			s=new DefaultMutableTreeNode(new KVP("Object Link not used"));
-		}else{
-			s=new DefaultMutableTreeNode(new KVP(name+" "+TxtDataField.formatPageNo(getMagazine(), (getPageTens()*16)+getPageUnits(), 0x3f7f)));
-			s.add(new DefaultMutableTreeNode(new KVP("Magazine ",getMagazine(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("pageTens ",getPageTens(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("pageUnits ",getPageUnits(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("numberOfSubpages",getNumberOfSubpages(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("fallbackProtocol",getFallbackProtocol(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("defaultSidePanel",getDefaultSidePanel(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("defaultBackgroundColour",getDefaultBackgroundColour(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("defaultObject1Type",getDefaultObject1Type(),EBUTeletextHandler.getObjectTypeString(getDefaultObject1Type()))));
-			s.add(new DefaultMutableTreeNode(new KVP("defaultObject2Type",getDefaultObject2Type(),EBUTeletextHandler.getObjectTypeString(getDefaultObject2Type()))));
-			s.add(new DefaultMutableTreeNode(new KVP("defaultObject1",getDefaultObject1(),"subPage S1:"+getDefaultObject1SubPageS1()+", Pointer location:"+getDefaultObject1PointerLocation())));
-			s.add(new DefaultMutableTreeNode(new KVP("defaultObject2",getDefaultObject2(),"subPage S1:"+getDefaultObject2SubPageS1()+", Pointer location:"+getDefaultObject2PointerLocation())));
+			return new KVP("Object Link not used");
 		}
+		KVP s=new KVP(name+" "+TxtDataField.formatPageNo(getMagazine(), (getPageTens()*16)+getPageUnits(), 0x3f7f));
+		s.add(new KVP("Magazine ",getMagazine()));
+		s.add(new KVP("pageTens ",getPageTens()));
+		s.add(new KVP("pageUnits ",getPageUnits()));
+		s.add(new KVP("numberOfSubpages",getNumberOfSubpages()));
+		s.add(new KVP("fallbackProtocol",getFallbackProtocol()));
+		s.add(new KVP("defaultSidePanel",getDefaultSidePanel()));
+		s.add(new KVP("defaultBackgroundColour",getDefaultBackgroundColour()));
+		s.add(new KVP("defaultObject1Type",getDefaultObject1Type(),EBUTeletextHandler.getObjectTypeString(getDefaultObject1Type())));
+		s.add(new KVP("defaultObject2Type",getDefaultObject2Type(),EBUTeletextHandler.getObjectTypeString(getDefaultObject2Type())));
+		s.add(new KVP("defaultObject1",getDefaultObject1(),"subPage S1:"+getDefaultObject1SubPageS1()+", Pointer location:"+getDefaultObject1PointerLocation()));
+		s.add(new KVP("defaultObject2",getDefaultObject2(),"subPage S1:"+getDefaultObject2SubPageS1()+", Pointer location:"+getDefaultObject2PointerLocation()));
+
 		return s;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		return getJTreeNode(modus, "Object Link");
+	public KVP getJTreeNode(int modus) {
+		return getJTreeNode("Object Link");
 	}
 
 

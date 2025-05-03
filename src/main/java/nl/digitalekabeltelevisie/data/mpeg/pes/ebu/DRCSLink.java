@@ -45,30 +45,30 @@ public class DRCSLink implements TreeNode{
 	/**
 	 * 
 	 */
-	protected int offset;
+    private int offset;
 
 
-	public DRCSLink(final byte[] data,final int offset) {
+	public DRCSLink(byte[] data, int offset) {
 		data_block = data;
 		this.offset = offset;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final String name) {
-		DefaultMutableTreeNode s;
+	public KVP getJTreeNode(String name) {
+
 		if((getPageTens()==0xff)&&(getPageUnits()==0xf)){
-			s=new DefaultMutableTreeNode(new KVP("Object Link not used"));
-		}else{
-			s=new DefaultMutableTreeNode(new KVP(name+TxtDataField.formatPageNo(getMagazine(), getPageNo(), 0x3f7f)));
-			s.add(new DefaultMutableTreeNode(new KVP("Magazine ",getMagazine(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("pageTens ",getPageTens(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("pageUnits ",getPageUnits(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("numberOfSubpages",getNumberOfSubpages(),"highest S1 sub-code value transmitted "+(1+getNumberOfSubpages()))));
+			return new KVP("Object Link not used");
 		}
-		return s;
+			KVP kvp = new KVP(name+TxtDataField.formatPageNo(getMagazine(), getPageNo(), 0x3f7f));
+			kvp.add(new KVP("Magazine ",getMagazine()));
+			kvp.add(new KVP("pageTens ",getPageTens()));
+			kvp.add(new KVP("pageUnits ",getPageUnits()));
+			kvp.add(new KVP("numberOfSubpages",getNumberOfSubpages(),"highest S1 sub-code value transmitted "+(1+getNumberOfSubpages())));
+			return kvp;
+
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		return getJTreeNode(modus, "DRCS Link");
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
+		return getJTreeNode("DRCS Link");
 	}
 
 	public int getMagazine(){

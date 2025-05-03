@@ -27,10 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 
 /**
  * @author Eric Berendsen
@@ -40,13 +37,13 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
  *
  */
 public class TxtTriplet extends
-Triplet implements TreeNode {
+Triplet {
 
 
 	// From CharSet.java , part of ProjectX
 	//DM10082004 081.7 int08 changed
 	//A=65 .. Z=90
-	private static final short diacritical_uppercase_char_map[][] = {
+	private static final short[][] diacritical_uppercase_char_map = {
 		{ 0, 192, 193, 194, 195, 256, 258, 0, 196, 0, 197, 0, 0, 0, 260, 258 }, //A
 		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, //B
 		{ 0, 0, 262, 264, 0, 0, 268, 266, 0, 0, 0, 199, 0, 0, 0, 268 }, //C
@@ -77,7 +74,7 @@ Triplet implements TreeNode {
 
 	//DM10082004 081.7 int08 changed
 	//a=97 .. z=122
-	private static final short diacritical_lowercase_char_map[][] = {
+	private static final short[][] diacritical_lowercase_char_map = {
 		{ 0, 224, 225, 226, 227, 257, 259, 0, 228, 0, 229, 0, 0, 0, 261, 259 }, //a
 		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, //b
 		{ 0, 0, 263, 265, 0, 0, 269, 267, 0, 0, 0, 231, 0, 0, 0, 269 }, //c
@@ -107,7 +104,7 @@ Triplet implements TreeNode {
 	};
 
 
-	public static short getCombinedCharacter(final int basic_char, final int combine_char)
+	public static short getCombinedCharacter(int basic_char, int combine_char)
 	{
 		short val = 0;
 
@@ -125,7 +122,7 @@ Triplet implements TreeNode {
 		}
 	}
 
-	public static final short G0_sets[][] = {
+	public static final short[][] G0_sets = {
 		{
 			//0 = latin
 			0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
@@ -200,7 +197,7 @@ Triplet implements TreeNode {
 	};
 
 	//DM10082004 081.7 int08 changed
-	public static final short G2_sets[][] = {
+	public static final short[][] G2_sets = {
 		{
 			//0 = latin
 			0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
@@ -245,7 +242,7 @@ Triplet implements TreeNode {
 	};
 
 	//4 bits main triple + 3 bits character_set
-	private final static int G0_set_mapping[][] = {
+    private static final int[][] G0_set_mapping = {
 		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //0, latin
 		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //1, latin
 		{ 0, 0, 0, 0, 0, 0, 0, 0 }, //2, latin
@@ -265,7 +262,7 @@ Triplet implements TreeNode {
 	};
 
 
-	private static final short national_subsets[][] = {
+	private static final short[][] national_subsets = {
 		// 0x23     0x24    0x40    0x5b    0x5c    0x5d    0x5e    0x5f   0x60    0x7b     0x7c   0x7d    0x7e
 		{ 0x00a3, 0x0024, 0x0040, 0x00ab, 0x00bd, 0x00bb, 0x005e, 0x0023, 0x002d, 0x00bc, 0x00a6, 0x00be, 0x00f7 }, // english ,000
 		{ 0x00e9, 0x00ef, 0x00e0, 0x00eb, 0x00ea, 0x00f9, 0x00ee, 0x0023, 0x00e8, 0x00e2, 0x00f4, 0x00fb, 0x00e7 }, // french  ,001
@@ -285,7 +282,7 @@ Triplet implements TreeNode {
 
 	//DM10082004 081.7 int08 changed
 	//4 bits main tripl + 3 bits character_set
-	private static final int national_subset_mapping[][] = {
+	private static final int[][] national_subset_mapping = {
 		{ 0, 1, 2, 3, 4, 5, 6, 7 },  //0, en,fr,se,cz,de,es,it,ro
 		{ 9, 1, 2, 3, 4, 5, 6, 7 },  //1, pl,fr,se,cz,de,es,it,ro
 		{ 0, 1, 2, 12, 4, 5, 6, 7 }, //2, en,fr,se,tr,de,es,it,ro
@@ -310,8 +307,19 @@ Triplet implements TreeNode {
 	/**
 	 *
 	 */
-	public TxtTriplet(final byte[] data, final int offset) {
+	public TxtTriplet(byte[] data, int offset) {
 		super(data,offset);
+	}
+
+	public static String getObjectSourceString(int objectSource) {
+
+        return switch (objectSource) {
+            case 0x00 -> "Illegal";
+            case 0x01 -> "Local";
+            case 0x02 -> "POP";
+            case 0x03 -> "GPOP";
+            default -> "illegal value";
+        };
 	}
 
 	public int getAddress(){
@@ -327,10 +335,10 @@ Triplet implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final int address = val&0x00003f;
-		final int mode = (val&0x007c0)>>6;
-		final int data = (val&0x3f800)>>11;
+	public KVP getJTreeNode(int modus) {
+		int address = val&0x00003f;
+		int mode = (val&0x007c0)>>6;
+		int data = (val&0x3f800)>>11;
 
 		StringBuilder stringBuilder = new StringBuilder();
 
@@ -339,35 +347,35 @@ Triplet implements TreeNode {
 			stringBuilder.append(address);
 			stringBuilder.append(", ");
 			if(mode == 0){ //Foreground Colour
-				final int clut = (data & 0x18)>>3;
-				final int clutEntry = (data & 0x7);
+				int clut = (data & 0x18)>>3;
+				int clutEntry = (data & 0x7);
 				stringBuilder.append("clut ");
 				stringBuilder.append(clut);
 				stringBuilder.append(", entry ");
 				stringBuilder.append(clutEntry);
 			}
 			if(mode == 3){ //Background Colour
-				final int clut = (data & 0x18)>>3;
-				final int clutEntry = (data & 0x7);
+				int clut = (data & 0x18)>>3;
+				int clutEntry = (data & 0x7);
 				stringBuilder.append("clut ");
 				stringBuilder.append(clut);
 				stringBuilder.append(", entry ");
 				stringBuilder.append(clutEntry);
 			}
 			if(mode == 6){ // PDC - Cursor Column & Announced Starting & Finishing Time Minutes
-				final int minutesUnits = (data & 0x0F);
-				final int minutesTens = (data & 0x70)>>4;
+				int minutesUnits = (data & 0x0F);
+				int minutesTens = (data & 0x70)>>4;
 				stringBuilder.append("minutes ");
 				stringBuilder.append(minutesTens);
 				stringBuilder.append(minutesUnits);
 			}
 			if(mode == 12){ //Display attributes
-				final int doubleWidth = (data & 0x40)>>6;
-				final int underline = (data & 0x20)>>5;
-				final int invert = (data & 0x10)>>4;
-				final int conceal = (data & 0x4)>>2;
-				final int boxing = (data & 0x2)>>1;
-				final int doubleHeigth = (data & 0x1);
+				int doubleWidth = (data & 0x40)>>6;
+				int underline = (data & 0x20)>>5;
+				int invert = (data & 0x10)>>4;
+				int conceal = (data & 0x4)>>2;
+				int boxing = (data & 0x2)>>1;
+				int doubleHeigth = (data & 0x1);
 				stringBuilder.append("Double Width:");
 				stringBuilder.append(doubleWidth);
 				stringBuilder.append(", Underline/Separated Mosaics:");
@@ -382,8 +390,8 @@ Triplet implements TreeNode {
 				stringBuilder.append(doubleHeigth);
 			}
 			if(mode == 13){ //DRCS Character Invocation
-				final int normal = (data & 0x40)>>6;
-				final int chr = (data & 0x3F);
+				int normal = (data & 0x40)>>6;
+				int chr = (data & 0x3F);
 				if(normal==1){
 					stringBuilder.append("normal");
 				}else{
@@ -394,24 +402,18 @@ Triplet implements TreeNode {
 			}
 
 			if(mode > 16){ //char from G0 set w/ diacr.
-				stringBuilder.append("");
-				stringBuilder.append((char)data);
+                stringBuilder.append((char)data);
 				stringBuilder.append("+ ");
 				stringBuilder.append((char)G2_sets[0][64+ (mode & 0xF)]);// no typo, need G2_sets, but I don't understand why......????
 				stringBuilder.append("  ");
-				stringBuilder.append("");
-				stringBuilder.append((char)getCombinedCharacter(data, mode & 0xF));
+                stringBuilder.append((char)getCombinedCharacter(data, mode & 0xF));
 			}
 			if(mode == 15){ //Character from the G2 Supplementary Set
-				stringBuilder.append("");
-				stringBuilder.append((char)G2_sets[0][data]);
-				stringBuilder.append("");
-			}
+                stringBuilder.append((char)G2_sets[0][data]);
+            }
 			if(mode==16){
-				stringBuilder.append("");
-				stringBuilder.append((char)G0_sets[0][data]);
-				stringBuilder.append("");
-				//NOTE 3: The @ symbol replaces the * symbol at position 2/A when the table is accessed via a packet X/26 Column
+                stringBuilder.append((char)G0_sets[0][data]);
+                //NOTE 3: The @ symbol replaces the * symbol at position 2/A when the table is accessed via a packet X/26 Column
 				// Address triplet with Mode Description = 10 000 and Data = 0101010. See clause 12.2.4.
 			}
 		}else{ // address >= 40
@@ -434,8 +436,7 @@ Triplet implements TreeNode {
 				stringBuilder.append((address&0xF));
 				stringBuilder.append(", Day ");
 				stringBuilder.append(((data&0x30)>>4));
-				stringBuilder.append("");
-				stringBuilder.append((data&0x0F));
+                stringBuilder.append((data&0x0F));
 			}
 			if(mode==0x0A){// PDC - Cursor Row & Announced Starting Time Hours
 				stringBuilder.append("Row ");
@@ -461,18 +462,18 @@ Triplet implements TreeNode {
 			}
 
 			if((mode>=0x11)&&(mode<=0x13)){// Object Invocation
-				final int objectSource = (address&0x18)>>3;
-				final int objectType = (mode&0x3);
-				final int subPageS1 =data&0xF;
-				final int ptrLocation = address &0x3;
-				final int tripletOffset = (data & 0x60)>>5;
-				final int ptrPosition = (data&0x10)>>4;
-				final int objectNo = (ptrLocation<<3)|(tripletOffset<<1)|ptrPosition;
+				int objectSource = (address&0x18)>>3;
+				int objectType = (mode&0x3);
+				int subPageS1 =data&0xF;
+				int ptrLocation = address &0x3;
+				int tripletOffset = (data & 0x60)>>5;
+				int ptrPosition = (data&0x10)>>4;
+				int objectNo = (ptrLocation<<3)|(tripletOffset<<1)|ptrPosition;
 	
 				stringBuilder.append("object source");
 				stringBuilder.append(objectSource);
 				stringBuilder.append(" (");
-				stringBuilder.append(EBUTeletextHandler.getObjectSourceString(objectSource));
+				stringBuilder.append(getObjectSourceString(objectSource));
 				stringBuilder.append("), object type:");
 				stringBuilder.append(objectType);
 				stringBuilder.append(" (");
@@ -489,40 +490,29 @@ Triplet implements TreeNode {
 				stringBuilder.append(ptrPosition);
 			}
 			if((mode>=0x15)&&(mode<=0x17)){// Object Definition
-				String objectUsage ="";
-				switch ((address&0x18)>>3) {
-				case 0:
-					objectUsage ="illegal";
-					break;
-				case 1:
-					objectUsage ="Level 2.5";
-					break;
-				case 2:
-					objectUsage ="Level 3.5";
-					break;
-				case 3:
-					objectUsage ="Levels 2.5 and 3.5";
-					break;
-				default:
-					objectUsage ="illegal";
-					break;
-				}
-				stringBuilder.append("Object Usage ");
+				String objectUsage = switch ((address & 0x18) >> 3) {
+                    case 0 -> "illegal";
+                    case 1 -> "Level 2.5";
+                    case 2 -> "Level 3.5";
+                    case 3 -> "Levels 2.5 and 3.5";
+                    default -> "illegal";
+                };
+                stringBuilder.append("Object Usage ");
 				stringBuilder.append(objectUsage);
 				stringBuilder.append(", packet within object page containing the pointer to this object ");
 				stringBuilder.append((1+(address&0x03)));
 			}
 
 		}
-		if(stringBuilder.length()>0){
+		if(!stringBuilder.isEmpty()){
 			stringBuilder.insert(0, " (");
 			stringBuilder.append(")");
 		}
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Triplet",val,getModeString(mode,address)+stringBuilder.toString()));
-		t.add(new DefaultMutableTreeNode(new KVP("mode",mode,getModeString(mode,address))));
-		t.add(new DefaultMutableTreeNode(new KVP("address/data word A",address,(address<=39)?"Column Address Group":"Row Address Group "+(address==40?24:address-40))));
-		t.add(new DefaultMutableTreeNode(new KVP("data/data word B",data,null)));
+		KVP t = new KVP("Triplet",val,getModeString(mode,address)+stringBuilder.toString());
+		t.add(new KVP("mode",mode,getModeString(mode,address)));
+		t.add(new KVP("address/data word A",address,(address<=39)?"Column Address Group":"Row Address Group "+(address==40?24:address-40)));
+		t.add(new KVP("data/data word B",data));
 		return t;
 	}
 
@@ -530,19 +520,17 @@ Triplet implements TreeNode {
 	 * @param data
 	 * @return
 	 */
-	private static String getHoursString(final int data) {
-		StringBuilder hoursString = new StringBuilder();
-		int hoursUnits= data & 0x0F;
+	private static String getHoursString(int data) {
+        int hoursUnits= data & 0x0F;
 		int hoursTens= ((data&0x30)>>4);
-		hoursString.append(hoursTens).append(hoursUnits);
-		return hoursString.toString();
+        return String.valueOf(hoursTens) + hoursUnits;
 	}
 
 	/**
 	 * @param address
 	 * @return
 	 */
-	protected int getRow(final int address) {
+	protected static int getRow(int address) {
 		int row;
 		if(address==40){
 			row=24;
@@ -552,83 +540,79 @@ Triplet implements TreeNode {
 		return row;
 	}
 
-	public static String getModeString(final int mode, final int address){
+	public static String getModeString(int mode, int address){
 		if(address<=39){
-			switch (mode) {
-
-			case 0: return "Foreground Colour";
-			case 1: return "Block Mosaic Character from the G1 set";
-			case 2: return "Line Drawing or Smoothed Mosaic Character from the G3 set (Level 1.5)";
-			case 3: return "Background Colour";
-			case 4: return "Reserved";
-			case 5: return "Reserved";
-			case 6: return "PDC - Cursor Column & Announced Starting & Finishing Time Minutes";
-			case 7: return "Additional Flash Functions";
-			case 8: return "Modified G0 and G2 Character Set Design.";
-			case 9: return "Character from the G0 set (Levels 2.5 & 3.5)";
-			case 10: return "Reserved";
-			case 11: return "Line Drawing or Smoothed Mosaic Character from the G3 set (Levels 2.5 & 3.5)";
-			case 12: return "Display Attributes";
-			case 13: return "DRCS Character Invocation";
-			case 14: return "Font Style";
-			case 15: return "Character from the G2 set";
-			case 16: return "G0 character without diacritical mark";
-			case 17: return "G0 character with diacritical mark";
-			case 18: return "G0 character with diacritical mark";
-			case 19: return "G0 character with diacritical mark";
-			case 20: return "G0 character with diacritical mark";
-			case 21: return "G0 character with diacritical mark";
-			case 22: return "G0 character with diacritical mark";
-			case 23: return "G0 character with diacritical mark";
-			case 24: return "G0 character with diacritical mark";
-			case 25: return "G0 character with diacritical mark";
-			case 26: return "G0 character with diacritical mark";
-			case 27: return "G0 character with diacritical mark";
-			case 28: return "G0 character with diacritical mark";
-			case 29: return "G0 character with diacritical mark";
-			case 30: return "G0 character with diacritical mark";
-			case 31: return "G0 character with diacritical mark";
-			default:
-				return "Illegal value";
-			}
+            return switch (mode) {
+                case 0 -> "Foreground Colour";
+                case 1 -> "Block Mosaic Character from the G1 set";
+                case 2 -> "Line Drawing or Smoothed Mosaic Character from the G3 set (Level 1.5)";
+                case 3 -> "Background Colour";
+                case 4 -> "Reserved";
+                case 5 -> "Reserved";
+                case 6 -> "PDC - Cursor Column & Announced Starting & Finishing Time Minutes";
+                case 7 -> "Additional Flash Functions";
+                case 8 -> "Modified G0 and G2 Character Set Design.";
+                case 9 -> "Character from the G0 set (Levels 2.5 & 3.5)";
+                case 10 -> "Reserved";
+                case 11 -> "Line Drawing or Smoothed Mosaic Character from the G3 set (Levels 2.5 & 3.5)";
+                case 12 -> "Display Attributes";
+                case 13 -> "DRCS Character Invocation";
+                case 14 -> "Font Style";
+                case 15 -> "Character from the G2 set";
+                case 16 -> "G0 character without diacritical mark";
+                case 17 -> "G0 character with diacritical mark";
+                case 18 -> "G0 character with diacritical mark";
+                case 19 -> "G0 character with diacritical mark";
+                case 20 -> "G0 character with diacritical mark";
+                case 21 -> "G0 character with diacritical mark";
+                case 22 -> "G0 character with diacritical mark";
+                case 23 -> "G0 character with diacritical mark";
+                case 24 -> "G0 character with diacritical mark";
+                case 25 -> "G0 character with diacritical mark";
+                case 26 -> "G0 character with diacritical mark";
+                case 27 -> "G0 character with diacritical mark";
+                case 28 -> "G0 character with diacritical mark";
+                case 29 -> "G0 character with diacritical mark";
+                case 30 -> "G0 character with diacritical mark";
+                case 31 -> "G0 character with diacritical mark";
+                default -> "Illegal value";
+            };
 		}else{
-			switch (mode) {
-
-			case 0: return "Full Screen Colour";
-			case 1: return "Full Row Colour";
-			case 2: return "Reserved";
-			case 3: return "Reserved";
-			case 4: return "Set Active Position";
-			case 5: return "Reserved";
-			case 6: return "Reserved";
-			case 7: return "Address Display Row 0";
-			case 8: return "PDC - Country of Origin and Programme Source";
-			case 9: return "PDC - Month & Day";
-			case 10: return "PDC - Cursor Row & Announced Starting Time Hours";
-			case 11: return "PDC - Cursor Row & Announce Finishing Time Hours";
-			case 12: return "PDC - Cursor Row & Local Time Offset";
-			case 13: return "PDC - Series Identifier and Series Code";
-			case 14: return "Reserved";
-			case 15: return "Reserved";
-			case 16: return "Origin Modifier";
-			case 17: return "Active Object Invocation";
-			case 18: return "Adaptive Object Invocation";
-			case 19: return "Passive Object Invocation";
-			case 20: return "Reserved";
-			case 21: return "Active Object Definition";
-			case 22: return "Adaptive Object Definition";
-			case 23: return "Passive Object Definition";
-			case 24: return "DRCS Mode";
-			case 25: return "Reserved";
-			case 26: return "Reserved";
-			case 27: return "Reserved";
-			case 28: return "Reserved";
-			case 29: return "Reserved";
-			case 30: return "Reserved";
-			case 31: return "Termination Marker";
-			default:
-				return "Illegal value";
-			}
+            return switch (mode) {
+                case 0 -> "Full Screen Colour";
+                case 1 -> "Full Row Colour";
+                case 2 -> "Reserved";
+                case 3 -> "Reserved";
+                case 4 -> "Set Active Position";
+                case 5 -> "Reserved";
+                case 6 -> "Reserved";
+                case 7 -> "Address Display Row 0";
+                case 8 -> "PDC - Country of Origin and Programme Source";
+                case 9 -> "PDC - Month & Day";
+                case 10 -> "PDC - Cursor Row & Announced Starting Time Hours";
+                case 11 -> "PDC - Cursor Row & Announce Finishing Time Hours";
+                case 12 -> "PDC - Cursor Row & Local Time Offset";
+                case 13 -> "PDC - Series Identifier and Series Code";
+                case 14 -> "Reserved";
+                case 15 -> "Reserved";
+                case 16 -> "Origin Modifier";
+                case 17 -> "Active Object Invocation";
+                case 18 -> "Adaptive Object Invocation";
+                case 19 -> "Passive Object Invocation";
+                case 20 -> "Reserved";
+                case 21 -> "Active Object Definition";
+                case 22 -> "Adaptive Object Definition";
+                case 23 -> "Passive Object Definition";
+                case 24 -> "DRCS Mode";
+                case 25 -> "Reserved";
+                case 26 -> "Reserved";
+                case 27 -> "Reserved";
+                case 28 -> "Reserved";
+                case 29 -> "Reserved";
+                case 30 -> "Reserved";
+                case 31 -> "Termination Marker";
+                default -> "Illegal value";
+            };
 
 		}
 	}
@@ -672,66 +656,35 @@ Triplet implements TreeNode {
 	 * @return The national character, as mapped by {@code ch} and {@code nocs}.
 	 * If no mapping could be found, {@code ch} is returned.
 	 */
-	public static char getNationalOptionChar(final byte ch, final int nocs) {
-		char targetChar1;
-		final int g0SetDesignation = (nocs & 0x78) >>> 3;
-		final int controlBits = nocs & 0x7;
-		//System.err.println("g0SetDesignation:"+g0SetDesignation+", controlBits:"+controlBits);
+	public static char getNationalOptionChar(byte ch, int nocs) {
+		int g0SetDesignation = (nocs & 0x78) >>> 3;
+		int controlBits = nocs & 0x7;
 		int subset_idx = national_subset_mapping[g0SetDesignation][controlBits];
 		if(subset_idx==13){
 			return getG0Character(ch, g0SetDesignation, controlBits);
 		}
-		switch (ch) // special national characters
-		{
-		case 0x23:
-			targetChar1 = (char) national_subsets[subset_idx][0];
-			break;
-		case 0x24:
-			targetChar1 = (char) national_subsets[subset_idx][1];
-			break;
-		case 0x40:
-			targetChar1 = (char) national_subsets[subset_idx][2];
-			break;
-		case 0x5b:
-			targetChar1 = (char) national_subsets[subset_idx][3];
-			break;
-		case 0x5c:
-			targetChar1 = (char) national_subsets[subset_idx][4];
-			break;
-		case 0x5d:
-			targetChar1 = (char) national_subsets[subset_idx][5];
-			break;
-		case 0x5e:
-			targetChar1 = (char) national_subsets[subset_idx][6];
-			break;
-		case 0x5f:
-			targetChar1 = (char) national_subsets[subset_idx][7];
-			break;
-		case 0x60:
-			targetChar1 = (char) national_subsets[subset_idx][8];
-			break;
-		case 0x7b:
-			targetChar1 = (char) national_subsets[subset_idx][9];
-			break;
-		case 0x7c:
-			targetChar1 = (char) national_subsets[subset_idx][10];
-			break;
-		case 0x7d:
-			targetChar1 = (char) national_subsets[subset_idx][11];
-			break;
-		case 0x7e:
-			targetChar1 = (char) national_subsets[subset_idx][12];
-			break;
-		case 0x7f:
-			targetChar1 = (char) 0x25A0;
-			break;
-		default:
-			targetChar1 = getG0Character(ch, g0SetDesignation, controlBits);
-		}
-		return targetChar1;
+        return switch (ch) // special national characters
+        {
+            case 0x23 -> (char) national_subsets[subset_idx][0];
+            case 0x24 -> (char) national_subsets[subset_idx][1];
+            case 0x40 -> (char) national_subsets[subset_idx][2];
+            case 0x5b -> (char) national_subsets[subset_idx][3];
+            case 0x5c -> (char) national_subsets[subset_idx][4];
+            case 0x5d -> (char) national_subsets[subset_idx][5];
+            case 0x5e -> (char) national_subsets[subset_idx][6];
+            case 0x5f -> (char) national_subsets[subset_idx][7];
+            case 0x60 -> (char) national_subsets[subset_idx][8];
+            case 0x7b -> (char) national_subsets[subset_idx][9];
+            case 0x7c -> (char) national_subsets[subset_idx][10];
+            case 0x7d -> (char) national_subsets[subset_idx][11];
+            case 0x7e -> (char) national_subsets[subset_idx][12];
+            case 0x7f -> (char) 0x25A0;
+            default -> getG0Character(ch, g0SetDesignation, controlBits);
+        };
+
 	}
 
-	private static char getG0Character(final byte ch, final int g0SetDesignation, final int controlBits) {
+	private static char getG0Character(byte ch, int g0SetDesignation, int controlBits) {
 		return (char) G0_sets[G0_set_mapping[g0SetDesignation][controlBits]][ch];
 	}
 

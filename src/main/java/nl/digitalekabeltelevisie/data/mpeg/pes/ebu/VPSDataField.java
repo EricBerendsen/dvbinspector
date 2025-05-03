@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 /**
@@ -46,7 +44,7 @@ public class VPSDataField extends EBUDataField {
 	 * @param offset
 	 * @param len
 	 */
-	public VPSDataField(final byte[] data, final int offset, final int len, final long pts) {
+	public VPSDataField(byte[] data, int offset, int len, long pts) {
 		super(data, offset, len, pts);
 		// do not instantiatie fields, will be calculated as needed.
 	}
@@ -54,39 +52,42 @@ public class VPSDataField extends EBUDataField {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("vps_data_block",data_block,offset+3,13,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		s.add(new KVP("vps_data_block",data_block,offset+3,13));
 		// offset happens to be same as in  Figure 9: Data format of the programme delivery data in the dedicated TV line ETSI EN 300 231 V1.3.1
 		// (starting from byte 3, 0 - 2 are dataUnitId, dataUnitLength ,[reserved_future_use ,field_parity ,line_offset]
-		s.add(new DefaultMutableTreeNode(new KVP("not Relevant byte 3 to 4",getNotRelevant3_4(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("PCS/Audio",getPCSAudio(),getPCSAudioString(getPCSAudio()))));
-		s.add(new DefaultMutableTreeNode(new KVP("Reserved for enhancement of VPS",getReservedEnhancement(),getReservedEnhancement()==0xF?"Unenhanced VPS":"")));
-		s.add(new DefaultMutableTreeNode(new KVP("not Relevant byte 6 to 10",data_block,offset+6,5,null)));
+		s.add(new KVP("not Relevant byte 3 to 4",getNotRelevant3_4()));
+		s.add(new KVP("PCS/Audio",getPCSAudio(),getPCSAudioString(getPCSAudio())));
+		s.add(new KVP("Reserved for enhancement of VPS",getReservedEnhancement(),getReservedEnhancement()==0xF?"Unenhanced VPS":""));
+		s.add(new KVP("not Relevant byte 6 to 10",data_block,offset+6,5));
 		if((getDay()==0)&&(getMonth()==0xF)&&(getMinute()==0x3F)){ //Reserved code values for receiver control
 			// TODO ETSI EN 300 231 V1.3.1 (2003-04) p14  PIL
-			s.add(new DefaultMutableTreeNode(new KVP("Service Code",getHour(),getServiceCodeString(getHour()))));
+			s.add(new KVP("Service Code",getHour(),getServiceCodeString(getHour())));
 
 		}else{
-			s.add(new DefaultMutableTreeNode(new KVP("day",getDay(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("month",getMonth(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("hour",getHour(),null)));
-			s.add(new DefaultMutableTreeNode(new KVP("minute",getMinute(),null)));
+			s.add(new KVP("day",getDay()));
+			s.add(new KVP("month",getMonth()));
+			s.add(new KVP("hour",getHour()));
+			s.add(new KVP("minute",getMinute()));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("country",getCountry(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("network",getNetwork(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("PTY",getPTY(),null)));
+		s.add(new KVP("country",getCountry()));
+		s.add(new KVP("network",getNetwork()));
+		s.add(new KVP("PTY",getPTY()));
 		return s;
 	}
 
-	private static String getServiceCodeString(final int b) {
-		switch (b) {
-		case 31: return "Timer-control Code (TC), indicating that the programme identification information is to be ignored";
-		case 30: return "Recording Inhibit/Terminate code (RI/T), indicating that the transmission has no label and is for example, not intended to be recorded";
-		case 29: return "Interruption code (INT), indicating a break in the programme, which will continue after a short interval";
-		case 28: return "Continuation code, indicating possibly an erroneous transmission state. No action required";
-		default: return "reserved for future use";
-		}
+	private static String getServiceCodeString(int b) {
+        return switch (b) {
+            case 31 ->
+                    "Timer-control Code (TC), indicating that the programme identification information is to be ignored";
+            case 30 ->
+                    "Recording Inhibit/Terminate code (RI/T), indicating that the transmission has no label and is for example, not intended to be recorded";
+            case 29 ->
+                    "Interruption code (INT), indicating a break in the programme, which will continue after a short interval";
+            case 28 -> "Continuation code, indicating possibly an erroneous transmission state. No action required";
+            default -> "reserved for future use";
+        };
 	}
 
 	/**
@@ -137,15 +138,14 @@ public class VPSDataField extends EBUDataField {
 	}
 
 
-	public static String getPCSAudioString(final int aud) {
-		switch (aud) {
-		case 0x0: return "don't know";
-		case 0x1: return "mono";
-		case 0x2: return "Stereo";
-		case 0x3: return "dual sound";
-
-		default: return "Illegal Value";
-		}
+	public static String getPCSAudioString(int aud) {
+        return switch (aud) {
+            case 0x0 -> "don't know";
+            case 0x1 -> "mono";
+            case 0x2 -> "Stereo";
+            case 0x3 -> "dual sound";
+            default -> "Illegal Value";
+        };
 	}
 
 
@@ -174,7 +174,7 @@ public class VPSDataField extends EBUDataField {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -184,7 +184,7 @@ public class VPSDataField extends EBUDataField {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final VPSDataField other = (VPSDataField) obj;
+		VPSDataField other = (VPSDataField) obj;
 		if (dataUnitId != other.dataUnitId) {
 			return false;
 		}
@@ -227,11 +227,8 @@ public class VPSDataField extends EBUDataField {
 		if (offset != other.offset) {
 			return false;
 		}
-		if (reserved_future_use != other.reserved_future_use) {
-			return false;
-		}
-		return true;
-	}
+        return reserved_future_use == other.reserved_future_use;
+    }
 
 }
 

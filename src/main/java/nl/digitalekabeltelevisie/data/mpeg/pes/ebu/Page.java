@@ -2,19 +2,13 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.toHexString;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.*;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
 /**
- * Page holds a list of subPages. For normal teletext (non subtitle) this is a treemap. 
+ * Page holds a list of subPages. For normal teletext (non subtitle) this is a treemap.
  * If only one subpage exists with subPageNo==0, it is treated special
  * For subtitle pages all versions are stored in an ArrayList.
  */
@@ -27,21 +21,21 @@ public class Page implements TreeNode{
 	private final TreeMap<Integer, SubPage>subPages = new TreeMap<>();
 	private final List<SubPage> subtitles = new ArrayList<>();
 
-	private int pageNo=-1;
-	private SubPage currentSubPage=null;
-	
+	private int pageNo;
+	private SubPage currentSubPage;
+
 	/**
 	 * @param currentPageNo
 	 * @param magazine
 	 */
-	public Page(final Magazine magazine, final int currentPageNo) {
+	public Page(Magazine magazine, int currentPageNo) {
 		magazineHandler = magazine;
 		pageNo = currentPageNo;
 	}
 	/**
 	 * @param txtDataField
 	 */
-	public void addLine(final TxtDataField txtDataField) {
+	public void addLine(TxtDataField txtDataField) {
 		if(currentSubPage!=null){
 			currentSubPage.addLine(txtDataField);
 		}
@@ -49,15 +43,11 @@ public class Page implements TreeNode{
 	/**
 	 * @param txtDataField
 	 */
-	public void setHeader(final TxtDataField txtDataField) {
+	public void setHeader(TxtDataField txtDataField) {
 		int currentSubPageNo = txtDataField.getSubPage();
 		if((txtDataField.getDataUnitId()==0x02)|| (txtDataField.getDataUnitId()== 0xc0)){ //EBU Teletext non-subtitle data , or inverted
-			currentSubPage=subPages.get(currentSubPageNo);
-			if(currentSubPage==null){
-				currentSubPage=new SubPage(this, currentSubPageNo);
-				subPages.put(currentSubPageNo, currentSubPage);
-			}
-			currentSubPage.setHeader(txtDataField);
+            currentSubPage = subPages.computeIfAbsent(currentSubPageNo, n -> new SubPage(this, n));
+            currentSubPage.setHeader(txtDataField);
 		}else if(txtDataField.getDataUnitId()==0x03){ //EBU Teletext subtitle data // TODO ??check also for subtitle flag, because spanish TVE uses DataUnitId()==03 on all pages.... && txtDataField.isSubtitle()
 			// But then normal pages of TVE text are not shown at all...
 			currentSubPage=new SubPage(this, currentSubPageNo);
@@ -69,41 +59,44 @@ public class Page implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		DefaultMutableTreeNode treeNode;
+	public KVP getJTreeNode(int modus) {
+
 		if((subPages.size()==1)&&(subPages.get(0) != null)){ //only one subPage, and its number is 0000
-			treeNode = subPages.get(0).getJTreeNode(modus);
-			((KVP) treeNode.getUserObject()).setLabel(getPageNumberLabel());
-		}else if(subPages.size()>0){ // normal list of subpages
-			treeNode=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
+			return subPages.get(0).getJTreeNode(modus).setLabel(getPageNumberLabel());
+		}
+		if(!subPages.isEmpty()) { // normal list of subpages
+			KVP kvp = new KVP(getPageNumberLabel());
 			for (SubPage subPage : subPages.values()) {
-				treeNode.add(subPage.getJTreeNode(modus));
+				kvp.add(subPage.getJTreeNode(modus));
 			}
-		}else if(!subtitles.isEmpty()){
-			treeNode=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
-			for(final SubPage subPage: subtitles){
+			return kvp;
+		}
+		if(!subtitles.isEmpty()){
+			KVP treeNode = new KVP(getPageNumberLabel());
+			for(SubPage subPage: subtitles){
 				if(subPage!=null){
-					final DefaultMutableTreeNode t = subPage.getJTreeNode(modus);
-					final StringBuilder titel = new StringBuilder("subtitle ");
-					for (int i = 1; i < subPage.getLinesList().length; i++) { // skip the header
-						final TxtDataField line = subPage.getLinesList()[i];
+					KVP t = subPage.getJTreeNode(modus);
+					StringBuilder titel = new StringBuilder("subtitle ");
+					// skip the header
+					TxtDataField[] linesList = Arrays.copyOfRange(subPage.getLinesList(), 1, subPage.getLinesList().length);
+					for (TxtDataField line: linesList) {
 						if(line!=null){
 							titel.append(line.getTeletextPlain().trim()).append(' ');
 						}
 					}
-
-					t.setUserObject(new KVP(titel.toString().trim()).addImageSource(subPage, titel.toString().trim()));
+					String subTitle = titel.toString().trim();
+					t.setLabel(subTitle);
+					t.addImageSource(subPage, subTitle);
 					treeNode.add(t);
 				}
 			}
-		}else{
-			treeNode=new DefaultMutableTreeNode(new KVP(getPageNumberLabel()));
+			return treeNode;
 		}
-		return treeNode;
+		return new KVP(getPageNumberLabel());
 	}
 
 	private String getPageNumberLabel(){
-		final StringBuilder b = new StringBuilder("Page ");
+		StringBuilder b = new StringBuilder("Page ");
 		b.append(toHexString(pageNo,2));
 		if((pageNo==0xBE)&&(currentSubPage.linesList[0]!=null)&&(currentSubPage.linesList[0].getMagazineNo()==1)){
 			b.append(" [Automatic Channel Installation (ACI)]");
@@ -152,17 +145,12 @@ public class Page implements TreeNode{
 	public int getPageNo() {
 		return pageNo;
 	}
-	/**
-	 * @param pageNo the pageNo to set
-	 */
-	public void setPageNo(final int pageNo) {
-		this.pageNo = pageNo;
-	}
+
 	/**
 	 * @return
 	 */
 	public SubPage getMOTPage() {
-		final Page p = magazineHandler.getPage(0xFE);
+		Page p = magazineHandler.getPage(0xFE);
 		if((p!=null)&&!p.subPages.isEmpty()){// always hashMap, maybe no entries ?
 			return p.subPages.values().iterator().next();
 		}
@@ -182,18 +170,17 @@ public class Page implements TreeNode{
 	/**
 	 * @return the magazineHandler
 	 */
-	public Magazine getMagazine(final int m) {
+	public Magazine getMagazine(int m) {
 		return magazineHandler.getTxtService().getMagazine(m);
 	}
 	/**
 	 * @param subPageS1
 	 * @return
 	 */
-	public SubPage getSubPageByS1(final int subPageS1) {
-		final Set<Integer> subPageNos = subPages.keySet();
-		for(final Integer subNo:subPageNos){
-			if(subPageS1==(subNo&0xF)){ // last hex digit matches
-				return subPages.get(subNo);
+	public SubPage getSubPageByS1(int subPageS1) {
+        for(Map.Entry<Integer, SubPage> entry : subPages.entrySet()){
+			if(subPageS1==(entry.getKey() &0xF)){ // last hex digit matches
+				return entry.getValue();
 			}
 		}
 		return null;
@@ -201,7 +188,7 @@ public class Page implements TreeNode{
 
 	@Override
 	public String toString(){
-		return "Mag:"+getMagazineNo()+", pageNo"+getPageNo();
+		return "Mag:"+getMagazineNo()+", pageNo"+ pageNo;
 	}
 
 	public SortedMap<Integer, SubPage> getSubPages() {

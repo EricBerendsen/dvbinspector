@@ -29,11 +29,8 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  *	representation of the value encoded Hamming 24/18
@@ -52,7 +49,7 @@ public class Triplet implements TreeNode{
 	/**
 	 * 
 	 */
-	public Triplet(final byte[] data, final int offset) {
+	public Triplet(byte[] data, int offset) {
 		val = getHamming24_8Byte(data,offset);
 	}
 
@@ -68,21 +65,18 @@ public class Triplet implements TreeNode{
 	/**
 	 * @param val the val to set
 	 */
-	public void setVal(final int val) {
+	public void setVal(int val) {
 		this.val = val;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
-		return new DefaultMutableTreeNode(new KVP("Triplet",val,Utils.toBinaryString(val, 18)));
-
+	public KVP getJTreeNode(int modus) {
+		return new KVP("Triplet",val, toBinaryString(val, 18));
 	}
 	/**
 	 * @param tr1
 	 * @return
 	 */
 	public int getPageFunction() {
-
 		return val & MASK_4BITS;
 	}
 

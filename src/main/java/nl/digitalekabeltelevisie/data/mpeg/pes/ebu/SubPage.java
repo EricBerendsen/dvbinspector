@@ -51,6 +51,7 @@ import nl.digitalekabeltelevisie.util.*;
 
 public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
+	public static final String BLACK_HTML_LINE="<code><b><span style=\"background-color: black; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b></code>";
 	/**
 	 *
 	 */
@@ -69,8 +70,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	private static final int textColumns = 40;
 	private static final int textRows = 25;
 
-	private final int width = textColumns * charWidth;
-	private final int height = textRows * charHeight;
+	private static final int width = textColumns * charWidth;
+	private static final int height = textRows * charHeight;
 
 	public static final int NO_OBJECT_TYPE = 0;
 	public static final int ACTIVE_OBJECT_TYPE = 1;
@@ -111,11 +112,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 */
 
 	static {
-		try {
-			try (InputStream fileInputStream = classLoader.getResourceAsStream("g3_charset.gif")) {
+		try (InputStream fileInputStream = classLoader.getResourceAsStream("g3_charset.gif")) {
 				g3CharsImage = ImageIO.read(fileInputStream);
-			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			logger.log(Level.WARNING, "error reading image g3_charset.gif:", e);
 		}
 
@@ -210,7 +209,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				/* the national option selection data is contained in bits 14-8 of
 				 * triplet 1. */
 	
-				final int tripletVal = pageEnhancement.getTripletList().get(0).getVal();
+				int tripletVal = pageEnhancement.getTripletList().getFirst().getVal();
 	
 				/* EB very dirty hack, the order of the last 3 bits is reversed from the order used in getNationalOptionCharacterSubset()
 				 * Table 32 in ETSI EN 300 706 V1.2.1 (2003-04) suggest the order from triplet 1 is correct. 
@@ -220,19 +219,19 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	
 			
 				// G0 character set part
-				final int g0CharacterSet = (tripletVal & 0x3c00) >>> 7;
+				int g0CharacterSet = (tripletVal & 0x3c00) >>> 7;
 				
 				// National Option subset part, reverse bits with a lookup table
-				final int  nationalOptionSubset =Utils.invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
+				int  nationalOptionSubset = invNationalOptionSet[(tripletVal & 0x0380) >>> 7];
 				
 				r = g0CharacterSet | nationalOptionSubset;
 			}else{
 				// secondary G0 set
-				final int triplet1Val = pageEnhancement.getTripletList().get(0).getVal();
-				final int triplet2Val = pageEnhancement.getTripletList().get(1).getVal();
-				final int value = (triplet1Val&0b11_1100_0000_0000_0000)>>14 | ((triplet2Val & 0b0111)<<4);
+				int triplet1Val = pageEnhancement.getTripletList().get(0).getVal();
+				int triplet2Val = pageEnhancement.getTripletList().get(1).getVal();
+				int value = (triplet1Val&0b11_1100_0000_0000_0000)>>14 | ((triplet2Val & 0b0111)<<4);
 				// G0 character set part
-				r = (value & 0b1111000) | Utils.invNationalOptionSet[value & 0b111];
+				r = (value & 0b1111000) | invNationalOptionSet[value & 0b111];
 				
 				
 
@@ -262,7 +261,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	/**
 	 *
 	 */
-	public SubPage(final Page page, final int s) {
+	public SubPage(Page page, int s) {
 		pageHandler = page;
 		subPageNo = s;
 	}
@@ -270,7 +269,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	/**
 	 * @param txtDataField
 	 */
-	public void setHeader(final TxtDataField txtDataField) {
+	public void setHeader(TxtDataField txtDataField) {
 		if (txtDataField.getSubPage() != subPageNo) {
 			logger.log(Level.INFO, "txtDataField.getSubPage()!=subPageNo," + txtDataField.getSubPage() + "!=" + subPageNo);
 		}
@@ -284,8 +283,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 	}
 
-	public void addLine(final TxtDataField txtDataField) {
-		final int l = txtDataField.getPacketNo();
+	public void addLine(TxtDataField txtDataField) {
+		int l = txtDataField.getPacketNo();
 		if (txtDataField.getPacketNo() == 26) {
 			packetx_26[txtDataField.getDesignationCode()] = txtDataField;
 		} else if (txtDataField.getPacketNo() == 27) {
@@ -297,34 +296,35 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp = new KVP("SubPage " + toHexString(subPageNo, 4)).addImageSource(this, "Sub Page");
-		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(kvp);
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("SubPage " + toHexString(subPageNo, 4));
+		s.addImageSource(this, "Sub Page");
 
-		final JMenuItem objectMenu = new JMenuItem("Save Page as .t42");
+
+		JMenuItem objectMenu = new JMenuItem("Save Page as .t42");
 		objectMenu.setActionCommand(DVBtree.T42);
-		kvp.setSubMenuAndOwner(objectMenu, this);
+		s.setSubMenuAndOwner(objectMenu, this);
 		
 		for (int i = 0; i < 26; i++) { // 24 or 25 lines, what is line 25 used for anyaway ??? normal is 0 (header) + 1 to 24
-			final PageLine pageLine = linesList[i];
+			PageLine pageLine = linesList[i];
 			if (pageLine != null) {
 				s.add(pageLine.getHTMLJTreeNode(modus));
 			} else {
-				s.add(new DefaultMutableTreeNode(new KVP( "").setHtmlLabel(TxtDataField.BLACK_HTML_LINE)));
+				s.add(new DefaultMutableTreeNode(new KVP( "").setHtmlLabel(BLACK_HTML_LINE)));
 			}
 		}
-		for (final TxtDataField txtDatafield : packetx_26) {
+		for (TxtDataField txtDatafield : packetx_26) {
 			if (txtDatafield != null) {
 				s.add(txtDatafield.getJTreeNode(modus));
 			}
 		}
-		for (final TxtDataField txtDatafield : packetx_27) {
+		for (TxtDataField txtDatafield : packetx_27) {
 			if (txtDatafield != null) {
 				s.add(txtDatafield.getJTreeNode(modus));
 			}
 		}
 
-		for (final TxtDataField txtDatafield : packetx_28) {
+		for (TxtDataField txtDatafield : packetx_28) {
 			if (txtDatafield != null) {
 				s.add(txtDatafield.getJTreeNode(modus));
 			}
@@ -357,30 +357,30 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addMPTPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode mptPage = new DefaultMutableTreeNode(new KVP("Multipage Table (MPT) Page"));
+	private void addMPTPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+		DefaultMutableTreeNode mptPage = new DefaultMutableTreeNode(new KVP("Multipage Table (MPT) Page"));
 		s.add(mptPage);
 
 		for (int i = 1; i <= 23; i++) {
-			final TxtDataField txtDataField = linesList[i];
+			TxtDataField txtDataField = linesList[i];
 			if(txtDataField!=null){
-				final StringBuilder b = new StringBuilder();
+				StringBuilder b = new StringBuilder();
 				for(int j= 0; j < 39; j++){
-					final int value = getHammingReverseByte(txtDataField.getRawByte(j));
+					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					b.append(Integer.toHexString(value));
 				}
-				final DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Row "+i,b.toString(),null));
+				DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Row "+i,b.toString(),null));
 				mptPage.add(p);
 			}
 		}
 
 		for (int i = 1; i <= 20; i++) {
-			final TxtDataField txtDataField = linesList[i];
+			TxtDataField txtDataField = linesList[i];
 			if(txtDataField!=null){
 				for(int j= 0; j < 39; j++){
-					final int value = getHammingReverseByte(txtDataField.getRawByte(j));
-					final int pageNo= 100 + ((i-1)*40)+j;
-					final DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("page "+pageNo,value,null));
+					int value = getHammingReverseByte(txtDataField.getRawByte(j));
+					int pageNo= 100 + ((i-1)*40)+j;
+					DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("page "+pageNo,value,null));
 					mptPage.add(p);
 
 				}
@@ -395,22 +395,22 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addAITPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode aitPage = new DefaultMutableTreeNode(new KVP("Additional Information Tables (AIT) Page"));
+	private void addAITPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+		DefaultMutableTreeNode aitPage = new DefaultMutableTreeNode(new KVP("Additional Information Tables (AIT) Page"));
 		s.add(aitPage);
 
 		for (int i = 1; i <= 22; i++) {
-			final TxtDataField txtDataField = linesList[i];
+			TxtDataField txtDataField = linesList[i];
 			if(txtDataField!=null){
 				for(int j= 0; j < 2; j++){
-					final StringBuilder b = new StringBuilder();
+					StringBuilder b = new StringBuilder();
 					for(int k= 0; k < 8; k++){
-						final int v = getHammingReverseByte(txtDataField.getRawByte((j*20)+k));
+						int v = getHammingReverseByte(txtDataField.getRawByte((j*20)+k));
 						b.append(Integer.toHexString(v));
 					}
-					final StringBuilder buf = new StringBuilder();
+					StringBuilder buf = new StringBuilder();
 					for(int k= 8; k < 20; k++){
-						final byte ch = txtDataField.getPageDataByte((j*20)+k);
+						byte ch = txtDataField.getPageDataByte((j*20)+k);
 						if((ch>=32)&&(ch<127)){
 							buf.append((char)ch);
 						}else{  // empty space
@@ -418,7 +418,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 						}
 
 					}
-					final DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Title "+(((i-1)*2)+j),b.toString()+" "+buf.toString(),null));
+					DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Title "+(((i-1)*2)+j),b.toString()+" "+buf.toString(),null));
 					aitPage.add(p);
 				}
 			}
@@ -429,16 +429,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addBTTPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode bttPage = new DefaultMutableTreeNode(new KVP("Basic Top Table (BTT) Page"));
+	private void addBTTPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+		DefaultMutableTreeNode bttPage = new DefaultMutableTreeNode(new KVP("Basic Top Table (BTT) Page"));
 		s.add(bttPage);
 		for (int i = 1; i <= 20; i++) {
-			final TxtDataField txtDataField = linesList[i];
+			TxtDataField txtDataField = linesList[i];
 			if(txtDataField!=null){
 				for(int j= 0; j < 39; j++){
-					final int value = getHammingReverseByte(txtDataField.getRawByte(j));
-					final int pageNo= 100 + ((i-1)*40)+j;
-					final DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("page "+pageNo,value,getPageDescription(value)));
+					int value = getHammingReverseByte(txtDataField.getRawByte(j));
+					int pageNo= 100 + ((i-1)*40)+j;
+					DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("page "+pageNo,value,getPageDescription(value)));
 					bttPage.add(p);
 
 				}
@@ -446,14 +446,14 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			}
 		}
 		for (int i = 21; i <= 23; i++) {
-			final TxtDataField txtDataField = linesList[i];
+			TxtDataField txtDataField = linesList[i];
 			if(txtDataField!=null){
-				final StringBuilder b = new StringBuilder();
+				StringBuilder b = new StringBuilder();
 				for(int j= 0; j < 39; j++){
-					final int value = getHammingReverseByte(txtDataField.getRawByte(j));
+					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					b.append(Integer.toHexString(value));
 				}
-				final DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Row "+i,b.toString(),null));
+				DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Row "+i,b.toString(),null));
 				bttPage.add(p);
 			}
 		}
@@ -463,67 +463,53 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param value
 	 * @return
 	 */
-	private static String getPageDescription(final int value) {
-		switch (value) {
-		case 0:
-			return "Page not in transmission cycle";
-		case 1:
-			return "Text Page, extra information";
-		case 2:
-			return "Header Page, main group page of TV programs, extra information";
-		case 3:
-			return "Header Page, main group page of TV programs, extra information, multiple page";
-		case 4:
-			return "Main Group Page, extra information";
-		case 5:
-			return "Main Group Page, extra information, multiple page";
-		case 6:
-			return "Group Page, extra information";
-		case 7:
-			return "Group Page, extra information, multiple page";
-		case 8:
-			return "Normal Page";
-		case 9:
-			return "Normal Page, extra information";
-		case 10:
-			return "Normal Page, multiple page";
-		case 11:
-			return "Normal Page, extra information, multiple page";
-
-		default:
-			return "Reserved";
-		}
+	private static String getPageDescription(int value) {
+        return switch (value) {
+            case 0 -> "Page not in transmission cycle";
+            case 1 -> "Text Page, extra information";
+            case 2 -> "Header Page, main group page of TV programs, extra information";
+            case 3 -> "Header Page, main group page of TV programs, extra information, multiple page";
+            case 4 -> "Main Group Page, extra information";
+            case 5 -> "Main Group Page, extra information, multiple page";
+            case 6 -> "Group Page, extra information";
+            case 7 -> "Group Page, extra information, multiple page";
+            case 8 -> "Normal Page";
+            case 9 -> "Normal Page, extra information";
+            case 10 -> "Normal Page, multiple page";
+            case 11 -> "Normal Page, extra information, multiple page";
+            default -> "Reserved";
+        };
 	}
 
 	/**
 	 * @param modus
 	 * @param s
 	 */
-	private void addObjectDefinitionPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode objPage = new DefaultMutableTreeNode(new KVP("Object Definition Page"));
+	private void addObjectDefinitionPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+		DefaultMutableTreeNode objPage = new DefaultMutableTreeNode(new KVP("Object Definition Page"));
 		s.add(objPage);
 		for (int i = 1; i <= 4; i++) {
 			// possible pointer rows
-			final TxtDataField txtDataField = linesList[i];
+			TxtDataField txtDataField = linesList[i];
 			if (txtDataField != null) {
-				final int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
+				int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
 				if ((functionByte & MASK_1BIT) != 0) {
-					final DefaultMutableTreeNode pointerLineTreeNode = new DefaultMutableTreeNode(new KVP(
+					DefaultMutableTreeNode pointerLineTreeNode = new DefaultMutableTreeNode(new KVP(
 							"Pointer Table line " + i));
 					pointerLineTreeNode
 					.add(new DefaultMutableTreeNode(new KVP("functionByte", functionByte, null)));
 					objPage.add(pointerLineTreeNode);
-					final List<Triplet> tripletList = txtDataField.getTripletList();
+					List<Triplet> tripletList = txtDataField.getTripletList();
 					for (int j = 0; j <= 3; j++) { // skip triplet 0,reserved
-						final Triplet tr1 = tripletList.get(1 + (j * 3));
-						final Triplet tr2 = tripletList.get(1 + (j * 3) + 1);
-						final Triplet tr3 = tripletList.get(1 + (j * 3) + 2);
-						final int activeObjectEven = (tr1.getVal() & MASK_9BITS);
-						final int activeObjectOdd = (tr1.getVal() & 0x3FE00) >> 9;
-					final int adaptiveObjectEven = (tr2.getVal() & MASK_9BITS);
-					final int adaptiveObjectOdd = (tr2.getVal() & 0x3FE00) >> 9;
-				final int pasiveObjectEven = (tr3.getVal() & MASK_9BITS);
-				final int pasiveObjectOdd = (tr3.getVal() & 0x3FE00) >> 9;
+						Triplet tr1 = tripletList.get(1 + (j * 3));
+						Triplet tr2 = tripletList.get(1 + (j * 3) + 1);
+						Triplet tr3 = tripletList.get(1 + (j * 3) + 2);
+						int activeObjectEven = (tr1.getVal() & MASK_9BITS);
+						int activeObjectOdd = (tr1.getVal() & 0x3FE00) >> 9;
+					int adaptiveObjectEven = (tr2.getVal() & MASK_9BITS);
+					int adaptiveObjectOdd = (tr2.getVal() & 0x3FE00) >> 9;
+				int pasiveObjectEven = (tr3.getVal() & MASK_9BITS);
+				int pasiveObjectOdd = (tr3.getVal() & 0x3FE00) >> 9;
 				addObjectPointer(((i - 1) * 8) + (j * 2), pointerLineTreeNode, activeObjectEven,
 						"Active Object",modus);
 				addObjectPointer(((i - 1) * 8) + (j * 2), pointerLineTreeNode, adaptiveObjectEven,
@@ -544,26 +530,26 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		// line 3 up
 		for (int i = 3; i <= 41; i++) {
 			// possible pointer rows
-			final TxtDataField txtDataField = getLine(i);
+			TxtDataField txtDataField = getLine(i);
 			if (txtDataField != null) {
-				final int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
+				int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
 				if ((functionByte & MASK_1BIT) == 0) {
-					final List<TxtTriplet> tripletList = txtDataField.getTxtTripletList();
+					List<TxtTriplet> tripletList = txtDataField.getTxtTripletList();
 					addListJTree(objPage, tripletList, modus, "triplet_list line " + i);
 				}
 			}
 		}
 	}
 
-	private void addObjectPointer(final int i, final DefaultMutableTreeNode t, final int objPointer, final String label,final int modus) {
+	private void addObjectPointer(int i, DefaultMutableTreeNode t, int objPointer, String label, int modus) {
 		if (objPointer != 0x1FF) {
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(label + " " + i, objPointer, null));
+			DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(label + " " + i, objPointer, null));
 			t.add(s);
 
-			final int lineNo = 3 + (objPointer/13);
-			final int tripletNo = objPointer%13;
-			final List<TxtTriplet> objectDefinition = getObjectDefinition(this, lineNo, tripletNo);
-			Utils.addListJTree(s, objectDefinition, modus, "Object Definition");
+			int lineNo = 3 + (objPointer/13);
+			int tripletNo = objPointer%13;
+			List<TxtTriplet> objectDefinition = getObjectDefinition(this, lineNo, tripletNo);
+			addListJTree(s, objectDefinition, modus, "Object Definition");
 
 		}
 	}
@@ -572,17 +558,17 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addDRCSDownloadPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
+	private void addDRCSDownloadPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
 		TxtDataField drcsDatafield = null;
-		for (final TxtDataField txtDatafield : packetx_28) {
+		for (TxtDataField txtDatafield : packetx_28) {
 			if ((txtDatafield != null) && (txtDatafield.getDesignationCode() == 3)) {
 				drcsDatafield = txtDatafield;
 			}
 		}
 		if (drcsDatafield != null) {
-			final List<Triplet> tripletList = drcsDatafield.getTripletList();
+			List<Triplet> tripletList = drcsDatafield.getTripletList();
 
-			final BitString bs = new BitString();
+			BitString bs = new BitString();
 			// bits 11-18 of triplet 2
 			for (int i = 2; i <= 11; i++) {
 				bs.addIntBitsReverse(tripletList.get(i - 1).getVal(), 18);
@@ -590,12 +576,12 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			// bits 1-12 of triplet 12
 			bs.addIntBitsReverse(tripletList.get(11).getVal() & 0xFFF, 12);
 
-			final DefaultMutableTreeNode drcs = new DefaultMutableTreeNode(new KVP("DRCS Downloading Mode Invocation"));
+			DefaultMutableTreeNode drcs = new DefaultMutableTreeNode(new KVP("DRCS Downloading Mode Invocation"));
 
 			for (int i = 0; i < 48; i++) {
-				final int drcsMode = bs.getIntBitsReverse(4); // 0..15
+				int drcsMode = bs.getIntBitsReverse(4); // 0..15
 
-				final DRCSCharacter drcsChar = new DRCSCharacter(drcsMode, this, i);
+				DRCSCharacter drcsChar = new DRCSCharacter(drcsMode, this, i);
 				drcs.add(drcsChar.getJTreeNode(modus));
 			}
 			s.add(drcs);
@@ -603,20 +589,20 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	private boolean isDRCSDownloadingpage() {
-		for (final TxtDataField txtDatafield : packetx_28) {
+		for (TxtDataField txtDatafield : packetx_28) {
 			if ((txtDatafield != null) && (txtDatafield.getDesignationCode() == 3)) {
-				final List<Triplet> tripletList = txtDatafield.getTripletList();
-				final Triplet tr1 = tripletList.get(0);
+				List<Triplet> tripletList = txtDatafield.getTripletList();
+				Triplet tr1 = tripletList.getFirst();
 				if ((tr1.getPageFunction() == 0x04) || (tr1.getPageFunction() == 0x05)) {
 					return true;
 				}
 			}
 		}
 		// look in MOT
-		final SubPage motPage = getMOTPage();
+		SubPage motPage = getMOTPage();
 		if(motPage!=null){
-			final List<DRCSLink> drcsLinks = motPage.getDRCSLinksLevel25();
-			for(final DRCSLink link :drcsLinks){
+			List<DRCSLink> drcsLinks = motPage.getDRCSLinksLevel25();
+			for(DRCSLink link :drcsLinks){
 				if((link.getMagazine()==getMagazineNo())&&(link.getPageNo()==getPageNo())&&(link.getPageNo()!=0xFF)){
 					return true;
 				}
@@ -635,7 +621,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 	private SubPage getBTTPage() {
 		if(getMagazine(1)!=null){
-			final Page p= getMagazine(1).getPage(0xF0);
+			Page p= getMagazine(1).getPage(0xF0);
 			if((p!=null)&&!p.getSubPages().isEmpty()){
 				return p.getSubPages().values().iterator().next();
 			}
@@ -645,20 +631,20 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	private boolean isObjectDefinitionpage() {
-		for (final TxtDataField txtDatafield : packetx_28) {
+		for (TxtDataField txtDatafield : packetx_28) {
 			if ((txtDatafield != null) && (txtDatafield.getDesignationCode() == 0)) {
-				final List<Triplet> tripletList = txtDatafield.getTripletList();
-				final Triplet tr1 = tripletList.get(0);
+				List<Triplet> tripletList = txtDatafield.getTripletList();
+				Triplet tr1 = tripletList.getFirst();
 				if ((tr1.getPageFunction() == 0x02) || (tr1.getPageFunction() == 0x03)) {
 					return true;
 				}
 			}
 		}
 		// look in MOT,just in case line 28 does not indicate POP
-		final SubPage motPage = getMOTPage();
+		SubPage motPage = getMOTPage();
 		if(motPage!=null){
-			final List<ObjectLink> objectLinks = motPage.getObjectLinksLevel25();
-			for(final ObjectLink link :objectLinks){
+			List<ObjectLink> objectLinks = motPage.getObjectLinksLevel25();
+			for(ObjectLink link :objectLinks){
 				if((link.getMagazine()==getMagazineNo())&&(link.getPageNo()==getPageNo())&&(link.getPageNo()!=0xFF)){
 					return true;
 				}
@@ -671,19 +657,19 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	/**
 	 * @return
 	 */
-	private static List<ObjectLink> getObjectLinks(final TxtDataField txtDataField1, final TxtDataField txtDataField2) {
-		final List<ObjectLink> objects = new ArrayList<>();
+	private static List<ObjectLink> getObjectLinks(TxtDataField txtDataField1, TxtDataField txtDataField2) {
+		List<ObjectLink> objects = new ArrayList<>();
 		if (txtDataField1 != null) {
-			final ObjectLink gpop = new ObjectLink(txtDataField1.data_block, 6 + txtDataField1.offset);
+			ObjectLink gpop = new ObjectLink(txtDataField1.data_block, 6 + txtDataField1.offset);
 			objects.add(gpop);
 			for (int i = 1; i < 4; i++) {
-				final ObjectLink pop = new ObjectLink(txtDataField1.data_block, 6 + (10 * i) + txtDataField1.offset);
+				ObjectLink pop = new ObjectLink(txtDataField1.data_block, 6 + (10 * i) + txtDataField1.offset);
 				objects.add(pop);
 			}
 		}
 		if (txtDataField2 != null) {
 			for (int i = 4; i < 8; i++) {
-				final ObjectLink pop = new ObjectLink(txtDataField2.data_block, 6 + (10 * (i-4)) + txtDataField2.offset);
+				ObjectLink pop = new ObjectLink(txtDataField2.data_block, 6 + (10 * (i-4)) + txtDataField2.offset);
 				objects.add(pop);
 			}
 		}
@@ -703,17 +689,17 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addMOTPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode mot = new DefaultMutableTreeNode(new KVP("MOT Structure"));
+	private void addMOTPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+		DefaultMutableTreeNode mot = new DefaultMutableTreeNode(new KVP("MOT Structure"));
 		s.add(mot);
 
 		for (int i = 1; i <= 8; i++) { // lines with links for normal pages without last hexnumber
 			if (linesList[i] != null) {
 				for (int j = 0; j < 2; j++) { // two sections per line
 					for (int k = 0; k <= 9; k++) {
-						final int objectPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 20) + (k * 2)));
-						final int drcsPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 20) + 1 + (k * 2)));
-						final int associationPageNo = (16 * (((i - 1) * 2) + j)) + k;
+						int objectPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 20) + (k * 2)));
+						int drcsPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 20) + 1 + (k * 2)));
+						int associationPageNo = (16 * (((i - 1) * 2) + j)) + k;
 						addPageAssociationsToTree(mot, objectPageAssociation, drcsPageAssociation, associationPageNo);
 					}
 				}
@@ -725,11 +711,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				for (int j = 0; j < 3; j++) { // 3 sections per line
 					for (int k = 0; k <= 5; k++) {
 						if ((i < 14) || (j == 0)) { // line 8-13 completely,line 14 only first 6 elements (0xFA - 0xFF)
-							final int objectPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 12)
+							int objectPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 12)
 									+ (k * 2)));
-							final int drcsPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 12) + 1
+							int drcsPageAssociation = getHammingReverseByte(linesList[i].getRawByte((j * 12) + 1
 									+ (k * 2)));
-							final int associationPageNo = (16 * (((i - 9) * 3) + j)) + k + 10;
+							int associationPageNo = (16 * (((i - 9) * 3) + j)) + k + 10;
 							addPageAssociationsToTree(mot, objectPageAssociation, drcsPageAssociation,
 									associationPageNo);
 						}
@@ -741,15 +727,15 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		String level = "Level 2.5";
 		addObjectLinkLine1ToJTree(modus, mot, linesList[19], level);
 		addObjectLinkLine2ToJTree(modus, mot, linesList[20], level);
-		final List<ObjectLink> obs=getObjectLinksLevel25();
-		Utils.addListJTree(mot, obs, modus, "Objects list");
+		List<ObjectLink> obs=getObjectLinksLevel25();
+		addListJTree(mot, obs, modus, "Objects list");
 
-		addDRCSLinkLineToJTree(modus, mot, linesList[21], level);
+		addDRCSLinkLineToJTree(mot, linesList[21], level);
 
 		level = "Level 3.5";
 		addObjectLinkLine1ToJTree(modus, mot, linesList[22], level);
 		addObjectLinkLine2ToJTree(modus, mot, linesList[23], level);
-		addDRCSLinkLineToJTree(modus, mot, linesList[24], level);
+		addDRCSLinkLineToJTree(mot, linesList[24], level);
 	}
 
 	/**
@@ -758,8 +744,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param drcsPageAssociation
 	 * @param associationPageNo
 	 */
-	private static void addPageAssociationsToTree(final DefaultMutableTreeNode mot, final int objectPageAssociation,
-			final int drcsPageAssociation, final int associationPageNo) {
+	private static void addPageAssociationsToTree(DefaultMutableTreeNode mot, int objectPageAssociation,
+                                                  int drcsPageAssociation, int associationPageNo) {
 		if (objectPageAssociation != 0) {
 			String exp = ((objectPageAssociation & 0x08) != 0) ? "global objects required"
 					: "no global objects required";
@@ -784,17 +770,17 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param s
 	 */
 
-	private void addMIPPageDetailsToJTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode mot = new DefaultMutableTreeNode(new KVP("MIP Structure"));
+	private void addMIPPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+		DefaultMutableTreeNode mot = new DefaultMutableTreeNode(new KVP("MIP Structure"));
 		s.add(mot);
 
 		for (int i = 1; i <= 8; i++) { // lines with links for normal pages without last hexnumber
 			if (linesList[i] != null) {
 				for (int j = 0; j <= 1; j++) { // two sections per line
 					for (int k = 0; k <= 9; k++) {
-						final int lowerNibble = getHammingReverseByte(linesList[i].getRawByte((j * 20) + (k * 2)));
-						final int upperNibble = getHammingReverseByte(linesList[i].getRawByte((j * 20) + 1 + (k * 2)));
-						final int mipPageNo = (16 * (((i - 1) * 2) + j)) + k;
+						int lowerNibble = getHammingReverseByte(linesList[i].getRawByte((j * 20) + (k * 2)));
+						int upperNibble = getHammingReverseByte(linesList[i].getRawByte((j * 20) + 1 + (k * 2)));
+						int mipPageNo = (16 * (((i - 1) * 2) + j)) + k;
 						addMIPPageDetailsToTree(mot, lowerNibble, upperNibble, mipPageNo);
 					}
 				}
@@ -806,9 +792,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				for (int j = 0; j <= 3; j++) { // 3 sections per line
 					for (int k = 0; k <= 5; k++) {
 						if ((i < 14) || (j == 0)) { // line 8-13 completely,line 14 only first 6 elements (0xFA - 0xFF)
-							final int lowerNibble = getHammingReverseByte(linesList[i].getRawByte((j * 12) + (k * 2)));
-							final int upperNibble = getHammingReverseByte(linesList[i].getRawByte((j * 12) + 1 + (k * 2)));
-							final int mipPageNo = (16 * (((i - 9) * 3) + j)) + k + 10;
+							int lowerNibble = getHammingReverseByte(linesList[i].getRawByte((j * 12) + (k * 2)));
+							int upperNibble = getHammingReverseByte(linesList[i].getRawByte((j * 12) + 1 + (k * 2)));
+							int mipPageNo = (16 * (((i - 9) * 3) + j)) + k + 10;
 							addMIPPageDetailsToTree(mot, lowerNibble, upperNibble, mipPageNo);
 						}
 					}
@@ -825,8 +811,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param upperNibble
 	 * @param mipPageNo
 	 */
-	private static void addMIPPageDetailsToTree(final DefaultMutableTreeNode mot, final int lowerNibble, final int upperNibble, final int mipPageNo) {
-		final int pagecode = (16 * upperNibble) + lowerNibble;
+	private static void addMIPPageDetailsToTree(DefaultMutableTreeNode mot, int lowerNibble, int upperNibble, int mipPageNo) {
+		int pagecode = (16 * upperNibble) + lowerNibble;
 		if (pagecode != 0) {
 			mot.add(new DefaultMutableTreeNode(new KVP("Page " + toHexString(mipPageNo, 2), pagecode, getMIPPageFunctionString(pagecode))));
 		}
@@ -838,13 +824,13 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param txtDataField
 	 * @param level
 	 */
-	private static void addObjectLinkLine1ToJTree(final int modus, final DefaultMutableTreeNode mot, final TxtDataField txtDataField, final String level) {
+	private static void addObjectLinkLine1ToJTree(int modus, DefaultMutableTreeNode mot, TxtDataField txtDataField, String level) {
 		if (txtDataField != null) {
-			final ObjectLink gpop = new ObjectLink(txtDataField.data_block, 6 + txtDataField.offset);
-			mot.add(gpop.getJTreeNode(modus, level + " GPOP "));
+			ObjectLink gpop = new ObjectLink(txtDataField.data_block, 6 + txtDataField.offset);
+			mot.add(gpop.getJTreeNode(level + " GPOP "));
 			for (int i = 1; i < 4; i++) {
-				final ObjectLink pop = new ObjectLink(txtDataField.data_block, 6 + (10 * i) + txtDataField.offset);
-				mot.add(pop.getJTreeNode(modus, level + " POP " + i + " "));
+				ObjectLink pop = new ObjectLink(txtDataField.data_block, 6 + (10 * i) + txtDataField.offset);
+				mot.add(pop.getJTreeNode(level + " POP " + i + " "));
 			}
 		}
 	}
@@ -855,11 +841,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param txtDataField
 	 * @param level
 	 */
-	private static void addObjectLinkLine2ToJTree(final int modus, final DefaultMutableTreeNode mot, final TxtDataField txtDataField, final String level) {
+	private static void addObjectLinkLine2ToJTree(int modus, DefaultMutableTreeNode mot, TxtDataField txtDataField, String level) {
 		if (txtDataField != null) {
 			for (int i = 4; i < 8; i++) {
-				final ObjectLink pop = new ObjectLink(txtDataField.data_block, 6 + (10 * (i - 4)) + txtDataField.offset);
-				mot.add(pop.getJTreeNode(modus, level + " POP " + i + " "));
+				ObjectLink pop = new ObjectLink(txtDataField.data_block, 6 + (10 * (i - 4)) + txtDataField.offset);
+				mot.add(pop.getJTreeNode(level + " POP " + i + " "));
 			}
 		}
 	}
@@ -870,27 +856,27 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param txtDataField
 	 * @param level
 	 */
-	private static void addDRCSLinkLineToJTree(final int modus, final DefaultMutableTreeNode mot, final TxtDataField txtDataField, final String level) {
+	private static void addDRCSLinkLineToJTree(DefaultMutableTreeNode mot, TxtDataField txtDataField, String level) {
 		if (txtDataField != null) {
-			final DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
-			mot.add(gpop.getJTreeNode(modus, level + " GDRCS "));
+			DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
+			mot.add(gpop.getJTreeNode(level + " GDRCS "));
 			for (int i = 1; i < 8; i++) {
-				final DRCSLink pop = new DRCSLink(txtDataField.data_block, 6 + (4 * i) + txtDataField.offset);
-				mot.add(pop.getJTreeNode(modus, level + " DRCS " + i + " "));
+				DRCSLink pop = new DRCSLink(txtDataField.data_block, 6 + (4 * i) + txtDataField.offset);
+				mot.add(pop.getJTreeNode(level + " DRCS " + i + " "));
 			}
 
 			// ETSI EN 300 706 § 10.6.6 Number of Enhancement Pages defines next byte numbers with respect to entire line.
 			// getRawByte uses only bytes from the data part, so the offset is off by 6.
-			final int mag1 = getHammingReverseByte(txtDataField.getRawByte(34)); // byte 40 in ETSI EN 300 706 § 10.6.6
-			final int mag2 = getHammingReverseByte(txtDataField.getRawByte(35));
+			int mag1 = getHammingReverseByte(txtDataField.getRawByte(34)); // byte 40 in ETSI EN 300 706 § 10.6.6
+			int mag2 = getHammingReverseByte(txtDataField.getRawByte(35));
 
-			final DefaultMutableTreeNode noPagesNode = new DefaultMutableTreeNode(new KVP("Number of Enhancement Pages"));
+			DefaultMutableTreeNode noPagesNode = new DefaultMutableTreeNode(new KVP("Number of Enhancement Pages"));
 
 			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Magazine 3,2,1,8", mag1, null)));
 			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Magazine 7,6,5,4", mag2, null)));
-			final int objectPages = getHammingReverseByte(txtDataField.getRawByte(36)) + (16
+			int objectPages = getHammingReverseByte(txtDataField.getRawByte(36)) + (16
 					* getHammingReverseByte(txtDataField.getRawByte(37)));
-			final int drcsPages = getHammingReverseByte(txtDataField.getRawByte(38)) + (16
+			int drcsPages = getHammingReverseByte(txtDataField.getRawByte(38)) + (16
 					* getHammingReverseByte(txtDataField.getRawByte(39)));
 			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Total number of object pages", objectPages, null)));
 			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Total number of DRCS pages", drcsPages, null)));
@@ -901,13 +887,13 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 
 
-	private static List<DRCSLink> getDRCSLinks(final TxtDataField txtDataField) {
-		final List<DRCSLink> res = new ArrayList<>();
+	private static List<DRCSLink> getDRCSLinks(TxtDataField txtDataField) {
+		List<DRCSLink> res = new ArrayList<>();
 		if (txtDataField != null) {
-			final DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
+			DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
 			res.add(gpop);
 			for (int i = 1; i < 8; i++) {
-				final DRCSLink pop = new DRCSLink(txtDataField.data_block, 6 + (4 * i) + txtDataField.offset);
+				DRCSLink pop = new DRCSLink(txtDataField.data_block, 6 + (4 * i) + txtDataField.offset);
 				res.add(pop);
 			}
 
@@ -960,16 +946,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 */
 	public BufferedImage getImage() {
 
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		final Graphics2D gd = img.createGraphics();
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D gd = img.createGraphics();
 		gd.setColor(Color.BLACK);
 		gd.fillRect(0, 0, width, height);
 
-		final BufferedImage charImg = new BufferedImage(charWidth, charHeight, BufferedImage.TYPE_INT_ARGB);
-		final Graphics2D charGD = charImg.createGraphics();
-		final Font font = new Font("Monospaced", Font.BOLD, 18);
+		BufferedImage charImg = new BufferedImage(charWidth, charHeight, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D charGD = charImg.createGraphics();
+		Font font = new Font("Monospaced", Font.BOLD, 18);
 		charGD.setFont(font);
-		Image targetChar = null;
+		Image targetChar;
 
 
 		fillLevel1();
@@ -979,8 +965,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		// now use txt[][], fgColor[][], bgColor[][] and effect[][] to draw on image
 		// TODO do we need original lines to lookup CLUT?
 
-		final List<DRCSCharacter> globalDrcsChars = getDRCSChars(false); // global
-		final List<DRCSCharacter> localDrcsChars = getDRCSChars(true);
+		List<DRCSCharacter> globalDrcsChars = getDRCSChars(false); // global
+		List<DRCSCharacter> localDrcsChars = getDRCSChars(true);
 
 		for (int i = 24; i >=0 ; i--) {
 			for (int j = 0; j < 40; j++) {
@@ -1026,7 +1012,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 *
 	 */
 	private void fillLevel1() {
-		byte[] rowData = null;
+		byte[] rowData;
 		// level 1.5 page
 		boolean doubleHeightUsed1 = false;
 		for (int row = 0; row < 25; row++) {
@@ -1065,9 +1051,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 					bgColor[row][column] = bg;
 					effect[row][column] = effectFlags;
 
-					final byte ch = rowData[column];
+					byte ch = rowData[column];
 					if (ch >= 32) { // national option charset subset
-						final int nocs = getNationalOptionCharSubset(useSecondaryG0set);
+						int nocs = getNationalOptionCharSubset(useSecondaryG0set);
 						// all chars 0x20..7F
 						if ((effectFlags & (MOSAIC_GRAPHICS)) == 0) { // not in block graphics
 							targetChar1 = TxtTriplet.getNationalOptionChar(ch, nocs);
@@ -1114,7 +1100,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 					} else if (ch == 0x0c) { //Normal Size ("Set-At")
 						//  clear DOUBLE_HEIGHT DOUBLE_SIZE,DOUBLE_WIDTH
-						final int oldEffectFlags=effectFlags;
+						int oldEffectFlags=effectFlags;
 						effectFlags = effectFlags & ~(DOUBLE_HEIGHT | DOUBLE_SIZE | DOUBLE_WIDTH);
 						if(oldEffectFlags!=effectFlags){
 							heldMosaicCharacter = ' ';
@@ -1126,7 +1112,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 						}
 					} else if (ch == 0x0d) { //Double Height ("Set-After")
 						// set DOUBLE_HEIGHT, clear DOUBLE_SIZE,DOUBLE_WIDTH
-						final int oldEffectFlags=effectFlags;
+						int oldEffectFlags=effectFlags;
 						effectFlags = effectFlags | DOUBLE_HEIGHT;
 						effectFlags = effectFlags & ~(DOUBLE_SIZE | DOUBLE_WIDTH);
 						if(oldEffectFlags!=effectFlags){
@@ -1227,18 +1213,18 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param j
 	 * @return
 	 */
-	private Image drawG3Char(final int i, final int j) {
-		final BufferedImage b = new BufferedImage(12,10,BufferedImage.TYPE_BYTE_BINARY);
-		final Graphics2D gd = b.createGraphics();
+	private Image drawG3Char(int i, int j) {
+		BufferedImage b = new BufferedImage(12,10,BufferedImage.TYPE_BYTE_BINARY);
+		Graphics2D gd = b.createGraphics();
 		Image target;
-		final int bgC = getColorInt(bgColor[i][j]);
-		final int fgC = getColorInt(fgColor[i][j]);
-		final IndexColorModel blackAndWhite = new IndexColorModel(
+		int bgC = getColorInt(bgColor[i][j]);
+		int fgC = getColorInt(fgColor[i][j]);
+		IndexColorModel blackAndWhite = new IndexColorModel(
 				1, // One bit per pixel
 				2,new int[]{fgC,bgC},0,false,-1,DataBuffer.TYPE_BYTE);
 		gd.drawImage(g3CharsImage, 0, 0, 12, 10, ((txt[i][j])-32)*12, 0, ((txt[i][j])-31)*12, 10, null);
-		final DataBuffer buf = b.getData().getDataBuffer();
-		final WritableRaster wr =  Raster.createPackedRaster(buf, 12, 10, 1, null);
+		DataBuffer buf = b.getData().getDataBuffer();
+		WritableRaster wr =  Raster.createPackedRaster(buf, 12, 10, 1, null);
 		target = new BufferedImage(blackAndWhite, wr, true, null);
 
 		return target;
@@ -1250,11 +1236,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param j
 	 * @return
 	 */
-	private Image drawDRCSChar(final List<DRCSCharacter> globalDrcsChars,final List<DRCSCharacter> localDdrcsChars, final int i, final int j) {
-		Image target=null;
-		final int bgC = getColorInt(bgColor[i][j]);
-		final int fgC = getColorInt(fgColor[i][j]);
-		final IndexColorModel blackAndWhite = new IndexColorModel(
+	private Image drawDRCSChar(List<DRCSCharacter> globalDrcsChars, List<DRCSCharacter> localDdrcsChars, int i, int j) {
+		Image target;
+		int bgC = getColorInt(bgColor[i][j]);
+		int fgC = getColorInt(fgColor[i][j]);
+		IndexColorModel blackAndWhite = new IndexColorModel(
 				1, // One bit per pixel
 				2,new int[]{bgC,fgC},0,false,-1,DataBuffer.TYPE_BYTE);
 		if(txt[i][j]<48){ // global
@@ -1269,55 +1255,59 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	/**
 	 * @return
 	 */
-	private List<DRCSCharacter> getDRCSChars(final boolean local) {
-		final SubPage mot = getMOTPage();
-		if(mot!=null){
-			final int pageNo=pageHandler.getPageNo();
-			final int association = mot.getDRCSPageAssociation(pageNo);
+	private List<DRCSCharacter> getDRCSChars(boolean local) {
+		SubPage mot = getMOTPage();
+		if(null != mot){
+			int pageNo=pageHandler.getPageNo();
+			int association = mot.getDRCSPageAssociation(pageNo);
 			if(association==0){
 				return null;
 			}
-			final List<DRCSLink> drcsLinks= mot.getDRCSLinksLevel25();
-			DRCSLink drcsLink =null;
+			List<DRCSLink> drcsLinks= mot.getDRCSLinksLevel25();
+			DRCSLink drcsLink;
 			if(local){
 				drcsLink = drcsLinks.get(association%8); // GDRCS == 8, mask that bit out. (COuld also use association & 0x7,
 			}else{
-				drcsLink = drcsLinks.get(0); // GDRCS == 0,
+				drcsLink = drcsLinks.getFirst(); // GDRCS == 0,
 			}
-			final int drcsPageNo = drcsLink.getPageNo();
-			final int drcsMagazine = drcsLink.getMagazine();
+			int drcsPageNo = drcsLink.getPageNo();
+			int drcsMagazine = drcsLink.getMagazine();
 			// DRCS can have multiple sub pages, If the object data does not fit within one page, additional sub-pages can be used 10.5.1.1 Page Format
-			final Page drcsDefPage = getMagazine(drcsMagazine).getPage(drcsPageNo); // now we have the page that defines the correct drcs chars.
+			Page drcsDefPage = getMagazine(drcsMagazine).getPage(drcsPageNo); // now we have the page that defines the correct drcs chars.
 			// TODO just ass-u-me a single sub page
-			final SubPage drcsDefSubPage = drcsDefPage.getSubPages().values().iterator().next();
+			SubPage drcsDefSubPage = drcsDefPage.getSubPages().values().iterator().next();
 
 			TxtDataField drcsDatafield = null;
-			for (final TxtDataField txtDatafield : drcsDefSubPage.packetx_28) {
+			for (TxtDataField txtDatafield : drcsDefSubPage.packetx_28) {
 				if ((txtDatafield != null) && (txtDatafield.getDesignationCode() == 3)) {
 					drcsDatafield = txtDatafield;
 				}
 			}
 			if (drcsDatafield != null) {
-				final List<Triplet> tripletList = drcsDatafield.getTripletList();
-
-				final BitString bs = new BitString();
-				// bits 11-18 of triplet 2
-				for (int i = 2; i <= 11; i++) {
-					bs.addIntBitsReverse(tripletList.get(i - 1).getVal(), 18);
-				}
-				// bits 1-12 of triplet 12
-				bs.addIntBitsReverse(tripletList.get(11).getVal() & 0xFFF, 12);
-				final List<DRCSCharacter> drcsChars = new ArrayList<>();
-
-				for (int i = 0; i < 48; i++) {
-					final int drcsMode = bs.getIntBitsReverse(4); // 0..15
-					final DRCSCharacter drcsChar = new DRCSCharacter(drcsMode, drcsDefSubPage, i);
-					drcsChars.add(drcsChar);
-				}
-				return drcsChars;
+                return getDrcsCharacters(drcsDatafield, drcsDefSubPage);
 			}
 		}
 		return null;
+	}
+
+	private static List<DRCSCharacter> getDrcsCharacters(TxtDataField drcsDatafield, SubPage drcsDefSubPage) {
+		List<Triplet> tripletList = drcsDatafield.getTripletList();
+
+		BitString bs = new BitString();
+		// bits 11-18 of triplet 2
+		for (int i = 2; i <= 11; i++) {
+			bs.addIntBitsReverse(tripletList.get(i - 1).getVal(), 18);
+		}
+		// bits 1-12 of triplet 12
+		bs.addIntBitsReverse(tripletList.get(11).getVal() & 0xFFF, 12);
+		List<DRCSCharacter> drcsChars = new ArrayList<>();
+
+		for (int i = 0; i < 48; i++) {
+			int drcsMode = bs.getIntBitsReverse(4); // 0..15
+			DRCSCharacter drcsChar = new DRCSCharacter(drcsMode, drcsDefSubPage, i);
+			drcsChars.add(drcsChar);
+		}
+		return drcsChars;
 	}
 
 	/**
@@ -1325,21 +1315,21 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 */
 	private void processDefaultObjects() {
 
-		final SubPage mot = getMOTPage();
+		SubPage mot = getMOTPage();
 		if(mot!=null){
-			final int pageNo=pageHandler.getPageNo();
-			final int association = mot.getObjectPageAssociation(pageNo);
+			int pageNo=pageHandler.getPageNo();
+			int association = mot.getObjectPageAssociation(pageNo);
 			if(association==0){
 				return;
 			}
-			final List<ObjectLink> objectLinks= mot.getObjectLinksLevel25();
+			List<ObjectLink> objectLinks= mot.getObjectLinksLevel25();
 			// can have 2 links for each page, GPOPLink, and POPLink. Both can have 2 default objects.
 			if(association>=8){ // has GPOP
-				final ObjectLink objectLink = objectLinks.get(0); // GPOP == 0
+				ObjectLink objectLink = objectLinks.getFirst(); // GPOP == 0
 				processDefaultObjectsLink(objectLink);
 			}
 			if((association&0x7)!=0){ // has POP
-				final ObjectLink objectLink = objectLinks.get((association&0x7)); // POP != 0
+				ObjectLink objectLink = objectLinks.get((association&0x7)); // POP != 0
 				processDefaultObjectsLink(objectLink);
 			}
 		}
@@ -1348,30 +1338,30 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	/**
 	 * @param objectLink
 	 */
-	private void processDefaultObjectsLink(final ObjectLink objectLink) {
-		final int objectPageNo = objectLink.getPageNo();
-		final int magazine = objectLink.getMagazine();
+	private void processDefaultObjectsLink(ObjectLink objectLink) {
+		int objectPageNo = objectLink.getPageNo();
+		int magazine = objectLink.getMagazine();
 		if(objectLink.getDefaultObject1Type()!=0){  // default object
-			final int object1type = objectLink.getDefaultObject1Type();
+			int object1type = objectLink.getDefaultObject1Type();
 			// (G)POP can have multiple sub pages, If the object data does not fit within one page, additional sub-pages can be used 10.5.1.1 Page Format
-			final Page objectDefPage = getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
-			final int subPageS1=objectLink.getDefaultObject1SubPageS1();
-			final SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
-			final int ptrLocation=objectLink.getDefaultObject1PointerLocation();
-			final int tripletOffset=objectLink.getDefaultObject1TripletNoOffset();
-			final int ptrPosition = objectLink.getDefaultObject1PointerPosition();
+			Page objectDefPage = getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
+			int subPageS1=objectLink.getDefaultObject1SubPageS1();
+			SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
+			int ptrLocation=objectLink.getDefaultObject1PointerLocation();
+			int tripletOffset=objectLink.getDefaultObject1TripletNoOffset();
+			int ptrPosition = objectLink.getDefaultObject1PointerPosition();
 			findProcessObjectDefinition(objectDefSubPage, object1type, ptrLocation, tripletOffset, ptrPosition,0,0,0,0);
 		}
 		if(objectLink.getDefaultObject2Type()!=0){  // default object
-			final int object2type = objectLink.getDefaultObject2Type();
+			int object2type = objectLink.getDefaultObject2Type();
 			// object 2
 			// (G)POP can have multiple sub pages, If the object data does not fit within one page, additional sub-pages can be used 10.5.1.1 Page Format
-			final Page objectDefPage = getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
-			final int subPageS1=objectLink.getDefaultObject2SubPageS1();
-			final SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
-			final int ptrLocation=objectLink.getDefaultObject2PointerLocation();
-			final int tripletOffset=objectLink.getDefaultObject2TripletNoOffset();
-			final int ptrPosition = objectLink.getDefaultObject2PointerPosition();
+			Page objectDefPage = getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
+			int subPageS1=objectLink.getDefaultObject2SubPageS1();
+			SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
+			int ptrLocation=objectLink.getDefaultObject2PointerLocation();
+			int tripletOffset=objectLink.getDefaultObject2TripletNoOffset();
+			int ptrPosition = objectLink.getDefaultObject2PointerPosition();
 			findProcessObjectDefinition(objectDefSubPage, object2type, ptrLocation, tripletOffset, ptrPosition,0,0,0,0);
 		}
 	}
@@ -1383,14 +1373,14 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param tripletOffset
 	 * @param ptrPosition
 	 */
-	private void findProcessObjectDefinition(final SubPage objectDefSubPage, final int objectType, final int ptrLocation, final int tripletOffset, final int ptrPosition,final int actRow,final int actCol,final int rowOffset, final int colOffset) {
-		final TxtDataField txtDataField = objectDefSubPage.linesList[1+ptrLocation]; // ptrLine
+	private void findProcessObjectDefinition(SubPage objectDefSubPage, int objectType, int ptrLocation, int tripletOffset, int ptrPosition, int actRow, int actCol, int rowOffset, int colOffset) {
+		TxtDataField txtDataField = objectDefSubPage.linesList[1+ptrLocation]; // ptrLine
 		if (txtDataField != null) {
-			final int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
+			int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
 			if ((functionByte & MASK_1BIT) != 0) { // PTRLine
-				final List<Triplet> tripletList = txtDataField.getTripletList();
-				final Triplet tr1 = tripletList.get(objectType + (tripletOffset * 3));
-				int tripletStart = 0;
+				List<Triplet> tripletList = txtDataField.getTripletList();
+				Triplet tr1 = tripletList.get(objectType + (tripletOffset * 3));
+				int tripletStart;
 				if((ptrPosition==0)){
 					tripletStart = (tr1.getVal() & MASK_9BITS);
 				}else{
@@ -1398,9 +1388,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				}
 				// now we have the  9-bit pointer that gives the absolute triplet number of the definition triplet for the object, starting from line 3
 				if(tripletStart!=511){
-					final int lineNo = 3 + (tripletStart/13);
-					final int tripletNo = tripletStart%13;
-					final List<TxtTriplet> objectDefinition = getObjectDefinition(objectDefSubPage, lineNo, tripletNo);
+					int lineNo = 3 + (tripletStart/13);
+					int tripletNo = tripletStart%13;
+					List<TxtTriplet> objectDefinition = getObjectDefinition(objectDefSubPage, lineNo, tripletNo);
 					processTripletList(objectDefinition,objectType,actRow,actCol,rowOffset,colOffset);
 				}
 
@@ -1415,11 +1405,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param tripletOffset
 	 * @return
 	 */
-	private static List<TxtTriplet> getObjectDefinition(final SubPage objectDefSubPage, final int lineNo, final int tripletOffset) {
+	private static List<TxtTriplet> getObjectDefinition(SubPage objectDefSubPage, int lineNo, int tripletOffset) {
 		
 		int lineNumber = lineNo;
 		int offset = tripletOffset;
-		final List<TxtTriplet> objectDefinition = new ArrayList<>();
+		List<TxtTriplet> objectDefinition = new ArrayList<>();
 
 		TxtDataField line = objectDefSubPage.getLine(lineNumber);
 		if(line!=null){
@@ -1450,7 +1440,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param startLine
 	 * @return
 	 */
-	private TxtDataField getLine(final int lineNo) {
+	private TxtDataField getLine(int lineNo) {
 		if(lineNo<=25){
 			return linesList[lineNo];
 		}else if(lineNo<41){
@@ -1463,26 +1453,25 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param pageNo (hex) pagenumber within magazine,range 0x00 - 0xff
 	 * @return
 	 */
-	private int getObjectPageAssociation(final int pageNo) {
+	private int getObjectPageAssociation(int pageNo) {
 		// assumes this is a MOT page.
 		int objectPageAssociation = 0;
-		final int pageNoUnits = pageNo & 0x0F; // last (hex) digit pageNo
-		final int pageNoTens = (pageNo & 0xF0) >> 4; // first (hex) digit pageNo
-		if(pageNoUnits < 0xA){
-			final int row = 1 + (pageNoTens / 2);
-			final int col = 2 * pageNoUnits + (pageNoTens % 2) * 20;
-			if(linesList[row]!=null){
-				objectPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
-			}
+		int pageNoUnits = pageNo & 0x0F; // last (hex) digit pageNo
+		int pageNoTens = (pageNo & 0xF0) >> 4; // first (hex) digit pageNo
+        int row;
+        int col;
+        if(pageNoUnits < 0xA){
+            row = 1 + (pageNoTens / 2);
+            col = 2 * pageNoUnits + (pageNoTens % 2) * 20;
 
-		}else{
-			final int row = 9 + (pageNoTens / 3);
-			final int col = 2 * (pageNoUnits - 0XA) + (pageNoTens % 3) * 12;
-			if(linesList[row]!=null){
-				objectPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
-			}
-		}
-		return objectPageAssociation;
+        }else{
+            row = 9 + (pageNoTens / 3);
+            col = 2 * (pageNoUnits - 0XA) + (pageNoTens % 3) * 12;
+        }
+        if(linesList[row]!=null){
+            objectPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
+        }
+        return objectPageAssociation;
 	}
 
 	/**
@@ -1491,24 +1480,23 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param pageNo
 	 * @return
 	 */
-	private int getDRCSPageAssociation(final int pageNo) {
+	private int getDRCSPageAssociation(int pageNo) {
 		// assumes this is a MOT page.
 		int drcsPageAssociation = 0;
-		if((pageNo&0x0F)<10){
-			final int row=1+(((pageNo&0xF0)>>4) / 2);
-			final int col = 1+(2 * (pageNo&0x0F));
-			if(linesList[row]!=null){
-				drcsPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
-			}
+        int row;
+        int col;
+        if((pageNo&0x0F)<10){
+            row = 1 + (((pageNo & 0xF0) >> 4) / 2);
+            col = 1 + (2 * (pageNo & 0x0F));
 
-		}else{
-			final int row=10+ (((pageNo&0xF0)>>4) / 3);
-			final int col = 1+ (3 * ((pageNo&0x0F)-10));
-			if(linesList[row]!=null){
-				drcsPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
-			}
-		}
-		return drcsPageAssociation;
+        }else{
+            row = 10 + (((pageNo & 0xF0) >> 4) / 3);
+            col = 1 + (3 * ((pageNo & 0x0F) - 10));
+        }
+        if(linesList[row]!=null){
+            drcsPageAssociation = getHammingReverseByte(linesList[row].getRawByte(col));
+        }
+        return drcsPageAssociation;
 	}
 
 	/**
@@ -1517,15 +1505,15 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param j
 	 */
 
-	private void drawChar(final Graphics2D charGD, final int i, final int j) {
-		final FontMetrics metrics = charGD.getFontMetrics();
-		final int descent = metrics.getDescent();
+	private void drawChar(Graphics2D charGD, int i, int j) {
+		FontMetrics metrics = charGD.getFontMetrics();
+		int descent = metrics.getDescent();
 
 		charGD.setColor(new Color(getColorInt(bgColor[i][j])));
 		charGD.fillRect(0, 0, charWidth, charHeight);
 		charGD.setColor(new Color(getColorInt(fgColor[i][j])));
-		final int ch = txt[i][j];
-		final int characterEffect = effect[i][j];
+		int ch = txt[i][j];
+		int characterEffect = effect[i][j];
 		if (isMosaicGraphicsMode(characterEffect) && 
 			isValidMosaicCharacter(ch)) {
 			final int blockH = charHeight / 3;
@@ -1562,11 +1550,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		}
 	}
 
-	private static boolean isValidMosaicCharacter(final int ch) {
+	private static boolean isValidMosaicCharacter(int ch) {
 		return (ch < 0x40) || ((ch >= 0x60)&&(ch <= 0x7f));
 	}
 
-	private static boolean isMosaicGraphicsMode(final int ef) {
+	private static boolean isMosaicGraphicsMode(int ef) {
 		return (ef & MOSAIC_GRAPHICS) != 0;
 	}
 
@@ -1574,14 +1562,14 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param i
 	 * @return
 	 */
-	private int getColorInt(final int i) {
+	private int getColorInt(int i) {
 		// first look at page level for line 28/0,
 		if(i>15){
 			if(packetx_28[0]!=null){		// first look at page level for line 28/0,
 				return packetx_28[0].getColor(i);
 			}
-			final Magazine mag = pageHandler.getMagazine();
-			final TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
+			Magazine mag = pageHandler.getMagazine();
+			TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
 			if(line!=null){
 				return line.getColor(i);
 			}
@@ -1589,13 +1577,13 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 
 		if(i==0){
 			if(packetx_28[0]!=null){		// first look at page level for line 28/0,
-				final TxtDataField line = packetx_28[0];
+				TxtDataField line = packetx_28[0];
 				if((line.getPageFunction()==0)&&(line.isBlackBackGroundColorSubstitution())){
 					return line.getColor(line.getDefaultRowColour());
 				}
 			}else{// then at magazine level line 29/0
-				final Magazine mag = pageHandler.getMagazine();
-				final TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
+				Magazine mag = pageHandler.getMagazine();
+				TxtDataField line = mag.getPageEnhanceMentDataPackes(0);
 				if((line!=null)&&(line.getPageFunction()==0)&&(line.isBlackBackGroundColorSubstitution())){
 					return line.getColor(line.getDefaultRowColour());
 				}
@@ -1609,8 +1597,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 *
 	 */
 	private void processX26Enhancements() {
-		final List<TxtTriplet> tripletList = new ArrayList<>();
-		for (final TxtDataField x26 : packetx_26) {
+		List<TxtTriplet> tripletList = new ArrayList<>();
+		for (TxtDataField x26 : packetx_26) {
 			if((x26!=null)&&(x26.getTxtTripletList()!=null)){
 				tripletList.addAll(x26.getTxtTripletList());
 			}
@@ -1629,7 +1617,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param rowOffset
 	 * @param colOffset
 	 */
-	private void processTripletList(final List<TxtTriplet> tripletList,final int objectType,final int row, final int col,final int rowOffset, final int colOffset) {
+	private void processTripletList(List<TxtTriplet> tripletList, int objectType, int row, int col, int rowOffset, int colOffset) {
 
 		int originModifierRowOffset = 0;
 		int originModifierColOffset = 0;
@@ -1641,10 +1629,10 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		int effct = -1;
 
 		if (tripletList != null) {
-			for (final TxtTriplet triplet : tripletList) {
-				final int address = triplet.getAddress();
-				final int mode = triplet.getMode();
-				final int data = triplet.getData();
+			for (TxtTriplet triplet : tripletList) {
+				int address = triplet.getAddress();
+				int mode = triplet.getMode();
+				int data = triplet.getData();
 				if(address >= 40){
 					if (mode == 0x04) { // Set Active Position
 						actRow = rowOffset + ((address == 40) ? 24 : address - 40);
@@ -1658,33 +1646,33 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 						originModifierRowOffset = address-40;
 						originModifierColOffset = data;
 					}else if ((mode >= 0x11)&&(mode <= 0x13)){ // Object Invocation
-						final int objectSource = (address&0x18)>>3;
-						final int calledObjectType = (mode&0x3);
-						final int subPageS1 =data&0xF;
+						int objectSource = (address&0x18)>>3;
+						int calledObjectType = (mode&0x3);
+						int subPageS1 =data&0xF;
 						if((objectSource==3)||(objectSource==2)){ // GPOP or POP
-							final SubPage mot = getMOTPage();
+							SubPage mot = getMOTPage();
 							if(mot!=null){
-								final int pageNo=pageHandler.getPageNo();
+								int pageNo=pageHandler.getPageNo();
 								// only needed for POP
-								final int association = mot.getObjectPageAssociation(pageNo);
+								int association = mot.getObjectPageAssociation(pageNo);
 								if(association==0){
 									return;
 								}
-								final List<ObjectLink> objectLinks= mot.getObjectLinksLevel25();
-								ObjectLink objectLink = null;
+								List<ObjectLink> objectLinks= mot.getObjectLinksLevel25();
+								ObjectLink objectLink;
 								if(objectSource==3){
-									objectLink = objectLinks.get(0); // GPOP == ,
+									objectLink = objectLinks.getFirst(); // GPOP == ,
 								}else{ //POP
 									objectLink = objectLinks.get(association);
 								}
 
-								final int objectPageNo = objectLink.getPageNo();
-								final int magazine = objectLink.getMagazine();
-								final Page objectDefPage = pageHandler.getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
-								final SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
-								final int ptrLocation = address &0x3;
-								final int tripletOffset = (data & 0x60)>>5;
-								final int ptrPosition = (data&0x10)>>4;
+								int objectPageNo = objectLink.getPageNo();
+								int magazine = objectLink.getMagazine();
+								Page objectDefPage = pageHandler.getMagazine(magazine).getPage(objectPageNo); // now we have the page that defines the correct default object.
+								SubPage objectDefSubPage = objectDefPage.getSubPageByS1(subPageS1);
+								int ptrLocation = address &0x3;
+								int tripletOffset = (data & 0x60)>>5;
+								int ptrPosition = (data&0x10)>>4;
 								findProcessObjectDefinition(objectDefSubPage, calledObjectType, ptrLocation, tripletOffset, ptrPosition,actRow,actCol,originModifierRowOffset,originModifierColOffset);
 								originModifierRowOffset = 0;
 								originModifierColOffset = 0;
@@ -1719,21 +1707,23 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 					if (mode == 0) { //Foreground Colour
 						// this is implementation for active, TODO passive and adaptive
 						if(data<32){ // When data field bits D6 and D5 are both set to '0',
-							if(objectType==ACTIVE_OBJECT_TYPE){
-								fgColor[actRow][actCol] = data;
-								for(int i = actCol+1; ((i<40)
-										&&(getPageDataByte(actRow, i)>7) // alpha codes 0-7, so anything above is fine
-										&& !((getPageDataByte(actRow, i)>=0x10)&&(getPageDataByte(actRow, i)<=0x17)) // except Mosaic Colour Codes
-										)
-										; i++){
-									fgColor[actRow][i] = data;
-								}
-							}else if (objectType==ADAPTIVE_OBJECT_TYPE){
-								fgCol=data;
-								fgColor[actRow][actCol] = data;
-							}else if (objectType==PASSIVE_OBJECT_TYPE){
-								fgCol=data;
-							}
+                            switch (objectType) {
+                                case ACTIVE_OBJECT_TYPE -> {
+                                    fgColor[actRow][actCol] = data;
+                                    for (int i = actCol + 1; ((i < 40)
+                                            && (getPageDataByte(actRow, i) > 7) // alpha codes 0-7, so anything above is fine
+                                            && !((getPageDataByte(actRow, i) >= 0x10) && (getPageDataByte(actRow, i) <= 0x17)) // except Mosaic Colour Codes
+                                    )
+                                            ; i++) {
+                                        fgColor[actRow][i] = data;
+                                    }
+                                }
+                                case ADAPTIVE_OBJECT_TYPE -> {
+                                    fgCol = data;
+                                    fgColor[actRow][actCol] = data;
+                                }
+                                case PASSIVE_OBJECT_TYPE -> fgCol = data;
+                            }
 						}
 					}else if (mode == 0x1) { //Block Mosaic Character from the G1 Set
 						txt[actRow][actCol] = (char)data;
@@ -1744,17 +1734,19 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 						}
 					}else if (mode == 0x3) { //Background Colour
 						if(data<32){ // When data field bits D6 and D5 are both set to '0',
-							if(objectType==ACTIVE_OBJECT_TYPE){
-								bgColor[actRow][actCol] = data;
-								for(int i = actCol+1; ((i<40) &&(getPageDataByte(actRow, i)!=0x1C)&&(getPageDataByte(actRow, i)!=0x1D)); i++){ // 1/C Black Background , 1/D New Background
-									bgColor[actRow][i] = data;
-								}
-							}else if (objectType==ADAPTIVE_OBJECT_TYPE){
-								bgCol=data;
-								bgColor[actRow][actCol] = data;
-							}else if (objectType==PASSIVE_OBJECT_TYPE){
-								bgCol=data;
-							}
+                            switch (objectType) {
+                                case ACTIVE_OBJECT_TYPE -> {
+                                    bgColor[actRow][actCol] = data;
+                                    for (int i = actCol + 1; ((i < 40) && (getPageDataByte(actRow, i) != 0x1C) && (getPageDataByte(actRow, i) != 0x1D)); i++) { // 1/C Black Background , 1/D New Background
+                                        bgColor[actRow][i] = data;
+                                    }
+                                }
+                                case ADAPTIVE_OBJECT_TYPE -> {
+                                    bgCol = data;
+                                    bgColor[actRow][actCol] = data;
+                                }
+                                case PASSIVE_OBJECT_TYPE -> bgCol = data;
+                            }
 						}
 					}else if (mode == 0x9) { //Character from the G0 Set at Levels 2.5 and 3.5
 						txt[actRow][actCol] = (char) TxtTriplet.G0_sets[0][data];
@@ -1809,7 +1801,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param i
 	 * @param effct
 	 */
-	private void setEffect(final int i, final int effct) {
+	private void setEffect(int i, int effct) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1819,7 +1811,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param i
 	 * @return
 	 */
-	private byte getPageDataByte(final int actRow, final int i) {
+	private byte getPageDataByte(int actRow, int i) {
 		if(linesList[actRow]!=null){
 			return linesList[actRow].getPageDataByte(i);
 		}
@@ -1830,7 +1822,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param effectFlags
 	 * @return
 	 */
-	private static boolean holdMosaicActive(final int effectFlags) {
+	private static boolean holdMosaicActive(int effectFlags) {
 		return ((effectFlags & HOLD_MOSAIC) != 0);
 	}
 
@@ -1855,16 +1847,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		return isTOPpage(1);
 	}
 
-	private boolean isTOPpage(final int type) {
-		final SubPage btt= getBTTPage();
+	private boolean isTOPpage(int type) {
+		SubPage btt= getBTTPage();
 		if(btt!=null){
 			for(int i=21;i<23;i++){
-				final TxtDataField txtDataField=btt.getLine(i);
+				TxtDataField txtDataField=btt.getLine(i);
 				if(txtDataField!=null){
 					for (int j = 0; j < 5; j++) {
-						final int magNo=getHammingReverseByte(txtDataField.getRawByte(j*8));
-						final int pagNo= (getHammingReverseByte(txtDataField.getRawByte((j*8)+1))*16) + getHammingReverseByte(txtDataField.getRawByte((j*8)+2));
-						final int t = getHammingReverseByte(txtDataField.getRawByte((j*8)+7));
+						int magNo=getHammingReverseByte(txtDataField.getRawByte(j*8));
+						int pagNo= (getHammingReverseByte(txtDataField.getRawByte((j*8)+1))*16) + getHammingReverseByte(txtDataField.getRawByte((j*8)+2));
+						int t = getHammingReverseByte(txtDataField.getRawByte((j*8)+7));
 						if((t==type)&&(pagNo==getPageNo())&&(magNo==getMagazineNo())){
 							return true;
 						}
@@ -1891,7 +1883,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @return
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.ebu.Page#getMagazine(int)
 	 */
-	public Magazine getMagazine(final int m) {
+	public Magazine getMagazine(int m) {
 		return pageHandler.getMagazine(m);
 	}
 

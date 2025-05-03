@@ -37,7 +37,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Arrays;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -80,7 +79,7 @@ public class EBUDataField implements TreeNode{
 
 
 
-	public EBUDataField(final byte[] data,final int offset,final int len,final long pts) {
+	public EBUDataField(byte[] data, int offset, int len, long pts) {
 		dataUnitId = getInt(data, offset, 1, MASK_8BITS);
 		dataUnitLength = getInt(data, offset+1, 1, MASK_8BITS);
 
@@ -97,24 +96,24 @@ public class EBUDataField implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(EBUPESDataField.getDataUnitIdString(dataUnitId)));
+	public KVP getJTreeNode(int modus) {
+		KVP s=new KVP(EBUPESDataField.getDataUnitIdString(dataUnitId));
 
-		addDetailsToJTree(s,modus);
+		addDetailsToJTree(s);
 		return s;
 	}
 
 	/**
 	 * @param s
 	 */
-	protected void addDetailsToJTree(final DefaultMutableTreeNode s, final int modus) {
-		s.add(new DefaultMutableTreeNode(new KVP("data_unit_id",dataUnitId,EBUPESDataField.getDataUnitIdString(dataUnitId))));
-		s.add(new DefaultMutableTreeNode(new KVP("data_unit_length",dataUnitLength,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved_future_use,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("field_parity",field_parity,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("line_offset",line_offset,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
-		s.add(new DefaultMutableTreeNode(new KVP("count",count, null)));
+	protected void addDetailsToJTree(KVP s) {
+		s.add(new KVP("data_unit_id",dataUnitId,EBUPESDataField.getDataUnitIdString(dataUnitId)));
+		s.add(new KVP("data_unit_length",dataUnitLength));
+		s.add(new KVP("reserved_future_use",reserved_future_use));
+		s.add(new KVP("field_parity",field_parity));
+		s.add(new KVP("line_offset",line_offset));
+		s.add(new KVP("pts",pts, printTimebase90kHz(pts)));
+		s.add(new KVP("count",count));
 	}
 
 	/* (non-Javadoc)
@@ -129,7 +128,6 @@ public class EBUDataField implements TreeNode{
 		result = (PRIME * result) + Arrays.hashCode(data_block);
 		result = (PRIME * result) + field_parity;
 		result = (PRIME * result) + line_offset;
-		//result = PRIME * result + offset;
 		result = (PRIME * result) + reserved_future_use;
 		return result;
 	}
@@ -138,7 +136,7 @@ public class EBUDataField implements TreeNode{
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj){
 			return true;
 		}
@@ -148,7 +146,7 @@ public class EBUDataField implements TreeNode{
 		if (getClass() != obj.getClass()){
 			return false;
 		}
-		final EBUDataField other = (EBUDataField) obj;
+		EBUDataField other = (EBUDataField) obj;
 		if (dataUnitId != other.dataUnitId){
 			return false;
 		}
@@ -164,11 +162,8 @@ public class EBUDataField implements TreeNode{
 		if (line_offset != other.line_offset){
 			return false;
 		}
-		if (reserved_future_use != other.reserved_future_use){
-			return false;
-		}
-		return true;
-	}
+        return reserved_future_use == other.reserved_future_use;
+    }
 
 
 	/**
@@ -182,11 +177,11 @@ public class EBUDataField implements TreeNode{
 	/**
 	 * @param count the count to set
 	 */
-	public void setCount(final int count) {
+	public void setCount(int count) {
 		this.count = count;
 	}
 
-	public void incCount(final int t) {
+	public void incCount(int t) {
 		this.count += t;
 	}
 

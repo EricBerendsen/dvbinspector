@@ -38,7 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -57,84 +56,66 @@ public class EBUTeletextHandler extends GeneralPesHandler implements SaveAble{
 	private static final Logger logger = Logger.getLogger(EBUTeletextHandler.class.getName());
 
 
-	private TxtService txtService = null;
-	private List<VPSDataField> vps = null;
-	private List<WSSDataField> wss = null;
+	private TxtService txtService;
+	private List<VPSDataField> vps = new ArrayList<>();
+	private List<WSSDataField> wss = new ArrayList<>();
 
-	public static String getObjectTypeString(final int objectType) {
+	public static String getObjectTypeString(int objectType) {
 
-		switch (objectType) {
-		case 0x00: return "No default object required";
-		case 0x01: return "Active";
-		case 0x02: return "Adaptive";
-		case 0x03: return "Passive";
-		default: return "illegal value";
-		}
-	}
-
-	public static String getObjectSourceString(final int objectSource) {
-
-		switch (objectSource) {
-		case 0x00: return "Illegal";
-		case 0x01: return "Local";
-		case 0x02: return "POP";
-		case 0x03: return "GPOP";
-		default: return "illegal value";
-		}
+        return switch (objectType) {
+            case 0x00 -> "No default object required";
+            case 0x01 -> "Active";
+            case 0x02 -> "Adaptive";
+            case 0x03 -> "Passive";
+            default -> "illegal value";
+        };
 	}
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp = new KVP("EBU PES Data");
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(kvp);
-		
-		final JMenuItem objectMenu = new JMenuItem("Save Txt Service as .t42");
+	public KVP getJTreeNode(int modus) {
+		KVP kvp = new KVP("EBU PES Data");
+
+		JMenuItem objectMenu = new JMenuItem("Save Txt Service as .t42");
 		objectMenu.setActionCommand(DVBtree.T42);
 		kvp.setSubMenuAndOwner(objectMenu, this);
 
-		addListJTree(s,pesPackets,modus,"PES Packets");
+		addListJTree(kvp,pesPackets,modus,"PES Packets");
 
-		final DefaultMutableTreeNode t=new DefaultMutableTreeNode(new KVP("EBU Data"));
+		KVP t=new KVP("EBU Data");
 		if(txtService!=null){ t.add(txtService.getJTreeNode(modus));}
-		if(vps!=null){
-			addListJTree(t,vps,modus,"VPS");
-		}
-
-		if(wss!=null){
-			addListJTree(t,wss,modus,"WSS");
-		}
-		s.add(t);
-		return s;
+		addListJTree(t,vps,modus,"VPS");
+		addListJTree(t,wss,modus,"WSS");
+		kvp.add(t);
+		return kvp;
 	}
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#porcessPesDataBytes(int, byte[], int, int)
 	 */
 	@Override
-	protected void processPesDataBytes(final PesPacketData pesData) {
+	protected void processPesDataBytes(PesPacketData pesData) {
 
-		final EBUPESDataField pesDataField = new EBUPESDataField(pesData);
+		EBUPESDataField pesDataField = new EBUPESDataField(pesData);
 		pesPackets.add(pesDataField);
-		final List<EBUDataField> lines = pesDataField.getFieldList();
-		for(final EBUDataField ebuData: lines){
-			if(ebuData instanceof TxtDataField txtDataField) {
-				if(txtService==null){
-					txtService = new TxtService(getTransportStream());
-				}
-				txtService.addTxtDataField(txtDataField);
-			}else if(ebuData instanceof VPSDataField vpsDataField){
-				if(vps==null){
-					vps = new ArrayList<>();
-				}
-				add(vpsDataField, vps);
-			}else if(ebuData instanceof WSSDataField wssDataField){
-				if(wss==null){
-					wss = new ArrayList<>();
-				}
-				add(wssDataField, wss);
+		List<EBUDataField> lines = pesDataField.getFieldList();
+		for(EBUDataField ebuData: lines){
+			switch(ebuData) {
+				case TxtDataField txtDataField:
+					if(txtService==null){
+						txtService = new TxtService(getTransportStream());
+					}
+					txtService.addTxtDataField(txtDataField);
+					break;
+				case VPSDataField vpsDataField:
+					add(vpsDataField, vps);
+					break;
+				case WSSDataField wssDataField:
+					add(wssDataField, wss);
+					break;
+				default:
 			}
 		}
 	}
@@ -143,9 +124,9 @@ public class EBUTeletextHandler extends GeneralPesHandler implements SaveAble{
 	 * @param ebuData
 	 * @param list
 	 */
-	protected static <T extends EBUDataField> void  add(final T ebuData, final List<T> v) {
+	protected static <T extends EBUDataField> void  add(T ebuData, List<T> v) {
 
-		final int i = v.indexOf(ebuData);
+		int i = v.indexOf(ebuData);
 		if(i==-1){ // not found
 			v.add(ebuData);
 		}else{

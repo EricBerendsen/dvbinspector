@@ -242,29 +242,29 @@ public class PesPacketData  implements TreeNode{
 	 * @param titleKVP
 	 * @return
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final KVP titleKVP) {
+	public DefaultMutableTreeNode getJTreeNode(final int modus, final KVP kvp) {
 
 		final PesHeader phv = getPesHeader();
 		if(showPtsModus(modus)&& hasPTS(phv)){ // PTS present, so decorate top node with it
-			titleKVP.appendLabel(" [pts="+ printTimebase90kHz(phv.getPts())+"]");
+			kvp.appendLabel(" [pts="+ printTimebase90kHz(phv.getPts())+"]");
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(titleKVP);
 
-		t.add(new DefaultMutableTreeNode(new KVP("Start TS Packet No",startPacketNo,null)));
-		phv.addToJtree(t,modus);
+
+		kvp.add(new KVP("Start TS Packet No",startPacketNo));
+		phv.addToJtree(kvp,modus);
 		if(noBytes==0){
-			t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("data",data,0,bytesRead,null)));
+			kvp.add(new KVP("Actual PES length",bytesRead));
+			kvp.add(new KVP("data",data,0,bytesRead));
 		}else{
 			if((noBytes+6)!=bytesRead){
-				t.add(new DefaultMutableTreeNode(getErrorKVP("Actual PES length does not match PES Header Length")));
-				t.add(new DefaultMutableTreeNode(new KVP("Actual PES length",bytesRead,null)));
+				kvp.add(getErrorKVP("Actual PES length does not match PES Header Length"));
+				kvp.add(new KVP("Actual PES length",bytesRead));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("data",data,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("payload",data,pesDataStart,pesDataLen,null)));
+			kvp.add(new KVP("data",data));
+			kvp.add(new KVP("payload",data,pesDataStart,pesDataLen));
 		}
 
-		return t;
+		return kvp;
 	}
 	
 	public boolean hasPTS(PesHeader phv) {
