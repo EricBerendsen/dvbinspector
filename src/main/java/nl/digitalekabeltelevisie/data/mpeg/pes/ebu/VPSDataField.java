@@ -78,16 +78,13 @@ public class VPSDataField extends EBUDataField {
 	}
 
 	private static String getServiceCodeString(int b) {
-        return switch (b) {
-            case 31 ->
-                    "Timer-control Code (TC), indicating that the programme identification information is to be ignored";
-            case 30 ->
-                    "Recording Inhibit/Terminate code (RI/T), indicating that the transmission has no label and is for example, not intended to be recorded";
-            case 29 ->
-                    "Interruption code (INT), indicating a break in the programme, which will continue after a short interval";
-            case 28 -> "Continuation code, indicating possibly an erroneous transmission state. No action required";
-            default -> "reserved for future use";
-        };
+		return switch (b) {
+		case 31 -> "Timer-control Code (TC), indicating that the programme identification information is to be ignored";
+		case 30 -> "Recording Inhibit/Terminate code (RI/T), indicating that the transmission has no label and is for example, not intended to be recorded";
+		case 29 -> "Interruption code (INT), indicating a break in the programme, which will continue after a short interval";
+		case 28 -> "Continuation code, indicating possibly an erroneous transmission state. No action required";
+		default -> "reserved for future use";
+		};
 	}
 
 	/**

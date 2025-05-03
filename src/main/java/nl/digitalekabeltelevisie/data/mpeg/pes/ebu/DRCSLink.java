@@ -29,7 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ebu;
 
 import static nl.digitalekabeltelevisie.util.Utils.getHammingReverseByte;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -67,7 +66,7 @@ public class DRCSLink implements TreeNode{
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 		return getJTreeNode("DRCS Link");
 	}
 

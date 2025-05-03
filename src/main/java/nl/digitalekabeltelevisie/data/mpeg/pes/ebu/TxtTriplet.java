@@ -117,9 +117,8 @@ Triplet {
 
 		if (val == 0) {
 			return (short)basic_char;
-		} else {
-			return val;
 		}
+		return val;
 	}
 
 	public static final short[][] G0_sets = {
@@ -577,44 +576,42 @@ Triplet {
                 case 31 -> "G0 character with diacritical mark";
                 default -> "Illegal value";
             };
-		}else{
-            return switch (mode) {
-                case 0 -> "Full Screen Colour";
-                case 1 -> "Full Row Colour";
-                case 2 -> "Reserved";
-                case 3 -> "Reserved";
-                case 4 -> "Set Active Position";
-                case 5 -> "Reserved";
-                case 6 -> "Reserved";
-                case 7 -> "Address Display Row 0";
-                case 8 -> "PDC - Country of Origin and Programme Source";
-                case 9 -> "PDC - Month & Day";
-                case 10 -> "PDC - Cursor Row & Announced Starting Time Hours";
-                case 11 -> "PDC - Cursor Row & Announce Finishing Time Hours";
-                case 12 -> "PDC - Cursor Row & Local Time Offset";
-                case 13 -> "PDC - Series Identifier and Series Code";
-                case 14 -> "Reserved";
-                case 15 -> "Reserved";
-                case 16 -> "Origin Modifier";
-                case 17 -> "Active Object Invocation";
-                case 18 -> "Adaptive Object Invocation";
-                case 19 -> "Passive Object Invocation";
-                case 20 -> "Reserved";
-                case 21 -> "Active Object Definition";
-                case 22 -> "Adaptive Object Definition";
-                case 23 -> "Passive Object Definition";
-                case 24 -> "DRCS Mode";
-                case 25 -> "Reserved";
-                case 26 -> "Reserved";
-                case 27 -> "Reserved";
-                case 28 -> "Reserved";
-                case 29 -> "Reserved";
-                case 30 -> "Reserved";
-                case 31 -> "Termination Marker";
-                default -> "Illegal value";
-            };
-
 		}
+		return switch (mode) {
+		    case 0 -> "Full Screen Colour";
+		    case 1 -> "Full Row Colour";
+		    case 2 -> "Reserved";
+		    case 3 -> "Reserved";
+		    case 4 -> "Set Active Position";
+		    case 5 -> "Reserved";
+		    case 6 -> "Reserved";
+		    case 7 -> "Address Display Row 0";
+		    case 8 -> "PDC - Country of Origin and Programme Source";
+		    case 9 -> "PDC - Month & Day";
+		    case 10 -> "PDC - Cursor Row & Announced Starting Time Hours";
+		    case 11 -> "PDC - Cursor Row & Announce Finishing Time Hours";
+		    case 12 -> "PDC - Cursor Row & Local Time Offset";
+		    case 13 -> "PDC - Series Identifier and Series Code";
+		    case 14 -> "Reserved";
+		    case 15 -> "Reserved";
+		    case 16 -> "Origin Modifier";
+		    case 17 -> "Active Object Invocation";
+		    case 18 -> "Adaptive Object Invocation";
+		    case 19 -> "Passive Object Invocation";
+		    case 20 -> "Reserved";
+		    case 21 -> "Active Object Definition";
+		    case 22 -> "Adaptive Object Definition";
+		    case 23 -> "Passive Object Definition";
+		    case 24 -> "DRCS Mode";
+		    case 25 -> "Reserved";
+		    case 26 -> "Reserved";
+		    case 27 -> "Reserved";
+		    case 28 -> "Reserved";
+		    case 29 -> "Reserved";
+		    case 30 -> "Reserved";
+		    case 31 -> "Termination Marker";
+		    default -> "Illegal value";
+		};
 	}
 
 	/**

@@ -41,7 +41,6 @@ import java.util.logging.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.JMenuItem;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.gui.DVBtree;
@@ -305,12 +304,12 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		objectMenu.setActionCommand(DVBtree.T42);
 		s.setSubMenuAndOwner(objectMenu, this);
 		
-		for (int i = 0; i < 26; i++) { // 24 or 25 lines, what is line 25 used for anyaway ??? normal is 0 (header) + 1 to 24
+		for (int i = 0; i < 26; i++) { // 24 or 25 lines, what is line 25 used for anyway ??? normal is 0 (header) + 1 to 24
 			PageLine pageLine = linesList[i];
 			if (pageLine != null) {
 				s.add(pageLine.getHTMLJTreeNode(modus));
 			} else {
-				s.add(new DefaultMutableTreeNode(new KVP( "").setHtmlLabel(BLACK_HTML_LINE)));
+				s.add(new KVP( "").setHtmlLabel(BLACK_HTML_LINE));
 			}
 		}
 		for (TxtDataField txtDatafield : packetx_26) {
@@ -357,8 +356,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addMPTPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
-		DefaultMutableTreeNode mptPage = new DefaultMutableTreeNode(new KVP("Multipage Table (MPT) Page"));
+	private void addMPTPageDetailsToJTree(int modus, KVP s) {
+		KVP mptPage = new KVP("Multipage Table (MPT) Page");
 		s.add(mptPage);
 
 		for (int i = 1; i <= 23; i++) {
@@ -369,7 +368,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					b.append(Integer.toHexString(value));
 				}
-				DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Row "+i,b.toString(),null));
+				KVP p = new KVP("Row "+i,b.toString());
 				mptPage.add(p);
 			}
 		}
@@ -380,7 +379,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				for(int j= 0; j < 39; j++){
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					int pageNo= 100 + ((i-1)*40)+j;
-					DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("page "+pageNo,value,null));
+					KVP p = new KVP("page "+pageNo,value);
 					mptPage.add(p);
 
 				}
@@ -395,8 +394,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addAITPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
-		DefaultMutableTreeNode aitPage = new DefaultMutableTreeNode(new KVP("Additional Information Tables (AIT) Page"));
+	private void addAITPageDetailsToJTree(int modus, KVP s) {
+		KVP aitPage = new KVP("Additional Information Tables (AIT) Page");
 		s.add(aitPage);
 
 		for (int i = 1; i <= 22; i++) {
@@ -418,7 +417,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 						}
 
 					}
-					DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Title "+(((i-1)*2)+j),b.toString()+" "+buf.toString(),null));
+					KVP p = new KVP("Title "+(((i-1)*2)+j),b.toString()+" "+buf.toString());
 					aitPage.add(p);
 				}
 			}
@@ -429,8 +428,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addBTTPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
-		DefaultMutableTreeNode bttPage = new DefaultMutableTreeNode(new KVP("Basic Top Table (BTT) Page"));
+	private void addBTTPageDetailsToJTree(int modus, KVP s) {
+		KVP bttPage = new KVP("Basic Top Table (BTT) Page");
 		s.add(bttPage);
 		for (int i = 1; i <= 20; i++) {
 			TxtDataField txtDataField = linesList[i];
@@ -438,7 +437,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				for(int j= 0; j < 39; j++){
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					int pageNo= 100 + ((i-1)*40)+j;
-					DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("page "+pageNo,value,getPageDescription(value)));
+					KVP p = new KVP("page "+pageNo,value,getPageDescription(value));
 					bttPage.add(p);
 
 				}
@@ -453,7 +452,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					b.append(Integer.toHexString(value));
 				}
-				DefaultMutableTreeNode p = new DefaultMutableTreeNode(new KVP("Row "+i,b.toString(),null));
+				KVP p = new KVP("Row "+i,b.toString());
 				bttPage.add(p);
 			}
 		}
@@ -485,8 +484,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addObjectDefinitionPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
-		DefaultMutableTreeNode objPage = new DefaultMutableTreeNode(new KVP("Object Definition Page"));
+	private void addObjectDefinitionPageDetailsToJTree(int modus, KVP s) {
+		KVP objPage = new KVP("Object Definition Page");
 		s.add(objPage);
 		for (int i = 1; i <= 4; i++) {
 			// possible pointer rows
@@ -494,10 +493,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			if (txtDataField != null) {
 				int functionByte = getHammingReverseByte(txtDataField.getRawByte(0)); // start counting from payload,this is actual byte 6
 				if ((functionByte & MASK_1BIT) != 0) {
-					DefaultMutableTreeNode pointerLineTreeNode = new DefaultMutableTreeNode(new KVP(
-							"Pointer Table line " + i));
-					pointerLineTreeNode
-					.add(new DefaultMutableTreeNode(new KVP("functionByte", functionByte, null)));
+					KVP pointerLineTreeNode = new KVP("Pointer Table line " + i);
+					pointerLineTreeNode.add(new KVP("functionByte", functionByte));
 					objPage.add(pointerLineTreeNode);
 					List<Triplet> tripletList = txtDataField.getTripletList();
 					for (int j = 0; j <= 3; j++) { // skip triplet 0,reserved
@@ -541,9 +538,9 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		}
 	}
 
-	private void addObjectPointer(int i, DefaultMutableTreeNode t, int objPointer, String label, int modus) {
+	private void addObjectPointer(int i, KVP t, int objPointer, String label, int modus) {
 		if (objPointer != 0x1FF) {
-			DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(label + " " + i, objPointer, null));
+			KVP s = new KVP(label + " " + i, objPointer);
 			t.add(s);
 
 			int lineNo = 3 + (objPointer/13);
@@ -558,7 +555,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addDRCSDownloadPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
+	private void addDRCSDownloadPageDetailsToJTree(int modus, KVP s) {
 		TxtDataField drcsDatafield = null;
 		for (TxtDataField txtDatafield : packetx_28) {
 			if ((txtDatafield != null) && (txtDatafield.getDesignationCode() == 3)) {
@@ -576,7 +573,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			// bits 1-12 of triplet 12
 			bs.addIntBitsReverse(tripletList.get(11).getVal() & 0xFFF, 12);
 
-			DefaultMutableTreeNode drcs = new DefaultMutableTreeNode(new KVP("DRCS Downloading Mode Invocation"));
+			KVP drcs = new KVP("DRCS Downloading Mode Invocation");
 
 			for (int i = 0; i < 48; i++) {
 				int drcsMode = bs.getIntBitsReverse(4); // 0..15
@@ -689,8 +686,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param modus
 	 * @param s
 	 */
-	private void addMOTPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
-		DefaultMutableTreeNode mot = new DefaultMutableTreeNode(new KVP("MOT Structure"));
+	private void addMOTPageDetailsToJTree(int modus, KVP s) {
+		KVP mot = new KVP("MOT Structure");
 		s.add(mot);
 
 		for (int i = 1; i <= 8; i++) { // lines with links for normal pages without last hexnumber
@@ -725,16 +722,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 		}
 
 		String level = "Level 2.5";
-		addObjectLinkLine1ToJTree(modus, mot, linesList[19], level);
-		addObjectLinkLine2ToJTree(modus, mot, linesList[20], level);
+		addObjectLinkLine1ToJTree(mot, linesList[19], level);
+		addObjectLinkLine2ToJTree(mot, linesList[20], level);
 		List<ObjectLink> obs=getObjectLinksLevel25();
 		addListJTree(mot, obs, modus, "Objects list");
 
 		addDRCSLinkLineToJTree(mot, linesList[21], level);
 
 		level = "Level 3.5";
-		addObjectLinkLine1ToJTree(modus, mot, linesList[22], level);
-		addObjectLinkLine2ToJTree(modus, mot, linesList[23], level);
+		addObjectLinkLine1ToJTree(mot, linesList[22], level);
+		addObjectLinkLine2ToJTree(mot, linesList[23], level);
 		addDRCSLinkLineToJTree(mot, linesList[24], level);
 	}
 
@@ -744,24 +741,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param drcsPageAssociation
 	 * @param associationPageNo
 	 */
-	private static void addPageAssociationsToTree(DefaultMutableTreeNode mot, int objectPageAssociation,
-                                                  int drcsPageAssociation, int associationPageNo) {
+	private static void addPageAssociationsToTree(KVP mot, int objectPageAssociation, int drcsPageAssociation, int associationPageNo) {
 		if (objectPageAssociation != 0) {
-			String exp = ((objectPageAssociation & 0x08) != 0) ? "global objects required"
-					: "no global objects required";
-			exp += ", "
-					+ (((objectPageAssociation & 0x07) == 0) ? "no public objects required"
-							: ("POP link " + (objectPageAssociation & 0x07)));
-			mot.add(new DefaultMutableTreeNode(new KVP("Page " + toHexString(associationPageNo, 2)
-					+ " Object Page Association", objectPageAssociation, exp)));
+			String exp = ((objectPageAssociation & 0x08) != 0) ? "global objects required" : "no global objects required";
+			exp += ", " + (((objectPageAssociation & 0x07) == 0) ? "no public objects required" : ("POP link " + (objectPageAssociation & 0x07)));
+			mot.add(new KVP("Page " + toHexString(associationPageNo, 2) + " Object Page Association", objectPageAssociation, exp));
 		}
 		if (drcsPageAssociation != 0) {
 			String exp = ((drcsPageAssociation & 0x08) != 0) ? "global DRCS required" : "no global DRCS required";
-			exp += ", "
-					+ (((drcsPageAssociation & 0x07) == 0) ? "no public DRCS required"
-							: ("DRCS link " + (drcsPageAssociation & 0x07)));
-			mot.add(new DefaultMutableTreeNode(new KVP("Page " + toHexString(associationPageNo, 2)
-					+ " DRCS Page Association", drcsPageAssociation, exp)));
+			exp += ", " + (((drcsPageAssociation & 0x07) == 0) ? "no public DRCS required" : ("DRCS link " + (drcsPageAssociation & 0x07)));
+			mot.add(new KVP("Page " + toHexString(associationPageNo, 2) + " DRCS Page Association", drcsPageAssociation, exp));
 		}
 	}
 
@@ -770,8 +759,8 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param s
 	 */
 
-	private void addMIPPageDetailsToJTree(int modus, DefaultMutableTreeNode s) {
-		DefaultMutableTreeNode mot = new DefaultMutableTreeNode(new KVP("MIP Structure"));
+	private void addMIPPageDetailsToJTree(int modus, KVP s) {
+		KVP mot = new KVP("MIP Structure");
 		s.add(mot);
 
 		for (int i = 1; i <= 8; i++) { // lines with links for normal pages without last hexnumber
@@ -811,20 +800,19 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param upperNibble
 	 * @param mipPageNo
 	 */
-	private static void addMIPPageDetailsToTree(DefaultMutableTreeNode mot, int lowerNibble, int upperNibble, int mipPageNo) {
+	private static void addMIPPageDetailsToTree(KVP mot, int lowerNibble, int upperNibble, int mipPageNo) {
 		int pagecode = (16 * upperNibble) + lowerNibble;
 		if (pagecode != 0) {
-			mot.add(new DefaultMutableTreeNode(new KVP("Page " + toHexString(mipPageNo, 2), pagecode, getMIPPageFunctionString(pagecode))));
+			mot.add(new KVP("Page " + toHexString(mipPageNo, 2), pagecode, getMIPPageFunctionString(pagecode)));
 		}
 	}
 
 	/**
-	 * @param modus
 	 * @param mot
 	 * @param txtDataField
 	 * @param level
 	 */
-	private static void addObjectLinkLine1ToJTree(int modus, DefaultMutableTreeNode mot, TxtDataField txtDataField, String level) {
+	private static void addObjectLinkLine1ToJTree(KVP mot, TxtDataField txtDataField, String level) {
 		if (txtDataField != null) {
 			ObjectLink gpop = new ObjectLink(txtDataField.data_block, 6 + txtDataField.offset);
 			mot.add(gpop.getJTreeNode(level + " GPOP "));
@@ -836,12 +824,11 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	/**
-	 * @param modus
 	 * @param mot
 	 * @param txtDataField
 	 * @param level
 	 */
-	private static void addObjectLinkLine2ToJTree(int modus, DefaultMutableTreeNode mot, TxtDataField txtDataField, String level) {
+	private static void addObjectLinkLine2ToJTree(KVP mot, TxtDataField txtDataField, String level) {
 		if (txtDataField != null) {
 			for (int i = 4; i < 8; i++) {
 				ObjectLink pop = new ObjectLink(txtDataField.data_block, 6 + (10 * (i - 4)) + txtDataField.offset);
@@ -856,7 +843,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	 * @param txtDataField
 	 * @param level
 	 */
-	private static void addDRCSLinkLineToJTree(DefaultMutableTreeNode mot, TxtDataField txtDataField, String level) {
+	private static void addDRCSLinkLineToJTree(KVP mot, TxtDataField txtDataField, String level) {
 		if (txtDataField != null) {
 			DRCSLink gpop = new DRCSLink(txtDataField.data_block, 6 + txtDataField.offset);
 			mot.add(gpop.getJTreeNode(level + " GDRCS "));
@@ -870,16 +857,16 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 			int mag1 = getHammingReverseByte(txtDataField.getRawByte(34)); // byte 40 in ETSI EN 300 706 § 10.6.6
 			int mag2 = getHammingReverseByte(txtDataField.getRawByte(35));
 
-			DefaultMutableTreeNode noPagesNode = new DefaultMutableTreeNode(new KVP("Number of Enhancement Pages"));
+			KVP noPagesNode = new KVP("Number of Enhancement Pages");
 
-			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Magazine 3,2,1,8", mag1, null)));
-			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Magazine 7,6,5,4", mag2, null)));
+			noPagesNode.add(new KVP("Magazine 3,2,1,8", mag1));
+			noPagesNode.add(new KVP("Magazine 7,6,5,4", mag2));
 			int objectPages = getHammingReverseByte(txtDataField.getRawByte(36)) + (16
 					* getHammingReverseByte(txtDataField.getRawByte(37)));
 			int drcsPages = getHammingReverseByte(txtDataField.getRawByte(38)) + (16
 					* getHammingReverseByte(txtDataField.getRawByte(39)));
-			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Total number of object pages", objectPages, null)));
-			noPagesNode.add(new DefaultMutableTreeNode(new KVP("Total number of DRCS pages", drcsPages, null)));
+			noPagesNode.add(new KVP("Total number of object pages", objectPages));
+			noPagesNode.add(new KVP("Total number of DRCS pages", drcsPages));
 
 			mot.add(noPagesNode);
 		}

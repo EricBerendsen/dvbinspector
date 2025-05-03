@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.BitString;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -106,19 +104,19 @@ public class TxtDataField extends EBUDataField {
 		}
 		if((getPacketNo()==27)&&(getDesignationCode()>=0)&&(getDesignationCode()<=3)){
 			// 9.6.1 Packets X/27/0 to X/27/3 for Editorial Linking
-			DefaultMutableTreeNode linkControl=new DefaultMutableTreeNode(new KVP("Editorial Linking"));
+			KVP linkControl =new KVP("Editorial Linking");
 			s.add(linkControl);
 			for(int t=0;t<6;t++){
 				int pageNumber=getPageNumber(7+(t*6));
 				int subPage = getSubPage(9+(t*6));
 				int m=getMagazineComplement(10+(6*t))^getMagazineNo();
 				String formattedPageNo = formatPageNo(m,pageNumber,subPage);
-				DefaultMutableTreeNode link=new DefaultMutableTreeNode(new KVP("Link "+t+": "+formattedPageNo));
+				KVP link = new KVP("Link "+t+": "+formattedPageNo);
 				linkControl.add(link);
 
-				link.add(new DefaultMutableTreeNode(new KVP("pageNumber",pageNumber)));
-				link.add(new DefaultMutableTreeNode(new KVP("sub page",subPage)));
-				link.add(new DefaultMutableTreeNode(new KVP("magazine modified",m)));
+				link.add(new KVP("pageNumber",pageNumber));
+				link.add(new KVP("sub page",subPage));
+				link.add(new KVP("magazine modified",m));
 			}
 			if(getPacketNo()==27){
 				int linkControlByte = getHammingByte(data_block[43+offset]);
@@ -130,14 +128,14 @@ public class TxtDataField extends EBUDataField {
 			s.add(new KVP("Data Channel",getDataChannel(),getDataChannelString(getDataChannel())));
 		}
 		if((getMagazineNo()==0)&&(getPacketNo()==30)&&(getDesignationCode()>=0)&&(getDesignationCode()<=1)){ // 9.8.1 Packet 8/30 Format 1
-			addInititalPagePacket8_30ToJTree(s,modus);
-			addChannelDataLine30(s,modus);
+			addInititalPagePacket8_30ToJTree(s);
+			addChannelDataLine30(s);
 
 			s.add(new KVP("Status Display",getDataBytes(26, 46)));
 
 		}
 		if((getMagazineNo()==0)&&(getPacketNo()==30)&&(getDesignationCode()>=2)&&(getDesignationCode()<=3)){ // 9.8.2 Packet 8/30 Format 2
-			addInititalPagePacket8_30ToJTree(s,modus);
+			addInititalPagePacket8_30ToJTree(s);
 			addPDCDetails(s, 13);
 			s.add(new KVP("Status Display",getDataBytes(26, 46)));
 		}
@@ -162,7 +160,7 @@ public class TxtDataField extends EBUDataField {
 	 * @param s
 	 * @param modus
 	 */
-	private void addPacketX28Format1Details(DefaultMutableTreeNode s, int modus) {
+	private void addPacketX28Format1Details(KVP s, int modus) {
 		// magazine specific
 		// 13 triplets, Hamming 24/18 coded
 
@@ -182,13 +180,11 @@ public class TxtDataField extends EBUDataField {
 			int defaultCharset = (tr1.getVal() & 0x3F80) >> 7;
 			int bits14_11 = (defaultCharset & 0b1111000)>>3;
 			int bits10_8 = (defaultCharset & 0b111);
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Default G0 and G2 Character Set Designation and National Option Selection", defaultCharset,
-							"bits 14 13 12 11: "+ toBinaryString(bits14_11 , 4)+" bits 10 9 8: " + toBinaryString(bits10_8,3))));
+			s.add(new KVP("Default G0 and G2 Character Set Designation and National Option Selection", defaultCharset,
+							"bits 14 13 12 11: "+ toBinaryString(bits14_11 , 4)+" bits 10 9 8: " + toBinaryString(bits10_8,3)));
 			Triplet tr2 = tripletList.get(1);
 			int secondCharset = (tr1.getVal()&0b11_1100_0000_0000_0000)>>14 | ((tr2.getVal() & 0b0111)<<4);
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Second G0 Set Designation and National Option Selection",secondCharset)));
+			s.add(new KVP("Second G0 Set Designation and National Option Selection",secondCharset));
 			int leftSidePanel = (tr2.getVal() & 0x08) >> 3;
 			int rightSidePanel = (tr2.getVal() & 0x10) >> 4;
 			int sidePanelStatusFlag = (tr2.getVal() & 0x20) >> 5;
@@ -200,8 +196,7 @@ public class TxtDataField extends EBUDataField {
 			s.add(new KVP("Side Panel Status Flag", sidePanelStatusFlag,
 					sidePanelStatusFlag == 0 ? "Side panel(s) required at Level 3.5 only"
 							: "Side panel(s) required at Levels 2.5 & 3.5"));
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Number of Columns in Side Panels", numberOfColumnsInSidePanels)));
+			s.add(new KVP("Number of Columns in Side Panels", numberOfColumnsInSidePanels));
 
 			// The bits for Colour Map Entry Coding for CLUTs 2 and 3 are transmitted LSB first (as standard for
 			// teletext)
@@ -219,8 +214,7 @@ public class TxtDataField extends EBUDataField {
 			// bits 1-4 of triplet 13
 			bs.addIntBitsReverse(tripletList.get(12).getVal() & 0xF, 4);
 
-			DefaultMutableTreeNode clut23 = new DefaultMutableTreeNode(
-					new KVP("Colour Map Entry Coding for CLUTs 2 and 3"));
+			KVP clut23 = new KVP("Colour Map Entry Coding for CLUTs 2 and 3");
 
 			for (int i = 16; i <= 31; i++) {
 				int r = bs.getIntBitsReverse(4); // 0..15
@@ -233,13 +227,13 @@ public class TxtDataField extends EBUDataField {
 
 				String bgColor = "#" + toHexStringUnformatted(r_byte, 2)
 						+ toHexStringUnformatted(g_byte, 2) + toHexStringUnformatted(b_byte, 2);
-				DefaultMutableTreeNode cmapEntry = new DefaultMutableTreeNode(new KVP("Colour Map entry " + i).setHtmlLabel(
+				KVP cmapEntry = new KVP("Colour Map entry " + i).setHtmlLabel(
 						"Colour Map entry " + i + " <code><span style=\"background-color: " + bgColor
 								+ "; color: white;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></code>"
-						));
-				cmapEntry.add(new DefaultMutableTreeNode(new KVP("R", r, null)));
-				cmapEntry.add(new DefaultMutableTreeNode(new KVP("G", g, null)));
-				cmapEntry.add(new DefaultMutableTreeNode(new KVP("B", b, null)));
+						);
+				cmapEntry.add(new KVP("R", r));
+				cmapEntry.add(new KVP("G", g));
+				cmapEntry.add(new KVP("B", b));
 				clut23.add(cmapEntry);
 			}
 			s.add(clut23);
@@ -252,13 +246,11 @@ public class TxtDataField extends EBUDataField {
 
 			s.add(new KVP("Default Screen Colour", defaultScreenColour));
 			s.add(new KVP("Default Row Colour", defaultRowColour));
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Black Background Colour Substitution", blackBackgroundColourSubstitution,
+			s.add(new KVP("Black Background Colour Substitution", blackBackgroundColourSubstitution,
 							blackBackgroundColourSubstitution == 1
 									? "black background is replaced by the full row colour applying to that row"
-									: "No substitution of black background by the pertaining row colour")));
-			s.add(new DefaultMutableTreeNode(
-					new KVP("Colour Table Re-mapping for use with Spacing Attributes", colourTableRemapping)));
+									: "No substitution of black background by the pertaining row colour"));
+			s.add(new KVP("Colour Table Re-mapping for use with Spacing Attributes", colourTableRemapping));
 
 		}
 	}
@@ -317,8 +309,8 @@ public class TxtDataField extends EBUDataField {
 	/**
 	 * @param s
 	 */
-	private void addChannelDataLine30(DefaultMutableTreeNode node, int modus) {
-		DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("TV channel related broadcast service data"));
+	private void addChannelDataLine30(KVP node) {
+		KVP s = new KVP("TV channel related broadcast service data");
 		node.add(s);
 		s.add(new KVP("Multiplexing",getDesignationCode(),(getDesignationCode()==0)?"Multiplexed with video":"Non-multiplexed, all lines may be used to carry Teletext"));
 		int netWorkIdent = getInt(data_block, offset+13, 2, MASK_16BITS);
@@ -352,15 +344,12 @@ public class TxtDataField extends EBUDataField {
 	}
 
 
-	/**
-	 * @param s
-	 */
-	private void addInititalPagePacket8_30ToJTree(DefaultMutableTreeNode s, int modus) {
+	private void addInititalPagePacket8_30ToJTree(KVP s) {
 		int pageNumber=getPageNumber(7);
 		int subPage = getSubPage(9);
 		int m=getMagazineComplement(10)^getMagazineNo();
 		String formattedPageNo = formatPageNo(m,pageNumber,subPage);
-		DefaultMutableTreeNode initialTxtPage=new DefaultMutableTreeNode(new KVP("Initial Teletext Page",formattedPageNo,null));
+		KVP initialTxtPage = new KVP("Initial Teletext Page",formattedPageNo);
 		s.add(initialTxtPage);
 
 		initialTxtPage.add(new KVP("pageNumber",pageNumber));

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -77,8 +75,8 @@ public class TxtService implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("TxtService"));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("TxtService");
 
 		for (int i = 0; i < packet8_30.length; i++) {
 			List<TxtDataField> txtDatafield = packet8_30[i];
