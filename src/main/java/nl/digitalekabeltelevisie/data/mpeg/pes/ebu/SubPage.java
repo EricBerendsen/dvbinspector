@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -283,16 +283,13 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 	}
 
 	public void addLine(TxtDataField txtDataField) {
-		int l = txtDataField.getPacketNo();
-		if (txtDataField.getPacketNo() == 26) {
-			packetx_26[txtDataField.getDesignationCode()] = txtDataField;
-		} else if (txtDataField.getPacketNo() == 27) {
-			packetx_27[txtDataField.getDesignationCode()] = txtDataField;
-		} else if (txtDataField.getPacketNo() == 28) {
-			packetx_28[txtDataField.getDesignationCode()] = txtDataField;
-		} else {
-			linesList[l] = new PageLine(this, txtDataField);
-		}
+		int packetNo = txtDataField.getPacketNo();
+        switch (packetNo) {
+            case 26 -> packetx_26[txtDataField.getDesignationCode()] = txtDataField;
+            case 27 -> packetx_27[txtDataField.getDesignationCode()] = txtDataField;
+            case 28 -> packetx_28[txtDataField.getDesignationCode()] = txtDataField;
+            default -> linesList[packetNo] = new PageLine(this, txtDataField);
+        }
 	}
 
 	@Override

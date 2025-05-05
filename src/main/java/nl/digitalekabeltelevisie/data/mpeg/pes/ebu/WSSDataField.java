@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -44,8 +44,29 @@ import nl.digitalekabeltelevisie.controller.KVP;
 public class WSSDataField extends EBUDataField {
 
 
+	private int wss_data_block;
+	private int aspectRatio;
+	private int filmBit;
+	private int colourCodingBit;
+	private int helperBit;
+	private int subtitlesWithinTeletextBit;
+	private int subtitlingMode;
+	private int surroundSoundBit;
+	private int copyrightBit;
+	private int generationBit;
+	
 	public WSSDataField(byte[] data, int offset, int len, long pts) {
 		super(data, offset, len, pts);
+		wss_data_block = getInt(data_block, offset+3, 2, 0xFFFC)>>2;
+		aspectRatio = getInt(data_block, offset+3, 1, 0xF0)>>4;
+		filmBit = getInt(data_block, offset+3, 1, 0x08)>>3;
+		colourCodingBit = getInt(data_block, offset+3, 1, 0x04)>>2;
+		helperBit = getInt(data_block, offset+3, 1, 0x02)>>1;
+		subtitlesWithinTeletextBit = getInt(data_block, offset+4, 1, 0x80)>>7;
+		subtitlingMode = getInt(data_block, offset+4, 1, 0x60)>>5;
+		surroundSoundBit = getInt(data_block, offset+4, 1, 0x10)>>4;
+		copyrightBit = getInt(data_block, offset+4, 1, 0x08)>>3;
+		generationBit = getInt(data_block, offset+4, 1, 0x04)>>2;
 	}
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
@@ -53,25 +74,15 @@ public class WSSDataField extends EBUDataField {
 	@Override
 	public KVP getJTreeNode(int modus) {
 		KVP s = super.getJTreeNode(modus);
-		int wss_data_block = getInt(data_block, offset+3, 2, 0xFFFC)>>2;
 		s.add(new KVP("wss_data_block",wss_data_block));
-		int aspectRatio = getInt(data_block, offset+3, 1, 0xF0)>>4;
 		s.add(new KVP("Aspect Ratio",aspectRatio,getAspectRatioString(aspectRatio)));
-		int filmBit = getInt(data_block, offset+3, 1, 0x08)>>3;
 		s.add(new KVP("Film Bit",filmBit,getFilmBitString(filmBit)));
-		int colourCodingBit = getInt(data_block, offset+3, 1, 0x04)>>2;
 		s.add(new KVP("Colour coding Bit",colourCodingBit,getColourCodingBitString(colourCodingBit)));
-		int helperBit = getInt(data_block, offset+3, 1, 0x02)>>1;
 		s.add(new KVP("Helper Bit",helperBit,getHelperBitString(helperBit)));
-		int subtitlesWithinTeletextBit = getInt(data_block, offset+4, 1, 0x80)>>7;
 		s.add(new KVP("Subtitles within Teletext",subtitlesWithinTeletextBit,getSubtitlesWithinTeletextString(subtitlesWithinTeletextBit)));
-		int subtitlingMode = getInt(data_block, offset+4, 1, 0x60)>>5;
 		s.add(new KVP("Subtitling mode",subtitlingMode,getSubtitlingModeString(subtitlingMode)));
-		int surroundSoundBit = getInt(data_block, offset+4, 1, 0x10)>>4;
 		s.add(new KVP("Surround sound bit",surroundSoundBit,getSurroundSoundBitString(surroundSoundBit)));
-		int copyrightBit = getInt(data_block, offset+4, 1, 0x08)>>3;
 		s.add(new KVP("Copyright bit",copyrightBit,getCopyrightBitString(copyrightBit)));
-		int generationBit = getInt(data_block, offset+4, 1, 0x04)>>2;
 		s.add(new KVP("Generation bit",generationBit,getGenerationBitString(generationBit)));
 		return s;
 	}

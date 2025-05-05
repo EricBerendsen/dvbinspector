@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -106,20 +106,16 @@ public class EBUPESDataField extends PesPacketData {
 			if((offset+t+2+0x2C)<=data.length){  // element always assumed to be 0x2c long.
                 switch (dataUnitId) {
                     case 0x02, 0x03, 0xc0, 0xc1 -> {
-                        EBUDataField f = new TxtDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
-                        fieldList.add(f);
+                        fieldList.add(new TxtDataField(data, offset + t, dataUnitLen, getPesHeader().getPts()));
                     }
                     case 0xC4 -> {
-                        EBUDataField f = new WSSDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
-                        fieldList.add(f);
+                        fieldList.add(new WSSDataField(data, offset + t, dataUnitLen, getPesHeader().getPts()));
                     }
                     case 0xC3 -> {
-                        EBUDataField f = new VPSDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
-                        fieldList.add(f);
+                        fieldList.add(new VPSDataField(data, offset + t, dataUnitLen, getPesHeader().getPts()));
                     }
                     default -> {
-                        EBUDataField f = new EBUDataField(data, offset + t, dataUnitLen, getPesHeader().getPts());
-                        fieldList.add(f);
+                        fieldList.add(new EBUDataField(data, offset + t, dataUnitLen, getPesHeader().getPts()));
                     }
                 }
 			}else{

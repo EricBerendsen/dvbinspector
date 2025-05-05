@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -339,180 +339,197 @@ Triplet {
 		int mode = (val&0x007c0)>>6;
 		int data = (val&0x3f800)>>11;
 
-		StringBuilder stringBuilder = new StringBuilder();
-
-		if(address < 40){
-			stringBuilder.append("column ");
-			stringBuilder.append(address);
-			stringBuilder.append(", ");
-			if(mode == 0){ //Foreground Colour
-				int clut = (data & 0x18)>>3;
-				int clutEntry = (data & 0x7);
-				stringBuilder.append("clut ");
-				stringBuilder.append(clut);
-				stringBuilder.append(", entry ");
-				stringBuilder.append(clutEntry);
-			}
-			if(mode == 3){ //Background Colour
-				int clut = (data & 0x18)>>3;
-				int clutEntry = (data & 0x7);
-				stringBuilder.append("clut ");
-				stringBuilder.append(clut);
-				stringBuilder.append(", entry ");
-				stringBuilder.append(clutEntry);
-			}
-			if(mode == 6){ // PDC - Cursor Column & Announced Starting & Finishing Time Minutes
-				int minutesUnits = (data & 0x0F);
-				int minutesTens = (data & 0x70)>>4;
-				stringBuilder.append("minutes ");
-				stringBuilder.append(minutesTens);
-				stringBuilder.append(minutesUnits);
-			}
-			if(mode == 12){ //Display attributes
-				int doubleWidth = (data & 0x40)>>6;
-				int underline = (data & 0x20)>>5;
-				int invert = (data & 0x10)>>4;
-				int conceal = (data & 0x4)>>2;
-				int boxing = (data & 0x2)>>1;
-				int doubleHeigth = (data & 0x1);
-				stringBuilder.append("Double Width:");
-				stringBuilder.append(doubleWidth);
-				stringBuilder.append(", Underline/Separated Mosaics:");
-				stringBuilder.append(underline);
-				stringBuilder.append(", Invert Colour:");
-				stringBuilder.append(invert);
-				stringBuilder.append(", Conceal:");
-				stringBuilder.append(conceal);
-				stringBuilder.append(", Boxing/Window:");
-				stringBuilder.append(boxing);
-				stringBuilder.append(", Double Height:");
-				stringBuilder.append(doubleHeigth);
-			}
-			if(mode == 13){ //DRCS Character Invocation
-				int normal = (data & 0x40)>>6;
-				int chr = (data & 0x3F);
-				if(normal==1){
-					stringBuilder.append("normal");
-				}else{
-					stringBuilder.append("global");
-				}
-				stringBuilder.append(", character ");
-				stringBuilder.append(chr);
-			}
-
-			if(mode > 16){ //char from G0 set w/ diacr.
-                stringBuilder.append((char)data);
-				stringBuilder.append("+ ");
-				stringBuilder.append((char)G2_sets[0][64+ (mode & 0xF)]);// no typo, need G2_sets, but I don't understand why......????
-				stringBuilder.append("  ");
-                stringBuilder.append((char)getCombinedCharacter(data, mode & 0xF));
-			}
-			if(mode == 15){ //Character from the G2 Supplementary Set
-                stringBuilder.append((char)G2_sets[0][data]);
-            }
-			if(mode==16){
-                stringBuilder.append((char)G0_sets[0][data]);
-                //NOTE 3: The @ symbol replaces the * symbol at position 2/A when the table is accessed via a packet X/26 Column
-				// Address triplet with Mode Description = 10 000 and Data = 0101010. See clause 12.2.4.
-			}
-		}else{ // address >= 40
-			if(mode==0x04){// set active position
-				stringBuilder.append("Row ");
-				stringBuilder.append(getRow(address));
-				stringBuilder.append(", column ");
-				stringBuilder.append(((data<40)? data:"undefined"));
-			}
-			// PDC related
-			if(mode==0x08){// PDC - Country of Origin and Programme Source
-				stringBuilder.append("Country of Origin ");
-				stringBuilder.append((address&0x0F));
-				stringBuilder.append(", Programme Source ");
-				stringBuilder.append((data&0x03F));
-				//ETSI EN 300 231 V1.3.1 says in §7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
-			}
-			if(mode==0x09){// PDC - Month & Day
-				stringBuilder.append("Month ");
-				stringBuilder.append((address&0xF));
-				stringBuilder.append(", Day ");
-				stringBuilder.append(((data&0x30)>>4));
-                stringBuilder.append((data&0x0F));
-			}
-			if(mode==0x0A){// PDC - Cursor Row & Announced Starting Time Hours
-				stringBuilder.append("Row ");
-				stringBuilder.append(getRow(address));
-				stringBuilder.append(", hours ");
-				stringBuilder.append(getHoursString(data));
-				stringBuilder.append(", Controlled Access Flag ");
-				stringBuilder.append(((data&0x40)>0?"controlled access":"free access"));
-			}
-			if(mode==0x0B){// PDC - Cursor Row & Announce Finishing Time Hours
-				stringBuilder.append("Row ");
-				stringBuilder.append(getRow(address));
-				stringBuilder.append(", hours ");
-				stringBuilder.append(getHoursString(data));
-				stringBuilder.append(", duration ");
-				stringBuilder.append(((data&0x40)>0?"programme duration":"finishing time"));
-			}
-			if(mode==0x10){// Origin Modifier
-				stringBuilder.append("row offset  ");
-				stringBuilder.append((address-40));
-				stringBuilder.append(", column offset ");
-				stringBuilder.append((data&0x0F));
-			}
-
-			if((mode>=0x11)&&(mode<=0x13)){// Object Invocation
-				int objectSource = (address&0x18)>>3;
-				int objectType = (mode&0x3);
-				int subPageS1 =data&0xF;
-				int ptrLocation = address &0x3;
-				int tripletOffset = (data & 0x60)>>5;
-				int ptrPosition = (data&0x10)>>4;
-				int objectNo = (ptrLocation<<3)|(tripletOffset<<1)|ptrPosition;
-	
-				stringBuilder.append("object source");
-				stringBuilder.append(objectSource);
-				stringBuilder.append(" (");
-				stringBuilder.append(getObjectSourceString(objectSource));
-				stringBuilder.append("), object type:");
-				stringBuilder.append(objectType);
-				stringBuilder.append(" (");
-				stringBuilder.append(EBUTeletextHandler.getObjectTypeString(objectType));
-				stringBuilder.append(") objectNo:");
-				stringBuilder.append(objectNo);
-				stringBuilder.append(", SubPageS1:");
-				stringBuilder.append(subPageS1);
-				stringBuilder.append(", ptrLocation:");
-				stringBuilder.append(ptrLocation);
-				stringBuilder.append(", tripletOffset ");
-				stringBuilder.append(tripletOffset);
-				stringBuilder.append(" ptrPosition ");
-				stringBuilder.append(ptrPosition);
-			}
-			if((mode>=0x15)&&(mode<=0x17)){// Object Definition
-				String objectUsage = switch ((address & 0x18) >> 3) {
-                    case 0 -> "illegal";
-                    case 1 -> "Level 2.5";
-                    case 2 -> "Level 3.5";
-                    case 3 -> "Levels 2.5 and 3.5";
-                    default -> "illegal";
-                };
-                stringBuilder.append("Object Usage ");
-				stringBuilder.append(objectUsage);
-				stringBuilder.append(", packet within object page containing the pointer to this object ");
-				stringBuilder.append((1+(address&0x03)));
-			}
-
-		}
-		if(!stringBuilder.isEmpty()){
-			stringBuilder.insert(0, " (");
-			stringBuilder.append(")");
-		}
-
-		KVP t = new KVP("Triplet",val,getModeString(mode,address)+stringBuilder.toString());
+		String detailString = buildDetail(address, mode, data);
+		
+		KVP t = new KVP("Triplet",val,getModeString(mode,address)+detailString);
 		t.add(new KVP("mode",mode,getModeString(mode,address)));
 		t.add(new KVP("address/data word A",address,(address<=39)?"Column Address Group":"Row Address Group "+(address==40?24:address-40)));
 		t.add(new KVP("data/data word B",data));
 		return t;
+	}
+
+	private static String buildDetail(int address, int mode, int data) {
+		String result = buildDetailCore(address, mode, data);
+		if(!result.isEmpty()){
+			return " (" + result + ")";
+		}
+
+		return "";
+	}
+
+	private static String buildDetailCore(int address, int mode, int data) {
+		if(address < 40){
+			return buildColumnAddresGroupDetail(address, mode, data);
+		}
+		return buildRowAddressGroupDetail(address, mode, data);
+	}
+
+	private static String buildRowAddressGroupDetail(int address, int mode, int data) {
+		StringBuilder stringBuilder = new StringBuilder();
+		if(mode==0x04){// set active position
+			stringBuilder.append("Row ");
+			stringBuilder.append(getRow(address));
+			stringBuilder.append(", column ");
+			stringBuilder.append(((data<40)? data:"undefined"));
+		}
+		// PDC related
+		if(mode==0x08){// PDC - Country of Origin and Programme Source
+			stringBuilder.append("Country of Origin ");
+			stringBuilder.append((address&0x0F));
+			stringBuilder.append(", Programme Source ");
+			stringBuilder.append((data&0x03F));
+			//ETSI EN 300 231 V1.3.1 says in §7.3.2.3:  "4 least-significant bits: Country of Origin", but TS 101 231 Codes Register (2010-12) only matches when we use 6
+		}
+		if(mode==0x09){// PDC - Month & Day
+			stringBuilder.append("Month ");
+			stringBuilder.append((address&0xF));
+			stringBuilder.append(", Day ");
+			stringBuilder.append(((data&0x30)>>4));
+		    stringBuilder.append((data&0x0F));
+		}
+		if(mode==0x0A){// PDC - Cursor Row & Announced Starting Time Hours
+			stringBuilder.append("Row ");
+			stringBuilder.append(getRow(address));
+			stringBuilder.append(", hours ");
+			stringBuilder.append(getHoursString(data));
+			stringBuilder.append(", Controlled Access Flag ");
+			stringBuilder.append(((data&0x40)>0?"controlled access":"free access"));
+		}
+		if(mode==0x0B){// PDC - Cursor Row & Announce Finishing Time Hours
+			stringBuilder.append("Row ");
+			stringBuilder.append(getRow(address));
+			stringBuilder.append(", hours ");
+			stringBuilder.append(getHoursString(data));
+			stringBuilder.append(", duration ");
+			stringBuilder.append(((data&0x40)>0?"programme duration":"finishing time"));
+		}
+		if(mode==0x10){// Origin Modifier
+			stringBuilder.append("row offset  ");
+			stringBuilder.append((address-40));
+			stringBuilder.append(", column offset ");
+			stringBuilder.append((data&0x0F));
+		}
+
+		if((mode>=0x11)&&(mode<=0x13)){// Object Invocation
+			int objectSource = (address&0x18)>>3;
+			int objectType = (mode&0x3);
+			int subPageS1 =data&0xF;
+			int ptrLocation = address &0x3;
+			int tripletOffset = (data & 0x60)>>5;
+			int ptrPosition = (data&0x10)>>4;
+			int objectNo = (ptrLocation<<3)|(tripletOffset<<1)|ptrPosition;
+
+			stringBuilder.append("object source");
+			stringBuilder.append(objectSource);
+			stringBuilder.append(" (");
+			stringBuilder.append(getObjectSourceString(objectSource));
+			stringBuilder.append("), object type:");
+			stringBuilder.append(objectType);
+			stringBuilder.append(" (");
+			stringBuilder.append(EBUTeletextHandler.getObjectTypeString(objectType));
+			stringBuilder.append(") objectNo:");
+			stringBuilder.append(objectNo);
+			stringBuilder.append(", SubPageS1:");
+			stringBuilder.append(subPageS1);
+			stringBuilder.append(", ptrLocation:");
+			stringBuilder.append(ptrLocation);
+			stringBuilder.append(", tripletOffset ");
+			stringBuilder.append(tripletOffset);
+			stringBuilder.append(" ptrPosition ");
+			stringBuilder.append(ptrPosition);
+		}
+		if((mode>=0x15)&&(mode<=0x17)){// Object Definition
+			String objectUsage = switch ((address & 0x18) >> 3) {
+		        case 0 -> "illegal";
+		        case 1 -> "Level 2.5";
+		        case 2 -> "Level 3.5";
+		        case 3 -> "Levels 2.5 and 3.5";
+		        default -> "illegal";
+		    };
+		    stringBuilder.append("Object Usage ");
+			stringBuilder.append(objectUsage);
+			stringBuilder.append(", packet within object page containing the pointer to this object ");
+			stringBuilder.append((1+(address&0x03)));
+		}
+		return stringBuilder.toString();
+	}
+
+	private static String buildColumnAddresGroupDetail(int address, int mode, int data) {
+		StringBuilder stringBuilder = new  StringBuilder();
+		stringBuilder.append("column ");
+		stringBuilder.append(address);
+		stringBuilder.append(", ");
+		if(mode == 0){ //Foreground Colour
+			int clut = (data & 0x18)>>3;
+			int clutEntry = (data & 0x7);
+			stringBuilder.append("clut ");
+			stringBuilder.append(clut);
+			stringBuilder.append(", entry ");
+			stringBuilder.append(clutEntry);
+		}
+		if(mode == 3){ //Background Colour
+			int clut = (data & 0x18)>>3;
+			int clutEntry = (data & 0x7);
+			stringBuilder.append("clut ");
+			stringBuilder.append(clut);
+			stringBuilder.append(", entry ");
+			stringBuilder.append(clutEntry);
+		}
+		if(mode == 6){ // PDC - Cursor Column & Announced Starting & Finishing Time Minutes
+			int minutesUnits = (data & 0x0F);
+			int minutesTens = (data & 0x70)>>4;
+			stringBuilder.append("minutes ");
+			stringBuilder.append(minutesTens);
+			stringBuilder.append(minutesUnits);
+		}
+		if(mode == 12){ //Display attributes
+			int doubleWidth = (data & 0x40)>>6;
+			int underline = (data & 0x20)>>5;
+			int invert = (data & 0x10)>>4;
+			int conceal = (data & 0x4)>>2;
+			int boxing = (data & 0x2)>>1;
+			int doubleHeigth = (data & 0x1);
+			stringBuilder.append("Double Width:");
+			stringBuilder.append(doubleWidth);
+			stringBuilder.append(", Underline/Separated Mosaics:");
+			stringBuilder.append(underline);
+			stringBuilder.append(", Invert Colour:");
+			stringBuilder.append(invert);
+			stringBuilder.append(", Conceal:");
+			stringBuilder.append(conceal);
+			stringBuilder.append(", Boxing/Window:");
+			stringBuilder.append(boxing);
+			stringBuilder.append(", Double Height:");
+			stringBuilder.append(doubleHeigth);
+		}
+		if(mode == 13){ //DRCS Character Invocation
+			int normal = (data & 0x40)>>6;
+			int chr = (data & 0x3F);
+			if(normal==1){
+				stringBuilder.append("normal");
+			}else{
+				stringBuilder.append("global");
+			}
+			stringBuilder.append(", character ");
+			stringBuilder.append(chr);
+		}
+
+		if(mode > 16){ //char from G0 set w/ diacr.
+		    stringBuilder.append((char)data);
+			stringBuilder.append("+ ");
+			stringBuilder.append((char)G2_sets[0][64+ (mode & 0xF)]);// no typo, need G2_sets, but I don't understand why......????
+			stringBuilder.append("  ");
+		    stringBuilder.append((char)getCombinedCharacter(data, mode & 0xF));
+		}
+		if(mode == 15){ //Character from the G2 Supplementary Set
+		    stringBuilder.append((char)G2_sets[0][data]);
+		}
+		if(mode==16){
+		    stringBuilder.append((char)G0_sets[0][data]);
+		    //NOTE 3: The @ symbol replaces the * symbol at position 2/A when the table is accessed via a packet X/26 Column
+			// Address triplet with Mode Description = 10 000 and Data = 0101010. See clause 12.2.4.
+		}
+		return stringBuilder.toString();
 	}
 
 	/**
