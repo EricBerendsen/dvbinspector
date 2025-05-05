@@ -365,8 +365,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					b.append(Integer.toHexString(value));
 				}
-				KVP p = new KVP("Row "+i,b.toString());
-				mptPage.add(p);
+                mptPage.add(new KVP("Row "+i,b.toString()));
 			}
 		}
 
@@ -376,8 +375,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				for(int j= 0; j < 39; j++){
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					int pageNo= 100 + ((i-1)*40)+j;
-					KVP p = new KVP("page "+pageNo,value);
-					mptPage.add(p);
+                    mptPage.add(new KVP("page "+pageNo,value));
 
 				}
 
@@ -413,8 +411,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 						}
 
 					}
-					KVP p = new KVP("Title "+(((i-1)*2)+j),b.toString()+" "+buf.toString());
-					aitPage.add(p);
+                    aitPage.add(new KVP("Title "+(((i-1)*2)+j), b +" "+ buf));
 				}
 			}
 		}
@@ -432,8 +429,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 				for(int j= 0; j < 39; j++){
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					int pageNo= 100 + ((i-1)*40)+j;
-					KVP p = new KVP("page "+pageNo,value,getPageDescription(value));
-					bttPage.add(p);
+                    bttPage.add(new KVP("page "+pageNo,value,getPageDescription(value)));
 
 				}
 
@@ -447,8 +443,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 					int value = getHammingReverseByte(txtDataField.getRawByte(j));
 					b.append(Integer.toHexString(value));
 				}
-				KVP p = new KVP("Row "+i,b.toString());
-				bttPage.add(p);
+                bttPage.add(new KVP("Row "+i,b.toString()));
 			}
 		}
 	}

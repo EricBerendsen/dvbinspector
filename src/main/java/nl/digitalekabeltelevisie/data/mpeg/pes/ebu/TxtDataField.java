@@ -66,7 +66,7 @@ public class TxtDataField extends EBUDataField {
 		s.add(new KVP("magazine_and_packet_address",getInt(data_block, 4+offset, 2,MASK_16BITS),"Magazine:"+getMagazineNo()+" Packet:"+getPacketNo()));
 		s.add(new KVP("raw data",data_block,offset,46));
 		if(getPacketNo()==0){ // header
-			s.add(new KVP("page number",toHexString((getPageNumberTens()*16)+getPageNumberUnits(),2))); // Tens is really hexadecimal
+			s.add(new KVP("page number",toHexString((getPageNumberTens()* 16L)+getPageNumberUnits(),2))); // Tens is really hexadecimal
 			s.add(new KVP("sub page",toHexString(getSubPage(),4)));
 			s.add(new KVP("data bytes",getHeaderDataBytes()));
 			StringBuilder flags =new StringBuilder();
@@ -136,7 +136,7 @@ public class TxtDataField extends EBUDataField {
 		}
 		if((getMagazineNo()==0)&&(getPacketNo()==30)&&(getDesignationCode()>=2)&&(getDesignationCode()<=3)){ // 9.8.2 Packet 8/30 Format 2
 			addInititalPagePacket8_30ToJTree(s);
-			addPDCDetails(s, 13);
+			addPDCDetails(s);
 			s.add(new KVP("Status Display",getDataBytes(26, 46)));
 		}
 
@@ -325,7 +325,7 @@ public class TxtDataField extends EBUDataField {
 		int units = invtab[getInt(data_block, offset+18, 1, 0xF0)]-1;
 		int tens = invtab[getInt(data_block, offset+18, 1, 0x0F)<<4]-1;
 
-		long mjd= (((((((tenthousands*10)+thousands)*10)+hundreds)*10)+tens)*10)+units;
+		long mjd= (((((((tenthousands* 10L)+thousands)*10)+hundreds)*10)+tens)*10)+units;
 		long y =  (long) ((mjd  - 15078.2) / 365.25);
 		long m =  (long) ((mjd - 14956.1 - (long)(y * 365.25) ) / 30.6001);
 		long d =  (mjd - 14956 - (long)(y * 365.25) - (long)(m * 30.6001));
@@ -700,84 +700,88 @@ public class TxtDataField extends EBUDataField {
 	}
 
 
-	protected void addPDCDetails(KVP node, int localOffset) {
+	protected void addPDCDetails(KVP node) {
 		KVP s = new KVP("TV programme identification data for VCR control");
 		node.add(s);
 
-		s.add(new KVP("Label channel identifier",getLabelChannelIdentifier(localOffset)));
-		s.add(new KVP("Label Update Flag",getLabelUpdateFlag(localOffset),(getLabelUpdateFlag(localOffset)==1)?"label does not relate to the current television programme, but is intended to update the label memories in video recorders":"label does relate to the current television programme"));
-		s.add(new KVP("Prepare to Record Flag",getPrepareToRecordFlag(localOffset)));
-		s.add(new KVP("Status of analogue sound",getStatusOfAnalogueSound(localOffset),VPSDataField.getPCSAudioString(getStatusOfAnalogueSound(localOffset))));
-		s.add(new KVP("Mode identifier",getModeIdentifier(localOffset),(getModeIdentifier(localOffset)==1)?"service code takes immediate effect":"effect of service codes is delayed by 30 s"));
-		s.add(new KVP("CNI Country",getCNICountry(localOffset)));
-		s.add(new KVP("CNI Network",getCNINetwork(localOffset)));
-		s.add(new KVP("day",getDay(localOffset)));
-		s.add(new KVP("month",getMonth(localOffset)));
-		s.add(new KVP("hour",getHour(localOffset)));
-		s.add(new KVP("minute",getMinute(localOffset)));
-		s.add(new KVP("PTY",getPTY(localOffset)));
+		s.add(new KVP("Label channel identifier",getLabelChannelIdentifier()));
+		s.add(new KVP("Label Update Flag",getLabelUpdateFlag(),(getLabelUpdateFlag()==1)?"label does not relate to the current television programme, but is intended to update the label memories in video recorders":"label does relate to the current television programme"));
+		s.add(new KVP("Prepare to Record Flag",getPrepareToRecordFlag()));
+		s.add(new KVP("Status of analogue sound",getStatusOfAnalogueSound(),VPSDataField.getPCSAudioString(getStatusOfAnalogueSound())));
+		s.add(new KVP("Mode identifier",getModeIdentifier(),(getModeIdentifier()==1)?"service code takes immediate effect":"effect of service codes is delayed by 30 s"));
+		s.add(new KVP("CNI Country",getCNICountry()));
+		s.add(new KVP("CNI Network",getCNINetwork()));
+		s.add(new KVP("day",getDay()));
+		s.add(new KVP("month",getMonth()));
+		s.add(new KVP("hour",getHour()));
+		s.add(new KVP("minute",getMinute()));
+		s.add(new KVP("PTY",getPTY()));
 	}
 
 
-	protected int getCNICountry(int localOffset) {
-		return (16*getHammingByte(data_block[localOffset+offset+2]))
-				+ (4*(getHammingByte(data_block[localOffset+offset+8])&0x03))
-				+ ((getHammingByte(data_block[localOffset+offset+9])&0x0C)>>2);
+	protected int getCNICountry() {
+		return (16*getHammingByte(data_block[13 +offset+2]))
+				+ (4*(getHammingByte(data_block[13 +offset+8])&0x03))
+				+ ((getHammingByte(data_block[13 +offset+9])&0x0C)>>2);
 	}
 
 
-	protected int getCNINetwork(int localOffset) {
-		return ((64*(getHammingByte(data_block[localOffset+offset+3])&0xC))>>2)
-				+ (16*((getHammingByte(data_block[localOffset+offset+9])&0x03)))
-				+ getHammingByte(data_block[localOffset+offset+10]);
+	protected int getCNINetwork() {
+		return ((64*(getHammingByte(data_block[13 +offset+3])&0xC))>>2)
+				+ (16*(getHammingByte(data_block[13 +offset+9])&0x03))
+				+ getHammingByte(data_block[13 +offset+10]);
 	}
 
 
-	protected int getLabelChannelIdentifier(int localOffset) {
-		return (getHammingByte(data_block[localOffset+offset])&0xC)>>2;
+	protected int getLabelChannelIdentifier() {
+		return (getHammingByte(data_block[13 + offset]) & 0xC) >> 2;
 	}
 
-	protected int getLabelUpdateFlag(int localOffset) {
-		return (getHammingByte(data_block[localOffset+offset])&0x2)>>1;
+	protected int getLabelUpdateFlag() {
+		return (getHammingByte(data_block[13 + offset]) & 0x2) >> 1;
 	}
 
-	protected int getPrepareToRecordFlag(int localOffset) {
-		return (getHammingByte(data_block[localOffset+offset])&0x1);
+	protected int getPrepareToRecordFlag() {
+		return (getHammingByte(data_block[13 + offset]) & 0x1);
 	}
 
-	protected int getStatusOfAnalogueSound(int localOffset) {
-		return (getHammingByte(data_block[localOffset+offset+1])&0xC)>>2;
+	protected int getStatusOfAnalogueSound() {
+		return (getHammingByte(data_block[13 + offset + 1]) & 0xC) >> 2;
 	}
 
-	protected int getModeIdentifier(int localOffset) {
-		return (getHammingByte(data_block[localOffset+offset+1])&0x2)>>1;
+	protected int getModeIdentifier() {
+		return (getHammingByte(data_block[13 + offset + 1]) & 0x2) >> 1;
 	}
 
-	protected int getDay(int localOffset) {
-		return (8*(getHammingByte(data_block[localOffset+offset+3])&0x3))+((getHammingByte(data_block[localOffset+offset+4])&0xe)>>1);
-	}
-	protected int getMonth(int localOffset) {
-		return (2*(getHammingByte(data_block[localOffset+offset+4])&0x1))+((getHammingByte(data_block[localOffset+offset+5])&0xe)>>1);
-	}
-	protected int getHour(int localOffset) {
-		return (16*(getHammingByte(data_block[localOffset+offset+5])&0x1))+getHammingByte(data_block[localOffset+offset+6]);
-	}
-	protected int getMinute(int localOffset) {
-		return (4*getHammingByte(data_block[localOffset+offset+7]))+((getHammingByte(data_block[localOffset+offset+8])&0xC)>>2);
-	}
-	protected int getPTY(int localOffset) {
-		return (16*getHammingByte(data_block[localOffset+offset+11]))+getHammingByte(data_block[localOffset+offset+12]);
+	protected int getDay() {
+		return (8 * (getHammingByte(data_block[13 + offset + 3]) & 0x3)) + ((getHammingByte(data_block[13 + offset + 4]) & 0xe) >> 1);
 	}
 
-	private static String getTimeOffsetCodeString(int timeOffset){
-		int uren = invtab[(timeOffset&0x1E)<<3];
+	protected int getMonth() {
+		return (2 * (getHammingByte(data_block[13 + offset + 4]) & 0x1)) + ((getHammingByte(data_block[13 + offset + 5]) & 0xe) >> 1);
+	}
+
+	protected int getHour() {
+		return (16 * (getHammingByte(data_block[13 + offset + 5]) & 0x1)) + getHammingByte(data_block[13 + offset + 6]);
+	}
+
+	protected int getMinute() {
+		return (4 * getHammingByte(data_block[13 + offset + 7])) + ((getHammingByte(data_block[13 + offset + 8]) & 0xC) >> 2);
+	}
+
+	protected int getPTY() {
+		return (16 * getHammingByte(data_block[13 + offset + 11])) + getHammingByte(data_block[13 + offset + 12]);
+	}
+
+	private static String getTimeOffsetCodeString(int timeOffset) {
+		int uren = invtab[(timeOffset & 0x1E) << 3];
 		StringBuilder b = new StringBuilder().append(uren);
-		if((timeOffset&0x20)!=0){
+		if ((timeOffset & 0x20) != 0) {
 			b.append('½');
 		}
-		if((timeOffset&0x01)!=0){
+		if ((timeOffset & 0x01) != 0) {
 			b.append(" hour(s), negative offset (west of Greenwich)");
-		}else{
+		} else {
 			b.append(" hour(s), positive offset (east of Greenwich)");
 		}
 
