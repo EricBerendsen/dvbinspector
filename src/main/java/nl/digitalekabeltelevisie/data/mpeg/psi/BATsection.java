@@ -119,7 +119,7 @@ public class BATsection extends TableSectionExtendedSyntax{
 		if(!transportStreamList.isEmpty()) {
 			kvp.addTableSource(this::getTableModel, "bat");
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_lengt", getNetworkDescriptorsLength(), null)));
+		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_length", getNetworkDescriptorsLength(), null)));
 		Utils.addListJTree(t, networkDescriptorList, modus, "network_descriptors");
 		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length", getTransportStreamLoopLength(), null)));
 		Utils.addListJTree(t, transportStreamList, modus, "transport_stream_loop");

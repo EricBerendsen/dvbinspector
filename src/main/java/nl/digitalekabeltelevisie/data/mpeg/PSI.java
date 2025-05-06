@@ -31,6 +31,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGT;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
@@ -64,6 +65,8 @@ public class PSI {
 	
 	private final M7Fastscan m7fastscan = new M7Fastscan(this);
 	
+	private final SGT sgt = new SGT(this);
+	
 
 	public KVP getJTreeNode(final int modus){
 
@@ -90,6 +93,7 @@ public class PSI {
 		if(PreferencesManager.isEnableM7Fastscan()) {
 			t.add(m7fastscan.getJTreeNode(modus));
 		}
+		t.add(sgt.getJTreeNode(modus));
 		return t;
 	}
 	public PMTs getPmts() {
@@ -180,5 +184,8 @@ public class PSI {
 	}
 	public TSDT getTsdt() {
 		return tsdt;
+	}
+	public SGT getSgt() {
+		return sgt;
 	}
 }

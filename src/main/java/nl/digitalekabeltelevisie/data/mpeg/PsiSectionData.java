@@ -43,6 +43,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGTsection;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -198,6 +199,8 @@ public class PsiSectionData {
 					if(PreferencesManager.isEnableDSMCC()) {
 						transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
 					}
+				}else if((tableId==0x91)&&isSGTSection(pid)){
+					transportStream.getPsi().getSgt().update(new SGTsection(this,parentPID));
 				}else if(PreferencesManager.isEnableM7Fastscan()) {
 					if(tableId== 0xBC){
 						transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
@@ -211,6 +214,11 @@ public class PsiSectionData {
 		} catch (final RuntimeException re) {
 			logger.log(Level.WARNING, "RuntimeException in updatePSI PSI data: pid="+pid, re);
 		}
+	}
+
+	private boolean isSGTSection(int pid) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 	private boolean isSpliceInfoSection(int pid) {
