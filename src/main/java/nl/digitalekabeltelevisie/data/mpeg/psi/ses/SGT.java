@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
@@ -49,7 +47,6 @@ public class SGT extends AbstractPSITabel {
 	public void update(final SGTsection section) {
 		
 		final int pid = section.getParentPID().getPid();
-		
 		
 		HashMap<Integer, SGTsection []> l =  service_guides.computeIfAbsent(pid,HashMap::new);
 
@@ -80,15 +77,14 @@ public class SGT extends AbstractPSITabel {
 			for(int service_list_id:new TreeSet<>(guide.getValue().keySet())) {
 	
 				KVP kvp = new KVP("service_list_id",service_list_id);
-				final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
 				final SGTsection [] sections = guide.getValue().get(service_list_id);
 				for (final SGTsection tsection : sections) {
 					if(tsection!= null){
-						n.add(tsection.getJTreeNode(modus));
+						kvp.add(tsection.getJTreeNode(modus));
 	
 					}
 				}
-				pid.add(n);
+				pid.add(kvp);
 	
 			}
 		}

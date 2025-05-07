@@ -228,6 +228,12 @@ public class KVP extends DefaultMutableTreeNode{
 		setDescription(description);
 	}
 	
+	
+	public KVP add(String label, int intValue) {
+		add(new KVP(label, intValue));
+		return this;
+	}
+	
 	public String getDescription() {
 		return description;
 	}
