@@ -52,6 +52,9 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fast
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.opencable.EBPDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.scte.SCTEAdaptationFieldDataDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.BouquetListDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.ServiceListNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.VirtualServiceIDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.uwa.CUVVVideoStreamDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.*;
@@ -299,12 +302,23 @@ public final class DescriptorFactory {
 				case 0xD1:
 					return new AVS3VideoDescriptor(data, 0, tableSection);
 			}
-		}
-		else if (private_data_specifier == 0x41565341) { // AVS Audio
+		} else if (private_data_specifier == 0x41565341) { // AVS Audio
 			switch (descriptor_tag) {
 				case 0xD2:
 					return new AVS3AudioDescriptor(data, 0, tableSection);
 			}
+		} else if (private_data_specifier == 0x1) { // SES Astra
+			switch (descriptor_tag) {
+				case 0x88:
+					return new ServiceListNameDescriptor(data, tableSection);
+				case 0x93:
+					return new BouquetListDescriptor(data, tableSection);
+				case 0xD1:
+					return new VirtualServiceIDDescriptor(data, tableSection);
+					
+					
+			}
+		
 		}
 		logger.info("Unimplemented private descriptor, private_data_specifier=" + private_data_specifier
 					+ ", descriptortag=" + descriptor_tag + ", tableSection=" + tableSection);
