@@ -48,7 +48,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
  */
 public class SGTsection extends TableSectionExtendedSyntax {
 	
-	public class Service implements TreeNode{
+	public static class Service implements TreeNode{
 		
 		private int service_id;
 		private int transport_stream_id;
@@ -185,11 +185,11 @@ public class SGTsection extends TableSectionExtendedSyntax {
 		serviceList = buildServicesList(raw_data.getData(), 14 + service_list_descriptors_length, service_loop_length);
 	}
 	
-	private List<Service> buildServicesList(final byte[] data, final int offset, final int programInfoLength) {
-		final ArrayList<Service> r = new ArrayList<>();
+	private List<Service> buildServicesList(byte[] data, int offset, int programInfoLength) {
+		List<Service> r = new ArrayList<>();
 		int t = offset;
 		while (t < (programInfoLength + offset)) {
-			final Service service = new Service();
+			Service service = new Service();
 			service.setService_id(getInt(data, t, 2, MASK_16BITS));
 			service.setTransport_stream_id(getInt(data, t + 2, 2, MASK_16BITS));
 			service.setOriginal_network_id(getInt(data, t + 4, 2, MASK_16BITS));
@@ -220,9 +220,9 @@ public class SGTsection extends TableSectionExtendedSyntax {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final KVP t = (KVP)super.getJTreeNode(modus); 
+		KVP t = (KVP)super.getJTreeNode(modus);
 			t.add("reserved", reserved1)
 			.add("reserved_future_use", reserved_future_use1)
 			.add("service_list_descriptors_length", service_list_descriptors_length);

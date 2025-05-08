@@ -55,7 +55,7 @@ public class ServiceListNameDescriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
 		KVP t = (KVP)super.getJTreeNode(modus);
 		t.add(new KVP("ISO_639-2_language_code", iso_639_2_language_code));

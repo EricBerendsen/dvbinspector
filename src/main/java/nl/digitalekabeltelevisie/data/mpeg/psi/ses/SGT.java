@@ -44,18 +44,18 @@ public class SGT extends AbstractPSITabel {
 	
 	private final Map<Integer,HashMap<Integer, SGTsection []>> service_guides = new HashMap<>();
 
-	public void update(final SGTsection section) {
+	public void update(SGTsection section) {
 		
-		final int pid = section.getParentPID().getPid();
+		int pid = section.getParentPID().getPid();
 		
 		HashMap<Integer, SGTsection []> l =  service_guides.computeIfAbsent(pid,HashMap::new);
 
-		final int key = section.getServiceListId();
+		int key = section.getServiceListId();
 		SGTsection[] sections = l.computeIfAbsent(key, k -> new SGTsection[section.getSectionLastNumber() + 1]);
 		if (sections[section.getSectionNumber()] == null) {
 			sections[section.getSectionNumber()] = section;
 		} else {
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
@@ -65,7 +65,7 @@ public class SGT extends AbstractPSITabel {
 		super(parentPSI);
 	}
 	@Override
-	public KVP getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
 		KVP t = new KVP("SGT");
 		
@@ -77,8 +77,8 @@ public class SGT extends AbstractPSITabel {
 			for(int service_list_id:new TreeSet<>(guide.getValue().keySet())) {
 	
 				KVP kvp = new KVP("service_list_id",service_list_id);
-				final SGTsection [] sections = guide.getValue().get(service_list_id);
-				for (final SGTsection tsection : sections) {
+				SGTsection [] sections = guide.getValue().get(service_list_id);
+				for (SGTsection tsection : sections) {
 					if(tsection!= null){
 						kvp.add(tsection.getJTreeNode(modus));
 	

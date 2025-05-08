@@ -57,7 +57,7 @@ public class VirtualServiceIDDescriptor extends Descriptor {
 
 	
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
 		KVP t = (KVP)super.getJTreeNode(modus);
 		t.add(new KVP("virtual_service_id", virtual_service_id));
