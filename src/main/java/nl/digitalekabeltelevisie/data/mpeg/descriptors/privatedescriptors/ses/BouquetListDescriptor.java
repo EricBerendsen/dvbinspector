@@ -45,11 +45,11 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  */
 public class BouquetListDescriptor extends Descriptor {
 	
-	public record BouquetName(DVBString dvbString) implements TreeNode{
+	public record BouquetName(DVBString name) implements TreeNode{
 
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			return new KVP("bouquet_name", dvbString);
+			return new KVP("bouquet_name", name);
 		}
 		
 	}
@@ -77,6 +77,10 @@ public class BouquetListDescriptor extends Descriptor {
 		KVP t = (KVP)super.getJTreeNode(modus);
 		addListJTree(t,bouquet_names, modus,"bouquet_names");
 		return t;
+	}
+	
+	public List<BouquetName> getBouquet_names(){
+		return bouquet_names;
 	}
 
 }

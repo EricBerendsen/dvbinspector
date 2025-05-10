@@ -27,15 +27,30 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.ses;
 
-import java.util.HashMap;
-import java.util.Map;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
+
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.swing.table.TableModel;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.ServiceDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.BouquetListDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.ServiceListNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.VirtualServiceIDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGTsection.Service;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 /**
  * 
@@ -60,35 +75,139 @@ public class SGT extends AbstractPSITabel {
 		}
 	}
 
-
 	public SGT(PSI parentPSI) {
 		super(parentPSI);
 	}
+	
 	@Override
 	public KVP getJTreeNode(int modus) {
 
 		KVP t = new KVP("SGT");
-		
 		for(Entry<Integer, HashMap<Integer, SGTsection[]>> guide:service_guides.entrySet()) {
 			
-			KVP pid = new KVP("pid",guide.getKey());
-			t.add(pid);
+			int pid = guide.getKey();
+			KVP pidKvp = new KVP("pid",pid).addTableSource(() -> getTableForPid(pid), "SGT pid: "+pid);
+			t.add(pidKvp);
 		
 			for(int service_list_id:new TreeSet<>(guide.getValue().keySet())) {
-	
-				KVP kvp = new KVP("service_list_id",service_list_id);
-				SGTsection [] sections = guide.getValue().get(service_list_id);
-				for (SGTsection tsection : sections) {
+				KVP serviceListIdKvp = new KVP("service_list_id",service_list_id);
+				serviceListIdKvp.addTableSource(() -> getTableForServiceListID(pid, service_list_id),"SGT service_list_id: "+service_list_id);
+
+				for (SGTsection tsection : guide.getValue().get(service_list_id)) {
 					if(tsection!= null){
-						kvp.add(tsection.getJTreeNode(modus));
-	
+						serviceListIdKvp.add(tsection.getJTreeNode(modus));
 					}
 				}
-				pid.add(kvp);
-	
+				pidKvp.add(serviceListIdKvp);
 			}
 		}
 		return t;
+	}
+	
+	static TableHeader<SGTsection,Service>  buildSgtTableHeader() {
+		
+		Function<SGTsection, List<Object>> findServiceListNames = component -> findGenericDescriptorsInList(
+				component.getServiceListDescriptorsList(), 
+				ServiceListNameDescriptor.class)
+			.stream()
+			.map(serviceListNameDescriptor -> serviceListNameDescriptor.getService_list_name().toString())
+			.collect(Collectors.toList());
+		
+		Function<Service, Object> findServiceName = service -> findDescriptorApplyFunc(service.getDescriptorList(),
+				ServiceDescriptor.class,
+				sd -> sd.getServiceName().toString());
+		
+		Function<Service, Object> findServiceProviderName = service -> findDescriptorApplyFunc(service.getDescriptorList(),
+				ServiceDescriptor.class,
+				sd -> sd.getServiceProviderName().toString());
+		
+		Function<Service, List<Object>> findBouquetNames = component -> findDescriptorApplyListFunc(
+				component.getDescriptorList(), 
+				BouquetListDescriptor.class,
+				bouquetListDescriptor -> new ArrayList<>(bouquetListDescriptor.getBouquet_names()
+						.stream()
+						.map(a->a.name().toString())
+						.collect(Collectors.toList())
+						)
+				);
+		
+		Function<Service, Object> findServiceId = service -> findDescriptorApplyFunc(service.getDescriptorList(),
+				VirtualServiceIDDescriptor.class,
+				sd -> sd.getVirtual_service_id());
+		return new TableHeaderBuilder<SGTsection,Service>()
+				.addRequiredBaseColumn("service_list_id", SGTsection::getServiceListId, Integer.class)
+
+				.addOptionalRepeatingBaseColumn("bouquet_name",
+						findServiceListNames,
+						String.class)
+				.addOptionalRowColumn("service_id",
+						Service::getService_id,
+						Integer.class)
+				.addOptionalRowColumn("transport_stream_id",
+						Service::getTransport_stream_id,
+						Integer.class)
+				.addOptionalRowColumn("original_network_id",
+						Service::getOriginal_network_id,
+						Integer.class)
+				.addOptionalRowColumn("logical_channel_number",
+						Service::getLogical_channel_number,
+						Integer.class)
+				.addOptionalRowColumn("visible_service_flag",
+						Service::getVisible_service_flag,
+						Integer.class)
+				.addOptionalRowColumn("new_service_flag",
+						Service::getNew_service_flag,
+						Integer.class)
+				.addOptionalRowColumn("genre_code",
+						Service::getGenre_code,
+						Integer.class)
+				.addOptionalRowColumn("service_name",
+						findServiceName,
+						String.class)
+				.addOptionalRowColumn("provider_name",
+						findServiceProviderName,
+						String.class)
+
+				.addOptionalRepeatingRowColumn("bouquet_name ",
+						findBouquetNames,
+						String.class)
+				.addOptionalRowColumn("virtual_service_id",
+						findServiceId,
+						Integer.class)
+				.build();
+	}
+
+	private TableModel getTableForServiceListID(int pid, int slid) {
+		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());
+		final SGTsection [] sections = service_guides.get(pid).get(slid);
+		fillTableForServiceListId(tableModel, sections);
+
+		tableModel.process();
+		return tableModel;
+	}
+
+
+	private TableModel getTableForPid(int pid) {
+		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());
+		HashMap<Integer, SGTsection[]> pidSGT = service_guides.get(pid);
+
+		fillTableForPid(tableModel, pidSGT);
+		
+		tableModel.process();
+		return tableModel;
+	}
+	
+
+	private static void fillTableForPid(FlexTableModel<SGTsection, Service> tableModel,final HashMap<Integer, SGTsection[]> networkSDT) {
+		networkSDT.values().forEach(s-> fillTableForServiceListId(tableModel,s));
+	}
+
+	private static void fillTableForServiceListId(FlexTableModel<SGTsection, Service> tableModel, final SGTsection[] tsSDT) {
+		for (final SGTsection tsection : tsSDT) {
+			if (tsection != null) {
+				tableModel.addData(tsection, tsection.getServiceList());
+			}
+		}
 	}
 
 }

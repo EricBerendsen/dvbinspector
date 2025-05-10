@@ -229,7 +229,7 @@ public class KVP extends DefaultMutableTreeNode{
 	}
 	
 	
-	public KVP add(String label, int intValue) {
+	public KVP addChild(String label, int intValue) {
 		add(new KVP(label, intValue));
 		return this;
 	}

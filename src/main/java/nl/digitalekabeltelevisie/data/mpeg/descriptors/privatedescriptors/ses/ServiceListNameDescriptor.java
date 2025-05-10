@@ -63,6 +63,16 @@ public class ServiceListNameDescriptor extends Descriptor {
 		return t;
 	}
 
+
+	public byte[] getIso_639_2_language_code() {
+		return iso_639_2_language_code;
+	}
+
+
+	public DVBString getService_list_name() {
+		return service_list_name;
+	}
+
 	
 
 }

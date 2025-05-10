@@ -65,4 +65,14 @@ public class VirtualServiceIDDescriptor extends Descriptor {
 		return t;
 	}
 
+
+	public int getVirtual_service_id() {
+		return virtual_service_id;
+	}
+
+
+	public byte[] getReserved_future_use() {
+		return reserved_future_use;
+	}
+
 }

@@ -35,6 +35,8 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -42,6 +44,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 /**
  * 
@@ -65,15 +68,15 @@ public class SGTsection extends TableSectionExtendedSyntax {
 		@Override
 		public KVP getJTreeNode(int modus) {
 			KVP kvp = new KVP("Service")
-				.add("service_id", service_id)
-				.add("transport_stream_id",transport_stream_id)
-				.add("original_network_id",original_network_id)
-				.add("logical_channel_number",logical_channel_number)
-				.add("visible_service_flag",visible_service_flag)
-				.add("new_service_flag",new_service_flag)
-				.add("genre_code",genre_code)
-				.add("reserved_future_use",reserved_future_use)
-				.add("service_descriptors_length",service_descriptors_length);
+				.addChild("service_id", service_id)
+				.addChild("transport_stream_id",transport_stream_id)
+				.addChild("original_network_id",original_network_id)
+				.addChild("logical_channel_number",logical_channel_number)
+				.addChild("visible_service_flag",visible_service_flag)
+				.addChild("new_service_flag",new_service_flag)
+				.addChild("genre_code",genre_code)
+				.addChild("reserved_future_use",reserved_future_use)
+				.addChild("service_descriptors_length",service_descriptors_length);
 
 			addListJTree(kvp,descriptorList,modus,"service_descriptors");
 		
@@ -223,15 +226,55 @@ public class SGTsection extends TableSectionExtendedSyntax {
 	public KVP getJTreeNode(int modus) {
 
 		KVP t = (KVP)super.getJTreeNode(modus);
-			t.add("reserved", reserved1)
-			.add("reserved_future_use", reserved_future_use1)
-			.add("service_list_descriptors_length", service_list_descriptors_length);
+			t.addTableSource(this::getTableModel, "SGT Section")
+			.addChild("reserved", reserved1)
+			.addChild("reserved_future_use", reserved_future_use1)
+			.addChild("service_list_descriptors_length", service_list_descriptors_length);
 		addListJTree(t, serviceListDescriptorsList, modus, "service_list_descriptors");
-		t.add("reserved_future_use", reserved_future_use2)
-			.add("service_loop_length", service_loop_length);
+		t.addChild("reserved_future_use", reserved_future_use2)
+			.addChild("service_loop_length", service_loop_length);
 		
 		addListJTree(t,serviceList,modus,"services_loop");
 
 		return t;
 	}
+	
+	
+	public TableModel getTableModel() {
+		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());
+		
+		tableModel.addData(this,getServiceList());
+		tableModel.process();
+		return tableModel;
+	}
+
+	public int getReserved1() {
+		return reserved1;
+	}
+
+	public int getReserved_future_use1() {
+		return reserved_future_use1;
+	}
+
+	public int getService_list_descriptors_length() {
+		return service_list_descriptors_length;
+	}
+
+	public List<Descriptor> getServiceListDescriptorsList() {
+		return serviceListDescriptorsList;
+	}
+
+	public int getReserved_future_use2() {
+		return reserved_future_use2;
+	}
+
+	public int getService_loop_length() {
+		return service_loop_length;
+	}
+
+	public List<Service> getServiceList() {
+		return serviceList;
+	}
+
+	
 }

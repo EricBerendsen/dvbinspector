@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.util.tablemodel;
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -51,10 +51,24 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 				List<ColumnDetails<?>> columns = tableHeader.header();
 				for (ColumnDetails<?> column : columns) {
 					if (column.isBaseColumn()) {
-						@SuppressWarnings("unchecked")
-						Function<E, Object> fun = (Function<E, Object>) column.getFunction();
-						Object r = fun.apply(entity);
-						rowData.put(column.getKey(), r);
+						if (!column.isList()){
+							@SuppressWarnings("unchecked")
+							Function<E, Object> fun = (Function<E, Object>) column.getFunction();
+							Object r = fun.apply(entity);
+							rowData.put(column.getKey(), r);
+						} else {
+							@SuppressWarnings("unchecked")
+							Function<E, List<Object>> listFun = (Function<E, List<Object>>) column.getListFunction();
+							List<Object> listValues = listFun.apply(entity);
+							if(listValues!=null) {
+								int t=0;
+								for(Object val:listValues) {
+									rowData.put(column.getKey()+REPEATING_KEY_SEPARATOR+t, val);
+									t++;
+								}
+							}
+							
+						}
 					} else if (!column.isList()){
 						@SuppressWarnings("unchecked")
 						Function<R, Object> fun = (Function<R, Object>) column.getFunction();

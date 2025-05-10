@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.util.tablemodel;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -61,6 +61,23 @@ public class TableHeaderBuilder<E,R> {
 		ColumnDetails<E> bcd = new ColumnDetails<E>(name, key, fun, null, type, false, false,null,true);
 		header.add(bcd);
 		map.put(key, bcd);
+		return this;
+	}
+	
+	public TableHeaderBuilder<E,R> addOptionalRepeatingBaseColumn(String name, Function<E, List<Object>> listFun, Class<?> type) {
+		String keyBase = nextKey();
+		ColumnDetails<E> cd = new ColumnDetails<E>(name, keyBase, null, listFun, type, false, true,null,true);
+		header.add(cd);
+		map.put(keyBase, cd);
+		return this;
+	}
+
+
+	public TableHeaderBuilder<E,R> addOptionalRepeatingGroupedBaseColumn(String name, Function<E, List<Object>> listFun, Class<?> type, String groupId) {
+		String keyBase = nextKey();
+		ColumnDetails<E> cd = new ColumnDetails<E>(name, keyBase, null, listFun, type, false, true,groupId,true);
+		header.add(cd);
+		map.put(keyBase, cd);
 		return this;
 	}
 
