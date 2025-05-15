@@ -30,18 +30,19 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class LinkageDescriptor extends Descriptor {
 
@@ -345,8 +346,8 @@ public class LinkageDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus){
+		final KVP t = (KVP)super.getJTreeNode(modus);
 		t.add(new KVP("transport_stream_id",transportStreamId));
 		t.add(new KVP("original_network_id",originalNetworkId).setDescription(getOriginalNetworkIDString(originalNetworkId)));
 		t.add(new KVP("service_id",serviceId).setDescription(parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId)));
@@ -447,8 +448,13 @@ public class LinkageDescriptor extends Descriptor {
 			 0x89, 
 			 0x8A : return "user defined: (M7 Fastscan Home TP location descriptor)";
 		case 0x8D : return "user defined: (M7 Fastscan ONT location location descriptor)";
+		
+		case 0x90 : return "user defined: SES SGT HD+ LCN";
+		case 0x91 : return "user defined: SES SGT Austria LCN";
+		case 0x93 : return "user defined: SES SGT International LCN";
 
 		case 0xA0 : return "user defined: link to OpenTV VOD service";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
+		case 0xA2 : return "user defined: SES SGT White Label Platform LCN";
 		case 0xA6 : return "user defined: link to OpenTV ITV service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 		case 0xA7 : return "user defined: link to WEB service (YOUSEE)";  // http://download.tdconline.dk/pub/kabeltv/pdf/CPE/Rules_of_Operation.pdf
 
