@@ -243,7 +243,7 @@ public class SGTsection extends TableSectionExtendedSyntax {
 	public TableModel getTableModel() {
 		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());
 		
-		tableModel.addData(this,getServiceList());
+		tableModel.addData(this, serviceList);
 		tableModel.process();
 		return tableModel;
 	}

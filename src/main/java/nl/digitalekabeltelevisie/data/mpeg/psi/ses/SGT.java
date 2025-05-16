@@ -133,7 +133,7 @@ public class SGT extends AbstractPSITabel {
 		
 		Function<Service, Object> findServiceId = service -> findDescriptorApplyFunc(service.getDescriptorList(),
 				VirtualServiceIDDescriptor.class,
-				sd -> sd.getVirtual_service_id());
+                VirtualServiceIDDescriptor::getVirtual_service_id);
 		return new TableHeaderBuilder<SGTsection,Service>()
 				.addRequiredBaseColumn("service_list_id", SGTsection::getServiceListId, Integer.class)
 
@@ -178,8 +178,8 @@ public class SGT extends AbstractPSITabel {
 	}
 
 	private TableModel getTableForServiceListID(int pid, int slid) {
-		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());
-		final SGTsection [] sections = service_guides.get(pid).get(slid);
+		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(buildSgtTableHeader());
+		SGTsection [] sections = service_guides.get(pid).get(slid);
 		fillTableForServiceListId(tableModel, sections);
 
 		tableModel.process();
@@ -188,7 +188,7 @@ public class SGT extends AbstractPSITabel {
 
 
 	private TableModel getTableForPid(int pid) {
-		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());
+		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(buildSgtTableHeader());
 		HashMap<Integer, SGTsection[]> pidSGT = service_guides.get(pid);
 
 		fillTableForPid(tableModel, pidSGT);
@@ -198,12 +198,12 @@ public class SGT extends AbstractPSITabel {
 	}
 	
 
-	private static void fillTableForPid(FlexTableModel<SGTsection, Service> tableModel,final HashMap<Integer, SGTsection[]> networkSDT) {
+	private static void fillTableForPid(FlexTableModel<SGTsection, Service> tableModel, Map<Integer, SGTsection[]> networkSDT) {
 		networkSDT.values().forEach(s-> fillTableForServiceListId(tableModel,s));
 	}
 
-	private static void fillTableForServiceListId(FlexTableModel<SGTsection, Service> tableModel, final SGTsection[] tsSDT) {
-		for (final SGTsection tsection : tsSDT) {
+	private static void fillTableForServiceListId(FlexTableModel<SGTsection, Service> tableModel, SGTsection[] tsSDT) {
+		for (SGTsection tsection : tsSDT) {
 			if (tsection != null) {
 				tableModel.addData(tsection, tsection.getServiceList());
 			}
