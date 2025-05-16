@@ -124,7 +124,7 @@ public class NIT extends AbstractPSITabel{
 	}
 
 
-	public String getNetworkName(final int networkNo){
+	public String getNetworkName(int networkNo){
 		final NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
 			for (final NITsection section : sections) {
@@ -140,20 +140,14 @@ public class NIT extends AbstractPSITabel{
 		}
 		return null;
 	}
-
-
-	public boolean exists(final int netWorkID, final int section){
-		return ((networks.get(netWorkID)!=null) &&
-				(networks.get(netWorkID).length >section) &&
-				(networks.get(netWorkID)[section]!=null));
+	
+	public NITsection [] getNetwork(int networkNo) {
+		return networks.get(networkNo);
 	}
+
 
 	public Map<Integer, NITsection[]> getNetworks() {
 		return networks;
-	}
-
-	public void setNetworks(final Map<Integer, NITsection[]> networks) {
-		this.networks = networks;
 	}
 
 	public int getActualNetworkID(){
@@ -185,23 +179,6 @@ public class NIT extends AbstractPSITabel{
 
 	}
 
-	/**
-	 * @param networkNo
-	 * @param streamID
-	 * @return
-	 */
-	public TransportStream getTransportStream(final int networkNo,final int streamID) {
-		final NITsection [] sections = networks.get(networkNo);
-		if(sections!=null){
-			for (final NITsection tsection : sections) {
-				final TransportStream ts= tsection.getTransportStream(streamID);
-				if(ts!=null){
-					return ts;
-				}
-			}
-		}
-		return null;
-	}
 
 	private TableModel getTableForNetworkID(int networkNo) {
 		FlexTableModel<NITsection,TransportStream> tableModel =  new FlexTableModel<>(buildNitTableHeader());

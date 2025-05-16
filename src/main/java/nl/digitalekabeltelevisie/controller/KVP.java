@@ -33,6 +33,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JMenuItem;
@@ -227,6 +228,7 @@ public class KVP extends DefaultMutableTreeNode{
         this(label, bigIntegerValue);
 		setDescription(description);
 	}
+	
 	
 	public String getDescription() {
 		return description;
@@ -518,6 +520,10 @@ public class KVP extends DefaultMutableTreeNode{
 		return this;
 	}
 
+	public KVP addList( Collection<? extends TreeNode> itemList, int modus, String label) {
+		addListJTree(this, itemList, modus, label);
+		return this;
+	}
 
 	
 }

@@ -369,6 +369,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		long defaultPrivateDataSpecifier = PreferencesManager.getDefaultPrivateDataSpecifier();
 
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x00, "none",defaultPrivateDataSpecifier);
+		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x1, "SES",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x16, "Casema",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x28, "EACEM",defaultPrivateDataSpecifier);
 		addPrivateDataSpecMenuItem(privateDataSubMenu, privateDataSpecifierMenuGroup, 0x29, "Nordig",defaultPrivateDataSpecifier);

@@ -199,6 +199,19 @@ public class SDT extends AbstractPSITabel{
 	}
 
 
+	public int getOrgNetworkForActualTransportStream() {
+		if(actualTransportStreamSDT !=null) {
+
+			final SDTsection [] sections = actualTransportStreamSDT;
+			for (SDTsection section : sections) {
+				if(section!= null)  {
+					return section.getOriginalNetworkID();
+				}
+			}
+		}
+		return -1;
+		
+	}
 	public Optional<SDTsection.Service> getServiceForActualTransportStream(final int serviceID){
 
 

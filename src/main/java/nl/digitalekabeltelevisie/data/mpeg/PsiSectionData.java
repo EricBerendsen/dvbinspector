@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -43,6 +43,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGTsection;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -198,6 +199,8 @@ public class PsiSectionData {
 					if(PreferencesManager.isEnableDSMCC()) {
 						transportStream.getPsi().getDsms().update(new TableSectionExtendedSyntax(this,parentPID));
 					}
+				}else if((tableId==0x91)&&isSGTSection(pid)){
+					transportStream.getPsi().getSgt().update(new SGTsection(this,parentPID));
 				}else if(PreferencesManager.isEnableM7Fastscan()) {
 					if(tableId== 0xBC){
 						transportStream.getPsi().getM7fastscan().update(new FNTsection(this, parentPID));
@@ -213,6 +216,47 @@ public class PsiSectionData {
 		}
 	}
 
+	private boolean isSGTSection(int pid) {
+		int transportStreamId = transportStream.getStreamID();
+		PSI psi = transportStream.getPsi();
+
+		int orgNetworkId = psi.getSdt().getOrgNetworkForActualTransportStream();
+		final Map<Integer, PMTsection[]> pmtList = psi.getPmts().getPmts();
+		int nid = psi.getNit().getActualNetworkID();
+		if(nid == -1) {
+			return false;
+		}
+		List<LinkageDescriptor> linkageDescriptors = transportStream.getLinkageDescriptorsFromNitNetworkLoop();
+
+		for (final PMTsection[] pmts : pmtList.values()) {
+			final PMTsection pmt = pmts[0]; // PMT always one section
+			int programNumber = pmt.getProgramNumber();
+			for (final Component component : pmt.getComponentenList()) {
+				if (component.getElementaryPID() == pid) {
+
+					for (final LinkageDescriptor ld : linkageDescriptors) {
+
+						if (isSGTLinkageType(ld.getLinkageType()) && 
+								ld.getServiceId() == programNumber && 
+								ld.getTransportStreamId() == transportStreamId &&
+								ld.getOriginalNetworkId() == orgNetworkId) {
+							return true;
+
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private static boolean isSGTLinkageType(int linkageType) {
+		return (linkageType == 0x90 ||
+				linkageType == 0x91 ||
+				linkageType == 0x93 ||
+				linkageType == 0xA2);
+	}
+			
 	private boolean isSpliceInfoSection(int pid) {
 		
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
@@ -287,7 +331,7 @@ public class PsiSectionData {
 	 * @param pid
 	 * @return true if this PID contains the UNT
 	 */
-	public boolean isUNTSection(final int pid){
+	private boolean isUNTSection(final int pid){
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
 
 		for (final PMTsection[] pmt : pmtList.values()){
@@ -321,7 +365,7 @@ public class PsiSectionData {
 	 * @param pid
 	 * @return true if this PID contains a AIT
 	 */
-	public boolean isAITSection(final int pid){
+	private boolean isAITSection(final int pid){
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
 
 		for (final PMTsection[] pmt : pmtList.values()){
@@ -348,7 +392,7 @@ public class PsiSectionData {
 	 * @param pid
 	 * @return true if this PID contains a AIT
 	 */
-	public boolean isDIFTSection(final int pid){
+	private boolean isDIFTSection(final int pid){
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
 
 		for (final PMTsection[] pmt : pmtList.values()){
@@ -379,7 +423,7 @@ public class PsiSectionData {
 	 * @param pid
 	 * @return true if this PID contains a RCT
 	 */
-	public boolean isRCTSection(final int pid){
+	private boolean isRCTSection(final int pid){
 		final Map<Integer, PMTsection[]> pmtList = transportStream.getPsi().getPmts().getPmts();
 
 		for (final PMTsection[] pmt : pmtList.values()){
