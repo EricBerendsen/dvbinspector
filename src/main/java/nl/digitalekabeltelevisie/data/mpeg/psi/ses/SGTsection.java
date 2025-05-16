@@ -67,19 +67,19 @@ public class SGTsection extends TableSectionExtendedSyntax {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			KVP kvp = new KVP("Service")
-				.addChild("service_id", service_id)
-				.addChild("transport_stream_id",transport_stream_id)
-				.addChild("original_network_id",original_network_id)
-				.addChild("logical_channel_number",logical_channel_number)
-				.addChild("visible_service_flag",visible_service_flag)
-				.addChild("new_service_flag",new_service_flag)
-				.addChild("genre_code",genre_code)
-				.addChild("reserved_future_use",reserved_future_use)
-				.addChild("service_descriptors_length",service_descriptors_length);
+			KVP kvp = new KVP("Service");
+			kvp.add(new KVP("service_id", service_id));
+			kvp.add(new KVP("transport_stream_id", transport_stream_id));
+			kvp.add(new KVP("original_network_id", original_network_id));
+			kvp.add(new KVP("logical_channel_number", logical_channel_number));
+			kvp.add(new KVP("visible_service_flag", visible_service_flag));
+			kvp.add(new KVP("new_service_flag", new_service_flag));
+			kvp.add(new KVP("genre_code", genre_code));
+			kvp.add(new KVP("reserved_future_use", reserved_future_use));
+			kvp.add(new KVP("service_descriptors_length", service_descriptors_length));
 
-			addListJTree(kvp,descriptorList,modus,"service_descriptors");
-		
+			kvp.addList(descriptorList, modus, "service_descriptors");
+
 			return kvp;
 		}
 
@@ -225,20 +225,19 @@ public class SGTsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP t = (KVP)super.getJTreeNode(modus);
-			t.addTableSource(this::getTableModel, "SGT Section")
-			.addChild("reserved", reserved1)
-			.addChild("reserved_future_use", reserved_future_use1)
-			.addChild("service_list_descriptors_length", service_list_descriptors_length);
+		KVP t = (KVP) super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "SGT Section");
+		t.add(new KVP("reserved", reserved1));
+		t.add(new KVP("reserved_future_use", reserved_future_use1));
+		t.add(new KVP("service_list_descriptors_length", service_list_descriptors_length));
 		addListJTree(t, serviceListDescriptorsList, modus, "service_list_descriptors");
-		t.addChild("reserved_future_use", reserved_future_use2)
-			.addChild("service_loop_length", service_loop_length);
-		
-		addListJTree(t,serviceList,modus,"services_loop");
+		t.add(new KVP("reserved_future_use", reserved_future_use2));
+		t.add(new KVP("service_loop_length", service_loop_length));
+
+		addListJTree(t, serviceList, modus, "services_loop");
 
 		return t;
 	}
-	
 	
 	public TableModel getTableModel() {
 		FlexTableModel<SGTsection,Service> tableModel =  new FlexTableModel<>(SGT.buildSgtTableHeader());

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,10 +71,9 @@ public class BouquetListDescriptor extends Descriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus){
-
-		KVP t = (KVP)super.getJTreeNode(modus);
-		addListJTree(t,bouquet_names, modus,"bouquet_names");
-		return t;
+		KVP kvp = (KVP)super.getJTreeNode(modus);
+		kvp.addList(bouquet_names, modus,"bouquet_names");
+		return kvp;
 	}
 	
 	public List<BouquetName> getBouquet_names(){
