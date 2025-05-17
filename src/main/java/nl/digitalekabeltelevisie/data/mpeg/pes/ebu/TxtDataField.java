@@ -31,6 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.BitString;
@@ -69,15 +70,15 @@ public class TxtDataField extends EBUDataField {
 			s.add(new KVP("page number",toHexString((getPageNumberTens()* 16L)+getPageNumberUnits(),2))); // Tens is really hexadecimal
 			s.add(new KVP("sub page",toHexString(getSubPage(),4)));
 			s.add(new KVP("data bytes",getHeaderDataBytes()));
-			StringBuilder flags =new StringBuilder();
-			if(isErasePage()){ buildStringList(flags,"Erase Page");	}
-			if(isNewsFlash()){ buildStringList(flags,"Newsflash");	}
-			if(isSubtitle()){ buildStringList(flags,"Subtitle");	}
-			if(isSuppresHeader()){ buildStringList(flags,"Suppress Header");	}
-			if(isUpdateIndicator()){ buildStringList(flags,"Update Indicator");	}
-			if(isInterruptedSequence()){ buildStringList(flags,"Interrupted Sequence");	}
-			if(isInhibitDisplay()){ buildStringList(flags,"Inhibit Display");	}
-			if(isMagazineSerial()){ buildStringList(flags,"Magazine Serial");	}
+			StringJoiner flags =new StringJoiner(",");
+			if(isErasePage()){flags.add("Erase Page");	}
+			if(isNewsFlash()){flags.add("Newsflash");	}
+			if(isSubtitle()){flags.add("Subtitle");	}
+			if(isSuppresHeader()){flags.add("Suppress Header");	}
+			if(isUpdateIndicator()){flags.add("Update Indicator");	}
+			if(isInterruptedSequence()){flags.add("Interrupted Sequence");	}
+			if(isInhibitDisplay()){flags.add("Inhibit Display");	}
+			if(isMagazineSerial()){flags.add("Magazine Serial");	}
 			s.add(new KVP("flags",flags.toString()));
 			// internal we use reverted order of NationalOptionCharacterSubset, bevause of ProjectX legacy.
 			// For display we want to conform to Table 32 of ETSI EN 300 706 V1.2.1 (2003-04) 
@@ -381,18 +382,6 @@ public class TxtDataField extends EBUDataField {
         }
 
 		return b.toString();
-	}
-
-
-	/**
-	 * @param flags
-	 * @param string
-	 */
-	private static void buildStringList(StringBuilder flags, String string) {
-		if(!flags.isEmpty()){
-			flags.append(",");
-		}
-		flags.append(string);
 	}
 
 

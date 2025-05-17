@@ -45,11 +45,12 @@ public class Page implements TreeNode{
 	 */
 	public void setHeader(TxtDataField txtDataField) {
 		int currentSubPageNo = txtDataField.getSubPage();
-		if((txtDataField.getDataUnitId()==0x02)|| (txtDataField.getDataUnitId()== 0xc0)){ //EBU Teletext non-subtitle data , or inverted
+		if((txtDataField.getDataUnitId()==0x02)|| // EBU Teletext non-subtitle data
+				(txtDataField.getDataUnitId()==0x03 && !txtDataField.isSubtitle()) || // EBU Teletext subtitle data AND not subtitle :-)
+				(txtDataField.getDataUnitId()== 0xc0)){ //Inverted Teletext
             currentSubPage = subPages.computeIfAbsent(currentSubPageNo, n -> new SubPage(this, n));
             currentSubPage.setHeader(txtDataField);
-		}else if(txtDataField.getDataUnitId()==0x03){ //EBU Teletext subtitle data // TODO ??check also for subtitle flag, because spanish TVE uses DataUnitId()==03 on all pages.... && txtDataField.isSubtitle()
-			// But then normal pages of TVE text are not shown at all...
+		}else if(txtDataField.getDataUnitId()==0x03 && txtDataField.isSubtitle()){ //EBU Teletext subtitle data AND isSubtitle()
 			currentSubPage=new SubPage(this, currentSubPageNo);
 			subtitles.add(currentSubPage);
 			currentSubPage.setHeader(txtDataField);
@@ -87,7 +88,7 @@ public class Page implements TreeNode{
 					}
 					String subTitle = titel.toString().trim();
 					t.setLabel(subTitle);
-					t.addImageSource(subPage, subTitle);
+					//t.addImageSource(subPage, subTitle);
 					treeNode.add(t);
 				}
 			}
