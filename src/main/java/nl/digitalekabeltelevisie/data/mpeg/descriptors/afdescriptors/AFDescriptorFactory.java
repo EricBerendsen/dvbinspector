@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors;
 import static java.lang.Byte.toUnsignedInt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -54,14 +55,24 @@ public final class AFDescriptorFactory {
 
 		while (t < len) {
 
+			// make a copy of the just the bytes for the descriptor. 
+			// If the descriptor constructor reads further then descriptorLen it will cause a ArrayIndexOutOfBoundsException, 
+			// which will result in fall back to a standard Descriptor.
+			// Reasoning: better not to interpret the data, than to show it wrong without warning. 
+			//
+			// see https://github.com/EricBerendsen/dvbinspector/issues/22
+			
+			int descriptorLen = toUnsignedInt(data[offset + t+ 1]);
+			byte[] descriptorData = Arrays.copyOfRange(data, offset + t, offset + t + descriptorLen + 2);
+
 			Descriptor d;
 			try {
-				d = getAFDescriptor(data, offset,t);
+				d = getAFDescriptor(descriptorData);
 
 			} catch (final RuntimeException iae) {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
-				d = new AFDescriptor(data, t + offset);
+				d = new AFDescriptor(data);
 				logger.info("Fall back for descriptor:" + toUnsignedInt(data[t + offset]) + " ("
 						+ AFDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
 						+ ")in AFDescriptorList adaptationField. data=" + d.getRawDataString()+", RuntimeException:"+iae);
@@ -74,17 +85,17 @@ public final class AFDescriptorFactory {
 		return r;
 	}
 
-	private static Descriptor getAFDescriptor(final byte[] data, final int offset, final int t) {
+	private static Descriptor getAFDescriptor(final byte[] data) {
 		Descriptor d;
-		switch (toUnsignedInt(data[t + offset])) {
+		switch (toUnsignedInt(data[0])) {
 		case 0x04:
-			d = new TimelineDescriptor(data, t + offset);
+			d = new TimelineDescriptor(data);
 			break;
 
 		default:
-			d = new AFDescriptor(data, t + offset);
-			logger.info("Not implemented AFDescriptor:" + toUnsignedInt(data[t + offset]) + " ("
-					+ AFDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
+			d = new AFDescriptor(data);
+			logger.info("Not implemented AFDescriptor:" + toUnsignedInt(data[0]) + " ("
+					+ AFDescriptor.getDescriptorname(toUnsignedInt(data[0]))
 					+ ",) data=" + d.getRawDataString());
 			break;
 		}

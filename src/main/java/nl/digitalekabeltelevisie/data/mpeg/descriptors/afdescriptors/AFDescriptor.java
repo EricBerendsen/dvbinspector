@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -47,8 +47,8 @@ public class AFDescriptor extends Descriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public AFDescriptor(final byte[] b, final int offset) {
-		super(b, offset, null);
+	public AFDescriptor(final byte[] b) {
+		super(b, null);
 	}
 
 	@Override
