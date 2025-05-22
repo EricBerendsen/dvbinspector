@@ -209,6 +209,8 @@ public final class DescriptorFactory {
 			return new M7OperatorOptionsDescriptor(data, 0, tableSection);
 		case 0x89:
 			return new M7NagraBrandIdDescriptor(data, 0, tableSection);
+		case 0x8A:
+			return new M7OttBrandIdDescriptor(data, 0, tableSection);
 		default:
 			Descriptor d = new M7Descriptor(data, 0, tableSection);
 			logger.info("Not implemented M7Descriptor:" + descriptorTag + " ("

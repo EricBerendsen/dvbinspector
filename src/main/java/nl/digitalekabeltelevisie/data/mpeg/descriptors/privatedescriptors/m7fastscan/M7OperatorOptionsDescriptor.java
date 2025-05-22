@@ -70,45 +70,27 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 		return ""+ (parental_control_rating+3)+" +";
 	}
 	
-	private String getEncodingType(int charSet) {
-		switch (charSet) {
-		case 0x01:
-			return "ISO/IEC 8859-5";
-		case 0x02:
-			return "ISO/IEC 8859-6";
-		case 0x03:
-			return "ISO/IEC 8859-7";
-		case 0x04:
-			return "ISO/IEC 8859-8";
-		case 0x05:
-			return "ISO/IEC 8859-9";
-		case 0x06:
-			return "ISO/IEC 8859-10";
-		case 0x07:
-			return "ISO/IEC 8859-11";
-		case 0x08:
-			return "ISO/IEC 8859-12";
-		case 0x09:
-			return "ISO/IEC 8859-13";
-		case 0x0A:
-			return "ISO/IEC 8859-14";
-		case 0x0B:
-			return "ISO/IEC 8859-15";
-		case 0x10:
-			return "Illegal value";
-		case 0x11:
-			return "ISO/IEC 10646-1";
-		case 0x12:
-			return "KSX1001-2004";
-		case 0x13:
-			return "GB-2312-1980";
-		case 0x14:
-			return "Big5 subset of ISO/IEC 10646-1";
-		case 0x15:
-			return "UTF-8 encoding of ISO/IEC 10646-1";
-		default:
-			return "reserved for future use";
-		}
+	private static String getEncodingType(int charSet) {
+		return switch (charSet) {
+		case 0x01 -> "ISO/IEC 8859-5";
+		case 0x02 -> "ISO/IEC 8859-6";
+		case 0x03 -> "ISO/IEC 8859-7";
+		case 0x04 -> "ISO/IEC 8859-8";
+		case 0x05 -> "ISO/IEC 8859-9";
+		case 0x06 -> "ISO/IEC 8859-10";
+		case 0x07 -> "ISO/IEC 8859-11";
+		case 0x08 -> "ISO/IEC 8859-12";
+		case 0x09 -> "ISO/IEC 8859-13";
+		case 0x0A -> "ISO/IEC 8859-14";
+		case 0x0B -> "ISO/IEC 8859-15";
+		case 0x10 -> "Illegal value";
+		case 0x11 -> "ISO/IEC 10646-1";
+		case 0x12 -> "KSX1001-2004";
+		case 0x13 -> "GB-2312-1980";
+		case 0x14 -> "Big5 subset of ISO/IEC 10646-1";
+		case 0x15 -> "UTF-8 encoding of ISO/IEC 10646-1";
+		default -> "reserved for future use";
+		};
 
 	}
 
