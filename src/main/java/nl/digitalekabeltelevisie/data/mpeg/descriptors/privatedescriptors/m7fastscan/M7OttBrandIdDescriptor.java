@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -38,15 +37,15 @@ public class M7OttBrandIdDescriptor extends M7Descriptor {
 	private final long reserved;
 	private final DVBString ott_brand_id;
 	
-	public M7OttBrandIdDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public M7OttBrandIdDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		reserved = Utils.getLong(b, 2, 4, Utils.MASK_33BITS);
 		ott_brand_id = new DVBString(b,6, descriptorLength - 4);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus){
+		final KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("reserved", reserved));
 		t.add(new KVP("OTT_brand_id",ott_brand_id));
 		return t;

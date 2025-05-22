@@ -29,12 +29,12 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fas
 
 import static nl.digitalekabeltelevisie.util.Utils.getBCD;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -47,11 +47,11 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 		private int reserved;
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DiSEqC"));
-			t.add(new DefaultMutableTreeNode(new KVP("orbital_position",orbital_position,Descriptor.formatOrbitualPosition(orbital_position))));
-			t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,getWestEastString())));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("DiSEqC");
+			t.add(new KVP("orbital_position", orbital_position, Descriptor.formatOrbitualPosition(orbital_position)));
+			t.add(new KVP("west_east_flag", westEastFlag, getWestEastString()));
+			t.add(new KVP("reserved", reserved));
 
 			return t;
 		}
@@ -92,9 +92,9 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 	
 	List<DiSEqC> diSEqCList = new ArrayList<>();
 	
-	public M7OperatorDiSEqCTDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		diSEqCList = buildDiSEqCList(b,offset+2,descriptorLength);
+	public M7OperatorDiSEqCTDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		diSEqCList = buildDiSEqCList(b,2,descriptorLength);
 	}
 
 	
@@ -113,9 +113,9 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		Utils.addListJTree(t,diSEqCList,modus,"DiSEqC_loop");
+	public KVP getJTreeNode(final int modus){
+		final KVP t = super.getJTreeNode(modus);
+		t.addList(diSEqCList,modus,"DiSEqC_loop");
 		return t;
 	}
 

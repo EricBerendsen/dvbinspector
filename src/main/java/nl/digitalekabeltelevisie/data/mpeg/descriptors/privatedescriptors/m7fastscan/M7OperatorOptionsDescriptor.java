@@ -27,11 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class M7OperatorOptionsDescriptor extends M7Descriptor {
@@ -41,21 +40,21 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 	private final int subtitles_enabled;
 	private final int special_regions_setup;
 	
-	public M7OperatorOptionsDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		parental_control_rating =getInt(b, offset+2,1,MASK_8BITS);
-		default_char_set =getInt(b, offset+3,1,MASK_8BITS);
-		subtitles_enabled =getInt(b, offset+4,1,0x80)>>>7;
-		special_regions_setup =getInt(b, offset+4,1,0x40)>>>6;
+	public M7OperatorOptionsDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		parental_control_rating = getInt(b, 2, 1, MASK_8BITS);
+		default_char_set = getInt(b, 3, 1, MASK_8BITS);
+		subtitles_enabled = getInt(b, 4, 1, 0x80) >>> 7;
+		special_regions_setup = getInt(b, 4, 1, 0x40) >>> 6;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("parental_control_rating",parental_control_rating ,getParentalControlString())));
-		t.add(new DefaultMutableTreeNode(new KVP("default_char_set",default_char_set ,getEncodingTypeString())));
-		t.add(new DefaultMutableTreeNode(new KVP("subtitles_enabled",subtitles_enabled ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("special_regions_setup",special_regions_setup ,null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("parental_control_rating", parental_control_rating, getParentalControlString()));
+		t.add(new KVP("default_char_set", default_char_set, getEncodingTypeString()));
+		t.add(new KVP("subtitles_enabled", subtitles_enabled));
+		t.add(new KVP("special_regions_setup", special_regions_setup, null));
 		return t;
 	}
 

@@ -29,9 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fas
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class M7NagraBrandIdDescriptor extends M7Descriptor {
@@ -42,26 +40,26 @@ public class M7NagraBrandIdDescriptor extends M7Descriptor {
 	private final int reserved;
 	byte[] emm_brand_ids = new byte[0];
 	
-	public M7NagraBrandIdDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		nagra_brand_id =getInt(b, offset+2,1,MASK_8BITS);
-		ca_system_ID =getInt(b, offset+3,2,MASK_16BITS);
-		emm_stored =getInt(b, offset+5,1,0x80)>>>7;
-		reserved =getInt(b, offset+5,1,MASK_7BITS);
-		if(emm_stored==0) {
-			emm_brand_ids = getBytes(b, offset+6, descriptorLength-4);
+	public M7NagraBrandIdDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		nagra_brand_id = getInt(b, 2, 1, MASK_8BITS);
+		ca_system_ID = getInt(b, 3, 2, MASK_16BITS);
+		emm_stored = getInt(b, 5, 1, 0x80) >>> 7;
+		reserved = getInt(b, 5, 1, MASK_7BITS);
+		if (emm_stored == 0) {
+			emm_brand_ids = getBytes(b, 6, descriptorLength - 4);
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("nagra_brand_id",nagra_brand_id ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("CA_system_ID",ca_system_ID ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("emm_stored",emm_stored ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-		if(emm_stored==0) {
-				t.add(new DefaultMutableTreeNode(new KVP("emm_brand_ids",emm_brand_ids ,null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("nagra_brand_id", nagra_brand_id));
+		t.add(new KVP("CA_system_ID", ca_system_ID));
+		t.add(new KVP("emm_stored", emm_stored));
+		t.add(new KVP("reserved", reserved));
+		if (emm_stored == 0) {
+			t.add(new KVP("emm_brand_ids", emm_brand_ids));
 		}
 		return t;
 	}

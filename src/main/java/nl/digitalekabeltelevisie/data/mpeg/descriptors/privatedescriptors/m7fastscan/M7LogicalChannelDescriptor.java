@@ -27,13 +27,15 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_14BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 //based on M7 FastScan Spec v7.1 Page 28 
@@ -73,12 +75,13 @@ public class M7LogicalChannelDescriptor extends M7Descriptor {
 		}
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel: "+logicalChannelNumber));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("hidden",hidden,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logicalChannelNumber,null)));
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("logical_channel: " + logicalChannelNumber);
+			s.add(new KVP("service_id", serviceID));
+			s.add(new KVP("reserved", reserved));
+			s.add(new KVP("hidden", hidden));
+			s.add(new KVP("logical_channel_number", logicalChannelNumber));
 			return s;
 		}
 
@@ -93,18 +96,18 @@ public class M7LogicalChannelDescriptor extends M7Descriptor {
 
 	}
 
-	public M7LogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
-			final int reserved = getInt(b,offset+t+4,1,0x80) >>7; // 1 bit
-			final int hidden = getInt(b,offset+t+4,1,0x40) >>6; // 1 bit
+	public M7LogicalChannelDescriptor(final byte[] b, final TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			final int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			final int reserved = getInt(b, t + 4, 1, 0x80) >> 7; // 1 bit
+			final int hidden = getInt(b, t + 4, 1, 0x40) >> 6; // 1 bit
 			// chNumber is 14 bits in Nordig specs V1
-			final int chNumber=getInt(b, offset+t+4,2,MASK_14BITS);
+			final int chNumber = getInt(b, t + 4, 2, MASK_14BITS);
 			final LogicalChannel s = new LogicalChannel(serviceId, reserved, hidden, chNumber);
 			channelList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
 
@@ -126,10 +129,9 @@ public class M7LogicalChannelDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,channelList,modus,"logical_channels");
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.addList(channelList, modus, "logical_channels");
 		return t;
 	}
 
