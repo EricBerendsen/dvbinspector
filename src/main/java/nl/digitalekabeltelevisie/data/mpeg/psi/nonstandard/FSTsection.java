@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -120,26 +119,25 @@ public class FSTsection extends TableSectionExtendedSyntax{
 			return stringBuilder.toString();
 
 		}
-		public DefaultMutableTreeNode getJTreeNode(int modus){
 
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service:",service_id,null));
+		public KVP getJTreeNode(int modus) {
+			KVP kvp = new KVP("service:", service_id);
 
-			t.add(new DefaultMutableTreeNode(new KVP("original_network_id",original_network_id,Utils.getOriginalNetworkIDString(original_network_id) )));
-			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transport_stream_id,null)));
-			
-			t.add(new DefaultMutableTreeNode(new KVP("service_id",service_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("default_video_PID",default_video_PID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("default_audio_PID",default_audio_PID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("default_video_ECM_PID",default_video_ECM_PID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("default_audio_ECM_PID",default_audio_ECM_PID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("default_PCR_PID",default_PCR_PID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("default_video_ECM_PID",default_video_ECM_PID,null)));
-			
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length", transportDescriptorsLength,null)));
+			kvp.add(new KVP("original_network_id", original_network_id, Utils.getOriginalNetworkIDString(original_network_id)));
+			kvp.add(new KVP("transport_stream_id", transport_stream_id));
+			kvp.add(new KVP("service_id", service_id));
+			kvp.add(new KVP("default_video_PID", default_video_PID));
+			kvp.add(new KVP("default_audio_PID", default_audio_PID));
+			kvp.add(new KVP("default_video_ECM_PID", default_video_ECM_PID));
+			kvp.add(new KVP("default_audio_ECM_PID", default_audio_ECM_PID));
+			kvp.add(new KVP("default_PCR_PID", default_PCR_PID));
+			kvp.add(new KVP("default_video_ECM_PID", default_video_ECM_PID));
 
-			Utils.addListJTree(t,descriptorList,modus,"service_descriptor");
+			kvp.add(new KVP("descriptor_loop_length", transportDescriptorsLength));
 
-			return t;
+			kvp.addList(descriptorList, modus, "service_descriptor");
+
+			return kvp;
 		}
 
 		public int getDefault_video_PID() {
@@ -247,15 +245,12 @@ public class FSTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP) t.getUserObject();
+		KVP kvp = (KVP) super.getJTreeNode(modus);
 		kvp.addTableSource(this::getTableModel, "FST");
-
-
-		Utils.addListJTree(t,serviceList,modus,"service_loop");
-		return t;
+		kvp.addList(serviceList, modus, "service_loop");
+		return kvp;
 	}
 
 

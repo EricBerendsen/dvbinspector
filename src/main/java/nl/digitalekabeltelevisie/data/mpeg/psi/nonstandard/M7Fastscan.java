@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 import java.util.*;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -152,13 +151,13 @@ public class M7Fastscan implements TreeNode {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("M7 Fastscan"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("M7 Fastscan");
 		
 		if(ontSections!=null) {
-			KVP kvp = new KVP("ONT");
-			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(kvp);
-			kvp.addTableSource(this::getTableModelOnt, "ONT");
+
+			KVP ont = new KVP("ONT");
+			ont.addTableSource(this::getTableModelOnt, "ONT");
 			for (ONTSection ontSection : ontSections) {
 				if(ontSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(ont, ontSection, modus);
@@ -170,11 +169,11 @@ public class M7Fastscan implements TreeNode {
 
 		for (Integer operatorId : new TreeSet<>(operators.keySet())) {
 			Map<Integer, OperatorFastscan> operatorsInPid = operators.get(operatorId);
-			DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode(new KVP("operator_network_id",operatorId,getOperatorName(operatorId)));
-			t.add(defaultMutableTreeNode);
+			KVP operatorNode = new KVP("operator_network_id",operatorId,getOperatorName(operatorId));
+			t.add(operatorNode);
 			for (Integer pid : new TreeSet<>(operatorsInPid.keySet())) {
 				OperatorFastscan operatorFastscan = operatorsInPid.get(pid);
-				defaultMutableTreeNode.add(operatorFastscan.getJTreeNode(modus));
+				operatorNode.add(operatorFastscan.getJTreeNode(modus));
 			}
 			
 		}

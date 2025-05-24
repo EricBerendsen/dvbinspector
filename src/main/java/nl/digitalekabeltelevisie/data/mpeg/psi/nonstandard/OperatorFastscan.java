@@ -36,7 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -76,7 +75,7 @@ public class OperatorFastscan implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 		KVP networkKVP = new KVP("Pid",pid,getOperatorSubListName());
 		if(fntSections==null){
 			networkKVP.addHTMLSource(() -> "FNT Missing", "FNT Missing");
@@ -86,34 +85,29 @@ public class OperatorFastscan implements TreeNode{
 			networkKVP.addTableSource(this::getTableModel, "Operator Fastscan");
 		}
 		
-		DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode(networkKVP);
-		
 		if(fstSections!=null) {
 			KVP fstKvp = new KVP("FST");
-			DefaultMutableTreeNode fst = new DefaultMutableTreeNode(fstKvp);
 			fstKvp.addTableSource(this::getFstTableModel, "FST");
 			for (FSTsection fstSection : fstSections) {
 				if(fstSection!= null){
-					AbstractPSITabel.addSectionVersionsToJTree(fst, fstSection, modus);
+					AbstractPSITabel.addSectionVersionsToJTree(fstKvp, fstSection, modus);
 				}
 			}
-			
-			defaultMutableTreeNode.add(fst);
+
+			networkKVP.add(fstKvp);
 		}
 
 		if (fntSections != null) {
 			KVP fntKvp = new KVP("FNT");
-			DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(fntKvp);
 			fntKvp.addTableSource(this::getFntTableModel, "FNT");
 			for (FNTsection fntSection : fntSections) {
 				if (fntSection != null) {
-					AbstractPSITabel.addSectionVersionsToJTree(fnt, fntSection, modus);
+					AbstractPSITabel.addSectionVersionsToJTree(fntKvp, fntSection, modus);
 				}
 			}
-
-			defaultMutableTreeNode.add(fnt);
+			networkKVP.add(fntKvp);
 		}
-		return defaultMutableTreeNode;
+		return networkKVP;
 	}
 
 	public String getOperatorSubListName() {

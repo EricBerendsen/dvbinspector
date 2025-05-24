@@ -36,7 +36,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -70,14 +69,14 @@ public class ONTSection extends TableSectionExtendedSyntax {
 		public List<Descriptor> descriptorList;
 		
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("operator_brand",operator_network_id + "-"+ operator_sublist_id,null));
+		public KVP getJTreeNode(int modus) {
 
-			t.add(new DefaultMutableTreeNode(new KVP("operator_network_id",operator_network_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("operator_sublist_id",operator_sublist_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved_future_use,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("operator_descriptors_length",operator_descriptors_length,null)));
+			KVP t =  new KVP("operator_brand",operator_network_id + "-"+ operator_sublist_id );
+
+			t.add( new KVP("operator_network_id",operator_network_id ));
+			t.add( new KVP("operator_sublist_id",operator_sublist_id ));
+			t.add( new KVP("reserved_future_use",reserved_future_use ));
+			t.add( new KVP("operator_descriptors_length",operator_descriptors_length ));
 
 			Utils.addListJTree(t,descriptorList,modus,"operator_descriptors");
 
@@ -167,19 +166,17 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus){
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP) t.getUserObject();
+		KVP kvp = (KVP) super.getJTreeNode(modus);
 		kvp.addTableSource(this::getTableModel, "ONT Section");
 
-		t.add(new DefaultMutableTreeNode(new KVP("bouquet_descriptors_loop_length",bouquet_descriptors_loop_length,null)));
-		Utils.addListJTree(t,bouquetDescriptorList,modus,"bouquet_descriptors");
-		t.add(new DefaultMutableTreeNode(new KVP("operator_brands_loop_length",operator_brands_loop_length,null)));
-		Utils.addListJTree(t,operatorBrandList,modus,"operator_brands_loop");
+		kvp.add( new KVP("bouquet_descriptors_loop_length",bouquet_descriptors_loop_length ));
+		kvp.addList(bouquetDescriptorList,modus,"bouquet_descriptors");
+		kvp.add( new KVP("operator_brands_loop_length",operator_brands_loop_length ));
+		kvp.addList(operatorBrandList,modus,"operator_brands_loop");
 
-
-		return t;
+		return kvp;
 	}
 
 	public String getOperatorName(int operator_network_id) {

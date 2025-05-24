@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -117,17 +116,18 @@ public class FNTsection extends TableSectionExtendedSyntax{
 			return stringBuilder.toString();
 
 		}
-		public DefaultMutableTreeNode getJTreeNode(int modus){
 
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("transport_stream:",transportStreamID,null));
+		public KVP getJTreeNode(int modus) {
 
-			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID) )));
-			t.add(new DefaultMutableTreeNode(new KVP("transport_descriptors_length", transportDescriptorsLength,null)));
+			KVP kvp = new KVP("transport_stream:", transportStreamID);
 
-			Utils.addListJTree(t,descriptorList,modus,"transport_descriptors");
+			kvp.add(new KVP("transport_stream_id", transportStreamID));
+			kvp.add(new KVP("original_network_id", originalNetworkID, Utils.getOriginalNetworkIDString(originalNetworkID)));
+			kvp.add(new KVP("transport_descriptors_length", transportDescriptorsLength));
 
-			return t;
+			kvp.addList(descriptorList, modus, "transport_descriptors");
+
+			return kvp;
 		}
 
 
@@ -195,20 +195,17 @@ public class FNTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus){
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP) t.getUserObject();
+		KVP kvp = (KVP) super.getJTreeNode(modus);
 		kvp.addTableSource(this::getTableModel, "FNT");
 
-		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_loop_length",network_descriptors_loop_length,null)));
-		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
-		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length", transport_stream_loop_length,null)));
+		kvp.add( new KVP("network_descriptors_loop_length",network_descriptors_loop_length ));
+		kvp.addList(networkDescriptorList,modus,"network_descriptors");
+		kvp.add( new KVP("transport_stream_loop_length", transport_stream_loop_length ));
 
-		Utils.addListJTree(t,transportStreamList,modus,"transport_stream_loop");
-
-
-		return t;
+		kvp.addList( transportStreamList,modus,"transport_stream_loop");
+		return kvp;
 	}
 
 	
