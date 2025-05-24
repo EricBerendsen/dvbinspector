@@ -188,21 +188,21 @@ public class OperatorFastscan implements TreeNode{
 				addOptionalRowColumn("lcn",
 						this::getLcn,
 				Integer.class).
-				addRequiredRowColumn("onid", Service::getOriginalNetworkID, Integer.class).
-				addRequiredRowColumn("tsid", Service::getTransportStreamID, Integer.class).
-				addRequiredRowColumn("sid", Service::getService_id, Integer.class).
+				addRequiredRowColumn("onid", Service::original_network_id, Integer.class).
+				addRequiredRowColumn("tsid", Service::transport_stream_id, Integer.class).
+				addRequiredRowColumn("sid", Service::service_id, Integer.class).
 				addOptionalRowColumn("service name",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								ServiceDescriptor.class,
 								sd -> sd.getServiceName().toString(m7FastScanCharset)),
 						String.class).
 				addOptionalRowColumn("service type",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								ServiceDescriptor.class,
 								sd -> Descriptor.getServiceTypeString(sd.getServiceType())),
 						String.class).
 				addOptionalRowColumn("service provider",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								ServiceDescriptor.class,
 								sd -> sd.getServiceProviderName().toString(m7FastScanCharset)),
 						String.class).
@@ -266,7 +266,7 @@ public class OperatorFastscan implements TreeNode{
 			if(!lcnDescs.isEmpty()) {
 				M7LogicalChannelDescriptor desc = lcnDescs.getFirst();
 				for(LogicalChannel channel: desc.getChannelList()) {
-					if(channel.getServiceID() == service.getService_id()) {
+					if(channel.getServiceID() == service.service_id()) {
 						return channel.getLogicalChannelNumber();
 					}
 				}
@@ -279,8 +279,8 @@ public class OperatorFastscan implements TreeNode{
 		for( FNTsection fntSection: fntSections){
 			if(fntSection!=null) {
 				for(TransportStream ts : fntSection.getTransportStreamList()) {
-					if(ts.originalNetworkID() == service.getOriginalNetworkID() &&
-						ts.transportStreamID() == service.getTransportStreamID()) {
+					if(ts.originalNetworkID() == service.original_network_id() &&
+						ts.transportStreamID() == service.transport_stream_id()) {
 						return ts;
 					}
 				}
