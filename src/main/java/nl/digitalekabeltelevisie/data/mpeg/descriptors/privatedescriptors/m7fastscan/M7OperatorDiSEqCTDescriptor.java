@@ -40,57 +40,30 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 
-	public class DiSEqC implements TreeNode{
-
-		private String orbital_position;
-		private int westEastFlag;
-		private int reserved;
+	public record DiSEqC(String orbital_position, int westEastFlag, int reserved) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(int modus) {
-			KVP t = new KVP("DiSEqC");
-			t.add(new KVP("orbital_position", orbital_position, Descriptor.formatOrbitualPosition(orbital_position)));
-			t.add(new KVP("west_east_flag", westEastFlag, getWestEastString()));
-			t.add(new KVP("reserved", reserved));
+			public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("DiSEqC");
+				t.add(new KVP("orbital_position", orbital_position, formatOrbitualPosition(orbital_position)));
+				t.add(new KVP("west_east_flag", westEastFlag, getWestEastString()));
+				t.add(new KVP("reserved", reserved));
 
-			return t;
-		}
-		
+				return t;
+			}
+
 		public String getTotalPositionString() {
-			return Descriptor.formatOrbitualPosition(orbital_position) + " " + getWestEastString();
-		}
+				return formatOrbitualPosition(orbital_position) + " " + getWestEastString();
+			}
 
-		public String getWestEastString() {
-			return westEastFlag==1?"east":"west";
-		}
+			public String getWestEastString() {
+				return westEastFlag == 1 ? "east" : "west";
+			}
 
-		public String getOrbital_position() {
-			return orbital_position;
-		}
 
-		public void setOrbital_position(String orbital_position) {
-			this.orbital_position = orbital_position;
-		}
-
-		public int getWestEastFlag() {
-			return westEastFlag;
-		}
-
-		public void setWestEastFlag(int westEastFlag) {
-			this.westEastFlag = westEastFlag;
-		}
-
-		public int getReserved() {
-			return reserved;
-		}
-
-		public void setReserved(int reserved) {
-			this.reserved = reserved;
-		}
-		
 	}
 	
-	List<DiSEqC> diSEqCList = new ArrayList<>();
+	private List<DiSEqC> diSEqCList = new ArrayList<>();
 	
 	public M7OperatorDiSEqCTDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
@@ -99,13 +72,13 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 
 	
 	private List<DiSEqC> buildDiSEqCList(byte[] data, int offset, int diseqc_loop_length) {
-		final ArrayList<DiSEqC> r = new ArrayList<>();
+		List<DiSEqC> r = new ArrayList<>();
 		int t =0;
 		while(t<diseqc_loop_length){
-			final DiSEqC diseqc = new DiSEqC();
-			diseqc.setOrbital_position(getBCD(data, (offset +t) *2, 4));
-			diseqc.setWestEastFlag(Utils.getInt(data, offset+t+2, 1, 0X80)>>>7);
-			diseqc.setReserved(Utils.getInt(data, offset+t+2, 1, Utils.MASK_7BITS));
+			String orbitalPosition = getBCD(data, (offset + t) * 2, 4);
+			int westEastFlag = Utils.getInt(data, offset + t + 2, 1, 0X80) >>> 7;
+			int reserved = Utils.getInt(data, offset + t + 2, 1, Utils.MASK_7BITS);
+			DiSEqC diseqc = new DiSEqC(orbitalPosition, westEastFlag, reserved);
 			r.add(diseqc);
 			t = t+3;
 		}
@@ -113,8 +86,8 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.addList(diSEqCList,modus,"DiSEqC_loop");
 		return t;
 	}

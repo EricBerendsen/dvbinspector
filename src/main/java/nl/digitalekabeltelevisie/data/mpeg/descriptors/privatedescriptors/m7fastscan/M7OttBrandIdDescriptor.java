@@ -44,8 +44,8 @@ public class M7OttBrandIdDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("reserved", reserved));
 		t.add(new KVP("OTT_brand_id",ott_brand_id));
 		return t;

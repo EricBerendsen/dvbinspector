@@ -41,71 +41,38 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 //based on M7 FastScan Spec v7.1 Page 28 
 public class M7LogicalChannelDescriptor extends M7Descriptor {
 
-	private List<LogicalChannel> channelList = new ArrayList<>();
+	private final List<LogicalChannel> channelList = new ArrayList<>();
 
 
-	public class LogicalChannel implements TreeNode{
-		private int serviceID;
-		private int reserved;
-		private final int hidden;
-
-		private int logicalChannelNumber;
-
-		public LogicalChannel(final int id, final int reserved, final int hidden, final int type){
-			this.serviceID = id;
-			this.reserved = reserved;
-			this.hidden = hidden;
-			logicalChannelNumber = type;
-		}
-
-		public int getServiceID() {
-			return serviceID;
-		}
-
-		public void setServiceID(final int serviceID) {
-			this.serviceID = serviceID;
-		}
-
-		public int getLogicalChannelNumber() {
-			return logicalChannelNumber;
-		}
-
-		public void setLogicalChannelNumber(final int serviceType) {
-			this.logicalChannelNumber = serviceType;
-		}
-
+	public record LogicalChannel(int serviceID, int reserved, int hidden,
+								 int logicalChannelNumber) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("logical_channel: " + logicalChannelNumber);
-			s.add(new KVP("service_id", serviceID));
-			s.add(new KVP("reserved", reserved));
-			s.add(new KVP("hidden", hidden));
-			s.add(new KVP("logical_channel_number", logicalChannelNumber));
-			return s;
+			public KVP getJTreeNode(int modus) {
+				KVP s = new KVP("logical_channel: " + logicalChannelNumber);
+				s.add(new KVP("service_id", serviceID));
+				s.add(new KVP("reserved", reserved));
+				s.add(new KVP("hidden", hidden));
+				s.add(new KVP("logical_channel_number", logicalChannelNumber));
+				return s;
+			}
+
+			public int getVisibleServiceFlag() {
+				return reserved;
+			}
+
 		}
 
-		public int getVisibleServiceFlag() {
-			return reserved;
-		}
-
-		public void setVisibleServiceFlag(final int visibleServiceFlag) {
-			this.reserved = visibleServiceFlag;
-		}
-
-
-	}
-
-	public M7LogicalChannelDescriptor(final byte[] b, final TableSection parent) {
+	public M7LogicalChannelDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		int t = 0;
 		while (t < descriptorLength) {
-			final int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
-			final int reserved = getInt(b, t + 4, 1, 0x80) >> 7; // 1 bit
-			final int hidden = getInt(b, t + 4, 1, 0x40) >> 6; // 1 bit
+			int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			int reserved = getInt(b, t + 4, 1, 0x80) >> 7; // 1 bit
+			int hidden = getInt(b, t + 4, 1, 0x40) >> 6; // 1 bit
 			// chNumber is 14 bits in Nordig specs V1
-			final int chNumber = getInt(b, t + 4, 2, MASK_14BITS);
-			final LogicalChannel s = new LogicalChannel(serviceId, reserved, hidden, chNumber);
+			int chNumber = getInt(b, t + 4, 2, MASK_14BITS);
+			LogicalChannel s = new LogicalChannel(serviceId, reserved, hidden, chNumber);
 			channelList.add(s);
 			t += 4;
 		}
@@ -118,10 +85,10 @@ public class M7LogicalChannelDescriptor extends M7Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (int i = 0; i < getNoServices(); i++) {
-			final LogicalChannel s = channelList.get(i);
-			buf.append("(").append(i).append(";").append(s.getServiceID()).append(":").append(s.getLogicalChannelNumber()).append(":").append(s.getVisibleServiceFlag()).append("),");
+			LogicalChannel s = channelList.get(i);
+			buf.append("(").append(i).append(";").append(s.serviceID()).append(":").append(s.logicalChannelNumber()).append(":").append(s.getVisibleServiceFlag()).append("),");
 		}
 
 
@@ -129,8 +96,8 @@ public class M7LogicalChannelDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.addList(channelList, modus, "logical_channels");
 		return t;
 	}

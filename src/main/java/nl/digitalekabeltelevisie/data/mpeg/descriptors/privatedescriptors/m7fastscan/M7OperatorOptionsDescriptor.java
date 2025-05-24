@@ -49,8 +49,8 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("parental_control_rating", parental_control_rating, getParentalControlString()));
 		t.add(new KVP("default_char_set", default_char_set, getEncodingTypeString()));
 		t.add(new KVP("subtitles_enabled", subtitles_enabled));
@@ -66,7 +66,7 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 		if(parental_control_rating==0) {
 			return "undefined";
 		}
-		return ""+ (parental_control_rating+3)+" +";
+		return (parental_control_rating+3)+" +";
 	}
 	
 	private static String getEncodingType(int charSet) {

@@ -34,11 +34,11 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class M7OperatorPreferencesDescriptor extends M7Descriptor {
 
-	private String country_code;
-	private String menu_ISO_639_language_code;
-	private String audio1_ISO_639_language_code;
-	private String audio2_ISO_639_language_code;
-	private String subs_ISO_639_language_code;
+	private final String country_code;
+	private final String menu_ISO_639_language_code;
+	private final String audio1_ISO_639_language_code;
+	private final String audio2_ISO_639_language_code;
+	private final String subs_ISO_639_language_code;
 
 	public M7OperatorPreferencesDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
@@ -50,8 +50,8 @@ public class M7OperatorPreferencesDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("country_code", country_code));
 		t.add(new KVP("menu_ISO_639_language_code", menu_ISO_639_language_code));
 		t.add(new KVP("audio1_ISO_639_language_code", audio1_ISO_639_language_code));

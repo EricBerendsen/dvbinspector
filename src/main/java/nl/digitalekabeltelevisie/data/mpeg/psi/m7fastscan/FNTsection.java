@@ -242,7 +242,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 								M7LogicalChannelDescriptor.class,
 								lcd -> lcd.getChannelList().
 								stream().
-								map(M7LogicalChannelDescriptor.LogicalChannel::getServiceID).
+								map(M7LogicalChannelDescriptor.LogicalChannel::serviceID).
 								collect(Collectors.toList())),
 
 						Integer.class,
@@ -252,7 +252,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 								M7LogicalChannelDescriptor.class,
 								lcd -> lcd.getChannelList().
 								stream().
-								map(M7LogicalChannelDescriptor.LogicalChannel::getLogicalChannelNumber).
+								map(M7LogicalChannelDescriptor.LogicalChannel::logicalChannelNumber).
 								collect(Collectors.toList())),
 
 						Integer.class,

@@ -41,8 +41,8 @@ public class M7OperatorNameDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("operator_name",operatorName));
 		return t;
 	}

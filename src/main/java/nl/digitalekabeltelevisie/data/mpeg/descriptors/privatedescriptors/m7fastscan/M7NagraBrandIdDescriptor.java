@@ -38,7 +38,7 @@ public class M7NagraBrandIdDescriptor extends M7Descriptor {
 	private final int ca_system_ID;
 	private final int emm_stored;
 	private final int reserved;
-	byte[] emm_brand_ids = new byte[0];
+	private byte[] emm_brand_ids = new byte[0];
 	
 	public M7NagraBrandIdDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
@@ -52,8 +52,8 @@ public class M7NagraBrandIdDescriptor extends M7Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("nagra_brand_id", nagra_brand_id));
 		t.add(new KVP("CA_system_ID", ca_system_ID));
 		t.add(new KVP("emm_stored", emm_stored));

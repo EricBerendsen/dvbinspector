@@ -266,8 +266,8 @@ public class OperatorFastscan implements TreeNode{
 			if(!lcnDescs.isEmpty()) {
 				M7LogicalChannelDescriptor desc = lcnDescs.getFirst();
 				for(LogicalChannel channel: desc.getChannelList()) {
-					if(channel.getServiceID() == service.service_id()) {
-						return channel.getLogicalChannelNumber();
+					if(channel.serviceID() == service.service_id()) {
+						return channel.logicalChannelNumber();
 					}
 				}
 			}

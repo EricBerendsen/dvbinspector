@@ -34,7 +34,7 @@ import nl.digitalekabeltelevisie.util.LookUpList;
 
 public class M7Descriptor extends Descriptor {
 
-	static LookUpList m7_descriptor_name = new LookUpList.Builder().
+	private static final LookUpList m7_descriptor_name = new LookUpList.Builder().
 			add(0x83, "M7 logical_channel_descriptor").
 			add(0x84, "M7 operator_name_descriptor").
 			add(0x85, "M7 operator_sublist_name_descriptor").
@@ -50,9 +50,8 @@ public class M7Descriptor extends Descriptor {
 	}
 	
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP kvp = (KVP)super.getJTreeNode(modus);
-		return kvp;
+	public KVP getJTreeNode(int modus){
+        return (KVP)super.getJTreeNode(modus);
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public class M7Descriptor extends Descriptor {
 		return m7_descriptor_name.get(descriptorTag, "unknown M7 descriptor");
 	}
 
-	public static String getDescriptorname(final int tag){
+	public static String getDescriptorname(int tag){
 		return m7_descriptor_name.get(tag, "unknown M7 descriptor");
 	}
 
