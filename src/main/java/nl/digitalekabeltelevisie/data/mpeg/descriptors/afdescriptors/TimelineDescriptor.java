@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -63,19 +63,19 @@ public class TimelineDescriptor extends AFDescriptor {
 	private long timescale;
 	private BigInteger media_timestamp;
 
-	public TimelineDescriptor(byte[] b, int offset) {
-		super(b, offset);
+	public TimelineDescriptor(byte[] b) {
+		super(b);
 
-		has_timestamp = getInt(b, offset + 2, 1, 0xC0) >> 6;
-		has_ntp = getInt(b, offset + 2, 1, 0x20) >> 5;
-		has_ptp = getInt(b, offset + 2, 1, 0x10) >> 4;
-		has_timecode = getInt(b, offset + 2, 1, 0x0C) >> 2;
-		force_reload = getInt(b, offset + 2, 1, 0x02) >> 1;
-		paused = getInt(b, offset + 2, 1, 0x01);
-		discontinuity = getInt(b, offset + 3, 1, 0x80) >> 7;
-		reserved = getInt(b, offset + 3, 1, MASK_7BITS);
-		timeline_id = getInt(b, offset + 4, 1, MASK_8BITS);
-		int localOffset = offset + 5;
+		has_timestamp = getInt(b, 2, 1, 0xC0) >> 6;
+		has_ntp = getInt(b, 2, 1, 0x20) >> 5;
+		has_ptp = getInt(b, 2, 1, 0x10) >> 4;
+		has_timecode = getInt(b, 2, 1, 0x0C) >> 2;
+		force_reload = getInt(b, 2, 1, 0x02) >> 1;
+		paused = getInt(b, 2, 1, 0x01);
+		discontinuity = getInt(b, 3, 1, 0x80) >> 7;
+		reserved = getInt(b, 3, 1, MASK_7BITS);
+		timeline_id = getInt(b, 4, 1, MASK_8BITS);
+		int localOffset =  5;
 		
 		 if (has_timestamp !=0) {
 	         timescale = getLong(b, localOffset, 4, MASK_32BITS);

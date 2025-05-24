@@ -27,41 +27,37 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
+import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.Utils;
 
-public class M7NagraBrandIdDescriptor extends M7Descriptor {
+public class M7OttBrandIdDescriptor extends M7Descriptor {
 
-	private final int nagra_brand_id;
-	private final int ca_system_ID;
-	private final int emm_stored;
-	private final int reserved;
-	byte[] emm_brand_ids = new byte[0];
+	private final long reserved;
+	private final DVBString ott_brand_id;
 	
-	public M7NagraBrandIdDescriptor(byte[] b, TableSection parent) {
+	public M7OttBrandIdDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
-		nagra_brand_id = getInt(b, 2, 1, MASK_8BITS);
-		ca_system_ID = getInt(b, 3, 2, MASK_16BITS);
-		emm_stored = getInt(b, 5, 1, 0x80) >>> 7;
-		reserved = getInt(b, 5, 1, MASK_7BITS);
-		if (emm_stored == 0) {
-			emm_brand_ids = getBytes(b, 6, descriptorLength - 4);
-		}
+		reserved = Utils.getLong(b, 2, 4, Utils.MASK_33BITS);
+		ott_brand_id = new DVBString(b,6, descriptorLength - 4);
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
+	public KVP getJTreeNode(final int modus){
 		final KVP t = super.getJTreeNode(modus);
-		t.add(new KVP("nagra_brand_id", nagra_brand_id));
-		t.add(new KVP("CA_system_ID", ca_system_ID));
-		t.add(new KVP("emm_stored", emm_stored));
 		t.add(new KVP("reserved", reserved));
-		if (emm_stored == 0) {
-			t.add(new KVP("emm_brand_ids", emm_brand_ids));
-		}
+		t.add(new KVP("OTT_brand_id",ott_brand_id));
 		return t;
 	}
+
+	public long getReserved() {
+		return reserved;
+	}
+
+	public DVBString getOtt_brand_id() {
+		return ott_brand_id;
+	}
+
 
 }

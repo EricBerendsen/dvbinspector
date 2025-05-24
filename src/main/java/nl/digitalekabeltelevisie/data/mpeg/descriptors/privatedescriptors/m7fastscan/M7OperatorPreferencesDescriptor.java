@@ -29,9 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fas
 
 import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class M7OperatorPreferencesDescriptor extends M7Descriptor {
@@ -41,24 +39,24 @@ public class M7OperatorPreferencesDescriptor extends M7Descriptor {
 	private String audio1_ISO_639_language_code;
 	private String audio2_ISO_639_language_code;
 	private String subs_ISO_639_language_code;
-	
-	public M7OperatorPreferencesDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		country_code = getISO8859_1String(b,offset+2,3);
-		menu_ISO_639_language_code = getISO8859_1String(b,offset+5,3);
-		audio1_ISO_639_language_code = getISO8859_1String(b,offset+8,3);
-		audio2_ISO_639_language_code = getISO8859_1String(b,offset+11,3);
-		subs_ISO_639_language_code = getISO8859_1String(b,offset+14,3);
+
+	public M7OperatorPreferencesDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		country_code = getISO8859_1String(b, 2, 3);
+		menu_ISO_639_language_code = getISO8859_1String(b, 5, 3);
+		audio1_ISO_639_language_code = getISO8859_1String(b, 8, 3);
+		audio2_ISO_639_language_code = getISO8859_1String(b, 11, 3);
+		subs_ISO_639_language_code = getISO8859_1String(b, 14, 3);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("country_code",country_code ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("menu_ISO_639_language_code",menu_ISO_639_language_code ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("audio1_ISO_639_language_code",audio1_ISO_639_language_code ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("audio2_ISO_639_language_code",audio2_ISO_639_language_code ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("subs_ISO_639_language_code",subs_ISO_639_language_code ,null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("country_code", country_code));
+		t.add(new KVP("menu_ISO_639_language_code", menu_ISO_639_language_code));
+		t.add(new KVP("audio1_ISO_639_language_code", audio1_ISO_639_language_code));
+		t.add(new KVP("audio2_ISO_639_language_code", audio2_ISO_639_language_code));
+		t.add(new KVP("subs_ISO_639_language_code", subs_ISO_639_language_code));
 		return t;
 	}
 

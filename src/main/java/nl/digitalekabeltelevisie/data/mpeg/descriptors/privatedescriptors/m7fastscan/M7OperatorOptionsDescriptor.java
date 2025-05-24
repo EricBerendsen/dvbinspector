@@ -27,11 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class M7OperatorOptionsDescriptor extends M7Descriptor {
@@ -41,21 +40,21 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 	private final int subtitles_enabled;
 	private final int special_regions_setup;
 	
-	public M7OperatorOptionsDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		parental_control_rating =getInt(b, offset+2,1,MASK_8BITS);
-		default_char_set =getInt(b, offset+3,1,MASK_8BITS);
-		subtitles_enabled =getInt(b, offset+4,1,0x80)>>>7;
-		special_regions_setup =getInt(b, offset+4,1,0x40)>>>6;
+	public M7OperatorOptionsDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		parental_control_rating = getInt(b, 2, 1, MASK_8BITS);
+		default_char_set = getInt(b, 3, 1, MASK_8BITS);
+		subtitles_enabled = getInt(b, 4, 1, 0x80) >>> 7;
+		special_regions_setup = getInt(b, 4, 1, 0x40) >>> 6;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("parental_control_rating",parental_control_rating ,getParentalControlString())));
-		t.add(new DefaultMutableTreeNode(new KVP("default_char_set",default_char_set ,getEncodingTypeString())));
-		t.add(new DefaultMutableTreeNode(new KVP("subtitles_enabled",subtitles_enabled ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("special_regions_setup",special_regions_setup ,null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("parental_control_rating", parental_control_rating, getParentalControlString()));
+		t.add(new KVP("default_char_set", default_char_set, getEncodingTypeString()));
+		t.add(new KVP("subtitles_enabled", subtitles_enabled));
+		t.add(new KVP("special_regions_setup", special_regions_setup, null));
 		return t;
 	}
 
@@ -70,45 +69,27 @@ public class M7OperatorOptionsDescriptor extends M7Descriptor {
 		return ""+ (parental_control_rating+3)+" +";
 	}
 	
-	private String getEncodingType(int charSet) {
-		switch (charSet) {
-		case 0x01:
-			return "ISO/IEC 8859-5";
-		case 0x02:
-			return "ISO/IEC 8859-6";
-		case 0x03:
-			return "ISO/IEC 8859-7";
-		case 0x04:
-			return "ISO/IEC 8859-8";
-		case 0x05:
-			return "ISO/IEC 8859-9";
-		case 0x06:
-			return "ISO/IEC 8859-10";
-		case 0x07:
-			return "ISO/IEC 8859-11";
-		case 0x08:
-			return "ISO/IEC 8859-12";
-		case 0x09:
-			return "ISO/IEC 8859-13";
-		case 0x0A:
-			return "ISO/IEC 8859-14";
-		case 0x0B:
-			return "ISO/IEC 8859-15";
-		case 0x10:
-			return "Illegal value";
-		case 0x11:
-			return "ISO/IEC 10646-1";
-		case 0x12:
-			return "KSX1001-2004";
-		case 0x13:
-			return "GB-2312-1980";
-		case 0x14:
-			return "Big5 subset of ISO/IEC 10646-1";
-		case 0x15:
-			return "UTF-8 encoding of ISO/IEC 10646-1";
-		default:
-			return "reserved for future use";
-		}
+	private static String getEncodingType(int charSet) {
+		return switch (charSet) {
+		case 0x01 -> "ISO/IEC 8859-5";
+		case 0x02 -> "ISO/IEC 8859-6";
+		case 0x03 -> "ISO/IEC 8859-7";
+		case 0x04 -> "ISO/IEC 8859-8";
+		case 0x05 -> "ISO/IEC 8859-9";
+		case 0x06 -> "ISO/IEC 8859-10";
+		case 0x07 -> "ISO/IEC 8859-11";
+		case 0x08 -> "ISO/IEC 8859-12";
+		case 0x09 -> "ISO/IEC 8859-13";
+		case 0x0A -> "ISO/IEC 8859-14";
+		case 0x0B -> "ISO/IEC 8859-15";
+		case 0x10 -> "Illegal value";
+		case 0x11 -> "ISO/IEC 10646-1";
+		case 0x12 -> "KSX1001-2004";
+		case 0x13 -> "GB-2312-1980";
+		case 0x14 -> "Big5 subset of ISO/IEC 10646-1";
+		case 0x15 -> "UTF-8 encoding of ISO/IEC 10646-1";
+		default -> "reserved for future use";
+		};
 
 	}
 

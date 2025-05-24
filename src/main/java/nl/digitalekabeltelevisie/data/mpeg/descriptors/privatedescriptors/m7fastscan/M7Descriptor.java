@@ -27,6 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
@@ -41,14 +42,19 @@ public class M7Descriptor extends Descriptor {
 			add(0x87, "M7 operator_DiSEqC_descriptor").
 			add(0x88, "M7 operator_options_descriptor").
 			add(0x89, "M7 Nagra_brandID_descriptor").
+			add(0x8A, "M7 OTT_brandID_descriptor").
 			build();
 			
-	public M7Descriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public M7Descriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+	}
+	
+	@Override
+	public KVP getJTreeNode(final int modus){
+		final KVP kvp = (KVP)super.getJTreeNode(modus);
+		return kvp;
 	}
 
-	
-	
 	@Override
 	public String getDescriptorname(){
 		return m7_descriptor_name.get(descriptorTag, "unknown M7 descriptor");

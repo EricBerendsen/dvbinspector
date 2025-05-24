@@ -196,21 +196,23 @@ public final class DescriptorFactory {
 		int descriptorTag = toUnsignedInt(data[0]);
 		switch (descriptorTag) {
 		case 0x83:
-			return new M7LogicalChannelDescriptor(data, 0, tableSection);
+			return new M7LogicalChannelDescriptor(data, tableSection);
 		case 0x84:
-			return new M7OperatorNameDescriptor(data, 0, tableSection);
+			return new M7OperatorNameDescriptor(data, tableSection);
 		case 0x85:
-			return new M7OperatorSublistNameDescriptor(data, 0, tableSection);
+			return new M7OperatorSublistNameDescriptor(data, tableSection);
 		case 0x86:
-			return new M7OperatorPreferencesDescriptor(data, 0, tableSection);
+			return new M7OperatorPreferencesDescriptor(data, tableSection);
 		case 0x87:
-			return new M7OperatorDiSEqCTDescriptor(data, 0, tableSection);
+			return new M7OperatorDiSEqCTDescriptor(data, tableSection);
 		case 0x88:
-			return new M7OperatorOptionsDescriptor(data, 0, tableSection);
+			return new M7OperatorOptionsDescriptor(data, tableSection);
 		case 0x89:
-			return new M7NagraBrandIdDescriptor(data, 0, tableSection);
+			return new M7NagraBrandIdDescriptor(data, tableSection);
+		case 0x8A:
+			return new M7OttBrandIdDescriptor(data, tableSection);
 		default:
-			Descriptor d = new M7Descriptor(data, 0, tableSection);
+			Descriptor d = new M7Descriptor(data, tableSection);
 			logger.info("Not implemented M7Descriptor:" + descriptorTag + " ("
 					+ M7Descriptor.getDescriptorname(descriptorTag) + ")in section "
 					+ TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data="

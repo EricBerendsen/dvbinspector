@@ -27,23 +27,22 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class M7OperatorNameDescriptor extends M7Descriptor {
 
 	private final DVBString operatorName;
 	
-	public M7OperatorNameDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public M7OperatorNameDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		operatorName = new DVBString(b,1);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(final int modus){
+		final KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("operator_name",operatorName));
 		return t;
 	}
