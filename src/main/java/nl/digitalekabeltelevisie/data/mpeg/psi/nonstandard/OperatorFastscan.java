@@ -250,7 +250,7 @@ public class OperatorFastscan implements TreeNode{
 	private SatelliteDeliverySystemDescriptor getSatelliteDeliverySystemDescriptor(Service service) {
 		TransportStream ts = getTransportStreamFromFnt(service);
 		if(ts!=null) {
-			List<SatelliteDeliverySystemDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.getDescriptorList(),SatelliteDeliverySystemDescriptor.class);
+			List<SatelliteDeliverySystemDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.descriptorList(),SatelliteDeliverySystemDescriptor.class);
 			if(!lcnDescs.isEmpty()) {
 				return lcnDescs.getFirst();
 			}
@@ -262,7 +262,7 @@ public class OperatorFastscan implements TreeNode{
 
 		TransportStream ts = getTransportStreamFromFnt(service);
 		if(ts!=null) {
-			List<M7LogicalChannelDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.getDescriptorList(),M7LogicalChannelDescriptor.class);
+			List<M7LogicalChannelDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.descriptorList(),M7LogicalChannelDescriptor.class);
 			if(!lcnDescs.isEmpty()) {
 				M7LogicalChannelDescriptor desc = lcnDescs.getFirst();
 				for(LogicalChannel channel: desc.getChannelList()) {
@@ -279,8 +279,8 @@ public class OperatorFastscan implements TreeNode{
 		for( FNTsection fntSection: fntSections){
 			if(fntSection!=null) {
 				for(TransportStream ts : fntSection.getTransportStreamList()) {
-					if(ts.getOriginalNetworkID() == service.getOriginalNetworkID() &&
-						ts.getTransportStreamID() == service.getTransportStreamID()) {
+					if(ts.originalNetworkID() == service.getOriginalNetworkID() &&
+						ts.transportStreamID() == service.getTransportStreamID()) {
 						return ts;
 					}
 				}

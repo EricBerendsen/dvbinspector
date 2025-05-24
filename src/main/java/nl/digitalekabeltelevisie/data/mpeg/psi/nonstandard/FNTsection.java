@@ -66,74 +66,20 @@ public class FNTsection extends TableSectionExtendedSyntax{
 	private final int network_descriptors_loop_length;
 	private final int transport_stream_loop_length;
 
-	public static class TransportStream implements TreeNode{
-		private int transportStreamID;
-		private int originalNetworkID;
-		private int transportDescriptorsLength;
-
-		public List<Descriptor> descriptorList;
-
-		public List<Descriptor> getDescriptorList() {
-			return descriptorList;
-		}
-
-		public void setDescriptorList(List<Descriptor> descriptorList) {
-			this.descriptorList = descriptorList;
-		}
-
-		public int getOriginalNetworkID() {
-			return originalNetworkID;
-		}
-
-		public void setOriginalNetworkID(int originalNetworkID) {
-			this.originalNetworkID = originalNetworkID;
-		}
-
-		public int getTransportDescriptorsLength() {
-			return transportDescriptorsLength;
-		}
-
-		public void setTransportDescriptorsLength(int transportDescriptorsLength) {
-			this.transportDescriptorsLength = transportDescriptorsLength;
-		}
-
-		public int getTransportStreamID() {
-			return transportStreamID;
-		}
-
-		public void setTransportStreamID(int transportStreamID) {
-			this.transportStreamID = transportStreamID;
-		}
+	public record TransportStream(int transportStreamID, int originalNetworkID, int transportDescriptorsLength,
+								  List<Descriptor> descriptorList) implements TreeNode {
 
 		@Override
-		public String toString(){
-			StringBuilder stringBuilder = new StringBuilder("Service, transportStreamID=");
-			stringBuilder.append(transportStreamID).append(", originalNetworkID=").append(originalNetworkID).append(", ");
-			for (Descriptor descriptor : descriptorList) {
-				stringBuilder.append(descriptor).append(", ");
-
-			}
-			return stringBuilder.toString();
-
-		}
-
-		public KVP getJTreeNode(int modus) {
-
+        public KVP getJTreeNode(int modus) {
 			KVP kvp = new KVP("transport_stream:", transportStreamID);
-
 			kvp.add(new KVP("transport_stream_id", transportStreamID));
 			kvp.add(new KVP("original_network_id", originalNetworkID, Utils.getOriginalNetworkIDString(originalNetworkID)));
 			kvp.add(new KVP("transport_descriptors_length", transportDescriptorsLength));
-
 			kvp.addList(descriptorList, modus, "transport_descriptors");
 
 			return kvp;
 		}
-
-
-
 	}
-
 
 
 	public FNTsection(PsiSectionData raw_data, PID parent){
@@ -156,18 +102,13 @@ public class FNTsection extends TableSectionExtendedSyntax{
         return "FNTsection section=" + getSectionNumber() + ", lastSection=" + getSectionLastNumber() + ", tableType=" + getTableType(tableId) + ", NetworkID=" + getOperatorNetworkID() + ", ";
 	}
 
-
 	public List<Descriptor> getNetworkDescriptorList() {
 		return networkDescriptorList;
 	}
 
-
-
 	public List<TransportStream> getTransportStreamList() {
 		return transportStreamList;
 	}
-
-
 
 	public int getTransportStreamLoopLength() {
 		return transport_stream_loop_length;
@@ -178,20 +119,20 @@ public class FNTsection extends TableSectionExtendedSyntax{
 	}
 
 	private List<TransportStream> buildTransportStreamList(byte[] data, int i, int programInfoLength) {
-		List<TransportStream> r = new ArrayList<>();
-		int t =0;
-		while(t<programInfoLength){
-			TransportStream transportStream = new TransportStream();
-			transportStream.setTransportStreamID(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-			transportStream.setOriginalNetworkID(Utils.getInt(data, i+t+2, 2, Utils.MASK_16BITS));
-			transportStream.setTransportDescriptorsLength(Utils.getInt(data, i+t+4, 2, Utils.MASK_12BITS));
-			transportStream.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+6,transportStream.getTransportDescriptorsLength(),this));
-			t+=6+transportStream.getTransportDescriptorsLength();
-			r.add(transportStream);
+		List<TransportStream> transportStreams = new ArrayList<>();
+		int t = 0;
+		while (t < programInfoLength) {
+			int transportStreamID = Utils.getInt(data, i + t, 2, Utils.MASK_16BITS);
+			int originalNetworkID = Utils.getInt(data, i + t + 2, 2, Utils.MASK_16BITS);
+			int transportDescriptorsLength = Utils.getInt(data, i + t + 4, 2, Utils.MASK_12BITS);
+			List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(data, i + t + 6, transportDescriptorsLength, this);
+			TransportStream transportStream = new TransportStream(transportStreamID, originalNetworkID, transportDescriptorsLength, descriptorList);
+			transportStreams.add(transportStream);
+			t += 6 + transportDescriptorsLength;
 
 		}
 
-		return r;
+		return transportStreams;
 	}
 
 	@Override
@@ -225,58 +166,58 @@ public class FNTsection extends TableSectionExtendedSyntax{
 								NetworkNameDescriptor.class,
 								nnd -> ("".equals(nnd.getNetworkNameAsString())?null:nnd.getNetworkNameAsString())),
 						String.class).
-				addRequiredRowColumn("onid", TransportStream::getOriginalNetworkID, Integer.class).
-				addRequiredRowColumn("tsid", TransportStream::getTransportStreamID, Integer.class).
+				addRequiredRowColumn("onid", TransportStream::originalNetworkID, Integer.class).
+				addRequiredRowColumn("tsid", TransportStream::transportStreamID, Integer.class).
 
 
 				addOptionalRowColumn("sat frequency",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> formatSatelliteFrequency(sat.getFrequency())),
 						Number.class).
 				addOptionalRowColumn("sat position",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> formatOrbitualPosition(sat.getOrbitalPosition())),
 						Number.class).
 				addOptionalRowColumn("sat west_east",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								SatelliteDeliverySystemDescriptor::getWestEastFlagString),
 						String.class).
 				addOptionalRowColumn("sat polarization",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> getPolarizationString(sat.getPolarization())),
 						String.class).
 				addOptionalRowColumn("mod system",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								SatelliteDeliverySystemDescriptor::getModulationSystemString),
 						String.class).
 				addOptionalRowColumn("roll_off",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> (sat.getModulationSystem()==1? getRollOffString(sat.getRollOff()):null)),
 						Number.class).
 				addOptionalRowColumn("mod type",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> getModulationString(sat.getModulationType())),
 						String.class).
 				addOptionalRowColumn("sat symbol_rate",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> formatSymbolRate(sat.getSymbol_rate())),
 						Number.class).
 				addOptionalRowColumn("sat fec_inner",
-						transportStream -> findDescriptorApplyFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyFunc(transportStream.descriptorList(),
 								SatelliteDeliverySystemDescriptor.class,
 								sat -> getFEC_innerString(sat.getFEC_inner())),
 						String.class).
 
 				addOptionalRepeatingGroupedColumn("sid",
-						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyListFunc(transportStream.descriptorList(),
 								ServiceListDescriptor.class,
 								sld -> sld.getServiceList().
 								stream().
@@ -286,7 +227,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 						Integer.class,
 						"service_list").
 				addOptionalRepeatingGroupedColumn("type",
-						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyListFunc(transportStream.descriptorList(),
 								ServiceListDescriptor.class,
 								sld -> sld.getServiceList().
 								stream().
@@ -297,7 +238,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 						"service_list").
 
 				addOptionalRepeatingGroupedColumn("lcn sid",
-						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyListFunc(transportStream.descriptorList(),
 								M7LogicalChannelDescriptor.class,
 								lcd -> lcd.getChannelList().
 								stream().
@@ -307,7 +248,7 @@ public class FNTsection extends TableSectionExtendedSyntax{
 						Integer.class,
 						"lcn_list").
 				addOptionalRepeatingGroupedColumn("lcn no",
-						transportStream -> findDescriptorApplyListFunc(transportStream.getDescriptorList(),
+						transportStream -> findDescriptorApplyListFunc(transportStream.descriptorList(),
 								M7LogicalChannelDescriptor.class,
 								lcd -> lcd.getChannelList().
 								stream().
