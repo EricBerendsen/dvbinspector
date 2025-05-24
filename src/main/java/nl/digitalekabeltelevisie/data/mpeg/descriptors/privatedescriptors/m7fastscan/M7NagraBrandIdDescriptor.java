@@ -37,6 +37,23 @@ public class M7NagraBrandIdDescriptor extends M7Descriptor {
 	private final int nagra_brand_id;
 	private final int ca_system_ID;
 	private final int emm_stored;
+
+	public int getNagra_brand_id() {
+		return nagra_brand_id;
+	}
+
+	public int getCa_system_ID() {
+		return ca_system_ID;
+	}
+
+	public int getEmm_stored() {
+		return emm_stored;
+	}
+
+	public byte[] getEmm_brand_ids() {
+		return emm_brand_ids;
+	}
+
 	private final int reserved;
 	private byte[] emm_brand_ids = new byte[0];
 	

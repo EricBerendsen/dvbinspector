@@ -44,11 +44,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorDiSEqCTDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorNameDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorOptionsDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorPreferencesDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorSublistNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
@@ -180,14 +176,26 @@ public class ONTSection extends TableSectionExtendedSyntax {
 								M7OperatorNameDescriptor.class,
 								ond -> ond.getOperatorName().toString()),
 						String.class).
-
-
 				addOptionalRowColumn("operator sublist name",
 						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorSublistNameDescriptor.class,
 								osnd -> osnd.getOperatorSublistName().toString()),
 						String.class).
-
+				addOptionalRowColumn("nagra brand id",
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
+								M7NagraBrandIdDescriptor.class,
+								nbid -> nbid.getNagra_brand_id()),
+						Integer.class).
+				addOptionalRowColumn("nagra ca system id",
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
+								M7NagraBrandIdDescriptor.class,
+								nbid -> nbid.getCa_system_ID()),
+						Integer.class).
+				addOptionalRowColumn("ott brand id",
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
+								M7OttBrandIdDescriptor.class,
+								obid -> obid.getOtt_brand_id().toString()),
+						String.class).
 				addOptionalRowColumn("country code",
 						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorPreferencesDescriptor.class,
