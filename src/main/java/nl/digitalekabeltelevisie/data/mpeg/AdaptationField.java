@@ -39,6 +39,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.AFDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.AFDescriptorFactory;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -403,7 +404,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		 * @param aU_frame_rate_code2
 		 * @return
 		 */
-		private String getAUFrameRateCodeString(int aU_frame_rate_code2) {
+		private static String getAUFrameRateCodeString(int aU_frame_rate_code2) {
 			return AU_frame_rate_code_list.get(aU_frame_rate_code2);
 		}
 
@@ -572,7 +573,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	private int ltw_offset;
 	private int piecewise_rate;
 
-	private List<Descriptor> afDescriptorList;
+	private List<AFDescriptor> afDescriptorList;
 
 
 
@@ -650,7 +651,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	 * @param private_data_byte2
 	 * @return
 	 */
-	private List<PrivateDataField> buildPrivatedataFieldsList(byte[] private_data_byte2) {
+	private static List<PrivateDataField> buildPrivatedataFieldsList(byte[] private_data_byte2) {
 
 		List<PrivateDataField> result = new ArrayList<>();
 		int offset = 0;
@@ -1029,7 +1030,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 	}
 
 
-	public List<Descriptor> getAfDescriptorList() {
+	public List<AFDescriptor> getAfDescriptorList() {
 		return afDescriptorList;
 	}
 

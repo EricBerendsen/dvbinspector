@@ -32,13 +32,10 @@ public class TemiTimeStamp {
 
 	private final int packetNo;
 	private final BigInteger media_timestamp;
-	private long timescale;
-	private int discontinuity;
-	private int paused;
+	private final long timescale;
+	private final int discontinuity;
+	private final int paused;
 
-	public TemiTimeStamp(int packetNo, BigInteger time) {
-		this(packetNo,time,0,0,0);
-	}
 
 	public TemiTimeStamp(int packetNo, BigInteger media_timestamp, long timescale, int discontinuity,
 			int paused) {

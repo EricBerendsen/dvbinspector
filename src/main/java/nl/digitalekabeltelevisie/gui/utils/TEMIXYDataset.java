@@ -76,8 +76,8 @@ public class TEMIXYDataset implements XYDataset {
 		if ((list != null) && (!list.isEmpty())) {
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);
-			TemiTimeStamp startKey = new TemiTimeStamp(startPacket, BigInteger.ZERO);
-			TemiTimeStamp endKey = new TemiTimeStamp(endPacket, BigInteger.valueOf(Long.MAX_VALUE));
+			TemiTimeStamp startKey = new TemiTimeStamp(startPacket, BigInteger.ZERO,0,0,0);
+			TemiTimeStamp endKey = new TemiTimeStamp(endPacket, BigInteger.valueOf(Long.MAX_VALUE),0,0,0);
 
 			Comparator<TemiTimeStamp> comperator = Comparator.comparing(TemiTimeStamp::getPacketNo)
 					.thenComparing(TemiTimeStamp::getMediaTimeStamp);

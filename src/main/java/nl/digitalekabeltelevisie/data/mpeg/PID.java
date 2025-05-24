@@ -31,13 +31,7 @@ import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.system_clock_frequency;
 import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,7 +40,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.AFDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.afdescriptors.TimelineDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
@@ -452,8 +446,8 @@ public class PID implements TreeNode{
 	private static void processTEMI(AdaptationField adaptationField, HashMap<Integer, ArrayList<TemiTimeStamp>> temiList, int packetNo) {
 		if(adaptationField.isAdaptation_field_extension_flag()){
 			if(!adaptationField.isAf_descriptor_not_present_flag()){
-				List<Descriptor> afDescriptorList = adaptationField.getAfDescriptorList();
-				for (Descriptor descriptor : afDescriptorList) {
+				List<AFDescriptor> afDescriptorList = adaptationField.getAfDescriptorList();
+				for (AFDescriptor descriptor : afDescriptorList) {
 					if(descriptor instanceof TimelineDescriptor){
 						TimelineDescriptor timelineDescriptor = (TimelineDescriptor) descriptor;
 						if((timelineDescriptor.getHas_timestamp()==1)||
