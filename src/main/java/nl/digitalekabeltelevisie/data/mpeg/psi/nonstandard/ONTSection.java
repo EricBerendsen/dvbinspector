@@ -72,7 +72,7 @@ public class ONTSection extends TableSectionExtendedSyntax {
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
 			
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("operator_brand",operator_network_id + "-"+ operator_sublist_id,null));
+			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("operator_brand",operator_network_id + "-"+ operator_sublist_id,null));
 
 			t.add(new DefaultMutableTreeNode(new KVP("operator_network_id",operator_network_id,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("operator_sublist_id",operator_sublist_id,null)));
@@ -145,21 +145,21 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	}
 	
 	private List<OperatorBrand> buildOperatorBrandList(byte[] data, int i, int operator_brands_loop_length2) {
-		final ArrayList<OperatorBrand> r = new ArrayList<>();
+		List<OperatorBrand> r = new ArrayList<>();
 		int t =0;
 		try {
 			while(t<operator_brands_loop_length2){
-				final OperatorBrand c = new OperatorBrand();
-				r.add(c);
-				c.setOperator_network_id(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-				c.setOperator_sublist_id(Utils.getInt(data, i+t+2, 1, Utils.MASK_8BITS));
-				c.setReserved_future_use(Utils.getInt(data, i+t+3, 1, 0xF0)>>>4);
-				final int operator_descriptors_length = Utils.getInt(data, i+t+3, 2, Utils.MASK_12BITS);
-				c.setOperator_descriptors_length(operator_descriptors_length);
-				c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,operator_descriptors_length,this));
+				OperatorBrand operatorBrand = new OperatorBrand();
+				r.add(operatorBrand);
+				operatorBrand.setOperator_network_id(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
+				operatorBrand.setOperator_sublist_id(Utils.getInt(data, i+t+2, 1, Utils.MASK_8BITS));
+				operatorBrand.setReserved_future_use(Utils.getInt(data, i+t+3, 1, 0xF0)>>>4);
+				int operator_descriptors_length = Utils.getInt(data, i+t+3, 2, Utils.MASK_12BITS);
+				operatorBrand.setOperator_descriptors_length(operator_descriptors_length);
+				operatorBrand.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,operator_descriptors_length,this));
 				t+=5+operator_descriptors_length;
 			}
-		} catch (final RuntimeException re) {
+		} catch (RuntimeException re) {
 			logger.info("RuntimeException in buildOperatorBrandList;"+re);
 		}
 
@@ -167,9 +167,9 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
 		kvp.addTableSource(this::getTableModel, "ONT Section");
 
@@ -187,8 +187,8 @@ public class ONTSection extends TableSectionExtendedSyntax {
 		for( OperatorBrand operatorBrand: operatorBrandList) {
 			if(operatorBrand.getOperator_network_id()==operator_network_id) {
 				List<M7OperatorNameDescriptor> operatorNameDescriptors = Descriptor.findGenericDescriptorsInList(operatorBrand.getDescriptorList(), M7OperatorNameDescriptor.class);
-				if(operatorNameDescriptors.size()>=1) {
-					return operatorNameDescriptors.get(0).getOperatorName().toString();
+				if(!operatorNameDescriptors.isEmpty()) {
+					return operatorNameDescriptors.getFirst().getOperatorName().toString();
 				}
 			}
 		}
@@ -201,22 +201,23 @@ public class ONTSection extends TableSectionExtendedSyntax {
 			if((operatorBrand.getOperator_network_id()==operator_network_id) && 
 					(operatorBrand.getOperator_sublist_id()==operator_sublist_id)){
 				List<M7OperatorSublistNameDescriptor> operatorSublistNameDescriptors = Descriptor.findGenericDescriptorsInList(operatorBrand.getDescriptorList(), M7OperatorSublistNameDescriptor.class);
-				if(operatorSublistNameDescriptors.size()>=1) {
-					return operatorSublistNameDescriptors.get(0).getOperatorSublistName().toString();
+				if(!operatorSublistNameDescriptors.isEmpty()) {
+					return operatorSublistNameDescriptors.getFirst().getOperatorSublistName().toString();
 				}
 			}
 		}
 		return null;
 	}
 
-	protected String getTableIdExtensionLabel() {
+	@Override
+    protected String getTableIdExtensionLabel() {
 		return "bouquet_id";
 	}
 
 	public TableModel getTableModel() {
 		FlexTableModel<ONTSection,OperatorBrand> tableModel =  new FlexTableModel<>(buildOntTableHeader());
 
-		tableModel.addData(this, getOperatorBrandList());
+		tableModel.addData(this, operatorBrandList);
 
 		tableModel.process();
 		return tableModel;

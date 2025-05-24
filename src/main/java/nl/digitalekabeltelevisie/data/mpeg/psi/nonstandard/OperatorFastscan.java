@@ -67,8 +67,8 @@ public class OperatorFastscan implements TreeNode{
 	private int operatorNetworkId = -1;
 	private final M7Fastscan m7Fastscan;
 	
-	FNTsection[] fntSections;
-	FSTsection[] fstSections;
+	private FNTsection[] fntSections;
+	private FSTsection[] fstSections;
 
 	public OperatorFastscan(int pid, M7Fastscan m7Fastscan) {
 		this.pid = pid;
@@ -77,7 +77,7 @@ public class OperatorFastscan implements TreeNode{
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final KVP networkKVP = new KVP("Pid",pid,getOperatorSubListName());
+		KVP networkKVP = new KVP("Pid",pid,getOperatorSubListName());
 		if(fntSections==null){
 			networkKVP.addHTMLSource(() -> "FNT Missing", "FNT Missing");
 		}else if(fstSections==null){
@@ -86,34 +86,34 @@ public class OperatorFastscan implements TreeNode{
 			networkKVP.addTableSource(this::getTableModel, "Operator Fastscan");
 		}
 		
-		final DefaultMutableTreeNode n = new DefaultMutableTreeNode(networkKVP);
+		DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode(networkKVP);
 		
 		if(fstSections!=null) {
 			KVP fstKvp = new KVP("FST");
 			DefaultMutableTreeNode fst = new DefaultMutableTreeNode(fstKvp);
 			fstKvp.addTableSource(this::getFstTableModel, "FST");
-			for (final FSTsection fstSection : fstSections) {
+			for (FSTsection fstSection : fstSections) {
 				if(fstSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(fst, fstSection, modus);
 				}
 			}
 			
-			n.add(fst);
+			defaultMutableTreeNode.add(fst);
 		}
 
 		if (fntSections != null) {
 			KVP fntKvp = new KVP("FNT");
 			DefaultMutableTreeNode fnt = new DefaultMutableTreeNode(fntKvp);
 			fntKvp.addTableSource(this::getFntTableModel, "FNT");
-			for (final FNTsection fntSection : fntSections) {
+			for (FNTsection fntSection : fntSections) {
 				if (fntSection != null) {
 					AbstractPSITabel.addSectionVersionsToJTree(fnt, fntSection, modus);
 				}
 			}
 
-			n.add(fnt);
+			defaultMutableTreeNode.add(fnt);
 		}
-		return n;
+		return defaultMutableTreeNode;
 	}
 
 	public String getOperatorSubListName() {
@@ -135,7 +135,7 @@ public class OperatorFastscan implements TreeNode{
 		if(fstSections[section.getSectionNumber()]==null){
 			fstSections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = fstSections[section.getSectionNumber()];
+			TableSection last = fstSections[section.getSectionNumber()];
 			AbstractPSITabel.updateSectionVersion(section, last);
 		}
 
@@ -155,7 +155,7 @@ public class OperatorFastscan implements TreeNode{
 		if(fntSections[section.getSectionNumber()]==null){
 			fntSections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = fntSections[section.getSectionNumber()];
+			TableSection last = fntSections[section.getSectionNumber()];
 			AbstractPSITabel.updateSectionVersion(section, last);
 		}
 		
@@ -165,7 +165,7 @@ public class OperatorFastscan implements TreeNode{
 	public TableModel getFntTableModel() {
 		FlexTableModel<FNTsection,TransportStream> tableModel =  new FlexTableModel<>(FNTsection.buildFntTableHeader());
 
-		for (final FNTsection fntSection : fntSections) {
+		for (FNTsection fntSection : fntSections) {
 			if(fntSection!= null){
 				tableModel.addData(fntSection, fntSection.getTransportStreamList());
 			}
@@ -179,7 +179,7 @@ public class OperatorFastscan implements TreeNode{
 	public TableModel getFstTableModel() {
 		FlexTableModel<FSTsection,Service> tableModel =  new FlexTableModel<>(FSTsection.buildFstTableHeader());
 
-		for (final FSTsection fstSection : fstSections) {
+		for (FSTsection fstSection : fstSections) {
 			if(fstSection!= null){
 				tableModel.addData(fstSection, fstSection.getServiceList());
 			}
@@ -229,50 +229,50 @@ public class OperatorFastscan implements TreeNode{
 	}
 
 
-	private String getOrbitualPosition(Service s) {
-		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(s);
+	private String getOrbitualPosition(Service service) {
+		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(service);
 		if(sdd!=null) {
 			return formatOrbitualPosition(sdd.getOrbitalPosition());
 		}
 		return null;
 	}
 	
-	private String getWestEastFlag(Service s) {
-		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(s);
+	private String getWestEastFlag(Service service) {
+		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(service);
 		if(sdd!=null) {
 			return sdd.getWestEastFlagString();
 		}
 		return null;
 	}
 
-	private String getFrequency(Service s) {
-		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(s);
+	private String getFrequency(Service service) {
+		SatelliteDeliverySystemDescriptor sdd = getSatelliteDeliverySystemDescriptor(service);
 		if(sdd!=null) {
 			return formatSatelliteFrequency(sdd.getFrequency());
 		}
 		return null;
 	}
 
-	private SatelliteDeliverySystemDescriptor getSatelliteDeliverySystemDescriptor(Service s) {
-		TransportStream ts = getTransportStreamFromFnt(s);
+	private SatelliteDeliverySystemDescriptor getSatelliteDeliverySystemDescriptor(Service service) {
+		TransportStream ts = getTransportStreamFromFnt(service);
 		if(ts!=null) {
 			List<SatelliteDeliverySystemDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.getDescriptorList(),SatelliteDeliverySystemDescriptor.class);
 			if(!lcnDescs.isEmpty()) {
-				return lcnDescs.get(0);
+				return lcnDescs.getFirst();
 			}
 		}
 		return null;
 	}
 
-	private Integer getLcn(Service s) {
+	private Integer getLcn(Service service) {
 
-		TransportStream ts = getTransportStreamFromFnt(s);
+		TransportStream ts = getTransportStreamFromFnt(service);
 		if(ts!=null) {
 			List<M7LogicalChannelDescriptor>lcnDescs = Descriptor.findGenericDescriptorsInList(ts.getDescriptorList(),M7LogicalChannelDescriptor.class);
 			if(!lcnDescs.isEmpty()) {
-				M7LogicalChannelDescriptor desc = lcnDescs.get(0);
+				M7LogicalChannelDescriptor desc = lcnDescs.getFirst();
 				for(LogicalChannel channel: desc.getChannelList()) {
-					if(channel.getServiceID() == s.getService_id()) {
+					if(channel.getServiceID() == service.getService_id()) {
 						return channel.getLogicalChannelNumber();
 					}
 				}
@@ -281,12 +281,12 @@ public class OperatorFastscan implements TreeNode{
 		return null;
 	}
 	
-	private TransportStream getTransportStreamFromFnt(Service s) {
-		for( FNTsection f: fntSections){
-			if(f!=null) {
-				for(TransportStream ts : f.getTransportStreamList()) {
-					if(ts.getOriginalNetworkID() == s.getOriginalNetworkID() &&
-						ts.getTransportStreamID() == s.getTransport_stream_id()) {
+	private TransportStream getTransportStreamFromFnt(Service service) {
+		for( FNTsection fntSection: fntSections){
+			if(fntSection!=null) {
+				for(TransportStream ts : fntSection.getTransportStreamList()) {
+					if(ts.getOriginalNetworkID() == service.getOriginalNetworkID() &&
+						ts.getTransportStreamID() == service.getTransportStreamID()) {
 						return ts;
 					}
 				}
@@ -300,7 +300,7 @@ public class OperatorFastscan implements TreeNode{
 
 		FlexTableModel<TransportStream,Service> tableModel =  new FlexTableModel<>(buildFastscanTableHeader());
 
-		for (final FSTsection fstSection : fstSections) {
+		for (FSTsection fstSection : fstSections) {
 			if(fstSection!= null){
 				tableModel.addData(null, fstSection.getServiceList());
 			}

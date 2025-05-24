@@ -42,8 +42,8 @@ import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class M7Fastscan implements TreeNode {
 	
-	final Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
-	ONTSection[] ontSections; 
+	private final Map<Integer, Map<Integer,OperatorFastscan>> operators = new HashMap<>();
+	private ONTSection[] ontSections;
 
 	@SuppressWarnings("unused")
 	private final PSI parentPSI;
@@ -57,20 +57,20 @@ public class M7Fastscan implements TreeNode {
 	}
 
 
-	public void update(final ONTSection section){
+	public void update(ONTSection section){
 		if(ontSections == null) {
 			ontSections = new ONTSection[section.getSectionLastNumber()+1];
 		}
 		if(ontSections[section.getSectionNumber()]==null){
 			ontSections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = ontSections[section.getSectionNumber()];
+			TableSection last = ontSections[section.getSectionNumber()];
 			AbstractPSITabel.updateSectionVersion(section, last);
 		}	
 	}
 	
-	public void update(final FSTsection section){
-		final int pid = section.getParentPID().getPid();
+	public void update(FSTsection section){
+		int pid = section.getParentPID().getPid();
 		int operator = section.getOperatorNetworkID();
 		
 		findOrCreateOperatorFastscan(operator,pid).update(section);
@@ -83,8 +83,8 @@ public class M7Fastscan implements TreeNode {
 	}
 
 
-	public void update(final FNTsection section){
-		final int pid = section.getParentPID().getPid();
+	public void update(FNTsection section){
+		int pid = section.getParentPID().getPid();
 		int operator = section.getOperatorNetworkID();
 		
 		findOrCreateOperatorFastscan(operator,pid).update(section);
@@ -109,24 +109,22 @@ public class M7Fastscan implements TreeNode {
 
 	public String getOperatorSubListName(int operatorNetworkId, int fstPid) {
 		
-		String r = null;
-
-		final NIT nit = parentPSI.getNit();
-		final int actualNetworkID = nit.getActualNetworkID();
-		final List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
+		NIT nit = parentPSI.getNit();
+		int actualNetworkID = nit.getActualNetworkID();
+		List<Descriptor> descriptors = nit.getNetworkDescriptors(actualNetworkID);
 		
 		Optional<LinkageDescriptor> optionalHomeTP_location_descriptor = descriptors.stream()
 		    .filter(LinkageDescriptor.class::isInstance)
 		    .map (LinkageDescriptor.class::cast)
-		    .filter(k -> (k.getLinkageType() >= 0x88 &&k.getLinkageType() <=0x8a)) // linkage_type(M7 Fastscan Home TP location descriptor)
+		    .filter(linkageDescriptor -> (linkageDescriptor.getLinkageType() >= 0x88 &&linkageDescriptor.getLinkageType() <=0x8a)) // linkage_type(M7 Fastscan Home TP location descriptor)
 		    .findFirst();
 	    
 		 if(optionalHomeTP_location_descriptor.isPresent()) {
 			 LinkageDescriptor homeTP_location_descriptor = optionalHomeTP_location_descriptor.get();
 			 Optional<BrandHomeTransponder> optionalBrandHomeTransponder = homeTP_location_descriptor.getM7BrandHomeTransponderList()
 			 	.stream()
-			 	.filter(k -> k.operator_network_id() == operatorNetworkId)
-			 	.filter(k -> k.fst_pid() == fstPid)
+			 	.filter(brandHomeTransponder -> brandHomeTransponder.operator_network_id() == operatorNetworkId)
+			 	.filter(brandHomeTransponder -> brandHomeTransponder.fst_pid() == fstPid)
 			 	.findFirst();
 			 
 
@@ -134,7 +132,7 @@ public class M7Fastscan implements TreeNode {
 			if (optionalBrandHomeTransponder.isPresent()) {
 				BrandHomeTransponder brandHomeTransponder = optionalBrandHomeTransponder.get();
 				int sublist_id = brandHomeTransponder.operator_sublist_id();
-				r = "sublist_id: " + sublist_id;
+				String r = "sublist_id: " + sublist_id;
 				if(ontSections!=null) {
 					for(ONTSection ontSection:ontSections) {
 						if(ontSection!=null) {
@@ -155,13 +153,13 @@ public class M7Fastscan implements TreeNode {
 
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("M7 Fastscan"));
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("M7 Fastscan"));
 		
 		if(ontSections!=null) {
 			KVP kvp = new KVP("ONT");
 			DefaultMutableTreeNode ont = new DefaultMutableTreeNode(kvp);
 			kvp.addTableSource(this::getTableModelOnt, "ONT");
-			for (final ONTSection ontSection : ontSections) {
+			for (ONTSection ontSection : ontSections) {
 				if(ontSection!= null){
 					AbstractPSITabel.addSectionVersionsToJTree(ont, ontSection, modus);
 				}
@@ -172,11 +170,11 @@ public class M7Fastscan implements TreeNode {
 
 		for (Integer operatorId : new TreeSet<>(operators.keySet())) {
 			Map<Integer, OperatorFastscan> operatorsInPid = operators.get(operatorId);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("operator_network_id",operatorId,getOperatorName(operatorId)));
-			t.add(n);
+			DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode(new KVP("operator_network_id",operatorId,getOperatorName(operatorId)));
+			t.add(defaultMutableTreeNode);
 			for (Integer pid : new TreeSet<>(operatorsInPid.keySet())) {
 				OperatorFastscan operatorFastscan = operatorsInPid.get(pid);
-				n.add(operatorFastscan.getJTreeNode(modus));
+				defaultMutableTreeNode.add(operatorFastscan.getJTreeNode(modus));
 			}
 			
 		}
@@ -187,7 +185,7 @@ public class M7Fastscan implements TreeNode {
 	public TableModel getTableModelOnt() {
 		FlexTableModel<ONTSection,OperatorBrand> tableModel =  new FlexTableModel<>(ONTSection.buildOntTableHeader());
 
-		for (final ONTSection ontSection : ontSections) {
+		for (ONTSection ontSection : ontSections) {
 			if (ontSection != null) {
 				tableModel.addData(ontSection, ontSection.getOperatorBrandList());
 			}

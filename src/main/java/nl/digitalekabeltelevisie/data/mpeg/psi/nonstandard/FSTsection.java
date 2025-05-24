@@ -51,7 +51,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class FSTsection extends TableSectionExtendedSyntax{
 
-	public final List<Service> serviceList;
+	private final List<Service> serviceList;
 
 	public static class Service implements TreeNode{
 		
@@ -72,7 +72,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 			return descriptorList;
 		}
 
-		public void setDescriptorList(final List<Descriptor> descriptorList) {
+		public void setDescriptorList(List<Descriptor> descriptorList) {
 			this.descriptorList = descriptorList;
 		}
 
@@ -80,7 +80,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 			return original_network_id;
 		}
 
-		public void setOriginalNetworkID(final int originalNetworkID) {
+		public void setOriginalNetworkID(int originalNetworkID) {
 			this.original_network_id = originalNetworkID;
 		}
 
@@ -88,7 +88,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 			return transportDescriptorsLength;
 		}
 
-		public void setTransportDescriptorsLength(final int transportDescriptorsLength) {
+		public void setTransportDescriptorsLength(int transportDescriptorsLength) {
 			this.transportDescriptorsLength = transportDescriptorsLength;
 		}
 
@@ -96,7 +96,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 			return transport_stream_id;
 		}
 
-		public void setTransportStreamID(final int transportStreamID) {
+		public void setTransportStreamID(int transportStreamID) {
 			this.transport_stream_id = transportStreamID;
 		}
 
@@ -111,18 +111,18 @@ public class FSTsection extends TableSectionExtendedSyntax{
 
 		@Override
 		public String toString(){
-			final StringBuilder b = new StringBuilder("Service, transportStreamID=");
-			b.append(getTransportStreamID()).append(", originalNetworkID=").append(getOriginalNetworkID()).append(", ");
-			for (Descriptor d : descriptorList) {
-				b.append(d).append(", ");
+			StringBuilder stringBuilder = new StringBuilder("Service, transportStreamID=");
+			stringBuilder.append(transport_stream_id).append(", originalNetworkID=").append(original_network_id).append(", ");
+			for (Descriptor descriptor : descriptorList) {
+				stringBuilder.append(descriptor).append(", ");
 
 			}
-			return b.toString();
+			return stringBuilder.toString();
 
 		}
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+		public DefaultMutableTreeNode getJTreeNode(int modus){
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service:",service_id,null));
+			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service:",service_id,null));
 
 			t.add(new DefaultMutableTreeNode(new KVP("original_network_id",original_network_id,Utils.getOriginalNetworkIDString(original_network_id) )));
 			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transport_stream_id,null)));
@@ -135,27 +135,11 @@ public class FSTsection extends TableSectionExtendedSyntax{
 			t.add(new DefaultMutableTreeNode(new KVP("default_PCR_PID",default_PCR_PID,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("default_video_ECM_PID",default_video_ECM_PID,null)));
 			
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length",getTransportDescriptorsLength(),null)));
+			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length", transportDescriptorsLength,null)));
 
 			Utils.addListJTree(t,descriptorList,modus,"service_descriptor");
 
 			return t;
-		}
-
-		public int getOriginal_network_id() {
-			return original_network_id;
-		}
-
-		public void setOriginal_network_id(int original_network_id) {
-			this.original_network_id = original_network_id;
-		}
-
-		public int getTransport_stream_id() {
-			return transport_stream_id;
-		}
-
-		public void setTransport_stream_id(int transport_stream_id) {
-			this.transport_stream_id = transport_stream_id;
 		}
 
 		public int getDefault_video_PID() {
@@ -212,7 +196,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 
 
 
-	public FSTsection(final PsiSectionData raw_data, final PID parent){
+	public FSTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 		serviceList = buildTransportStreamList(raw_data.getData(), 8, sectionLength - 9);
 
@@ -225,10 +209,8 @@ public class FSTsection extends TableSectionExtendedSyntax{
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("FSTsection section=");
-		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=").append(getTableType(tableId)). append(", NetworkID=").append(getOperatorNetworkID()).append(", ");
 
-		return b.toString();
+        return "FSTsection section=" + getSectionNumber() + ", lastSection=" + getSectionLastNumber() + ", tableType=" + getTableType(tableId) + ", NetworkID=" + getOperatorNetworkID() + ", ";
 	}
 
 
@@ -236,28 +218,28 @@ public class FSTsection extends TableSectionExtendedSyntax{
 
 
 
-	private List<Service> buildTransportStreamList(final byte[] data, final int offset, final int programInfoLength) {
-		final ArrayList<Service> r = new ArrayList<>();
+	private List<Service> buildTransportStreamList(byte[] data, int offset, int programInfoLength) {
+		List<Service> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
-			final Service c = new Service();
-			c.setOriginalNetworkID(Utils.getInt(data, offset+t, 2, Utils.MASK_16BITS));
-			c.setTransportStreamID(Utils.getInt(data, offset+t+2, 2, Utils.MASK_16BITS));
-			c.setService_id(Utils.getInt(data, offset+t+4, 2, Utils.MASK_16BITS));
-			c.setDefault_video_PID(Utils.getInt(data, offset+t+6, 2, Utils.MASK_16BITS));
-			c.setDefault_audio_PID(Utils.getInt(data, offset+t+8, 2, Utils.MASK_16BITS));
+			Service service = new Service();
+			service.setOriginalNetworkID(Utils.getInt(data, offset+t, 2, Utils.MASK_16BITS));
+			service.setTransportStreamID(Utils.getInt(data, offset+t+2, 2, Utils.MASK_16BITS));
+			service.setService_id(Utils.getInt(data, offset+t+4, 2, Utils.MASK_16BITS));
+			service.setDefault_video_PID(Utils.getInt(data, offset+t+6, 2, Utils.MASK_16BITS));
+			service.setDefault_audio_PID(Utils.getInt(data, offset+t+8, 2, Utils.MASK_16BITS));
 			
-			c.setDefault_video_ECM_PID(Utils.getInt(data, offset+t+10, 2, Utils.MASK_16BITS));
+			service.setDefault_video_ECM_PID(Utils.getInt(data, offset+t+10, 2, Utils.MASK_16BITS));
 			
-			c.setDefault_audio_ECM_PID(Utils.getInt(data, offset+t+12, 2, Utils.MASK_16BITS));
+			service.setDefault_audio_ECM_PID(Utils.getInt(data, offset+t+12, 2, Utils.MASK_16BITS));
 
-			c.setDefault_PCR_PID(Utils.getInt(data, offset+t+14, 2, Utils.MASK_16BITS));
+			service.setDefault_PCR_PID(Utils.getInt(data, offset+t+14, 2, Utils.MASK_16BITS));
 			
 			
-			c.setTransportDescriptorsLength(Utils.getInt(data, offset+t+16, 2, Utils.MASK_12BITS));
-			c.setDescriptorList(DescriptorFactory.buildDescriptorList(data,offset+t+18,c.getTransportDescriptorsLength(),this));
-			t+=18+c.getTransportDescriptorsLength();
-			r.add(c);
+			service.setTransportDescriptorsLength(Utils.getInt(data, offset+t+16, 2, Utils.MASK_12BITS));
+			service.setDescriptorList(DescriptorFactory.buildDescriptorList(data,offset+t+18,service.getTransportDescriptorsLength(),this));
+			t+=18+service.getTransportDescriptorsLength();
+			r.add(service);
 
 		}
 
@@ -265,9 +247,9 @@ public class FSTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public DefaultMutableTreeNode getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		DefaultMutableTreeNode t = super.getJTreeNode(modus);
 		KVP kvp = (KVP) t.getUserObject();
 		kvp.addTableSource(this::getTableModel, "FST");
 
@@ -276,7 +258,8 @@ public class FSTsection extends TableSectionExtendedSyntax{
 		return t;
 	}
 
-	
+
+	@Override
 	protected String getTableIdExtensionLabel() {
 		return "operator_network_id";
 	}
@@ -285,7 +268,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 	public TableModel getTableModel() {
 		FlexTableModel<FSTsection,Service> tableModel =  new FlexTableModel<>(buildFstTableHeader());
 
-		tableModel.addData(this, getServiceList());
+		tableModel.addData(this, serviceList);
 
 		tableModel.process();
 		return tableModel;
