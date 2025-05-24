@@ -27,8 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard;
 
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory.buildDescriptorList;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorDiSEqCTDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.M7OperatorOptionsDescriptor;
@@ -58,108 +59,57 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	
 	private static final Logger	logger	= Logger.getLogger(ONTSection.class.getName());
 
-	public static class OperatorBrand implements TreeNode{
+	public record OperatorBrand(int operator_network_id, int operator_sublist_id, int reserved_future_use,
+								int operator_descriptors_length, List<Descriptor> descriptorList) implements TreeNode {
 
-		
-		private int operator_network_id;
-		private int operator_sublist_id;
-		private int reserved_future_use;
-		private int operator_descriptors_length;
-		
-		public List<Descriptor> descriptorList;
-		
-		@Override
+
+	@Override
 		public KVP getJTreeNode(int modus) {
 
-			KVP t =  new KVP("operator_brand",operator_network_id + "-"+ operator_sublist_id );
+			KVP t = new KVP("operator_brand", operator_network_id + "-" + operator_sublist_id);
 
-			t.add( new KVP("operator_network_id",operator_network_id ));
-			t.add( new KVP("operator_sublist_id",operator_sublist_id ));
-			t.add( new KVP("reserved_future_use",reserved_future_use ));
-			t.add( new KVP("operator_descriptors_length",operator_descriptors_length ));
+			t.add(new KVP("operator_network_id", operator_network_id));
+			t.add(new KVP("operator_sublist_id", operator_sublist_id));
+			t.add(new KVP("reserved_future_use", reserved_future_use));
+			t.add(new KVP("operator_descriptors_length", operator_descriptors_length));
 
-			Utils.addListJTree(t,descriptorList,modus,"operator_descriptors");
+			Utils.addListJTree(t, descriptorList, modus, "operator_descriptors");
 
 			return t;
 		}
 
-		public int getOperator_network_id() {
-			return operator_network_id;
-		}
-
-		public void setOperator_network_id(int operator_network_id) {
-			this.operator_network_id = operator_network_id;
-		}
-
-		public int getOperator_sublist_id() {
-			return operator_sublist_id;
-		}
-
-		public void setOperator_sublist_id(int operator_sublist_id) {
-			this.operator_sublist_id = operator_sublist_id;
-		}
-
-		public int getReserved_future_use() {
-			return reserved_future_use;
-		}
-
-		public void setReserved_future_use(int reserved_future_use) {
-			this.reserved_future_use = reserved_future_use;
-		}
-
-		public int getOperator_descriptors_length() {
-			return operator_descriptors_length;
-		}
-
-		public void setOperator_descriptors_length(int operator_descriptors_length) {
-			this.operator_descriptors_length = operator_descriptors_length;
-		}
-
-		public List<Descriptor> getDescriptorList() {
-			return descriptorList;
-		}
-
-		public void setDescriptorList(List<Descriptor> descriptorList) {
-			this.descriptorList = descriptorList;
-		}
-		
 	}
 
 	private final int bouquet_descriptors_loop_length;
-	
 	private final List<Descriptor> bouquetDescriptorList;
 	private final int operator_brands_loop_length;
-	
 	private final List<OperatorBrand> operatorBrandList;
-
 
 	public ONTSection(PsiSectionData raw_data, PID parent) {
 		super(raw_data, parent);
-		int reserved = Utils.getInt(raw_data.getData(), 8, 2, 0xF000) >>> 12;
-		bouquet_descriptors_loop_length = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
-		bouquetDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,bouquet_descriptors_loop_length,this);
-		int reserved2 = Utils.getInt(raw_data.getData(), 10 + bouquet_descriptors_loop_length, 2, 0xF000) >>> 12;
-		operator_brands_loop_length = Utils.getInt(raw_data.getData(), 10 +bouquet_descriptors_loop_length , 2, Utils.MASK_12BITS);
+		bouquet_descriptors_loop_length = getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
+		bouquetDescriptorList = buildDescriptorList(raw_data.getData(),10,bouquet_descriptors_loop_length,this);
+		operator_brands_loop_length = getInt(raw_data.getData(), 10 +bouquet_descriptors_loop_length , 2, Utils.MASK_12BITS);
 		operatorBrandList = buildOperatorBrandList(raw_data.getData(), 12+bouquet_descriptors_loop_length, operator_brands_loop_length);
 	}
-	
+
 	private List<OperatorBrand> buildOperatorBrandList(byte[] data, int i, int operator_brands_loop_length2) {
 		List<OperatorBrand> r = new ArrayList<>();
-		int t =0;
+		int t = 0;
 		try {
-			while(t<operator_brands_loop_length2){
-				OperatorBrand operatorBrand = new OperatorBrand();
+			while (t < operator_brands_loop_length2) {
+				int operatorNetworkId = getInt(data, i + t, 2, Utils.MASK_16BITS);
+				int operatorSublistId = getInt(data, i + t + 2, 1, Utils.MASK_8BITS);
+				int reservedFutureUse = getInt(data, i + t + 3, 1, 0xF0) >>> 4;
+				int operator_descriptors_length = getInt(data, i + t + 3, 2, Utils.MASK_12BITS);
+				List<Descriptor> descriptorList = buildDescriptorList(data, i + t + 5, operator_descriptors_length, this);
+
+				OperatorBrand operatorBrand = new OperatorBrand(operatorNetworkId, operatorSublistId, reservedFutureUse, operator_descriptors_length, descriptorList);
 				r.add(operatorBrand);
-				operatorBrand.setOperator_network_id(Utils.getInt(data, i+t, 2, Utils.MASK_16BITS));
-				operatorBrand.setOperator_sublist_id(Utils.getInt(data, i+t+2, 1, Utils.MASK_8BITS));
-				operatorBrand.setReserved_future_use(Utils.getInt(data, i+t+3, 1, 0xF0)>>>4);
-				int operator_descriptors_length = Utils.getInt(data, i+t+3, 2, Utils.MASK_12BITS);
-				operatorBrand.setOperator_descriptors_length(operator_descriptors_length);
-				operatorBrand.setDescriptorList(DescriptorFactory.buildDescriptorList(data,i+t+5,operator_descriptors_length,this));
-				t+=5+operator_descriptors_length;
+				t += 5 + operator_descriptors_length;
 			}
 		} catch (RuntimeException re) {
-			logger.info("RuntimeException in buildOperatorBrandList;"+re);
+			logger.info("RuntimeException in buildOperatorBrandList;" + re);
 		}
 
 		return r;
@@ -182,8 +132,8 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	public String getOperatorName(int operator_network_id) {
 		
 		for( OperatorBrand operatorBrand: operatorBrandList) {
-			if(operatorBrand.getOperator_network_id()==operator_network_id) {
-				List<M7OperatorNameDescriptor> operatorNameDescriptors = Descriptor.findGenericDescriptorsInList(operatorBrand.getDescriptorList(), M7OperatorNameDescriptor.class);
+			if(operatorBrand.operator_network_id()==operator_network_id) {
+				List<M7OperatorNameDescriptor> operatorNameDescriptors = findGenericDescriptorsInList(operatorBrand.descriptorList(), M7OperatorNameDescriptor.class);
 				if(!operatorNameDescriptors.isEmpty()) {
 					return operatorNameDescriptors.getFirst().getOperatorName().toString();
 				}
@@ -195,9 +145,9 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	public String getOperatorSublistName(int operator_network_id, int operator_sublist_id) {
 		
 		for( OperatorBrand operatorBrand: operatorBrandList) {
-			if((operatorBrand.getOperator_network_id()==operator_network_id) && 
-					(operatorBrand.getOperator_sublist_id()==operator_sublist_id)){
-				List<M7OperatorSublistNameDescriptor> operatorSublistNameDescriptors = Descriptor.findGenericDescriptorsInList(operatorBrand.getDescriptorList(), M7OperatorSublistNameDescriptor.class);
+			if((operatorBrand.operator_network_id()==operator_network_id) &&
+					(operatorBrand.operator_sublist_id()==operator_sublist_id)){
+				List<M7OperatorSublistNameDescriptor> operatorSublistNameDescriptors = findGenericDescriptorsInList(operatorBrand.descriptorList(), M7OperatorSublistNameDescriptor.class);
 				if(!operatorSublistNameDescriptors.isEmpty()) {
 					return operatorSublistNameDescriptors.getFirst().getOperatorSublistName().toString();
 				}
@@ -222,72 +172,72 @@ public class ONTSection extends TableSectionExtendedSyntax {
 
 	static TableHeader<ONTSection,OperatorBrand>  buildOntTableHeader() {
 		return new TableHeaderBuilder<ONTSection,OperatorBrand>().
-				addRequiredRowColumn("operator network id", OperatorBrand::getOperator_network_id, Integer.class).
-				addRequiredRowColumn("operator_sublist_id", OperatorBrand::getOperator_sublist_id, Integer.class).
+				addRequiredRowColumn("operator network id", OperatorBrand::operator_network_id, Integer.class).
+				addRequiredRowColumn("operator_sublist_id", OperatorBrand::operator_sublist_id, Integer.class).
 
 				addOptionalRowColumn("operator name",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorNameDescriptor.class,
 								ond -> ond.getOperatorName().toString()),
 						String.class).
 
 
 				addOptionalRowColumn("operator sublist name",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorSublistNameDescriptor.class,
 								osnd -> osnd.getOperatorSublistName().toString()),
 						String.class).
 
 				addOptionalRowColumn("country code",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorPreferencesDescriptor.class,
 								M7OperatorPreferencesDescriptor::getCountry_code),
 						String.class).
 				addOptionalRowColumn("menu osd",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorPreferencesDescriptor.class,
 								M7OperatorPreferencesDescriptor::getMenu_ISO_639_language_code),
 						String.class).
 				addOptionalRowColumn("audio 1",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorPreferencesDescriptor.class,
 								M7OperatorPreferencesDescriptor::getAudio1_ISO_639_language_code),
 						String.class).
 				addOptionalRowColumn("audio 2",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorPreferencesDescriptor.class,
 								M7OperatorPreferencesDescriptor::getAudio2_ISO_639_language_code),
 						String.class).
 				addOptionalRowColumn("subs lang",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorPreferencesDescriptor.class,
 								M7OperatorPreferencesDescriptor::getSubs_ISO_639_language_code),
 						String.class).
 
 				addOptionalRowColumn("subs usage",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorOptionsDescriptor.class,
 								M7OperatorOptionsDescriptor::getSubtitles_enabled),
 						Integer.class).
 				addOptionalRowColumn("parental control",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorOptionsDescriptor.class,
 								M7OperatorOptionsDescriptor::getParentalControlString),
 						String.class).
 
 				addOptionalRowColumn("FST char set",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorOptionsDescriptor.class,
 								M7OperatorOptionsDescriptor::getEncodingTypeString),
 						String.class).
 				addOptionalRowColumn("region",
-						operator -> findDescriptorApplyFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyFunc(operator.descriptorList(),
 								M7OperatorOptionsDescriptor.class,
 								M7OperatorOptionsDescriptor::getSpecial_regions_setup),
 						Integer.class).
 
 				addOptionalRepeatingRowColumn("DiSeq Pos",
-						operator -> findDescriptorApplyListFunc(operator.getDescriptorList(),
+						operator -> findDescriptorApplyListFunc(operator.descriptorList(),
 								M7OperatorDiSEqCTDescriptor.class,
 								odd -> odd.getDiSEqCList().
 								stream().
