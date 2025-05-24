@@ -30,7 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
-import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGT;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 

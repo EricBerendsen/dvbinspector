@@ -40,10 +40,10 @@ import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable.TableSectionOccurrence;
-import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FNTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.FSTsection;
-import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.M7Fastscan;
-import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.ONTSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FNTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FSTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.M7Fastscan;
+import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.ONTSection;
 
 /**
  * @author Eric

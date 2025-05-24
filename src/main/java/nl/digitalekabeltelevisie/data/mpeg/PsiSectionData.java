@@ -42,7 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
-import nl.digitalekabeltelevisie.data.mpeg.psi.nonstandard.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGTsection;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
