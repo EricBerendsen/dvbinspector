@@ -37,18 +37,17 @@ class ColumnDetails<E>{
 	private final Function<E, Object> function;
 	private final Function<E, List<Object>> listFunction;
 	private Class<?> dataClass;
-	boolean isList;
-	boolean required;
-	String groupId;
+	private boolean isList;
+	private boolean required;
+	private String groupId;
 
-	boolean used;
-	int listMax;
+	private boolean used;
+	private int listMax;
 	
 	private final boolean isBaseColumn;
 	
-	public ColumnDetails(String name, String key, Function<E, Object> function, Function<E, List<Object>> listFunction,Class<?> dataClass, boolean required,boolean isList, String groupId, boolean isBaseColumn) {
-		super();
-		this.name = name;
+	ColumnDetails(String name, String key, Function<E, Object> function, Function<E, List<Object>> listFunction, Class<?> dataClass, boolean required, boolean isList, String groupId, boolean isBaseColumn) {
+        this.name = name;
 		this.key = key;
 		this.function = function;
 		this.listFunction = listFunction;

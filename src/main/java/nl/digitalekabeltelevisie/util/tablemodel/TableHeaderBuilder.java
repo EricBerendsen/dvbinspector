@@ -36,7 +36,7 @@ public class TableHeaderBuilder<E,R> {
 	private final List<ColumnDetails<?>> header;
 	private final Map<String, ColumnDetails<?>> map;
 	
-	private long keyBase = 0L;
+	private long keyBase;
 	
 	private String nextKey() {
 		keyBase++;
@@ -50,7 +50,7 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addRequiredBaseColumn(String name, Function<E, Object> fun, Class<?> type) {
 		String key = nextKey();
-		ColumnDetails<E> bcd = new ColumnDetails<E>(name, key, fun, null, type, true, false,null,true);
+		ColumnDetails<E> bcd = new ColumnDetails<>(name, key, fun, null, type, true, false, null, true);
 		header.add(bcd);
 		map.put(key, bcd);
 		return this;
@@ -58,7 +58,7 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addOptionalBaseColumn(String name, Function<E, Object> fun, Class<?> type) {
 		String key = nextKey();
-		ColumnDetails<E> bcd = new ColumnDetails<E>(name, key, fun, null, type, false, false,null,true);
+		ColumnDetails<E> bcd = new ColumnDetails<>(name, key, fun, null, type, false, false, null, true);
 		header.add(bcd);
 		map.put(key, bcd);
 		return this;
@@ -66,7 +66,7 @@ public class TableHeaderBuilder<E,R> {
 	
 	public TableHeaderBuilder<E,R> addOptionalRepeatingBaseColumn(String name, Function<E, List<Object>> listFun, Class<?> type) {
 		String keyBase = nextKey();
-		ColumnDetails<E> cd = new ColumnDetails<E>(name, keyBase, null, listFun, type, false, true,null,true);
+		ColumnDetails<E> cd = new ColumnDetails<>(name, keyBase, null, listFun, type, false, true, null, true);
 		header.add(cd);
 		map.put(keyBase, cd);
 		return this;
@@ -75,7 +75,7 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addOptionalRepeatingGroupedBaseColumn(String name, Function<E, List<Object>> listFun, Class<?> type, String groupId) {
 		String keyBase = nextKey();
-		ColumnDetails<E> cd = new ColumnDetails<E>(name, keyBase, null, listFun, type, false, true,groupId,true);
+		ColumnDetails<E> cd = new ColumnDetails<>(name, keyBase, null, listFun, type, false, true, groupId, true);
 		header.add(cd);
 		map.put(keyBase, cd);
 		return this;
@@ -83,7 +83,7 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addRequiredRowColumn(String name, Function<R, Object> fun, Class<?> type) {
 		String key = nextKey();
-		ColumnDetails<R> bcd = new ColumnDetails<R>(name, key, fun, null, type, true, false,null,false);
+		ColumnDetails<R> bcd = new ColumnDetails<>(name, key, fun, null, type, true, false, null, false);
 		header.add(bcd);
 		map.put(key, bcd);
 		return this;
@@ -91,7 +91,7 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addOptionalRowColumn(String name, Function<R, Object> fun, Class<?> type) {
 		String key = nextKey();
-		ColumnDetails<R> cd = new ColumnDetails<R>(name, key, fun, null, type, false, false,null,false);
+		ColumnDetails<R> cd = new ColumnDetails<>(name, key, fun, null, type, false, false, null, false);
 		header.add(cd);
 		map.put(key, cd);
 		return this;
@@ -99,7 +99,7 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addOptionalRepeatingRowColumn(String name, Function<R, List<Object>> listFun, Class<?> type) {
 		String keyBase = nextKey();
-		ColumnDetails<R> cd = new ColumnDetails<R>(name, keyBase, null, listFun, type, false, true,null,false);
+		ColumnDetails<R> cd = new ColumnDetails<>(name, keyBase, null, listFun, type, false, true, null, false);
 		header.add(cd);
 		map.put(keyBase, cd);
 		return this;
@@ -107,13 +107,13 @@ public class TableHeaderBuilder<E,R> {
 
 	public TableHeaderBuilder<E,R> addOptionalRepeatingGroupedColumn(String name, Function<R, List<Object>> listFun, Class<?> type, String groupId) {
 		String keyBase = nextKey();
-		ColumnDetails<R> cd = new ColumnDetails<R>(name, keyBase, null, listFun, type, false, true,groupId,false);
+		ColumnDetails<R> cd = new ColumnDetails<>(name, keyBase, null, listFun, type, false, true, groupId, false);
 		header.add(cd);
 		map.put(keyBase, cd);
 		return this;
 	}
 
 	public TableHeader<E,R> build() {
-		return new TableHeader<E,R>(header, map);
+		return new TableHeader<>(header, map);
 	}
 }

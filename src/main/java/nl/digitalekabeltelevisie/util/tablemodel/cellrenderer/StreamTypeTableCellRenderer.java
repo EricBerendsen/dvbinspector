@@ -34,11 +34,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class StreamTypeTableCellRenderer extends DefaultTableCellRenderer {
-	String toolTip;
+	private String toolTip;
 	
 	public StreamTypeTableCellRenderer() {
-		super();
-		setHorizontalAlignment(SwingConstants.RIGHT);
+        setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
 	
@@ -52,8 +51,7 @@ public class StreamTypeTableCellRenderer extends DefaultTableCellRenderer {
 	protected void setValue(Object value) {
     	
     	super.setValue(value);
-    	if((value instanceof Integer)) {
-    		int streamType = (Integer) value;
+    	if(value instanceof Integer streamType) {
     		toolTip = Utils.getStreamTypeShortString(streamType);
     	}else {
     		toolTip = null;

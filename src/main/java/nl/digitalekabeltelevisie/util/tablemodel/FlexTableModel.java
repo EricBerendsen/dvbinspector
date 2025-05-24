@@ -44,31 +44,31 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 		
 	}
 	
-	public void addData(E entity, List<R> rows) {
+	public void addData(E entity, List<? extends R> rows) {
 		for (R row : rows) {
 			if (row != null) {
 				Map<String, Object> rowData = new HashMap<>();
 				List<ColumnDetails<?>> columns = tableHeader.header();
 				for (ColumnDetails<?> column : columns) {
 					if (column.isBaseColumn()) {
-						if (!column.isList()){
-							@SuppressWarnings("unchecked")
-							Function<E, Object> fun = (Function<E, Object>) column.getFunction();
-							Object r = fun.apply(entity);
-							rowData.put(column.getKey(), r);
-						} else {
-							@SuppressWarnings("unchecked")
-							Function<E, List<Object>> listFun = (Function<E, List<Object>>) column.getListFunction();
-							List<Object> listValues = listFun.apply(entity);
-							if(listValues!=null) {
-								int t=0;
-								for(Object val:listValues) {
-									rowData.put(column.getKey()+REPEATING_KEY_SEPARATOR+t, val);
-									t++;
-								}
-							}
-							
-						}
+                        if (column.isList()) {
+                            @SuppressWarnings("unchecked")
+                            Function<E, List<Object>> listFun = (Function<E, List<Object>>) column.getListFunction();
+                            List<Object> listValues = listFun.apply(entity);
+                            if (listValues != null) {
+                                int t = 0;
+                                for (Object val : listValues) {
+                                    rowData.put(column.getKey() + REPEATING_KEY_SEPARATOR + t, val);
+                                    t++;
+                                }
+                            }
+
+                        } else {
+                            @SuppressWarnings("unchecked")
+                            Function<E, Object> fun = (Function<E, Object>) column.getFunction();
+                            Object r = fun.apply(entity);
+                            rowData.put(column.getKey(), r);
+                        }
 					} else if (!column.isList()){
 						@SuppressWarnings("unchecked")
 						Function<R, Object> fun = (Function<R, Object>) column.getFunction();
@@ -99,7 +99,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 		buildDisplayableColumnsList();
 	}
 
-	void buildDisplayableColumnsList() {
+	private void buildDisplayableColumnsList() {
 		List<ColumnDetails<?>> header = tableHeader.header();
 		int headerIndex = 0;
 		while (headerIndex < header.size()) {
@@ -119,7 +119,7 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 		}
 	}
 
-	int addRepeatingColumnGroup(List<ColumnDetails<?>> header, int headerIndexStart, ColumnDetails<?> column) {
+	private int addRepeatingColumnGroup(List<? extends ColumnDetails<?>> header, int headerIndexStart, ColumnDetails<?> column) {
 		int headerIndex = headerIndexStart;
 		List<ColumnDetails<?>> groupList = new ArrayList<>();
 		int iterCount = column.getListMax();
@@ -143,27 +143,28 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 		return headerIndex;
 	}
 
-	void addSimpleColumn(ColumnDetails<?> column) {
+	private void addSimpleColumn(ColumnDetails<?> column) {
 		displayableColumns.add(column.getKey());
 	}
 
-	void addRepeatingColumn(ColumnDetails<?> column) {
+	private void addRepeatingColumn(ColumnDetails<?> column) {
 		String baseKey = column.getKey();
 		for (int i = 0; i <= column.getListMax(); i++) {
 			displayableColumns.add(baseKey + REPEATING_KEY_SEPARATOR + i);
 		}
 	}
 
-	void determineUsedColumns() {
+	private void determineUsedColumns() {
 		for (Map<String, Object> row : model) {
-			for (String key : row.keySet()) {
-				if(isRepeatingKey(key)) {
+			for (Map.Entry<String, Object> entry : row.entrySet()) {
+                String key = entry.getKey();
+                if(isRepeatingKey(key)) {
 					String keyBase = getBase(key);
 					int keyOrd = getOrdinal(key);
 					if(tableHeader.isRepeatingColumn(keyBase)) {
 						tableHeader.countOrdinal(keyBase,keyOrd);
 					}
-				}else if(row.get(key)!=null) {
+				}else if(entry.getValue() !=null) {
 					tableHeader.flagUsed(key);
 				}
 			}
@@ -209,8 +210,8 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 	}
 
 	@Override
-	public String getColumnName(int columnIndex) {
-		String key = displayableColumns.get(columnIndex);
+	public String getColumnName(int column) {
+		String key = displayableColumns.get(column);
 		ColumnDetails<?> columnDetails = tableHeader.map().get(getBase(key));
 		if (columnDetails.isList()) {
 			String baseName = columnDetails.getName();
@@ -223,10 +224,5 @@ public class FlexTableModel<E,R> extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		return model.get(rowIndex).get(displayableColumns.get(columnIndex));
 	}
-
-	@Override
-	public boolean isCellEditable(int row, int col) {
-		 return false;
-	 }
 
 }
