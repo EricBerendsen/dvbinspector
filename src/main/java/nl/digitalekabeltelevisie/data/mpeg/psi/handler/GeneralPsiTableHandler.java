@@ -44,6 +44,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FNTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FSTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.ONTSection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGT;
+import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGTsection;
 
 /**
  * @author Eric
@@ -66,16 +68,18 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 	private TOT tot;
 	private SIT sit;
 	
-	// private INT int_table; // INT and DFIT use same tableID, both not supported here
 	private UNTs unt_table;
+	private INT int_table;
 	private AITs ait_table;
 	private RCTs rct_table;
 	private DSMCCs dsm_table;
 	private SCTE35 scte35_table;
 	// private DFITs dfit_table;// INT and DFIT use same tableID, both not supported here
+	private DFITs dfit_table; 
 	
 	private M7Fastscan m7fastscan;
 	
+	private SGT sgt;
 
 
 	@Override
@@ -94,10 +98,13 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		addToNodeIfNotNull(node, sit, modus);
 		addToNodeIfNotNull(node, ait_table, modus);
 		addToNodeIfNotNull(node, unt_table, modus);
+		addToNodeIfNotNull(node, int_table, modus);
 		addToNodeIfNotNull(node, rct_table, modus);
 		addToNodeIfNotNull(node, scte35_table, modus);
+		addToNodeIfNotNull(node, dfit_table, modus);
 		addToNodeIfNotNull(node, dsm_table, modus);
 		addToNodeIfNotNull(node, m7fastscan, modus);
+		addToNodeIfNotNull(node, sgt, modus);
 		return node;
 	}
 
@@ -162,7 +169,9 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 				handleEIT(section);
 			} else if (tableID == 0x4b) { // update notification table section
 				handleUNT(section);
-				// TODO FONT/|INT section tableId conflict
+			} else if (tableID == 0x4c) { // IP/MAC_notification_section
+				handleINT(section);
+
 			} else if (tableID == 0x70) { // TDT
 				handleTDT(section);
 			} else if (tableID == 0x73) { // TOT
@@ -173,6 +182,10 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 				handleRCT(section);
 			} else if (tableID == 0x7F) { // selection_information_section
 				handleSIT(section);
+			} else if (tableID == 0x7C) { // downloadable font info section (ETSI EN 303 560)
+				handleDFIT(section);
+			} else if (tableID == 0x91) { // ASTRA Service Guide Table
+				handleSGT(section); 
 
 			} else if ((tableID >= 0xBC) && (tableID <= 0xBE)) {
 				handleFastScan(section);
@@ -279,6 +292,14 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		copyMetaData(section, s);
 		sit.update(s);
 	}
+	private void handleSGT(final TableSection section) {
+		if (sgt == null) {
+			sgt = new SGT(getTransportStream().getPsi());
+		}
+		SGTsection s = new SGTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		sgt.update(s);
+	}
 
 	private void handleUNT(final TableSection section) {
 		if (unt_table == null) {
@@ -287,6 +308,15 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		UNTsection s = new UNTsection(section.getRaw_data(), pid);
 		copyMetaData(section, s);
 		unt_table.update(s);
+	}
+
+	private void handleINT(final TableSection section) {
+		if (int_table == null) {
+			int_table = new INT(getTransportStream().getPsi());
+		}
+		INTsection s = new INTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		int_table.update(s);
 	}
 
 	private void handleRCT(final TableSection section) {
@@ -305,6 +335,15 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		SpliceInfoSection s = new SpliceInfoSection(section.getRaw_data(), pid);
 		copyMetaData(section, s);
 		scte35_table.update(s);
+	}
+
+	private void handleDFIT(final TableSection section) {
+		if (dfit_table == null) {
+			dfit_table = new DFITs(getTransportStream().getPsi());
+		}
+		DFITSection s = new DFITSection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		dfit_table.update(s);
 	}
 
 	private void handleDSMCC(final TableSection section) {

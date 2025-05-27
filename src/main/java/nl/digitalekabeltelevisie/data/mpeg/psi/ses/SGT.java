@@ -53,7 +53,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 /**
- * 
+ * Astra Service Guide Table, based on ASTRA_LCN_v2_6.pdf
  */
 public class SGT extends AbstractPSITabel {
 	
@@ -82,7 +82,7 @@ public class SGT extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP t = new KVP("SGT");
+		KVP t = new KVP("SGT (Astra Service Guide Table)");
 		for(Entry<Integer, HashMap<Integer, SGTsection[]>> guide:service_guides.entrySet()) {
 			
 			int pid = guide.getKey();
