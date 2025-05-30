@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -45,13 +45,13 @@ public class TimestampXYDataset implements XYDataset {
 	/** The group that the dataset belongs to. */
     private DatasetGroup group;
 
-    private ArrayList<List<TimeStamp>> seriesList = new ArrayList<>();
-    ArrayList<String> seriesKeys = new ArrayList<>(); 
-    ArrayList<Integer> seriesOffset = new ArrayList<>();
-    ArrayList<Integer> seriesViewContextLength = new ArrayList<>();
+    private final List<List<TimeStamp>> seriesList = new ArrayList<>();
+    final ArrayList<String> seriesKeys = new ArrayList<>();
+    final ArrayList<Integer> seriesOffset = new ArrayList<>();
+    final ArrayList<Integer> seriesViewContextLength = new ArrayList<>();
     
-    long startPacket;
-    long endPacket;
+    final long startPacket;
+    final long endPacket;
     
 	private static final Logger logger = Logger.getLogger(TimestampXYDataset.class.getName());
 
@@ -75,7 +75,7 @@ public class TimestampXYDataset implements XYDataset {
 		
 		boolean hasSCTE35 = PsiSectionData.hasSCTE35RegistrationDescriptor(pmt.getDescriptorList());
 		for(Component component:pmt.getComponentenList()){
-			final PID pid = transportStream.getPID((short) component.getElementaryPID());
+			PID pid = transportStream.getPID((short) component.getElementaryPID());
 			if(pid!=null){
 				addToSeriesList(pid.getPtsList(),getComponentLabel(transportStream, component)+" PTS");
 				addToSeriesList(pid.getDtsList(),getComponentLabel(transportStream, component)+" DTS");
@@ -147,7 +147,7 @@ public class TimestampXYDataset implements XYDataset {
 		return (short) component.getElementaryPID()+" - "+transportStream.getShortLabel((short) component.getElementaryPID());
 	}
 
-	private void addToSeriesList(final List<TimeStamp> list, String componentLabel) {
+	private void addToSeriesList(List<TimeStamp> list, String componentLabel) {
 		if((list!=null)&&(!list.isEmpty())){
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);

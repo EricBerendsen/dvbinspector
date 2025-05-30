@@ -19,8 +19,7 @@ public class WrapLayout extends FlowLayout
 	*/
 	public WrapLayout()
 	{
-		super();
-	}
+    }
 
 	/**
 	* Constructs a new <code>FlowLayout</code> with the specified

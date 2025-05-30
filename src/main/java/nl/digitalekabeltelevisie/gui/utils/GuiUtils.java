@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -57,8 +57,8 @@ public final class GuiUtils {
 		// Do not instantiate
 	}
 
-	public static JFreeChart createTitleOnlyChart(final String title) {
-		final Plot plot = new Plot() {
+	public static JFreeChart createTitleOnlyChart(String title) {
+		Plot plot = new Plot() {
 
 			@Override
 			public String getPlotType() {
@@ -67,25 +67,25 @@ public final class GuiUtils {
 			}
 
 			@Override
-			public void draw(final Graphics2D g2, final Rectangle2D area, final Point2D anchor, final PlotState parentState, final PlotRenderingInfo info) {
+			public void draw(Graphics2D g2, Rectangle2D area, Point2D anchor, PlotState parentState, PlotRenderingInfo info) {
 				// empty
 			}
 		};
 		return new JFreeChart(title,plot);
 	}
 
-	public static KVP getNotImplementedKVP(final String feature){
-		final StringBuilder message = new StringBuilder();
+	public static KVP getNotImplementedKVP(String feature){
+		StringBuilder message = new StringBuilder();
 		message.append(feature).append(" not implemented. ").append(getImproveMsg());
 		return new KVP(message.toString()).setHtmlLabel("<span style=\"color: red;\">"+ message +"</span>");
 	}
 
-	public static KVP getErrorKVP(final String message){
+	public static KVP getErrorKVP(String message){
 		return new KVP( message).setHtmlLabel("<span style=\"color: red;\">"+ message +"</span>");
 	}
 
 	public static String getImproveMsg() {
-		final String version = getVersionString();
+		String version = getVersionString();
 
 		return "You can help to improve DVB Inspector by making this stream available\n" +
 				"to Eric Berendsen (e_ber"+"endsen@digitalekabeltel"+"evisie.nl)\n\n" +
@@ -93,7 +93,7 @@ public final class GuiUtils {
 	}
 
 	public static String getVersionString() {
-		final Package p = GuiUtils.class.getPackage();
+		Package p = GuiUtils.class.getPackage();
 		String version = p.getImplementationVersion();
 
 		if(version==null){
@@ -105,8 +105,8 @@ public final class GuiUtils {
 	public static BufferedImage getErrorImage(String str) {
 		final int width = 800;
 		final int height = 450;
-		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		final Graphics2D gd = img.createGraphics();
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D gd = img.createGraphics();
 	
 		gd.setColor(Color.GRAY);
 		gd.fillRect(0, 0, width, height);
@@ -132,11 +132,8 @@ public final class GuiUtils {
 	
 		gd.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	
-		final Font font = new Font("Arial", Font.BOLD, 20);
+		Font font = new Font("Arial", Font.BOLD, 20);
 		gd.setFont(font);
-		
-		
-	
 		gd.setColor(Color.WHITE);
 		
 		int x = 20;
@@ -144,7 +141,6 @@ public final class GuiUtils {
 		for (String line : str.split("\n")) {
 	        gd.drawString(line, x, y += gd.getFontMetrics().getHeight());
 		}
-	
 		return img;
 	}
 

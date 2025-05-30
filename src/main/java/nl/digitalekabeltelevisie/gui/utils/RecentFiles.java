@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -39,27 +39,26 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  * @author Eric
  *
  */
-public class RecentFiles {
+public final class RecentFiles {
 	
 	private List<String> recentFiles = new ArrayList<>();
 	
-	private static int MAX_ENTRIES = 10;
+	private static final int MAX_ENTRIES = 10;
 
-	private static RecentFiles instance;
-	
-	public static RecentFiles getInstance() {
-		 if (instance == null) {
-			 instance = new RecentFiles();
-		 }
-	 
-		 return instance;	
+    private static final class InstanceHolder {
+        private static final RecentFiles instance = new RecentFiles();
+    }
+
+    public static RecentFiles getInstance() {
+
+        return InstanceHolder.instance;
 	}
 	
 	private RecentFiles() {
 		init(PreferencesManager.getRecentFiles());
 	}
 
-	public void init(String allFiles) {
+	private void init(String allFiles) {
 		
 		recentFiles.clear();
 		if(!allFiles.isEmpty()) {
@@ -70,13 +69,13 @@ public class RecentFiles {
 		}
 	}
 	
-	public String getString() {
+	private String getString() {
 		return recentFiles.stream().collect(Collectors.joining (File.pathSeparator));
 	}
 	
 	public void addOrMoveToBegin(String fileName) {
 		recentFiles.remove(fileName);
-		recentFiles.add(0, fileName);
+		recentFiles.addFirst(fileName);
 		if(recentFiles.size()>MAX_ENTRIES) {
 			recentFiles = recentFiles.subList(0, MAX_ENTRIES);
 		}

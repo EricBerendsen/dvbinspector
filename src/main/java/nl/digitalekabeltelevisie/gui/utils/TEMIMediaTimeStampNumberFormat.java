@@ -34,7 +34,7 @@ import java.text.ParsePosition;
 
 public final class TEMIMediaTimeStampNumberFormat extends NumberFormat {
 
-	static DecimalFormat df = new DecimalFormat("#0.00");
+	static final DecimalFormat df = new DecimalFormat("#0.00");
 
 	@Override
 	public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {

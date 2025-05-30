@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,15 +36,14 @@ import nl.digitalekabeltelevisie.data.mpeg.TemiTimeStamp;
 
 public class TEMIToolTipGenerator implements XYToolTipGenerator {
 	
-	private NumberFormat timeFormat;
+	private final NumberFormat timeFormat;
 
 	public TEMIToolTipGenerator(NumberFormat packetNumberFormat, NumberFormat timeFormat) {
-		super();
-		this.packetNumberFormat = packetNumberFormat;
+        this.packetNumberFormat = packetNumberFormat;
 		this.timeFormat = timeFormat;
 	}
 
-	NumberFormat packetNumberFormat;
+	final NumberFormat packetNumberFormat;
 
 	@Override
 	public String generateToolTip(XYDataset  dataset, int series, int item){

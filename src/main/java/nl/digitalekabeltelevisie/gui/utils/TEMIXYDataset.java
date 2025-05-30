@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -44,10 +44,10 @@ public class TEMIXYDataset implements XYDataset {
 	/** The group that the dataset belongs to. */
 	private DatasetGroup group;
 
-	private final ArrayList<List<TemiTimeStamp>> seriesList = new ArrayList<>();
-	private final ArrayList<String> seriesKeys = new ArrayList<>();
-	private final ArrayList<Integer> seriesOffset = new ArrayList<>();
-	private final ArrayList<Integer> seriesViewContextLength = new ArrayList<>();
+	private final List<List<TemiTimeStamp>> seriesList = new ArrayList<>();
+	private final List<String> seriesKeys = new ArrayList<>();
+	private final List<Integer> seriesOffset = new ArrayList<>();
+	private final List<Integer> seriesViewContextLength = new ArrayList<>();
 
 	private final int startPacket;
 	private final int endPacket;
@@ -60,19 +60,19 @@ public class TEMIXYDataset implements XYDataset {
 		for (Component c : pmt.getComponentenList()) {
 			short componentPid = (short) c.getElementaryPID();
 			String componentLabel = componentPid + " - " + transportStream.getShortLabel(componentPid);
-			final PID pid = transportStream.getPID(componentPid);
+			PID pid = transportStream.getPID(componentPid);
 			if (pid != null) {
-				HashMap<Integer, ArrayList<TemiTimeStamp>> temiMap = pid.getTemiList();
+				Map<Integer, ArrayList<TemiTimeStamp>> temiMap = pid.getTemiList();
 				for (Entry<Integer, ArrayList<TemiTimeStamp>> entry : temiMap.entrySet()) {
 					int time_line_id = entry.getKey();
-					ArrayList<TemiTimeStamp> value = entry.getValue();
+					List<TemiTimeStamp> value = entry.getValue();
 					addToSeriesList(value, componentLabel + " TEMI time_line_id:" + time_line_id);
 				}
 			}
 		}
 	}
 
-	private void addToSeriesList(final List<TemiTimeStamp> list, String componentLabel) {
+	private void addToSeriesList(List<TemiTimeStamp> list, String componentLabel) {
 		if ((list != null) && (!list.isEmpty())) {
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);
