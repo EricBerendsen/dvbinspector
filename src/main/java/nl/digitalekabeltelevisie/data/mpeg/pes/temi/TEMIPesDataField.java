@@ -54,7 +54,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 	public TEMIPesDataField(PesPacketData pesPacketData) {
 		super(pesPacketData);
 		int offset = pesPacketData.getPesDataStart();
-		crc_flag = getInt(data, offset, 1, 0x01); // TODO, fix to test for first bit.
+		crc_flag = getInt(data, offset, 1, 0x80)>>>7; 
 		int descriptorsLen = pesPacketData.getPesDataLen() - 1 - 4 * crc_flag;
 		afDescriptors = AFDescriptorFactory.buildDescriptorList(data, offset+1, descriptorsLen);
 		if(crc_flag == 1) {
