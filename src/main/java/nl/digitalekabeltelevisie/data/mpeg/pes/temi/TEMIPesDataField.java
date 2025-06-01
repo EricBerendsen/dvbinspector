@@ -43,7 +43,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 	public class TEMIPesDataField extends PesPacketData {
 
-	private int crc_flag;
+	private final int crc_flag;
 
 	private List<AFDescriptor> afDescriptors = new ArrayList<>();
 
@@ -54,7 +54,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 	public TEMIPesDataField(PesPacketData pesPacketData) {
 		super(pesPacketData);
 		int offset = pesPacketData.getPesDataStart();
-		crc_flag = getInt(data, offset, 1, 0x01);
+		crc_flag = getInt(data, offset, 1, 0x01); // TODO, fix to test for first bit.
 		int descriptorsLen = pesPacketData.getPesDataLen() - 1 - 4 * crc_flag;
 		afDescriptors = AFDescriptorFactory.buildDescriptorList(data, offset+1, descriptorsLen);
 		if(crc_flag == 1) {
@@ -72,6 +72,18 @@ import nl.digitalekabeltelevisie.util.Utils;
 			s.add(new KVP("CRC_32",crc_32));
 		}
 		return s;
+	}
+
+	public int getCrc_flag() {
+		return crc_flag;
+	}
+
+	public List<AFDescriptor> getAfDescriptors() {
+		return afDescriptors;
+	}
+
+	public long getCrc_32() {
+		return crc_32;
 	}
 
 

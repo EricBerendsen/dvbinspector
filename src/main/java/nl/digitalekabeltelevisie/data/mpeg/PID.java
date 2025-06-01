@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -448,8 +448,7 @@ public class PID implements TreeNode{
 			if(!adaptationField.isAf_descriptor_not_present_flag()){
 				List<AFDescriptor> afDescriptorList = adaptationField.getAfDescriptorList();
 				for (AFDescriptor descriptor : afDescriptorList) {
-					if(descriptor instanceof TimelineDescriptor){
-						TimelineDescriptor timelineDescriptor = (TimelineDescriptor) descriptor;
+					if(descriptor instanceof TimelineDescriptor timelineDescriptor){
 						if((timelineDescriptor.getHas_timestamp()==1)||
 							(timelineDescriptor.getHas_timestamp()==2)){
 							ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
