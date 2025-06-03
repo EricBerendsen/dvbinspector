@@ -375,9 +375,31 @@ public class TransportStream implements TreeNode{
 	public void postProcess() {
 		namePIDs();
 		setGeneralPsiTableHandlers();
+		parseTemiPids();
+		
 		calculateBitRate();
 		calculateBitrateTDT();
 		calculateZeroTime();
+	}
+
+	private void parseTemiPids() {
+		if (PreferencesManager.isEnablePcrPtsView()) {
+			Map<Integer,GeneralPidHandler> toParsePids = new HashMap<>();
+			for(PMTsection[] pmt: psi.getPmts()){
+				PMTsection pmtSection = pmt[0];
+				for(Component component:pmtSection.getComponentenList()) {
+					if(component.getStreamtype()==39) {
+						int pid = component.getElementaryPID();
+						toParsePids.put(pid, pids[pid].getPidHandler());
+					}
+				}
+			}
+			try {
+				parsePidStreams(toParsePids);
+			} catch (IOException e) {
+				logger.info("IOException while parsing TEMI");
+			}
+		}
 	}
 
 	private void processPacket(TSPacket packet) {
