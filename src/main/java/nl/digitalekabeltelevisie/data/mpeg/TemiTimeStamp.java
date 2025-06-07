@@ -31,15 +31,17 @@ import java.math.*;
 public class TemiTimeStamp {
 
 	private final int packetNo;
+	private final long pts;
 	private final BigInteger media_timestamp;
 	private final long timescale;
 	private final int discontinuity;
 	private final int paused;
 
 
-	public TemiTimeStamp(int packetNo, BigInteger media_timestamp, long timescale, int discontinuity,
+	public TemiTimeStamp(int packetNo, long pts, BigInteger media_timestamp, long timescale, int discontinuity,
 			int paused) {
 		this.packetNo = packetNo;
+		this.pts = pts;
 		this.media_timestamp = media_timestamp;
 		this.timescale = timescale;
 		this.discontinuity = discontinuity;
@@ -51,6 +53,10 @@ public class TemiTimeStamp {
 	}
 	public int getPacketNo() {
 		return packetNo;
+	}
+	
+	public long getPts() {
+		return pts;
 	}
 
 	public BigInteger getMediaTimeStamp() {

@@ -28,8 +28,9 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.temi;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.TemiTimeStamp;
@@ -42,10 +43,8 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
  */
 public class TEMIPesHandler extends GeneralPesHandler {
 
-	public TEMIPesHandler() {
-		// TODO Auto-generated constructor stub
-	}
-
+	
+	private static final Logger logger = Logger.getLogger(TEMIPesHandler.class.getName());
 	
 	@Override
 	protected void processPesDataBytes(PesPacketData pesData) {
@@ -53,15 +52,20 @@ public class TEMIPesHandler extends GeneralPesHandler {
 		TEMIPesDataField temiPesDataField = new TEMIPesDataField(pesData);
 		pesPackets.add(temiPesDataField);
 		
-		List<TimelineDescriptor> timelineDescriptors = Descriptor.findGenericDescriptorsInList(temiPesDataField.getAfDescriptors(),TimelineDescriptor.class);
-		int packetNo = temiPesDataField.getStartPacketNo();
-		HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = getPID().getTemiList();
-		for(TimelineDescriptor timelineDescriptor:timelineDescriptors) {
-			if((timelineDescriptor.getHas_timestamp()==1)||
-					(timelineDescriptor.getHas_timestamp()==2)){
-					ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
-					tl.add(new TemiTimeStamp(packetNo, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
+		if(temiPesDataField.hasPTS()) {
+			long pts = temiPesDataField.getPts();
+			List<TimelineDescriptor> timelineDescriptors = Descriptor.findGenericDescriptorsInList(temiPesDataField.getAfDescriptors(),TimelineDescriptor.class);
+			int packetNo = temiPesDataField.getStartPacketNo();
+			Map<Integer, ArrayList<TemiTimeStamp>> temiList = getPID().getTemiMap();
+			for(TimelineDescriptor timelineDescriptor:timelineDescriptors) {
+				if((timelineDescriptor.getHas_timestamp()==1)||
+						(timelineDescriptor.getHas_timestamp()==2)){
+						ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
+						tl.add(new TemiTimeStamp(packetNo, pts, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
+				}
 			}
+		} else {
+			logger.warning("TEMIPesDataField packetNo: " + temiPesDataField.getStartPacketNo() + " has no PTS (required for TEMI)");
 		}
 		
 	}

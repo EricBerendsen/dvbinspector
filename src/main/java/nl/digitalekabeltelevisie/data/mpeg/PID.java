@@ -111,9 +111,15 @@ public class PID implements TreeNode{
 	private final ArrayList<TimeStamp> ptsList = new ArrayList<>();
 	private final ArrayList<TimeStamp> dtsList = new ArrayList<>();
 	
-	private final HashMap<Integer, ArrayList<TemiTimeStamp>> temiList = new HashMap<>();
+
+	/**
+	 * Map &lt;time_line_id, List&lt;TemiTimeStamp&gt;&gt;
+	 */
+	private final Map<Integer, ArrayList<TemiTimeStamp>> temiMap = new HashMap<>();
 
 	private final LabelMaker labelMaker = new LabelMaker();
+
+	private long lastPts = -1;
 	
 	/**
 	 *
@@ -330,6 +336,21 @@ public class PID implements TreeNode{
 			}
 			if (isNormalPacket(packet, adaptationField)) {
 				handleNormalPacket(packet);
+				
+				if(packet.isPayloadUnitStartIndicator() && type != PSI) {
+					PesHeader pesHeader = packet.getPesHeader();
+					if(pesHeader != null) {
+						if(pesHeader.hasPTS()) {
+							lastPts = pesHeader.getPts();
+						} else {
+							lastPts  = -1L;
+						}
+					}
+				}
+				if (packet.hasAdaptationField()) {
+					processTEMI(adaptationField, temiMap, packet.getPacketNo(), lastPts);
+				}
+
 			} else if (packet.hasPayload() && (last_continuity_counter == packet.getContinuityCounter())) {
 				handleDuplicatePacket(packet);
 			} else if (packet.hasPayload() || // not dup, and not consecutive, so error
@@ -413,7 +434,6 @@ public class PID implements TreeNode{
 
 
 	private void processAdaptationField(AdaptationField adaptationField, int packetNo, long timeBase) {
-		processTEMI(adaptationField, temiList, packetNo);
 		if (adaptationField.isPCR_flag()) {
 			final PCR newPCR = adaptationField.getProgram_clock_reference();
 			if(PreferencesManager.isEnablePcrPtsView()) {
@@ -443,22 +463,22 @@ public class PID implements TreeNode{
 		}
 	}
 
-	private static void processTEMI(AdaptationField adaptationField, HashMap<Integer, ArrayList<TemiTimeStamp>> temiList, int packetNo) {
-		if(adaptationField.isAdaptation_field_extension_flag()){
-			if(!adaptationField.isAf_descriptor_not_present_flag()){
+	private static void processTEMI(AdaptationField adaptationField, Map<Integer, ArrayList<TemiTimeStamp>> temiList, int packetNo, long pts) {
+		if (adaptationField.isAdaptation_field_extension_flag()) {
+			if (!adaptationField.isAf_descriptor_not_present_flag()) {
 				List<AFDescriptor> afDescriptorList = adaptationField.getAfDescriptorList();
 				for (AFDescriptor descriptor : afDescriptorList) {
-					if(descriptor instanceof TimelineDescriptor timelineDescriptor){
-						if((timelineDescriptor.getHas_timestamp()==1)||
-							(timelineDescriptor.getHas_timestamp()==2)){
+					if (descriptor instanceof TimelineDescriptor timelineDescriptor) {
+						if ((timelineDescriptor.getHas_timestamp() == 1) || (timelineDescriptor.getHas_timestamp() == 2)) {
 							ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
-							tl.add(new TemiTimeStamp(packetNo, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
+							tl.add(new TemiTimeStamp(packetNo, pts, timelineDescriptor.getMedia_timestamp(), timelineDescriptor.getTimescale(),
+									timelineDescriptor.getDiscontinuity(), timelineDescriptor.getPaused()));
 						}
 					}
 				}
 			}
 		}
-		
+
 	}
 
 	/**
@@ -689,8 +709,8 @@ public class PID implements TreeNode{
 		return dtsList;
 	}
 
-	public HashMap<Integer, ArrayList<TemiTimeStamp>> getTemiList() {
-		return temiList;
+	public Map<Integer, ArrayList<TemiTimeStamp>> getTemiMap() {
+		return temiMap;
 	}
 
 	public LabelMaker getLabelMaker() {

@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui.utils;
 
+import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
+
 import java.text.NumberFormat;
 
 import org.jfree.chart.labels.XYToolTipGenerator;
@@ -53,6 +55,7 @@ public class TEMIToolTipGenerator implements XYToolTipGenerator {
 
 		StringBuilder stringBuilder = new StringBuilder("<html>").append(label).append("<br>");
 		stringBuilder.append(packetNumberFormat.format(timeStamp.getPacketNo())).append("<br>");
+		stringBuilder.append("PTS: ").append(printTimebase90kHz(timeStamp.getPts())).append("<br>");
 		stringBuilder.append("Time: ").append(timeFormat.format(timeStamp.getTime())).append("<br>");
 		stringBuilder.append("media_timestamp: ").append(timeStamp.getMediaTimeStamp()).append("<br>");
 		stringBuilder.append("time_scale: ").append(timeStamp.getTimescale()).append("<br>");

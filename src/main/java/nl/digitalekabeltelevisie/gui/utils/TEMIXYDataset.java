@@ -62,7 +62,7 @@ public class TEMIXYDataset implements XYDataset {
 			String componentLabel = componentPid + " - " + transportStream.getShortLabel(componentPid);
 			PID pid = transportStream.getPID(componentPid);
 			if (pid != null) {
-				Map<Integer, ArrayList<TemiTimeStamp>> temiMap = pid.getTemiList();
+				Map<Integer, ArrayList<TemiTimeStamp>> temiMap = pid.getTemiMap();
 				for (Entry<Integer, ArrayList<TemiTimeStamp>> entry : temiMap.entrySet()) {
 					int time_line_id = entry.getKey();
 					List<TemiTimeStamp> value = entry.getValue();
@@ -76,8 +76,8 @@ public class TEMIXYDataset implements XYDataset {
 		if ((list != null) && (!list.isEmpty())) {
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);
-			TemiTimeStamp startKey = new TemiTimeStamp(startPacket, BigInteger.ZERO,0,0,0);
-			TemiTimeStamp endKey = new TemiTimeStamp(endPacket, BigInteger.valueOf(Long.MAX_VALUE),0,0,0);
+			TemiTimeStamp startKey = new TemiTimeStamp(startPacket,0,  BigInteger.ZERO,0,0,0);
+			TemiTimeStamp endKey = new TemiTimeStamp(endPacket,0, BigInteger.valueOf(Long.MAX_VALUE),0,0,0);
 
 			Comparator<TemiTimeStamp> comperator = Comparator.comparing(TemiTimeStamp::getPacketNo)
 					.thenComparing(TemiTimeStamp::getMediaTimeStamp);

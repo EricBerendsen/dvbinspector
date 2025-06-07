@@ -94,7 +94,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 				try {
 					pesHeader = new PesHeader(buffer, payloadStart);
 				} catch (Exception e) {
-					logger.info("Exception getting PesHeader");
+					logger.info("Exception getting PesHeader at packet "+ packetNo);
 				}
 			}
 		}
