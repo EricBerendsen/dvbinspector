@@ -43,7 +43,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 	public class TEMIPesDataField extends PesPacketData {
 
-	private final int crc_flag;
+	private int crc_flag;
 
 	private List<AFDescriptor> afDescriptors = new ArrayList<>();
 
@@ -54,11 +54,13 @@ import nl.digitalekabeltelevisie.util.Utils;
 	public TEMIPesDataField(PesPacketData pesPacketData) {
 		super(pesPacketData);
 		int offset = pesPacketData.getPesDataStart();
-		crc_flag = getInt(data, offset, 1, 0x80)>>>7; 
-		int descriptorsLen = pesPacketData.getPesDataLen() - 1 - 4 * crc_flag;
-		afDescriptors = AFDescriptorFactory.buildDescriptorList(data, offset+1, descriptorsLen);
-		if(crc_flag == 1) {
-			crc_32 = Utils.getLong(data, offset + descriptorsLen + 1 , 4, Utils.MASK_32BITS);
+		if(pesDataLen>0) { // PES packet with more than just header
+			crc_flag = getInt(data, offset, 1, 0x80)>>>7; 
+			int descriptorsLen = pesPacketData.getPesDataLen() - 1 - 4 * crc_flag;
+			afDescriptors = AFDescriptorFactory.buildDescriptorList(data, offset+1, descriptorsLen);
+			if(crc_flag == 1) {
+				crc_32 = Utils.getLong(data, offset + descriptorsLen + 1 , 4, Utils.MASK_32BITS);
+			}
 		}
 		
 	}
@@ -66,10 +68,12 @@ import nl.digitalekabeltelevisie.util.Utils;
 	@Override
 	public KVP getJTreeNode(int modus) {
 		KVP s = (KVP) getJTreeNode(modus, new KVP("TEMI PES Packet"));
-		s.add(new KVP("CRC_flag",crc_flag));
-		s.addList(afDescriptors,modus,"af_descriptors");
-		if(crc_flag == 1) {
-			s.add(new KVP("CRC_32",crc_32));
+		if (pesDataLen > 0) { // PES packet with more than just header
+			s.add(new KVP("CRC_flag", crc_flag));
+			s.addList(afDescriptors, modus, "af_descriptors");
+			if (crc_flag == 1) {
+				s.add(new KVP("CRC_32", crc_32));
+			}
 		}
 		return s;
 	}
