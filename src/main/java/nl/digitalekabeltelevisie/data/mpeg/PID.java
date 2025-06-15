@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.system_clock_fre
 import static nl.digitalekabeltelevisie.util.Utils.printPCRTime;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -115,7 +116,7 @@ public class PID implements TreeNode{
 	/**
 	 * Map &lt;time_line_id, List&lt;TemiTimeStamp&gt;&gt;
 	 */
-	private final Map<Integer, ArrayList<TemiTimeStamp>> temiMap = new HashMap<>();
+	private final SortedMap<Integer, ArrayList<TemiTimeStamp>> temiMap = new TreeMap<>();
 
 	private final LabelMaker labelMaker = new LabelMaker();
 
@@ -565,6 +566,21 @@ public class PID implements TreeNode{
 		if((generalPidHandler!=null)&&(generalPidHandler.isInitialized())) {
 			t.add(generalPidHandler.getJTreeNode(modus));
 		}
+
+		
+			
+		if(!temiMap.isEmpty()) {
+			KVP temiKvp = new KVP("TEMI");
+			for (Entry<Integer, ArrayList<TemiTimeStamp>> entry : temiMap.entrySet()) {
+				int time_line_id = entry.getKey();
+				KVP timeline_idKvp = new KVP("time_line_id", time_line_id);
+				timeline_idKvp.addToList(entry.getValue(), modus);
+				temiKvp.add(timeline_idKvp);
+			}
+			
+			t.add(temiKvp);
+		}
+
 
 		return t;
 	}

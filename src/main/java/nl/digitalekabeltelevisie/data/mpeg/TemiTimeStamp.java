@@ -26,9 +26,15 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import java.math.*;
+import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
 
-public class TemiTimeStamp {
+import java.math.BigInteger;
+
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.gui.HTMLSource;
+
+public class TemiTimeStamp implements TreeNode, HTMLSource {
 
 	private final int packetNo;
 	private final long pts;
@@ -74,6 +80,33 @@ public class TemiTimeStamp {
 	public int getPaused() {
 		return paused;
 	}
-	
+
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP kvp = new KVP(String.format("temi (time %.2f sec)", media_timestamp.floatValue() / timescale));
+		kvp.addHTMLSource(this, "temi packet");
+		kvp.add(new KVP("packetNo", packetNo));
+		kvp.add(new KVP("pts", pts, printTimebase90kHz(pts)));
+		kvp.add(new KVP("media_timestamp", media_timestamp));
+		kvp.add(new KVP("timescale", timescale));
+		kvp.add(new KVP("paused", paused));
+		kvp.add(new KVP("discontinuity", discontinuity));
+		return kvp;
+	}
+
+	@Override
+	public String getHTML() {
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("packetNo: ").append(packetNo).append("<br>");
+		stringBuilder.append("PTS: ").append(printTimebase90kHz(pts)).append("<br>");
+		stringBuilder.append("media_timestamp: ").append(media_timestamp).append("<br>");
+		stringBuilder.append("timescale: ").append(timescale).append("<br>");
+		stringBuilder.append("paused: ").append(paused).append("<br>");
+		stringBuilder.append("discontinuity:").append(discontinuity).append("<br>");
+		stringBuilder.append("</html>");
+
+		return stringBuilder.toString();
+	}	
 
 }
