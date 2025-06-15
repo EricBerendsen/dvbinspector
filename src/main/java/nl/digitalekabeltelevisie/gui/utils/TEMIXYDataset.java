@@ -26,16 +26,20 @@
  */
 package nl.digitalekabeltelevisie.gui.utils;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jfree.data.DomainOrder;
-import org.jfree.data.general.*;
+import org.jfree.data.general.DatasetChangeListener;
+import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.TemiTimeStamp;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
 
@@ -46,16 +50,8 @@ public class TEMIXYDataset implements XYDataset {
 
 	private final List<List<TemiTimeStamp>> seriesList = new ArrayList<>();
 	private final List<String> seriesKeys = new ArrayList<>();
-	private final List<Integer> seriesOffset = new ArrayList<>();
-	private final List<Integer> seriesViewContextLength = new ArrayList<>();
-
-	private final int startPacket;
-	private final int endPacket;
 
 	public TEMIXYDataset(PMTsection pmt, TransportStream transportStream, ViewContext viewContext) {
-
-		startPacket = viewContext.getStartPacket();
-		endPacket = viewContext.getEndPacket();
 
 		for (Component c : pmt.getComponentenList()) {
 			short componentPid = (short) c.getElementaryPID();
@@ -76,24 +72,6 @@ public class TEMIXYDataset implements XYDataset {
 		if ((list != null) && (!list.isEmpty())) {
 			seriesList.add(list);
 			seriesKeys.add(componentLabel);
-			TemiTimeStamp startKey = new TemiTimeStamp(startPacket,0,  BigInteger.ZERO,0,0,0);
-			TemiTimeStamp endKey = new TemiTimeStamp(endPacket,0, BigInteger.valueOf(Long.MAX_VALUE),0,0,0);
-
-			Comparator<TemiTimeStamp> comperator = Comparator.comparing(TemiTimeStamp::getPacketNo)
-					.thenComparing(TemiTimeStamp::getMediaTimeStamp);
-
-			int startOffset = Collections.binarySearch(list, startKey, comperator);
-			if (startOffset < 0) {
-				startOffset = (-startOffset) - 1;
-			}
-			int endRange = Collections.binarySearch(list, endKey, comperator);
-
-			if (endRange < 0) {
-				endRange = (-endRange) - 1;
-			}
-
-			seriesOffset.add(startOffset);
-			seriesViewContextLength.add(endRange - startOffset);
 		}
 	}
 
@@ -141,31 +119,31 @@ public class TEMIXYDataset implements XYDataset {
 
 	@Override
 	public int getItemCount(int series) {
-		return seriesViewContextLength.get(series);
+		return seriesList.get(series).size();
 	}
 
 	@Override
 	public Number getX(int series, int item) {
-		return getTimestamp(series, item).getPacketNo();
+		return seriesList.get(series).get(item).getPacketNo();
 	}
 
 	protected TemiTimeStamp getTimestamp(int series, int item) {
-		return seriesList.get(series).get(item+seriesOffset.get(series));
+		return seriesList.get(series).get(item);
 	}
 
 	@Override
 	public double getXValue(int series, int item) {
-		return getTimestamp(series, item).getPacketNo();
+		return seriesList.get(series).get(item).getPacketNo();
 	}
 
 	@Override
 	public Number getY(int series, int item) {
-		return getTimestamp(series, item).getTime();
+		return seriesList.get(series).get(item).getTime();
 	}
 
 	@Override
 	public double getYValue(int series, int item) {
-		return getTimestamp(series, item).getTime();
+		return seriesList.get(series).get(item).getTime();
 	}
 
 }
