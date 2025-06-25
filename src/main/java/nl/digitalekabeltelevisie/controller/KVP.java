@@ -40,6 +40,7 @@ import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.gui.*;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Holder for names/values (and explanations) that takes care of formatting and presentation.
@@ -525,5 +526,9 @@ public class KVP extends DefaultMutableTreeNode{
 		return this;
 	}
 
+	public KVP addToList( Collection<? extends TreeNode> itemList, int modus) {
+		Utils.addToList(this, itemList, modus);
+		return this;
+	}
 	
 }

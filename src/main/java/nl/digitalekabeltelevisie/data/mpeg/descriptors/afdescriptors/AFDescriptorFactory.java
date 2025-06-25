@@ -34,8 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-
 public final class AFDescriptorFactory {
 
 
@@ -49,8 +47,8 @@ public final class AFDescriptorFactory {
 	private static final Logger	logger	= Logger.getLogger(AFDescriptorFactory.class.getName());
 
 
-	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {
-		final List<Descriptor> r = new ArrayList<>();
+	public static List<AFDescriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {
+		final List<AFDescriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
@@ -65,7 +63,7 @@ public final class AFDescriptorFactory {
 			int descriptorLen = toUnsignedInt(data[offset + t+ 1]);
 			byte[] descriptorData = Arrays.copyOfRange(data, offset + t, offset + t + descriptorLen + 2);
 
-			Descriptor d;
+			AFDescriptor d;
 			try {
 				d = getAFDescriptor(descriptorData);
 
@@ -85,8 +83,8 @@ public final class AFDescriptorFactory {
 		return r;
 	}
 
-	private static Descriptor getAFDescriptor(final byte[] data) {
-		Descriptor d;
+	private static AFDescriptor getAFDescriptor(final byte[] data) {
+		AFDescriptor d;
 		switch (toUnsignedInt(data[0])) {
 		case 0x04:
 			d = new TimelineDescriptor(data);

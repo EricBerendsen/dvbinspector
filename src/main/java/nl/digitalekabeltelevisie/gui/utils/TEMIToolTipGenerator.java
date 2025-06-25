@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui.utils;
 
+import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
+
 import java.text.NumberFormat;
 
 import org.jfree.chart.labels.XYToolTipGenerator;
@@ -36,15 +38,14 @@ import nl.digitalekabeltelevisie.data.mpeg.TemiTimeStamp;
 
 public class TEMIToolTipGenerator implements XYToolTipGenerator {
 	
-	private NumberFormat timeFormat;
+	private final NumberFormat timeFormat;
 
 	public TEMIToolTipGenerator(NumberFormat packetNumberFormat, NumberFormat timeFormat) {
-		super();
-		this.packetNumberFormat = packetNumberFormat;
+        this.packetNumberFormat = packetNumberFormat;
 		this.timeFormat = timeFormat;
 	}
 
-	NumberFormat packetNumberFormat;
+	final NumberFormat packetNumberFormat;
 
 	@Override
 	public String generateToolTip(XYDataset  dataset, int series, int item){
@@ -54,6 +55,7 @@ public class TEMIToolTipGenerator implements XYToolTipGenerator {
 
 		StringBuilder stringBuilder = new StringBuilder("<html>").append(label).append("<br>");
 		stringBuilder.append(packetNumberFormat.format(timeStamp.getPacketNo())).append("<br>");
+		stringBuilder.append("PTS: ").append(printTimebase90kHz(timeStamp.getPts())).append("<br>");
 		stringBuilder.append("Time: ").append(timeFormat.format(timeStamp.getTime())).append("<br>");
 		stringBuilder.append("media_timestamp: ").append(timeStamp.getMediaTimeStamp()).append("<br>");
 		stringBuilder.append("time_scale: ").append(timeStamp.getTimescale()).append("<br>");

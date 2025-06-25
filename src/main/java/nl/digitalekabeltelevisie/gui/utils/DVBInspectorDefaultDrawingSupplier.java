@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,7 +31,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
@@ -49,7 +48,7 @@ public class DVBInspectorDefaultDrawingSupplier extends DefaultDrawingSupplier {
             = createDVBISeriesShapes();
 
     /** The default outline paint sequence. */
-    public static final Paint[] DVB_OUTLINE_PAINT_SEQUENCE = new Paint[] {
+    public static final Paint[] DVB_OUTLINE_PAINT_SEQUENCE = {
             Color.black};
     /**
 	 *
@@ -61,34 +60,6 @@ public class DVBInspectorDefaultDrawingSupplier extends DefaultDrawingSupplier {
                 DEFAULT_OUTLINE_STROKE_SEQUENCE,
                 DVBI_SHAPE_SEQUENCE);
 	}
-
-	/**
-	 * @param paintSequence
-	 * @param outlinePaintSequence
-	 * @param strokeSequence
-	 * @param outlineStrokeSequence
-	 * @param shapeSequence
-	 */
-	public DVBInspectorDefaultDrawingSupplier(Paint[] paintSequence, Paint[] outlinePaintSequence,
-			Stroke[] strokeSequence, Stroke[] outlineStrokeSequence, Shape[] shapeSequence) {
-		super(paintSequence, outlinePaintSequence, strokeSequence, outlineStrokeSequence, shapeSequence);
-	}
-
-	/**
-	 * @param paintSequence
-	 * @param fillPaintSequence
-	 * @param outlinePaintSequence
-	 * @param strokeSequence
-	 * @param outlineStrokeSequence
-	 * @param shapeSequence
-	 */
-	public DVBInspectorDefaultDrawingSupplier(Paint[] paintSequence, Paint[] fillPaintSequence,
-			Paint[] outlinePaintSequence, Stroke[] strokeSequence, Stroke[] outlineStrokeSequence, Shape[] shapeSequence) {
-		super(paintSequence, fillPaintSequence, outlinePaintSequence, strokeSequence, outlineStrokeSequence,
-				shapeSequence);
-		// TODO Auto-generated constructor stub
-	}
-
 
 
     /**

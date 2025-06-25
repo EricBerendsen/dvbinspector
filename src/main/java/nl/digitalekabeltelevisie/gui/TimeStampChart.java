@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -50,78 +50,27 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.gui.utils.*;
 import nl.digitalekabeltelevisie.util.*;
 
-/**
- * Shows variation over time of the bandwidth each PID uses
- *
- * @author Eric Berendsen
- *
- */
+
 public class TimeStampChart extends JPanel implements TransportStreamView, ActionListener{
 
 
-	/**
-	 * @author Eric
-	 *
-	 */
-	private static final class TimeStampNumberFormat extends NumberFormat {
-		@Override
-		public Number parse(String source, ParsePosition parsePosition) {
-			// not used
-			return null;
-		}
 
-		@Override
-		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
-			return toAppendTo.append(Utils .printTimebase90kHz(number));
-		}
-
-		@Override
-		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
-			return toAppendTo.append(Utils .printTimebase90kHz((long)number));
-		}
-	}
-
-	private static final class TEMIMediaTimeStampNumberFormat extends NumberFormat {
-
-		@Override
-		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
-			
-			return  toAppendTo.append(df.format(number));
-		}
-
-		@Override
-		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
-		
-			return  toAppendTo.append(number);
-		}
-
-		@Override
-		public Number parse(String source, ParsePosition parsePosition) {
-			// not used
-			return null;
-		}
-		
-	}
-	/**
-	 * @author Eric
-	 *
-	 */
 	public final class PacketTimeNumberFormat extends NumberFormat {
 
 		@Override
-		public Number parse(final String source, final ParsePosition parsePosition) {
+		public Number parse(String source, ParsePosition parsePosition) {
 			return null;
 		}
 
 		@Override
-		public StringBuffer format(final long number, final StringBuffer toAppendTo, final FieldPosition pos) {
-			final String s = (usepacketTime?transportStream.getShortPacketTime(number): Long.toString(number));
+		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+			String s = (usepacketTime?transportStream.getShortPacketTime(number): Long.toString(number));
 			return toAppendTo.append(s);
 		}
 
 		@Override
-		public StringBuffer format(final double number, final StringBuffer toAppendTo, final FieldPosition pos) {
-			final String s = (usepacketTime?transportStream.getShortPacketTime((long)number):Long.toString((long)number));
+		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+			String s = (usepacketTime?transportStream.getShortPacketTime((long)number):Long.toString((long)number));
 			return toAppendTo.append(s);
 		}
 	}
@@ -130,21 +79,21 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	public final class  PacketTimeNumberFormatLabel extends NumberFormat {
 
 		@Override
-		public Number parse(final String source, final ParsePosition parsePosition) {
+		public Number parse(String source, ParsePosition parsePosition) {
 			return null;
 		}
 
 		@Override
-		public StringBuffer format(final long number, final StringBuffer toAppendTo, final FieldPosition pos) {
-			final String label = usepacketTime?"Packet Time: ":"Packet No: ";
-			final String s = packetTimeNumberFormat.format(number);
+		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+			String label = usepacketTime?"Packet Time: ":"Packet No: ";
+			String s = packetTimeNumberFormat.format(number);
 			return toAppendTo.append(label).append(s);
 		}
 
 		@Override
-		public StringBuffer format(final double number, final StringBuffer toAppendTo, final FieldPosition pos) {
-			final String label = usepacketTime?"Time: ":"Packet No: ";
-			final String s = packetTimeNumberFormat.format(number);
+		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+			String label = usepacketTime?"Time: ":"Packet No: ";
+			String s = packetTimeNumberFormat.format(number);
 			return toAppendTo.append(label).append(s);
 		}
 	}
@@ -153,28 +102,24 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	private JFreeChart freeChart;
 	
 
-	private PacketTimeNumberFormat packetTimeNumberFormat = new PacketTimeNumberFormat();
-	private PacketTimeNumberFormatLabel packetTimeNumberFormatLabel = new PacketTimeNumberFormatLabel();
+	private final PacketTimeNumberFormat packetTimeNumberFormat = new PacketTimeNumberFormat();
+	private final PacketTimeNumberFormatLabel packetTimeNumberFormatLabel = new PacketTimeNumberFormatLabel();
 	private boolean usepacketTime = true;
-	private TimeStampNumberFormat timeStampNumberFormat = new TimeStampNumberFormat();
-	private TEMIMediaTimeStampNumberFormat temiNumberFormat = new TEMIMediaTimeStampNumberFormat();
+	private final TimeStampNumberFormat timeStampNumberFormat = new TimeStampNumberFormat();
+	private final TEMIMediaTimeStampNumberFormat temiNumberFormat = new TEMIMediaTimeStampNumberFormat();
 
 	private TransportStream transportStream;
-	private List<PMTsection> pmts = new ArrayList<>();
+	private final List<PMTsection> pmts = new ArrayList<>();
 	private final ChartPanel chartPanel;
 	private boolean legendVisible = true;
 
-	JComboBox<String> serviceChooser = new JComboBox<>() ;
+	private final JComboBox<String> serviceChooser = new JComboBox<>() ;
 	private ViewContext viewContext;
 	
-	static DecimalFormat df = new DecimalFormat("#0.00");
-	private JCheckBox temiOptionCheckBox = new JCheckBox("enable");
-	private JPanel seriesSelectionPanel;
-
-	// TODO disable when packetsize == 192, means not CBR
+	private final JPanel seriesSelectionPanel;
+	private final JPanel temiSelectionPanel;
 
 	private JRadioButton timeButton;
-	// TODO disable when packetsize == 192, means not CBR
 
 	private JRadioButton packetNoButton;
 
@@ -185,15 +130,17 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 * @param transportStream stream to be displayed (can be <code>null</code>)
 	 * @param viewContext determines which PIDs to include, what interval to use, and how many steps in the graph
 	 */
-	public TimeStampChart(final TransportStream transportStream, final ViewContext viewContext){
+	public TimeStampChart(TransportStream transportStream, ViewContext viewContext){
 		super(new BorderLayout());
 		this.transportStream = transportStream;
 		JPanel topRowbuttonPanel = createTopRowButtonPanel();
 		seriesSelectionPanel = new JPanel(new WrapLayout());
+		temiSelectionPanel = new JPanel(new WrapLayout());
 		JPanel controls = new JPanel();
 		controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
 		controls.add(topRowbuttonPanel);
 		controls.add(seriesSelectionPanel);
+		controls.add(temiSelectionPanel);
 		add(controls,BorderLayout.PAGE_START);
 
 		chartPanel = new ChartPanel(null,false);
@@ -218,7 +165,6 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		
 		addTimePacketNoRadioButtons(buttonPanel);
 		buttonPanel.add(Box.createHorizontalStrut(20)); // spacer
-		addTEMIOption(buttonPanel);
 		buttonPanel.invalidate();
 		return buttonPanel;
 	}
@@ -227,7 +173,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 */
 	private void addServicesSelect(JPanel buttonPanel) {
 
-		final JLabel typeLabel = new JLabel("Service:");
+		JLabel typeLabel = new JLabel("Service:");
 		buttonPanel.add(typeLabel);
 		serviceChooser.addActionListener(this);
 
@@ -242,7 +188,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 *
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
-	public final void setTransportStream(final TransportStream transportStream, final ViewContext viewContext){
+	public final void setTransportStream(TransportStream transportStream, ViewContext viewContext){
 		this.transportStream = transportStream;
 		this.viewContext = viewContext;
 		serviceChooser.removeActionListener(this);
@@ -252,11 +198,10 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
 			seriesSelectionPanel.removeAll();
-			temiOptionCheckBox.setEnabled(false);
+			temiSelectionPanel.removeAll();
 		}else if(!PreferencesManager.isEnablePcrPtsView()) {
 			freeChart = null;
 			chartPanel.setChart(GuiUtils.createTitleOnlyChart("PCR/PTS/DTS View not enabled, select 'Settings -> Enable PCR/PTS/DTS View' to enable "));
-			temiOptionCheckBox.setEnabled(false);
 			
 		}else{
 			
@@ -265,7 +210,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			if(transportStream.isAVCHD()) {
 				usepacketTime = true;
 			}
-			final PMTs streamPmts = transportStream.getPsi().getPmts();
+			PMTs streamPmts = transportStream.getPsi().getPmts();
 			if(streamPmts.getPmts().isEmpty()){
 				chartPanel.setChart(GuiUtils.createTitleOnlyChart("No PMTs found, nothing to display in this graph"));
 			}else{
@@ -294,7 +239,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 * @param programNumber
 	 * @return
 	 */
-	private static String getServiceName(final TransportStream transportStream, int programNumber) {
+	private static String getServiceName(TransportStream transportStream, int programNumber) {
 		return transportStream.
 				getPsi().
 				getSdt().
@@ -311,18 +256,31 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		freeChart.getLegend().setVisible(legendVisible);
 		chartPanel.setDomainZoomable(true);
 		chartPanel.setRangeZoomable(true);
-		fillSeriesSelectionPanel(seriesSelectionPanel,freeChart);
+		fillSelectionPanels();
 	}
 
-	private void fillSeriesSelectionPanel(JPanel seriesSelectionPanel, JFreeChart freeChart2) {
-		seriesSelectionPanel.removeAll();
+	private void fillSelectionPanels() {
 
 		XYPlot plot = (XYPlot) freeChart.getPlot();
-		XYDataset dataset = plot.getDataset();
 
-		int count = dataset.getSeriesCount();
+		seriesSelectionPanel.removeAll();
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+		XYDataset dataset = plot.getDataset();
+		createCheckBoxForSeries(seriesSelectionPanel, renderer, dataset);
 
+		temiSelectionPanel.removeAll();
+		XYDataset temiDataset = plot.getDataset(1);
+		if (temiDataset != null) {
+			XYLineAndShapeRenderer temiRenderer = (XYLineAndShapeRenderer) plot.getRenderer(1);
+			createCheckBoxForSeries(temiSelectionPanel, temiRenderer, temiDataset);
+		}
+
+		seriesSelectionPanel.revalidate();
+		temiSelectionPanel.revalidate();
+	}
+
+	private static void createCheckBoxForSeries(JPanel selectionPanel, XYLineAndShapeRenderer renderer, XYDataset dataset) {
+		int count = dataset.getSeriesCount();
 		for (int i = 0; i < count; i++) {
 			String label = (String) dataset.getSeriesKey(i);
 			JCheckBox cb1 = new JCheckBox(label,true);
@@ -332,16 +290,13 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 				int index = dataset.indexOf(label);
 				renderer.setSeriesVisible(index, source.isSelected());
 			});
-			seriesSelectionPanel.validate();
+			selectionPanel.validate();
 
-			seriesSelectionPanel.add(cb1);
+			selectionPanel.add(cb1);
 			if(i<(count-1)) {
-				seriesSelectionPanel.add(Box.createHorizontalStrut(20)); // spacer
+				selectionPanel.add(Box.createHorizontalStrut(20)); // spacer
 			}
 		}
-		
-		seriesSelectionPanel.revalidate();
-//		updateUI();
 	}
 
 	/**
@@ -352,7 +307,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 */
 	private JFreeChart createChart(int selectedIndex) {
 
-		final XYDataset categoryTableXYDataset = createDataSet(selectedIndex);
+		XYDataset categoryTableXYDataset = createDataSet(selectedIndex);
 		PMTsection section = pmts.get(selectedIndex);
 		String serviceLabel = getServiceName(transportStream, section.getProgramNumber());
 
@@ -382,7 +337,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		// JDK-8213535 : Windows HiDPI html lightweight tooltips are truncated
 		UIManager.put("ToolTip.font",  new FontUIResource("SansSerif", Font.PLAIN, 12));
 
-		final XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("<htmL>{0}<br\\>{1}<br\\>value: {2}</html>",
+		XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("<htmL>{0}<br\\>{1}<br\\>value: {2}</html>",
 				packetTimeNumberFormatLabel, timeStampNumberFormat);
 		renderer.setDefaultToolTipGenerator(toolTipGenerator);
 
@@ -395,12 +350,11 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 
 		rangeAxis.setNumberFormatOverride(timeStampNumberFormat);
 
-		final XYDataset temiDataset = createTEMIDataset(selectedIndex);
-		final boolean hasTEMIData = temiDataset.getSeriesCount()>0;
-		temiOptionCheckBox.setEnabled(hasTEMIData);
-		if(temiOptionCheckBox.isSelected() && hasTEMIData){
+		XYDataset temiDataset = createTEMIDataset(selectedIndex);
+		boolean hasTEMIData = temiDataset.getSeriesCount()>0;
+		if(hasTEMIData){
 			
-			final NumberAxis axis2 = new NumberAxis("TEMI");
+			NumberAxis axis2 = new NumberAxis("TEMI");
 
 			axis2.setAutoRangeIncludesZero(false);
 			axis2.setLabelFont(rangeAxis.getLabelFont());
@@ -410,10 +364,10 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			plot.setDataset(1, temiDataset);
 			
 			plot.mapDatasetToRangeAxis(1, 1);
-			final XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(false,true);
+			XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(false,true);
 			useBlackOutlinePaint(temiDataset, renderer2);
 
-			final TEMIToolTipGenerator temiToolTipGenerator = new TEMIToolTipGenerator(	packetTimeNumberFormatLabel, temiNumberFormat);
+			TEMIToolTipGenerator temiToolTipGenerator = new TEMIToolTipGenerator(	packetTimeNumberFormatLabel, temiNumberFormat);
 			renderer2.setDefaultToolTipGenerator(temiToolTipGenerator);
 		    plot.setRenderer(1, renderer2);
 		}
@@ -421,7 +375,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		return chart;
 	}
 
-	private static void useBlackOutlinePaint(final XYDataset categoryTableXYDataset, XYLineAndShapeRenderer renderer) {
+	private static void useBlackOutlinePaint(XYDataset categoryTableXYDataset, XYLineAndShapeRenderer renderer) {
 		int seriesCount = categoryTableXYDataset.getSeriesCount();
 		for (int i = 0; i < seriesCount; i++) {
 			renderer.setSeriesOutlinePaint(i, Color.black);
@@ -445,9 +399,9 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	
 
 	private void addLegendRadioButtons(JPanel buttonPanel) {
-		final JLabel typeLabel = new JLabel("Legend:");
+		JLabel typeLabel = new JLabel("Legend:");
 		buttonPanel.add(typeLabel);
-		final JRadioButton onButton = new JRadioButton("On");
+		JRadioButton onButton = new JRadioButton("On");
 		onButton.addActionListener(e -> {
 			if(!legendVisible){
 				legendVisible = true;
@@ -456,7 +410,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 				}
 			}
 		});
-		final JRadioButton offButton = new JRadioButton("Off");
+		JRadioButton offButton = new JRadioButton("Off");
 		offButton.addActionListener(e -> {
 			if(legendVisible){
 				legendVisible = false;
@@ -466,23 +420,16 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			}
 		});
 		onButton.setSelected(true);
-		final ButtonGroup group = new ButtonGroup();
+		ButtonGroup group = new ButtonGroup();
 		group.add(onButton);
 		group.add(offButton);
 
 		buttonPanel.add(onButton);
 		buttonPanel.add(offButton);
 	}
-	
-	private void addTEMIOption(JPanel temiPanel) {
-		final JLabel typeLabel = new JLabel("TEMI display:");
-		temiPanel.add(typeLabel);
-		temiOptionCheckBox.addActionListener(this);
-		temiPanel.add(temiOptionCheckBox);
-	}
 
 	private void addTimePacketNoRadioButtons(JPanel buttonPanel) {
-		final JLabel typeLabel = new JLabel("X-Axis:");
+		JLabel typeLabel = new JLabel("X-Axis:");
 		buttonPanel.add(typeLabel);
 		timeButton = new JRadioButton("Time");
 		timeButton.addActionListener(e -> {
@@ -503,7 +450,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			}
 		});
 		timeButton.setSelected(true);
-		final ButtonGroup group = new ButtonGroup();
+		ButtonGroup group = new ButtonGroup();
 		group.add(timeButton);
 		group.add(packetNoButton);
 

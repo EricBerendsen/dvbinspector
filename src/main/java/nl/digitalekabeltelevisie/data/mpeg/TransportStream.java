@@ -60,6 +60,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4.AC4Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling.DVBSubtitleHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ebu.EBUTeletextHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.smpte.Smpte2038Handler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.temi.TEMIPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ttml.TtmlPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.Video138182Handler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.jpegxs.JpegXsHandler;
@@ -374,9 +375,31 @@ public class TransportStream implements TreeNode{
 	public void postProcess() {
 		namePIDs();
 		setGeneralPsiTableHandlers();
+		parseTemiPids();
+		
 		calculateBitRate();
 		calculateBitrateTDT();
 		calculateZeroTime();
+	}
+
+	private void parseTemiPids() {
+		if (PreferencesManager.isEnablePcrPtsView()) {
+			Map<Integer,GeneralPidHandler> toParsePids = new HashMap<>();
+			for(PMTsection[] pmt: psi.getPmts()){
+				PMTsection pmtSection = pmt[0];
+				for(Component component:pmtSection.getComponentenList()) {
+					if(component.getStreamtype()==39) {
+						int pid = component.getElementaryPID();
+						toParsePids.put(pid, pids[pid].getPidHandler());
+					}
+				}
+			}
+			try {
+				parsePidStreams(toParsePids);
+			} catch (IOException e) {
+				logger.info("IOException while parsing TEMI");
+			}
+		}
 	}
 
 	private void processPacket(TSPacket packet) {
@@ -946,6 +969,7 @@ public class TransportStream implements TreeNode{
 				case 0x1B -> new Video14496Handler();
 				case 0x20 -> new Video14496Handler(); //MVC video sub-bitstream of an AVC video stream conforming to one or more profiles defined in Annex H of ITU-T Rec. H.264 | ISO/IEC 14496-10
 				case 0x24 -> new H265Handler();
+				case 0x27 -> new TEMIPesHandler();
 				case 0x33 -> new H266Handler();
 				case 0x32 -> new JpegXsHandler();
 				default -> new GeneralPesHandler();

@@ -26,26 +26,47 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg;
 
-import java.math.*;
+import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
 
-public class TemiTimeStamp {
+import java.math.BigInteger;
+
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.gui.HTMLSource;
+
+public class TemiTimeStamp implements TreeNode, HTMLSource {
 
 	private final int packetNo;
+	private long pts;
 	private final BigInteger media_timestamp;
-	private long timescale;
-	private int discontinuity;
-	private int paused;
+	private final long timescale;
+	private final int discontinuity;
+	
+	private int timeline_id;
+	private final int paused;
 
-	public TemiTimeStamp(int packetNo, BigInteger time) {
-		this(packetNo,time,0,0,0);
-	}
 
-	public TemiTimeStamp(int packetNo, BigInteger media_timestamp, long timescale, int discontinuity,
+	public TemiTimeStamp(int packetNo, long pts, BigInteger media_timestamp, long timescale, int discontinuity, int timeline_id,
 			int paused) {
 		this.packetNo = packetNo;
+		this.pts = pts;
 		this.media_timestamp = media_timestamp;
 		this.timescale = timescale;
 		this.discontinuity = discontinuity;
+		this.timeline_id = timeline_id;
+		this.paused = paused;
+		
+	}
+
+
+	public TemiTimeStamp(int packetNo, BigInteger media_timestamp, long timescale, int discontinuity, int timeline_id,
+			int paused) {
+		this.packetNo = packetNo;
+		this.pts = -1L;
+		this.media_timestamp = media_timestamp;
+		this.timescale = timescale;
+		this.discontinuity = discontinuity;
+		this.timeline_id = timeline_id;
 		this.paused = paused;
 	}
 
@@ -54,6 +75,10 @@ public class TemiTimeStamp {
 	}
 	public int getPacketNo() {
 		return packetNo;
+	}
+	
+	public long getPts() {
+		return pts;
 	}
 
 	public BigInteger getMediaTimeStamp() {
@@ -71,6 +96,43 @@ public class TemiTimeStamp {
 	public int getPaused() {
 		return paused;
 	}
-	
+
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP kvp = new KVP(String.format("temi (time %.2f sec)", media_timestamp.floatValue() / timescale));
+		kvp.addHTMLSource(this, "temi packet");
+		kvp.add(new KVP("packetNo", packetNo));
+		kvp.add(new KVP("pts", pts, printTimebase90kHz(pts)));
+		kvp.add(new KVP("media_timestamp", media_timestamp));
+		kvp.add(new KVP("timescale", timescale));
+		kvp.add(new KVP("paused", paused));
+		kvp.add(new KVP("discontinuity", discontinuity));
+		return kvp;
+	}
+
+	@Override
+	public String getHTML() {
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("packetNo: ").append(packetNo).append("<br>");
+		stringBuilder.append("PTS: ").append(printTimebase90kHz(pts)).append("<br>");
+		stringBuilder.append("media_timestamp: ").append(media_timestamp).append("<br>");
+		stringBuilder.append("timescale: ").append(timescale).append("<br>");
+		stringBuilder.append("paused: ").append(paused).append("<br>");
+		stringBuilder.append("discontinuity:").append(discontinuity).append("<br>");
+		stringBuilder.append("</html>");
+
+		return stringBuilder.toString();
+	}
+
+
+	public int getTimeline_id() {
+		return timeline_id;
+	}
+
+
+	public void setPts(long pts) {
+		this.pts = pts;
+	}	
 
 }
