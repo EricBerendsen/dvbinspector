@@ -37,6 +37,7 @@ import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.PCR;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.TemiTimeStamp;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -51,7 +52,25 @@ public class TEMIXYDataset implements XYDataset {
 	private final List<List<TemiTimeStamp>> seriesList = new ArrayList<>();
 	private final List<String> seriesKeys = new ArrayList<>();
 
+
+	private long firstPcrPacketNo;
+
+	private long pcrBase;
+
+	private long packetsPerSec;
+
 	public TEMIXYDataset(PMTsection pmt, TransportStream transportStream, ViewContext viewContext) {
+		
+		long bitRate = transportStream.getBitRate();
+		int packetInBits = transportStream.getPacketLenghth() * 8;
+		
+		packetsPerSec = bitRate / packetInBits;
+		
+		
+		PID pcrPid = transportStream.getPID(pmt.getPcrPid());
+		PCR firstPCR = pcrPid.getFirstPCR();
+		firstPcrPacketNo = pcrPid.getFirstPCRpacketNo();
+		pcrBase = firstPCR.getProgram_clock_reference_base();
 
 		for (Component c : pmt.getComponentenList()) {
 			short componentPid = (short) c.getElementaryPID();
@@ -124,7 +143,20 @@ public class TEMIXYDataset implements XYDataset {
 
 	@Override
 	public Number getX(int series, int item) {
-		return seriesList.get(series).get(item).getPacketNo();
+		return calcPacketNoFromPts(series, item);
+	}
+
+	private long calcPacketNoFromPts(int series, int item) {
+		TemiTimeStamp temiTimeStamp = seriesList.get(series).get(item);
+		long pts = temiTimeStamp.getPts();
+		
+		long delta = pts - pcrBase;
+		
+		if(pts<pcrBase) { // pcr wrapped around
+			delta = 0x2_0000_0000L + pts - pcrBase;
+		}
+		
+		return firstPcrPacketNo + (packetsPerSec * delta / 90_000L);
 	}
 
 	protected TemiTimeStamp getTimestamp(int series, int item) {
@@ -133,7 +165,8 @@ public class TEMIXYDataset implements XYDataset {
 
 	@Override
 	public double getXValue(int series, int item) {
-		return seriesList.get(series).get(item).getPacketNo();
+		return calcPacketNoFromPts(series, item);
+
 	}
 
 	@Override

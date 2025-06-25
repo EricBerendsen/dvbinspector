@@ -37,20 +37,36 @@ import nl.digitalekabeltelevisie.gui.HTMLSource;
 public class TemiTimeStamp implements TreeNode, HTMLSource {
 
 	private final int packetNo;
-	private final long pts;
+	private long pts;
 	private final BigInteger media_timestamp;
 	private final long timescale;
 	private final int discontinuity;
+	
+	private int timeline_id;
 	private final int paused;
 
 
-	public TemiTimeStamp(int packetNo, long pts, BigInteger media_timestamp, long timescale, int discontinuity,
+	public TemiTimeStamp(int packetNo, long pts, BigInteger media_timestamp, long timescale, int discontinuity, int timeline_id,
 			int paused) {
 		this.packetNo = packetNo;
 		this.pts = pts;
 		this.media_timestamp = media_timestamp;
 		this.timescale = timescale;
 		this.discontinuity = discontinuity;
+		this.timeline_id = timeline_id;
+		this.paused = paused;
+		
+	}
+
+
+	public TemiTimeStamp(int packetNo, BigInteger media_timestamp, long timescale, int discontinuity, int timeline_id,
+			int paused) {
+		this.packetNo = packetNo;
+		this.pts = -1L;
+		this.media_timestamp = media_timestamp;
+		this.timescale = timescale;
+		this.discontinuity = discontinuity;
+		this.timeline_id = timeline_id;
 		this.paused = paused;
 	}
 
@@ -107,6 +123,16 @@ public class TemiTimeStamp implements TreeNode, HTMLSource {
 		stringBuilder.append("</html>");
 
 		return stringBuilder.toString();
+	}
+
+
+	public int getTimeline_id() {
+		return timeline_id;
+	}
+
+
+	public void setPts(long pts) {
+		this.pts = pts;
 	}	
 
 }

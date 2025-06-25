@@ -61,7 +61,7 @@ public class TEMIPesHandler extends GeneralPesHandler {
 				if((timelineDescriptor.getHas_timestamp()==1)||
 						(timelineDescriptor.getHas_timestamp()==2)){
 						ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
-						tl.add(new TemiTimeStamp(packetNo, pts, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getPaused()));
+						tl.add(new TemiTimeStamp(packetNo, pts, timelineDescriptor.getMedia_timestamp(),timelineDescriptor.getTimescale(),timelineDescriptor.getDiscontinuity(),timelineDescriptor.getTimeline_id(), timelineDescriptor.getPaused()));
 				}
 			}
 		} else {

@@ -58,6 +58,7 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  */
 public class PID implements TreeNode{
 	
+
 	private record ContinuityError(int lastPacketNo, int lastCCounter, int newPacketNo,int newCCounter) {}
 	
 	private static final Logger logger = Logger.getLogger(PID.class.getName());
@@ -117,11 +118,11 @@ public class PID implements TreeNode{
 	 * Map &lt;time_line_id, List&lt;TemiTimeStamp&gt;&gt;
 	 */
 	private final SortedMap<Integer, ArrayList<TemiTimeStamp>> temiMap = new TreeMap<>();
+	private List<TemiTimeStamp> temiBuffer = new ArrayList<>();
 
 	private final LabelMaker labelMaker = new LabelMaker();
 
-	private long lastPts = -1;
-	
+
 	/**
 	 *
 	 * This inner class is a helper that collects and groups TSPackets for the containing PID into PsiSectionData's . If this PID contains PES data, the bytes are ignored.
@@ -337,19 +338,21 @@ public class PID implements TreeNode{
 			}
 			if (isNormalPacket(packet, adaptationField)) {
 				handleNormalPacket(packet);
-				
-				if(packet.isPayloadUnitStartIndicator() && type != PSI) {
-					PesHeader pesHeader = packet.getPesHeader();
-					if(pesHeader != null) {
-						if(pesHeader.hasPTS()) {
-							lastPts = pesHeader.getPts();
-						} else {
-							lastPts  = -1L;
-						}
-					}
-				}
+
 				if (packet.hasAdaptationField()) {
-					processTEMI(adaptationField, temiMap, packet.getPacketNo(), lastPts);
+					processTEMI(adaptationField, temiMap, packet.getPacketNo());
+				}
+				if (packet.isPayloadUnitStartIndicator() && type != PSI) {
+					PesHeader pesHeader = packet.getPesHeader();
+					if (pesHeader != null && pesHeader.hasPTS()) {
+						long pts = pesHeader.getPts();
+						for (TemiTimeStamp temi : temiBuffer) {
+							temi.setPts(pts);
+							ArrayList<TemiTimeStamp> tl = temiMap.computeIfAbsent(temi.getTimeline_id(), k -> new ArrayList<>());
+							tl.add(temi);
+						}
+						temiBuffer.clear();
+					}
 				}
 
 			} else if (packet.hasPayload() && (last_continuity_counter == packet.getContinuityCounter())) {
@@ -359,7 +362,8 @@ public class PID implements TreeNode{
 																				// increment
 			) {
 				handleContinuityError(packet);
-			} // else{ // no payload, only adaptation. Don't Increase continuity_counter
+			} // no payload, only adaptation. Don't Increase continuity_counter
+		
 		}
 	}
 
@@ -464,16 +468,15 @@ public class PID implements TreeNode{
 		}
 	}
 
-	private static void processTEMI(AdaptationField adaptationField, Map<Integer, ArrayList<TemiTimeStamp>> temiList, int packetNo, long pts) {
+	private void processTEMI(AdaptationField adaptationField, Map<Integer, ArrayList<TemiTimeStamp>> temiList, int packetNo) {
 		if (adaptationField.isAdaptation_field_extension_flag()) {
 			if (!adaptationField.isAf_descriptor_not_present_flag()) {
 				List<AFDescriptor> afDescriptorList = adaptationField.getAfDescriptorList();
 				for (AFDescriptor descriptor : afDescriptorList) {
 					if (descriptor instanceof TimelineDescriptor timelineDescriptor) {
 						if ((timelineDescriptor.getHas_timestamp() == 1) || (timelineDescriptor.getHas_timestamp() == 2)) {
-							ArrayList<TemiTimeStamp> tl = temiList.computeIfAbsent(timelineDescriptor.getTimeline_id(), k -> new ArrayList<>());
-							tl.add(new TemiTimeStamp(packetNo, pts, timelineDescriptor.getMedia_timestamp(), timelineDescriptor.getTimescale(),
-									timelineDescriptor.getDiscontinuity(), timelineDescriptor.getPaused()));
+							temiBuffer.add(new TemiTimeStamp(packetNo, timelineDescriptor.getMedia_timestamp(), timelineDescriptor.getTimescale(),
+									timelineDescriptor.getDiscontinuity(), timelineDescriptor.getTimeline_id(), timelineDescriptor.getPaused()));
 						}
 					}
 				}
