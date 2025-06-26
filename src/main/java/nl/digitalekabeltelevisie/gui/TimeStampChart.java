@@ -396,7 +396,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 			XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(false,true);
 			useBlackOutlinePaint(temiDataset, renderer2);
 
-			TEMIToolTipGenerator temiToolTipGenerator = new TEMIToolTipGenerator(	packetTimeNumberFormatLabel, temiNumberFormat);
+			TEMIToolTipGenerator temiToolTipGenerator = new TEMIToolTipGenerator(	temiNumberFormat);
 			renderer2.setDefaultToolTipGenerator(temiToolTipGenerator);
 		    plot.setRenderer(1, renderer2);
 		}

@@ -40,12 +40,10 @@ public class TEMIToolTipGenerator implements XYToolTipGenerator {
 	
 	private final NumberFormat timeFormat;
 
-	public TEMIToolTipGenerator(NumberFormat packetNumberFormat, NumberFormat timeFormat) {
-        this.packetNumberFormat = packetNumberFormat;
+	public TEMIToolTipGenerator(NumberFormat timeFormat) {
 		this.timeFormat = timeFormat;
 	}
 
-	final NumberFormat packetNumberFormat;
 
 	@Override
 	public String generateToolTip(XYDataset  dataset, int series, int item){
@@ -54,7 +52,7 @@ public class TEMIToolTipGenerator implements XYToolTipGenerator {
 		TemiTimeStamp timeStamp = temiDataSet.getTimestamp(series,item);
 
 		StringBuilder stringBuilder = new StringBuilder("<html>").append(label).append("<br>");
-		stringBuilder.append(packetNumberFormat.format(timeStamp.getPacketNo())).append("<br>");
+		stringBuilder.append("Packet No: ").append(timeStamp.getPacketNo()).append("<br>");
 		stringBuilder.append("PTS: ").append(printTimebase90kHz(timeStamp.getPts())).append("<br>");
 		stringBuilder.append("Time: ").append(timeFormat.format(timeStamp.getTime())).append("<br>");
 		stringBuilder.append("media_timestamp: ").append(timeStamp.getMediaTimeStamp()).append("<br>");
