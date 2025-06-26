@@ -28,31 +28,53 @@
 package nl.digitalekabeltelevisie.gui;
 
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
 import java.awt.event.*;
-import java.text.*;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.plaf.FontUIResource;
 
-import org.jfree.chart.*;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.*;
-import org.jfree.chart.plot.*;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 
 import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.MPEGConstants;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.gui.utils.*;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 public class TimeStampChart extends JPanel implements TransportStreamView, ActionListener{
 
+
+	class HoverCopyAction extends AbstractAction{
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+        Point p = chartPanel.getMousePosition();
+        String htmlString = chartPanel.getToolTipText(new MouseEvent(chartPanel,
+            0, System.currentTimeMillis(), 0, p.x, p.y, 0, false));
+		String plainData = Utils.extractTextFromHTML(htmlString);
+		TextHTMLTransferable transferable = new TextHTMLTransferable(plainData, htmlString);
+		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(transferable, null);
+		}
+	}
 
 
 	public final class PacketTimeNumberFormat extends NumberFormat {
@@ -144,11 +166,21 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		add(controls,BorderLayout.PAGE_START);
 
 		chartPanel = new ChartPanel(null,false);
-		// see http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=28118
-		// Bug in ChartPanel.setMouseWheelEnabled in jfreechart 1.0.13
-		chartPanel.isMouseWheelEnabled();
 		chartPanel.setMouseWheelEnabled(true);
 
+		// catch keystrokes for ctrl-c
+		chartPanel.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseEntered(MouseEvent e) {
+	        requestFocus();}
+		});
+
+		InputMap im = getInputMap();
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), "copytip");
+		
+		HoverCopyAction hoverCopyAction = new HoverCopyAction();
+		getActionMap().put("copytip", hoverCopyAction);
+		
 		setTransportStream(transportStream,viewContext);
 		add(chartPanel,BorderLayout.CENTER);
 	}
@@ -188,6 +220,7 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 	 *
 	 * @see nl.digitalekabeltelevisie.gui.TransportStreamView#setTransportStream(nl.digitalekabeltelevisie.data.mpeg.TransportStream, nl.digitalekabeltelevisie.controller.ViewContext)
 	 */
+	@Override
 	public final void setTransportStream(TransportStream transportStream, ViewContext viewContext){
 		this.transportStream = transportStream;
 		this.viewContext = viewContext;
@@ -332,10 +365,6 @@ public class TimeStampChart extends JPanel implements TransportStreamView, Actio
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 
 		useBlackOutlinePaint(categoryTableXYDataset, renderer);
-		
-		// workaround for https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8213535
-		// JDK-8213535 : Windows HiDPI html lightweight tooltips are truncated
-		UIManager.put("ToolTip.font",  new FontUIResource("SansSerif", Font.PLAIN, 12));
 
 		XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator("<htmL>{0}<br\\>{1}<br\\>value: {2}</html>",
 				packetTimeNumberFormatLabel, timeStampNumberFormat);
