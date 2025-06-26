@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,15 +31,7 @@ import static nl.digitalekabeltelevisie.util.Utils.escapeHtmlBreakLines;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +53,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  * @author Eric
  *
  */
-public class Grid extends JPanel implements ComponentListener, Scrollable, FocusListener, MouseListener
+public class Grid extends JPanel implements ComponentListener, Scrollable
 {
 	
 	class GridCopyAction extends AbstractAction{
@@ -122,9 +114,12 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	 */
 	public Grid(final TransportStream stream, final ViewContext viewContext) {
 		super();
-		//setFocusable(true);
-	    addMouseListener(this);
-	    addFocusListener(this);
+	    
+		addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseEntered(MouseEvent e) {
+	        requestFocus();}
+		});
 
 		this.addComponentListener(this);
 
@@ -287,9 +282,8 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	private static Color getContrastingColor(final Color c) {
 		if((c.getGreen()+c.getRed()+c.getBlue())<384){
 			return Color.WHITE;
-		}else{
-			return Color.BLACK;
 		}
+		return Color.BLACK;
 	}
 
 	/* (non-Javadoc)
@@ -299,9 +293,8 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	public Dimension getPreferredSize() {
 		if(stream==null){
 			return new Dimension(0,0);
-		}else{
-			return new Dimension(blocksPerRow * blockW,lines * blockH);
 		}
+		return new Dimension(blocksPerRow * blockW,lines * blockH);
 	}
 
 	/* (non-Javadoc)
@@ -364,6 +357,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
 	 */
+	@Override
 	public void componentHidden(final ComponentEvent e) {
 		// empty block
 
@@ -372,6 +366,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
 	 */
+	@Override
 	public void componentMoved(final ComponentEvent e) {
 		// empty block
 
@@ -380,6 +375,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
 	 */
+	@Override
 	public void componentResized(final ComponentEvent e) {
 		final int wid = (int)getVisibleRect().getWidth();
 		blocksPerRow = wid/blockW;
@@ -396,6 +392,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	/* (non-Javadoc)
 	 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
 	 */
+	@Override
 	public void componentShown(final ComponentEvent e) {
 		repaint();
 	}
@@ -443,10 +440,9 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 		if (orientation == SwingConstants.HORIZONTAL){
 			// actual value not relevant, no horizontal scrolling
 			return blockW;
-		}else{
-			// single line
-			return blockH;
 		}
+		// single line
+		return blockH;
 	}
 
 	/* (non-Javadoc)
@@ -457,11 +453,11 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 		if (orientation == SwingConstants.HORIZONTAL){
 			// actual value not relevant, no horizontal scrolling
 			return blockW;
-		}else{
-			// round down to integer number of blocks
-			final int h = (int)getVisibleRect().getHeight();
-			return h - (h % blockH);
 		}
+		// round down to integer number of blocks
+		final int h = (int)getVisibleRect().getHeight();
+		return h - (h % blockH);
+		
 	}
 
 	/* (non-Javadoc)
@@ -494,62 +490,5 @@ public class Grid extends JPanel implements ComponentListener, Scrollable, Focus
 	public void setGridLines(final int gridLines) {
 		this.gridLines = gridLines;
 		repaint();
-	}
-
-/*//	/* (non-Javadoc)
-	 * @see java.awt.event.FocusListener#focusGained(java.awt.event.FocusEvent)
-	 */
-	@Override
-	public void focusGained(FocusEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.FocusListener#focusLost(java.awt.event.FocusEvent)
-	 */
-	@Override
-	public void focusLost(FocusEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		 //Since the user clicked on us, let us get focus!
-	    requestFocusInWindow();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// ignore
-	}
-
-	/* (non-Javadoc)
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// ignore
 	}
 }
