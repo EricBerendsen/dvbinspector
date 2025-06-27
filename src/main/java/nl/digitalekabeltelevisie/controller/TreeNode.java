@@ -2,7 +2,7 @@
  *  
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl) 
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  *  
@@ -32,11 +32,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import nl.digitalekabeltelevisie.gui.DVBtree;
 
 /**
- * @author Eric Berendsen
- * 
+ *
  * If a class implements this interface it means we can use it as element in {@link DVBtree} 
  *
  */
+@FunctionalInterface
 public interface TreeNode {
 
 	DefaultMutableTreeNode getJTreeNode(int modus);

@@ -222,8 +222,8 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 			final int noPIDs) {
 		final ChartLabel[] labels = new ChartLabel[noPIDs];
 		for (int i = 0; i < noPIDs; i++) {
-			labels[i] = new ChartLabel(transportStream.getShortLabel(viewContext.getShown().get(i).getPid()),
-					viewContext.getShown().get(i).getPid());
+			labels[i] = new ChartLabel(transportStream.getShortLabel(viewContext.getShown().get(i).pid()),
+					viewContext.getShown().get(i).pid());
 		}
 		return labels;
 	}

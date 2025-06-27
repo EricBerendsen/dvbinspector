@@ -109,8 +109,8 @@ public class KVP extends DefaultMutableTreeNode{
 	private int			intValue;
 	private long		longValue;
 	private byte[]		byteValue;
-	private int			byteStart					= 0;
-	private int			byteLen						= 0;
+	private int			byteStart;
+	private int			byteLen;
 	private DVBString	dvbStringValue;
 	private BigInteger 	bigIntegerValue;
 

@@ -143,7 +143,7 @@ public class Grid extends JPanel implements ComponentListener, Scrollable
 			}
 
 			for(final ChartLabel l:viewContext.getShown()){
-				colors.put(l.getPid(), l.getColor());
+				colors.put(l.pid(), l.color());
 			}
 		}
 

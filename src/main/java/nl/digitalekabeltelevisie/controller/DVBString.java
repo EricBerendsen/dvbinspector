@@ -34,8 +34,7 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import static nl.digitalekabeltelevisie.util.Utils.getString;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -58,9 +57,8 @@ public class DVBString {
 	private final byte[]data;
 	private final int offset;
 
-	public DVBString(final byte[] data, final int offset) {
-		super();
-		this.data = data;
+	public DVBString(byte[] data, int offset) {
+        this.data = data;
 		this.offset = offset;
 	}
 
@@ -73,9 +71,8 @@ public class DVBString {
 	 * @param offset
 	 * @param len
 	 */
-	public DVBString(final byte[] dataIn, final int offset, int len) {
-		super();
-		if(len>255) {
+	public DVBString(byte[] dataIn, int offset, int len) {
+        if(len>255) {
 			throw new RuntimeException("DVB String can not be longer than 255 chars:" + len); 
 		}
 		
@@ -96,9 +93,8 @@ public class DVBString {
 	 * @param maxWidth maximum width of HTML fragment in chars.
 	 * @return HTML representation of this string, including linefeeds  (0x8A) and emphasis (0x86/0x87). Line length max
 	 */
-	public String toEscapedHTML(final int maxWidth){
-		ArrayList<DVBString> array = new ArrayList<>(Arrays.asList(this));
-		return getEscapedHTML(array, maxWidth);
+	public String toEscapedHTML(int maxWidth){
+        return getEscapedHTML(List.of(this), maxWidth);
 	}
 
 	/**
@@ -106,7 +102,7 @@ public class DVBString {
 	 */
 	@Override
 	public String toString(){
-		return getString(data,this.getOffset()+1, this.getLength());
+		return getString(data, offset +1, this.getLength());
 	}
 	
 	
@@ -114,7 +110,7 @@ public class DVBString {
 	 * @return tring representation where control chars are present
 	 */
 	public String toRawString() {
-		return getCharDecodedStringWithControls(data,this.getOffset()+1, this.getLength());
+		return getCharDecodedStringWithControls(data, offset +1, this.getLength());
 	}
 	
 	/**
@@ -126,11 +122,11 @@ public class DVBString {
 		if((getCharSet()!=null) || (defaultCharSet == null)){
 			return toString();
 		}
-		return new String(data, this.getOffset() + 1, this.getLength(), defaultCharSet);
+		return new String(data, offset + 1, this.getLength(), defaultCharSet);
 	}
 
 	public Charset getCharSet(){
-		return Utils.getCharSet(data, this.getOffset()+1, this.getLength());
+		return Utils.getCharSet(data, offset +1, this.getLength());
 	}
 
 	public String getEncodingString(){
@@ -140,54 +136,37 @@ public class DVBString {
 			return "-";
 		}
 
-		final int fb = toUnsignedInt(data[offset+1]);
+		int fb = toUnsignedInt(data[offset+1]);
 		if(0x20<=fb)
 		{
 			return "default (ISO 6937, latin)";
-		}else if((0x01<=fb)&&(fb<=0x1F)){
-			switch (fb) {
-			case 0x01:
-				return "ISO/IEC 8859-5";
-			case 0x02:
-				return "ISO/IEC 8859-6";
-			case 0x03:
-				return "ISO/IEC 8859-7";
-			case 0x04:
-				return "ISO/IEC 8859-8";
-			case 0x05:
-				return "ISO/IEC 8859-9";
-			case 0x06:
-				return "ISO/IEC 8859-10";
-			case 0x07:
-				return "ISO/IEC 8859-11";
-			case 0x08:
-				return "ISO/IEC 8859-12";
-			case 0x09:
-				return "ISO/IEC 8859-13";
-			case 0x0A:
-				return "ISO/IEC 8859-14";
-			case 0x0B:
-				return "ISO/IEC 8859-15";
-			case 0x10:
-				if((data[offset+2]==0x0)&&(data.length > offset+3)){
-					return "ISO/IEC 8859-"+data[offset+3];
-				}
-				return "Illegal value";
-			case 0x11:
-				return "ISO/IEC 10646-1";
-			case 0x12:
-				return "KSX1001-2004";
-			case 0x13:
-				return "GB-2312-1980";
-			case 0x14:
-				return "Big5 subset of ISO/IEC 10646-1";
-			case 0x15:
-				return "UTF-8 encoding of ISO/IEC 10646-1";
-			case 0x1F:
-				return "Described by encoding_type_id;"+data[offset+2];
-			default:
-				return "reserved for future use";
-			}
+		}else if(0x01<=fb){
+            return switch (fb) {
+                case 0x01 -> "ISO/IEC 8859-5";
+                case 0x02 -> "ISO/IEC 8859-6";
+                case 0x03 -> "ISO/IEC 8859-7";
+                case 0x04 -> "ISO/IEC 8859-8";
+                case 0x05 -> "ISO/IEC 8859-9";
+                case 0x06 -> "ISO/IEC 8859-10";
+                case 0x07 -> "ISO/IEC 8859-11";
+                case 0x08 -> "ISO/IEC 8859-12";
+                case 0x09 -> "ISO/IEC 8859-13";
+                case 0x0A -> "ISO/IEC 8859-14";
+                case 0x0B -> "ISO/IEC 8859-15";
+                case 0x10 -> {
+                    if ((data[offset + 2] == 0x0) && (data.length > offset + 3)) {
+                        yield "ISO/IEC 8859-" + data[offset + 3];
+                    }
+                    yield "Illegal value";
+                }
+                case 0x11 -> "ISO/IEC 10646-1";
+                case 0x12 -> "KSX1001-2004";
+                case 0x13 -> "GB-2312-1980";
+                case 0x14 -> "Big5 subset of ISO/IEC 10646-1";
+                case 0x15 -> "UTF-8 encoding of ISO/IEC 10646-1";
+                case 0x1F -> "Described by encoding_type_id;" + data[offset + 2];
+                default -> "reserved for future use";
+            };
 
 		}
 		return "illegal value";

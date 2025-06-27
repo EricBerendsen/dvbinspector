@@ -28,39 +28,22 @@
 package nl.digitalekabeltelevisie.controller;
 
 import java.awt.Paint;
+import java.util.Objects;
 
 /**
- * @author Eric Berendsen
- *
  *         Used as a label for the Charts as produced by jfreechart..
- *
- */
+  */
 
-@SuppressWarnings("rawtypes")
-public class ChartLabel implements Comparable {
+public record ChartLabel( String label, short pid,  Paint color) implements Comparable<ChartLabel> {
 
-	private final String label;
-	private final short pid;
-	private final Paint color;
 
-	public ChartLabel(final String label, final short pid, final Paint color) {
-		super();
-		this.label = label;
-		this.pid = pid;
-		this.color = color;
-	}
-
-	public ChartLabel(final String label, final short pid) {
+	public ChartLabel(String label, short pid) {
 		this(label, pid, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(final Object o) {
-		return Short.compare(this.pid, ((ChartLabel) o).getPid());
+	@Override
+    public int compareTo(ChartLabel chartLabel) {
+		return Short.compare(pid, chartLabel.pid());
 	}
 
 	@Override
@@ -68,19 +51,16 @@ public class ChartLabel implements Comparable {
 		return label;
 	}
 
-	public String getLabel() {
-		return label;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ChartLabel chartLabel && compareTo(chartLabel) == 0;
+    }
 
-	public short getPid() {
-		return pid;
+	@Override
+	public int hashCode() {
+		int result = label.hashCode();
+		result = 31 * result + pid;
+		result = 31 * result + Objects.hashCode(color);
+		return result;
 	}
-
-	/**
-	 * @return the color
-	 */
-	public Paint getColor() {
-		return color;
-	}
-
 }

@@ -75,11 +75,11 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 		  public Paint getItemPaint(int x_row, int x_col) {
 		    CategoryDataset l_jfcDataset = getPlot().getDataset();
 		    ChartLabel l_colKey = (ChartLabel)l_jfcDataset.getColumnKey(x_col);
-		    if("I".equals(l_colKey.getLabel())){
+		    if("I".equals(l_colKey.label())){
 		    	return Color.RED;
-		    }else if("P".equals(l_colKey.getLabel())){
+		    }else if("P".equals(l_colKey.label())){
 		    	return Color.BLUE;
-		    }else if("B".equals(l_colKey.getLabel())){
+		    }else if("B".equals(l_colKey.label())){
 		    	return Color.GREEN;
 		    }
 		    // unknown type

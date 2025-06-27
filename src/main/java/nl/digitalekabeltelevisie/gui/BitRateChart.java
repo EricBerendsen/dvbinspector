@@ -189,7 +189,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 		        toolTipGenerator, null);
 		final int noPIDs=viewContext.getShown().size();
 		for (int i = 0; i < noPIDs; i++) {
-			renderer.setSeriesPaint(i, viewContext.getShown().get(i).getColor());
+			renderer.setSeriesPaint(i, viewContext.getShown().get(i).color());
 		}
 
 		renderer.setOutline(false);
@@ -222,9 +222,9 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 
 			for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
 				if (transportStream.getBitRate() == -1) {
-					categoryTableXYDataset.add(startPacketStep, pidcount[used_pids[pidIndex]], labels[pidIndex].getLabel());
+					categoryTableXYDataset.add(startPacketStep, pidcount[used_pids[pidIndex]], labels[pidIndex].label());
 				} else if (endPacketStep > startPacketStep) {
-					categoryTableXYDataset.add(startPacketStep, ((pidcount[used_pids[pidIndex]]) * transportStream.getBitRate())	/ (endPacketStep - startPacketStep), labels[pidIndex].getLabel());
+					categoryTableXYDataset.add(startPacketStep, ((pidcount[used_pids[pidIndex]]) * transportStream.getBitRate())	/ (endPacketStep - startPacketStep), labels[pidIndex].label());
 				}
 			}
 			startPacketStep = endPacketStep;
@@ -235,7 +235,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 	static short[] createUsedPidsArray(final ViewContext viewContext, final int noPIDs) {
 		final short[] used_pids = new short[noPIDs];
 		for (int i = 0; i < noPIDs; i++) {
-			used_pids[i] = viewContext.getShown().get(i).getPid();
+			used_pids[i] = viewContext.getShown().get(i).pid();
 		}
 		return used_pids;
 	}
@@ -340,7 +340,7 @@ public class BitRateChart extends JPanel implements TransportStreamView{
 			for (int pidIndex = 0; pidIndex < used_pids.length; pidIndex++) {
 				if (endStepPacketTime > startStepPacketTime) {
 					final long bitRate = ((pidcount[used_pids[pidIndex]]) * (long) MPEGConstants.system_clock_frequency) * 8 * AVCHD_PACKET_LENGTH	/ (endStepPacketTime - startStepPacketTime) ;
-					categoryTableXYDataset.add(startStepPacketTime, bitRate, labels[pidIndex].getLabel());
+					categoryTableXYDataset.add(startStepPacketTime, bitRate, labels[pidIndex].label());
 				}
 			}
 			startStepPacketTime = endStepPacketTime;

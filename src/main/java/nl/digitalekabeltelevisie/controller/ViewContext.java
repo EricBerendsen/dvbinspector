@@ -39,8 +39,8 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 public class ViewContext {
 
-	private List<ChartLabel> shown = new ArrayList<ChartLabel>();
-	private List<ChartLabel> notShown = new ArrayList<ChartLabel>();
+	private List<ChartLabel> shown = new ArrayList<>();
+	private List<ChartLabel> notShown = new ArrayList<>();
 
 	private int startPacket ;
 	private int endPacket;
@@ -53,7 +53,7 @@ public class ViewContext {
 		return endPacket;
 	}
 
-	public void setEndPacket(final int endPacket) {
+	public void setEndPacket(int endPacket) {
 		this.endPacket = endPacket;
 	}
 
@@ -61,7 +61,7 @@ public class ViewContext {
 		return graphSteps;
 	}
 
-	public void setGraphSteps(final int graphSteps) {
+	public void setGraphSteps(int graphSteps) {
 		this.graphSteps = graphSteps;
 	}
 
@@ -69,7 +69,7 @@ public class ViewContext {
 		return notShown;
 	}
 
-	public void setNotShown(final List<ChartLabel> notShown) {
+	public void setNotShown(List<ChartLabel> notShown) {
 		this.notShown = notShown;
 	}
 
@@ -77,7 +77,7 @@ public class ViewContext {
 		return shown;
 	}
 
-	public void setShown(final List<ChartLabel> shown) {
+	public void setShown(List<ChartLabel> shown) {
 		this.shown = shown;
 	}
 
@@ -85,7 +85,7 @@ public class ViewContext {
 		return startPacket;
 	}
 
-	public void setStartPacket(final int startPacket) {
+	public void setStartPacket(int startPacket) {
 		this.startPacket = startPacket;
 	}
 
@@ -93,7 +93,7 @@ public class ViewContext {
 		return maxPacket;
 	}
 
-	public void setMaxPacket(final int maxPacket) {
+	public void setMaxPacket(int maxPacket) {
 		this.maxPacket = maxPacket;
 	}
 
@@ -101,7 +101,7 @@ public class ViewContext {
 		return transportStream;
 	}
 
-	public void setTransportStream(final TransportStream transportStream) {
+	public void setTransportStream(TransportStream transportStream) {
 		this.transportStream = transportStream;
 	}
 
