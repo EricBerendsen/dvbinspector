@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2020-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2020-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,22 +31,21 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Objects;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.table.TableModel;
+
+import com.opencsv.CSVWriter;
 
 import nl.digitalekabeltelevisie.gui.utils.WrapLayout;
 import nl.digitalekabeltelevisie.util.tablemodel.cellrenderer.StreamTypeTableCellRenderer;
 
-public class TablePanel extends JPanel implements MouseListener {
+public class TablePanel extends JPanel{
 	
 	private final JTable table;
 	private final TableColumnAdjuster tca;
@@ -60,13 +59,21 @@ public class TablePanel extends JPanel implements MouseListener {
 		
 		setFocusable(true);
 		tableScrollPane = new JScrollPane(table);
-		tableScrollPane.addMouseListener(this);
+		MouseAdapter mouseAdapter = new MouseAdapter() {
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			    table.requestFocusInWindow();
+			}
+
+		};
+		tableScrollPane.addMouseListener(mouseAdapter);
 		
 		this.table = table;
 		table.setFocusable(true);
 
 		JPanel buttonToolbar = new JPanel(new WrapLayout(FlowLayout.LEFT));
-		buttonToolbar.addMouseListener(this);
+		buttonToolbar.addMouseListener(mouseAdapter);
 
 		TableCopyAction copyAction = new TableCopyAction(this, "Copy");
 		JButton copyButton = new JButton(copyAction);
@@ -117,30 +124,25 @@ public class TablePanel extends JPanel implements MouseListener {
 
 	public String getTableAsHtml() {
 		
-		int[] rows;
-        int[] cols;
-        
-		rows = getRows();
-        cols = getColumns();
-        
+		int[] rows = getSelectedRows();
+		int columnCount = table.getColumnCount();
+		
         StringBuilder htmlStr = new StringBuilder();
         htmlStr.append("<html>\n<body>\n<table>\n");
 
-		if (getIncludeHeadersCheckBox().isSelected()) {
+		if (includeHeadersCheckBox.isSelected()) {
+			
 			htmlStr.append("<tr>\n");
-
-			for (int col = 0; col < cols.length; col++) {
-				String colName = table.getColumnName(col);
+			for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+				String colName = table.getColumnName(columnIndex);
 				htmlStr.append("  <th>").append(colName).append("</th>\n");
 			}
 			htmlStr.append("</tr>\n");
 		}
-		for (int i : rows) {
+		for (int row : rows) {
 			htmlStr.append("<tr>\n");
-			for (int j : cols) {
-				Object obj = table.getValueAt(i, j);
-				String val = ((obj == null) ? "" : obj.toString());
-				htmlStr.append("  <td>").append(val).append("</td>\n");
+			for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+				htmlStr.append("  <td>").append(Objects.toString(table.getValueAt(row, columnIndex), "")).append("</td>\n");
 			}
 			htmlStr.append("</tr>\n");
 		}
@@ -150,21 +152,80 @@ public class TablePanel extends JPanel implements MouseListener {
 	}
 
 
-	private int[] getColumns() {
-		int[] cols;
-		int colCount = table.getColumnCount();
+	public String getTableAsText() {
+		
+		int[] rows = getSelectedRows();
+		int columnCount = table.getColumnCount();
+		
+	    StringBuilder plainStr = new StringBuilder();
+	
+	
+		if (includeHeadersCheckBox.isSelected()) {
+			for (int col = 0; col < columnCount; col++) {
+				String colName = table.getColumnName(col);
+				plainStr.append(colName).append('\t');
+			}
+			// we want a newline at the end of each line and not a tab
+			plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
+		}
+		for (int row : rows) {
+			for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+				plainStr.append(Objects.toString(table.getValueAt(row, columnIndex), "")).append('\t');
+			}
+			// we want a newline at the end of each line and not a tab
+			plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
+		}
+	
+	    // remove the last newline
+	    plainStr.deleteCharAt(plainStr.length() - 1);
+	    return plainStr.toString();
+	
+	}
+	
+	public String getTableAsCsv() {
+		
+		int[] rows = getSelectedRows();
+		String res = "";
+		 try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
+			 
+			 if (includeHeadersCheckBox.isSelected()) {
+				 csvWriter.writeNext(getHeaders());
+			 }
+				for (int row : rows) {
+					csvWriter.writeNext(getRow(row));
+				}
 
-        cols = new int[colCount];
-        for (int counter = 0; counter < colCount; counter++) {
-            cols[counter] = counter;
-        }
-		return cols;
+			 res = sw.toString();
+		 } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 
+		 return res;
+	}
+
+	private String[] getRow(int row) {
+		int columnCount = table.getColumnCount();
+		String[] res = new String[columnCount];
+		for (int col = 0; col < columnCount; col++) {
+			res[col] = Objects.toString(table.getValueAt(row, col), "");
+		}
+		return res;
 	}
 
 
-	private int[] getRows() {
-		int[] rows;
-		rows = table.getSelectedRows();
+	private String[] getHeaders() {
+		int columnCount = table.getColumnCount();
+		String[] res = new String[columnCount];
+		for (int col = 0; col < columnCount; col++) {
+			res[col] = table.getColumnName(col);
+		}
+		return res;
+	}
+
+
+	private int[] getSelectedRows() {
+		int[] rows = table.getSelectedRows();
 		
         if (rows.length == 0) { // nothing selected, include all rows
             int rowCount = table.getRowCount();
@@ -186,71 +247,5 @@ public class TablePanel extends JPanel implements MouseListener {
 		return tableScrollPane;
 	}
 
-
-	public JCheckBox getIncludeHeadersCheckBox() {
-		return includeHeadersCheckBox;
-	}
-
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-	    table.requestFocusInWindow();
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// ignore
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// ignore
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// ignore
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// ignore
-	}
-
-
-	public String getTableAsText() {
-		
-		int[] rows;
-	    int[] cols;
-	    
-		rows = getRows();
-	    cols = getColumns();
-	    
-	    StringBuilder plainStr = new StringBuilder();
-	
-	
-		if (getIncludeHeadersCheckBox().isSelected()) {
-			for (int col = 0; col < cols.length; col++) {
-				String colName = table.getColumnName(col);
-				plainStr.append(colName).append('\t');
-			}
-			// we want a newline at the end of each line and not a tab
-			plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
-		}
-		for (int i : rows) {
-			for (int j : cols) {
-				Object obj = table.getValueAt(i, j);
-				String val = ((obj == null) ? "" : obj.toString());
-				plainStr.append(val).append('\t');
-			}
-			// we want a newline at the end of each line and not a tab
-			plainStr.deleteCharAt(plainStr.length() - 1).append('\n');
-		}
-	
-	    // remove the last newline
-	    plainStr.deleteCharAt(plainStr.length() - 1);
-	    return plainStr.toString();
-	
-	}
 
 }

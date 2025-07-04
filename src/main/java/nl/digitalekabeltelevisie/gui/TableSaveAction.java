@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -54,6 +54,7 @@ public class TableSaveAction extends AbstractAction {
 	
 	private static final String TEXT = "TEXT";
 	private static final String HTML = "HTML";
+	private static final String CSV = "CSV";
 	
 	final TablePanel tablePanel;
 
@@ -96,16 +97,15 @@ public class TableSaveAction extends AbstractAction {
 				}
 			}
 			if (write) {
-				String content;
-				if(HTML.equals(filter.getDescription())){
-					content = tablePanel.getTableAsHtml();
-				}else {
-					content = tablePanel.getTableAsText();
-				}
+				String content = switch (filter.getDescription()) {
+					case HTML -> tablePanel.getTableAsHtml();
+					case CSV -> tablePanel.getTableAsCsv();
+					default -> tablePanel.getTableAsText();
+				};
 				try {
 					Files.writeString(saveFile.toPath(), content);
 				} catch (IOException e1) {
-					logger.warning(()->"IOException while saving; "+e1);
+					logger.warning(() -> "IOException while saving; " + e1);
 				}
 			}
 		}
@@ -114,10 +114,9 @@ public class TableSaveAction extends AbstractAction {
 	
 	private static JFileChooser createFileChooser() {
 		JFileChooser chooser = new JFileChooser();
-		FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter(HTML, "html", "htm");
-		chooser.addChoosableFileFilter(jpgFilter);
-		FileNameExtensionFilter pngFilter = new FileNameExtensionFilter(TEXT, "txt", "text");
-		chooser.addChoosableFileFilter(pngFilter);
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter(HTML, "html", "htm"));
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter(TEXT, "txt", "text"));
+		chooser.addChoosableFileFilter(new FileNameExtensionFilter(CSV, "csv"));
 		chooser.setAcceptAllFileFilterUsed(false);
 		final String defaultDir = PreferencesManager.getSaveDir();
 		if (defaultDir != null) {
