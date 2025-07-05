@@ -36,6 +36,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
@@ -47,6 +49,9 @@ import nl.digitalekabeltelevisie.util.tablemodel.cellrenderer.StreamTypeTableCel
 
 public class TablePanel extends JPanel{
 	
+
+	private static final Logger logger = Logger.getLogger(TablePanel.class.getName());
+
 	private final JTable table;
 	private final TableColumnAdjuster tca;
 
@@ -183,25 +188,22 @@ public class TablePanel extends JPanel{
 	}
 	
 	public String getTableAsCsv() {
-		
+
 		int[] rows = getSelectedRows();
 		String res = "";
-		 try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
-			 
-			 if (includeHeadersCheckBox.isSelected()) {
-				 csvWriter.writeNext(getHeaders());
-			 }
-				for (int row : rows) {
-					csvWriter.writeNext(getRow(row));
-				}
+		try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
 
-			 res = sw.toString();
-		 } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (includeHeadersCheckBox.isSelected()) {
+				csvWriter.writeNext(getHeaders());
+			}
+			for (int row : rows) {
+				csvWriter.writeNext(getRow(row));
+			}
+			res = sw.toString();
+		} catch (IOException e) {
+			logger.log(Level.INFO, "error building csv content", e);
 		}
-		 
-		 return res;
+		return res;
 	}
 
 	private String[] getRow(int row) {

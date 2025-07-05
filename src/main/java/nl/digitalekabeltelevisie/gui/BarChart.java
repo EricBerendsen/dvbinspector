@@ -26,14 +26,10 @@
  */
 package nl.digitalekabeltelevisie.gui;
 
-import nl.digitalekabeltelevisie.controller.ChartLabel;
-import nl.digitalekabeltelevisie.controller.ViewContext;
-import nl.digitalekabeltelevisie.data.mpeg.MPEGConstants;
-import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
-import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.AVCHD_PACKET_LENGTH;
 import static nl.digitalekabeltelevisie.data.mpeg.MPEGConstants.MAX_PIDS;
+
+import javax.swing.JMenuItem;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -42,19 +38,20 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtils;
 
+import nl.digitalekabeltelevisie.controller.ChartLabel;
+import nl.digitalekabeltelevisie.controller.ViewContext;
+import nl.digitalekabeltelevisie.data.mpeg.MPEGConstants;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
+
 /**
  * @author Eric Berendsen
  */
 public class BarChart extends ChartPanel implements TransportStreamView {
+	
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -654471783180064471L;
-	/**
-	 *
-	 */
 	private JFreeChart	freeChart;
+	private CategoryDataset dataSet;
 
 	/**
 	 * @param transportStream
@@ -64,6 +61,8 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 
 		super(null,false);
 		setTransportStream(transportStream, viewContext);
+		JMenuItem export = new JMenuItem(new BarChartExportAction("export as .csv", this));
+		getPopupMenu().add(export);
 	}
 
 	/* (non-Javadoc)
@@ -72,13 +71,14 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 
 	public final void setTransportStream(final TransportStream transportStream, final ViewContext viewContext) {
 		if(transportStream!=null){
-			final CategoryDataset dataSet = createDataSet(transportStream, viewContext);
+			dataSet = createDataSet(transportStream, viewContext);
 			freeChart = ChartFactory.createBarChart(transportStream.getFile().getName() + " - stream:"
 					+ transportStream.getStreamID(), "PID", "bitrate", dataSet, PlotOrientation.HORIZONTAL, true, true,
 					false);
 			setChart(freeChart);
 		}else{ // transportstream == null
 			freeChart = null;
+			dataSet = null;
 			setChart(GuiUtils.createTitleOnlyChart(GuiUtils.NO_TRANSPORTSTREAM_LOADED));
 
 		}
@@ -226,6 +226,10 @@ public class BarChart extends ChartPanel implements TransportStreamView {
 					viewContext.getShown().get(i).getPid());
 		}
 		return labels;
+	}
+
+	public CategoryDataset getDataSet() {
+		return dataSet;
 	}
 
 }
