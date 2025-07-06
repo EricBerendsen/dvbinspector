@@ -27,26 +27,22 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class DSMConnBinder extends LiteComponent {
 	protected int taps_count;
-	protected List<Tap> taps = new ArrayList<Tap>();
+	protected List<Tap> taps = new ArrayList<>();
 
-	public DSMConnBinder(final byte[] data, final int offset) {
+	public DSMConnBinder(byte[] data, int offset) {
 		super(data, offset);
 		taps_count= Utils.getInt(data, offset+5, 1, Utils.MASK_8BITS);
 		// TODO does not work for different length Taps
 		for (int i = 0; i < taps_count; i++) {
-			final Tap tap =new Tap(data,offset+6+(i*17));
+			Tap tap =new Tap(data,offset+6+(i*17));
 			taps.add(tap);
 
 		}
@@ -55,13 +51,12 @@ public class DSMConnBinder extends LiteComponent {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(
-				"DSM::ConnBinder"));
-		t.add(new DefaultMutableTreeNode(new KVP("component_tag",component_tag ,getComponentTagString((int)component_tag))));
-		t.add(new DefaultMutableTreeNode(new KVP("component_data_length",component_data_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("taps_count",taps_count ,null)));
-		addListJTree(t,taps,modus,"BIOP::Taps");
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("DSM::ConnBinder");
+		t.add(new KVP("component_tag",component_tag ,getComponentTagString((int)component_tag)));
+		t.add(new KVP("component_data_length",component_data_length));
+		t.add(new KVP("taps_count",taps_count));
+		t.addList(taps,modus,"BIOP::Taps");
 		return t;
 	}
 

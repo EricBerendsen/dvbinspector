@@ -38,19 +38,14 @@ public final class LiteComponentsFactory {
 		// private to avoid instantion
 	}
 
-	public static LiteComponent createLiteComponent(final byte[] data, final int offset) {
+	public static LiteComponent createLiteComponent(byte[] data, int offset) {
 
-		final int tag = Utils.getInt(data, offset, 4, Utils.MASK_31BITS); // is 32 bits, but never negative.
-		switch (tag) {
-		case 0x49534F50:
-			return new BIOPObjectLocation(data, offset);
-		case 0x49534F40:
-			return new DSMConnBinder(data, offset);
-
-
-		default:
-			return new LiteComponent(data, offset);
-		}
+		int tag = Utils.getInt(data, offset, 4, Utils.MASK_31BITS); // is 32 bits, but never negative.
+        return switch (tag) {
+            case 0x49534F50 -> new BIOPObjectLocation(data, offset);
+            case 0x49534F40 -> new DSMConnBinder(data, offset);
+            default -> new LiteComponent(data, offset);
+        };
 
 
 	}

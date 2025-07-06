@@ -28,12 +28,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -57,14 +57,14 @@ public class IOR implements TreeNode {
 	public static final byte[] TYPE_SERVICEGATEWAY = {'s','r','g',0};
 	public static final byte[] TYPE_STREAMEVENT = {'s','t','e',0};
 
-	public IOR(final byte[] privateDataByte, final int offset) {
-		type_id_length = Utils.getLong(privateDataByte, offset+0, 4, Utils.MASK_32BITS);
-		type_id = Utils.copyOfRange(privateDataByte,offset+4,offset+4+(int)type_id_length);
-		taggedProfiles_count = Utils.getLong(privateDataByte, offset+4+(int)type_id_length,4, Utils.MASK_32BITS);
-		profiles = new ArrayList<TaggedProfile>((int)taggedProfiles_count);
+	public IOR(byte[] privateDataByte, int offset) {
+		type_id_length = getLong(privateDataByte, offset+0, 4, Utils.MASK_32BITS);
+		type_id = copyOfRange(privateDataByte, offset + 4, offset + 4 + (int) type_id_length);
+		taggedProfiles_count = getLong(privateDataByte, offset+4+(int)type_id_length,4, Utils.MASK_32BITS);
+		profiles = new ArrayList<>((int) taggedProfiles_count);
 		int r = 8+(int)type_id_length;
 		for (int i = 0; i < taggedProfiles_count; i++) {
-			final TaggedProfile tp = new TaggedProfile(privateDataByte, offset+r );
+			TaggedProfile tp = new TaggedProfile(privateDataByte, offset+r );
 			r+=tp.getProfile_data_length()+8;
 			profiles.add(tp);
 
@@ -79,19 +79,19 @@ public class IOR implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("IOP::IOR"));
-		t.add(new DefaultMutableTreeNode(new KVP("type_id_length",type_id_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("type_id",type_id ,getTypeIdString(type_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("taggedProfiles_count",taggedProfiles_count ,null)));
+		KVP t = new KVP("IOP::IOR");
+		t.add(new KVP("type_id_length",type_id_length));
+		t.add(new KVP("type_id",type_id ,getTypeIdString(type_id)));
+		t.add(new KVP("taggedProfiles_count",taggedProfiles_count));
 		addListJTree(t,profiles,modus,"TaggedProfiles");
 
 
 		return t;
 	}
 
-	public static String getTypeIdString(final byte[] typeId){
+	public static String getTypeIdString(byte[] typeId){
 		if(Utils.equals(typeId, 0, typeId.length,TYPE_DIRECTORY,0,TYPE_DIRECTORY.length)){
 			return "DSM::Directory";
 		}else if(Utils.equals(typeId, 0, typeId.length,TYPE_FILE,0,TYPE_FILE.length)){
@@ -128,23 +128,4 @@ public class IOR implements TreeNode {
 		return length;
 	}
 
-	public static byte[] getTYPE_DIRECTORY() {
-		return TYPE_DIRECTORY;
-	}
-
-	public static byte[] getTYPE_FILE() {
-		return TYPE_FILE;
-	}
-
-	public static byte[] getTYPE_STREAM() {
-		return TYPE_STREAM;
-	}
-
-	public static byte[] getTYPE_SERVICEGATEWAY() {
-		return TYPE_SERVICEGATEWAY;
-	}
-
-	public static byte[] getTYPE_STREAMEVENT() {
-		return TYPE_STREAMEVENT;
-	}
 }

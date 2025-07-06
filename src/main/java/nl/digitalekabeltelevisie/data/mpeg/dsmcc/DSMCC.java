@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCC_UNMessageSection.ModuleInfo;
@@ -62,85 +60,88 @@ public class DSMCC extends AbstractPSITabel{
 	private int pid = 0;
 	private boolean isObjectCarousel = true; // set to false for SSU
 
-	private final static Logger logger = Logger.getLogger(DSMCC.class.getName());
+	private static final Logger logger = Logger.getLogger(DSMCC.class.getName());
 
-	public DSMCC(final PSI parent, final boolean isObjectCarousel){
+	public DSMCC(PSI parent, boolean isObjectCarousel){
 		super(parent);
 		this.isObjectCarousel = isObjectCarousel;
 
 	}
 
-	public void update(final TableSectionExtendedSyntax section){
+	public void update(TableSectionExtendedSyntax section){
 		pid=section.getParentPID().getPid();
 
-		final int tableID  = section.getTableId();
-		if(tableID==0x3b){ // DSM-CC - U-N messages (DSI or DII)
-			// TODO DSI or DII can be only one single section, so no need for []
-			final int tableIdExt = section.getTableIdExtension();
-			DSMCC_UNMessageSection [] sections= unMessages.get(tableIdExt);
-			final DSMCC_UNMessageSection unMessage = new DSMCC_UNMessageSection(section.getRaw_data(), section.getParentPID(),isObjectCarousel);
+		int tableID  = section.getTableId();
+        switch (tableID) {
+            case 0x3b -> { // DSM-CC - U-N messages (DSI or DII)
+                // TODO DSI or DII can be only one single section, so no need for []
+                int tableIdExt = section.getTableIdExtension();
+                DSMCC_UNMessageSection[] sections = unMessages.get(tableIdExt);
+                DSMCC_UNMessageSection unMessage = new DSMCC_UNMessageSection(section.getRaw_data(), section.getParentPID(), isObjectCarousel);
 
-			if(sections==null){
-				sections = new DSMCC_UNMessageSection[section.getSectionLastNumber()+1];
-				unMessages.put(tableIdExt, sections);
-			}
-			if(sections[section.getSectionNumber()]==null){
-				sections[section.getSectionNumber()] = unMessage;
-			}else{
-				final TableSection last = sections[section.getSectionNumber()];
-				updateSectionVersion(unMessage, last);
-			}
-		}else if(tableID==0x3c){ // DSM-CC Download data message
+                if (sections == null) {
+                    sections = new DSMCC_UNMessageSection[section.getSectionLastNumber() + 1];
+                    unMessages.put(tableIdExt, sections);
+                }
+                if (sections[section.getSectionNumber()] == null) {
+                    sections[section.getSectionNumber()] = unMessage;
+                } else {
+                    TableSection last = sections[section.getSectionNumber()];
+                    updateSectionVersion(unMessage, last);
+                }
+            }
+            case 0x3c -> { // DSM-CC Download data message
 
-			final int moduleID = section.getTableIdExtension();
-			final DSMCC_DownLoadDataMessageSection downloadMessage = new DSMCC_DownLoadDataMessageSection(section.getRaw_data(), section.getParentPID());
-			DSMCC_DownLoadDataMessageSection[] sections = downloadMessages.computeIfAbsent(moduleID, k -> new DSMCC_DownLoadDataMessageSection[section.getSectionLastNumber() + 1]);
+                int moduleID = section.getTableIdExtension();
+                DSMCC_DownLoadDataMessageSection downloadMessage = new DSMCC_DownLoadDataMessageSection(section.getRaw_data(), section.getParentPID());
+                DSMCC_DownLoadDataMessageSection[] sections = downloadMessages.computeIfAbsent(moduleID, k -> new DSMCC_DownLoadDataMessageSection[section.getSectionLastNumber() + 1]);
 
-			if(section.getSectionNumber()<=section.getSectionLastNumber()){ // this should always be the case, but Ziggo managed to break this rule...
-				if(section.getSectionLastNumber()>=sections.length){ //new version has getSectionLastNumber > previous version, resize
-					sections = Arrays.copyOf(sections, section.getSectionLastNumber()+1);
-					downloadMessages.put(moduleID, sections);
-				}
-				if(sections[section.getSectionNumber()]==null){
-					sections[section.getSectionNumber()] = downloadMessage;
-				}else{
-					final TableSection last = sections[section.getSectionNumber()];
-					updateSectionVersion(downloadMessage, last);
-				}
-			}else{
-				logger.info("SectionNumber > lastSectionNumber: pid:"+pid+",section.getSectionNumber:"+section.getSectionNumber()+" section.getSectionLastNumber:"+section.getSectionLastNumber()+",tableID:"+tableID);
-			}
-		}else if(tableID==0x3d){ // DSM-CC - stream descriptorlist;
+                if (section.getSectionNumber() <= section.getSectionLastNumber()) { // this should always be the case, but Ziggo managed to break this rule...
+                    if (section.getSectionLastNumber() >= sections.length) { //new version has getSectionLastNumber > previous version, resize
+                        sections = Arrays.copyOf(sections, section.getSectionLastNumber() + 1);
+                        downloadMessages.put(moduleID, sections);
+                    }
+                    if (sections[section.getSectionNumber()] == null) {
+                        sections[section.getSectionNumber()] = downloadMessage;
+                    } else {
+                        TableSection last = sections[section.getSectionNumber()];
+                        updateSectionVersion(downloadMessage, last);
+                    }
+                } else {
+                    logger.info("SectionNumber > lastSectionNumber: pid:" + pid + ",section.getSectionNumber:" + section.getSectionNumber() + " section.getSectionLastNumber:" + section.getSectionLastNumber() + ",tableID:" + tableID);
+                }
+            }
+            case 0x3d -> { // DSM-CC - stream descriptorlist;
 
-			final int eventID = section.getTableIdExtension();
-			final DSMCC_StreamDescriptorList streamDescriptorListSection = new DSMCC_StreamDescriptorList(section.getRaw_data(), section.getParentPID());
-			DSMCC_StreamDescriptorList[] sections = eventStreams.computeIfAbsent(eventID, k -> new DSMCC_StreamDescriptorList[section.getSectionLastNumber() + 1]);
+                int eventID = section.getTableIdExtension();
+                DSMCC_StreamDescriptorList streamDescriptorListSection = new DSMCC_StreamDescriptorList(section.getRaw_data(), section.getParentPID());
+                DSMCC_StreamDescriptorList[] sections = eventStreams.computeIfAbsent(eventID, k -> new DSMCC_StreamDescriptorList[section.getSectionLastNumber() + 1]);
 
-			if(sections[section.getSectionNumber()]==null){
-				sections[section.getSectionNumber()] = streamDescriptorListSection;
-			}else{
-				final TableSection last = sections[section.getSectionNumber()];
-				updateSectionVersion(streamDescriptorListSection, last);
-			}
+                if (sections[section.getSectionNumber()] == null) {
+                    sections[section.getSectionNumber()] = streamDescriptorListSection;
+                } else {
+                    TableSection last = sections[section.getSectionNumber()];
+                    updateSectionVersion(streamDescriptorListSection, last);
+                }
 
-		}else{
-			logger.info("Unhandled tableId: pid:"+pid+",section.getSectionNumber:"+section.getSectionNumber()+" section.getSectionLastNumber:"+section.getSectionLastNumber()+",tableID:"+tableID);
-			
-		}
+            }
+            default ->
+                    logger.info("Unhandled tableId: pid:" + pid + ",section.getSectionNumber:" + section.getSectionNumber() + " section.getSectionLastNumber:" + section.getSectionLastNumber() + ",tableID:" + tableID);
+        }
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC PID",pid,null ));
+		KVP t = new KVP("DSM-CC PID",pid);
 		TreeSet<Integer> s = new TreeSet<>(unMessages.keySet());
 
 		Iterator<Integer> i = s.iterator();
 		while(i.hasNext()){
-			final Integer type=i.next();
-			final DSMCC_UNMessageSection [] sections = unMessages.get(type);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC UN-Message",type, null));
-			for (final DSMCC_UNMessageSection tsection : sections) {
+			Integer type=i.next();
+			DSMCC_UNMessageSection [] sections = unMessages.get(type);
+			KVP n = new KVP("DSM-CC UN-Message",type);
+			for (DSMCC_UNMessageSection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
@@ -153,35 +154,31 @@ public class DSMCC extends AbstractPSITabel{
 
 		i = s.iterator();
 		while(i.hasNext()){
-			final Integer type=i.next();
-			final DSMCC_DownLoadDataMessageSection [] sections = downloadMessages.get(type);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC DownloadMessage ModuleID",type, null));
-			for (final DSMCC_DownLoadDataMessageSection tsection : sections) {
+			Integer type=i.next();
+			DSMCC_DownLoadDataMessageSection [] sections = downloadMessages.get(type);
+			KVP n = new KVP("DSM-CC DownloadMessage ModuleID",type);
+			for (DSMCC_DownLoadDataMessageSection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
 			}
 			t.add(n);
-
 		}
-
 
 		s = new TreeSet<>(eventStreams.keySet());
 
 		i = s.iterator();
 		while(i.hasNext()){
-			final Integer type=i.next();
-			final DSMCC_StreamDescriptorList [] sections = eventStreams.get(type);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DSM-CC Stream Descriptor List",type, null));
-			for (final DSMCC_StreamDescriptorList tsection : sections) {
+			Integer type=i.next();
+			DSMCC_StreamDescriptorList [] sections = eventStreams.get(type);
+			KVP n = new KVP("DSM-CC Stream Descriptor List",type);
+			for (DSMCC_StreamDescriptorList tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}
 			}
 			t.add(n);
-
 		}
-
 		return t;
 	}
 
@@ -197,7 +194,7 @@ public class DSMCC extends AbstractPSITabel{
 		return null;
 	}
 
-	public DSMCC_UNMessageSection getDII(final int transactionID){
+	public DSMCC_UNMessageSection getDII(int transactionID){
 		// DII transaction_id may toggle bit 0, so check for both
 		// See ETSI TR 101 202 V1.2.1 P.49
 		DSMCC_UNMessageSection [] res = unMessages.get(transactionID);
@@ -210,19 +207,19 @@ public class DSMCC extends AbstractPSITabel{
 		return null;
 	}
 
-	public DSMCC_DownLoadDataMessageSection [] getDDM(final int modId){
+	public DSMCC_DownLoadDataMessageSection [] getDDM(int modId){
 		return downloadMessages.get(modId);
 	}
 
-	public byte[] getDDMbytes(final int modId){
-		final DSMCC_DownLoadDataMessageSection [] sections =  downloadMessages.get(modId);
+	public byte[] getDDMbytes(int modId){
+		DSMCC_DownLoadDataMessageSection [] sections =  downloadMessages.get(modId);
 		if(sections==null){
 			return null;
 		}
 		// how many bytes do we need,
 		// if one of the sections is null,not complete data, return..
 		int len =0;
-		for(final DSMCC_DownLoadDataMessageSection s:sections){
+		for(DSMCC_DownLoadDataMessageSection s:sections){
 			if((s!=null)){
 				len+= s.getPayLoadLength();
 			}else{
@@ -230,11 +227,11 @@ public class DSMCC extends AbstractPSITabel{
 			}
 		}
 		// reserve space
-		final byte [] res = new byte[len];
+		byte [] res = new byte[len];
 		// copy
 		int i = 0;
-		for(final DSMCC_DownLoadDataMessageSection s:sections){
-			final int thisLen=s.getPayLoadLength();
+		for(DSMCC_DownLoadDataMessageSection s:sections){
+			int thisLen=s.getPayLoadLength();
 			System.arraycopy(s.getPayLoad(), 0, res, i, thisLen);
 			i+= thisLen;
 		}
@@ -245,7 +242,7 @@ public class DSMCC extends AbstractPSITabel{
 	public byte[] getDDMbytes(ModuleInfo moduleInfo){
 		int modId = moduleInfo.getModuleId();
 		int version = moduleInfo.getModuleVersion();
-		final DSMCC_DownLoadDataMessageSection [] sections =  downloadMessages.get(modId);
+		DSMCC_DownLoadDataMessageSection [] sections =  downloadMessages.get(modId);
 		if(sections==null){
 			return null;
 		}
@@ -270,7 +267,7 @@ public class DSMCC extends AbstractPSITabel{
 			return null;
 		}
 		// reserve space
-		final byte [] res = new byte[len];
+		byte [] res = new byte[len];
 		// copy
 		int i = 0;
 		for(DSMCC_DownLoadDataMessageSection s:sections){
@@ -279,7 +276,7 @@ public class DSMCC extends AbstractPSITabel{
 			}
 
 			if(s!=null){
-				final int thisLen=s.getPayLoadLength();
+				int thisLen=s.getPayLoadLength();
 				System.arraycopy(s.getPayLoad(), 0, res, i, thisLen);
 				i+= thisLen;
 			}else{

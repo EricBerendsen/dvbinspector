@@ -72,7 +72,7 @@ public class ServiceDSMCC implements TreeNode {
 		private BIOPMessage biopMessage;
 		private String label;
 
-		public DSMFile(final BIOPMessage biopMessage, final String label) {
+		public DSMFile(BIOPMessage biopMessage, String label) {
 			this.biopMessage = biopMessage;
 			this.label = label;
 		}
@@ -81,7 +81,7 @@ public class ServiceDSMCC implements TreeNode {
 			return biopMessage;
 		}
 
-		public void setBiopMessage(final BIOPFileMessage biopMessage) {
+		public void setBiopMessage(BIOPFileMessage biopMessage) {
 			this.biopMessage = biopMessage;
 		}
 
@@ -89,68 +89,69 @@ public class ServiceDSMCC implements TreeNode {
 			return label;
 		}
 
-		public void setLabel(final String label) {
+		public void setLabel(String label) {
 			this.label = label;
 		}
 
 
 
 		public String getHTML() {
-			final StringBuilder b = new StringBuilder();
-			if(biopMessage instanceof BIOPFileMessage){
-				b.append("Type: File<br>Size:");
-				final BIOPFileMessage fileMes= (BIOPFileMessage) biopMessage;
-				b.append(fileMes.getContent_length());
-				b.append("<br>Data:<br>");
-				b.append(getHTMLHexview(fileMes.getData(), fileMes.getContentStartOffset(),(int)fileMes.getContent_length()));
-			}else if(biopMessage instanceof BIOPDirectoryMessage){
-				b.append("Type: Directory<br>Descendants:<br>");
-				final BIOPDirectoryMessage dirMes= (BIOPDirectoryMessage) biopMessage;
-				for(final Binding binding:dirMes.getBindingList()){
-					b.append(binding.getBiopName().getName()).append(": (").append(BIOPDirectoryMessage.getBindingTypeString(binding.getBindingType())).append(")<br>");
-				}
-			}else if(biopMessage instanceof BIOPStreamEventMessage){
-				b.append("Type: StreamEvent<br>EventNames:<br>");
-				BIOPStreamEventMessage eventMsg = (BIOPStreamEventMessage)biopMessage;
-				for(EventName eventName:eventMsg.getEventNames()){
-					b.append(new String(eventName.getEventName_data_byte())).append("<br>");
+			StringBuilder b = new StringBuilder();
+            switch (biopMessage) {
+                case BIOPFileMessage fileMes -> {
+                    b.append("Type: File<br>Size:");
+                    b.append(fileMes.getContent_length());
+                    b.append("<br>Data:<br>");
+                    b.append(getHTMLHexview(fileMes.getData(), fileMes.getContentStartOffset(), (int) fileMes.getContent_length()));
+                }
+                case BIOPDirectoryMessage dirMes -> {
+                    b.append("Type: Directory<br>Descendants:<br>");
+                    for (Binding binding : dirMes.getBindingList()) {
+                        b.append(binding.getBiopName().getName()).append(": (").append(BIOPDirectoryMessage.getBindingTypeString(binding.getBindingType())).append(")<br>");
+                    }
+                }
+                case BIOPStreamEventMessage eventMsg -> {
+                    b.append("Type: StreamEvent<br>EventNames:<br>");
+                    for (EventName eventName : eventMsg.getEventNames()) {
+                        b.append(new String(eventName.eventName_data_byte())).append("<br>");
 
-				}
-			}
+                    }
+                }
+                case null, default -> {
+                }
+            }
 
 			return b.toString();
 		}
 		
 		@Override
-		public void save(final File file) {
-			saveFile(file, this.getBiopMessage());
+		public void save(File file) {
+			saveFile(file, biopMessage);
 		}
 
-		public void saveFile(final File file, final BIOPMessage biopMessage) {
+		public void saveFile(File file, BIOPMessage biopMessage) {
 			logger.info("saveFile called for file path:"+file.getAbsolutePath()+", name:"+file.getName());
-			if(biopMessage instanceof BIOPFileMessage){
+			if(biopMessage instanceof BIOPFileMessage biopFile){
 				logger.info("starting write file");
 				try (FileOutputStream out = new FileOutputStream(file)){
 
-					final BIOPFileMessage biopFile = (BIOPFileMessage)biopMessage;
-					out.write(biopFile.getData(),biopFile.getContentStartOffset(),(int)biopFile.getContent_length());
+                    out.write(biopFile.getData(),biopFile.getContentStartOffset(),(int)biopFile.getContent_length());
 
 				} catch (IOException e) {
 					logger.log(Level.WARNING,"could not write file",e);
 				}
-			}else if(biopMessage instanceof BIOPDirectoryMessage){
+			}else if(biopMessage instanceof BIOPDirectoryMessage dirMes){
 				//recursively save tree..
 				// file now contains the dir to start from.
 				// append label first
-				final BIOPDirectoryMessage dirMes = (BIOPDirectoryMessage)biopMessage;
 
-				logger.log(Level.INFO,"trying to create directory "+ file);
-				final boolean success = file.mkdir();
+                logger.log(Level.INFO,"trying to create directory "+ file);
+				boolean success = file.mkdir();
 				logger.log(Level.INFO,"trying to create directory. result "+ success);
-				for(final Binding binding:dirMes.getBindingList()){
-					final String descName=binding.getBiopName().getName();
-					final IOR ior = binding.getIor();
-					final BIOPMessage child = getBIOPMessage(ior);
+				for(Binding binding:dirMes.getBindingList()){
+					String descName=binding.getBiopName().getName();
+					IOR ior = binding.getIor();
+					BIOPMessage child = getBIOPMessage(ior);
 					if((child!=null)&&(descName!=null)){
 						logger.log(Level.INFO,"now going down to save:"+descName);
 						saveFile(new File(file,descName),child);
@@ -162,13 +163,9 @@ public class ServiceDSMCC implements TreeNode {
 
 
 	public class ObjectCarousel implements TreeNode{
-		/**
-		 * @param associationTag
-		 * @param dataBroadCastId
-		 */
-		public ObjectCarousel(final int associationTag, final int dataBroadCastId) {
-			super();
-			this.associationTag = associationTag;
+
+		public ObjectCarousel(int associationTag, int dataBroadCastId) {
+            this.associationTag = associationTag;
 			this.dataBroadCastId = dataBroadCastId;
 		}
 
@@ -178,16 +175,15 @@ public class ServiceDSMCC implements TreeNode {
 		private CarouselIdentifierDescriptor carouselIdentifierDesc;
 
 		// recursive find all biopMessagases, and add as flat list
-		private  void addToTree(final BIOPMessage biopMessage, final String label, final DefaultMutableTreeNode s,final int modus){
+		private  void addToTree(BIOPMessage biopMessage, String label, DefaultMutableTreeNode s, int modus){
 			if(biopMessage!=null){
-				if(biopMessage instanceof BIOPDirectoryMessage){
-					final BIOPDirectoryMessage dir = (BIOPDirectoryMessage) biopMessage;
-					s.add(dir.getJTreeNode(modus,label));
-					final List<Binding> bindings = dir.getBindingList();
-					for(final Binding binding:bindings){
-						final BIOPName biopName = binding.getBiopName();
-						final IOR ior = binding.getIor();
-						final BIOPMessage child = getBIOPMessage(ior);
+				if(biopMessage instanceof BIOPDirectoryMessage dir){
+                    s.add(dir.getJTreeNode(modus,label));
+					List<Binding> bindings = dir.getBindingList();
+					for(Binding binding:bindings){
+						BIOPName biopName = binding.getBiopName();
+						IOR ior = binding.getIor();
+						BIOPMessage child = getBIOPMessage(ior);
 						if((child!=null)&&(biopName!=null)){
 							addToTree(child, label+"/"+biopName.getName(), s, modus);
 						}
@@ -199,67 +195,64 @@ public class ServiceDSMCC implements TreeNode {
 		}
 
 		// recursive find all biopMessagases, and build treeview
-		private  DefaultMutableTreeNode buildTree(final BIOPMessage biopMessage, final String label, final int modus){
-			DefaultMutableTreeNode treeNode = null;
-			final KVP kvp = new KVP(label);
-			treeNode = new DefaultMutableTreeNode(kvp);
-			if(biopMessage instanceof BIOPDirectoryMessage){
-				final BIOPDirectoryMessage dir = (BIOPDirectoryMessage) biopMessage;
-				final DSMFile dsmFile = new DSMFile(dir,label);
-				kvp.addHTMLSource(dsmFile,"directory_message");
+		private  KVP buildTree(BIOPMessage biopMessage, String label, int modus){
+			KVP treeNode = new KVP(label);
+			if(biopMessage instanceof BIOPDirectoryMessage dir){
+                DSMFile dsmFile = new DSMFile(dir,label);
+				treeNode.addHTMLSource(dsmFile,"directory_message");
 
-				final JMenuItem objectMenu = new JMenuItem("Export (sub)tree...");
+				JMenuItem objectMenu = new JMenuItem("Export (sub)tree...");
 				objectMenu.setActionCommand(DVBtree.EXPORT);
-				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
-				final List<Binding> bindings = dir.getBindingList();
-				for(final Binding binding:bindings){
-					final BIOPName biopName = binding.getBiopName();
-					final IOR ior = binding.getIor();
-					final BIOPMessage child = getBIOPMessage(ior);
+				treeNode.setSubMenuAndOwner(objectMenu,dsmFile);
+				List<Binding> bindings = dir.getBindingList();
+				for(Binding binding:bindings){
+					BIOPName biopName = binding.getBiopName();
+					IOR ior = binding.getIor();
+					BIOPMessage child = getBIOPMessage(ior);
 					if((child!=null)&&(biopName!=null)){
 						treeNode.add(buildTree(child, biopName.getName(), modus));
 					}
 				}
 			}else if(biopMessage instanceof BIOPFileMessage){
-				final JMenuItem objectMenu = new JMenuItem("Save as...");
+				JMenuItem objectMenu = new JMenuItem("Save as...");
 				objectMenu.setActionCommand(DVBtree.SAVE);
-				final DSMFile dsmFile = new DSMFile(biopMessage,label);
-				kvp.addHTMLSource(dsmFile,"file_message");
+				DSMFile dsmFile = new DSMFile(biopMessage,label);
+				treeNode.addHTMLSource(dsmFile,"file_message");
 
-				kvp.setSubMenuAndOwner(objectMenu,dsmFile);
+				treeNode.setSubMenuAndOwner(objectMenu,dsmFile);
 
 			}else if(biopMessage instanceof BIOPStreamEventMessage){
-				final DSMFile dsmFile = new DSMFile(biopMessage,label);
-				kvp.addHTMLSource(dsmFile,"stream_event_message");
+				DSMFile dsmFile = new DSMFile(biopMessage,label);
+				treeNode.addHTMLSource(dsmFile,"stream_event_message");
 			}
 			return treeNode;
 		}
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Object Carousel"));
-			s.add(new DefaultMutableTreeNode(new KVP("associationTag",associationTag,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("dataBroadCastId",dataBroadCastId,Utils.getDataBroadCastIDString(dataBroadCastId))));
+		public KVP getJTreeNode(int modus){
+			KVP s=new KVP("Object Carousel");
+			s.add(new KVP("associationTag",associationTag));
+			s.add(new KVP("dataBroadCastId",dataBroadCastId,Utils.getDataBroadCastIDString(dataBroadCastId)));
 			if(carouselIdentifierDesc!=null){
 				s.add(carouselIdentifierDesc.getJTreeNode(modus));
 			}
-			final DSMCC_UNMessageSection dsi = dsmccs.get(associationTag).getDSI();
+			DSMCC_UNMessageSection dsi = dsmccs.get(associationTag).getDSI();
 			if((carouselIdentifierDesc!=null)&&(carouselIdentifierDesc.getFormatId()==0x01)){  //enhanced boot
 				// module must be in this PID
-				final BIOPMessage biopMessage = getBIOPMessage(carouselIdentifierDesc, associationTag);
+				BIOPMessage biopMessage = getBIOPMessage(carouselIdentifierDesc, associationTag);
 				addTreeDetails(modus, s, biopMessage);
 			}else if(dsi!=null){
-				final IOR ior = dsi.getServiceGatewayIOR();
-				final BIOPMessage biopMessage = getBIOPMessage(ior);
+				IOR ior = dsi.getServiceGatewayIOR();
+				BIOPMessage biopMessage = getBIOPMessage(ior);
 				addTreeDetails(modus, s, biopMessage);
 			}// no DSI, no starting point....
 
 			return s;
 		}
 
-		public void addTreeDetails(final int modus, final DefaultMutableTreeNode s,
-				final BIOPMessage biopMessage) {
-			final DefaultMutableTreeNode messages=new DefaultMutableTreeNode(new KVP("Messages"));
+		public void addTreeDetails(int modus, KVP s,
+                                   BIOPMessage biopMessage) {
+			KVP messages = new KVP("Messages");
 			addToTree(biopMessage, "", messages, modus);
 			s.add(messages);
 			if(biopMessage!=null){
@@ -268,7 +261,7 @@ public class ServiceDSMCC implements TreeNode {
 		}
 
 		public void setCarouselIdentifierDescriptor(
-				final CarouselIdentifierDescriptor carouselIdentifierDescriptor) {
+				CarouselIdentifierDescriptor carouselIdentifierDescriptor) {
 			carouselIdentifierDesc = carouselIdentifierDescriptor;
 
 		}
@@ -278,18 +271,18 @@ public class ServiceDSMCC implements TreeNode {
 
 
 	public List<BIOPMessage> getBIOPMessagesForModule(
-			final DSMCC_UNMessageSection dii,
-			final int moduleId) {
+			DSMCC_UNMessageSection dii,
+			int moduleId) {
 		List<BIOPMessage> biopMessages = null;
-		final ModuleInfo moduleInfo = dii.getModule(moduleId);
+		ModuleInfo moduleInfo = dii.getModule(moduleId);
 		if(moduleInfo!=null){
-			final BIOPModuleInfo biopModInfo = moduleInfo.getBiopModuleInfo();
+			BIOPModuleInfo biopModInfo = moduleInfo.getBiopModuleInfo();
 			if(biopModInfo!=null){ // find PID containing actual DDB with module data
-				final List<Tap> moduleTaps = biopModInfo.getTaps();
-				if((moduleTaps!=null)&&(moduleTaps.size()>0)){
-					final Tap moduleTap = moduleTaps.get(0);
-					final int moduleAssociationTag = moduleTap.getAssociation_tag();
-					final DSMCC ddbPid = dsmccs.get(moduleAssociationTag);
+				List<Tap> moduleTaps = biopModInfo.getTaps();
+				if((moduleTaps!=null)&&(!moduleTaps.isEmpty())){
+					Tap moduleTap = moduleTaps.getFirst();
+					int moduleAssociationTag = moduleTap.getAssociation_tag();
+					DSMCC ddbPid = dsmccs.get(moduleAssociationTag);
 					byte [] rawData= ddbPid.getDDMbytes(moduleInfo);
 					if(rawData!=null){
 						rawData = uncompressModuleData(biopModInfo,rawData);
@@ -301,28 +294,28 @@ public class ServiceDSMCC implements TreeNode {
 		return biopMessages;
 	}
 
-	public byte[] uncompressModuleData(final BIOPModuleInfo biopModInfo,
-			final byte[] rawData) {
+	public byte[] uncompressModuleData(BIOPModuleInfo biopModInfo,
+                                       byte[] rawData) {
 		byte[] res =rawData;
-		final List<Descriptor> moduleDescriptors = biopModInfo.getDescriptors();
-		if((moduleDescriptors!=null)&&(moduleDescriptors.size()>0)){
-			final List<CompressedModuleDescriptor> compressedModuleDescriptorsList = Descriptor.findGenericDescriptorsInList(moduleDescriptors, CompressedModuleDescriptor.class); //Descriptor: compressed_module_descriptor: 0x9 (9)
-			if((compressedModuleDescriptorsList!=null)&&(compressedModuleDescriptorsList.size()>0)){ // comrpession used
-				final CompressedModuleDescriptor compressedModuleDescriptor =  compressedModuleDescriptorsList.get(0);
-				final int original_size = (int)compressedModuleDescriptor.getOriginal_size();
+		List<Descriptor> moduleDescriptors = biopModInfo.getDescriptors();
+		if((moduleDescriptors!=null)&&(!moduleDescriptors.isEmpty())){
+			List<CompressedModuleDescriptor> compressedModuleDescriptorsList = Descriptor.findGenericDescriptorsInList(moduleDescriptors, CompressedModuleDescriptor.class); //Descriptor: compressed_module_descriptor: 0x9 (9)
+			if((compressedModuleDescriptorsList!=null)&&(!compressedModuleDescriptorsList.isEmpty())){ // comrpession used
+				CompressedModuleDescriptor compressedModuleDescriptor =  compressedModuleDescriptorsList.getFirst();
+				int original_size = (int)compressedModuleDescriptor.getOriginal_size();
 				res = decompress(rawData, original_size);
 			}
 		}
 		return res;
 	}
 
-	public byte[] decompress(final byte[] rawData, final int original_size) {
+	public byte[] decompress(byte[] rawData, int original_size) {
 		byte []res = rawData;
-		final Inflater decompressor = new Inflater();
+		Inflater decompressor = new Inflater();
 		decompressor.setInput(res);
-		final byte [] uncompressed =new byte[original_size];
+		byte [] uncompressed =new byte[original_size];
 		try {
-			final int inflated = decompressor.inflate(uncompressed);
+			int inflated = decompressor.inflate(uncompressed);
 			decompressor.end();
 			if(inflated==original_size){
 				res = uncompressed;
@@ -330,7 +323,7 @@ public class ServiceDSMCC implements TreeNode {
 				logger.log(Level.WARNING, "Error inflating data, inflated!=original_size");
 			}
 
-		} catch (final DataFormatException e) {
+		} catch (DataFormatException e) {
 			logger.log(Level.WARNING, "inflating DSM-CC failed:", e);
 		}
 		return res;
@@ -344,11 +337,11 @@ public class ServiceDSMCC implements TreeNode {
 	private PSI psi; // reference to parentPSI, to get service names etc...
 
 
-	public ServiceDSMCC(final int programNum) {
+	public ServiceDSMCC(int programNum) {
 		programNumber = programNum;
 	}
 
-	public void addDSMCC(final int association_tag, final DSMCC dsmcc){
+	public void addDSMCC(int association_tag, DSMCC dsmcc){
 		dsmccs.put(association_tag, dsmcc);
 		psi = dsmcc.getParentPSI();
 	}
@@ -356,40 +349,40 @@ public class ServiceDSMCC implements TreeNode {
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC ObjectCarousel components for program",programNumber,psi.getSdt().getServiceNameForActualTransportStream(programNumber)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("DSM-CC ObjectCarousel components for program",programNumber,psi.getSdt().getServiceNameForActualTransportStream(programNumber));
 
-		final TreeSet<Integer> s = new TreeSet<>(dsmccs.keySet());
+		TreeSet<Integer> s = new TreeSet<>(dsmccs.keySet());
 		for (int associationTag : s) {
-			final DefaultMutableTreeNode association = new DefaultMutableTreeNode(new KVP("Association: " + associationTag));
-			final DSMCC dsmcc = dsmccs.get(associationTag);
-			association.add(new DefaultMutableTreeNode(new KVP("PID", dsmcc.getPid(), null)));
+			KVP association = new KVP("Association: " + associationTag);
+			DSMCC dsmcc = dsmccs.get(associationTag);
+			association.add(new KVP("PID", dsmcc.getPid()));
 			t.add(association);
 		}
-		Utils.addListJTree(t, bootList.values(), modus, "ObjectCarousels");
+		t.addList(bootList.values(), modus, "ObjectCarousels");
 		return t;
 	}
 
-	public void addBootPID(final int associationTag, final int dataBroadCastId) {
+	public void addBootPID(int associationTag, int dataBroadCastId) {
 		bootList.put(associationTag, new ObjectCarousel(associationTag, dataBroadCastId));
 
 	}
 
 
-	public BIOPMessage getBIOPMessage(final CarouselIdentifierDescriptor carouselIdentifierDescriptor, final int associationTag){
-		final BIOPMessage biopMessage = null;
+	public BIOPMessage getBIOPMessage(CarouselIdentifierDescriptor carouselIdentifierDescriptor, int associationTag){
+		BIOPMessage biopMessage = null;
 
-		final DSMCC ddbPid = dsmccs.get(associationTag);
+		DSMCC ddbPid = dsmccs.get(associationTag);
 		byte [] rawData= ddbPid.getDDMbytes(carouselIdentifierDescriptor.getModuleId());
 		if(rawData!=null){
 			if(carouselIdentifierDescriptor.getCompressionMethod()!=0){
 				rawData = decompress(rawData, (int)carouselIdentifierDescriptor.getOriginalSize());
 			}
-			final List<BIOPMessage> biopMessages = BIOPMessageFactory.createBIOPMessages(rawData, 0);
+			List<BIOPMessage> biopMessages = BIOPMessageFactory.createBIOPMessages(rawData, 0);
 			if(biopMessages!=null){
-				final byte []findObjectKey = carouselIdentifierDescriptor.getObjectKeyData();
-				for (final BIOPMessage biopMessage2: biopMessages) {
-					final byte [] foundObjectKey = biopMessage2.getObjectKey_data_byte();
+				byte []findObjectKey = carouselIdentifierDescriptor.getObjectKeyData();
+				for (BIOPMessage biopMessage2: biopMessages) {
+					byte [] foundObjectKey = biopMessage2.getObjectKey_data_byte();
 					if(Utils.equals(findObjectKey, 0, findObjectKey.length, foundObjectKey, 0, foundObjectKey.length)){
 						return biopMessage2;
 					}
@@ -401,41 +394,39 @@ public class ServiceDSMCC implements TreeNode {
 	}
 
 
-	public BIOPMessage getBIOPMessage(final IOR ior){
-		final BIOPMessage biopMessage = null;
+	public BIOPMessage getBIOPMessage(IOR ior){
+		BIOPMessage biopMessage = null;
 
-		final List<TaggedProfile> profiles = ior.getProfiles();
+		List<TaggedProfile> profiles = ior.getProfiles();
 
-		if((profiles!=null)&&(profiles.size()>0)){
-			final TaggedProfile profile = ior.getProfiles().get(0); // should be only one for the serviceGateway
+		if((profiles!=null)&&(!profiles.isEmpty())){
+			TaggedProfile profile = ior.getProfiles().getFirst(); // should be only one for the serviceGateway
 			if(profile!=null){
-				final List<LiteComponent> components = profile.getLiteComponents(); // should be 2; BIOP::ObjectLocation and DSM::COnnBinder
+				List<LiteComponent> components = profile.getLiteComponents(); // should be 2; BIOP::ObjectLocation and DSM::COnnBinder
 				if((components!=null)&&(components.size()>1)){
-					final LiteComponent objectLocation = components.get(0);
-					final LiteComponent connBinder = components.get(1);
-					if((objectLocation instanceof BIOPObjectLocation) &&
-							(connBinder instanceof DSMConnBinder)){
-						final DSMConnBinder connBind =(DSMConnBinder)connBinder;
-						final BIOPObjectLocation biopObjectLocation = (BIOPObjectLocation) objectLocation;
-						final List<Tap> taps = connBind.getTaps();
-						if((taps!=null)&&(taps.size()>0)){
-							final Tap tap = connBind.getTaps().get(0);
+					LiteComponent objectLocation = components.get(0);
+					LiteComponent connBinder = components.get(1);
+					if((objectLocation instanceof BIOPObjectLocation biopObjectLocation) &&
+							(connBinder instanceof DSMConnBinder connBind)){
+                        List<Tap> taps = connBind.getTaps();
+						if((taps!=null)&&(!taps.isEmpty())){
+							Tap tap = connBind.getTaps().getFirst();
 							if(tap!=null){
 								// now find the PID with association
-								final int association = tap.getAssociation_tag();
-								final DSMCC diiPid = dsmccs.get(association);
+								int association = tap.getAssociation_tag();
+								DSMCC diiPid = dsmccs.get(association);
 								if(diiPid!=null){
 									// look for the DII with the right transaction ID
-									final long transaction = tap.getTransactionId();
-									final int tableExtension = (int) (transaction & Utils.MASK_16BITS);
-									final DSMCC_UNMessageSection dii = diiPid.getDII(tableExtension);
+									long transaction = tap.getTransactionId();
+									int tableExtension = (int) (transaction & Utils.MASK_16BITS);
+									DSMCC_UNMessageSection dii = diiPid.getDII(tableExtension);
 									if(dii!=null){
-										final int moduleId = biopObjectLocation.getModuleId();
-										final byte[] findObjectKey = biopObjectLocation.getObjectKey_data_byte();
-										final List<BIOPMessage> biopMessages= getBIOPMessagesForModule(dii, moduleId);
+										int moduleId = biopObjectLocation.getModuleId();
+										byte[] findObjectKey = biopObjectLocation.getObjectKey_data_byte();
+										List<BIOPMessage> biopMessages= getBIOPMessagesForModule(dii, moduleId);
 										if(biopMessages!=null){
-											for (final BIOPMessage biopMessage2: biopMessages) {
-												final byte [] foundObjectKey = biopMessage2.getObjectKey_data_byte();
+											for (BIOPMessage biopMessage2: biopMessages) {
+												byte [] foundObjectKey = biopMessage2.getObjectKey_data_byte();
 												if(Utils.equals(findObjectKey, 0, findObjectKey.length, foundObjectKey, 0, foundObjectKey.length)){
 													return biopMessage2;
 												}
@@ -453,9 +444,9 @@ public class ServiceDSMCC implements TreeNode {
 		return biopMessage;
 	}
 
-	public void setCarouselIdentifierDescriptor(final int associationTag,
-			final CarouselIdentifierDescriptor carouselIdentifierDescriptor) {
-		final ObjectCarousel objectCarousel = bootList.get(associationTag);
+	public void setCarouselIdentifierDescriptor(int associationTag,
+                                                CarouselIdentifierDescriptor carouselIdentifierDescriptor) {
+		ObjectCarousel objectCarousel = bootList.get(associationTag);
 		if(objectCarousel!=null){
 			objectCarousel.setCarouselIdentifierDescriptor(carouselIdentifierDescriptor);
 		}

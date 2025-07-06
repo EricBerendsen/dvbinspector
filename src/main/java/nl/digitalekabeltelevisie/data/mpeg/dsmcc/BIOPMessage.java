@@ -27,11 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
+
+import static java.util.Arrays.copyOfRange;
 
 /**
  * @author Eric
@@ -59,11 +59,11 @@ public class BIOPMessage implements TreeNode {
 	protected int byte_counter; // count bytes
 
 
-	public BIOPMessage(final byte[] data, final int off) {
+	public BIOPMessage(byte[] data, int off) {
 		this.data=data;
 		this.offset= off;
 
-		magic = Utils.copyOfRange(data,offset,offset+4);
+		magic = copyOfRange(data, offset, offset + 4);
 
 		biop_version_major = Utils.getInt(data, offset+4, 1, Utils.MASK_8BITS);
 		biop_version_minor = Utils.getInt(data, offset+5, 1, Utils.MASK_8BITS);
@@ -71,38 +71,36 @@ public class BIOPMessage implements TreeNode {
 		message_type = Utils.getInt(data, offset+7, 1, Utils.MASK_8BITS);
 		message_size = Utils.getLong(data, offset+8, 4, Utils.MASK_32BITS);
 		objectKey_length = Utils.getInt(data, offset+12, 1, Utils.MASK_8BITS);
-		objectKey_data_byte = Utils.copyOfRange(data,offset+13,offset+13+objectKey_length);
+		objectKey_data_byte = copyOfRange(data, offset + 13, offset + 13 + objectKey_length);
 		byte_counter=offset+13+objectKey_length;
 		objectKind_length = 4;// Utils.getLong(data,byte_counter, 4, Utils.MASK_32BITS); // should be 4
 		byte_counter +=4;
-		objectKind_data = Utils.copyOfRange(data,byte_counter,byte_counter+(int)objectKind_length);
+		objectKind_data = copyOfRange(data, byte_counter, byte_counter + (int) objectKind_length);
 		byte_counter += objectKind_length;
 		objectInfo_length =  Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
 		byte_counter +=2;
 
 	}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final String label) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(IOR.getTypeIdString(objectKind_data),label,null));
-		t.add(new DefaultMutableTreeNode(new KVP("magic",magic ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("biop_version_major",biop_version_major ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("biop_version_minor",biop_version_minor ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("byte_order",byte_order ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("message_type",message_type ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("message_size",message_size ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectKey_length",objectKey_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectKey_data_byte",objectKey_data_byte ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectKind_length",objectKind_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectKind_data",objectKind_data ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectInfo_length",objectInfo_length ,null)));
+
+	public KVP getJTreeNode(int modus, String label) {
+		KVP t = new KVP(IOR.getTypeIdString(objectKind_data),label);
+		t.add(new KVP("magic",magic ));
+		t.add(new KVP("biop_version_major",biop_version_major ));
+		t.add(new KVP("biop_version_minor",biop_version_minor ));
+		t.add(new KVP("byte_order",byte_order ));
+		t.add(new KVP("message_type",message_type ));
+		t.add(new KVP("message_size",message_size ));
+		t.add(new KVP("objectKey_length",objectKey_length ));
+		t.add(new KVP("objectKey_data_byte",objectKey_data_byte ));
+		t.add(new KVP("objectKind_length",objectKind_length ));
+		t.add(new KVP("objectKind_data",objectKind_data ));
+		t.add(new KVP("objectInfo_length",objectInfo_length ));
 		return t;
 	}
 
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 		return getJTreeNode(modus,"");
 	}
 

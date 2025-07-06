@@ -29,42 +29,35 @@ package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
-import nl.digitalekabeltelevisie.util.Utils;
 
 public class DSMCC_StreamDescriptorList extends TableSectionExtendedSyntax {
 
 	private List<Descriptor>	descriptorList;
 
-	public DSMCC_StreamDescriptorList(final PsiSectionData raw_data, final PID parent){
+	public DSMCC_StreamDescriptorList(PsiSectionData raw_data, PID parent){
 		super(raw_data, parent);
 		descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(), 8, sectionLength - 9, this);
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("DSMCC_StreamDescriptorList section=");
+		StringBuilder b = new StringBuilder("DSMCC_StreamDescriptorList section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber());
-//		final Iterator<Descriptor> j = descriptorList.iterator();
-//		while (j.hasNext()) {
-//			final Descriptor d = j.next();
-//			b.append(d).append(", ");
-//
-//		}
+
 		return b.toString();
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		Utils.addListJTree(t, descriptorList, modus, "descriptors");
+		KVP t = (KVP)super.getJTreeNode(modus);
+		t.addList(descriptorList, modus, "descriptors");
 		return t;
 	}
 	
@@ -72,19 +65,13 @@ public class DSMCC_StreamDescriptorList extends TableSectionExtendedSyntax {
 	@Override
 	protected String getTableIdExtensionDescription(int tableIdExtension) {
 		int type = (tableIdExtension & 0b1100_0000_0000_0000) >>14;
-		switch (type) {
-		case 0:
-			int eventID =tableIdExtension & 0b0011_1111_1111_1111;
-			return "Section carries a single \"do it now\" event, eventID="+eventID;
-		case 1:
-			return "Section carries NPT reference descriptors";
-		case 2:
-			return "Section carries one or more other stream descriptors";
-		case 3:
-			return "reserved for future use";
-		default:
-			return "Illegal value";
-		}
+        return switch (type) {
+            case 0 -> "Section carries a single \"do it now\" event, eventID=" + (tableIdExtension & 0b0011_1111_1111_1111);
+            case 1 -> "Section carries NPT reference descriptors";
+            case 2 -> "Section carries one or more other stream descriptors";
+            case 3 -> "reserved for future use";
+            default -> "Illegal value";
+        };
 
 	}
 
@@ -93,7 +80,7 @@ public class DSMCC_StreamDescriptorList extends TableSectionExtendedSyntax {
 		return descriptorList;
 	}
 
-	public void setDescriptorList(final List<Descriptor> descriptorList) {
+	public void setDescriptorList(List<Descriptor> descriptorList) {
 		this.descriptorList = descriptorList;
 	}
 

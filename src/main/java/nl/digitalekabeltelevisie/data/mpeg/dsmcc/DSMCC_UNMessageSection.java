@@ -36,8 +36,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -46,7 +44,6 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.DSMCCDescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.CompatibilityDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen
@@ -88,51 +85,24 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 
 	private final List<ModuleInfo> modules = new ArrayList<>();
 
-
-
 	private int numberOfGroups;
-
-
-
 	private int groupInfoLength;
-
-
-
 	private byte[] groupInfoByte;
-
-
-
 	private int privateDataLen2;
-
-
-
 	private byte[] privateDataByte2;
-
-
-
 
 	/**
 	 *
 	 * Only used in case of objectCarousel DII
-	 * @author Eric
 	 *
 	 */
 	public class ModuleInfo implements TreeNode{
 
 		private List<Descriptor> descriptors;
 
-
-		/**
-		 * @param moduleId
-		 * @param moduleSize
-		 * @param moduleVersion
-		 * @param moduleInfoLength
-		 * @param moduleInfoByte
-		 */
-		public ModuleInfo(final int moduleId, final long moduleSize, final int moduleVersion,
-				final int moduleInfoLength, final byte[] moduleInfoByte) {
-			super();
-			this.moduleId = moduleId;
+		public ModuleInfo(int moduleId, long moduleSize, int moduleVersion,
+                          int moduleInfoLength, byte[] moduleInfoByte) {
+            this.moduleId = moduleId;
 			this.moduleSize = moduleSize;
 			this.moduleVersion = moduleVersion;
 			this.moduleInfoLength = moduleInfoLength;
@@ -155,18 +125,18 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		private BIOPModuleInfo biopModuleInfo;
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Module",moduleId,null));
-			t.add(new DefaultMutableTreeNode(new KVP("moduleId",moduleId,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("moduleSize",moduleSize,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("moduleVersion",moduleVersion,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("moduleInfoLength",moduleInfoLength,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("moduleInfoByte",moduleInfoByte,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("Module",moduleId);
+			t.add(new KVP("moduleId",moduleId));
+			t.add(new KVP("moduleSize",moduleSize));
+			t.add(new KVP("moduleVersion",moduleVersion));
+			t.add(new KVP("moduleInfoLength",moduleInfoLength));
+			t.add(new KVP("moduleInfoByte",moduleInfoByte));
 			if(moduleInfoLength>0){
 				if(isObjectCarousel){
 					t.add(biopModuleInfo.getJTreeNode(modus));
 				}else{
-					Utils.addListJTree(t,descriptors,modus,"descriptors");
+					addListJTree(t,descriptors,modus,"descriptors");
 				}
 			}
 			return t;
@@ -217,9 +187,9 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		// Table 6: GroupInfoIndication structure of 8.1.1 DownloadServerInitiate message (DSI) of ETSI TS 102 006 V1.3.2 (2008-07)
 		// is not very clear, indentation is wrong
 
-		public GroupInfo(final byte[]data, final int offset){
-			groupId= Utils.getLong(data, offset, 4, Utils.MASK_32BITS);
-			groupSize= Utils.getLong(data, offset+4, 4, Utils.MASK_32BITS);
+		public GroupInfo(byte[]data, int offset){
+			groupId= getLong(data, offset, 4, MASK_32BITS);
+			groupSize= getLong(data, offset+4, 4, MASK_32BITS);
 			compatibilityDescriptor = new CompatibilityDescriptor(data, offset+8);
 		}
 
@@ -228,10 +198,10 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		private final CompatibilityDescriptor compatibilityDescriptor;
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("GroupInfo"));
-			t.add(new DefaultMutableTreeNode(new KVP("groupId",groupId,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("groupSize",groupSize,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("GroupInfo");
+			t.add(new KVP("groupId",groupId));
+			t.add(new KVP("groupSize",groupSize));
 			t.add(compatibilityDescriptor.getJTreeNode(modus));
 			return t;
 		}
@@ -258,11 +228,10 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 	}
 
 	public class DSMCCMessageHeader implements TreeNode{
-		public DSMCCMessageHeader(final int protocolDiscriminator, final int dsmccType,
-				final int messageId, final long transactionID, final int reserved,
-				final int adaptationLength, final int messageLength) {
-			super();
-			this.protocolDiscriminator = protocolDiscriminator;
+		public DSMCCMessageHeader(int protocolDiscriminator, int dsmccType,
+                                  int messageId, long transactionID, int reserved,
+                                  int adaptationLength, int messageLength) {
+            this.protocolDiscriminator = protocolDiscriminator;
 			this.dsmccType = dsmccType;
 			this.messageId = messageId;
 			this.transactionID = transactionID;
@@ -280,15 +249,15 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		private final int messageLength;
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC Message Header"));
-			t.add(new DefaultMutableTreeNode(new KVP("protocolDiscriminator",protocolDiscriminator,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("dsmccType",dsmccType,getDSMCCTypeString(dsmccType))));
-			t.add(new DefaultMutableTreeNode(new KVP("messageId",messageId,getMessageIDString(dsmccType, messageId))));
-			t.add(new DefaultMutableTreeNode(new KVP("transactionID",transactionID,getTransactionIDString(transactionID))));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("adaptationLength",adaptationLength,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("messageLength",messageLength,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("DSM-CC Message Header");
+			t.add(new KVP("protocolDiscriminator",protocolDiscriminator));
+			t.add(new KVP("dsmccType",dsmccType,getDSMCCTypeString(dsmccType)));
+			t.add(new KVP("messageId",messageId,getMessageIDString(dsmccType, messageId)));
+			t.add(new KVP("transactionID",transactionID,getTransactionIDString(transactionID)));
+			t.add(new KVP("reserved",reserved));
+			t.add(new KVP("adaptationLength",adaptationLength));
+			t.add(new KVP("messageLength",messageLength));
 
 			return t;
 		}
@@ -329,93 +298,93 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 
 
 
-	public DSMCC_UNMessageSection(final PsiSectionData raw_data, final PID parent, final boolean isObjectCarousel2){
+	public DSMCC_UNMessageSection(PsiSectionData raw_data, PID parent, boolean isObjectCarousel2){
 		super(raw_data, parent);
 
 		this.isObjectCarousel = isObjectCarousel2;
-		final int protocolDiscriminator = Utils.getInt(raw_data.getData(), 8, 1, Utils.MASK_8BITS);
-		final int dsmccType = Utils.getInt(raw_data.getData(), 9, 1, Utils.MASK_8BITS);
-		final int messageId = Utils.getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
-		final long transactionId = Utils.getLong(raw_data.getData(), 12, 4, Utils.MASK_32BITS);
-		final int reserved = Utils.getInt(raw_data.getData(), 16, 1, Utils.MASK_8BITS);
-		final int adaptationLength = Utils.getInt(raw_data.getData(), 17, 1, Utils.MASK_8BITS);
-		final int messageLength = Utils.getInt(raw_data.getData(), 18, 2, Utils.MASK_16BITS);
+		int protocolDiscriminator = getInt(raw_data.getData(), 8, 1, MASK_8BITS);
+		int dsmccType = getInt(raw_data.getData(), 9, 1, MASK_8BITS);
+		int messageId = getInt(raw_data.getData(), 10, 2, MASK_16BITS);
+		long transactionId = getLong(raw_data.getData(), 12, 4, MASK_32BITS);
+		int reserved = getInt(raw_data.getData(), 16, 1, MASK_8BITS);
+		int adaptationLength = getInt(raw_data.getData(), 17, 1, MASK_8BITS);
+		int messageLength = getInt(raw_data.getData(), 18, 2, MASK_16BITS);
 		header = new DSMCCMessageHeader(protocolDiscriminator, dsmccType, messageId, transactionId, reserved, adaptationLength, messageLength);
 		if(messageId==0x1006){ // DSI
 			serverId=copyOfRange(raw_data.getData(), 20, 40); // should be FF
 
 			compatibilityDescriptor = new CompatibilityDescriptor(raw_data.getData(), 40);
 			int offs=42 + compatibilityDescriptor.getCompatibilityDescriptorLength();
-			privateDataLength = Utils.getInt(raw_data.getData(), offs, 2, Utils.MASK_16BITS);
+			privateDataLength = getInt(raw_data.getData(), offs, 2, MASK_16BITS);
 			offs +=2;
 			privateDataByte =copyOfRange(raw_data.getData(), offs, offs+privateDataLength);
 			if(isObjectCarousel){
 				// create ServiceGatewayInfo from privateDataByte
 				serviceGatewayIOR = new IOR(privateDataByte,0);
-				final int len=serviceGatewayIOR.getLength();
-				downloadTaps_count= Utils.getInt(privateDataByte, len, 1, Utils.MASK_8BITS);
+				int len=serviceGatewayIOR.getLength();
+				downloadTaps_count= getInt(privateDataByte, len, 1, MASK_8BITS);
 				// Will fail if downloadTaps_count!=0
-				serviceContextList_count= Utils.getInt(privateDataByte, len+1, 1, Utils.MASK_8BITS);
+				serviceContextList_count= getInt(privateDataByte, len+1, 1, MASK_8BITS);
 				// Will fail if serviceContextList_count!=0
-				userInfoLength= Utils.getInt(privateDataByte, len+2, 2, Utils.MASK_16BITS);
+				userInfoLength= getInt(privateDataByte, len+2, 2, MASK_16BITS);
 				// Will fail if userInfoLength!=0
 
 			}else{ // SSU
 				int offset=0;
-				numberOfGroups = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS);
+				numberOfGroups = getInt(privateDataByte,offset, 2, MASK_16BITS);
 				offset += 2;
 				for (int i = 0; i < numberOfGroups; i++) {
-					final GroupInfo groupInfo = new GroupInfo(privateDataByte, offset);
+					GroupInfo groupInfo = new GroupInfo(privateDataByte, offset);
 					groupInfoIndication.add(groupInfo);
 					offset += groupInfo.len();
 				}
-				groupInfoLength = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS);
+				groupInfoLength = getInt(privateDataByte,offset, 2, MASK_16BITS);
 				offset += 2;
-				groupInfoByte = Utils.getBytes(privateDataByte, offset, groupInfoLength);
+				groupInfoByte = getBytes(privateDataByte, offset, groupInfoLength);
 				offset += groupInfoLength;
-				privateDataLen2 = Utils.getInt(privateDataByte,offset, 2, Utils.MASK_16BITS); // this gives exception for nordig DVB-t 746000000.ts pid 8006.
+				privateDataLen2 = getInt(privateDataByte,offset, 2, MASK_16BITS); // this gives exception for nordig DVB-t 746000000.ts pid 8006.
 				offset += 2;
-				privateDataByte2 = Utils.getBytes(privateDataByte, offset, privateDataLen2);
+				privateDataByte2 = getBytes(privateDataByte, offset, privateDataLen2);
 				offset += privateDataLen2;
 
 
 			}
 
 		}else if(messageId== 0x1002){ // DownloadInfoIndication
-			downloadId = Utils.getLong(raw_data.getData(), 20, 4, Utils.MASK_32BITS);
-			blockSize = Utils.getInt(raw_data.getData(), 24, 2, Utils.MASK_16BITS);
-			windowSize =  Utils.getInt(raw_data.getData(), 26, 1, Utils.MASK_8BITS);
-			ackPeriod =  Utils.getInt(raw_data.getData(), 27, 1, Utils.MASK_8BITS);
-			tCDownloadWindow = Utils.getLong(raw_data.getData(), 28, 4, Utils.MASK_32BITS);
-			tCDownloadScenario = Utils.getLong(raw_data.getData(), 32, 4, Utils.MASK_32BITS);
+			downloadId = getLong(raw_data.getData(), 20, 4, MASK_32BITS);
+			blockSize = getInt(raw_data.getData(), 24, 2, MASK_16BITS);
+			windowSize =  getInt(raw_data.getData(), 26, 1, MASK_8BITS);
+			ackPeriod =  getInt(raw_data.getData(), 27, 1, MASK_8BITS);
+			tCDownloadWindow = getLong(raw_data.getData(), 28, 4, MASK_32BITS);
+			tCDownloadScenario = getLong(raw_data.getData(), 32, 4, MASK_32BITS);
 			compatibilityDescriptor = new CompatibilityDescriptor(raw_data.getData(), 36); // start at 36, length-field is also part of descriptor
 			int p=38+compatibilityDescriptor.getCompatibilityDescriptorLength();
 
-			numberOfModules = Utils.getInt(raw_data.getData(), p, 2, Utils.MASK_16BITS);
+			numberOfModules = getInt(raw_data.getData(), p, 2, MASK_16BITS);
 			p+=2;
 
 			if(true){ // isObjectCarousel, also SSU ??
 				for (int i = 0; i < numberOfModules; i++) {
-					final int moduleId= Utils.getInt(raw_data.getData(), p, 2, Utils.MASK_16BITS);
+					int moduleId= getInt(raw_data.getData(), p, 2, MASK_16BITS);
 					p+=2;
-					final long moduleSize = Utils.getLong(raw_data.getData(), p, 4, Utils.MASK_32BITS);
+					long moduleSize = getLong(raw_data.getData(), p, 4, MASK_32BITS);
 					p+=4;
-					final int moduleVersion = Utils.getInt(raw_data.getData(), p++, 1, Utils.MASK_8BITS);
-					final int moduleInfoLength = Utils.getInt(raw_data.getData(), p++, 1, Utils.MASK_8BITS);
-					final byte[] moduleInfoByte = Utils.getBytes(raw_data.getData(), p, moduleInfoLength);
+					int moduleVersion = getInt(raw_data.getData(), p++, 1, MASK_8BITS);
+					int moduleInfoLength = getInt(raw_data.getData(), p++, 1, MASK_8BITS);
+					byte[] moduleInfoByte = getBytes(raw_data.getData(), p, moduleInfoLength);
 					p+=moduleInfoLength;
-					final ModuleInfo mod = new ModuleInfo(moduleId, moduleSize, moduleVersion, moduleInfoLength, moduleInfoByte);
+					ModuleInfo mod = new ModuleInfo(moduleId, moduleSize, moduleVersion, moduleInfoLength, moduleInfoByte);
 					modules.add(mod);
 				}
 			}
-			privateDataLength = Utils.getInt(raw_data.getData(), p, 2, Utils.MASK_16BITS);
+			privateDataLength = getInt(raw_data.getData(), p, 2, MASK_16BITS);
 		}
 
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("DSMCCsection section=");
+		StringBuilder b = new StringBuilder("DSMCCsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=")
 		.append(getTableType(tableId)).append(", ");
 
@@ -424,46 +393,46 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = (KVP)super.getJTreeNode(modus);
 		t.setUserObject(new KVP(isDSI()?"DSI":"DII"));
 		t.add(header.getJTreeNode(modus));
 		if(isDSI()){ // DSI
-			t.add(new DefaultMutableTreeNode(new KVP("serverId",serverId,null)));
+			t.add(new KVP("serverId",serverId));
 			t.add(compatibilityDescriptor.getJTreeNode(modus));
-			t.add(new DefaultMutableTreeNode(new KVP("privateDataLength",privateDataLength,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("privateDataByte",privateDataByte,null)));
+			t.add(new KVP("privateDataLength",privateDataLength));
+			t.add(new KVP("privateDataByte",privateDataByte));
 			if(isObjectCarousel){
 				t.add(serviceGatewayIOR.getJTreeNode(modus));
-				t.add(new DefaultMutableTreeNode(new KVP("downloadTaps_count",downloadTaps_count,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("serviceContextList_count",serviceContextList_count,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("userInfoLength",userInfoLength,null)));
+				t.add(new KVP("downloadTaps_count",downloadTaps_count));
+				t.add(new KVP("serviceContextList_count",serviceContextList_count));
+				t.add(new KVP("userInfoLength",userInfoLength));
 
 			}else { // SSU
-				t.add(new DefaultMutableTreeNode(new KVP("numberOfGroups",numberOfGroups,null)));
+				t.add(new KVP("numberOfGroups",numberOfGroups));
 				addListJTree(t,groupInfoIndication,modus,"GroupInfos");
-				t.add(new DefaultMutableTreeNode(new KVP("groupInfoLength",groupInfoLength,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("groupInfoByte",groupInfoByte,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("privateDataLen",privateDataLen2,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("privateDataByte",privateDataByte2,null)));
+				t.add(new KVP("groupInfoLength",groupInfoLength));
+				t.add(new KVP("groupInfoByte",groupInfoByte));
+				t.add(new KVP("privateDataLen",privateDataLen2));
+				t.add(new KVP("privateDataByte",privateDataByte2));
 			}
 
 
 		}else if(isDII()){ // DownloadInfoIndication
-			t.add(new DefaultMutableTreeNode(new KVP("downloadId",downloadId,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("blockSize",blockSize,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("windowSize",windowSize,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ackPeriod",ackPeriod,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("tCDownloadWindow",tCDownloadWindow,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("tCDownloadScenario",tCDownloadScenario,null)));
+			t.add(new KVP("downloadId",downloadId));
+			t.add(new KVP("blockSize",blockSize));
+			t.add(new KVP("windowSize",windowSize));
+			t.add(new KVP("ackPeriod",ackPeriod));
+			t.add(new KVP("tCDownloadWindow",tCDownloadWindow));
+			t.add(new KVP("tCDownloadScenario",tCDownloadScenario));
 			t.add(compatibilityDescriptor.getJTreeNode(modus));
 
-			t.add(new DefaultMutableTreeNode(new KVP("numberOfModules",numberOfModules,null)));
+			t.add(new KVP("numberOfModules",numberOfModules));
 			if(true){ // isObjectCarousel
 				addListJTree(t,modules,modus,"Modules");
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("privateDataLength",privateDataLength,null)));
+			t.add(new KVP("privateDataLength",privateDataLength));
 		}
 
 
@@ -481,52 +450,38 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		return header.getMessageId()==0x1006;
 	}
 
-	private static String getDSMCCTypeString(final int dsmccType) {
-		switch (dsmccType) {
-		case 0x01:
-			return "User-to-Network configuration message";
-		case 0x02:
-			return "User-to-Network session message";
-		case 0x03:
-			return "Download message";
-		case 0x04:
-			return "SDB Channel Change Protocol message";
-		case 0x05:
-			return "User-to- Network pass-thru message";
-
-		default:
-			if((dsmccType>=0x80)&&(dsmccType<=0xff)){
-				return "User Defined message type";
-			}
-			return "reserved";
-
-		}
+	private static String getDSMCCTypeString(int dsmccType) {
+        return switch (dsmccType) {
+            case 0x01 -> "User-to-Network configuration message";
+            case 0x02 -> "User-to-Network session message";
+            case 0x03 -> "Download message";
+            case 0x04 -> "SDB Channel Change Protocol message";
+            case 0x05 -> "User-to- Network pass-thru message";
+            default -> {
+                if ((dsmccType >= 0x80) && (dsmccType <= 0xff)) {
+                    yield "User Defined message type";
+                }
+                yield "reserved";
+            }
+        };
 	}
 
 
-	private static String getMessageIDString(final int dsmccType,final int messageId) {
-		switch (dsmccType) {
-		case 0x03:
-			// Download message
-			switch(messageId) {
-			case 0x1001:
-				return "DownloadInfoRequest";
-			case 0x1002:
-				return "DownloadInfoIndication";
-			case 0x1003:
-				return "DownloadDataBlock";
-			case 0x1004:
-				return "DownloadDataRequest";
-			case 0x1005:
-				return "DownloadCancel";
-			case 0x1006:
-				return "DownloadServerInitiate";
-			default:
-				return null;
-			}
-		default:
-			return null;
-		}
+	private static String getMessageIDString(int dsmccType, int messageId) {
+        return switch (dsmccType) {
+            case 0x03 ->
+                // Download message
+                    switch (messageId) {
+                        case 0x1001 -> "DownloadInfoRequest";
+                        case 0x1002 -> "DownloadInfoIndication";
+                        case 0x1003 -> "DownloadDataBlock";
+                        case 0x1004 -> "DownloadDataRequest";
+                        case 0x1005 -> "DownloadCancel";
+                        case 0x1006 -> "DownloadServerInitiate";
+                        default -> null;
+                    };
+            default -> null;
+        };
 	}
 
 
@@ -657,8 +612,8 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 		return modules;
 	}
 
-	public ModuleInfo getModule(final int modId) {
-		for(final ModuleInfo module: modules){
+	public ModuleInfo getModule(int modId) {
+		for(ModuleInfo module: modules){
 			if(module.getModuleId()==modId){
 				return module;
 			}

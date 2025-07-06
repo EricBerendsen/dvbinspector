@@ -27,12 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -45,12 +41,12 @@ public class BIOPModuleInfo implements TreeNode {
 	private final long blockTimeOut;
 	private final long minBlockTime;
 	private final int taps_count;
-	private List<Tap> taps = new ArrayList<Tap>();
+	private List<Tap> taps = new ArrayList<>();
 	private final int userInfoLength;
 	private List<Descriptor> descriptors;
 
 
-	public BIOPModuleInfo(final byte[] data,final int offset) {
+	public BIOPModuleInfo(byte[] data, int offset) {
 		moduleTimeOut= Utils.getLong(data, offset, 4, Utils.MASK_32BITS);
 		blockTimeOut= Utils.getLong(data, offset+4, 4, Utils.MASK_32BITS);
 		minBlockTime= Utils.getLong(data, offset+8, 4, Utils.MASK_32BITS);
@@ -59,7 +55,7 @@ public class BIOPModuleInfo implements TreeNode {
 		int off= offset+13;
 
 		for (int i = 0; i < taps_count; i++) {
-			final Tap tap =new Tap(data,off);
+			Tap tap =new Tap(data,off);
 			taps.add(tap);
 			off+= tap.getSelector_length()+7;
 
@@ -71,16 +67,15 @@ public class BIOPModuleInfo implements TreeNode {
 
 
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(
-				"BIOP::ModuleInfo"));
-		t.add(new DefaultMutableTreeNode(new KVP("ModuleTimeOut",moduleTimeOut ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("BlockTimeOut",blockTimeOut ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("MinBlockTime",minBlockTime ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("taps_count",taps_count ,null)));
-		addListJTree(t,taps,modus,"BIOP::Taps");
-		t.add(new DefaultMutableTreeNode(new KVP("userInfoLength",userInfoLength ,null)));
-		Utils.addListJTree(t,descriptors,modus,"descriptors");
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("BIOP::ModuleInfo");
+		t.add(new KVP("ModuleTimeOut",moduleTimeOut));
+		t.add(new KVP("BlockTimeOut",blockTimeOut));
+		t.add(new KVP("MinBlockTime",minBlockTime));
+		t.add(new KVP("taps_count",taps_count));
+		t.addList(taps,modus,"BIOP::Taps");
+		t.add(new KVP("userInfoLength",userInfoLength));
+		t.addList(descriptors,modus,"descriptors");
 
 		return t;
 	}

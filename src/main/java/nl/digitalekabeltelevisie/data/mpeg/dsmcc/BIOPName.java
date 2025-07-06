@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static java.util.Arrays.copyOfRange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,71 +44,41 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class BIOPName implements TreeNode {
 
-	public static class NameComponent implements TreeNode {
-		/**
-		 * @param id_length
-		 * @param id_data_byte
-		 * @param kind_length
-		 * @param kind_data_byte
-		 */
-		public NameComponent(final int id_length, final byte[] id_data_byte,
-				final int kind_length, final byte[] kind_data_byte) {
-			super();
-			this.id_length = id_length;
-			this.id_data_byte = id_data_byte;
-			this.kind_length = kind_length;
-			this.kind_data_byte = kind_data_byte;
+	public record NameComponent(int id_length, byte[] id_data_byte, int kind_length,
+								byte[] kind_data_byte) implements TreeNode {
+			public NameComponent {
 		}
 
-		private final int id_length;
-		private final byte[] id_data_byte;
-		private final int kind_length;
-		private final byte[] kind_data_byte;
+			public DefaultMutableTreeNode getJTreeNode(int modus) {
+				DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NameComponent"));
+				t.add(new DefaultMutableTreeNode(new KVP("id_length", id_length, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("id_data_byte", id_data_byte, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("kind_length", kind_length, null)));
+				t.add(new DefaultMutableTreeNode(new KVP("kind_data_byte", kind_data_byte, null)));
+				return t;
+			}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NameComponent"));
-			t.add(new DefaultMutableTreeNode(new KVP("id_length",id_length ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("id_data_byte",id_data_byte ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("kind_length",kind_length ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("kind_data_byte",kind_data_byte ,null)));
-			return t;
-		}
 
-		public int getId_length() {
-			return id_length;
-		}
-
-		public byte[] getId_data_byte() {
-			return id_data_byte;
-		}
-
-		public int getKind_length() {
-			return kind_length;
-		}
-
-		public byte[] getKind_data_byte() {
-			return kind_data_byte;
-		}
 	}
 
 	private final int nameComponents_count;
-	private final List<NameComponent> nameComponents = new ArrayList<NameComponent>();
+	private final List<NameComponent> nameComponents = new ArrayList<>();
 	private int len = 0;
 
 
-	public BIOPName(final byte[] data, final int r) {
+	public BIOPName(byte[] data, int r) {
 		nameComponents_count = Utils.getInt(data, r, 1, Utils.MASK_8BITS);
 		len += 1;
 		for (int i = 0; i < nameComponents_count; i++) {
-			final int id_length = Utils.getInt(data, r+len, 1, Utils.MASK_8BITS);
+			int id_length = Utils.getInt(data, r+len, 1, Utils.MASK_8BITS);
 			len += 1;
-			final byte[] id_data_byte = Utils.copyOfRange(data,r+len,r+len+id_length);
+			byte[] id_data_byte = copyOfRange(data, r + len, r + len + id_length);
 			len += id_length;
-			final int kind_length = Utils.getInt(data, r+len, 1, Utils.MASK_8BITS);
+			int kind_length = Utils.getInt(data, r+len, 1, Utils.MASK_8BITS);
 			len += 1;
-			final byte[] kind_data_byte = Utils.copyOfRange(data,r+len,r+len+kind_length);
+			byte[] kind_data_byte = copyOfRange(data, r + len, r + len + kind_length);
 			len += kind_length;
-			final NameComponent nameComponent = new NameComponent(id_length, id_data_byte, kind_length, kind_data_byte);
+			NameComponent nameComponent = new NameComponent(id_length, id_data_byte, kind_length, kind_data_byte);
 			nameComponents.add(nameComponent);
 		}
 
@@ -119,10 +89,10 @@ public class BIOPName implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("BIOP::Name"));
-		t.add(new DefaultMutableTreeNode(new KVP("nameComponents_count",nameComponents_count ,null)));
-		addListJTree(t,nameComponents,modus,"Name Components");
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("BIOP::Name");
+		t.add(new KVP("nameComponents_count",nameComponents_count));
+		t.addList(nameComponents,modus,"Name Components");
 		return t;
 	}
 
@@ -143,9 +113,9 @@ public class BIOPName implements TreeNode {
 
 	public String getName(){
 		String r =null;
-		final NameComponent comp = nameComponents.get(0);
+		NameComponent comp = nameComponents.getFirst();
 		if(comp!=null){
-			final byte[] b= Utils.copyOfRange(comp.getId_data_byte(),0,comp.getId_length()-1);
+			byte[] b= copyOfRange(comp.id_data_byte(), 0, comp.id_length() - 1);
 			r =Utils.toSafeString(b);
 		}
 		return r;

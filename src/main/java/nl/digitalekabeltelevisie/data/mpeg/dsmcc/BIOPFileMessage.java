@@ -27,16 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.util.Utils;
+
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 /**
  * see ETSI TS 102 809 V1.3.1 (2017-06) Table B.16: BIOP::FileMessage syntax
@@ -51,10 +49,9 @@ public class BIOPFileMessage extends BIOPMessage {
 		 * @param context_data_length
 		 * @param context_data_byte
 		 */
-		public ServiceContext(final long context_id, final int context_data_length,
-				final byte[] context_data_byte) {
-			super();
-			this.context_id = context_id;
+		public ServiceContext(long context_id, int context_data_length,
+                              byte[] context_data_byte) {
+            this.context_id = context_id;
 			this.context_data_length = context_data_length;
 			this.context_data_byte = context_data_byte;
 		}
@@ -63,11 +60,11 @@ public class BIOPFileMessage extends BIOPMessage {
 		private final int context_data_length;
 		private final byte[] context_data_byte;
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ServiceContext"));
-			t.add(new DefaultMutableTreeNode(new KVP("context_id",context_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("context_data_length",context_data_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("context_data_byte",context_data_byte,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("ServiceContext");
+			t.add(new KVP("context_id",context_id));
+			t.add(new KVP("context_data_length",context_data_length));
+			t.add(new KVP("context_data_byte",context_data_byte));
 			return t;
 		}
 
@@ -75,42 +72,38 @@ public class BIOPFileMessage extends BIOPMessage {
 
 	protected byte[] objectInfo_data_byte = new byte[0];
 	protected int serviceContextList_count;
-	private final List<ServiceContext> serviceContextList = new ArrayList<ServiceContext>();
+	private final List<ServiceContext> serviceContextList = new ArrayList<>();
 	protected long messageBody_length;
 	private byte[] dsmFileContentSize;
 	private final long content_length;
 	private final int contentStartOffset;
-	//	private byte[] content_data_byte;  // no need to make a copy, refer to data[]
 
-
-
-
-	public BIOPFileMessage(final byte[] data, final int offset) {
+	public BIOPFileMessage(byte[] data, int offset) {
 		super(data, offset);
 		if(objectInfo_length>=8){
-			dsmFileContentSize=Utils.copyOfRange(data,byte_counter,byte_counter+8);
+			dsmFileContentSize= Arrays.copyOfRange(data, byte_counter, byte_counter + 8);
 		}
 
 		if(objectInfo_length>8){
-			objectInfo_data_byte = Utils.copyOfRange(data,byte_counter+8,byte_counter+objectInfo_length);
+			objectInfo_data_byte = Arrays.copyOfRange(data, byte_counter + 8, byte_counter + objectInfo_length);
 		}
 		byte_counter += objectInfo_length;
 
-		serviceContextList_count =  Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		serviceContextList_count =  getInt(data, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
 		for (int i = 0; i < serviceContextList_count; i++) {
-			final long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+			long context_id = getLong(data, byte_counter, 4, MASK_32BITS);
 			byte_counter += 4;
-			final int  context_data_length = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+			int  context_data_length = getInt(data, byte_counter, 2, MASK_16BITS);
 			byte_counter += 2;
-			final byte[] context_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+context_data_length);
+			byte[] context_data_byte = Arrays.copyOfRange(data, byte_counter, byte_counter + context_data_length);
 			byte_counter += context_data_length;
-			final ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
+			ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
 			serviceContextList.add(serviceContext);
 		}
-		messageBody_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		messageBody_length = getLong(data, byte_counter, 4, MASK_32BITS);
 		byte_counter += 4;
-		content_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		content_length = getLong(data, byte_counter, 4, MASK_32BITS);
 		byte_counter += 4;
 		contentStartOffset =byte_counter;
 
@@ -119,15 +112,15 @@ public class BIOPFileMessage extends BIOPMessage {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final String label) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus,label);
-		t.add(new DefaultMutableTreeNode(new KVP("dsmFileContentSize",dsmFileContentSize ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectInfo_data_byte",objectInfo_data_byte ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("serviceContextList_count",serviceContextList_count ,null)));
+	public KVP getJTreeNode(int modus, String label) {
+		KVP t = super.getJTreeNode(modus,label);
+		t.add(new KVP("dsmFileContentSize",dsmFileContentSize));
+		t.add(new KVP("objectInfo_data_byte",objectInfo_data_byte));
+		t.add(new KVP("serviceContextList_count",serviceContextList_count));
 		addListJTree(t,serviceContextList,modus,"ServiceContextList");
-		t.add(new DefaultMutableTreeNode(new KVP("messageBody_length",messageBody_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("content_length",content_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("content_data_byte",data, contentStartOffset, (int)content_length ,null)));
+		t.add(new KVP("messageBody_length",messageBody_length));
+		t.add(new KVP("content_length",content_length));
+		t.add(new KVP("content_data_byte",data, contentStartOffset, (int)content_length));
 
 
 
@@ -135,7 +128,7 @@ public class BIOPFileMessage extends BIOPMessage {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 		return getJTreeNode(modus,"");
 	}
 

@@ -30,14 +30,16 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
+
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
 
 /**
  * @author Eric Berendsen
@@ -56,113 +58,67 @@ public class DSMCC_DownLoadDataMessageSection extends TableSectionExtendedSyntax
 
 	/**
 	 * This DSMCCMessageHeader is different form the one in DSMCC_UNMessageSection because the field transactionId is called downloadID in this one.
-	 * @author Eric
 	 *
+	 * @author Eric
 	 */
-	public static class DSMCCMessageHeader implements TreeNode{
-		public DSMCCMessageHeader(final int protocolDiscriminator, final int dsmccType,
-				final int messageId, final long downloadId, final int reserved,
-				final int adaptationLength, final int messageLength) {
-			super();
-			this.protocolDiscriminator = protocolDiscriminator;
-			this.dsmccType = dsmccType;
-			this.messageId = messageId;
-			this.downloadId = downloadId;
-			this.reserved = reserved;
-			this.adaptationLength = adaptationLength;
-			this.messageLength = messageLength;
-		}
+		public record DSMCCMessageHeader(int protocolDiscriminator, int dsmccType, int messageId, long downloadId,
+										 int reserved, int adaptationLength, int messageLength) implements TreeNode {
 
-		private final int protocolDiscriminator;
-		private final int dsmccType;
-		private final int messageId;
-		private final long downloadId;
-		private final int reserved;
-		private final int adaptationLength;
-		private final int messageLength;
+		public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("DSM-CC Message Header");
+				t.add(new KVP("protocolDiscriminator", protocolDiscriminator));
+				t.add(new KVP("dsmccType", dsmccType, getDSMCCTypeString(dsmccType)));
+				t.add(new KVP("messageId", messageId, getMessageIDString(dsmccType, messageId)));
+				t.add(new KVP("downloadId", downloadId));
+				t.add(new KVP("reserved", reserved));
+				t.add(new KVP("adaptationLength", adaptationLength));
+				t.add(new KVP("messageLength", messageLength));
 
+				return t;
+			}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DSM-CC Message Header"));
-			t.add(new DefaultMutableTreeNode(new KVP("protocolDiscriminator",protocolDiscriminator,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("dsmccType",dsmccType,getDSMCCTypeString(dsmccType))));
-			t.add(new DefaultMutableTreeNode(new KVP("messageId",messageId,getMessageIDString(dsmccType, messageId))));
-			t.add(new DefaultMutableTreeNode(new KVP("downloadId",downloadId,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("adaptationLength",adaptationLength,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("messageLength",messageLength,null)));
-
-			return t;
-		}
-
-		public int getProtocolDiscriminator() {
-			return protocolDiscriminator;
-		}
-
-		public int getDsmccType() {
-			return dsmccType;
-		}
-
-		public int getMessageId() {
-			return messageId;
-		}
-
-		public long getDownloadId() {
-			return downloadId;
-		}
-
-		public int getReserved() {
-			return reserved;
-		}
-
-		public int getAdaptationLength() {
-			return adaptationLength;
-		}
-
-		private int getMessageLength() {
-			return messageLength;
-		}
 
 	}
 
 
 
-	public DSMCC_DownLoadDataMessageSection(final PsiSectionData raw_data, final PID parent){
+	public DSMCC_DownLoadDataMessageSection(PsiSectionData raw_data, PID parent){
 		super(raw_data, parent);
 
-		final int protocolDiscriminator = Utils.getInt(raw_data.getData(), 8, 1, Utils.MASK_8BITS);
-		final int dsmccType = Utils.getInt(raw_data.getData(), 9, 1, Utils.MASK_8BITS);
-		final int messageId = Utils.getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
-		final long downloadId = Utils.getLong(raw_data.getData(), 12, 4, Utils.MASK_32BITS);
-		final int reserved1 = Utils.getInt(raw_data.getData(), 16, 1, Utils.MASK_8BITS);
-		final int adaptationLength = Utils.getInt(raw_data.getData(), 17, 1, Utils.MASK_8BITS);
-		final int messageLength = Utils.getInt(raw_data.getData(), 18, 2, Utils.MASK_16BITS);
+		int protocolDiscriminator = getInt(raw_data.getData(), 8, 1, Utils.MASK_8BITS);
+		int dsmccType = getInt(raw_data.getData(), 9, 1, Utils.MASK_8BITS);
+		int messageId = getInt(raw_data.getData(), 10, 2, Utils.MASK_16BITS);
+		long downloadId = getLong(raw_data.getData(), 12, 4, Utils.MASK_32BITS);
+		int reserved1 = getInt(raw_data.getData(), 16, 1, Utils.MASK_8BITS);
+		int adaptationLength = getInt(raw_data.getData(), 17, 1, Utils.MASK_8BITS);
+		int messageLength = getInt(raw_data.getData(), 18, 2, Utils.MASK_16BITS);
 		header = new DSMCCMessageHeader(protocolDiscriminator, dsmccType, messageId, downloadId, reserved1, adaptationLength, messageLength);
-		moduleId = Utils.getInt(raw_data.getData(), 20, 2, Utils.MASK_16BITS);
-		moduleVersion = Utils.getInt(raw_data.getData(), 22, 1, Utils.MASK_8BITS);
-		reserved = Utils.getInt(raw_data.getData(), 23, 1, Utils.MASK_8BITS);
-		blockNumber = Utils.getInt(raw_data.getData(), 24, 2, Utils.MASK_16BITS);
-		blockDataByte = Utils.copyOfRange(raw_data.getData(), 26, 20+header.getMessageLength()); //to = 26+messagelength - 6
+		moduleId = getInt(raw_data.getData(), 20, 2, Utils.MASK_16BITS);
+		moduleVersion = getInt(raw_data.getData(), 22, 1, Utils.MASK_8BITS);
+		reserved = getInt(raw_data.getData(), 23, 1, Utils.MASK_8BITS);
+		blockNumber = getInt(raw_data.getData(), 24, 2, Utils.MASK_16BITS);
+		byte[] original = raw_data.getData();
+		blockDataByte = copyOfRange(original, 26, 20 + header.messageLength()); //to = 26+messagelength - 6
 
 	}
 
 	public int getPayLoadLength(){
 		if(header!=null){
-			return  header.getMessageLength()-6;
+			return  header.messageLength()-6;
 		}
 		return 0;
 	}
 
 
 	public byte[] getPayLoad(){
-		return Utils.copyOfRange(raw_data.getData(), 26, (26+header.getMessageLength())-6);
+        return copyOfRange(raw_data.getData(), 26, (26+header.messageLength())-6);
 	}
 
 
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("DSMCCsection section=");
+		StringBuilder b = new StringBuilder("DSMCCsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=")
 		.append(getTableType(tableId)).append(", ");
 
@@ -172,21 +128,21 @@ public class DSMCC_DownLoadDataMessageSection extends TableSectionExtendedSyntax
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = (KVP)super.getJTreeNode(modus);
 		t.add(header.getJTreeNode(modus));
-		t.add(new DefaultMutableTreeNode(new KVP("moduleId",moduleId,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("moduleVersion",moduleVersion,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("blockNumber",blockNumber,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("blockDataByte",blockDataByte,null)));
+		t.add(new KVP("moduleId",moduleId));
+		t.add(new KVP("moduleVersion",moduleVersion));
+		t.add(new KVP("reserved",reserved));
+		t.add(new KVP("blockNumber",blockNumber));
+		t.add(new KVP("blockDataByte",blockDataByte));
 
 
 		return t;
 	}
 
-	private static String getDSMCCTypeString(final int dsmccType) {
+	private static String getDSMCCTypeString(int dsmccType) {
 		switch (dsmccType) {
 		case 0x01:
 			return "User-to-Network configuration message";
@@ -210,41 +166,30 @@ public class DSMCC_DownLoadDataMessageSection extends TableSectionExtendedSyntax
 	}
 
 
-	private static String getMessageIDString(final int dsmccType,final int messageId) {
-		switch (dsmccType) {
-		//		case 0x01:
-		//			return "User-to-Network configuration message";
-		//		case 0x02:
-		//			return "User-to-Network session message";
-		case 0x03:
-			// "Download message";
-			switch(messageId) {
-			case 0x1001:
-				return "DownloadInfoRequest";
-			case 0x1002:
-				return "DownloadInfoIndication";
-			case 0x1003:
-				return "DownloadDataBlock";
-			case 0x1004:
-				return "DownloadDataRequest";
-			case 0x1005:
-				return "DownloadCancel";
-			case 0x1006:
-				return "DownloadServerInitiate";
-			default:
-				return null;
+	private static String getMessageIDString(int dsmccType, int messageId) {
+        return switch (dsmccType) {
+            //		case 0x01:
+            //			return "User-to-Network configuration message";
+            //		case 0x02:
+            //			return "User-to-Network session message";
+            case 0x03 ->
+                // "Download message";
+                    switch (messageId) {
+                        case 0x1001 -> "DownloadInfoRequest";
+                        case 0x1002 -> "DownloadInfoIndication";
+                        case 0x1003 -> "DownloadDataBlock";
+                        case 0x1004 -> "DownloadDataRequest";
+                        case 0x1005 -> "DownloadCancel";
+                        case 0x1006 -> "DownloadServerInitiate";
+                        default -> null;
+                    };
+            //		case 0x04:
+            //			return "SDB Channel Change Protocol message";
+            //		case 0x05:
+            //			return "User-to- Network pass-thru message";
 
-
-			}
-			//		case 0x04:
-			//			return "SDB Channel Change Protocol message";
-			//		case 0x05:
-			//			return "User-to- Network pass-thru message";
-
-		default:
-			return null;
-
-		}
+            default -> null;
+        };
 	}
 
 

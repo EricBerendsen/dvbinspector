@@ -31,9 +31,8 @@ package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -50,42 +49,41 @@ public class TaggedProfile implements TreeNode {
 	// BIOP
 	private final int profile_data_byte_order;
 	private final int liteComponents_count;
-	private final List<LiteComponent>liteComponents=new ArrayList<LiteComponent>();
+	private final List<LiteComponent>liteComponents= new ArrayList<>();
 
 
 	/** The associated profile data. */
-	public byte profile_data[] = null;
+	public byte[] profile_data = null;
 
-	public TaggedProfile( final byte[] data, final int offset) {
+	public TaggedProfile( byte[] data, int offset) {
 		profileId_tag = getLong(data, offset, 4, MASK_32BITS);
 		profile_data_length = getLong(data, offset+4, 4, MASK_32BITS);
-		profile_data = copyOfRange(data, offset+8, offset+8+(int)profile_data_length);
+		profile_data = Arrays.copyOfRange(data, offset + 8, offset + 8 + (int) profile_data_length);
 		profile_data_byte_order = getInt(data,offset+8,1,MASK_8BITS);
 		liteComponents_count = getInt(data,offset+9,1,MASK_8BITS);
 		int liteOffset= offset+10;
 		for (int i = 0; i < liteComponents_count; i++) {
-			final LiteComponent liteComponent = LiteComponentsFactory.createLiteComponent(data,liteOffset);
+			LiteComponent liteComponent = LiteComponentsFactory.createLiteComponent(data,liteOffset);
 			liteComponents.add(liteComponent);
 			liteOffset += 5+liteComponent.getComponentDataLength(); // tag=4 bytes, length itself =1
 		}
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(
-				"TaggedProfile"));
-		t.add(new DefaultMutableTreeNode(new KVP("profileId_tag",profileId_tag ,getProfileIdTagString(profileId_tag))));
-		t.add(new DefaultMutableTreeNode(new KVP("profile_data_length",profile_data_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("profile_data",profile_data ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("profile_data_byte_order",profile_data_byte_order ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("liteComponents_count",liteComponents_count ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("TaggedProfile");
+		t.add(new KVP("profileId_tag",profileId_tag ,getProfileIdTagString(profileId_tag)));
+		t.add(new KVP("profile_data_length",profile_data_length));
+		t.add(new KVP("profile_data",profile_data));
+		t.add(new KVP("profile_data_byte_order",profile_data_byte_order));
+		t.add(new KVP("liteComponents_count",liteComponents_count));
 		addListJTree(t,liteComponents,modus,"LiteComponents");
 		return t;
 	}
 
 
 
-	public static String getProfileIdTagString(final long profileId_tag){
+	public static String getProfileIdTagString(long profileId_tag){
 		if(profileId_tag==TAG_BIOP){
 			return "TAG_BIOP (BIOP Profile Body)";
 		}else if(profileId_tag==TAG_LITE_OPTIONS){
@@ -106,14 +104,6 @@ public class TaggedProfile implements TreeNode {
 
 	public long getProfileId_tag() {
 		return profileId_tag;
-	}
-
-	public static long getTAG_BIOP() {
-		return TAG_BIOP;
-	}
-
-	public static long getTAG_LITE_OPTIONS() {
-		return TAG_LITE_OPTIONS;
 	}
 
 	public int getProfile_data_byte_order() {

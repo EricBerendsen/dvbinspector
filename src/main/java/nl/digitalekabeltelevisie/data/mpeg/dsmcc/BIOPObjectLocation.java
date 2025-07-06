@@ -27,10 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
+
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
 
 public class BIOPObjectLocation extends LiteComponent {
 	protected long carouselId;
@@ -41,30 +43,29 @@ public class BIOPObjectLocation extends LiteComponent {
 	protected byte[] objectKey_data_byte;
 
 
-	public BIOPObjectLocation(final byte[] data, final int offset) {
+	public BIOPObjectLocation(byte[] data, int offset) {
 		super(data, offset);
-		carouselId= Utils.getLong(data, offset+5, 4, Utils.MASK_32BITS);
-		moduleId= Utils.getInt(data, offset+9, 2, Utils.MASK_16BITS);
-		version_major= Utils.getInt(data, offset+11, 1, Utils.MASK_8BITS);
-		version_minor= Utils.getInt(data, offset+12, 1, Utils.MASK_8BITS);
-		objectKey_length= Utils.getInt(data, offset+13, 1, Utils.MASK_8BITS);
-		objectKey_data_byte = Utils.copyOfRange(data,offset+14,offset+14+objectKey_length);
+		carouselId= getLong(data, offset+5, 4, Utils.MASK_32BITS);
+		moduleId= getInt(data, offset+9, 2, Utils.MASK_16BITS);
+		version_major= getInt(data, offset+11, 1, Utils.MASK_8BITS);
+		version_minor= getInt(data, offset+12, 1, Utils.MASK_8BITS);
+		objectKey_length= getInt(data, offset+13, 1, Utils.MASK_8BITS);
+		objectKey_data_byte = copyOfRange(data, offset + 14, offset + 14 + objectKey_length);
 
 	}
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(
-				"BIOP::ObjectLocation"));
-		t.add(new DefaultMutableTreeNode(new KVP("component_tag",component_tag ,getComponentTagString((int)component_tag))));
-		t.add(new DefaultMutableTreeNode(new KVP("component_data_length",component_data_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("carouselId",carouselId ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("moduleId",moduleId ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("version.major",version_major ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("version.minor",version_minor ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectKey_length",objectKey_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("objectKey_data_byte",objectKey_data_byte ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("BIOP::ObjectLocation");
+		t.add(new KVP("component_tag",component_tag, getComponentTagString((int)component_tag)));
+		t.add(new KVP("component_data_length",component_data_length));
+		t.add(new KVP("carouselId",carouselId));
+		t.add(new KVP("moduleId",moduleId));
+		t.add(new KVP("version.major",version_major));
+		t.add(new KVP("version.minor",version_minor));
+		t.add(new KVP("objectKey_length",objectKey_length));
+		t.add(new KVP("objectKey_data_byte",objectKey_data_byte));
 		return t;
 	}
 

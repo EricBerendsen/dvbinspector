@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -44,7 +42,7 @@ public class Tap implements TreeNode{
 	private long timeout;
 
 
-	public Tap(final byte[] data, final int offset) {
+	public Tap(byte[] data, int offset) {
 		id=Utils.getInt(data, offset, 2, Utils.MASK_16BITS);
 		use=Utils.getInt(data, offset+2, 2, Utils.MASK_16BITS);
 		association_tag=Utils.getInt(data, offset+4, 2, Utils.MASK_16BITS);
@@ -59,52 +57,49 @@ public class Tap implements TreeNode{
 	}
 
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(
-				"BIOP::Tap"));
-		t.add(new DefaultMutableTreeNode(new KVP("id",id ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("use",use ,getUseString(use))));
-		t.add(new DefaultMutableTreeNode(new KVP("association_tag",association_tag ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("selector_length",selector_length ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("BIOP::Tap");
+		t.add(new KVP("id",id));
+		t.add(new KVP("use",use ,getUseString(use)));
+		t.add(new KVP("association_tag",association_tag));
+		t.add(new KVP("selector_length",selector_length));
 		if(use==0x0016){ // BIOP_DELIVERY_PARA_USE
-			t.add(new DefaultMutableTreeNode(new KVP("selector_type",selector_type ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("transactionId",transactionId ,DSMCC_UNMessageSection.getTransactionIDString(transactionId))));
-			t.add(new DefaultMutableTreeNode(new KVP("timeout",timeout ,null)));
+			t.add(new KVP("selector_type",selector_type));
+			t.add(new KVP("transactionId",transactionId ,DSMCC_UNMessageSection.getTransactionIDString(transactionId)));
+			t.add(new KVP("timeout",timeout));
 		}
 		return t;
 	}
 
 	// based on char *dsmccStrBIOP_TAP_Use (u_int id)  in dsmcc_str.c of DVBSnoop
-	public static String getUseString(final int use){
-		switch (use) {
-		case 0x0000: return   "UNKNOWN";
-		case 0x0001: return   "MPEG_TS_UP_USE";
-		case 0x0002: return   "MPEG_TS_DOWN_USE";
-		case 0x0003: return   "MPEG_ES_UP_USE";
-		case 0x0004: return   "MPEG_ES_DOWN_USE";
-		case 0x0005: return   "DOWNLOAD_CTRL_USE";
-		case 0x0006: return   "DOWNLOAD_CTRL_UP_USE";
-		case 0x0007: return   "DOWNLOAD_CTRL_DOWN_USE";
-		case 0x0008: return   "DOWNLOAD_DATA_USE";
-		case 0x0009: return   "DOWNLOAD_DATA_UP_USE";
-		case 0x000A: return   "DOWNLOAD_DATA_DOWN_USE";
-		case 0x000B: return   "STR_NPT_USE";
-		case 0x000C: return   "STR_STATUS_AND_EVENT_USE";
-		case 0x000D: return   "STR_EVENT_USE";
-		case 0x000E: return   "STR_STATUS_USE";
-		case 0x000F: return   "RPC_USE";
-		case 0x0010: return   "IP_USE";
-		case 0x0011: return   "SDB_CTRL_USE";
-		case 0x0015: return   "T120_TAP reserved";
-		case 0x0016: return   "BIOP_DELIVERY_PARA_USE";
-		case 0x0017: return   "BIOP_OBJECT_USE";
-		case 0x0018: return   "BIOP_ES_USE";
-		case 0x0019: return   "BIOP_PROGRAM_USE";
-		case 0x001A: return   "BIOP_DNL_CTRL_USE";
-
-		default:
-			return "unknown";
-		}
+	public static String getUseString(int use){
+        return switch (use) {
+            case 0x0000 -> "UNKNOWN";
+            case 0x0001 -> "MPEG_TS_UP_USE";
+            case 0x0002 -> "MPEG_TS_DOWN_USE";
+            case 0x0003 -> "MPEG_ES_UP_USE";
+            case 0x0004 -> "MPEG_ES_DOWN_USE";
+            case 0x0005 -> "DOWNLOAD_CTRL_USE";
+            case 0x0006 -> "DOWNLOAD_CTRL_UP_USE";
+            case 0x0007 -> "DOWNLOAD_CTRL_DOWN_USE";
+            case 0x0008 -> "DOWNLOAD_DATA_USE";
+            case 0x0009 -> "DOWNLOAD_DATA_UP_USE";
+            case 0x000A -> "DOWNLOAD_DATA_DOWN_USE";
+            case 0x000B -> "STR_NPT_USE";
+            case 0x000C -> "STR_STATUS_AND_EVENT_USE";
+            case 0x000D -> "STR_EVENT_USE";
+            case 0x000E -> "STR_STATUS_USE";
+            case 0x000F -> "RPC_USE";
+            case 0x0010 -> "IP_USE";
+            case 0x0011 -> "SDB_CTRL_USE";
+            case 0x0015 -> "T120_TAP reserved";
+            case 0x0016 -> "BIOP_DELIVERY_PARA_USE";
+            case 0x0017 -> "BIOP_OBJECT_USE";
+            case 0x0018 -> "BIOP_ES_USE";
+            case 0x0019 -> "BIOP_PROGRAM_USE";
+            case 0x001A -> "BIOP_DNL_CTRL_USE";
+            default -> "unknown";
+        };
 	}
 
 

@@ -27,12 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -51,24 +51,24 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 		private int len = 0;
 
 
-		public Binding(final byte[] data, final int offset) {
+		public Binding(byte[] data, int offset) {
 			biopName = new BIOPName(data, offset);
 			len=biopName.getLen();
 
-			bindingType  = Utils.getInt(data, offset+len, 1, Utils.MASK_8BITS);
+			bindingType  = getInt(data, offset+len, 1, Utils.MASK_8BITS);
 			len+=1;
 			ior = new IOR(data, offset+len);
 			len+=ior.getLength();
-			objectInfo_length  = Utils.getInt(data, offset+len, 2, Utils.MASK_16BITS);
+			objectInfo_length  = getInt(data, offset+len, 2, Utils.MASK_16BITS);
 			len+=2;
-			objectInfo_data_byte = Utils.copyOfRange(data,offset+len,offset+len+objectInfo_length);
+			objectInfo_data_byte = copyOfRange(data, offset + len, offset + len + objectInfo_length);
 			len+=objectInfo_length;
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Binding",biopName.getName(),null));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("Binding",biopName.getName());
 			t.add(biopName.getJTreeNode(modus));
-			t.add(new DefaultMutableTreeNode(new KVP("bindingType",bindingType ,getBindingTypeString(bindingType))));
+			t.add(new KVP("bindingType",bindingType ,getBindingTypeString(bindingType)));
 			t.add(ior.getJTreeNode(modus));
 
 			return t;
@@ -106,94 +106,72 @@ public class BIOPDirectoryMessage extends BIOPMessage {
 
 	}
 
-	public static class ServiceContext implements TreeNode{
+	public record ServiceContext(long context_id, int context_data_length,
+								 byte[] context_data_byte) implements TreeNode {
 
-		/**
-		 * @param context_id
-		 * @param context_data_length
-		 * @param context_data_byte
-		 */
-		public ServiceContext(final long context_id, final int context_data_length,
-				final byte[] context_data_byte) {
-			super();
-			this.context_id = context_id;
-			this.context_data_length = context_data_length;
-			this.context_data_byte = context_data_byte;
+		public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("ServiceContext");
+				t.add(new KVP("context_id", context_id));
+				t.add(new KVP("context_data_length", context_data_length));
+				t.add(new KVP("context_data_byte", context_data_byte));
+				return t;
+			}
+
 		}
-
-		private final long context_id;
-		private final int context_data_length;
-		private final byte[] context_data_byte;
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ServiceContext"));
-			t.add(new DefaultMutableTreeNode(new KVP("context_id",context_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("context_data_length",context_data_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("context_data_byte",context_data_byte,null)));
-			return t;
-		}
-
-	}
 
 	protected byte[] objectInfo_data_byte;
 	protected int serviceContextList_count;
-	private final List<ServiceContext> serviceContextList = new ArrayList<ServiceContext>();
+	private final List<ServiceContext> serviceContextList = new ArrayList<>();
 	protected long messageBody_length;
 	protected int bindings_count;
-	private final List<Binding> bindingList = new ArrayList<Binding>();
+	private final List<Binding> bindingList = new ArrayList<>();
 
-
-
-
-	public BIOPDirectoryMessage(final byte[] data, final int offset) {
+	public BIOPDirectoryMessage(byte[] data, int offset) {
 		super(data, offset);
-		objectInfo_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+objectInfo_length);
+		objectInfo_data_byte = copyOfRange(data, byte_counter, byte_counter + objectInfo_length);
 		byte_counter += objectInfo_length;
-		serviceContextList_count =  Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		serviceContextList_count =  getInt(data, byte_counter, 1, Utils.MASK_8BITS);
 		byte_counter += 1;
 		for (int i = 0; i < serviceContextList_count; i++) {
-			final long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+			long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
 			byte_counter += 4;
-			final int  context_data_length = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+			int  context_data_length = getInt(data, byte_counter, 2, Utils.MASK_16BITS);
 			byte_counter += 2;
-			final byte[] context_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+context_data_length);
+			byte[] context_data_byte = copyOfRange(data, byte_counter, byte_counter + context_data_length);
 			byte_counter += context_data_length;
-			final ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
+			ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
 			serviceContextList.add(serviceContext);
 		}
 		messageBody_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
 		byte_counter += 4;
-		bindings_count = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+		bindings_count = getInt(data, byte_counter, 2, Utils.MASK_16BITS);
 		byte_counter += 2;
 		for (int i = 0; i <bindings_count; i++) {
-			final Binding binding = new Binding(data,byte_counter);
+			Binding binding = new Binding(data,byte_counter);
 			bindingList.add(binding);
 			byte_counter += binding.length();
 
 		}
-
-
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final String label) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus,label);
-		t.add(new DefaultMutableTreeNode(new KVP("objectInfo_data_byte",objectInfo_data_byte ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("serviceContextList_count",serviceContextList_count ,null)));
+	public KVP getJTreeNode(int modus, String label) {
+		KVP t = super.getJTreeNode(modus,label);
+		t.add(new KVP("objectInfo_data_byte",objectInfo_data_byte));
+		t.add(new KVP("serviceContextList_count",serviceContextList_count));
 		addListJTree(t,serviceContextList,modus,"ServiceContextList");
-		t.add(new DefaultMutableTreeNode(new KVP("messageBody_length",messageBody_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("bindings_count",bindings_count ,null)));
+		t.add(new KVP("messageBody_length",messageBody_length));
+		t.add(new KVP("bindings_count",bindings_count));
 		addListJTree(t,bindingList,modus,"Bindings");
 		return t;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 		return getJTreeNode(modus,"");
 	}
 
-	public static String getBindingTypeString(final int bindingType) {
+	public static String getBindingTypeString(int bindingType) {
 
 		if(bindingType==0x1){
 			return "nobject";

@@ -33,7 +33,7 @@ import java.util.List;
 import nl.digitalekabeltelevisie.util.Utils;
 
 
-final public class BIOPMessageFactory {
+public final class BIOPMessageFactory {
 
 
 	/**
@@ -42,13 +42,13 @@ final public class BIOPMessageFactory {
 	private BIOPMessageFactory() {
 	}
 
-	public static List<BIOPMessage> createBIOPMessages(final byte[] data, final int offset) {
-		final List<BIOPMessage> messages = new ArrayList<BIOPMessage>();
+	public static List<BIOPMessage> createBIOPMessages(byte[] data, int offset) {
+		List<BIOPMessage> messages = new ArrayList<>();
 		int l = offset;
 		while(l<data.length){
 
 			BIOPMessage message = new BIOPMessage(data, l);
-			final byte[] objectKind= message.getObjectKind_data();
+			byte[] objectKind= message.getObjectKind_data();
 
 			if(Utils.equals(objectKind, 0, objectKind.length,IOR.TYPE_DIRECTORY,0,IOR.TYPE_DIRECTORY.length)){
 				message =  new BIOPDirectoryMessage(data, l);

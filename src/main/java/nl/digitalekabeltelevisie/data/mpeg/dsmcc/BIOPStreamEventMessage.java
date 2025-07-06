@@ -27,16 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.util.Utils;
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 public class BIOPStreamEventMessage extends BIOPMessage {
 
@@ -50,24 +48,24 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 		private int len = 0;
 
-		public Binding(final byte[] data, final int offset) {
+		public Binding(byte[] data, int offset) {
 			biopName = new BIOPName(data, offset);
 			len=biopName.getLen();
 
-			bindingType  = Utils.getInt(data, offset+len, 1, Utils.MASK_8BITS);
+			bindingType  = getInt(data, offset+len, 1, MASK_8BITS);
 			len+=1;
 			ior = new IOR(data, offset+len);
 			len+=ior.getLength();
-			objectInfo_length  = Utils.getInt(data, offset+len, 2, Utils.MASK_16BITS);
+			objectInfo_length  = getInt(data, offset+len, 2, MASK_16BITS);
 			len+=2;
-			objectInfo_data_byte = Utils.copyOfRange(data,offset+len,offset+len+objectInfo_length);
+			objectInfo_data_byte = copyOfRange(data, offset + len, offset + len + objectInfo_length);
 			len+=objectInfo_length;
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Binding",biopName.getName(),null));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("Binding",biopName.getName());
 			t.add(biopName.getJTreeNode(modus));
-			t.add(new DefaultMutableTreeNode(new KVP("bindingType",bindingType ,getBindingTypeString(bindingType))));
+			t.add(new KVP("bindingType",bindingType ,getBindingTypeString(bindingType)));
 			t.add(ior.getJTreeNode(modus));
 
 			return t;
@@ -105,93 +103,49 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 	}
 
-	public static class EventName implements TreeNode{
+	public record EventName(int eventName_length, byte[] eventName_data_byte) implements TreeNode {
 
-		/**
-		 * @param eventName_length
-		 * @param eventName_data_byte
-		 */
-		public EventName(final int eventName_length, final byte[] eventName_data_byte) {
-			super();
-			this.eventName_length = eventName_length;
-			this.eventName_data_byte = eventName_data_byte;
-		}
 
-		private final int eventName_length;
-		private final byte[] eventName_data_byte;
+			public KVP getJTreeNode(int modus) {
+				KVP t =new KVP("EventName");
+				t.add(new KVP("eventName_length", eventName_length));
+				t.add(new KVP("eventName_data_byte", eventName_data_byte));
+				return t;
+			}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("EventName"));
-			t.add(new DefaultMutableTreeNode(new KVP("eventName_length",eventName_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("eventName_data_byte",eventName_data_byte,null)));
-			return t;
-		}
-
-		public int getEventName_length() {
-			return eventName_length;
-		}
-
-		public byte[] getEventName_data_byte() {
-			return eventName_data_byte;
-		}
 
 	}
 
-	public static class EventId implements TreeNode{
+	public record EventId(int eventId) implements TreeNode {
 
-		/**
-		 * @param eventName_length
-		 * @param eventName_data_byte
-		 */
-		public EventId(final int eventId) {
-			super();
-			this.eventId = eventId;
+
+		public KVP getJTreeNode(int modus) {
+				return new KVP("eventId", eventId);
+			}
+
 		}
 
-		private final int eventId;
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			return new DefaultMutableTreeNode(new KVP("eventId",eventId,null));
+	public record ServiceContext(long context_id, int context_data_length,
+								 byte[] context_data_byte) implements TreeNode {
+
+
+		public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("ServiceContext");
+				t.add(new KVP("context_id", context_id));
+				t.add(new KVP("context_data_length", context_data_length));
+				t.add(new KVP("context_data_byte", context_data_byte));
+				return t;
+			}
+
 		}
-
-	}
-
-
-	public static class ServiceContext implements TreeNode{
-
-		/**
-		 * @param context_id
-		 * @param context_data_length
-		 * @param context_data_byte
-		 */
-		public ServiceContext(final long context_id, final int context_data_length,
-				final byte[] context_data_byte) {
-			super();
-			this.context_id = context_id;
-			this.context_data_length = context_data_length;
-			this.context_data_byte = context_data_byte;
-		}
-
-		private final long context_id;
-		private final int context_data_length;
-		private final byte[] context_data_byte;
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ServiceContext"));
-			t.add(new DefaultMutableTreeNode(new KVP("context_id",context_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("context_data_length",context_data_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("context_data_byte",context_data_byte,null)));
-			return t;
-		}
-
-	}
 
 	protected byte[] objectInfo_data_byte;
 	protected int serviceContextList_count;
-	private final List<ServiceContext> serviceContextList = new ArrayList<ServiceContext>();
+	private final List<ServiceContext> serviceContextList = new ArrayList<>();
 	protected long messageBody_length;
 	protected int bindings_count;
-	private final List<Binding> bindingList = new ArrayList<Binding>();
+	private final List<Binding> bindingList = new ArrayList<>();
 	private final int aDescription_length;
 	private final byte[] aDescription_bytes;
 	private final long duration_aSeconds;
@@ -200,82 +154,82 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 	private final int video;
 	private final int data1;
 	private final int eventNames_count;
-	private final List<EventName> eventNames = new ArrayList<BIOPStreamEventMessage.EventName>();
+	private final List<EventName> eventNames = new ArrayList<>();
 	private final int taps_count;
-	private final List<Tap> taps=new ArrayList<Tap>();
+	private final List<Tap> taps= new ArrayList<>();
 	private final int eventIds_count;
 
-	private final List<EventId> eventIds = new ArrayList<EventId>();
+	private final List<EventId> eventIds = new ArrayList<>();
 
 
-	public BIOPStreamEventMessage(final byte[] dataBytes, final int offset) {
+	public BIOPStreamEventMessage(byte[] dataBytes, int offset) {
 		super(dataBytes, offset);
-		final int objectInfoStart = byte_counter;
+		int objectInfoStart = byte_counter;
 
 
-		aDescription_length =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		aDescription_length =  getInt(dataBytes, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
-		aDescription_bytes = Utils.copyOfRange(dataBytes,byte_counter,byte_counter+aDescription_length);
+		aDescription_bytes = copyOfRange(dataBytes, byte_counter, byte_counter + aDescription_length);
 		byte_counter += aDescription_length;
 
-		duration_aSeconds = Utils.getLong(dataBytes, byte_counter, 4, Utils.MASK_32BITS);
+		duration_aSeconds = getLong(dataBytes, byte_counter, 4, MASK_32BITS);
 		byte_counter += 4;
-		duration_aMicroSeconds = Utils.getLong(dataBytes, byte_counter, 4, Utils.MASK_32BITS);
+		duration_aMicroSeconds = getLong(dataBytes, byte_counter, 4, MASK_32BITS);
 		byte_counter += 4;
-		audio =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		audio =  getInt(dataBytes, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
-		video =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		video =  getInt(dataBytes, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
-		data1 =  Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+		data1 =  getInt(dataBytes, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
 
-		eventNames_count = Utils.getInt(dataBytes, byte_counter, 2, Utils.MASK_16BITS);
+		eventNames_count = getInt(dataBytes, byte_counter, 2, MASK_16BITS);
 		byte_counter += 2;
 
 
 		for (int i = 0; i < eventNames_count; i++) {
-			final int  eventName_length = Utils.getInt(dataBytes, byte_counter, 1, Utils.MASK_8BITS);
+			int  eventName_length = getInt(dataBytes, byte_counter, 1, MASK_8BITS);
 			byte_counter += 1;
-			final byte[] eventName_data_byte = Utils.copyOfRange(dataBytes,byte_counter,byte_counter+eventName_length);
+			byte[] eventName_data_byte = copyOfRange(dataBytes,byte_counter,byte_counter+eventName_length);
 			byte_counter += eventName_length;
-			final EventName eventName = new EventName(eventName_length,eventName_data_byte);
+			EventName eventName = new EventName(eventName_length,eventName_data_byte);
 			eventNames.add(eventName);
 		}
 
-		objectInfo_data_byte = Utils.copyOfRange(dataBytes,byte_counter,objectInfoStart +objectInfo_length);
+		objectInfo_data_byte = copyOfRange(dataBytes,byte_counter,objectInfoStart +objectInfo_length);
 		byte_counter = objectInfoStart +objectInfo_length;
 
 
-		serviceContextList_count =  Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		serviceContextList_count =  getInt(data, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
 		for (int i = 0; i < serviceContextList_count; i++) {
-			final long context_id = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+			long context_id = getLong(data, byte_counter, 4, MASK_32BITS);
 			byte_counter += 4;
-			final int  context_data_length = Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS);
+			int  context_data_length = getInt(data, byte_counter, 2, MASK_16BITS);
 			byte_counter += 2;
-			final byte[] context_data_byte = Utils.copyOfRange(data,byte_counter,byte_counter+context_data_length);
+			byte[] context_data_byte = copyOfRange(data,byte_counter,byte_counter+context_data_length);
 			byte_counter += context_data_length;
-			final ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
+			ServiceContext serviceContext = new ServiceContext(context_id, context_data_length, context_data_byte);
 			serviceContextList.add(serviceContext);
 		}
-		messageBody_length = Utils.getLong(data, byte_counter, 4, Utils.MASK_32BITS);
+		messageBody_length = getLong(data, byte_counter, 4, MASK_32BITS);
 		byte_counter += 4;
 
-		taps_count= Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		taps_count= getInt(data, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
 
 
 		for (int i = 0; i < taps_count; i++) {
-			final Tap tap =new Tap(data,byte_counter);
+			Tap tap =new Tap(data,byte_counter);
 			taps.add(tap);
 			byte_counter+= tap.getSelector_length()+7;
 
 		}
 
-		eventIds_count = Utils.getInt(data, byte_counter, 1, Utils.MASK_8BITS);
+		eventIds_count = getInt(data, byte_counter, 1, MASK_8BITS);
 		byte_counter += 1;
 		for (int i = 0; i < eventIds_count; i++) {
-			final EventId eventId = new EventId(Utils.getInt(data, byte_counter, 2, Utils.MASK_16BITS));
+			EventId eventId = new EventId(getInt(data, byte_counter, 2, MASK_16BITS));
 			eventIds.add(eventId);
 			byte_counter +=2;
 		}
@@ -283,37 +237,37 @@ public class BIOPStreamEventMessage extends BIOPMessage {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final String label) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus,label);
+	public KVP getJTreeNode(int modus, String label) {
+		KVP t = super.getJTreeNode(modus,label);
 
-		t.add(new DefaultMutableTreeNode(new KVP("aDescription_length",aDescription_length ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("aDescription_bytes",aDescription_bytes ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("duration.aSeconds",duration_aSeconds ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("duration.aMicroSeconds",duration_aMicroSeconds ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("audio",audio ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("video",video ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("data",data1 ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("eventNames_count",eventNames_count ,null)));
+		t.add(new KVP("aDescription_length",aDescription_length));
+		t.add(new KVP("aDescription_bytes",aDescription_bytes));
+		t.add(new KVP("duration.aSeconds",duration_aSeconds));
+		t.add(new KVP("duration.aMicroSeconds",duration_aMicroSeconds));
+		t.add(new KVP("audio",audio));
+		t.add(new KVP("video",video));
+		t.add(new KVP("data",data1));
+		t.add(new KVP("eventNames_count",eventNames_count));
 
 		addListJTree(t,eventNames,modus,"EventNames");
-		t.add(new DefaultMutableTreeNode(new KVP("objectInfo_data_byte",objectInfo_data_byte ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("serviceContextList_count",serviceContextList_count ,null)));
+		t.add(new KVP("objectInfo_data_byte",objectInfo_data_byte));
+		t.add(new KVP("serviceContextList_count",serviceContextList_count));
 		addListJTree(t,serviceContextList,modus,"ServiceContextList");
-		t.add(new DefaultMutableTreeNode(new KVP("messageBody_length",messageBody_length ,null)));
+		t.add(new KVP("messageBody_length",messageBody_length));
 		addListJTree(t,taps,modus,"BIOP::Taps");
 
-		t.add(new DefaultMutableTreeNode(new KVP("eventIds_count",eventIds_count ,null)));
+		t.add(new KVP("eventIds_count",eventIds_count));
 		addListJTree(t,eventIds,modus,"EventIds");
 
 		return t;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 		return getJTreeNode(modus,"");
 	}
 
-	private static String getBindingTypeString(final int bindingType) {
+	private static String getBindingTypeString(int bindingType) {
 
 		if(bindingType==0x1){
 			return "nobject";
