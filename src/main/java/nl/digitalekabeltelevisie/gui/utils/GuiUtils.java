@@ -33,8 +33,14 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.List;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.*;
@@ -143,5 +149,24 @@ public final class GuiUtils {
 		}
 		return img;
 	}
+
+	public static JFileChooser createFileChooser() {
+		return createFileChooser(List.of());
+	
+	}
+
+	public static JFileChooser createFileChooser(List<FileNameExtensionFilter> fileNameExtensionFilters) {
+	JFileChooser chooser = new JFileChooser();
+	for(FileNameExtensionFilter fileNameExtensionFilter :fileNameExtensionFilters) {
+		chooser.addChoosableFileFilter(fileNameExtensionFilter);
+	}
+	chooser.setAcceptAllFileFilterUsed(fileNameExtensionFilters.isEmpty());
+	final String defaultDir = PreferencesManager.getSaveDir();
+	if (defaultDir != null) {
+		final File defDir = new File(defaultDir);
+		chooser.setCurrentDirectory(defDir);
+	}
+	return chooser;
+}
 
 }

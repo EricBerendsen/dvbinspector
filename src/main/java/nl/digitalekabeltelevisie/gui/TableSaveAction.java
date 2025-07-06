@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.gui;
 
+import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.createFileChooser;
+
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -70,7 +73,10 @@ public class TableSaveAction extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		JFileChooser chooser = createFileChooser();
+		JFileChooser chooser = createFileChooser(List.of(
+				new FileNameExtensionFilter(HTML, "html", "htm"),
+				new FileNameExtensionFilter(TEXT, "txt", "text"),
+				new FileNameExtensionFilter(CSV, "csv")));
 
 		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 		File saveFile = new File("dvb_inspector_table_" + df.format(new Date()));
@@ -105,25 +111,10 @@ public class TableSaveAction extends AbstractAction {
 				try {
 					Files.writeString(saveFile.toPath(), content);
 				} catch (IOException e1) {
-					logger.warning(() -> "IOException while saving; " + e1);
+					logger.warning(() -> "IOException while saving table; " + e1);
 				}
 			}
 		}
-	}
-        
-	
-	private static JFileChooser createFileChooser() {
-		JFileChooser chooser = new JFileChooser();
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter(HTML, "html", "htm"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter(TEXT, "txt", "text"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter(CSV, "csv"));
-		chooser.setAcceptAllFileFilterUsed(false);
-		final String defaultDir = PreferencesManager.getSaveDir();
-		if (defaultDir != null) {
-			final File defDir = new File(defaultDir);
-			chooser.setCurrentDirectory(defDir);
-		}
-		return chooser;
 	}
 
 

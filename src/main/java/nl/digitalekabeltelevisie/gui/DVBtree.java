@@ -659,7 +659,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	private void saveDsmccTree(KVP kvp) {
 		DSMFile dsmFile = (DSMFile) kvp.getOwner();
 
-		JFileChooser chooser = createFileChooserDefaultSaveDir();
+		JFileChooser chooser = GuiUtils.createFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
 		int returnVal = chooser.showSaveDialog(this);
@@ -676,15 +676,6 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		}
 	}
 
-	private static JFileChooser createFileChooserDefaultSaveDir() {
-		String defaultDir = PreferencesManager.getSaveDir();
-		JFileChooser chooser = new JFileChooser();
-		if(defaultDir!=null){
-			File defDir = new File(defaultDir);
-			chooser.setCurrentDirectory(defDir);
-		}
-		return chooser;
-	}
 
 	/**
 	 * @param kvp
@@ -985,7 +976,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 	 * @param saveAble
 	 */
 	private void selectFileAndSave(String fileName, SaveAble saveAble) {
-		JFileChooser chooser = createFileChooserDefaultSaveDir();
+		JFileChooser chooser = GuiUtils.createFileChooser();
 
 		chooser.setSelectedFile(new File(fileName));
 

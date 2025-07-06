@@ -41,13 +41,13 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.data.category.CategoryDataset;
 
 import com.opencsv.CSVWriter;
 
 import nl.digitalekabeltelevisie.controller.ChartLabel;
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
@@ -67,21 +67,16 @@ public class BarChartExportAction extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		JFileChooser chooser = createFileChooser();
+		JFileChooser chooser = GuiUtils.createFileChooser();
 
 		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-		File saveFile = new File("dvb_inspector_bitrates_" + df.format(new Date()));
+		File saveFile = new File("dvb_inspector_bitrates_" + df.format(new Date())+".csv");
 		chooser.setSelectedFile(saveFile);
 
 		int rval = chooser.showSaveDialog(barchart);
 		if (rval == JFileChooser.APPROVE_OPTION) {
 			saveFile = chooser.getSelectedFile();
 			PreferencesManager.setSaveDir(saveFile.getParent());
-			FileNameExtensionFilter filter = (FileNameExtensionFilter) chooser.getFileFilter();
-			String extension = filter.getExtensions()[0];
-			if (!saveFile.getName().endsWith('.' + extension)) {
-				saveFile = new File(saveFile.getPath() + "." + extension);
-			}
 			boolean write = true;
 			if (saveFile.exists()) {
 				final int n = JOptionPane.showConfirmDialog(barchart, "File " + saveFile + " already exists, want to overwrite?",
@@ -103,19 +98,7 @@ public class BarChartExportAction extends AbstractAction {
 
 	}
 
-	private static JFileChooser createFileChooser() {
-		JFileChooser chooser = new JFileChooser();
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV", "csv"));
-		chooser.setAcceptAllFileFilterUsed(false);
-		final String defaultDir = PreferencesManager.getSaveDir();
-		if (defaultDir != null) {
-			final File defDir = new File(defaultDir);
-			chooser.setCurrentDirectory(defDir);
-		}
-		return chooser;
-	}
-
-	public String getCsv(CategoryDataset categoryDataset) {
+	public static String getCsv(CategoryDataset categoryDataset) {
 
 		String res = "";
 		try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {

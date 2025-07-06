@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,12 +32,15 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.*;
 import java.util.Date;
-import java.util.prefs.Preferences;
+import java.util.List;
+import java.util.logging.Logger;
+
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
 /**
@@ -48,31 +51,26 @@ import nl.digitalekabeltelevisie.util.PreferencesManager;
  */
 public class ImageSaveAction extends AbstractAction{
 
-	/**
-	 * 
-	 */
+	private static final Logger	logger	= Logger.getLogger(ImageSaveAction.class.getName());
+
 	private final JPanel panel;
 	private final ImageSource imageSource;
 
-	/**
-	 *
-	 */
 	public ImageSaveAction(JPanel panel, String name, ImageSource imageSource) {
 		super(name);
 		this.panel = panel;
 		this.imageSource = imageSource;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		final BufferedImage image = imageSource.getImage();
 		if (image != null) {
-			final Preferences prefs = Preferences.userNodeForPackage(DVBtree.class);
-			JFileChooser chooser = createFileChooser(prefs);
+			JFileChooser chooser = GuiUtils.createFileChooser(List.of(
+					new FileNameExtensionFilter("JPG", "jpg", "jpeg"),
+					new FileNameExtensionFilter("PNG", "png")
+					));
 
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 			File saveFile = new File("dvb_inspector_image_" + df.format(new Date()));
@@ -99,28 +97,14 @@ public class ImageSaveAction extends AbstractAction{
 					}
 				}
 				if (write) {
-
 					try {
 						ImageIO.write(image, extension, saveFile);
 					} catch (IOException ex) {
+						logger.warning(() -> "IOException while saving image; " + ex);
 					}
 				}
 			}
 		}
 	}
 
-	private static JFileChooser createFileChooser(final Preferences prefs) {
-		JFileChooser chooser = new JFileChooser();
-		FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("JPG", "jpg", "jpeg");
-		chooser.addChoosableFileFilter(jpgFilter);
-		FileNameExtensionFilter pngFilter = new FileNameExtensionFilter("PNG", "png");
-		chooser.addChoosableFileFilter(pngFilter);
-		chooser.setAcceptAllFileFilterUsed(false);
-		final String defaultDir = PreferencesManager.getSaveDir();
-		if (defaultDir != null) {
-			final File defDir = new File(defaultDir);
-			chooser.setCurrentDirectory(defDir);
-		}
-		return chooser;
-	}
 }
