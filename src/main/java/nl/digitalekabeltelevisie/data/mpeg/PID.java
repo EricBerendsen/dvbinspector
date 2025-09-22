@@ -423,6 +423,7 @@ public class PID implements TreeNode{
 		last_packet = packet;
 		continuity_errors_count++;
 		gatherer.reset();
+		gatherer.processPayload(packet,parentTransportStream,this);
 	}
 
 	private void updateMegaFrameInitializationPacket(final TSPacket packet) {
