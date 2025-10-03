@@ -37,7 +37,7 @@ import nl.digitalekabeltelevisie.util.*;
 
 public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 	
-	private class CellInfo implements TreeNode{
+	private final class CellInfo implements TreeNode{
 
         public record CentreFrequency(int centre_frequency) implements TreeNode {
 
@@ -77,7 +77,7 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 		private int subcell_info_loop_length;
 		private List<SubCellInfo> subCellInfoList = new ArrayList<>();
 
-		public CellInfo(BitSource bs) {
+		private CellInfo(BitSource bs) {
 			
 			cell_id = bs.readBits(16); 
 			if (tfs_flag == 1){ 

@@ -63,38 +63,118 @@ public class NetworkChangeNotifyDescriptor extends DVBExtensionDescriptor {
                 default -> "Invalid Value - greater than 0xF";
             };
 		}
-		
-		public int changeId;
-		public int changeVersion;
-		public byte[] startTime;
-		public String duration;
-		public int receiverCategory;
-		public int invariantTsPresent;
-		public int changeType;
-		public int messageId;
-		public int invariantTsTsId;
-		public int invariantTsOnId;
+
+        private int changeId;
+        private int changeVersion;
+        private byte[] startTime;
+        private String duration;
+        private int receiverCategory;
+        private int invariantTsPresent;
+        private int changeType;
+        private int messageId;
+        private int invariantTsTsId;
+        private int invariantTsOnId;
 		
 		@Override
 		public KVP getJTreeNode(int modus) {
 			KVP tn=new KVP("change");
-			tn.add(new KVP("network_change_id", changeId));
-			tn.add(new KVP("network_change_version", changeVersion));
-			tn.add(new KVP("start_time_of_change", startTime, Utils.getUTCFormattedString(startTime)));
-			tn.add(new KVP("change_duration", duration, Utils.formatDuration(duration)));
-			tn.add(new KVP("receiver_category", receiverCategory, receiverCategoryToString(receiverCategory)));
-			tn.add(new KVP("invariant_ts_present", invariantTsPresent));
-			tn.add(new KVP("change_type", changeType, changeTypeToString(changeType)));
-			tn.add(new KVP("message_id", messageId));
-			if(invariantTsPresent == 1) {
-				tn.add(new KVP("invariant_ts_tsid ", invariantTsTsId));
-				tn.add(new KVP("invariant_ts_onid ", invariantTsOnId));
+			tn.add(new KVP("network_change_id", getChangeId()));
+			tn.add(new KVP("network_change_version", getChangeVersion()));
+			tn.add(new KVP("start_time_of_change", getStartTime(), Utils.getUTCFormattedString(getStartTime())));
+			tn.add(new KVP("change_duration", getDuration(), Utils.formatDuration(getDuration())));
+			tn.add(new KVP("receiver_category", getReceiverCategory(), receiverCategoryToString(getReceiverCategory())));
+			tn.add(new KVP("invariant_ts_present", getInvariantTsPresent()));
+			tn.add(new KVP("change_type", getChangeType(), changeTypeToString(getChangeType())));
+			tn.add(new KVP("message_id", getMessageId()));
+			if(getInvariantTsPresent() == 1) {
+				tn.add(new KVP("invariant_ts_tsid ", getInvariantTsTsId()));
+				tn.add(new KVP("invariant_ts_onid ", getInvariantTsOnId()));
 			}
 			return tn;
 		}
-	}
+
+        public int getChangeId() {
+            return changeId;
+        }
+
+        public void setChangeId(int changeId) {
+            this.changeId = changeId;
+        }
+
+        public int getChangeVersion() {
+            return changeVersion;
+        }
+
+        public void setChangeVersion(int changeVersion) {
+            this.changeVersion = changeVersion;
+        }
+
+        public byte[] getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(byte[] startTime) {
+            this.startTime = startTime;
+        }
+
+        public String getDuration() {
+            return duration;
+        }
+
+        public void setDuration(String duration) {
+            this.duration = duration;
+        }
+
+        public int getReceiverCategory() {
+            return receiverCategory;
+        }
+
+        public void setReceiverCategory(int receiverCategory) {
+            this.receiverCategory = receiverCategory;
+        }
+
+        public int getInvariantTsPresent() {
+            return invariantTsPresent;
+        }
+
+        public void setInvariantTsPresent(int invariantTsPresent) {
+            this.invariantTsPresent = invariantTsPresent;
+        }
+
+        public int getChangeType() {
+            return changeType;
+        }
+
+        public void setChangeType(int changeType) {
+            this.changeType = changeType;
+        }
+
+        public int getMessageId() {
+            return messageId;
+        }
+
+        public void setMessageId(int messageId) {
+            this.messageId = messageId;
+        }
+
+        public int getInvariantTsTsId() {
+            return invariantTsTsId;
+        }
+
+        public void setInvariantTsTsId(int invariantTsTsId) {
+            this.invariantTsTsId = invariantTsTsId;
+        }
+
+        public int getInvariantTsOnId() {
+            return invariantTsOnId;
+        }
+
+        public void setInvariantTsOnId(int invariantTsOnId) {
+            this.invariantTsOnId = invariantTsOnId;
+        }
+    }
 	
-	private class ChangeDescriptor  implements TreeNode {
+	private static class ChangeDescriptor  implements TreeNode {
 		public int cellId;
 		public int loopLength; 
 		List<Change> changes = new ArrayList<>();
@@ -125,18 +205,18 @@ public class NetworkChangeNotifyDescriptor extends DVBExtensionDescriptor {
 			
 			while((t-outerByteCount) < count) {
 				Change c = new Change();
-				c.changeId = Utils.getInt(b, t, 1, Utils.MASK_8BITS);
-				c.changeVersion = Utils.getInt(b, t+1, 1, Utils.MASK_8BITS);
-				c.startTime = Utils.getBytes(b, t+2, 5);
-				c.duration = Utils.getBCD(b, (t+7)*2,6);
-				c.receiverCategory = Utils.getInt(b, t+10, 1, 0xE0) >> 5;
-				c.invariantTsPresent = Utils.getInt(b, t+10, 1, 0x10) >> 4;
-				c.changeType = Utils.getInt(b, t+10, 1, 0x0F);
-				c.messageId = Utils.getInt(b, t+11, 1, Utils.MASK_8BITS);
+				c.setChangeId(Utils.getInt(b, t, 1, Utils.MASK_8BITS));
+				c.setChangeVersion(Utils.getInt(b, t+1, 1, Utils.MASK_8BITS));
+				c.setStartTime(Utils.getBytes(b, t+2, 5));
+				c.setDuration(Utils.getBCD(b, (t+7)*2,6));
+				c.setReceiverCategory(Utils.getInt(b, t+10, 1, 0xE0) >> 5);
+				c.setInvariantTsPresent(Utils.getInt(b, t+10, 1, 0x10) >> 4);
+				c.setChangeType(Utils.getInt(b, t+10, 1, 0x0F));
+				c.setMessageId(Utils.getInt(b, t+11, 1, Utils.MASK_8BITS));
 				t += 12;
-				if(c.invariantTsPresent == 1) {
-					c.invariantTsTsId = Utils.getInt(b, t, 2, Utils.MASK_16BITS);
-					c.invariantTsOnId = Utils.getInt(b, t+2, 2, Utils.MASK_16BITS);
+				if(c.getInvariantTsPresent() == 1) {
+					c.setInvariantTsTsId(Utils.getInt(b, t, 2, Utils.MASK_16BITS));
+					c.setInvariantTsOnId(Utils.getInt(b, t+2, 2, Utils.MASK_16BITS));
 					t += 4;
 				}
 				d.changes.add(c);

@@ -36,7 +36,6 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.BitSource;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * DVB BlueBook A038r16 – (April 2023) 6.4.18 Service Prominence Descriptor
@@ -44,9 +43,9 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 	
 	
-	private static class ServiceOfGeneralInterest implements TreeNode{
+	private static final class ServiceOfGeneralInterest implements TreeNode{
 
-		private static class TargetRegion implements TreeNode{
+		private static final class TargetRegion implements TreeNode{
 			
 			private int reserved_future_use;
 			private int country_code_flag;
@@ -56,7 +55,7 @@ public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 			private int secondary_region_code;
 			private int tertiary_region_code;
 
-			public TargetRegion(BitSource bs) {
+			private TargetRegion(BitSource bs) {
 				reserved_future_use = bs.readBits(5);
 				country_code_flag = bs.readBits(1);
 				region_depth = bs.readBits(2);
@@ -108,7 +107,7 @@ public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 		
 		private List<TargetRegion> targetRegionList = new ArrayList<>(); 
 
-		public ServiceOfGeneralInterest(BitSource bs) {
+		private ServiceOfGeneralInterest(BitSource bs) {
 			
 			SOGI_flag = bs.readBits(1);
 			target_region_flag = bs.readBits(1);

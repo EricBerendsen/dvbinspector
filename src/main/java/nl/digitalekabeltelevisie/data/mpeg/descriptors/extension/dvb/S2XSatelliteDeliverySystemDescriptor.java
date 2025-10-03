@@ -104,7 +104,6 @@ public class S2XSatelliteDeliverySystemDescriptor extends DVBExtensionDescriptor
 		
 		if (S2X_mode==2) {
 			timeslice_number = getInt(b, localOffset , 1, MASK_8BITS);
-			localOffset++;
 		}
 
 

@@ -55,15 +55,13 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 
 	private final int uri_linkage_type;
 	private final int uri_length;
-	private String uri_char = "";
+	private String uri_char;
 	private int min_polling_interval;
 	private byte[] private_data_byte;
 
 	private int dvb_i_endpoint_type;
-	private int dvb_i_service_list_name_length;
-	private String dvb_i_service_list_name = "";
-	private int dvb_i_service_list_provider_name_length;
-	private String dvb_i_service_list_provider_name = "";
+    private String dvb_i_service_list_name = "";
+    private String dvb_i_service_list_provider_name = "";
 
 	public URILinkageDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
@@ -81,10 +79,10 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 		else if (uri_linkage_type == 0x03) {  // for DVB-I. Refer to clause 5.1.3.3 of DVB A177
 			dvb_i_endpoint_type = getInt(payload, localOffset++, 1, MASK_8BITS);
 			if (dvb_i_endpoint_type == 0x03) {
-				dvb_i_service_list_name_length = getInt(payload, localOffset++, 1, MASK_8BITS);
+                int dvb_i_service_list_name_length = getInt(payload, localOffset++, 1, MASK_8BITS);
 				dvb_i_service_list_name = getString(payload, localOffset, dvb_i_service_list_name_length);
 				localOffset += dvb_i_service_list_name_length;
-				dvb_i_service_list_provider_name_length = getInt(payload, localOffset++, 1, MASK_8BITS);
+                int dvb_i_service_list_provider_name_length = getInt(payload, localOffset++, 1, MASK_8BITS);
 				dvb_i_service_list_provider_name = getString(payload, localOffset, dvb_i_service_list_provider_name_length);
 				localOffset += dvb_i_service_list_provider_name_length;
 			}

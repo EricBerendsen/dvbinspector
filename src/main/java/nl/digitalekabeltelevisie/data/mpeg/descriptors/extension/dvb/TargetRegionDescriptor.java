@@ -36,7 +36,6 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.BitSource;
-import nl.digitalekabeltelevisie.util.Utils;
 
 public class TargetRegionDescriptor extends DVBExtensionDescriptor {
 
