@@ -49,7 +49,7 @@ public abstract class ExtensionDescriptor extends Descriptor {
 	 * This will always return a KVP, but to not break interface it still is declared as DefaultMutableTreeNode
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus){
 
 		KVP t = (KVP) super.getJTreeNode(modus);
 		t.add(new KVP("descriptor_tag_extension",descriptor_tag_extension).setDescription(getDescriptorTagString()));
