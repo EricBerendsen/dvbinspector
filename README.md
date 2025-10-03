@@ -12,7 +12,7 @@ DVB inspector requires java 21 or higher.
 
 DVB inspector comes in a single .zip file. It contains all necessary files for running DVB inspector.
 
-Unzip DVBinspector-1.20.0-dist.zip to a directory of your choice. It will create the following directory structure;
+Unzip DVBinspector-1.21.0-dist.zip to a directory of your choice. It will create the following directory structure;
 
 ### Directory structure
 
@@ -24,13 +24,13 @@ Unzip DVBinspector-1.20.0-dist.zip to a directory of your choice. It will create
 *    dvb.bat Dos command script that starts the program. Can be modified if libraries are placed in a different location than default.
 *    dvb.sh Bash script to start the program using Linux.
 *    DVBInspector.jar contains the classes for the main program. Can be executed using the dvb.bat or dvb.sh script.
-*    DVBinspector-1.20.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
+*    DVBinspector-1.21.0.jar. Self contained jar that contains all resources and libs. To execute just double click.
 
 ## Usage
 
-### DVBinspector-1.20.0.jar
+### DVBinspector-1.21.0.jar
 
-There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.20.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.20.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.20.0.jar".
+There are two ways to start DVBInspector. The easiest is to use DVBinspector-1.21.0.jar. This jar contains everything DVBInspector needs (apart from java), so there is no need to set class-paths, etc. On windows just double-click. Or from command line type "DVBinspector-1.21.0.jar" (without the quotes). If you want more control (to set heap size), and see some debug information you can use "java -jar DVBinspector-1.21.0.jar".
 
 ### dvb.bat 
 
@@ -47,6 +47,22 @@ See the [manual](http://www.digitalekabeltelevisie.nl/dvb_inspector/usermanual.s
 ## Changelog
 
 List of the most important changes between releases.
+
+### Release 1.21.0
+Release date: 3/10/2025
+
+* fixed: first packet after discontinuity was not processed
+* added: export as .csv file to Bar Chart
+* added: export as .csv file to table views in detail panel
+* updated: versions of jfreechart and opencsv
+* changed: tooltip for temi always shows packetNo instead of time
+* added: use ctrl-c to copy tooltiptext in PCR/PTS/DTS view
+* added: support for TEMI data in PES packets
+* fixed: drawing TEMI timestamps
+* fixed: construction of AF Descriptors
+* added: M7 OTT_brandID_descriptor
+* added: support for ASTRA Service Guide Table (SGT)
+* fixed: show teletext data_unit_id=0x03 (subtitle) normal
 
 ### Release 1.20.0
 Release date: 21/04/2025
