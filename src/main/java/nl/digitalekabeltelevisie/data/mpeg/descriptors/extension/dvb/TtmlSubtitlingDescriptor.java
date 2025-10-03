@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -42,22 +40,19 @@ import nl.digitalekabeltelevisie.util.LookUpList;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
-	
-	public static class Font implements TreeNode {
-		
-		public Font(int font) {
-			super();
-			this.font_id = font&0b0111_1111;
-		}
 
-		final int font_id;
+    public record Font(int font_id) implements TreeNode {
 
-		@Override
-		public KVP getJTreeNode(int modus) {
-			return new KVP("font_id",font_id);
-		}
+        public Font(int font_id) {
+            this.font_id = font_id & 0b0111_1111;
+        }
 
-	}
+        @Override
+        public KVP getJTreeNode(int modus) {
+            return new KVP("font_id", font_id);
+        }
+
+    }
 
 	public static class Qualifier implements TreeNode{
 		
@@ -87,14 +82,13 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 				build();
 		
 		public Qualifier(long qualifier) {
-			super();
-			this.qualifier = qualifier;
-			size = (int) ((qualifier & 0xF0000000l)>>28);
-			cadence = (int) ((qualifier & 0x0F000000l)>>24);
-			monochrome_flag = (int) ((qualifier & 0x00800000l)>>23);
-			enhanced_accessibility_contrast_flag = (int) ((qualifier & 0x00400000l)>>22);
-			position = (int) ((qualifier & 0x003B0000l)>>18);
-			reserved_zero_future_use = (int) ((qualifier & 0x0003FFFFl)>>18);
+            this.qualifier = qualifier;
+			size = (int) ((qualifier & 0xF0000000L)>>28);
+			cadence = (int) ((qualifier & 0x0F000000L)>>24);
+			monochrome_flag = (int) ((qualifier & 0x00800000L)>>23);
+			enhanced_accessibility_contrast_flag = (int) ((qualifier & 0x00400000L)>>22);
+			position = (int) ((qualifier & 0x003B0000L)>>18);
+			reserved_zero_future_use = (int) ((qualifier & 0x0003FFFFL)>>18);
 		}
 
 		private final long qualifier;
@@ -108,7 +102,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			final KVP t = new KVP("qualifier",qualifier);
+			KVP t = new KVP("qualifier",qualifier);
 			t.add(new KVP("size", size).setDescription(size_lookup_list.get(size)));
 			t.add(new KVP("cadence", cadence).setDescription(cadence_lookup_list.get(cadence)));
 			t.add(new KVP("monochrome_flag", monochrome_flag));
@@ -131,8 +125,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 				
 				
 		public DvbTtmlProfile(int dvb_ttml_profile) {
-			super();
-			this.dvb_ttml_profile = dvb_ttml_profile;
+            this.dvb_ttml_profile = dvb_ttml_profile;
 		}
 
 		private final int dvb_ttml_profile;
@@ -183,10 +176,10 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 			add(0x3 ,"reserved for future use").
 			build(); 
 
-	public TtmlSubtitlingDescriptor(final byte[] b, final TableSection parent) {
+	public TtmlSubtitlingDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		int localOffset = PRIVATE_DATA_OFFSET;
-		iso639LanguageCode = Utils.getISO8859_1String(b, localOffset, 3);
+		iso639LanguageCode = getISO8859_1String(b, localOffset, 3);
 		localOffset +=3;
 		subtitle_purpose = getInt(b, localOffset, 1, 0b1111_1100)>>2;
 		tts_suitability = getInt(b, localOffset++, 1, MASK_2BITS);
@@ -216,9 +209,9 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("iso639LanguageCode", iso639LanguageCode));
 		t.add(new KVP("subtitle_purpose", subtitle_purpose).setDescription(subtitle_purpose_list.get(subtitle_purpose)));
 		t.add(new KVP("TTS_suitability", tts_suitability).setDescription(tts_suitability_list.get(tts_suitability)));

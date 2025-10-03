@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2018 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,32 +31,24 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.*;
 
 public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 	
 	private class CellInfo implements TreeNode{
+
+        public record CentreFrequency(int centre_frequency) implements TreeNode {
+
+            @Override
+            public KVP getJTreeNode(int modus) {
+                return new KVP("centre_frequency", centre_frequency, formatTerrestrialFrequency(centre_frequency));
+            }
+
+        }
 		
-		public class CentreFrequency implements TreeNode{
-			private final int centre_frequency; 
-
-			public CentreFrequency(final int centre_frequency){
-				this.centre_frequency = centre_frequency;
-			}
-
-			@Override
-			public DefaultMutableTreeNode getJTreeNode(final int modus){
-				return new DefaultMutableTreeNode(new KVP("centre_frequency",centre_frequency,Descriptor.formatTerrestrialFrequency(centre_frequency)));
-			}
-
-		}
-		
-		public class SubCellInfo implements TreeNode{
+		public static class SubCellInfo implements TreeNode{
 			
 			int cell_id_extension ;
 			int transposer_frequency ; 
@@ -68,10 +60,10 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 			}
 			
 			@Override
-			public DefaultMutableTreeNode getJTreeNode(final int modus){
-				DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("SubCellInfo"));
-				s.add(new DefaultMutableTreeNode(new KVP("cell_id_extension",cell_id_extension,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("transposer_frequency",transposer_frequency,Descriptor.formatTerrestrialFrequency(transposer_frequency))));
+			public KVP getJTreeNode(int modus){
+                KVP s = new KVP("SubCellInfo");
+				s.add(new KVP("cell_id_extension",cell_id_extension));
+				s.add(new KVP("transposer_frequency",transposer_frequency, formatTerrestrialFrequency(transposer_frequency)));
 				return s;
 			}
 			
@@ -106,21 +98,21 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 			}
 		}
 
-		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("CellInfo"));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_id",cell_id,null)));
-			if (tfs_flag == 1){ 
-				s.add(new DefaultMutableTreeNode(new KVP("frequency_loop_length",frequency_loop_length,null)));
-				addListJTree(s,centreFrequencyList,modus,"centre frequencies");
-			}else{ 
-				s.add(new DefaultMutableTreeNode(new KVP("centre_frequency",centre_frequency,Descriptor.formatTerrestrialFrequency(centre_frequency))));
-			}
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_info_loop_length",subcell_info_loop_length,null)));
-			addListJTree(s,subCellInfoList,modus,"subcell_info_loop");
+        @Override
+        public KVP getJTreeNode(int modus) {
+            KVP s = new KVP("CellInfo");
+            s.add(new KVP("cell_id", cell_id));
+            if (tfs_flag == 1) {
+                s.add(new KVP("frequency_loop_length", frequency_loop_length));
+                addListJTree(s, centreFrequencyList, modus, "centre frequencies");
+            } else {
+                s.add(new KVP("centre_frequency", centre_frequency, formatTerrestrialFrequency(centre_frequency)));
+            }
+            s.add(new KVP("subcell_info_loop_length", subcell_info_loop_length));
+            addListJTree(s, subCellInfoList, modus, "subcell_info_loop");
 
-			return s;
-		}
+            return s;
+        }
 		
 		
 	}
@@ -179,19 +171,19 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 	private int tfs_flag;
 	private List<CellInfo> cellInfoList = new ArrayList<>();
 
-	public T2DeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		plp_id = getInt(b, offset + 3, 1, MASK_8BITS);
-		t2_system_id = getInt(b, offset + 4, 2, MASK_16BITS);
+	public T2DeliverySystemDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		plp_id = getInt(b, 3, 1, MASK_8BITS);
+		t2_system_id = getInt(b, 4, 2, MASK_16BITS);
 		if (descriptorLength > 4) {
-			siso_miso = getInt(b, offset + 6, 1, 0b1100_0000) >> 6; // 2 bslbf
-			bandwidth = getInt(b, offset + 6, 1, 0b0011_1100) >> 2; // 4 bslbf
-			reserved_future_use = getInt(b, offset + 6, 1, 0b0000_0011); // 2 bslbf
-			guard_interval = getInt(b, offset + 7, 1, 0b1110_0000) >> 5; // 3 bslbf
-			transmission_mode = getInt(b, offset + 7, 1, 0b0001_1100) >> 2; // 3 bslbf
-			other_frequency_flag = getInt(b, offset + 7, 1, 0b0000_0010) >> 1; // 1 bslbf
-			tfs_flag = getInt(b, offset + 7, 1, 0b0000_0001); // 1 bslbf
-			BitSource bs = new BitSource(b, offset + 8, offset + descriptorLength + 2);
+			siso_miso = getInt(b, 6, 1, 0b1100_0000) >> 6; // 2 bslbf
+			bandwidth = getInt(b,  6, 1, 0b0011_1100) >> 2; // 4 bslbf
+			reserved_future_use = getInt(b, 6, 1, 0b0000_0011); // 2 bslbf
+			guard_interval = getInt(b, 7, 1, 0b1110_0000) >> 5; // 3 bslbf
+			transmission_mode = getInt(b, 7, 1, 0b0001_1100) >> 2; // 3 bslbf
+			other_frequency_flag = getInt(b, 7, 1, 0b0000_0010) >> 1; // 1 bslbf
+			tfs_flag = getInt(b, 7, 1, 0b0000_0001); // 1 bslbf
+			BitSource bs = new BitSource(b, 8, descriptorLength + 2);
 			while (bs.available() > 0) {
 				CellInfo ci = new CellInfo(bs);
 				cellInfoList.add(ci);
@@ -200,19 +192,19 @@ public class T2DeliverySystemDescriptor extends DVBExtensionDescriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("plp_id", plp_id, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("T2_system_id", t2_system_id, null)));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("plp_id", plp_id, null));
+		t.add(new KVP("T2_system_id", t2_system_id));
 		if (descriptorLength > 4) {
-			t.add(new DefaultMutableTreeNode(new KVP("siso_miso", siso_miso, siso_miso_mode_list.get(siso_miso))));
-			t.add(new DefaultMutableTreeNode(new KVP("bandwidth", bandwidth, bandwidth_list.get(bandwidth))));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use", reserved_future_use, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("guard_interval", guard_interval, guard_interval_list.get(guard_interval))));
-			t.add(new DefaultMutableTreeNode(new KVP("transmission_mode", transmission_mode, transmission_mode_list.get(transmission_mode))));
-			t.add(new DefaultMutableTreeNode(new KVP("other_frequency_flag", other_frequency_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("tfs_flag", tfs_flag, tfs_flag==0?"No TFS arrangement in place":"TFS arrangement in place ")));
+			t.add(new KVP("siso_miso", siso_miso, siso_miso_mode_list.get(siso_miso)));
+			t.add(new KVP("bandwidth", bandwidth, bandwidth_list.get(bandwidth)));
+			t.add(new KVP("reserved_future_use", reserved_future_use));
+			t.add(new KVP("guard_interval", guard_interval, guard_interval_list.get(guard_interval)));
+			t.add(new KVP("transmission_mode", transmission_mode, transmission_mode_list.get(transmission_mode)));
+			t.add(new KVP("other_frequency_flag", other_frequency_flag));
+			t.add(new KVP("tfs_flag", tfs_flag, tfs_flag==0?"No TFS arrangement in place":"TFS arrangement in place "));
 			addListJTree(t,cellInfoList,modus,"cell_info_loop");
 		}
 		return t;

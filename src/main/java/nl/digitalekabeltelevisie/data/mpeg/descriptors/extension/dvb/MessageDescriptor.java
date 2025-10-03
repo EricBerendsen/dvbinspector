@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -44,23 +42,23 @@ public class MessageDescriptor extends DVBExtensionDescriptor {
 
 
 
-	public MessageDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		message_id = getInt(b, offset+3, 1, MASK_8BITS);
-		iso639LanguageCode = getISO8859_1String(b, offset+4, 3);
-		message = getString(b, offset+7, descriptorLength -5);
+	public MessageDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		message_id = getInt(b, 3, 1, MASK_8BITS);
+		iso639LanguageCode = getISO8859_1String(b, 4, 3);
+		message = getString(b, 7, descriptorLength -5);
 	}
 
 
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+    @Override
+    public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("message_id",message_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("iso639LanguageCode",iso639LanguageCode,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("message",message,null)));
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("message_id", message_id));
+        t.add(new KVP("iso639LanguageCode", iso639LanguageCode));
+        t.add(new KVP("message", message));
 
-		return t;
-	}
+        return t;
+    }
 
 }

@@ -117,7 +117,7 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
 
     @Override
     public KVP getJTreeNode(int modus) {
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 
         t.add(new KVP("descriptor_version", descriptor_version));
         t.add(new KVP("horizontal_size", horizontal_size));
@@ -159,22 +159,22 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     }
 
     public static KVP buildFratNode(long frat) {
-        final KVP fratNode = new KVP("frat", frat, "Frame rate");
+        KVP fratNode = new KVP("frat", frat, "Frame rate");
 
-        final long interlaceMode = (frat >> 30) & 0x3;
-        final String interlaceText = interlaceMode == 0 ? "Progressive frame (frame contains one full-height picture)"
+        long interlaceMode = (frat >> 30) & 0x3;
+        String interlaceText = interlaceMode == 0 ? "Progressive frame (frame contains one full-height picture)"
                 : interlaceMode == 1 ? "Interlaced frame (picture is first video field)"
                 : interlaceMode == 2 ? "Interlaced frame (picture is second video field)"
                 : "Reserved";
         fratNode.add(new KVP("interlace_mode", interlaceMode, interlaceText));
 
-        final long framerateDenominator = (frat >> 24) & 0x3F;
-        final String denominatorText = framerateDenominator == 1 ? "Value=1.000"
+        long framerateDenominator = (frat >> 24) & 0x3F;
+        String denominatorText = framerateDenominator == 1 ? "Value=1.000"
                 : framerateDenominator == 2 ? "Value=1.001"
                 : "Reserved";
         fratNode.add(new KVP("framerate_denominator", framerateDenominator, denominatorText));
 
-        final long framerateNumerator = frat & 0xFFFF;
+        long framerateNumerator = frat & 0xFFFF;
         final String numeratorText = "Frames/sec";
         fratNode.add(new KVP("framerate_numerator", framerateNumerator, numeratorText));
 
@@ -182,17 +182,17 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     }
 
     public static KVP buildScharNode(long schar) {
-        final KVP scharNode = new KVP("schar", schar, "Sampling characteristics");
+        KVP scharNode = new KVP("schar", schar, "Sampling characteristics");
 
-        final long validFlag = (schar >> 15) & 0x1;
-        final String validText = validFlag == 0 ? "Invalid" : "Valid";
+        long validFlag = (schar >> 15) & 0x1;
+        String validText = validFlag == 0 ? "Invalid" : "Valid";
         scharNode.add(new KVP("valid_flag", validFlag, validText));
 
-        final long sampleBitDepth = (schar >> 4) & 0xF;
+        long sampleBitDepth = (schar >> 4) & 0xF;
         scharNode.add(new KVP("sample_bitdepth", sampleBitDepth));
 
-        final long samplingStructure = schar & 0xF;
-        final String samplingStructureText = samplingStructureToString(samplingStructure);
+        long samplingStructure = schar & 0xF;
+        String samplingStructureText = samplingStructureToString(samplingStructure);
         scharNode.add(new KVP("sampling_structure", samplingStructure, samplingStructureText));
 
         return scharNode;
@@ -205,12 +205,12 @@ public class JpegXsVideoDescriptor extends MPEGExtensionDescriptor {
     public static KVP buildPlevNode(long plev) {
     	KVP plevNode = new KVP("plev", plev);
 
-        final long level = (plev >> 8) & 0xFF;
-        final String levelText = getLevelText(level);
+        long level = (plev >> 8) & 0xFF;
+        String levelText = getLevelText(level);
         plevNode.add(new KVP("level", level, levelText));
 
-        final long subLevel = plev & 0xFF;
-        final String subLevelText = getSubLevelText(subLevel);
+        long subLevel = plev & 0xFF;
+        String subLevelText = getSubLevelText(subLevel);
         plevNode.add(new KVP("sub_level", subLevel, subLevelText));
 
         return plevNode;

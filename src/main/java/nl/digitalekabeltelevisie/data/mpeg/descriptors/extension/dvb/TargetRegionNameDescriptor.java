@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2016 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -44,7 +44,7 @@ public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 
 
 
-	private class TargetRegionName implements TreeNode{
+	private static final class TargetRegionName implements TreeNode{
 
 		private final int region_dept;
 		private final int region_name_length;
@@ -62,12 +62,11 @@ public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 		 * @param secondary_region_code
 		 * @param tertiary_region_code
 		 */
-		private TargetRegionName(final int region_dept, final int region_name_length, final byte [] region_name,
-				final int primary_region_code, final int secondary_region_code, final int tertiary_region_code) {
-			super();
-			this.region_dept = region_dept;
+		private TargetRegionName(int region_dept, int region_name_length, byte [] region_name,
+                                 int primary_region_code, int secondary_region_code, int tertiary_region_code) {
+            this.region_dept = region_dept;
 			this.region_name_length = region_name_length;
-			this.region_name = Utils.getString(region_name, 0, region_name_length);
+			this.region_name = getString(region_name, 0, region_name_length);
 
 			this.primary_region_code = primary_region_code;
 			this.secondary_region_code = secondary_region_code;
@@ -79,8 +78,8 @@ public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode t =  new DefaultMutableTreeNode(new KVP("TargetRegionName"));
+		public DefaultMutableTreeNode getJTreeNode(int modus) {
+			DefaultMutableTreeNode t =  new DefaultMutableTreeNode(new KVP("TargetRegionName"));
 			t.add(new DefaultMutableTreeNode(new KVP("region_dept",region_dept,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("region_name_length",region_name_length,null)));
 			t.add(new DefaultMutableTreeNode(new KVP("region_name",region_name,null)));
@@ -98,22 +97,22 @@ public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 
 	private final String country_code;
 	private final String iso_639_language_code;
-	private final List<TargetRegionName> targetRegions = new ArrayList<TargetRegionNameDescriptor.TargetRegionName>();
+	private final List<TargetRegionName> targetRegions = new ArrayList<>();
 
 	// 0x0a target name descriptor
 
-	public TargetRegionNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public TargetRegionNameDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		country_code = getISO8859_1String(selector_byte,0,3);
 		iso_639_language_code = getISO8859_1String(selector_byte,3,3);
 
-		final BitSource bs =new BitSource(selector_byte, 6);
+		BitSource bs =new BitSource(selector_byte, 6);
 		while(bs.available()>0){
-			final int region_depth = bs.readBits(2);
-			final int region_name_length = bs.readBits(6);
-			final byte [] region_name = bs.readBytes(region_name_length);
+			int region_depth = bs.readBits(2);
+			int region_name_length = bs.readBits(6);
+			byte [] region_name = bs.readBytes(region_name_length);
 
-			final int primary_region_code = bs.readBits(8);
+			int primary_region_code = bs.readBits(8);
 
 			int secondary_region_code = 0;
 			int tertiary_region_code = 0;
@@ -128,18 +127,14 @@ public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 
 	}
 
-
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("country_code",country_code,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso_639_language_code,null)));
-		Utils.addToList(t, targetRegions, modus);
-
-		return t;
-	}
-
+    @Override
+    public KVP getJTreeNode(int modus) {
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("country_code", country_code));
+        t.add(new KVP("ISO_639_language_code", iso_639_language_code));
+        addToList(t, targetRegions, modus);
+        return t;
+    }
 
 
 }

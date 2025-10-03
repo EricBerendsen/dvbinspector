@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Arrays;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -47,55 +45,45 @@ public class SupplementaryAudioDescriptor extends DVBExtensionDescriptor {
 
 
 
-	public SupplementaryAudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		mix_type = getInt(b, offset+3, 1, 0x80)>>7;
-		editorial_classification = getInt(b, offset+3, 1, 0x7c)>>2;
-		language_code_present = getInt(b, offset+3, 1, MASK_1BIT);
+	public SupplementaryAudioDescriptor( byte[] b, TableSection parent) {
+		super(b, parent);
+		mix_type = getInt(b, 3, 1, 0x80)>>7;
+		editorial_classification = getInt(b, 3, 1, 0x7c)>>2;
+		language_code_present = getInt(b, 3, 1, MASK_1BIT);
 		int t=4;
 		if(language_code_present==1){
-			iso639LanguageCode = getISO8859_1String(b, offset+4, 3);
+			iso639LanguageCode = getISO8859_1String(b, 4, 3);
 			t=7;
 		}
-		private_data_byte = Arrays.copyOfRange(b, offset+t,offset+descriptorLength+2);
+		private_data_byte = Arrays.copyOfRange(b, t,descriptorLength+2);
 	}
 
 
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+    @Override
+    public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("mix_type",mix_type,(mix_type==0?"Audio stream is a supplementary stream":"Audio stream is a complete and independent stream"))));
-		t.add(new DefaultMutableTreeNode(new KVP("editorial_classification",editorial_classification,getEditorialClassificationString(editorial_classification))));
-		t.add(new DefaultMutableTreeNode(new KVP("language_code_present",language_code_present,null)));
-		if(language_code_present==1){
-			t.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-		}
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",private_data_byte,null)));
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("mix_type", mix_type, (mix_type == 0 ? "Audio stream is a supplementary stream" : "Audio stream is a complete and independent stream")));
+        t.add(new KVP("editorial_classification", editorial_classification, getEditorialClassificationString(editorial_classification)));
+        t.add(new KVP("language_code_present", language_code_present));
+        if (language_code_present == 1) {
+            t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+        }
+        t.add(new KVP("private_data_byte", private_data_byte));
 
-		return t;
-	}
+        return t;
+    }
 
-	public static String getEditorialClassificationString(final int editorial_classification) {
-		switch (editorial_classification) {
-
-		case 0x0:
-			return "Main audio";
-		case 0x1:
-			return "Audio description for the visually impaired";
-		case 0x2:
-			return "Clean audio for the hearing impaired";
-		case 0x3:
-			return "Spoken subtitles for the visually impaired";
-		case 0x4:
-			return "Dependent parametric data stream";
-		case 0x17:
-			return "Unspecific supplementary audio for the general audience";
-
-		default:
-			return "reserved for future use";
-
-		}
+	public static String getEditorialClassificationString(int editorial_classification) {
+        return switch (editorial_classification) {
+            case 0x0 -> "Main audio";
+            case 0x1 -> "Audio description for the visually impaired";
+            case 0x2 -> "Clean audio for the hearing impaired";
+            case 0x3 -> "Spoken subtitles for the visually impaired";
+            case 0x4 -> "Dependent parametric data stream";
+            case 0x17 -> "Unspecific supplementary audio for the general audience";
+            default -> "reserved for future use";
+        };
 	}
 
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -73,8 +73,8 @@ public class HEVCTimingAndHRDDescriptor extends MPEGExtensionDescriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("hrd_management_valid_flag", hrd_management_valid_flag).setDescription(getHrdManagmentDescription()));
 		t.add(new KVP("target_schedule_idx_not_present_flag", target_schedule_idx_not_present_flag));
 		t.add(new KVP("target_schedule_idx", target_schedule_idx));

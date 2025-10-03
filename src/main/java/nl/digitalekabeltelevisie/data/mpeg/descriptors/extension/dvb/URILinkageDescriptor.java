@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -59,15 +57,15 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 	private final int uri_length;
 	private String uri_char = "";
 	private int min_polling_interval;
-	private byte[] private_data_byte = null; 
+	private byte[] private_data_byte;
 
-	private int dvb_i_endpoint_type = 0;
-	private int dvb_i_service_list_name_length = 0;
+	private int dvb_i_endpoint_type;
+	private int dvb_i_service_list_name_length;
 	private String dvb_i_service_list_name = "";
-	private int dvb_i_service_list_provider_name_length = 0;
+	private int dvb_i_service_list_provider_name_length;
 	private String dvb_i_service_list_provider_name = "";
 
-	public URILinkageDescriptor(final byte[] b, final int offset, final TableSection parent) {
+	public URILinkageDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		byte[] payload=getBytes(b, PRIVATE_DATA_OFFSET+1, descriptorLength-1);
 		int localOffset = 0;
@@ -96,9 +94,9 @@ public class URILinkageDescriptor extends DVBExtensionDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("uri_linkage_type", uri_linkage_type).setDescription(getURILinkageTypeString(uri_linkage_type)));
 		t.add(new KVP("uri_length", uri_length));
 		t.add(new KVP("uri_char", uri_char));

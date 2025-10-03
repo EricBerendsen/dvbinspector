@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,90 +27,61 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
+
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class DVBExtensionDescriptor extends ExtensionDescriptor {
 
-	public DVBExtensionDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, parent);
-	}
-
 	public DVBExtensionDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 	}
 
-	public static String getDescriptorTagString(final int descriptor_tag_extension) {
-		switch (descriptor_tag_extension) {
-
-		case 0x0:
-			return "image_icon_descriptor";
-		case 0x1:
-			return "cpcm_delivery_signalling_descriptor";
-		case 0x2:
-			return "CP_descriptor";
-		case 0x3:
-			return "CP_identifier_descriptor";
-		case 0x4:
-			return "T2_delivery_system_descriptor";
-		case 0x5:
-			return "SH_delivery_system_descriptor";
-		case 0x6:
-			return "supplementary_audio_descriptor";
-		case 0x7:
-			return "network_change_notify_descriptor";
-		case 0x8:
-			return "message_descriptor";
-		case 0x9:
-			return "target_region_descriptor";
-		case 0xa:
-			return "target_region_name_descriptor";
-		case 0xb:
-			return "service_relocated_descriptor";
-		case 0xc:
-			return "XAIT_PID_descriptor";
-		case 0xd:
-			return "C2_delivery_system_descriptor";
-		case 0xe:
-			return "DTS-HD_audio_stream_descriptor";
-		case 0xf:
-			return "DTS_Neural_descriptor";
-		case 0x10:
-			return "video_depth_range_descriptor";
-		case 0x11:
-			return "T2MI_descriptor";
-		case 0x13:
-			return "URI_linkage_descriptor";
-		case 0x14:
-			return "CI_ancillary_data_descriptor";
-		case 0x15:
-			return "AC-4_descriptor";
-		case 0x16:
-			return "C2_bundle_delivery_system_descriptor";
-		case 0x17:
-			return "S2X_satellite_delivery_system_descriptor";
-		case 0x18:
-			return "protection_message_descriptor";
-		case 0x19:
-			return "audio_preselection_descriptor";
-		case 0x20: // based on DVB BlueBook A038 jan 2017, shpuldn't this be 0x1a ?
-			return "TTML_subtitling_descriptor";
-		case 0x21:// based on DVB BlueBook A038 jun 2019
-			return "DTS-UHD_descriptor";
-		case 0x22:// based on DVB BlueBook A038r15 nov 2022
-			return "service_prominence_descriptor";
-		case 0x23:// based on DVB BlueBook A038r15 nov 2022
-			return "vvc_subpictures_descriptor";
-		case 0x24:// based on DVB BlueBook A038r15 nov 2022
-			return "S2Xv2_satellite_delivery_system_descriptor";
-		default:
-			return "reserved for future use";
-		}
+	public static String getDescriptorTagString(int descriptor_tag_extension) {
+        return switch (descriptor_tag_extension) {
+            case 0x0 -> "image_icon_descriptor";
+            case 0x1 -> "cpcm_delivery_signalling_descriptor";
+            case 0x2 -> "CP_descriptor";
+            case 0x3 -> "CP_identifier_descriptor";
+            case 0x4 -> "T2_delivery_system_descriptor";
+            case 0x5 -> "SH_delivery_system_descriptor";
+            case 0x6 -> "supplementary_audio_descriptor";
+            case 0x7 -> "network_change_notify_descriptor";
+            case 0x8 -> "message_descriptor";
+            case 0x9 -> "target_region_descriptor";
+            case 0xa -> "target_region_name_descriptor";
+            case 0xb -> "service_relocated_descriptor";
+            case 0xc -> "XAIT_PID_descriptor";
+            case 0xd -> "C2_delivery_system_descriptor";
+            case 0xe -> "DTS-HD_audio_stream_descriptor";
+            case 0xf -> "DTS_Neural_descriptor";
+            case 0x10 -> "video_depth_range_descriptor";
+            case 0x11 -> "T2MI_descriptor";
+            case 0x13 -> "URI_linkage_descriptor";
+            case 0x14 -> "CI_ancillary_data_descriptor";
+            case 0x15 -> "AC-4_descriptor";
+            case 0x16 -> "C2_bundle_delivery_system_descriptor";
+            case 0x17 -> "S2X_satellite_delivery_system_descriptor";
+            case 0x18 -> "protection_message_descriptor";
+            case 0x19 -> "audio_preselection_descriptor";
+            case 0x20 -> // based on DVB BlueBook A038 jan 2017, shpuldn't this be 0x1a ?
+                    "TTML_subtitling_descriptor";
+            case 0x21 ->// based on DVB BlueBook A038 jun 2019
+                    "DTS-UHD_descriptor";
+            case 0x22 ->// based on DVB BlueBook A038r15 nov 2022
+                    "service_prominence_descriptor";
+            case 0x23 ->// based on DVB BlueBook A038r15 nov 2022
+                    "vvc_subpictures_descriptor";
+            case 0x24 ->// based on DVB BlueBook A038r15 nov 2022
+                    "S2Xv2_satellite_delivery_system_descriptor";
+            default -> "reserved for future use";
+        };
 	}
 
 	@Override
 	public String getDescriptorTagString() {
 		return getDescriptorTagString(descriptor_tag_extension);
 	}
+
 
 }

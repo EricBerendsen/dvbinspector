@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,8 +28,6 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
@@ -71,16 +69,16 @@ public class S2XSatelliteDeliverySystemDescriptor extends DVBExtensionDescriptor
 
 
 
-	public S2XSatelliteDeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		receiver_profiles = getInt(b, offset+3, 1, 0xF8)>>3;
-		reserved_zero_future_use1 = getInt(b, offset+3, 1, MASK_3BITS);
+	public S2XSatelliteDeliverySystemDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		receiver_profiles = getInt(b, 3, 1, 0xF8)>>3;
+		reserved_zero_future_use1 = getInt(b, 3, 1, MASK_3BITS);
 		
-		S2X_mode = getInt(b, offset+4, 1, 0xC0)>>6;
-		scrambling_sequence_selector = getInt(b, offset+4, 1, 0x20)>>5;
-		reserved_zero_future_use2 = getInt(b, offset+4, 1, 0x1C)>>2;
-		TS_GS_S2X_mode = getInt(b, offset+4, 1, MASK_2BITS);
-		int localOffset = offset+5;
+		S2X_mode = getInt(b, 4, 1, 0xC0)>>6;
+		scrambling_sequence_selector = getInt(b, 4, 1, 0x20)>>5;
+		reserved_zero_future_use2 = getInt(b, 4, 1, 0x1C)>>2;
+		TS_GS_S2X_mode = getInt(b, 4, 1, MASK_2BITS);
+		int localOffset = 5;
 		if (scrambling_sequence_selector == 1) {
 			reserved_zero_future_use3 = getInt(b, localOffset, 1, 0xFC)>>2;
 			scrambling_sequence_index = getInt(b, localOffset, 3, MASK_18BITS);
@@ -113,74 +111,69 @@ public class S2XSatelliteDeliverySystemDescriptor extends DVBExtensionDescriptor
 	}
 
 
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+    @Override
+    public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("receiver_profiles",receiver_profiles,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("S2X_mode",S2X_mode,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("scrambling_sequence_selector",scrambling_sequence_selector,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("TS_GS_S2X_mode",TS_GS_S2X_mode,getTS_GS_S2X_modeString(TS_GS_S2X_mode))));
-		if (scrambling_sequence_selector == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use3,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("scrambling_sequence_index",scrambling_sequence_index,null)));
-		}
-		t.add(new DefaultMutableTreeNode(new KVP("frequency",frequency ,Descriptor.formatSatelliteFrequency(frequency))));
-		t.add(new DefaultMutableTreeNode(new KVP("orbital_position",orbitalPosition,Descriptor.formatOrbitualPosition(orbitalPosition))));
-		t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,westEastFlag==1?"east":"west")));
-		t.add(new DefaultMutableTreeNode(new KVP("polarization",polarization,SatelliteDeliverySystemDescriptor.getPolarizationString(polarization))));
-		
-		t.add(new DefaultMutableTreeNode(new KVP("multiple_input_stream_flag",multiple_input_stream_flag,multiple_input_stream_flag==1?"multiple transport streams are conveyed":"single transport stream is carried")));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use4,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("roll_off",rollOff,getS2XRollOffString(rollOff))));
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("receiver_profiles", receiver_profiles));
+        t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use1));
+        t.add(new KVP("S2X_mode", S2X_mode));
+        t.add(new KVP("scrambling_sequence_selector", scrambling_sequence_selector));
+        t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use2));
+        t.add(new KVP("TS_GS_S2X_mode", TS_GS_S2X_mode, getTS_GS_S2X_modeString(TS_GS_S2X_mode)));
+        if (scrambling_sequence_selector == 1) {
+            t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use3));
+            t.add(new KVP("scrambling_sequence_index", scrambling_sequence_index));
+        }
+        t.add(new KVP("frequency", frequency, formatSatelliteFrequency(frequency)));
+        t.add(new KVP("orbital_position", orbitalPosition, formatOrbitualPosition(orbitalPosition)));
+        t.add(new KVP("west_east_flag", westEastFlag, westEastFlag == 1 ? "east" : "west"));
+        t.add(new KVP("polarization", polarization, SatelliteDeliverySystemDescriptor.getPolarizationString(polarization)));
 
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use5,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("symbol_rate",symbol_rate,Descriptor.formatSymbolRate(symbol_rate))));
-		
-		if(multiple_input_stream_flag == 1){
-			t.add(new DefaultMutableTreeNode(new KVP("input_stream_identifier",input_stream_identifier,null)));
-		}
-		if (S2X_mode==2) {
-			t.add(new DefaultMutableTreeNode(new KVP("timeslice_number",timeslice_number,null)));
-		}
-		if (S2X_mode==3) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("S2X_mode==3")));
-		}
+        t.add(new KVP("multiple_input_stream_flag", multiple_input_stream_flag, multiple_input_stream_flag == 1 ? "multiple transport streams are conveyed" : "single transport stream is carried"));
+        t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use4));
+        t.add(new KVP("roll_off", rollOff, getS2XRollOffString(rollOff)));
 
-		return t;
-	}
+        t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use5));
+        t.add(new KVP("symbol_rate", symbol_rate, formatSymbolRate(symbol_rate)));
+
+        if (multiple_input_stream_flag == 1) {
+            t.add(new KVP("input_stream_identifier", input_stream_identifier));
+        }
+        if (S2X_mode == 2) {
+            t.add(new KVP("timeslice_number", timeslice_number));
+        }
+        if (S2X_mode == 3) {
+            t.add(GuiUtils.getNotImplementedKVP("S2X_mode==3"));
+        }
+
+        return t;
+    }
 
 
 	private static String getTS_GS_S2X_modeString(int tS_GS_S2X_mode2) {
-		switch (tS_GS_S2X_mode2) {
-		case 0:
-			return "generic packetized";
-		case 1:
-			return "GSE";
-		case 2:
-			return "GSE high efficiency mode";
-		case 3:
-			return "Transport Stream";
-
-		default:
-			return "illegal value";
-		}
+        return switch (tS_GS_S2X_mode2) {
+            case 0 -> "generic packetized";
+            case 1 -> "GSE";
+            case 2 -> "GSE high efficiency mode";
+            case 3 -> "Transport Stream";
+            default -> "illegal value";
+        };
 
 	}
 
-	public static String getS2XRollOffString(final int pol) {
-		switch (pol) {
-		case 0x00: return "\u03b1 = 0,35"; // alpha
-		case 0x01: return "\u03b1 = 0,25";
-		case 0x02: return "\u03b1 = 0,20";
-		case 0x03: return "reserved";
-		case 0x04: return "\u03b1 = 0,15"; // alpha
-		case 0x05: return "\u03b1 = 0,10";
-		case 0x06: return "\u03b1 = 0,05";
-		case 0x07: return "reserved";
-		default: return "illegal value";		}
+	public static String getS2XRollOffString(int pol) {
+        return switch (pol) {
+            case 0x00 -> "\u03b1 = 0,35"; // alpha
+            case 0x01 -> "\u03b1 = 0,25";
+            case 0x02 -> "\u03b1 = 0,20";
+            case 0x03 -> "reserved";
+            case 0x04 -> "\u03b1 = 0,15"; // alpha
+            case 0x05 -> "\u03b1 = 0,10";
+            case 0x06 -> "\u03b1 = 0,05";
+            case 0x07 -> "reserved";
+            default -> "illegal value";
+        };
 	}
 
 

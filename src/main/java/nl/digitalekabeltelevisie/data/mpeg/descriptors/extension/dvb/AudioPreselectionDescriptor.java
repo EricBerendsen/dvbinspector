@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2019 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -108,39 +106,39 @@ public class AudioPreselectionDescriptor extends DVBExtensionDescriptor {
 			}
 		}
 
-		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("preselection"));
-			s.add(new DefaultMutableTreeNode(new KVP("preselection_id",preselection_id,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("audio_rendering_indication",audio_rendering_indication,audio_rendering_indication_list.get(audio_rendering_indication, "??"))));
-			s.add(new DefaultMutableTreeNode(new KVP("audio_description",audio_description,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("spoken_subtitles",spoken_subtitles,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("dialogue_enhancement",dialogue_enhancement,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("interactivity_enabled",interactivity_enabled,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("language_code_present",language_code_present,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("text_label_present",text_label_present,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("multi_stream_info_present",multi_stream_info_present,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("future_extension",future_extension,null)));
-			if (language_code_present == 1) {
-				s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			}
-			if (text_label_present == 1) {
-				s.add(new DefaultMutableTreeNode(new KVP("message_id",message_id,null)));
-			}
+        @Override
+        public KVP getJTreeNode(int modus) {
+            KVP s = new KVP("preselection");
+            s.add(new KVP("preselection_id", preselection_id));
+            s.add(new KVP("audio_rendering_indication", audio_rendering_indication, audio_rendering_indication_list.get(audio_rendering_indication, "??")));
+            s.add(new KVP("audio_description", audio_description));
+            s.add(new KVP("spoken_subtitles", spoken_subtitles));
+            s.add(new KVP("dialogue_enhancement", dialogue_enhancement));
+            s.add(new KVP("interactivity_enabled", interactivity_enabled));
+            s.add(new KVP("language_code_present", language_code_present));
+            s.add(new KVP("text_label_present", text_label_present));
+            s.add(new KVP("multi_stream_info_present", multi_stream_info_present));
+            s.add(new KVP("future_extension", future_extension));
+            if (language_code_present == 1) {
+                s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+            }
+            if (text_label_present == 1) {
+                s.add(new KVP("message_id", message_id));
+            }
 
-			if (multi_stream_info_present == 1) {
-				s.add(new DefaultMutableTreeNode(new KVP("num_aux_components",num_aux_components,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use2,null)));
-				for (int j=0;j<num_aux_components;j++) {
-					s.add(new DefaultMutableTreeNode(new KVP("component_tag["+j+"]",component_tag[j],null)));
-				}
-			}
-			
-			if (future_extension == 1) {
-				s.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use3,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("future_extension_length",future_extension_length,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("future_extension_byte",future_extension_byte,null)));
-			}
+            if (multi_stream_info_present == 1) {
+                s.add(new KVP("num_aux_components", num_aux_components));
+                s.add(new KVP("reserved_zero_future_use", reserved_zero_future_use2));
+                for (int j = 0; j < num_aux_components; j++) {
+                    s.add(new KVP("component_tag[" + j + "]", component_tag[j]));
+                }
+            }
+
+            if (future_extension == 1) {
+                s.add(new KVP("reserved_zero_future_use", reserved_zero_future_use3));
+                s.add(new KVP("future_extension_length", future_extension_length));
+                s.add(new KVP("future_extension_byte", future_extension_byte));
+            }
 
 			return s;
 		}
@@ -152,24 +150,24 @@ public class AudioPreselectionDescriptor extends DVBExtensionDescriptor {
 	private List<Preselection> preselections = new ArrayList<>();
 	
 
-	public AudioPreselectionDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		num_preselections = getInt(b, offset+3, 1, 0xF8)>>3;
-		reserved_zero_future_use = getInt(b, offset+3, 1, MASK_3BITS);
-		BitSource bs = new BitSource(b, offset+4);
+	public AudioPreselectionDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		num_preselections = getInt(b, 3, 1, 0xF8)>>3;
+		reserved_zero_future_use = getInt(b, 3, 1, MASK_3BITS);
+		BitSource bs = new BitSource(b, 4);
 		for(int i=0;i<num_preselections;i++) {
 			preselections.add(new Preselection(bs));
 		}
 	}
 
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+    @Override
+    public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("num_preselections",num_preselections,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use,null)));
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("num_preselections", num_preselections));
+        t.add(new KVP("reserved_zero_future_use", reserved_zero_future_use));
 
-		addListJTree(t,preselections,modus,"preselections");
-		return t;
-	}
+        addListJTree(t, preselections, modus, "preselections");
+        return t;
+    }
 }

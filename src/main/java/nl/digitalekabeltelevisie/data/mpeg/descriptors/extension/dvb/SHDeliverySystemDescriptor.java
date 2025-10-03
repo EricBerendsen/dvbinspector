@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,15 +31,13 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.*;
 
 public class SHDeliverySystemDescriptor extends DVBExtensionDescriptor {
 	
-	public class Modulation implements TreeNode{
+	public static class Modulation implements TreeNode{
 		
 		private int modulation_type;
 		private int interleaver_presence;
@@ -111,40 +109,40 @@ public class SHDeliverySystemDescriptor extends DVBExtensionDescriptor {
 			
 		}
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t =  new DefaultMutableTreeNode(new KVP("Modulation"));
-			t.add(new DefaultMutableTreeNode(new KVP("modulation_type",modulation_type,modulation_type==0?"TDM":"OFDM")));
-			t.add(new DefaultMutableTreeNode(new KVP("interleaver_presence",interleaver_presence,interleaver_presence==0?"no interleaver info follows":"an interleaver info follows")));
-			t.add(new DefaultMutableTreeNode(new KVP("interleaver_type",interleaver_type,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t =  new KVP("Modulation");
+			t.add(new KVP("modulation_type",modulation_type,modulation_type==0?"TDM":"OFDM"));
+			t.add(new KVP("interleaver_presence",interleaver_presence,interleaver_presence==0?"no interleaver info follows":"an interleaver info follows"));
+			t.add(new KVP("interleaver_type",interleaver_type));
+			t.add(new KVP("reserved",reserved));
 			
 			if (modulation_type == 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("polarization",polarization,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("roll_off",roll_off,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("modulation_mode",modulation_mode,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("code_rate",code_rate,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("symbol_rate",symbol_rate,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("reserved2",reserved2,null)));
+				t.add(new KVP("polarization",polarization));
+				t.add(new KVP("roll_off",roll_off));
+				t.add(new KVP("modulation_mode",modulation_mode));
+				t.add(new KVP("code_rate",code_rate));
+				t.add(new KVP("symbol_rate",symbol_rate));
+				t.add(new KVP("reserved2",reserved2));
 			}else{
-				t.add(new DefaultMutableTreeNode(new KVP("bandwidth",bandwidth,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("priority",priority,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("constellation_and_hierarchy",constellation_and_hierarchy,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("code_rate",code_rate,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("guard_interval",guard_interval,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("transmission_mode",transmission_mode,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("common_frequency",common_frequency,null)));
+				t.add(new KVP("bandwidth",bandwidth));
+				t.add(new KVP("priority",priority));
+				t.add(new KVP("constellation_and_hierarchy",constellation_and_hierarchy));
+				t.add(new KVP("code_rate",code_rate));
+				t.add(new KVP("guard_interval",guard_interval));
+				t.add(new KVP("transmission_mode",transmission_mode));
+				t.add(new KVP("common_frequency",common_frequency));
 			}
 			
 			if (interleaver_presence == 1) {
 				if (interleaver_type == 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("common_multiplier",common_multiplier,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("nof_late_taps",nof_late_taps,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("nof_slices",nof_slices,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("slice_distance",slice_distance,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("non_late_increments",non_late_increments,null)));
+					t.add(new KVP("common_multiplier",common_multiplier));
+					t.add(new KVP("nof_late_taps",nof_late_taps));
+					t.add(new KVP("nof_slices",nof_slices));
+					t.add(new KVP("slice_distance",slice_distance));
+					t.add(new KVP("non_late_increments",non_late_increments));
 				} else {
-					t.add(new DefaultMutableTreeNode(new KVP("common_multiplier",common_multiplier,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved3",reserved3,null)));
+					t.add(new KVP("common_multiplier",common_multiplier));
+					t.add(new KVP("reserved3",reserved3));
 				}
 			}
 
@@ -163,12 +161,12 @@ public class SHDeliverySystemDescriptor extends DVBExtensionDescriptor {
 	
 	private List<Modulation> modulations = new ArrayList<>(); 
 
-	public SHDeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		diversity_mode = getInt(b, offset+3, 1, 0xF0)>>4;
-		reserved = getInt(b, offset+3, 1, MASK_4BITS);
+	public SHDeliverySystemDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		diversity_mode = getInt(b, 3, 1, 0xF0)>>4;
+		reserved = getInt(b, 3, 1, MASK_4BITS);
 		
-		final BitSource bs =new BitSource(selector_byte, 1);
+		BitSource bs =new BitSource(selector_byte, 1);
 		
 		while(bs.available()>0){
 			Modulation modulation = new Modulation(bs);
@@ -177,36 +175,28 @@ public class SHDeliverySystemDescriptor extends DVBExtensionDescriptor {
 	}
 
 
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+    @Override
+    public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("diversity_mode",diversity_mode,getDiversityModeDescription(diversity_mode))));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		
-		Utils.addListJTree(t,modulations,modus,"modulations");
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("diversity_mode", diversity_mode, getDiversityModeDescription(diversity_mode)));
+        t.add(new KVP("reserved", reserved));
 
-		return t;
-	}
+        addListJTree(t, modulations, modus, "modulations");
 
+        return t;
+    }
 
 	private static String getDiversityModeDescription(int diversity_mode) {
 
-		switch (diversity_mode) {
-
-		case 0b0000:
-			return "paTS:no, FEC diversity:no, FEC at phy:no, FEC at link:no";
-		case 0b1000:
-			return "paTS:yes, FEC diversity:no, FEC at phy:no, FEC at link:no";
-		case 0b1101:
-			return "paTS:yes, FEC diversity:yes, FEC at phy:no, FEC at link:yes";
-		case 0b1110:
-			return "paTS:yes, FEC diversity:yes, FEC at phy:yes, FEC at link:no";
-		case 0b1111:
-			return "paTS:yes, FEC diversity:yes, FEC at phy:yes, FEC at link:yes";
-		default:
-			return "reserved for future use";
-		}
+        return switch (diversity_mode) {
+            case 0b0000 -> "paTS:no, FEC diversity:no, FEC at phy:no, FEC at link:no";
+            case 0b1000 -> "paTS:yes, FEC diversity:no, FEC at phy:no, FEC at link:no";
+            case 0b1101 -> "paTS:yes, FEC diversity:yes, FEC at phy:no, FEC at link:yes";
+            case 0b1110 -> "paTS:yes, FEC diversity:yes, FEC at phy:yes, FEC at link:no";
+            case 0b1111 -> "paTS:yes, FEC diversity:yes, FEC at phy:yes, FEC at link:yes";
+            default -> "reserved for future use";
+        };
 	}
 
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -43,8 +41,8 @@ public class ServiceRelocatedDescriptor extends DVBExtensionDescriptor {
 
 
 
-	public ServiceRelocatedDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public ServiceRelocatedDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int localOffset = PRIVATE_DATA_OFFSET;
 		old_original_network_id = getInt(b, localOffset, 2, MASK_16BITS);
 		localOffset += 2;
@@ -55,9 +53,9 @@ public class ServiceRelocatedDescriptor extends DVBExtensionDescriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("old_original_network_id", old_original_network_id));
 		t.add(new KVP("old_transport_stream_id", old_transport_stream_id));
 		t.add(new KVP("old_service_id", old_service_id));

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -59,12 +57,12 @@ public class VvcSubpicturesDescriptor extends DVBExtensionDescriptor {
 			build();
 			
 	
-	public static record SubPicture(int component_tag, int vvc_subpicture_id) implements TreeNode{
+	public record SubPicture(int component_tag, int vvc_subpicture_id) implements TreeNode{
 		
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+		public KVP getJTreeNode(int modus){
 
-			final KVP t = new KVP("sub_picture");
+			KVP t = new KVP("sub_picture");
 			t.add(new KVP("component_tag",component_tag));
 			t.add(new KVP("vvc_subpicture_id",vvc_subpicture_id));
 
@@ -107,9 +105,9 @@ public class VvcSubpicturesDescriptor extends DVBExtensionDescriptor {
 
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("default_service_mode",default_service_mode));
 		t.add(new KVP("service_description_present",service_description_present));
 		t.add(new KVP("number_of_vvc_subpictures",number_of_vvc_subpictures));

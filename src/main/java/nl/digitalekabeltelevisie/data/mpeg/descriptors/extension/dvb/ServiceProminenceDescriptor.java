@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -46,9 +44,9 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 	
 	
-	private class ServiceOfGeneralInterest implements TreeNode{
+	private static class ServiceOfGeneralInterest implements TreeNode{
 
-		private class TargetRegion implements TreeNode{
+		private static class TargetRegion implements TreeNode{
 			
 			private int reserved_future_use;
 			private int country_code_flag;
@@ -77,26 +75,26 @@ public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 				
 			}
 
-			@Override
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
-				DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Target Region"));
-				t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved_future_use,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("country_code_flag",country_code_flag,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("region_depth",region_depth,null)));
-				if (country_code_flag == 0b1) {
-					t.add(new DefaultMutableTreeNode(new KVP("country_code",country_code,getISO8859_1String(country_code, 0, 3))));
-				}
-				if (region_depth >= 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("primary_region_code",primary_region_code,null)));
-					if (region_depth >= 2) {
-						t.add(new DefaultMutableTreeNode(new KVP("secondary_region_code",secondary_region_code,null)));
-						if (region_depth == 3) {
-							t.add(new DefaultMutableTreeNode(new KVP("tertiary_region_code",tertiary_region_code,null)));
-						}
-					}
-				}
-				return t;
-			}
+            @Override
+            public KVP getJTreeNode(int modus) {
+                KVP t = new KVP("Target Region");
+                t.add(new KVP("reserved_future_use", reserved_future_use));
+                t.add(new KVP("country_code_flag", country_code_flag));
+                t.add(new KVP("region_depth", region_depth));
+                if (country_code_flag == 0b1) {
+                    t.add(new KVP("country_code", country_code, getISO8859_1String(country_code, 0, 3)));
+                }
+                if (region_depth >= 1) {
+                    t.add(new KVP("primary_region_code", primary_region_code));
+                    if (region_depth >= 2) {
+                        t.add(new KVP("secondary_region_code", secondary_region_code));
+                        if (region_depth == 3) {
+                            t.add(new KVP("tertiary_region_code", tertiary_region_code));
+                        }
+                    }
+                }
+                return t;
+            }
 		}
 		
 		
@@ -132,25 +130,25 @@ public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 			}
 		}
 
-		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Service Of General Interest"));
-			t.add(new DefaultMutableTreeNode(new KVP("SOGI_flag",SOGI_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("target_region_flag",target_region_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("service_flag",service_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved_future_use,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("SOGI_priority",SOGI_priority,null)));
-			if (service_flag == 0b1) {
-				t.add(new DefaultMutableTreeNode(new KVP("service_id",service_id,null)));
-			}
-			
-			if (target_region_flag == 0b1) {
-				t.add(new DefaultMutableTreeNode(new KVP("target_region_loop_length",target_region_loop_length,null)));
-				Utils.addToList(t, targetRegionList, modus);
-			}
-			return t;
-			
-		}
+        @Override
+        public KVP getJTreeNode(int modus) {
+            KVP t = new KVP("Service Of General Interest");
+            t.add(new KVP("SOGI_flag", SOGI_flag));
+            t.add(new KVP("target_region_flag", target_region_flag));
+            t.add(new KVP("service_flag", service_flag));
+            t.add(new KVP("reserved_future_use", reserved_future_use));
+            t.add(new KVP("SOGI_priority", SOGI_priority));
+            if (service_flag == 0b1) {
+                t.add(new KVP("service_id", service_id));
+            }
+
+            if (target_region_flag == 0b1) {
+                t.add(new KVP("target_region_loop_length", target_region_loop_length));
+                addToList(t, targetRegionList, modus);
+            }
+            return t;
+
+        }
 		
 	}
 
@@ -162,13 +160,13 @@ public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 	private byte[] private_data_byte;
 
 
-	public ServiceProminenceDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		sogi_list_length = getInt(b, offset+3, 1, MASK_8BITS);
+	public ServiceProminenceDescriptor( byte[] b, TableSection parent) {
+		super(b, parent);
+		sogi_list_length = getInt(b, 3, 1, MASK_8BITS);
 		
-		final BitSource bitSourceWholeDescriptor =new BitSource(selector_byte, 1);
+		BitSource bitSourceWholeDescriptor =new BitSource(selector_byte, 1);
 		 
-		final BitSource bitSourceOsgiList = new BitSource(bitSourceWholeDescriptor,sogi_list_length);
+		BitSource bitSourceOsgiList = new BitSource(bitSourceWholeDescriptor,sogi_list_length);
 		while(bitSourceOsgiList.available()>=2) {
 			ServiceOfGeneralInterest serviceOfGeneralInterest = new ServiceOfGeneralInterest(bitSourceOsgiList);
 			sogiList.add(serviceOfGeneralInterest);
@@ -180,14 +178,12 @@ public class ServiceProminenceDescriptor extends DVBExtensionDescriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("SOGI_list_length",sogi_list_length,null)));
-		Utils.addToList(t, sogiList, modus);
-		
-		
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",private_data_byte,null)));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("SOGI_list_length",sogi_list_length));
+		addToList(t, sogiList, modus);
+		t.add(new KVP("private_data_byte",private_data_byte));
 
 		return t;
 	}

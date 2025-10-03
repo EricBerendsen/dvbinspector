@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,89 +27,51 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg;
 
-import nl.digitalekabeltelevisie.controller.KVP;
+
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class MPEGExtensionDescriptor extends ExtensionDescriptor {
 
-	public MPEGExtensionDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, parent);
-	}
-
 	public MPEGExtensionDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 	}
 
-	public static String getDescriptorTagString(final int descriptor_tag_extension) {
-		switch (descriptor_tag_extension) {
-		
-		case 0x0:
-			return "Reserved";
-		case 0x1:
-			return "Forbidden";
-		case 0x2:
-			return "ODUpdate_descriptor";
-		case 0x3:
-			return "HEVC_timing_and_HRD_descriptor";
-		case 0x4:
-			return "af_extensions_descriptor";
-		case 0x5:
-			return "HEVC_operation_point_descriptor";
-		case 0x6:
-			return "HEVC_hierarchy_extension_descriptor";
-		case 0x7:
-			return "Green_extension_descriptor";
-		case 0x8:
-			return "MPEG-H_3dAudio_descriptor";
-		case 0x9:
-			return "MPEG-H_3dAudio_config_descriptor";
-		case 0xa:
-			return "MPEG-H_3dAudio_scene_descriptor";
-		case 0xb:
-			return "MPEG-H_3dAudio_text_label_descriptor";
-		case 0xc:
-			return "MPEG-H_3dAudio_multi-stream_descriptor";
-		case 0xd:
-			return "MPEG--H_3dAudio_drc_loudness_descriptor";
-		case 0xe:
-			return "MPEG--H_3dAudio_command_descriptor";
-		case 0xf:
-			return "Quality_extension_descriptor";
-		case 0x10:
-			return "Virtual_segmentation_descriptor";
-		case 0x11:
-			return "timed_metadata_extension_descriptor";
-		case 0x12:
-			return "HEVC_tile_substream_descriptor";
-		case 0x13:
-			return "HEVC_subregion_descriptor";
-		case 0x14:
-			return "JPEG_XS_video_descriptor";
-		case 0x15:
-			return "VVC_timing_and_HRD_descripto";
-		case 0x16:
-			return "EVC_timing_and_HRD_descriptor";
-		case 0x17:
-			return "LCEVC_video_descriptor"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
-		case 0x18:
-			return "LCEVC_linkage_descriptor"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
-		case 0x19:
-			return "Media_service_kind_descriptor"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
-		default:
-			return "ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
-		}
+	public static String getDescriptorTagString(int descriptor_tag_extension) {
+        return switch (descriptor_tag_extension) {
+            case 0x0 -> "Reserved";
+            case 0x1 -> "Forbidden";
+            case 0x2 -> "ODUpdate_descriptor";
+            case 0x3 -> "HEVC_timing_and_HRD_descriptor";
+            case 0x4 -> "af_extensions_descriptor";
+            case 0x5 -> "HEVC_operation_point_descriptor";
+            case 0x6 -> "HEVC_hierarchy_extension_descriptor";
+            case 0x7 -> "Green_extension_descriptor";
+            case 0x8 -> "MPEG-H_3dAudio_descriptor";
+            case 0x9 -> "MPEG-H_3dAudio_config_descriptor";
+            case 0xa -> "MPEG-H_3dAudio_scene_descriptor";
+            case 0xb -> "MPEG-H_3dAudio_text_label_descriptor";
+            case 0xc -> "MPEG-H_3dAudio_multi-stream_descriptor";
+            case 0xd -> "MPEG--H_3dAudio_drc_loudness_descriptor";
+            case 0xe -> "MPEG--H_3dAudio_command_descriptor";
+            case 0xf -> "Quality_extension_descriptor";
+            case 0x10 -> "Virtual_segmentation_descriptor";
+            case 0x11 -> "timed_metadata_extension_descriptor";
+            case 0x12 -> "HEVC_tile_substream_descriptor";
+            case 0x13 -> "HEVC_subregion_descriptor";
+            case 0x14 -> "JPEG_XS_video_descriptor";
+            case 0x15 -> "VVC_timing_and_HRD_descripto";
+            case 0x16 -> "EVC_timing_and_HRD_descriptor";
+            case 0x17 -> "LCEVC_video_descriptor"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
+            case 0x18 -> "LCEVC_linkage_descriptor"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
+            case 0x19 -> "Media_service_kind_descriptor"; //Rec. ITU-T H.222.0 (2021)/Amd.1 (12/2022)
+            default -> "ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
+        };
 	}
 
 	@Override
 	public String getDescriptorTagString() {
 		return getDescriptorTagString(descriptor_tag_extension);
 	}
-	
-	@Override
-	public KVP getJTreeNode(int modus){
-		return (KVP) super.getJTreeNode(modus);
-	}
-
 
 }
