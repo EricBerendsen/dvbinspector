@@ -10,4 +10,4 @@ set JVM_FLAGS=
 :: uncomment next line to set initial and maximum heap size to 4 GByte
 ::set JVM_FLAGS=-Xmx4g -Xms4g
 
-java -classpath .;.\lib\jfreechart-1.5.6.jar;.\lib\opencsv-5.11.2.jar;.\lib\jlayer-1.0.1.4.jar;.\lib\commons-text-1.13.1.jar;.\lib\commons-logging-1.3.5.jar;.\lib\commons-lang3-3.17.0.jar;.\lib\commons-collections4-4.5.jar;.\lib\commons-collections-3.2.2.jar;.\lib\commons-beanutils-1.11.0.jar;.\DVBinspector.jar %JVM_FLAGS% -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector
+java -classpath .;.\lib\jfreechart-1.5.6.jar;.\lib\opencsv-5.12.0.jar;.\lib\jlayer-1.0.1.4.jar;.\lib\commons-text-1.13.1.jar;.\lib\commons-logging-1.3.5.jar;.\lib\commons-lang3-3.18.0.jar;.\lib\commons-collections4-4.5.jar;.\lib\commons-collections-3.2.2.jar;.\lib\commons-beanutils-1.11.0.jar;.\DVBinspector.jar %JVM_FLAGS% -Djava.util.logging.config.file=src/main/resources/logging.properties nl.digitalekabeltelevisie.main.DVBinspector
