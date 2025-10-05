@@ -59,7 +59,9 @@ public class DVBString {
 	private final int offset;
 
 	public DVBString(final byte[] data, final int offset) {
-		super();
+		if ((offset >= data.length) || (offset + Byte.toUnsignedInt(data[offset]) >= data.length)) {
+			throw new RuntimeException("DVB String outside of buffer");
+		}
 		this.data = data;
 		this.offset = offset;
 	}
@@ -74,7 +76,6 @@ public class DVBString {
 	 * @param len
 	 */
 	public DVBString(final byte[] dataIn, final int offset, int len) {
-		super();
 		if(len>255) {
 			throw new RuntimeException("DVB String can not be longer than 255 chars:" + len); 
 		}

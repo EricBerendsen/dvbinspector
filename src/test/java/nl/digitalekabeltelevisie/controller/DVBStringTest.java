@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -46,6 +46,7 @@ public class DVBStringTest {
 	final byte []rawStringExtendedAsci = {0x5,0x44,5,-92,-68,-67,-66,-45};
 	final byte []rawStringWithoutLength = {0x54, 0x65, 0x73, 0x74};
 
+	final byte[]bufferOutOfbounds = {0x0,0x2,0x44}; // offset = 1, one to short
 	@Before
 	public void setUp(){
 		dvbString = new DVBString(rawString, 2);
@@ -84,4 +85,13 @@ public class DVBStringTest {
 
 	}
 
+	@Test(expected = RuntimeException.class)
+	public void  bufferOutOfbounds() {
+		DVBString boom = new DVBString(bufferOutOfbounds, 1);
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void  bufferStartOutOfbounds() {
+		DVBString boom = new DVBString(bufferOutOfbounds, 3);
+	}
 }
