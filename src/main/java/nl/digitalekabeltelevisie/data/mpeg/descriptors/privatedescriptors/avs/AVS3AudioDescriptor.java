@@ -31,8 +31,6 @@ import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
@@ -199,13 +197,14 @@ public class AVS3AudioDescriptor extends Descriptor {
 		add(HOA_SIGNAL, "HOA").
 		build();
 
-	public AVS3AudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public AVS3AudioDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		audio_codec_id = getInt(b, offset+2, 1, 0b11110000) >>> 4;
-		sampling_frequency_index = getInt(b, offset+2, 1, MASK_4BITS);
-		int ofs=offset+3;
-		if (audio_codec_id == GENERAL_HIGH_RATE_CODING) {
+		audio_codec_id = getInt(b, 2, 1, 0b11110000) >>> 4;
+		sampling_frequency_index = getInt(b, 2, 1, MASK_4BITS);
+		int ofs = 3;
+		switch (audio_codec_id) {
+		case GENERAL_HIGH_RATE_CODING:
 			anc_data_index = getInt(b, ofs, 1, 0b10000000) >>> 7;
 			coding_profile = getInt(b, ofs, 1, 0b01110000) >>> 4;
 			bitrate_index = getInt(b, ofs++, 1, MASK_4BITS);
@@ -213,8 +212,8 @@ public class AVS3AudioDescriptor extends Descriptor {
 			channel_number_index = getInt(b, ofs++, 1, MASK_7BITS);
 			raw_frame_length = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
-		}
-		else if (audio_codec_id == LOSSLESS_CODING) {
+			break;
+		case LOSSLESS_CODING:
 			if (sampling_frequency_index == 0xF) {
 				sampling_frequency = getInt(b, ofs, 3, MASK_24BITS);
 				ofs+=3;
@@ -222,8 +221,8 @@ public class AVS3AudioDescriptor extends Descriptor {
 			anc_data_index = getInt(b, ofs, 1, 0b10000000) >>> 7;
 			coding_profile = getInt(b, ofs++, 1, 0b01110000) >>> 4;
 			channel_number = getInt(b, ofs++, 1, MASK_8BITS);
-		}
-		else if (audio_codec_id == GENERAL_FULL_RATE_CODING) {
+			break;
+		case GENERAL_FULL_RATE_CODING:
 			nn_type = getInt(b, ofs, 1, 0b11100000) >>> 5;
 			content_type = getInt(b, ofs++, 1, MASK_4BITS);
 			if (content_type == CHANNEL_SIGNAL)
@@ -238,7 +237,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 				hoa_order = getInt(b, ofs++, 1, 0b11110000) >>> 4;
 			total_bitrate = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
-
+			break;
 		}
 		resolution = getInt(b, ofs++, 1, 0b11000000) >> 6;
 		addition_info = copyOfRange(b, ofs, descriptorLength+2);
@@ -318,40 +317,44 @@ public class AVS3AudioDescriptor extends Descriptor {
 		};
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("audio_codec_id", audio_codec_id, audio_codec_id_String(audio_codec_id))));
+	@Override
+	public KVP getJTreeNode(final int modus) {
+		KVP t = (KVP) super.getJTreeNode(modus);
+		t.add(new KVP("audio_codec_id", audio_codec_id, audio_codec_id_String(audio_codec_id)));
 
-		if (audio_codec_id == LOSSLESS_CODING && sampling_frequency_index == 0xF)
-			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency", sampling_frequency)));
-		else
-			t.add(new DefaultMutableTreeNode(new KVP("sampling_frequency_index", sampling_frequency_index, sampling_frequency_index_String(sampling_frequency_index))));
+		if (audio_codec_id == LOSSLESS_CODING && sampling_frequency_index == 0xF) {
+			t.add(new KVP("sampling_frequency", sampling_frequency));
+		} else {
+			t.add(new KVP("sampling_frequency_index", sampling_frequency_index, sampling_frequency_index_String(sampling_frequency_index)));
+		}
 
-		if (audio_codec_id == GENERAL_HIGH_RATE_CODING) {
-			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index)));
-			t.add(new DefaultMutableTreeNode(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile))));
-			t.add(new DefaultMutableTreeNode(new KVP("bitrate_index", bitrate_index, bitrate_index_String(channel_number_index, bitrate_index))));
-			t.add(new DefaultMutableTreeNode(new KVP("bitstream_type", bitstream_type, bitstream_type_String(bitstream_type))));
-			t.add(new DefaultMutableTreeNode(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index))));
-			t.add(new DefaultMutableTreeNode(new KVP("raw_frame_length", raw_frame_length)));
-		}
-		else if (audio_codec_id == LOSSLESS_CODING) {
-			t.add(new DefaultMutableTreeNode(new KVP("anc_data_index", anc_data_index)));
-			t.add(new DefaultMutableTreeNode(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile))));
-			t.add(new DefaultMutableTreeNode(new KVP("channel_number", channel_number)));
-		}
-		else if (audio_codec_id == GENERAL_FULL_RATE_CODING) {
-			t.add(new DefaultMutableTreeNode(new KVP("nn_type", nn_type, nn_type_String(nn_type))));
-			t.add(new DefaultMutableTreeNode(new KVP("content_type", content_type, content_type_String(content_type))));
+		switch (audio_codec_id) {
+		case GENERAL_HIGH_RATE_CODING:
+			t.add(new KVP("anc_data_index", anc_data_index));
+			t.add(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile)));
+			t.add(new KVP("bitrate_index", bitrate_index, bitrate_index_String(channel_number_index, bitrate_index)));
+			t.add(new KVP("bitstream_type", bitstream_type, bitstream_type_String(bitstream_type)));
+			t.add(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index)));
+			t.add(new KVP("raw_frame_length", raw_frame_length));
+			break;
+		case LOSSLESS_CODING:
+			t.add(new KVP("anc_data_index", anc_data_index));
+			t.add(new KVP("coding_profile", coding_profile, coding_profile_String(coding_profile)));
+			t.add(new KVP("channel_number", channel_number));
+			break;
+		case GENERAL_FULL_RATE_CODING:
+			t.add(new KVP("nn_type", nn_type, nn_type_String(nn_type)));
+			t.add(new KVP("content_type", content_type, content_type_String(content_type)));
 			if (content_type == CHANNEL_SIGNAL || content_type == HYBRID_SIGNAL) 
-				t.add(new DefaultMutableTreeNode(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index))));
+				t.add(new KVP("channel_number_index", channel_number_index, channel_number_index_String(channel_number_index)));
 			if (content_type == OBJECT_SIGNAL|| content_type == HYBRID_SIGNAL) 
-				t.add(new DefaultMutableTreeNode(new KVP("object_channel_number", object_channel_number, object_channel_number_String(object_channel_number))));
+				t.add(new KVP("object_channel_number", object_channel_number, object_channel_number_String(object_channel_number)));
 			if (content_type == HOA_SIGNAL)
-				t.add(new DefaultMutableTreeNode(new KVP("hoa_order", hoa_order)));
-			t.add(new DefaultMutableTreeNode(new KVP("total_bitrate", total_bitrate)));	
+				t.add(new KVP("hoa_order", hoa_order));
+			t.add(new KVP("total_bitrate", total_bitrate));
+			break;
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("resolution", resolution, resolution_String(resolution))));
+		t.add(new KVP("resolution", resolution, resolution_String(resolution)));
 		if (addition_info.length > 0)
 			t.add(new KVP("addition_info",addition_info));
 		return t;

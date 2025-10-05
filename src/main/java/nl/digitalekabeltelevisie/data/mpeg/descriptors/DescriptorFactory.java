@@ -302,12 +302,12 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0x41565356) { // AVS Video
 			switch (descriptor_tag) {
 				case 0xD1:
-					return new AVS3VideoDescriptor(data, 0, tableSection);
+					return new AVS3VideoDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier == 0x41565341) { // AVS Audio
 			switch (descriptor_tag) {
 				case 0xD2:
-					return new AVS3AudioDescriptor(data, 0, tableSection);
+					return new AVS3AudioDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier == 0x1) { // SES Astra
 			switch (descriptor_tag) {

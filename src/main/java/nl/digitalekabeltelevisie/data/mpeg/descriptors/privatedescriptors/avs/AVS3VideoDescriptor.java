@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
@@ -71,21 +69,21 @@ public class AVS3VideoDescriptor extends Descriptor {
 		Builder(new String[]{"forbidden", "4:2:0", "4:2:2", "unknown"}).
 		build();
 
-	public AVS3VideoDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		profile_id = getInt(b, offset+2, 1, 0xFF);
-		level_id = getInt(b, offset+3, 1, 0xFF);
-		multiple_frame_rate_flag = getInt(b, offset+4, 1, 0b10000000) >>> 7;
-		frame_rate_code = getInt(b, offset+4, 1, 0b01111111) >>> 3;
-		sample_precision = getInt(b, offset+4, 1, 0b00000111);
-		chroma_format = getInt(b, offset+5, 1, 0b11000000) >>> 6;
-		temporal_id_flag = getInt(b, offset+5, 1, 0b00100000) >>> 5;
-		td_mode_flag = getInt(b, offset+5, 1, 0b00010000) >>> 4;
-		library_stream_flag = getInt(b, offset+5, 1, 0b00001000) >>> 3;
-		library_picture_enable_flag = getInt(b, offset+5, 1, 0b00000100) >>> 2;
-		colour_primaries = getInt(b, offset+6, 1, 0xFF);
-		transfer_characteristics = getInt(b, offset+7, 1, 0xFF);
-		matrix_coefficients = getInt(b, offset+8, 1, 0xFF);
+	public AVS3VideoDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		profile_id = getInt(b, 2, 1, 0xFF);
+		level_id = getInt(b, 3, 1, 0xFF);
+		multiple_frame_rate_flag = getInt(b, 4, 1, 0b10000000) >>> 7;
+		frame_rate_code = getInt(b, 4, 1, 0b01111111) >>> 3;
+		sample_precision = getInt(b, 4, 1, 0b00000111);
+		chroma_format = getInt(b, 5, 1, 0b11000000) >>> 6;
+		temporal_id_flag = getInt(b, 5, 1, 0b00100000) >>> 5;
+		td_mode_flag = getInt(b, 5, 1, 0b00010000) >>> 4;
+		library_stream_flag = getInt(b, 5, 1, 0b00001000) >>> 3;
+		library_picture_enable_flag = getInt(b, 5, 1, 0b00000100) >>> 2;
+		colour_primaries = getInt(b, 6, 1, 0xFF);
+		transfer_characteristics = getInt(b, 7, 1, 0xFF);
+		matrix_coefficients = getInt(b, 8, 1, 0xFF);
 	}
 
 	private static final String profile_id_String(int profile_id) {
@@ -166,21 +164,22 @@ public class AVS3VideoDescriptor extends Descriptor {
 		throw new IllegalArgumentException("Invalid value in chroma_format_String:"+chroma_format);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_id", profile_id, profile_id_String(profile_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("level_id", level_id, level_id_String(level_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("multiple_frame_rate_flag", multiple_frame_rate_flag, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_rate_code", frame_rate_code, frame_rate_code_String(frame_rate_code))));
-		t.add(new DefaultMutableTreeNode(new KVP("sample_precision", sample_precision, sample_precision_String(sample_precision))));
-		t.add(new DefaultMutableTreeNode(new KVP("chroma_format", chroma_format, chroma_format_String(chroma_format))));
-		t.add(new DefaultMutableTreeNode(new KVP("temporal_id_flag", temporal_id_flag, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("td_mode_flag", td_mode_flag, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("library_stream_flag", library_stream_flag, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("library_picture_enable_flag", library_picture_enable_flag, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("colour_primaries", colour_primaries, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transfer_characteristics", transfer_characteristics, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("matrix_coefficients", matrix_coefficients, null)));
+	@Override
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = (KVP)super.getJTreeNode(modus);
+		t.add(new KVP("profile_id", profile_id, profile_id_String(profile_id)));
+		t.add(new KVP("level_id", level_id, level_id_String(level_id)));
+		t.add(new KVP("multiple_frame_rate_flag", multiple_frame_rate_flag));
+		t.add(new KVP("frame_rate_code", frame_rate_code, frame_rate_code_String(frame_rate_code)));
+		t.add(new KVP("sample_precision", sample_precision, sample_precision_String(sample_precision)));
+		t.add(new KVP("chroma_format", chroma_format, chroma_format_String(chroma_format)));
+		t.add(new KVP("temporal_id_flag", temporal_id_flag));
+		t.add(new KVP("td_mode_flag", td_mode_flag));
+		t.add(new KVP("library_stream_flag", library_stream_flag));
+		t.add(new KVP("library_picture_enable_flag", library_picture_enable_flag));
+		t.add(new KVP("colour_primaries", colour_primaries));
+		t.add(new KVP("transfer_characteristics", transfer_characteristics));
+		t.add(new KVP("matrix_coefficients", matrix_coefficients));
 		return t;
 	}
 
