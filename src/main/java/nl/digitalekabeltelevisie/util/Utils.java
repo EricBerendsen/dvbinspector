@@ -1031,6 +1031,7 @@ public final class Utils {
 		case 0xCF: return"ISO/IEC 13818-7 ADTS AAC with AES-128-CBC frame encryption";
 		case 0xD1: return"Dirac video";
 		case 0xD4: return"AVS3 Video";
+		case 0xD5: return"AVS3 Audio";
 		case 0xDB: return"H.264 and ISO/IEC 14496-10 with AES-128-CBC slice encryption";
 		case 0xEA: return"VC-1";
 		
