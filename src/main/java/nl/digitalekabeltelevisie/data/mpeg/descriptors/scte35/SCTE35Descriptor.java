@@ -65,7 +65,7 @@ public class SCTE35Descriptor extends Descriptor {
 		case 0x00: return "avail_descriptor"; 
 		case 0x01: return "DTMF_descriptor";
 		case 0x02: return "segmentation_descriptor"; 
-		case 0x03: return "DVB-time_descriptor";
+		case 0x03: return "time_descriptor";
 		case 0x04: return "audio_descriptor";
 		default:
 
