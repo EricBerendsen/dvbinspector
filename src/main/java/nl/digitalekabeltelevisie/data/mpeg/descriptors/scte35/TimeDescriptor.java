@@ -9,7 +9,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 public class TimeDescriptor extends SCTE35Descriptor {
 
-    private String identifier;
 	private long TAI_seconds;
     private long TAI_ns;
     private int UTC_offset;
@@ -28,8 +27,7 @@ public class TimeDescriptor extends SCTE35Descriptor {
 	
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("identifier",identifier ,null)));
+		final DefaultMutableTreeNode t = super.getJTreeNode(modus);		
 		t.add(new DefaultMutableTreeNode(new KVP("TAI_seconds",TAI_seconds ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("TAI_ns",TAI_ns ,null)));
 		t.add(new DefaultMutableTreeNode(new KVP("UTC_offset",UTC_offset ,null)));
