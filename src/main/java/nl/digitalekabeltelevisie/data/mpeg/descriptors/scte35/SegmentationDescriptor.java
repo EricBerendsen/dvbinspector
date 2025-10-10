@@ -184,10 +184,16 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 			segmentation_type_id  = getInt(b,localOffset++,1,MASK_8BITS);
 			segment_num = getInt(b,localOffset++,1,MASK_8BITS);
 			segments_expected = getInt(b,localOffset++,1,MASK_8BITS);
-			if(segmentation_type_id == 0x34 ||segmentation_type_id == 0x36) {
-				sub_segment_num = getInt(b,localOffset++,1,MASK_8BITS);
-				sub_segments_expected = getInt(b,localOffset++,1,MASK_8BITS);
-			}
+
+            //10.3.3.1. Segmentation descriptor details
+            // Note: sub_segment_num and sub_segments_expected can form an optional appendix to the segmentation descriptor.
+            // The presence or absence of this optional data block is determined by the descriptor loop’s descriptor_length.
+            if (((b.length -localOffset) >= 2   ) &&
+                    (segmentation_type_id == 0x34 || segmentation_type_id == 0x36 ||
+                            segmentation_type_id == 0x38 || segmentation_type_id == 0x3A)) {
+                sub_segment_num = getInt(b, localOffset++, 1, MASK_8BITS);
+                sub_segments_expected = getInt(b, localOffset++, 1, MASK_8BITS);
+            }
 		}
 	}
 

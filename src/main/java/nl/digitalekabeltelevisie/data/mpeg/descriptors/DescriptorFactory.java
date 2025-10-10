@@ -685,6 +685,8 @@ public final class DescriptorFactory {
 			return new AvailDescriptor(data, 0, tableSection);
 		case 0x02:
 			return new SegmentationDescriptor(data, 0, tableSection);
+        case 0x03:
+            return new TimeDescriptor(data, 0, tableSection);			
 		default:
 			Descriptor d = new SCTE35Descriptor(data, 0, tableSection);
 			logger.info("Not implemented SCTE35Descriptor:" + toUnsignedInt(data[0]) + " ("
