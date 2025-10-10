@@ -56,12 +56,15 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 			add(0x0D, "MID()").
 			add(0x0E, "ADS Information").
 			add(0x0F, "URI").
-			add(0x1F,0xFF, "Reserved").
+			add(0x10, "UUID").
+			add(0x11, "SCR (Segment Content Reference)").
+			add(0x12, 0xFF, "Reserved").
 			build();
 	
 	LookUpList segmentationTypeIdList = new LookUpList.Builder().
 			add(0x00,"Not Indicated").
 			add(0x01,"Content Identification").
+			add(0x02,"Private").
 			add(0x10,"Program Start").
 			add(0x11,"Program End").
 			add(0x12,"Program Early Termination").
@@ -71,11 +74,16 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 			add(0x16,"Program Runover Unplanned").
 			add(0x17,"Program Overlap Start").
 			add(0x18,"Program Blackout Override").
-			add(0x19,"Program Start – In Progress").
+			add(0x19,"Program Join").
+			add(0x1A,"Program Immediate Resumption").
 			add(0x20,"Chapter Start").
 			add(0x21,"Chapter End").
 			add(0x22,"Break Start").
 			add(0x23,"Break End").
+			add(0x24,"Opening Credit Start (deprecated)").
+			add(0x25,"Opening Credit End (deprecated").
+			add(0x26,"Closing Credig Start (deprecated)").
+			add(0x27,"Closing Credit End (deprecated)").
 			add(0x30,"Provider Advertisement Start").
 			add(0x31,"Provider Advertisement End").
 			add(0x32,"Distributor Advertisement Start").
@@ -84,32 +92,37 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 			add(0x35,"Provider Placement Opportunity End").
 			add(0x36,"Distributor Placement Opportunity Start").
 			add(0x37,"Distributor Placement Opportunity End").
+			add(0x38,"Provider Overlay Placement Opportunity Start").
+			add(0x39,"Provider Overlay Placement Opportunity End").
+			add(0x3A,"Distributor Overlay Placement Opportunity Start").
+			add(0x3B,"Distributor Overlay Placement Opportunity End").
+			add(0x3C,"Provider Promo Start").
+			add(0x3D,"Provider Promo End").
+			add(0x3E,"Distributor Promo Start").
+			add(0x3F,"Distributor Promo End").
 			add(0x40,"Unscheduled Event Start").
 			add(0x41,"Unscheduled Event End").
+			add(0x42,"Alternate Content Opportunity Start").
+			add(0x43,"Alternate Content Opportunity SEnd").
+			add(0x44,"Provider Ad Block Start").
+			add(0x45,"Provider Ad Block End").
+			add(0x46,"Distributor Ad Block Start").
+			add(0x47,"Distributor Ad Block End").
 			add(0x50,"Network Start").
 			add(0x51,"Network End").
 			build();
 
 	
-	public class ComponentOffset implements TreeNode {
+	
 
-		private int component_tag;
-		private int reserved;
-		private long pts_offset;
-
-		public ComponentOffset(int component_tag, int reserved, long pts_offset) {
-			super();
-			this.component_tag = component_tag;
-			this.reserved = reserved;
-			this.pts_offset = pts_offset;
-		}
+	public record ComponentOffset(int component_tag, int reserved, long pts_offset) implements TreeNode  {
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("component_offset"));
-			t.add(new DefaultMutableTreeNode(new KVP("component_tag", component_tag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pts_offset", pts_offset, null)));
+		public KVP getJTreeNode(int modus) {
+            KVP t = new KVP("component_offset");
+			t.add(new KVP("component_tag", component_tag));
+			t.add(new KVP("reserved", reserved));
+			t.add(new KVP("pts_offset", pts_offset));
 			return t;
 		}
 
@@ -189,8 +202,14 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
             // Note: sub_segment_num and sub_segments_expected can form an optional appendix to the segmentation descriptor.
             // The presence or absence of this optional data block is determined by the descriptor loop’s descriptor_length.
             if (((b.length -localOffset) >= 2   ) &&
-                    (segmentation_type_id == 0x34 || segmentation_type_id == 0x36 ||
-                            segmentation_type_id == 0x38 || segmentation_type_id == 0x3A)) {
+                    (segmentation_type_id == 0x34 ||
+                    segmentation_type_id == 0x30 ||
+                    segmentation_type_id == 0x32 ||
+                    segmentation_type_id == 0x36 ||
+                    segmentation_type_id == 0x38 ||
+                    segmentation_type_id == 0x3A ||
+                    segmentation_type_id == 0x44 ||
+                    segmentation_type_id == 0x46)) {
                 sub_segment_num = getInt(b, localOffset++, 1, MASK_8BITS);
                 sub_segments_expected = getInt(b, localOffset++, 1, MASK_8BITS);
             }
@@ -256,7 +275,7 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 	}
 	
 	private String getSegmentationTypeIdString(int segmentation_type_id) {
-		return segmentationTypeIdList.get(segmentation_type_id);
+		return segmentationTypeIdList.get(segmentation_type_id, "Reserved");
 	}
 
 }
