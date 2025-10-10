@@ -37,7 +37,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
 public class SpliceInfoSections extends AbstractPSITabel{
 
-	private final List<SpliceInfoSection> spliceInfoSectionList = new ArrayList<SpliceInfoSection>();
+	private final List<SpliceInfoSection> spliceInfoSectionList = new ArrayList<>();
 	private int pid = 0;
 
 	public SpliceInfoSections(final PSI parent){
@@ -50,10 +50,15 @@ public class SpliceInfoSections extends AbstractPSITabel{
 	}
 
 	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
-		int programNumber = getParentPSI().getPmts().findPMTsFromComponentPID(pid).get(0).getProgramNumber();
 		
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SpliceInfoSections PID="+pid + " for program",programNumber,getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber)));
+		String programName = "";
+		List<PMTsection> pmts = getParentPSI().getPmts().findPMTsFromComponentPID(pid);
+		
+		if(!pmts.isEmpty()) {
+			int programNumber = pmts.get(0).getProgramNumber();
+			programName = " for program 	"+programNumber + " (" +getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber)+")";
+		}
+		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SpliceInfoSections PID="+pid + programName));
 
 		for (SpliceInfoSection toTsection : spliceInfoSectionList) {
 			t.add(toTsection.getJTreeNode(modus));
