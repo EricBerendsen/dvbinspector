@@ -253,16 +253,16 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0x28) { // EACEM
 			switch (descriptor_tag) {
 			case 0x83:
-				return new LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
+				return new LogicalChannelDescriptor(data, tableSection, descriptorContext);
 			case 0x86:
 				return new EACEMStreamIdentifierDescriptor(data, 0, tableSection);
 			case 0x88:
-				return new HDSimulcastLogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
+				return new HDSimulcastLogicalChannelDescriptor(data, tableSection, descriptorContext);
 			}
 		} else if (private_data_specifier == 0x29) { // Nordig
 			switch (descriptor_tag) {
 			case 0x83:
-				return new NordigLogicalChannelDescriptorV1(data, 0, tableSection, descriptorContext);
+				return new NordigLogicalChannelDescriptorV1(data, tableSection, descriptorContext);
 			case 0x87:
 				return new NordigLogicalChannelDescriptorV2(data, tableSection, descriptorContext);
 			}
@@ -280,14 +280,14 @@ public final class DescriptorFactory {
 			case 0x81:
 				return new CosInformationParametersDescriptor(data, 0, tableSection);
 			case 0x83:
-				return new CosLogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
+				return new CosLogicalChannelDescriptor(data, tableSection, descriptorContext);
 			case 0x88:
 				return new CosTimezoneDescriptor(data, 0, tableSection);
 			}
 		} else if (private_data_specifier == 0x233a) { // DTG
 			switch (descriptor_tag) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
-				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
+				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, tableSection, descriptorContext);
 			case 0x86:
 				return new ServiceAttributeDescriptor(data, 0, tableSection);
 			case 0x89:
@@ -296,7 +296,7 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier >= 0x00003200 && private_data_specifier <= 0x0000320F ) { // FREE TV AUSTRALIA OPERATIONAL PRACTICE OP-40
 			switch (descriptor_tag) {
 			case 0x83:
-				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.au.LogicalChannelDescriptor(data, 0, tableSection, descriptorContext);
+				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.au.LogicalChannelDescriptor(data, tableSection, descriptorContext);
 			}
 
 		} else if (private_data_specifier == 0x41565356) { // AVS Video

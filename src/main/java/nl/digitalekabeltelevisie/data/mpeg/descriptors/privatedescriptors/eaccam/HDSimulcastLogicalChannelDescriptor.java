@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,29 +38,27 @@ public class HDSimulcastLogicalChannelDescriptor extends AbstractLogicalChannelD
 
 	public class LogicalChannel extends AbstractLogicalChannel {
 
-		public LogicalChannel(final int service_id, final int visible_service, final int reserved,
-				final int logical_channel_number) {
-			super(service_id, visible_service, reserved, logical_channel_number);
+		public LogicalChannel(int service_id, int visible_service_flag, int reserved, int logical_channel_number) {
+			super(service_id, visible_service_flag, reserved, logical_channel_number);
 
 		}
 	}
 
-	public HDSimulcastLogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset,parent, descriptorContext);
-		int t=0;
-		while (t<descriptorLength) {
+	public HDSimulcastLogicalChannelDescriptor(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, parent, descriptorContext);
+		int t = 0;
+		while (t < descriptorLength) {
 
-			final int serviceId=getInt(b, offset+t+2,2,0xFFFF);
-			final int visisble = (b[offset+t+4] & 0x80) >>7;
-			final int reserved = getInt(b,offset+t+4,1,0x7C) >>2;
-			final int chNumber=getInt(b, offset+t+4,2,0x03FF);
+			int serviceId = getInt(b, t + 2, 2, 0xFFFF);
+			int visisble = (b[t + 4] & 0x80) >> 7;
+			int reserved = getInt(b, t + 4, 1, 0x7C) >> 2;
+			int chNumber = getInt(b, t + 4, 2, 0x03FF);
 
 			final LogicalChannel s = new LogicalChannel(serviceId, visisble, reserved, chNumber);
 			channelList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
-
 
 
 

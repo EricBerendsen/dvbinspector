@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.MASK_10BITS;
 import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorContext;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLogicalChannelDescriptor;
@@ -45,33 +43,31 @@ public class LogicalChannelDescriptor extends AbstractLogicalChannelDescriptor {
 		
 		// ignore visible_service
 
-		public LogicalChannel(final int service_id, final int reserved, final int logical_channel_number){
+		public LogicalChannel(int service_id, int reserved, int logical_channel_number){
 			super(service_id, 1, reserved, logical_channel_number);
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(createNodeLabel(service_id, logical_channel_number)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",service_id,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logical_channel_number,null)));
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP(createNodeLabel(service_id, logical_channel_number));
+			s.add(new KVP("service_id", service_id));
+			s.add(new KVP("reserved", reserved));
+			s.add(new KVP("logical_channel_number", logical_channel_number));
 			return s;
 		}
 
-
-
 	}
 
-	public LogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset,parent, descriptorContext);
-		int t=0;
-		while (t<descriptorLength) {
-			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
-			final int reserved = getInt(b,offset+t+4,1,0xFC) >>2;
-			final int chNumber=getInt(b, offset+t+4,2,MASK_10BITS);
-			final LogicalChannel s = new LogicalChannel(serviceId, reserved, chNumber);
+	public LogicalChannelDescriptor(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, parent, descriptorContext);
+		int t = 0;
+		while (t < descriptorLength) {
+			int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			int reserved = getInt(b, t + 4, 1, 0xFC) >> 2;
+			int chNumber = getInt(b, t + 4, 2, MASK_10BITS);
+			LogicalChannel s = new LogicalChannel(serviceId, reserved, chNumber);
 			channelList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
 

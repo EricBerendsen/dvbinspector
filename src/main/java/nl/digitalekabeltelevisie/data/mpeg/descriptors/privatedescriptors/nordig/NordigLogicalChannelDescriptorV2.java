@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -36,8 +36,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -77,7 +75,7 @@ public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDesc
 	}
 
 	public NordigLogicalChannelDescriptorV2(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
-		super(b, 0 , parent, descriptorContext);
+		super(b, parent, descriptorContext);
 		int t = 0;
 		while (t < descriptorLength) {
 			final int channel_list_id = getInt(b, 2 + t, 1, MASK_8BITS);
@@ -90,12 +88,12 @@ public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDesc
 			List<LogicalChannel> channelList = new ArrayList<>();
 			int s = 0;
 			while (s < service_loop_length) {
-				final int serviceId = getInt(b, 2 + t + s, 2, MASK_16BITS);
-				final int visible = getInt(b, t + 4 + s, 1, 0x80) >> 7;
-				final int reserved = getInt(b, t + 4 + s, 1, 0x7C) >> 2; // 5 bits
+				int serviceId = getInt(b, 2 + t + s, 2, MASK_16BITS);
+				int visible = getInt(b, t + 4 + s, 1, 0x80) >> 7;
+				int reserved = getInt(b, t + 4 + s, 1, 0x7C) >> 2; // 5 bits
 				// chNumber is 10 bits in Nordig specs V2
-				final int chNumber = getInt(b, t + 4 + s, 2, MASK_10BITS);
-				final LogicalChannel lc = new LogicalChannel(serviceId, visible, reserved, chNumber);
+				int chNumber = getInt(b, t + 4 + s, 2, MASK_10BITS);
+				LogicalChannel lc = new LogicalChannel(serviceId, visible, reserved, chNumber);
 				channelList.add(lc);
 				s += 4;
 			}
@@ -107,9 +105,9 @@ public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDesc
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus){
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,channelLists,modus,"Channel Lists");
 		return t;
 	}

@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -62,10 +61,10 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 			this.logical_channel_number = logical_channel_number;
 		}
 
-		protected final int service_id;
-		protected final int visible_service_flag;
-		protected final int reserved;
-		protected final int logical_channel_number;
+		protected int service_id;
+		protected int visible_service_flag;
+		protected int reserved;
+		protected int logical_channel_number;
 		
 		
 		@Override
@@ -93,13 +92,13 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		public KVP getJTreeNode(final int modus) {
 		
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP(createNodeLabel(service_id, logical_channel_number)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id", service_id, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("visible_service_flag", visible_service_flag, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number", logical_channel_number, null)));
+			final KVP s = new KVP(createNodeLabel(service_id, logical_channel_number));
+			s.add(new KVP("service_id", service_id  ));
+			s.add(new KVP("visible_service_flag", visible_service_flag  ));
+			s.add(new KVP("reserved", reserved  ));
+			s.add(new KVP("logical_channel_number", logical_channel_number  ));
 			return s;
 		}
 
@@ -110,8 +109,8 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	protected final List<AbstractLogicalChannel> channelList = new ArrayList<>();
 
 
-	protected AbstractLogicalChannelDescriptor(byte[] b, int offset, TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset, parent);
+	protected AbstractLogicalChannelDescriptor(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, parent);
 		this.descriptorContext = descriptorContext;
 
 	}
@@ -131,12 +130,10 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	}
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		if (t.getUserObject() instanceof KVP kvp) {
-			kvp.addTableSource(this, "logical_channels");
-		}
+		final KVP t = (KVP) super.getJTreeNode(modus);
+		t.addTableSource(this, "logical_channels");
 
 		addListJTree(t,channelList,modus,"logical_channels",this);
 		return t;
@@ -174,6 +171,7 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	}
 
 
+	@Override
 	public TableModel getTableModel() {
 		FlexTableModel<AbstractLogicalChannel,AbstractLogicalChannel> tableModel =  new FlexTableModel<>(buildTableHeader());
 

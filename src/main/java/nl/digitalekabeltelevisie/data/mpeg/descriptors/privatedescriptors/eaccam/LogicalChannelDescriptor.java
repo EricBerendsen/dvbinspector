@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -44,21 +44,20 @@ public class LogicalChannelDescriptor extends AbstractLogicalChannelDescriptor {
 		}
 	}
 
-	public LogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset,parent, descriptorContext);
-		
-		int t=0;
-		while (t<descriptorLength) {
-			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
-			final int visible = getInt(b,offset+t+4,1,0x80) >>7;
-			final int reserved = getInt(b,offset+t+4,1,0x7C) >>2;
-			final int chNumber=getInt(b, offset+t+4,2,MASK_10BITS);
-			final AbstractLogicalChannel s = new LogicalChannel(serviceId, visible, reserved, chNumber);
+	public LogicalChannelDescriptor(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, parent, descriptorContext);
+
+		int t = 0;
+		while (t < descriptorLength) {
+			int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			int visible = getInt(b, t + 4, 1, 0x80) >> 7;
+			int reserved = getInt(b, t + 4, 1, 0x7C) >> 2;
+			int chNumber = getInt(b, t + 4, 2, MASK_10BITS);
+			AbstractLogicalChannel s = new LogicalChannel(serviceId, visible, reserved, chNumber);
 			channelList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
-
 
 	@Override
 	public String getDescriptorname(){

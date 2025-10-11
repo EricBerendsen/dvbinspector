@@ -2,7 +2,7 @@
  * 
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  * 
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  * 
  *  This file is part of DVB Inspector.
  * 
@@ -48,21 +48,20 @@ public class NordigLogicalChannelDescriptorV1 extends AbstractLogicalChannelDesc
 
 	}
 
-	public NordigLogicalChannelDescriptorV1(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset,parent, descriptorContext);
-		int t=0;
-		while (t<descriptorLength) {
-			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
-			final int visible = getInt(b,offset+t+4,1,0x80) >>7; // 1 bit
-			final int reserved = getInt(b,offset+t+4,1,0x40) >>6; // 1 bit
+	public NordigLogicalChannelDescriptorV1(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, parent, descriptorContext);
+		int t = 0;
+		while (t < descriptorLength) {
+			int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			int visible = getInt(b, t + 4, 1, 0x80) >> 7; // 1 bit
+			int reserved = getInt(b, t + 4, 1, 0x40) >> 6; // 1 bit
 			// chNumber is 14 bits in Nordig specs V1
-			final int chNumber=getInt(b, offset+t+4,2,MASK_14BITS);
-			final LogicalChannel s = new LogicalChannel(serviceId, visible, reserved, chNumber);
+			int chNumber = getInt(b, t + 4, 2, MASK_14BITS);
+			LogicalChannel s = new LogicalChannel(serviceId, visible, reserved, chNumber);
 			channelList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
-
 
 	@Override
 	public String getDescriptorname(){
