@@ -682,13 +682,13 @@ public final class DescriptorFactory {
 
 		switch (toUnsignedInt(data[0])) {
 		case 0x00:
-			return new AvailDescriptor(data, 0, tableSection);
+			return new AvailDescriptor(data, tableSection);
 		case 0x02:
-			return new SegmentationDescriptor(data, 0, tableSection);
+			return new SegmentationDescriptor(data, tableSection);
         case 0x03:
-            return new TimeDescriptor(data, 0, tableSection);			
+            return new TimeDescriptor(data, tableSection);			
 		default:
-			Descriptor d = new SCTE35Descriptor(data, 0, tableSection);
+			Descriptor d = new SCTE35Descriptor(data, tableSection);
 			logger.info("Not implemented SCTE35Descriptor:" + toUnsignedInt(data[0]) + " ("
 					+ SCTE35Descriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35;
 
 import static nl.digitalekabeltelevisie.util.Utils.getBytes;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -49,9 +47,9 @@ public class SCTE35Descriptor extends Descriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public SCTE35Descriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		identifier = getBytes(b,offset+2,4);
+	public SCTE35Descriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		identifier = getBytes(b, 2,4);
 	}
 
 	@Override
@@ -75,9 +73,9 @@ public class SCTE35Descriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("identifier",identifier ,null)));
+	public KVP getJTreeNode(final int modus){
+		final KVP t = (KVP) super.getJTreeNode(modus);
+		t.add(new KVP("identifier",identifier));
 		return t;
 	}
 

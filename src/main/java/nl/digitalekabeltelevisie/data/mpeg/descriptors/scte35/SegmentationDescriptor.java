@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.*;
@@ -152,14 +150,14 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 	private int sub_segments_expected;
 
 
-	public SegmentationDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		segmentation_event_id = getBytes(b,offset+6,4);
-		segmentation_event_cancel_indicator = getInt(b,offset+10,1,0b1000_0000)>>7; 
-		reserved = getInt(b,offset+10,1,0b0111_1111); 
+	public SegmentationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		segmentation_event_id = getBytes(b,6,4);
+		segmentation_event_cancel_indicator = getInt(b,10,1,0b1000_0000)>>7; 
+		reserved = getInt(b,10,1,0b0111_1111); 
 		if(segmentation_event_cancel_indicator == 0) {
 			
-			int localOffset = offset+11;
+			int localOffset = 11;
 			program_segmentation_flag = getInt(b,localOffset,1,0b1000_0000)>>7; 
 			segmentation_duration_flag = getInt(b,localOffset,1,0b0100_0000)>>6;
 			delivery_not_restricted_flag = getInt(b,localOffset,1,0b0010_0000)>>5;
@@ -218,51 +216,47 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("segmentation_event_id", segmentation_event_id, null)));
-		t.add(new DefaultMutableTreeNode(
-				new KVP("segmentation_event_cancel_indicator", segmentation_event_cancel_indicator,
-						segmentation_event_cancel_indicator == 1
-								? "a previously sent segmentation event has been cancelled"
-								: "no previously sent segmentation event has been cancelled")));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
+	public KVP getJTreeNode(final int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("segmentation_event_id", segmentation_event_id));
+		t.add(new KVP("segmentation_event_cancel_indicator", segmentation_event_cancel_indicator,
+				segmentation_event_cancel_indicator == 1 ? "a previously sent segmentation event has been cancelled"
+						: "no previously sent segmentation event has been cancelled"));
+		t.add(new KVP("reserved", reserved));
 		if (segmentation_event_cancel_indicator == 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("program_segmentation_flag", program_segmentation_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("segmentation_duration_flag", segmentation_duration_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("delivery_not_restricted_flag", delivery_not_restricted_flag, null)));
+			t.add(new KVP("program_segmentation_flag", program_segmentation_flag));
+			t.add(new KVP("segmentation_duration_flag", segmentation_duration_flag));
+			t.add(new KVP("delivery_not_restricted_flag", delivery_not_restricted_flag));
 
 			if (delivery_not_restricted_flag == 0) {
-				t.add(new DefaultMutableTreeNode(
-						new KVP("web_delivery_allowed_flag", web_delivery_allowed_flag, null)));
-				t.add(new DefaultMutableTreeNode(
-						new KVP("no_regional_blackout_flag", no_regional_blackout_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("archive_allowed_flag", archive_allowed_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("device_restrictions", device_restrictions, null)));
+				t.add(new KVP("web_delivery_allowed_flag", web_delivery_allowed_flag));
+				t.add(new KVP("no_regional_blackout_flag", no_regional_blackout_flag));
+				t.add(new KVP("archive_allowed_flag", archive_allowed_flag));
+				t.add(new KVP("device_restrictions", device_restrictions));
 
 			} else {
-				t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved2, null)));
+				t.add(new KVP("reserved", reserved2));
 
 			}
 			if (program_segmentation_flag == 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("component_count", component_count, null)));
-				Utils.addListJTree(t, componentOffsetList, modus, "Component Offsets");
+				t.add(new KVP("component_count", component_count));
+				addListJTree(t, componentOffsetList, modus, "Component Offsets");
 			}
 			if (segmentation_duration_flag == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("segmentation_duration", segmentation_duration, Utils.printTimebase90kHz(segmentation_duration))));
+				t.add(new KVP("segmentation_duration", segmentation_duration, Utils.printTimebase90kHz(segmentation_duration)));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid_type", segmentation_upid_type, getSegmentationUpidTypeString(segmentation_upid_type))));
-			t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid_length", segmentation_upid_length, null)));
+			t.add(new KVP("segmentation_upid_type", segmentation_upid_type, getSegmentationUpidTypeString(segmentation_upid_type)));
+			t.add(new KVP("segmentation_upid_length", segmentation_upid_length));
 
 			if (segmentation_upid_length > 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("segmentation_upid", segmentation_upid, null)));
+				t.add(new KVP("segmentation_upid", segmentation_upid));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("segmentation_type_id", segmentation_type_id, getSegmentationTypeIdString(segmentation_type_id))));
-			t.add(new DefaultMutableTreeNode(new KVP("segment_num", segment_num, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("segments_expected", segments_expected, null)));
+			t.add(new KVP("segmentation_type_id", segmentation_type_id, getSegmentationTypeIdString(segmentation_type_id)));
+			t.add(new KVP("segment_num", segment_num));
+			t.add(new KVP("segments_expected", segments_expected));
 			if (segmentation_type_id == 0x34 || segmentation_type_id == 0x36) {
-				t.add(new DefaultMutableTreeNode(new KVP("sub_segment_num", sub_segment_num, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sub_segments_expected", sub_segments_expected, null)));
+				t.add(new KVP("sub_segment_num", sub_segment_num));
+				t.add(new KVP("sub_segments_expected", sub_segments_expected));
 			}
 
 		}
