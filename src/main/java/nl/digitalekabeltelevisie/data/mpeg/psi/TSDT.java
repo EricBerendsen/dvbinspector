@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -49,7 +47,7 @@ public class TSDT extends AbstractPSITabel {
 	}
 
 	
-	public void update(final TSDTsection section){
+	public void update(TSDTsection section){
 
 		if(tsdt==null){
 			tsdt = new TSDTsection[section.getSectionLastNumber()+1];
@@ -64,22 +62,21 @@ public class TSDT extends AbstractPSITabel {
 
 	}
 	
-	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TSDT"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("TSDT");
 		if (tsdt != null) {
 			for (TSDTsection element : tsdt) {
-				if(element!= null){
-					if(!Utils.simpleModus(modus)){ // show all versions
+				if (element != null) {
+					if (!Utils.simpleModus(modus)) { // show all versions
 						addSectionVersionsToJTree(t, element, modus);
-					}else{ // keep it simple
+					} else { // keep it simple
 						t.add(element.getJTreeNode(modus));
 					}
 				}
 			}
 		}
-		
+
 		return t;
 	}
 

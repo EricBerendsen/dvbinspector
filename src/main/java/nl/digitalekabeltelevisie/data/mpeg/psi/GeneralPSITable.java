@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,16 +26,8 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -89,17 +81,17 @@ public class GeneralPSITable extends AbstractPSITabel{
 	
 
 
-	public GeneralPSITable(final PSI parent){
+	public GeneralPSITable(PSI parent){
 		super(parent);
 	}
 
-	public void update(final TableSection section){
+	public void update(TableSection section){
 
 		int startPacket = section.getPacket_no();
 
-		if(section.sectionSyntaxIndicator==0x01){ // long suntax, section_syntax_indicator==1
+		if(section.sectionSyntaxIndicator==0x01){ // long syntax, section_syntax_indicator==1
 
-			final int tableId = section.getTableId();
+			int tableId = section.getTableId();
 			TreeMap<Integer, TableSection[]> table = longSections.computeIfAbsent(tableId, k -> new TreeMap<>());
 			TableSection[] sections = table.computeIfAbsent(section.getTableIdExtension(), k -> new TableSection[section.getSectionLastNumber() + 1]);
 
@@ -142,23 +134,24 @@ public class GeneralPSITable extends AbstractPSITabel{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PSI Data"));
+		KVP t = new KVP("PSI Data");
 		if(!PreferencesManager.isEnableGenericPSI()) {
-		    t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable ")));
+		    t.add(GuiUtils.getErrorKVP ("Generic PSI not enabled, select 'Settings -> Enable Generic PSI' to enable "));
 		    return t;
 		}
 		
 		for (Entry<Integer, TreeMap<Integer, TableSection[]>> tableIDSections : longSections.entrySet()) {
 			int tableId = tableIDSections.getKey();
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("table_id", tableId, TableSection.getTableType(tableId)));
-			final TreeMap<Integer, TableSection[]> tableIdExtensionSections = tableIDSections.getValue();
+			KVP n = new KVP("table_id", tableId, TableSection.getTableType(tableId));
+			TreeMap<Integer, TableSection[]> tableIdExtensionSections = tableIDSections.getValue();
 
-			for ( Entry<Integer, TableSection[]> tableIdExtensionSection : tableIdExtensionSections.entrySet()) {
+			for (Entry<Integer, TableSection[]> tableIdExtensionSection : tableIdExtensionSections.entrySet()) {
 				int tableIdExt = tableIdExtensionSection.getKey();
-				final DefaultMutableTreeNode o = new DefaultMutableTreeNode(new KVP("table_id_extension", tableIdExt, null));
-				final TableSection[] sections = tableIdExtensionSection.getValue();
+				KVP o = new KVP("table_id_extension", tableIdExt);
+				TableSection[] sections = tableIdExtensionSection.getValue();
 				for (TableSection section : sections) {
 					if (section != null) {
 						if (!Utils.simpleModus(modus)) { // show all versions
@@ -179,7 +172,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 	}
 
 
-	public boolean exists(final int tableId, final int tableIdExtension, final int section){
+	public boolean exists(int tableId, int tableIdExtension, int section){
 		return ((longSections.get(tableId)!=null) &&
 				(longSections.get(tableId).get(tableIdExtension)!=null) &&
 				(longSections.get(tableId).get(tableIdExtension).length >section) &&
@@ -196,7 +189,7 @@ public class GeneralPSITable extends AbstractPSITabel{
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj){
 			return true;
 		}

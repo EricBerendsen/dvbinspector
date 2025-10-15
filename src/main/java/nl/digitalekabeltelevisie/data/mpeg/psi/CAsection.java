@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,45 +28,45 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
+import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.CADescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.gui.TableSource;
-import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class CAsection extends TableSectionExtendedSyntax implements TableSource{
 
 	private List<Descriptor>	descriptorList;
 
-	public CAsection(final PsiSectionData raw_data, final PID parent){
+	public CAsection(PsiSectionData raw_data, PID parent){
 		super(raw_data, parent);
 		descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(), 8, sectionLength - 9, this);
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("CAsection section=");
+		StringBuilder b = new StringBuilder("CAsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber());
 		return b.toString();
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		if(!descriptorList.isEmpty()) {
-			KVP kvp = (KVP) t.getUserObject();
-			kvp.addTableSource(this, "cat");
+			t.addTableSource(this, "cat");
 		}
-		Utils.addListJTree(t, descriptorList, modus, "descriptors");
+		addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
 	}
 	
@@ -81,7 +81,7 @@ public class CAsection extends TableSectionExtendedSyntax implements TableSource
 		return descriptorList;
 	}
 
-	public void setDescriptorList(final List<Descriptor> descriptorList) {
+	public void setDescriptorList(List<Descriptor> descriptorList) {
 		this.descriptorList = descriptorList;
 	}
 
@@ -93,24 +93,5 @@ public class CAsection extends TableSectionExtendedSyntax implements TableSource
 		tableModel.process();
 		return tableModel;
 	}
-		
-
-	
-//
-//	@Override
-//	public TableModel getTableModel() {
-//		return TableUtils.getTableModel(CAT::buildCatTableHeader,()->getRowData()) ;
-//	}
-//
-//
-//	public List<Map<String, Object>> getRowData() {
-//		List<Map<String, Object>> rowData = new ArrayList<Map<String,Object>>(); 
-//		
-//		for( Descriptor descriptor:descriptorList) {
-//			if(descriptor instanceof TableRowSource)
-//			rowData.add(((TableRowSource)descriptor).getTableRowData());
-//		}
-//		return rowData;
-//	}
 
 }

@@ -132,7 +132,7 @@ public class FSTsection extends TableSectionExtendedSyntax{
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP kvp = (KVP) super.getJTreeNode(modus);
+		KVP kvp = super.getJTreeNode(modus);
 		kvp.addTableSource(this::getTableModel, "FST");
 		kvp.addList(serviceList, modus, "service_loop");
 		return kvp;

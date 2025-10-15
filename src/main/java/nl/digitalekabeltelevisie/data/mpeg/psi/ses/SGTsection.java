@@ -225,7 +225,7 @@ public class SGTsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP t = (KVP) super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.addTableSource(this::getTableModel, "SGT Section");
 		t.add(new KVP("reserved", reserved1));
 		t.add(new KVP("reserved_future_use", reserved_future_use1));

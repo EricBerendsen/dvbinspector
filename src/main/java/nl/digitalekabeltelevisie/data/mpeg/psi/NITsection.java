@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,12 +26,12 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.*;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
@@ -50,7 +50,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	private int transportStreamLoopLength;
 
 	
-	public NITsection(final PsiSectionData raw_data, final PID parent){
+	public NITsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 
 		networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
@@ -67,7 +67,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("NITsection section=");
+		StringBuilder b = new StringBuilder("NITsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=").append(getTableType(tableId)). append(", NetworkID=").append(getNetworkID()).append(", ");
 
 		return b.toString();
@@ -79,7 +79,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	}
 
 
-	public void setNetworkDescriptorList(final List<Descriptor> networkDescriptorList) {
+	public void setNetworkDescriptorList(List<Descriptor> networkDescriptorList) {
 		this.networkDescriptorList = networkDescriptorList;
 	}
 
@@ -89,7 +89,7 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	}
 
 
-	public void setNetworkDescriptorsLength(final int networkDescriptorsLength) {
+	public void setNetworkDescriptorsLength(int networkDescriptorsLength) {
 		this.networkDescriptorsLength = networkDescriptorsLength;
 	}
 
@@ -103,8 +103,8 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	 * @param streamID
 	 * @return
 	 */
-	public TransportStream getTransportStream(final int streamID) {
-		for(final TransportStream tStream:transportStreamList){
+	public TransportStream getTransportStream(int streamID) {
+		for(TransportStream tStream:transportStreamList){
 			if(tStream.transport_stream_id()==streamID){
 				return tStream;
 			}
@@ -130,20 +130,17 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 		this.transportStreamLoopLength = transportStreamLoopLength;
 	}
 
-	private List<TransportStream> buildTransportStreamList(final byte[] data, final int i,
-			final int programInfoLength) {
-		final ArrayList<TransportStream> r = new ArrayList<>();
+	private List<TransportStream> buildTransportStreamList(byte[] data, int i, int programInfoLength) {
+		ArrayList<TransportStream> r = new ArrayList<>();
 		int t = 0;
 		while (t < programInfoLength) {
-			final int transport_stream_id = getInt(data, i + t, 2, Utils.MASK_16BITS);
-			final int original_network_id = getInt(data, i + t + 2, 2, Utils.MASK_16BITS);
-			final int transport_descriptors_length = getInt(data, i + t + 4, 2, Utils.MASK_12BITS);
-			DescriptorContext dc = new DescriptorContext(original_network_id, transport_stream_id,getNetworkID());
-			final List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(data, i + t + 6,
-					transport_descriptors_length, this, dc);
+			int transport_stream_id = getInt(data, i + t, 2, Utils.MASK_16BITS);
+			int original_network_id = getInt(data, i + t + 2, 2, Utils.MASK_16BITS);
+			int transport_descriptors_length = getInt(data, i + t + 4, 2, Utils.MASK_12BITS);
+			DescriptorContext dc = new DescriptorContext(original_network_id, transport_stream_id, getNetworkID());
+			List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(data, i + t + 6, transport_descriptors_length, this, dc);
 
-			r.add(new TransportStream(transport_stream_id, original_network_id, transport_descriptors_length,
-					descriptorList));
+			r.add(new TransportStream(transport_stream_id, original_network_id, transport_descriptors_length, descriptorList));
 			t += 6 + transport_descriptors_length;
 		}
 
@@ -151,21 +148,19 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP) t.getUserObject();
+		KVP kvp = super.getJTreeNode(modus);
 		kvp.addTableSource(this, "Transport Streams");
 		kvp.addTableSource(this::getServicesTableD, "Services");
-		
-		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_length",getNetworkDescriptorsLength(),null)));
-		Utils.addListJTree(t,networkDescriptorList,modus,"network_descriptors");
-		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length",getTransportStreamLoopLength(),null)));
 
-		Utils.addListJTree(t,transportStreamList,modus,"transport_stream_loop");
+		kvp.add(new KVP("network_descriptors_length", getNetworkDescriptorsLength()));
+		addListJTree(kvp, networkDescriptorList, modus, "network_descriptors");
+		kvp.add(new KVP("transport_stream_loop_length", getTransportStreamLoopLength()));
 
+		addListJTree(kvp, transportStreamList, modus, "transport_stream_loop");
 
-		return t;
+		return kvp;
 	}
 
 	@Override
@@ -177,14 +172,14 @@ public class NITsection extends TableSectionExtendedSyntax implements TableSourc
 		FlexTableModel<TransportStream, Service> tableModel = new FlexTableModel<>(NIT.buildServiceTableHeader());
 
 		for (TransportStream ts : getTransportStreamList()) {
-			List<ServiceListDescriptor> sldList = Descriptor.findGenericDescriptorsInList(ts.descriptorList(),ServiceListDescriptor.class);
+			List<ServiceListDescriptor> sldList = Descriptor.findGenericDescriptorsInList(ts.descriptorList(), ServiceListDescriptor.class);
 			for (ServiceListDescriptor sld : sldList) {
 				tableModel.addData(ts, sld.getServiceList());
 			}
 		}
 
-	tableModel.process();
-	return tableModel;
+		tableModel.process();
+		return tableModel;
 
 	}
 

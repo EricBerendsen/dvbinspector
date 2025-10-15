@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -51,28 +49,28 @@ public class DFIT extends AbstractPSITabel {
 	public void update(DFITSection section) {
 		pid=section.getParentPID().getPid();
 		
-		final int fontId = section.getFont_id();
+		int fontId = section.getFont_id();
 		DFITSection [] sections= dfits.computeIfAbsent(fontId, f -> new DFITSection[section.getSectionLastNumber()+1]);
 
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DFIT PID="+pid ));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("DFIT PID="+pid);
 		
 		for(Entry<Integer, DFITSection[]> dfit:dfits.entrySet()) {
 			
-			final int font_id= dfit.getKey();
-			final DFITSection [] sections = dfit.getValue();
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("DFIT, fontId",font_id, null));
-			for (final DFITSection tsection : sections) {
+			int font_id= dfit.getKey();
+			DFITSection [] sections = dfit.getValue();
+			KVP n = new KVP("DFIT, fontId",font_id);
+			for (DFITSection tsection : sections) {
 				if(tsection!= null){
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

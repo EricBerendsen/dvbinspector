@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,15 +30,18 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
 import static nl.digitalekabeltelevisie.util.Utils.getCASystemIDString;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.CADescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class CAT extends AbstractPSITabel {
 
@@ -56,42 +59,42 @@ public class CAT extends AbstractPSITabel {
 		return l;
 	}
 
-	public CAT(final PSI parent) {
+	public CAT(PSI parent) {
 		super(parent);
 	}
 
 	/**
 	 * @param section
 	 */
-	public void update(final CAsection section) {
+	public void update(CAsection section) {
 		if (cat == null) {
 			cat = new CAsection[section.getSectionLastNumber() + 1];
 		}
 		if (cat[section.getSectionNumber()] == null) {
 			cat[section.getSectionNumber()] = section;
 		} else {
-			final TableSection last = cat[section.getSectionNumber()];
+			TableSection last = cat[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
 		KVP kvp = new KVP("CAT");
 		if(hasCADescriptors()) {
 			kvp.addTableSource(this::getTableModel, "cat");
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-
+	
 		if (cat != null) {
 			for (CAsection element : cat) {
 				if (element != null) {
-					addSectionVersionsToJTree(t, element, modus);
+					addSectionVersionsToJTree(kvp, element, modus);
 				}
 			}
 		}
-		return t;
+		return kvp;
 	}
 
 	

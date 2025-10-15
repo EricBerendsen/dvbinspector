@@ -27,7 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan;
 
-import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.*;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findDescriptorApplyListFunc;
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory.buildDescriptorList;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
@@ -43,7 +45,6 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -55,11 +56,10 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	
 	private static final Logger	logger	= Logger.getLogger(ONTSection.class.getName());
 
-	public record OperatorBrand(int operator_network_id, int operator_sublist_id, int reserved_future_use,
-								int operator_descriptors_length, List<Descriptor> descriptorList) implements TreeNode {
+	public record OperatorBrand(int operator_network_id, int operator_sublist_id, int reserved_future_use, int operator_descriptors_length,
+			List<Descriptor> descriptorList) implements TreeNode {
 
-
-	@Override
+		@Override
 		public KVP getJTreeNode(int modus) {
 
 			KVP t = new KVP("operator_brand", operator_network_id + "-" + operator_sublist_id);
@@ -114,7 +114,7 @@ public class ONTSection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(int modus){
 
-		KVP kvp = (KVP) super.getJTreeNode(modus);
+		KVP kvp = super.getJTreeNode(modus);
 		kvp.addTableSource(this::getTableModel, "ONT Section");
 
 		kvp.add( new KVP("bouquet_descriptors_loop_length",bouquet_descriptors_loop_length ));

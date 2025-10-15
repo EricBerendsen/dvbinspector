@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,24 +34,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ComponentDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ContentDescriptor.ContentItem;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtendedEventDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.LanguageDependentEitDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ParentalRatingDescriptor.Rating;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.ShortEventDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.TimeShiftedEventDescriptor;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
@@ -402,13 +393,12 @@ public class EITsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus){
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 
-		KVP kvp = (KVP)t.getUserObject();
-		kvp.addHTMLSource(()->getHtmlForEit(modus), "List");
-		kvp.addTableSource(this::getTableModel, "Events");
+		t.addHTMLSource(()->getHtmlForEit(modus), "List");
+		t.addTableSource(this::getTableModel, "Events");
 		t.add(new KVP("service_id",getServiceID()));
 		t.add(new KVP("transport_stream_id",transportStreamID));
 		t.add(new KVP("original_network_id",originalNetworkID).setDescription(Utils.getOriginalNetworkIDString(originalNetworkID)));

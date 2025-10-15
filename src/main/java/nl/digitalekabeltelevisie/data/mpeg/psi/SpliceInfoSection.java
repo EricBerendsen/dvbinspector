@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,11 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -63,8 +63,8 @@ public class SpliceInfoSection extends TableSection {
 
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			return new DefaultMutableTreeNode(new KVP("bandwidth_reservation"));
+		public KVP getJTreeNode(int modus) {
+			return new KVP("bandwidth_reservation");
 		}
 
 	}
@@ -87,14 +87,14 @@ public class SpliceInfoSection extends TableSection {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public KVP getJTreeNode(int modus) {
 
 			String preRoolTime = getPreRollTimeString();
-			
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("splice_time"+preRoolTime));
-			t.add(new DefaultMutableTreeNode(new KVP("time_specified_flag",time_specified_flag,null)));
-			if(time_specified_flag==1){
-				t.add(new DefaultMutableTreeNode(new KVP("pts_time",pts_time,Utils.printTimebase90kHz(pts_time))));
+
+			KVP t = new KVP("splice_time" + preRoolTime);
+			t.add(new KVP("time_specified_flag", time_specified_flag));
+			if (time_specified_flag == 1) {
+				t.add(new KVP("pts_time", pts_time, Utils.printTimebase90kHz(pts_time)));
 			}
 			return t;
 		}
@@ -154,11 +154,11 @@ public class SpliceInfoSection extends TableSection {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("break_duration"));
-			t.add(new DefaultMutableTreeNode(new KVP("auto_return", auto_return, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("duration", duration, Utils.printTimebase90kHz(duration))));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("break_duration");
+			t.add(new KVP("auto_return", auto_return));
+			t.add(new KVP("reserved", reserved));
+			t.add(new KVP("duration", duration, Utils.printTimebase90kHz(duration)));
 			return t;
 		}
 	}
@@ -215,24 +215,24 @@ public class SpliceInfoSection extends TableSection {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public KVP getJTreeNode(int modus) {
 			
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("splice_insert"));
+			KVP t = new KVP("splice_insert");
 
-			t.add(new DefaultMutableTreeNode(new KVP("splice_event_id",splice_event_id,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("splice_event_cancel_indicator",splice_event_cancel_indicator,splice_event_cancel_indicator==1?"a previously sent splice event, identified by splice_event_id, has been cancelled":null)));
+			t.add(new KVP("splice_event_id",splice_event_id));
+			t.add(new KVP("splice_event_cancel_indicator",splice_event_cancel_indicator,splice_event_cancel_indicator==1?"a previously sent splice event, identified by splice_event_id, has been cancelled":null));
 			if(splice_event_cancel_indicator==0){
-				t.add(new DefaultMutableTreeNode(new KVP("out_of_network_indicator",out_of_network_indicator,out_of_network_indicator==1?"the splice event is an opportunity to exit from the network feed":"the splice event is an opportunity to return to the network feed")));
-				t.add(new DefaultMutableTreeNode(new KVP("program_splice_flag",program_splice_flag,program_splice_flag==1?"the message refers to a Program Splice Point":"each component that is intended to be spliced will be listed separately")));
-				t.add(new DefaultMutableTreeNode(new KVP("duration_flag",duration_flag,duration_flag==1?"break_duration() field present":"break_duration() field not present")));
-				t.add(new DefaultMutableTreeNode(new KVP("splice_immediate_flag",splice_immediate_flag,splice_immediate_flag==1?"splice mode shall be the Splice Immediate Mode":"splice_time() field present")));
+				t.add(new KVP("out_of_network_indicator",out_of_network_indicator,out_of_network_indicator==1?"the splice event is an opportunity to exit from the network feed":"the splice event is an opportunity to return to the network feed"));
+				t.add(new KVP("program_splice_flag",program_splice_flag,program_splice_flag==1?"the message refers to a Program Splice Point":"each component that is intended to be spliced will be listed separately"));
+				t.add(new KVP("duration_flag",duration_flag,duration_flag==1?"break_duration() field present":"break_duration() field not present"));
+				t.add(new KVP("splice_immediate_flag",splice_immediate_flag,splice_immediate_flag==1?"splice mode shall be the Splice Immediate Mode":"splice_time() field present"));
 				if((program_splice_flag == 1) && (splice_immediate_flag == 0)){
 					t.add(splice_time.getJTreeNode(modus));
 				}
 				if(program_splice_flag == 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("component_count",component_count,null)));
+					t.add(new KVP("component_count",component_count));
 					for(int i=0;i<component_count;i++) {
-						t.add(new DefaultMutableTreeNode(new KVP("component_tag ["+i+"]",componentTags.get(i),null)));
+						t.add(new KVP("component_tag ["+i+"]",componentTags.get(i)));
 						 if(splice_immediate_flag == 0){
 								t.add(componentSpliceTimes.get(i).getJTreeNode(modus));
 						}
@@ -242,9 +242,9 @@ public class SpliceInfoSection extends TableSection {
 					t.add(break_duration.getJTreeNode(modus));
 				}
 				
-				t.add(new DefaultMutableTreeNode(new KVP("unique_program_id",unique_program_id,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("avail_num",avail_num,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("avails_expected",avails_expected,null)));
+				t.add(new KVP("unique_program_id",unique_program_id));
+				t.add(new KVP("avail_num",avail_num));
+				t.add(new KVP("avails_expected",avails_expected));
 			}
 			return t;
 		}
@@ -320,12 +320,12 @@ public class SpliceInfoSection extends TableSection {
 		}
 		
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("time_signal"));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("time_signal");
 			t.add(splice_time.getJTreeNode(modus));
 			return t;
 		}
-		
+
 	}
 	
 	private static class SpliceNull implements TreeNode{
@@ -335,8 +335,8 @@ public class SpliceInfoSection extends TableSection {
 		}
 		
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			return new DefaultMutableTreeNode(new KVP("splice_null"));
+		public KVP getJTreeNode(int modus) {
+			return new KVP("splice_null");
 		}
 		
 	}
@@ -355,20 +355,20 @@ public class SpliceInfoSection extends TableSection {
 	private TreeNode splice_command;
 
 
-	public SpliceInfoSection(final PsiSectionData raw_data, final PID parent){
+	public SpliceInfoSection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
-		final byte[] data = raw_data.getData();
+		byte[] data = raw_data.getData();
 		BitSource bitSource = new BitSource(data, 3, sectionLength);
-		protocol_version = bitSource.readBits(8); // Utils.getInt(data,3,1,Utils.MASK_8BITS);
-		encrypted_packet =  bitSource.readBits(1); //Utils.getInt(data,4,1,0x80)>>7;
-		encryption_algorithm =  bitSource.readBits(6); //Utils.getInt(data,4,1,0x7E)>>1;
+		protocol_version = bitSource.readBits(8); 
+		encrypted_packet =  bitSource.readBits(1); 
+		encryption_algorithm =  bitSource.readBits(6); 
 		
-		pts_adjustment =  bitSource.readBitsLong(33); //getLong(data,4, 5, MASK_33BITS);
-		cw_index =  bitSource.readBits(8); //Utils.getInt(data,9,1,Utils.MASK_8BITS);
-		tier =  bitSource.readBits(12); //Utils.getInt(data,10,2,0xFFF0)>>4;
-		splice_command_length =  bitSource.readBits(12); //Utils.getInt(data,11,2,Utils.MASK_12BITS);
+		pts_adjustment =  bitSource.readBitsLong(33); 
+		cw_index =  bitSource.readBits(8); 
+		tier =  bitSource.readBits(12); 
+		splice_command_length =  bitSource.readBits(12); 
 		if(encrypted_packet==0){
-			splice_command_type=  bitSource.readBits(8); //Utils.getInt(data,13,1,Utils.MASK_8BITS);
+			splice_command_type=  bitSource.readBits(8); 
 			if(splice_command_type==0){
 				splice_command = new SpliceNull(bitSource);
 			}else if(splice_command_type==5){
@@ -400,18 +400,18 @@ public class SpliceInfoSection extends TableSection {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("protocol_version",protocol_version,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("encrypted_packet",encrypted_packet,encrypted_packet==1?"portions of the splice_info_section, starting with splice_command_type and ending with and including E_CRC_32, are encrypted":"no part of this message is encrypted")));
-		t.add(new DefaultMutableTreeNode(new KVP("encryption_algorithm",encryption_algorithm,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pts_adjustment",pts_adjustment,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cw_index",cw_index,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("tier",tier,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("splice_command_length",splice_command_length,splice_command_length==0xFFF?"The value of 0xFFF provides backwards compatibility and shall be ignored by downstream equipment":null)));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("protocol_version",protocol_version));
+		t.add(new KVP("encrypted_packet",encrypted_packet,encrypted_packet==1?"portions of the splice_info_section, starting with splice_command_type and ending with and including E_CRC_32, are encrypted":"no part of this message is encrypted"));
+		t.add(new KVP("encryption_algorithm",encryption_algorithm));
+		t.add(new KVP("pts_adjustment",pts_adjustment));
+		t.add(new KVP("cw_index",cw_index));
+		t.add(new KVP("tier",tier));
+		t.add(new KVP("splice_command_length",splice_command_length,splice_command_length==0xFFF?"The value of 0xFFF provides backwards compatibility and shall be ignored by downstream equipment":null));
 		if(encrypted_packet==0){
-			t.add(new DefaultMutableTreeNode(new KVP("splice_command_type",splice_command_type,getSpliceCommandTypeString(splice_command_type))));
+			t.add(new KVP("splice_command_type",splice_command_type,getSpliceCommandTypeString(splice_command_type)));
 
 			if(splice_command_type==0){
 				t.add(splice_command.getJTreeNode(modus));
@@ -422,13 +422,13 @@ public class SpliceInfoSection extends TableSection {
 			}else if(splice_command_type==7){
 				t.add(splice_command.getJTreeNode(modus));
 			}else{
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("splice_command_type ="+splice_command_type+" ("+ getSpliceCommandTypeString(splice_command_type)+")")));
+				t.add(GuiUtils.getNotImplementedKVP("splice_command_type ="+splice_command_type+" ("+ getSpliceCommandTypeString(splice_command_type)+")"));
 				return t;
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("descriptor_loop_length",descriptor_loop_length,null)));
-			Utils.addListJTree(t,splice_descriptors,modus,"splice_descriptors");
+			t.add(new KVP("descriptor_loop_length",descriptor_loop_length));
+			addListJTree(t,splice_descriptors,modus,"splice_descriptors");
 		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("this portion of the splice_info_section, starting with splice_command_type and ending with and including E_CRC_32, is encrypted")));
+			t.add(new KVP("this portion of the splice_info_section, starting with splice_command_type and ending with and including E_CRC_32, is encrypted"));
 		}
 		return t;
 	}

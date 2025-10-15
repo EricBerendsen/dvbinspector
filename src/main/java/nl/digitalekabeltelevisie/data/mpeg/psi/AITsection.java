@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,13 +30,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import static nl.digitalekabeltelevisie.util.Utils.getAppTypeIDString;
 import static nl.digitalekabeltelevisie.util.Utils.getMHPOrganistionIdString;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -73,27 +72,28 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 		private List<Descriptor> applicationDescriptors;
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		@Override
+		public KVP getJTreeNode(int modus) {
 			// try to find application name
 			StringBuilder label = new StringBuilder("application");
 
-			final List<ApplicationNameDescriptor> applicationNameDescriptors = Descriptor.findGenericDescriptorsInList(applicationDescriptors, ApplicationNameDescriptor.class); //0x01 = applicationNameDescriptor
+			List<ApplicationNameDescriptor> applicationNameDescriptors = Descriptor.findGenericDescriptorsInList(applicationDescriptors, ApplicationNameDescriptor.class); //0x01 = applicationNameDescriptor
 			if(applicationNameDescriptors.size()>0){
-				final ApplicationNameDescriptor appNameDesc = applicationNameDescriptors.get(0);
-				final List<ApplicationName> appNames = appNameDesc.getApplicationNames();
+				ApplicationNameDescriptor appNameDesc = applicationNameDescriptors.get(0);
+				List<ApplicationName> appNames = appNameDesc.getApplicationNames();
 				if((appNames!=null)&&(appNames.size()>0)){
-					final ApplicationName appName = appNames.get(0);
+					ApplicationName appName = appNames.get(0);
 					label.append(" (").append(appName.application_name().toString()).append(")");
 				}
 			}
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(label.toString()));
-			t.add(new DefaultMutableTreeNode(new KVP("organisation_id", organisation_id, getMHPOrganistionIdString(organisation_id))));
-			t.add(new DefaultMutableTreeNode(new KVP("application_id", application_id, getApplicationIDString(application_id))));
-			t.add(new DefaultMutableTreeNode(new KVP("application_control_code", application_control_code, getApplicationControlCodeString(application_control_code))));
-			t.add(new DefaultMutableTreeNode(new KVP("application_descriptors_loop_length", application_descriptors_loop_length, null)));
+			KVP t = new KVP(label.toString());
+			t.add(new KVP("organisation_id", organisation_id, getMHPOrganistionIdString(organisation_id)));
+			t.add(new KVP("application_id", application_id, getApplicationIDString(application_id)));
+			t.add(new KVP("application_control_code", application_control_code, getApplicationControlCodeString(application_control_code)));
+			t.add(new KVP("application_descriptors_loop_length", application_descriptors_loop_length));
 
-			Utils.addListJTree(t,applicationDescriptors,modus,"application_descriptors");
+			addListJTree(t,applicationDescriptors,modus,"application_descriptors");
 
 			return t;
 		}
@@ -110,7 +110,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 		/**
 		 * @param application_control_code the application_control_code to set
 		 */
-		public void setApplication_control_code(final int application_control_code) {
+		public void setApplication_control_code(int application_control_code) {
 			this.application_control_code = application_control_code;
 		}
 
@@ -126,7 +126,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 		/**
 		 * @param application_descriptors_loop_lengt the application_descriptors_loop_lengt to set
 		 */
-		public void setApplication_descriptors_loop_length(final int application_descriptors_loop_lengt) {
+		public void setApplication_descriptors_loop_length(int application_descriptors_loop_lengt) {
 			this.application_descriptors_loop_length = application_descriptors_loop_lengt;
 		}
 
@@ -142,7 +142,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 		/**
 		 * @param application_id the application_id to set
 		 */
-		public void setApplication_id(final int application_id) {
+		public void setApplication_id(int application_id) {
 			this.application_id = application_id;
 		}
 
@@ -158,7 +158,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 		/**
 		 * @param applicationDescriptor the applicationDescriptor to set
 		 */
-		public void setApplicationDescriptors(final List<Descriptor> applicationDescriptor) {
+		public void setApplicationDescriptors(List<Descriptor> applicationDescriptor) {
 			this.applicationDescriptors = applicationDescriptor;
 		}
 
@@ -174,13 +174,13 @@ public class AITsection extends TableSectionExtendedSyntax {
 		/**
 		 * @param organisation_id the organisation_id to set
 		 */
-		public void setOrganisation_id(final long organisation_id) {
+		public void setOrganisation_id(long organisation_id) {
 			this.organisation_id = organisation_id;
 		}
 
 	}
 
-	public AITsection(final PsiSectionData raw_data, final PID parent){
+	public AITsection(PsiSectionData raw_data, PID parent){
 		super(raw_data, parent);
 
 		test_application_flag = Utils.getInt(raw_data.getData(), 3, 1, 0x80)>>7; // tableIdExtension first byte first bit
@@ -197,11 +197,11 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 	}
 
-	private List<Application> buildApplicationList(final byte[] data, final int i, final int length) {
-		final ArrayList<Application> r = new ArrayList<>();
+	private List<Application> buildApplicationList(byte[] data, int i, int length) {
+		ArrayList<Application> r = new ArrayList<>();
 		int t =0;
 		while(t<length){
-			final Application a = new Application();
+			Application a = new Application();
 			a.setOrganisation_id(Utils.getLong(data, i+t, 4, Utils.MASK_32BITS));
 			a.setApplication_id(Utils.getInt(data, i+t+4, 2, Utils.MASK_16BITS));
 			a.setApplication_control_code(Utils.getInt(data, i+t+6, 1, Utils.MASK_8BITS));
@@ -221,7 +221,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("AITsection section=");
+		StringBuilder b = new StringBuilder("AITsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=")
 		.append(getTableType(tableId)).append(", ");
 
@@ -231,13 +231,12 @@ public class AITsection extends TableSectionExtendedSyntax {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("common_descriptors_length", common_descriptors_length, null)));
-		Utils.addListJTree(t,common_descriptor_loop,modus,"common_descriptor_loop");
-
-		Utils.addListJTree(t,applications,modus,"applications");
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("common_descriptors_length", common_descriptors_length));
+		addListJTree(t,common_descriptor_loop,modus,"common_descriptor_loop");
+		addListJTree(t,applications,modus,"applications");
 		return t;
 	}
 
@@ -264,7 +263,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 	/**
 	 * @param application_loop_length the application_loop_length to set
 	 */
-	public void setApplication_loop_length(final int application_loop_length) {
+	public void setApplication_loop_length(int application_loop_length) {
 		this.application_loop_length = application_loop_length;
 	}
 
@@ -280,7 +279,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 	/**
 	 * @param application_type the application_type to set
 	 */
-	public void setApplication_type(final int application_type) {
+	public void setApplication_type(int application_type) {
 		this.application_type = application_type;
 	}
 
@@ -296,7 +295,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 	/**
 	 * @param applications the applications to set
 	 */
-	public void setApplications(final List<Application> applications) {
+	public void setApplications(List<Application> applications) {
 		this.applications = applications;
 	}
 
@@ -312,7 +311,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 	/**
 	 * @param common_descriptor_loop the common_descriptor_loop to set
 	 */
-	public void setCommon_descriptor_loop(final List<Descriptor> common_descriptor_loop) {
+	public void setCommon_descriptor_loop(List<Descriptor> common_descriptor_loop) {
 		this.common_descriptor_loop = common_descriptor_loop;
 	}
 
@@ -328,11 +327,11 @@ public class AITsection extends TableSectionExtendedSyntax {
 	/**
 	 * @param common_descriptors_length the common_descriptors_length to set
 	 */
-	public void setCommon_descriptors_length(final int common_descriptors_length) {
+	public void setCommon_descriptors_length(int common_descriptors_length) {
 		this.common_descriptors_length = common_descriptors_length;
 	}
 
-	public static String getApplicationControlCodeString(final int i){
+	public static String getApplicationControlCodeString(int i){
 
 		switch (i) {
 		case 0x00: return "reserved_future_use";
@@ -348,7 +347,7 @@ public class AITsection extends TableSectionExtendedSyntax {
 		}
 	}
 
-	public static String getApplicationIDString(final int i){
+	public static String getApplicationIDString(int i){
 		if(i==0x0000){
 			return "Shall not be used";
 		}

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -47,22 +46,22 @@ public class TDT extends AbstractPSITabel{
 		super(parent);
 	}
 
-	public void update(final TDTsection section){
+	public void update(TDTsection section){
 		tdtSectionList.add(section);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
 		KVP kvp = new KVP("TDT");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 		if(!tdtSectionList.isEmpty()) {
 			kvp.addTableSource(this::getTableModel, "TDT");
 		}
 
 		for (TDTsection tdTsection : tdtSectionList) {
-			t.add(tdTsection.getJTreeNode(modus));
+			kvp.add(tdTsection.getJTreeNode(modus));
 		}
-		return t;
+		return kvp;
 	}
 
 	public List<TDTsection> getTdtSectionList() {

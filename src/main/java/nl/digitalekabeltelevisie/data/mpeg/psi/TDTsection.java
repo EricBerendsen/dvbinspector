@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -46,7 +45,7 @@ public class TDTsection extends TableSection {
 
 	private final byte[] UTC_time;
 
-	public TDTsection(final PsiSectionData raw_data, final PID parent){
+	public TDTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 		UTC_time= copyOfRange(raw_data.getData(),3,8);
 	}
@@ -55,21 +54,19 @@ public class TDTsection extends TableSection {
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("TDTsection UTC_Time=");
+		StringBuilder b = new StringBuilder("TDTsection UTC_Time=");
 		b.append(Utils.toHexString(UTC_time)).append(", UTC_timeString=").append(getUTC_timeString()).append(", length=").append(getSectionLength());
 		return b.toString();
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP)t.getUserObject();
-		kvp.addTableSource(this::getTableModel, "TDT Section");
-		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
+		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "TDT Section");
+		t.add(new KVP("UTC_time", UTC_time, Utils.getUTCFormattedString(UTC_time)));
 		return t;
 	}
-
 
 	public byte[] getUTC_time() {
 		return UTC_time;

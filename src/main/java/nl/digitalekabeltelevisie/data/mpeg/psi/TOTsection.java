@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -29,11 +29,11 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -51,7 +51,7 @@ public class TOTsection extends TableSection {
 	private final int descriptorsLoopLength;
 	private final List<Descriptor> descriptorList;
 
-	public TOTsection(final PsiSectionData raw_data, final PID parent){
+	public TOTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 		UTC_time= copyOfRange(raw_data.getData(),3,8 );
 		descriptorsLoopLength = Utils.getInt(raw_data.getData(),8,2,Utils.MASK_12BITS);
@@ -75,20 +75,16 @@ public class TOTsection extends TableSection {
 		return UTC_time;
 	}
 
-
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP)t.getUserObject();
-		kvp.addTableSource(this::getTableModel, "TOT Section");
-		t.add(new DefaultMutableTreeNode(new KVP("UTC_time",UTC_time,Utils.getUTCFormattedString(UTC_time))));
-		if(!Utils.simpleModus(modus)){
-			t.add(new DefaultMutableTreeNode(new KVP("descriptors_loop_length",descriptorsLoopLength,null)));
+		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "TOT Section");
+		t.add(new KVP("UTC_time", UTC_time, Utils.getUTCFormattedString(UTC_time)));
+		if (!Utils.simpleModus(modus)) {
+			t.add(new KVP("descriptors_loop_length", descriptorsLoopLength));
 		}
-		Utils.addListJTree(t,descriptorList,modus,"descriptors");
+		addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
 	}
 

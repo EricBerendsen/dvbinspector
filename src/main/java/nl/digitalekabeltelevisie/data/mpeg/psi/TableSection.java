@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,8 +31,6 @@ import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.util.Formatter;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -368,7 +366,8 @@ public class TableSection implements TreeNode{
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(int modus){
+	@Override
+	public KVP getJTreeNode(int modus){
 
 		KVP t = getSectionKVP(modus);
 		addTableDetails(modus, t);
@@ -385,7 +384,7 @@ public class TableSection implements TreeNode{
 		return kvp;
 	}
 
-	protected void addTableDetails(int modus, DefaultMutableTreeNode t) {
+	protected void addTableDetails(int modus, KVP t) {
 		if (packetModus(modus)) {
 			t.add(new KVP("first_packet_no", firstPacketNo).setDescription(parentPID.getParentTransportStream().getPacketTime(firstPacketNo)));
 			t.add(new KVP("last_packet_no", lastPacketNo).setDescription(parentPID.getParentTransportStream().getPacketTime(lastPacketNo)));

@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,10 +26,11 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -57,14 +58,14 @@ public class SITsection extends TableSectionExtendedSyntax{
 			return descriptorList;
 		}
 
-		public void setDescriptorList(final List<Descriptor> descriptorList) {
+		public void setDescriptorList(List<Descriptor> descriptorList) {
 			this.descriptorList = descriptorList;
 		}
 
 
 		@Override
 		public String toString(){
-			final StringBuilder b = new StringBuilder("Service, serviceID=");
+			StringBuilder b = new StringBuilder("Service, serviceID=");
 			b.append(serviceID).append(", reservedFutureUse=").append(reservedFutureUse).append(", ");
 			for (Descriptor d : descriptorList) {
 				b.append(d).append(", ");
@@ -72,16 +73,16 @@ public class SITsection extends TableSectionExtendedSyntax{
 			return b.toString();
 
 		}
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+		
+		@Override
+		public KVP getJTreeNode(int modus) {
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("transport_stream:",serviceID,null));
+			KVP t = new KVP("transport_stream:", serviceID);
 
-			t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("original_network_id",reservedFutureUse,Utils.getOriginalNetworkIDString(reservedFutureUse) )));
-			t.add(new DefaultMutableTreeNode(new KVP("service_loop_length",serviceLoopLength,null)));
-
-			Utils.addListJTree(t,descriptorList,modus,"transport_descriptors");
-
+			t.add(new KVP("service_id", serviceID));
+			t.add(new KVP("original_network_id", reservedFutureUse, Utils.getOriginalNetworkIDString(reservedFutureUse)));
+			t.add(new KVP("service_loop_length", serviceLoopLength));
+			addListJTree(t, descriptorList, modus, "transport_descriptors");
 			return t;
 		}
 
@@ -89,7 +90,7 @@ public class SITsection extends TableSectionExtendedSyntax{
 			return serviceID;
 		}
 
-		public void setServiceID(final int serviceID) {
+		public void setServiceID(int serviceID) {
 			this.serviceID = serviceID;
 		}
 
@@ -97,7 +98,7 @@ public class SITsection extends TableSectionExtendedSyntax{
 			return reservedFutureUse;
 		}
 
-		public void setReservedFutureUse(final int reservedFutureUse) {
+		public void setReservedFutureUse(int reservedFutureUse) {
 			this.reservedFutureUse = reservedFutureUse;
 		}
 
@@ -105,7 +106,7 @@ public class SITsection extends TableSectionExtendedSyntax{
 			return runningStatus;
 		}
 
-		public void setRunningStatus(final int runningStatus) {
+		public void setRunningStatus(int runningStatus) {
 			this.runningStatus = runningStatus;
 		}
 
@@ -113,12 +114,12 @@ public class SITsection extends TableSectionExtendedSyntax{
 			return serviceLoopLength;
 		}
 
-		public void setServiceLoopLength(final int serviceLoopLength) {
+		public void setServiceLoopLength(int serviceLoopLength) {
 			this.serviceLoopLength = serviceLoopLength;
 		}
 	}
 
-	public SITsection(final PsiSectionData raw_data, final PID parent){
+	public SITsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 		transmissionInfoLoopLength = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_12BITS);
 		transmissionDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,transmissionInfoLoopLength,this);
@@ -128,23 +129,23 @@ public class SITsection extends TableSectionExtendedSyntax{
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("SITsection section=");
+		StringBuilder b = new StringBuilder("SITsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=").append(getTableType(tableId)).append(", ");
 
 		return b.toString();
 	}
 
 
-	private List<Service> buildServiceList(final byte[] data, final int start, final int len ) {
-		final ArrayList<Service> r = new ArrayList<>();
+	private List<Service> buildServiceList(byte[] data, int start, int len ) {
+		ArrayList<Service> r = new ArrayList<>();
 		int t =0;
 		while(t<len){
-			final int serviceId = Utils.getInt(data, start+t, 2, Utils.MASK_16BITS);
-			final int dvbReservedFutureUse = (Utils.getInt(data, start+t+2, 1, 0x80)>>7);
-			final int runningStatus = (Utils.getInt(data, start+t+2, 1, 0x70) >> 4);
-			final int serviceLoopLength = Utils.getInt(data, start+t+2, 2, Utils.MASK_12BITS);
-			final List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,serviceLoopLength,this);
-			final Service c = new Service();
+			int serviceId = Utils.getInt(data, start+t, 2, Utils.MASK_16BITS);
+			int dvbReservedFutureUse = (Utils.getInt(data, start+t+2, 1, 0x80)>>7);
+			int runningStatus = (Utils.getInt(data, start+t+2, 1, 0x70) >> 4);
+			int serviceLoopLength = Utils.getInt(data, start+t+2, 2, Utils.MASK_12BITS);
+			List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(),10,serviceLoopLength,this);
+			Service c = new Service();
 			c.setServiceID(serviceId);
 			c.setReservedFutureUse(dvbReservedFutureUse);
 			c.setRunningStatus(runningStatus);
@@ -158,15 +159,14 @@ public class SITsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("transmission_info_loop_length",transmissionInfoLoopLength,null)));
-		Utils.addListJTree(t,transmissionDescriptorList,modus,"transmission_descriptors");
-		Utils.addListJTree(t,serviceList,modus,"transport_stream_loop");
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("transmission_info_loop_length", transmissionInfoLoopLength));
+		addListJTree(t, transmissionDescriptorList, modus, "transmission_descriptors");
+		addListJTree(t, serviceList, modus, "transport_stream_loop");
 		return t;
 	}
-
 
 	public List<Descriptor> getTransmissionDescriptorList() {
 		return transmissionDescriptorList;

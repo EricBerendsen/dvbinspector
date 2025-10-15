@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -49,16 +47,18 @@ public class SpliceInfoSections extends AbstractPSITabel{
 		pid=section.getParentPID().getPid();
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		
+	@Override
+	public KVP getJTreeNode(int modus) {
+
 		String programName = "";
 		List<PMTsection> pmts = getParentPSI().getPmts().findPMTsFromComponentPID(pid);
-		
-		if(!pmts.isEmpty()) {
+
+		if (!pmts.isEmpty()) {
 			int programNumber = pmts.get(0).getProgramNumber();
-			programName = " for program 	"+programNumber + " (" +getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber)+")";
+			programName = " for program 	" + programNumber + " (" + getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber)
+					+ ")";
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SpliceInfoSections PID="+pid + programName));
+		KVP t = new KVP("SpliceInfoSections PID=" + pid + programName);
 
 		for (SpliceInfoSection toTsection : spliceInfoSectionList) {
 			t.add(toTsection.getJTreeNode(modus));

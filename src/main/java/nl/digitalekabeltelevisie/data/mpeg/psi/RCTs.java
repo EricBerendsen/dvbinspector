@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -47,32 +45,29 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 public class RCTs extends AbstractPSITabel{
 
 
-	public RCTs(final PSI parentPSI) {
+	public RCTs(PSI parentPSI) {
 		super(parentPSI);
 
 	}
 
 	private final Map<Integer, RCT> rcts = new HashMap<>();
 
-	public void update(final RCTsection section){
+	public void update(RCTsection section){
 
-		final int pid = section.getParentPID().getPid();
-		RCT  ait= rcts.get(pid);
+		int pid = section.getParentPID().getPid();
+		RCT ait= rcts.computeIfAbsent(pid, k -> new RCT(parentPSI));
 
-		if(ait==null){
-			ait = new RCT(parentPSI);
-			rcts.put(pid, ait);
-		}
 		ait.update(section);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("RCTs"));
-		final SortedSet<Integer> s = new TreeSet<>(rcts.keySet());
+		KVP t = new KVP("RCTs");
+		SortedSet<Integer> s = new TreeSet<>(rcts.keySet());
 
 		for (Integer pid : s) {
-			final RCT rct = rcts.get(pid);
+			RCT rct = rcts.get(pid);
 			t.add(rct.getJTreeNode(modus));
 
 		}

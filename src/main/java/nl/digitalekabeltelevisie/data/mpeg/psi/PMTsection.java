@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2023 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -28,17 +28,21 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 
 import static java.lang.Byte.toUnsignedInt;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.util.tablemodel.*;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 
 public class PMTsection extends TableSectionExtendedSyntax{
@@ -69,7 +73,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 			return elementaryPID;
 		}
 
-		public void setElementaryPID(final int elementaryPID) {
+		public void setElementaryPID(int elementaryPID) {
 			this.elementaryPID = elementaryPID;
 		}
 
@@ -77,7 +81,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 			return esInfoLength;
 		}
 
-		public void setEsInfoLength(final int infoLength) {
+		public void setEsInfoLength(int infoLength) {
 			esInfoLength = infoLength;
 		}
 
@@ -85,7 +89,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 			return streamtype;
 		}
 
-		public void setStreamtype(final int streamtype) {
+		public void setStreamtype(int streamtype) {
 			this.streamtype = streamtype;
 		}
 
@@ -93,12 +97,12 @@ public class PMTsection extends TableSectionExtendedSyntax{
 			return componentDescriptorList;
 		}
 
-		public void setComponentDescriptorList(final List<Descriptor> descriptorList) {
+		public void setComponentDescriptorList(List<Descriptor> descriptorList) {
 			this.componentDescriptorList = descriptorList;
 		}
 		@Override
 		public String toString(){
-			final StringBuilder b = new StringBuilder("Component stream type=");
+			StringBuilder b = new StringBuilder("Component stream type=");
 			b.append(getStreamtype()).append(" (").append(getStreamTypeString()).append("), ElementaryPID=").append(getElementaryPID()).append(", ");
 			for (Descriptor d : componentDescriptorList) {
 				b.append(d).append(", ");
@@ -110,26 +114,25 @@ public class PMTsection extends TableSectionExtendedSyntax{
 
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+		public KVP getJTreeNode(int modus) {
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("component ("+Utils.getStreamTypeString(streamtype)+")"));
+			KVP t = new KVP("component (" + Utils.getStreamTypeString(streamtype) + ")");
 
-			t.add(new DefaultMutableTreeNode(new KVP("stream_type",streamtype,Utils.getStreamTypeString(streamtype))));
-			t.add(new DefaultMutableTreeNode(new KVP("elementary_PID",elementaryPID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ES_info_length",esInfoLength,null)));
+			t.add(new KVP("stream_type", streamtype, Utils.getStreamTypeString(streamtype)));
+			t.add(new KVP("elementary_PID", elementaryPID));
+			t.add(new KVP("ES_info_length", esInfoLength));
 
-			Utils.addListJTree(t,componentDescriptorList,modus,"component_descriptors");
+			addListJTree(t, componentDescriptorList, modus, "component_descriptors");
 
 			return t;
 		}
 	}
 
-
-	private List<Component> buildComponentList(final byte[] data, final int i, final int length) {
-		final ArrayList<Component> r = new ArrayList<>();
+	private List<Component> buildComponentList(byte[] data, int i, int length) {
+		ArrayList<Component> r = new ArrayList<>();
 		int t =0;
 		while(t<length){
-			final Component c = new Component();
+			Component c = new Component();
 			c.setStreamtype(toUnsignedInt(data[i+t]));
 			c.setElementaryPID((256 *(toUnsignedInt(data[i+t+1])& 0x1F)) + toUnsignedInt(data[i+t+2]));
 			c.setEsInfoLength((256 *(toUnsignedInt(data[i+t+3])& 0x0F)) + toUnsignedInt(data[i+t+4]));
@@ -143,7 +146,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 	}
 
 
-	public PMTsection(final PsiSectionData raw_data, final PID parent){
+	public PMTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 
 		pcrPid = Utils.getInt(raw_data.getData(),8,2, 0x1FFF);
@@ -164,7 +167,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 
 	@Override
 	public String toString(){
-		final StringBuilder b = new StringBuilder("PMTsection section=");
+		StringBuilder b = new StringBuilder("PMTsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", program_number=").append(getProgramNumber()).append(", ").append(", PMT_PID:").append(getParentPID().getPid());
 		return b.toString();
 	}
@@ -173,7 +176,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 		return pcrPid;
 	}
 
-	public void setPcrPid(final int pcrPid) {
+	public void setPcrPid(int pcrPid) {
 		this.pcrPid = pcrPid;
 	}
 
@@ -181,7 +184,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 		return descriptorList;
 	}
 
-	public void setDescriptorList(final List<Descriptor> descriptorList) {
+	public void setDescriptorList(List<Descriptor> descriptorList) {
 		this.descriptorList = descriptorList;
 	}
 
@@ -189,7 +192,7 @@ public class PMTsection extends TableSectionExtendedSyntax{
 		return programInfoLength;
 	}
 
-	public void setProgramInfoLength(final int programInfoLength) {
+	public void setProgramInfoLength(int programInfoLength) {
 		this.programInfoLength = programInfoLength;
 	}
 
@@ -198,17 +201,16 @@ public class PMTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP) t.getUserObject();
-		kvp.addTableSource(this::getTableModel,"Components");
+		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "Components");
 
-		t.add(new DefaultMutableTreeNode(new KVP("PMT_PID",getParentPID().getPid(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("PCR_PID",pcrPid,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("program_info_length",programInfoLength,null)));
-		Utils.addListJTree(t,descriptorList,modus,"program_info");
-		Utils.addListJTree(t,componentsList,modus,"components");
+		t.add(new KVP("PMT_PID", getParentPID().getPid()));
+		t.add(new KVP("PCR_PID", pcrPid));
+		t.add(new KVP("program_info_length", programInfoLength));
+		addListJTree(t, descriptorList, modus, "program_info");
+		addListJTree(t, componentsList, modus, "components");
 		return t;
 	}
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,13 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getOUIString;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -43,33 +41,34 @@ public class UNT extends AbstractPSITabel{
 	private final Map<Integer, UNTsection []> ssu = new HashMap<>();
 	private int pid = 0;
 
-	public UNT(final PSI parent){
+	public UNT(PSI parent){
 		super(parent);
 	}
 
-	public void update(final UNTsection section){
+	public void update(UNTsection section){
 		pid=section.getParentPID().getPid();
 
-		final int key = section.getOui();
+		int key = section.getOui();
 		UNTsection[] sections = ssu.computeIfAbsent(key, k -> new UNTsection[section.getSectionLastNumber() + 1]);
 
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("UNT (Update Notification Table) PID="+pid));
-		final TreeSet<Integer> s = new TreeSet<>(ssu.keySet());
+		KVP t = new KVP("UNT (Update Notification Table) PID="+pid);
+		TreeSet<Integer> s = new TreeSet<>(ssu.keySet());
 
 		for (Integer oui : s) {
-			final UNTsection[] sections = ssu.get(oui);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("oui", oui, getOUIString(oui)));
-			for (final UNTsection tsection : sections) {
+			UNTsection[] sections = ssu.get(oui);
+			KVP n = new KVP("oui", oui, getOUIString(oui));
+			for (UNTsection tsection : sections) {
 				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

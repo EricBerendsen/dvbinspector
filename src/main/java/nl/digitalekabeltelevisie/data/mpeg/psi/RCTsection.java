@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,10 +30,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -83,7 +83,7 @@ public class RCTsection extends TableSectionExtendedSyntax {
 		public record PromotionalText(String iso639LanguageCode, DVBString promotional_text) implements TreeNode {
 			@Override
 			public KVP getJTreeNode(int modus) {
-				final KVP t = new KVP("promotional_text");
+				KVP t = new KVP("promotional_text");
 				t.add(new KVP("ISO 639-2_language_code", iso639LanguageCode));
 				t.add(new KVP("promotional_text",promotional_text));
 
@@ -113,7 +113,7 @@ public class RCTsection extends TableSectionExtendedSyntax {
 
 		protected LinkInfo(byte[] data, int offset, int len){
             this.len = len;
-            final BitSource bs =new BitSource(data,offset,len);
+            BitSource bs =new BitSource(data,offset,len);
 			link_type = bs.readBits(4);
 			bs.readBits(2); // reserved_future_use
 			how_related_classification_scheme_id = bs.readBits(6);
@@ -147,8 +147,8 @@ public class RCTsection extends TableSectionExtendedSyntax {
 		}
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP t = new KVP("link_info");
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("link_info");
 			t.add(new KVP("link_info_length", len));
 			t.add(new KVP("link_type", link_type).setDescription(link_type_list.get(link_type)));
 			t.add(new KVP("how_related_classification_scheme_id", how_related_classification_scheme_id)
@@ -159,17 +159,17 @@ public class RCTsection extends TableSectionExtendedSyntax {
 			t.add(new KVP("media_uri_length", media_uri_length));
 			t.add(new KVP("media_uri_byte", media_uri_byte));
 			t.add(new KVP("number_items", number_items));
-			Utils.addListJTree(t, promotional_items, modus, "Promotional text Items");
+			addListJTree(t, promotional_items, modus, "Promotional text Items");
 			t.add(new KVP("default_icon_flag", default_icon_flag));
 			t.add(new KVP("icon_id", icon_id));
 			t.add(new KVP("descriptor_loop_length", descriptor_loop_length));
-			Utils.addListJTree(t, descriptor_loop, modus, "descriptor_loop");
+			addListJTree(t, descriptor_loop, modus, "descriptor_loop");
 
 			return t;
 		}
 	}
 
-	public RCTsection(final PsiSectionData raw_data, final PID parent){
+	public RCTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data, parent);
 
 		byte[] b = raw_data.getData();
@@ -193,7 +193,7 @@ public class RCTsection extends TableSectionExtendedSyntax {
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("AITsection section=");
+		StringBuilder b = new StringBuilder("AITsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=")
 		.append(getTableType(tableId)).append(", ");
 
@@ -201,13 +201,13 @@ public class RCTsection extends TableSectionExtendedSyntax {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("year_offset", year_offset));
 		t.add(new KVP("link_count", link_count));
-		Utils.addListJTree(t,links,modus,"link_infos");
+		addListJTree(t,links,modus,"link_infos");
 		t.add(new KVP("descriptor_loop_length", descriptor_loop_length));
-		Utils.addListJTree(t,descriptor_loop,modus,"descriptor_loop");
+		addListJTree(t,descriptor_loop,modus,"descriptor_loop");
 		return t;
 	}
 	

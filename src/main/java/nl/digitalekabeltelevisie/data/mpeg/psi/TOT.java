@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -52,22 +51,22 @@ public class TOT extends AbstractPSITabel{
 		super(parent);
 	}
 
-	public void update(final TOTsection section){
+	public void update(TOTsection section){
 		totSectionList.add(section);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
 		KVP kvp = new KVP("TOT");
-		if(!totSectionList.isEmpty()) {
+		if (!totSectionList.isEmpty()) {
 			kvp.addTableSource(this::getTableModel, "TOT");
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		for (TOTsection toTsection : totSectionList) {
-			t.add(toTsection.getJTreeNode(modus));
+			kvp.add(toTsection.getJTreeNode(modus));
 		}
-		return t;
+		return kvp;
 	}
 
 	public List<TOTsection> getTotSectionList() {

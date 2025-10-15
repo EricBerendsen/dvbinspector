@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2015 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -26,8 +26,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  */
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -39,7 +37,7 @@ public class SIT extends AbstractPSITabel{
 		super(parent);
 	}
 
-	public void update(final SITsection section){
+	public void update(SITsection section){
 
 		if(sit==null){
 			sit = new SITsection[section.getSectionLastNumber()+1];
@@ -48,16 +46,17 @@ public class SIT extends AbstractPSITabel{
 		if(sit[section.getSectionNumber()]==null){
 			sit[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sit[section.getSectionNumber()];
+			TableSection last = sit[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode( new KVP("SIT"));
+		KVP t =  new KVP("SIT");
 		if(sit!=null){
-			for (final SITsection element : sit) {
+			for (SITsection element : sit) {
 				if(element!= null){
 					if(!Utils.simpleModus(modus)){ // show all versions
 						addSectionVersionsToJTree(t, element, modus);

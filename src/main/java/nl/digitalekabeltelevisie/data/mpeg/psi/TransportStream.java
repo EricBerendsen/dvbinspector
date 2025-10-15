@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getOriginalNetworkIDString;
 
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -51,16 +49,14 @@ public record TransportStream(int transport_stream_id,
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(
-				new KVP("transport_stream:", transport_stream_id, null));
+		final KVP t = new KVP("transport_stream:", transport_stream_id);
 
-		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id", transport_stream_id, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("original_network_id", original_network_id,
-				getOriginalNetworkIDString(original_network_id))));
-		t.add(new DefaultMutableTreeNode(
-				new KVP("transport_descriptors_length", transport_descriptors_length, null)));
+		t.add(new KVP("transport_stream_id", transport_stream_id));
+		t.add(new KVP("original_network_id", original_network_id, getOriginalNetworkIDString(original_network_id)));
+		t.add(new KVP("transport_descriptors_length", transport_descriptors_length));
 
 		Utils.addListJTree(t, descriptorList, modus, "transport_descriptors");
 

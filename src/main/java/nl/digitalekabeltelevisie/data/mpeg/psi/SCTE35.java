@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2017 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -43,32 +43,28 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 public class SCTE35 extends AbstractPSITabel{
 
 
-	public SCTE35(final PSI parentPSI) {
+	public SCTE35(PSI parentPSI) {
 		super(parentPSI);
 
 	}
 
 	private final Map<Integer, SpliceInfoSections> spliceSections = new HashMap<>();
 
-	public void update(final SpliceInfoSection section){
+	public void update(SpliceInfoSection section) {
 
-		final int pid = section.getParentPID().getPid();
-		SpliceInfoSections  sections= spliceSections.get(pid);
-
-		if(sections==null){
-			sections = new SpliceInfoSections(parentPSI);
-			spliceSections.put(pid, sections);
-		}
+		int pid = section.getParentPID().getPid();
+		SpliceInfoSections sections = spliceSections.computeIfAbsent(pid, k -> new SpliceInfoSections(parentPSI));
 		sections.update(section);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public DefaultMutableTreeNode getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SCTE-35"));
-		final SortedSet<Integer> s = new TreeSet<>(spliceSections.keySet());
+		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SCTE-35"));
+		SortedSet<Integer> s = new TreeSet<>(spliceSections.keySet());
 
 		for (Integer pid : s) {
-			final SpliceInfoSections sections = spliceSections.get(pid);
+			SpliceInfoSections sections = spliceSections.get(pid);
 			t.add(sections.getJTreeNode(modus));
 
 		}

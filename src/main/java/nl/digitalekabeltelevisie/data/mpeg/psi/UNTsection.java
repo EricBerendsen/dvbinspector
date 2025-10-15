@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,10 +30,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -85,14 +85,15 @@ public class UNTsection extends TableSectionExtendedSyntax {
 		private int						platform_loop_length;
 		private List<TargetLoop>		target_loop;
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		@Override
+		public KVP getJTreeNode(int modus) {
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("platform"));
+			KVP t = new KVP("platform");
 
 			t.add(compatibilityDescriptor.getJTreeNode(modus));
 
-			t.add(new DefaultMutableTreeNode(new KVP("platform_loop_length", platform_loop_length, null)));
-			Utils.addListJTree(t, target_loop, modus, "target_loop");
+			t.add(new KVP("platform_loop_length", platform_loop_length));
+			addListJTree(t, target_loop, modus, "target_loop");
 
 			return t;
 		}
@@ -131,16 +132,15 @@ public class UNTsection extends TableSectionExtendedSyntax {
 		private List<Descriptor>	target_descriptor_loop;
 		private List<Descriptor>	operational_descriptor_loop;
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
+		@Override
+		public KVP getJTreeNode(final int modus) {
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("target"));
+			KVP t = new KVP("target");
 
-			t.add(new DefaultMutableTreeNode(new KVP("target_descriptor_loop_length", target_descriptor_loop_length,
-					null)));
+			t.add(new KVP("target_descriptor_loop_length", target_descriptor_loop_length));
 			Utils.addListJTree(t, target_descriptor_loop, modus, "target_descriptor_loop");
-			t.add(new DefaultMutableTreeNode(new KVP("operational_descriptor_loop_length",
-					operational_descriptor_loop_length, null)));
-			Utils.addListJTree(t, operational_descriptor_loop, modus, "operational_descriptor_loop");
+			t.add(new KVP("operational_descriptor_loop_length", operational_descriptor_loop_length));
+			addListJTree(t, operational_descriptor_loop, modus, "operational_descriptor_loop");
 
 			return t;
 		}
@@ -216,24 +216,24 @@ public class UNTsection extends TableSectionExtendedSyntax {
 		return b.toString();
 	}
 
-	private PlatformLoop buildPlatformLoop(final byte[] data, final int offset, final int length) {
-		final PlatformLoop p = new PlatformLoop();
+	private PlatformLoop buildPlatformLoop(byte[] data, int offset, int length) {
+		PlatformLoop p = new PlatformLoop();
 
-		final CompatibilityDescriptor cd = new CompatibilityDescriptor(data, offset);
+		CompatibilityDescriptor cd = new CompatibilityDescriptor(data, offset);
 		p.setCompatibilityDescriptor(cd);
-		final int compLength = cd.getCompatibilityDescriptorLength();
-		final int platform_loop_length = Utils.getInt(data, offset + compLength + 2, 2, Utils.MASK_16BITS);
+		int compLength = cd.getCompatibilityDescriptorLength();
+		int platform_loop_length = Utils.getInt(data, offset + compLength + 2, 2, Utils.MASK_16BITS);
 		p.setPlatform_loop_length(platform_loop_length);
 		p.setTarget_loop(buildTargetLoopList(data, offset + compLength + 4, platform_loop_length));
 
 		return p;
 	}
 
-	private List<TargetLoop> buildTargetLoopList(final byte[] data, final int i, final int programInfoLength) {
-		final List<TargetLoop> r = new ArrayList<>();
+	private List<TargetLoop> buildTargetLoopList(byte[] data, int i, int programInfoLength) {
+		List<TargetLoop> r = new ArrayList<>();
 		int t = 0;
 		while (t < programInfoLength) {
-			final TargetLoop c = new TargetLoop();
+			TargetLoop c = new TargetLoop();
 			c.setTarget_descriptor_loop_length(Utils.getInt(data, i + t, 2, Utils.MASK_12BITS));
 			c.setTarget_descriptor_loop(DescriptorFactory.buildDescriptorList(data, i + t + 2, c
 					.getTarget_descriptor_loop_length(), this));
@@ -251,19 +251,16 @@ public class UNTsection extends TableSectionExtendedSyntax {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("action_type", action_type, getUNTActionTypeString(action_type))));
-		t.add(new DefaultMutableTreeNode(new KVP("oui_hash", oui_hash, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("oui", oui, Utils.getOUIString(oui))));
-		t.add(new DefaultMutableTreeNode(new KVP("processing_order", processing_order,
-				getUNTProcessingOrderString(processing_order))));
-		t
-		.add(new DefaultMutableTreeNode(new KVP("common_descriptor_loop_length", common_descriptor_loop_length,
-				null)));
-		Utils.addListJTree(t, common_descriptor_loop, modus, "common_descriptor_loop");
-		Utils.addListJTree(t, platformLoopList, modus, "platform_loop");
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("action_type", action_type, getUNTActionTypeString(action_type)));
+		t.add(new KVP("oui_hash", oui_hash));
+		t.add(new KVP("oui", oui, Utils.getOUIString(oui)));
+		t.add(new KVP("processing_order", processing_order, getUNTProcessingOrderString(processing_order)));
+		t.add(new KVP("common_descriptor_loop_length", common_descriptor_loop_length));
+		addListJTree(t, common_descriptor_loop, modus, "common_descriptor_loop");
+		addListJTree(t, platformLoopList, modus, "platform_loop");
 		return t;
 	}
 

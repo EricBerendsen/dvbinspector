@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -103,25 +103,25 @@ public class DFITSection extends TableSectionExtendedSyntax {
 		@Override
 		public DefaultMutableTreeNode getJTreeNode(int modus) {
 			
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Font Info"));
-			t.add(new DefaultMutableTreeNode(new KVP("font_info_type",font_info_type,fontInfoTypeList.get(font_info_type))));
+			KVP t = new KVP("Font Info");
+			t.add(new KVP("font_info_type",font_info_type,fontInfoTypeList.get(font_info_type)));
 			
 			
 			if(font_info_type==0) {
-				t.add(new DefaultMutableTreeNode(new KVP("font_style",font_style,fontStyleList.get(font_style))));
-				t.add(new DefaultMutableTreeNode(new KVP("font_weight",font_weight,fontWeightList.get(font_weight))));
-				t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use,null)));
+				t.add(new KVP("font_style",font_style,fontStyleList.get(font_style)));
+				t.add(new KVP("font_weight",font_weight,fontWeightList.get(font_weight)));
+				t.add(new KVP("reserved_zero_future_use",reserved_zero_future_use));
 			}else if(font_info_type==1) {
-				t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_future_use",reserved_zero_future_use,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("font_file_format",font_file_format,fontFileFormatList.get(font_file_format))));
-				t.add(new DefaultMutableTreeNode(new KVP("uri_length",uri_length,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("uri_char",uri_char,null)));
+				t.add(new KVP("reserved_zero_future_use",reserved_zero_future_use));
+				t.add(new KVP("font_file_format",font_file_format,fontFileFormatList.get(font_file_format)));
+				t.add(new KVP("uri_length",uri_length));
+				t.add(new KVP("uri_char",uri_char));
 				
 			}else if (font_info_type == 0x02) {
-				t.add(new DefaultMutableTreeNode(new KVP("font_size",font_size,null)));
+				t.add(new KVP("font_size",font_size));
 			}else { // if (font_info_type >= 0x02)  // p.31 ETSI EN 303 560 V1.1.1 (2018-05), should be >0x02
-				t.add(new DefaultMutableTreeNode(new KVP("font_info_length",font_info_length,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("text_char",text_char,null)));
+				t.add(new KVP("font_info_length",font_info_length));
+				t.add(new KVP("text_char",text_char));
 			}
 
 			return t;
@@ -272,13 +272,13 @@ public class DFITSection extends TableSectionExtendedSyntax {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("font_id_extension", font_id_extension, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("font_id", font_id, null)));
-		
-		addListJTree(t,fontInfoList,modus,"Font Info List");
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("font_id_extension", font_id_extension));
+		t.add(new KVP("font_id", font_id));
+
+		addListJTree(t, fontInfoList, modus, "Font Info List");
 		return t;
 	}
 

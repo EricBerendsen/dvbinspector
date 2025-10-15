@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,10 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+
 import java.util.*;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
@@ -68,7 +69,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return serviceDescriptorsLength;
 		}
 
-		public void setServiceDescriptorsLength(final int transportDescriptorsLength) {
+		public void setServiceDescriptorsLength(int transportDescriptorsLength) {
 			this.serviceDescriptorsLength = transportDescriptorsLength;
 		}
 
@@ -76,13 +77,13 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return serviceID;
 		}
 
-		public void setServiceID(final int transportStreamID) {
+		public void setServiceID(int transportStreamID) {
 			this.serviceID = transportStreamID;
 		}
 
 		@Override
 		public String toString(){
-			final StringBuilder b = new StringBuilder("Service, serviceID=");
+			StringBuilder b = new StringBuilder("Service, serviceID=");
 			b.append(getServiceID()).append(", reserved_future_use=").append(getReserved()).append(", EIT_schedule_flag=");
 			b.append(getEitScheduleFlag()).append(", EIT_present_following_flag=").append(getEitPresentFollowingFlag()).append(", running_status=");
 			b.append(getRunningStatus()).append(", free_CA_mode=").append(getFreeCAmode()).append(", descriptors_loop_length=").append(getServiceDescriptorsLength()).append(",descriptors=");
@@ -93,22 +94,23 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return b.toString();
 
 		}
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+		
+		@Override
+		public KVP getJTreeNode(int modus) {
 
-			String s = getPSI().
-					getSdt().getServiceNameDVBString(originalNetworkID, tableIdExtension, serviceID).map(DVBString::toString).
-					orElse("Service " + serviceID);
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("service (" +s+")"));
+			String s = getPSI().getSdt().getServiceNameDVBString(originalNetworkID, tableIdExtension, serviceID).map(DVBString::toString)
+					.orElse("Service " + serviceID);
+			KVP t = new KVP("service (" + s + ")");
 
-			t.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("EIT_schedule_flag",eitScheduleFlag,getEitScheduleFlagString(eitScheduleFlag))));
-			t.add(new DefaultMutableTreeNode(new KVP("EIT_present_following_flag",eitPresentFollowingFlag,getEitPresentFollowingFlagString(eitPresentFollowingFlag))));
-			t.add(new DefaultMutableTreeNode(new KVP("running_status",runningStatus,getRunningStatusString(runningStatus))));
-			t.add(new DefaultMutableTreeNode(new KVP("free_CA_mode",freeCAmode,getFreeCAmodeString(freeCAmode))));
-			t.add(new DefaultMutableTreeNode(new KVP("service_descriptors_length",getServiceDescriptorsLength(),null)));
+			t.add(new KVP("service_id", serviceID));
+			t.add(new KVP("reserved_future_use", reserved));
+			t.add(new KVP("EIT_schedule_flag", eitScheduleFlag, getEitScheduleFlagString(eitScheduleFlag)));
+			t.add(new KVP("EIT_present_following_flag", eitPresentFollowingFlag, getEitPresentFollowingFlagString(eitPresentFollowingFlag)));
+			t.add(new KVP("running_status", runningStatus, getRunningStatusString(runningStatus)));
+			t.add(new KVP("free_CA_mode", freeCAmode, getFreeCAmodeString(freeCAmode)));
+			t.add(new KVP("service_descriptors_length", getServiceDescriptorsLength()));
 
-			Utils.addListJTree(t,descriptorList,modus,"service_descriptors");
+			addListJTree(t, descriptorList, modus, "service_descriptors");
 
 			return t;
 		}
@@ -117,7 +119,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return eitPresentFollowingFlag;
 		}
 
-		public void setEitPresentFollowingFlag(final int eitPresentFollowingFlag) {
+		public void setEitPresentFollowingFlag(int eitPresentFollowingFlag) {
 			this.eitPresentFollowingFlag = eitPresentFollowingFlag;
 		}
 
@@ -125,7 +127,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return eitScheduleFlag;
 		}
 
-		public void setEitScheduleFlag(final int eitScheduleFlag) {
+		public void setEitScheduleFlag(int eitScheduleFlag) {
 			this.eitScheduleFlag = eitScheduleFlag;
 		}
 
@@ -133,7 +135,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return freeCAmode;
 		}
 
-		public void setFreeCAmode(final int freeCAmode) {
+		public void setFreeCAmode(int freeCAmode) {
 			this.freeCAmode = freeCAmode;
 		}
 
@@ -141,7 +143,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return runningStatus;
 		}
 
-		public void setRunningStatus(final int runningStatus) {
+		public void setRunningStatus(int runningStatus) {
 			this.runningStatus = runningStatus;
 		}
 
@@ -149,7 +151,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 			return reserved;
 		}
 
-		public void setReserved(final int reserved) {
+		public void setReserved(int reserved) {
 			this.reserved = reserved;
 		}
 
@@ -157,7 +159,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 
 
 
-	public SDTsection(final PsiSectionData raw_data, final PID parent){
+	public SDTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 
 		originalNetworkID = Utils.getInt(raw_data.getData(), 8, 2, Utils.MASK_16BITS);
@@ -195,11 +197,11 @@ public class SDTsection extends TableSectionExtendedSyntax{
 		return serviceList.size();
 	}
 
-	private List<Service> buildServicesList(final byte[] data, final int offset, final int programInfoLength) {
-		final ArrayList<Service> r = new ArrayList<>();
+	private List<Service> buildServicesList(byte[] data, int offset, int programInfoLength) {
+		ArrayList<Service> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
-			final Service c = new Service();
+			Service c = new Service();
 			c.setServiceID(Utils.getInt(data, offset+t, 2, 0xFFFF));
 			c.setReserved(Utils.getInt(data, offset+t+2, 1, 0xFC)>>2);
 			c.setEitScheduleFlag(Utils.getInt(data, offset+t+2, 1, 0x02)>>1);
@@ -218,14 +220,14 @@ public class SDTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		((KVP) t.getUserObject()).addTableSource(this::getTableModel, "SDT Section");
+		final KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "SDT Section");
 
-		t.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID))));
+		t.add(new KVP("original_network_id",originalNetworkID,Utils.getOriginalNetworkIDString(originalNetworkID)));
 
-		Utils.addListJTree(t,serviceList,modus,"services_loop");
+		addListJTree(t,serviceList,modus,"services_loop");
 
 		return t;
 	}
@@ -240,11 +242,11 @@ public class SDTsection extends TableSectionExtendedSyntax{
 	}
 
 
-	public void setOriginalNetworkID(final int originalNetworkID) {
+	public void setOriginalNetworkID(int originalNetworkID) {
 		this.originalNetworkID = originalNetworkID;
 	}
 
-	public static String getEitScheduleFlagString(final int eitScheduleFlag) {
+	public static String getEitScheduleFlagString(int eitScheduleFlag) {
 
 		switch (eitScheduleFlag) {
 		case 0: return "No EIT schedule information";
@@ -256,7 +258,7 @@ public class SDTsection extends TableSectionExtendedSyntax{
 
 	}
 
-	public static String getEitPresentFollowingFlagString(final int eitPresentFollowingFlag) {
+	public static String getEitPresentFollowingFlagString(int eitPresentFollowingFlag) {
 
 		switch (eitPresentFollowingFlag) {
 		case 0: return "No EIT_present_following information";

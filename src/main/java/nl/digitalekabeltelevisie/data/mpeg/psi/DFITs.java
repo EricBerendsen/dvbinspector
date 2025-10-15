@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 *
 *  http://www.digitalekabeltelevisie.nl/dvb_inspector
 *
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+*  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
 *
 *  This file is part of DVB Inspector.
 *
@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -48,17 +46,17 @@ public class DFITs extends AbstractPSITabel {
 	}
 
 	
-	public void update(final DFITSection section){
+	public void update(DFITSection section){
 
-		final int pid = section.getParentPID().getPid();
+		int pid = section.getParentPID().getPid();
 		DFIT dfit = dfits.computeIfAbsent(pid, p -> new DFIT(parentPSI));
 		dfit.update(section);
 		
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("DFITs (Downloadable Font Information Tables)"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("DFITs (Downloadable Font Information Tables)");
 		for(Entry<Integer, DFIT> dfitEntry:dfits.entrySet()) {
 			t.add(dfitEntry.getValue().getJTreeNode(modus));
 		}

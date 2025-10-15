@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,12 +27,10 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addToList;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -41,7 +39,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
 public class NetworkSync extends AbstractPSITabel{
 
-	private final List<MegaFrameInitializationPacket> megaFrameList = new ArrayList<MegaFrameInitializationPacket>();
+	private final List<MegaFrameInitializationPacket> megaFrameList = new ArrayList<>();
 
 	public NetworkSync(final PSI parent){
 		super(parent);
@@ -52,12 +50,11 @@ public class NetworkSync extends AbstractPSITabel{
 
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NetworkSync"));
-
+		KVP t = new KVP("NetworkSync");
 		addToList(t,megaFrameList,modus);
-
 		return t;
 	}
 

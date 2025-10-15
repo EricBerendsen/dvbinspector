@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.handler;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -83,8 +82,8 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		var node = new DefaultMutableTreeNode(new KVP("Interpreted PSI"));
+	public KVP getJTreeNode(int modus) {
+		var node = new KVP("Interpreted PSI");
 		addToNodeIfNotNull(node, pat, modus);
 		addToNodeIfNotNull(node, cat, modus);
 		addToNodeIfNotNull(node, bat, modus);
@@ -404,7 +403,7 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 	}
 
 
-	private static void addToNodeIfNotNull(DefaultMutableTreeNode node,  TreeNode treeNode, int modus) {
+	private static void addToNodeIfNotNull(KVP node,  TreeNode treeNode, int modus) {
 		if(treeNode!=null) {
 			node.add(treeNode.getJTreeNode(modus));
 		}

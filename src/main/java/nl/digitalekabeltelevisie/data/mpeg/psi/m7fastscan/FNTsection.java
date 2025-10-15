@@ -136,19 +136,18 @@ public class FNTsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public KVP getJTreeNode(int modus){
+	public KVP getJTreeNode(int modus) {
 
-		KVP kvp = (KVP) super.getJTreeNode(modus);
+		KVP kvp = super.getJTreeNode(modus);
 		kvp.addTableSource(this::getTableModel, "FNT");
 
-		kvp.add( new KVP("network_descriptors_loop_length",network_descriptors_loop_length ));
-		kvp.addList(networkDescriptorList,modus,"network_descriptors");
-		kvp.add( new KVP("transport_stream_loop_length", transport_stream_loop_length ));
+		kvp.add(new KVP("network_descriptors_loop_length", network_descriptors_loop_length));
+		kvp.addList(networkDescriptorList, modus, "network_descriptors");
+		kvp.add(new KVP("transport_stream_loop_length", transport_stream_loop_length));
 
-		kvp.addList( transportStreamList,modus,"transport_stream_loop");
+		kvp.addList(transportStreamList, modus, "transport_stream_loop");
 		return kvp;
 	}
-
 	
 	public TableModel getTableModel() {
 		FlexTableModel<FNTsection,TransportStream> tableModel =  new FlexTableModel<>(buildFntTableHeader());

@@ -51,7 +51,6 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -73,61 +72,57 @@ public class NIT extends AbstractPSITabel{
 	private Map<Integer, NITsection []> networks = new HashMap<>();
 
 
-	public NIT(final PSI parent){
+	public NIT(PSI parent){
 		super(parent);
 	}
 
-	public void update(final NITsection section){
-		final int key = section.getNetworkID();
+	public void update(NITsection section){
+		int key = section.getNetworkID();
 		NITsection[] sections = networks.computeIfAbsent(key, k -> new NITsection[section.getSectionLastNumber() + 1]);
 
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
 		KVP kvpNit = new KVP("NIT");
 		if(!networks.isEmpty()) {
 			kvpNit.addTableSource(this::getTableModel,"Transport Streams");
 		}
-		final DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode( kvpNit);
-		final TreeSet<Integer> s = new TreeSet<>(networks.keySet());
+		TreeSet<Integer> s = new TreeSet<>(networks.keySet());
 
 		for (Integer networkNo : s) {
 			KVP kvp = new KVP("network_id", networkNo, getNetworkName(networkNo));
 			kvp.addTableSource(() -> getTableForNetworkID(networkNo),"Transport Streams");
 			kvp.addTableSource(() -> getServiceTableForNetworkID(networkNo),"Services");
 			
-			
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
-
-			final NITsection[] sections = networks.get(networkNo);
-			for (final NITsection tsection : sections) {
+			NITsection[] sections = networks.get(networkNo);
+			for (NITsection tsection : sections) {
 				if (tsection != null) {
 					if (!Utils.simpleModus(modus)) {
-						addSectionVersionsToJTree(n, tsection, modus);
+						addSectionVersionsToJTree(kvp, tsection, modus);
 					} else {
-						addListJTree(n, tsection.getNetworkDescriptorList(), modus, "descriptors");
-						addListJTree(n, tsection.getTransportStreamList(), modus, "transport streams");
+						addListJTree(kvp, tsection.getNetworkDescriptorList(), modus, "descriptors");
+						addListJTree(kvp, tsection.getTransportStreamList(), modus, "transport streams");
 					}
 				}
 			}
-			treeNode.add(n);
+			kvpNit.add(kvp);
 		}
-		return treeNode;
+		return kvpNit;
 	}
 
 
 	public String getNetworkName(int networkNo){
-		final NITsection [] sections = networks.get(networkNo);
+		NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
-			for (final NITsection section : sections) {
+			for (NITsection section : sections) {
 				if(section!= null){
 					for (Descriptor d : section.getNetworkDescriptorList()) {
 						if (d instanceof NetworkNameDescriptor networkNameDescriptor) {
@@ -152,11 +147,11 @@ public class NIT extends AbstractPSITabel{
 
 	public int getActualNetworkID(){
 
-		final TreeSet<Integer> s = new TreeSet<>(networks.keySet());
+		TreeSet<Integer> s = new TreeSet<>(networks.keySet());
 
 		for (Integer networkNo : s) {
-			final NITsection[] sections = networks.get(networkNo);
-			for (final NITsection tsection : sections) {
+			NITsection[] sections = networks.get(networkNo);
+			for (NITsection tsection : sections) {
 				if ((tsection != null) && (tsection.getTableId() == 0x40)) {
 					return networkNo;
 				}
@@ -165,11 +160,11 @@ public class NIT extends AbstractPSITabel{
 		return -1;
 	}
 
-	public List<Descriptor> getNetworkDescriptors(final int networkNo){
-		final ArrayList<Descriptor> res = new ArrayList<>();
-		final NITsection [] sections = networks.get(networkNo);
+	public List<Descriptor> getNetworkDescriptors(int networkNo){
+		ArrayList<Descriptor> res = new ArrayList<>();
+		NITsection [] sections = networks.get(networkNo);
 		if(sections!=null){
-			for (final NITsection tsection : sections) {
+			for (NITsection tsection : sections) {
 				if(tsection!=null){
 					res.addAll(tsection.getNetworkDescriptorList());
 				}
@@ -183,9 +178,9 @@ public class NIT extends AbstractPSITabel{
 	private TableModel getTableForNetworkID(int networkNo) {
 		FlexTableModel<NITsection,TransportStream> tableModel =  new FlexTableModel<>(buildNitTableHeader());
 
-		final NITsection [] sections = networks.get(networkNo);
+		NITsection [] sections = networks.get(networkNo);
 		
-		for (final NITsection tsection : sections) {
+		for (NITsection tsection : sections) {
 			if(tsection!= null){
 				tableModel.addData(tsection, tsection.getTransportStreamList());
 			}
@@ -201,7 +196,7 @@ public class NIT extends AbstractPSITabel{
 		FlexTableModel<NITsection,TransportStream> tableModel =  new FlexTableModel<>(buildNitTableHeader());
 
 		for(NITsection[] nitSections:networks.values()) {
-			for (final NITsection tsection : nitSections) {
+			for (NITsection tsection : nitSections) {
 				if(tsection!= null){
 					tableModel.addData(tsection, tsection.getTransportStreamList());
 				}
@@ -216,9 +211,9 @@ public class NIT extends AbstractPSITabel{
 	private TableModel getServiceTableForNetworkID(int networkNo) {
 		FlexTableModel<TransportStream,Service> tableModel =  new FlexTableModel<>(buildServiceTableHeader());
 
-		final NITsection [] sections = networks.get(networkNo);
+		NITsection [] sections = networks.get(networkNo);
 
-		for (final NITsection tsection : sections) {
+		for (NITsection tsection : sections) {
 			if(tsection!= null){
 				List<TransportStream> tsList = tsection.getTransportStreamList();
 				for(TransportStream ts:tsList){
@@ -447,9 +442,9 @@ public class NIT extends AbstractPSITabel{
 	 * @return OriginalNetworkID for streamID, or -1 if stream not found in network with ID networkID
 	 */
 	public int getOriginalNetworkID(int networkID, int streamID) {
-		final NITsection[] sections = networks.get(networkID);
+		NITsection[] sections = networks.get(networkID);
 		if (sections != null) {
-			for (final NITsection tsection : sections) {
+			for (NITsection tsection : sections) {
 				if (tsection != null) {
 					TransportStream ts = tsection.getTransportStream(streamID);
 					if (ts != null) {

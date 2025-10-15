@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2022 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -45,7 +45,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.ComponentType;
@@ -85,34 +84,34 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PMTs"));
+		KVP t = new KVP("PMTs");
 		Iterable<Integer> serviceIds = new TreeSet<>(pmts.keySet());
 
 		for (Integer programNumber : serviceIds) {
 			PMTsection[] sections = pmts.get(programNumber);
 			KVP kvp = new KVP("program", programNumber, getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber));
-			kvp.addTableSource(() -> getTableForProgram(programNumber),"Components");
-			DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(kvp);
+			kvp.addTableSource(() -> getTableForProgram(programNumber), "Components");
 			for (PMTsection pmtSection : sections) {
 				if (pmtSection != null) {
 					if (Utils.simpleModus(modus)) {
 						// keep it simple
-						treeNode.add(new DefaultMutableTreeNode(new KVP("PCR_PID", pmtSection.getPcrPid(), null)));
-						addListJTree(treeNode, pmtSection.getDescriptorList(), modus, "program_info");
-						addListJTree(treeNode, pmtSection.getComponentenList(), modus, "components");
+						kvp.add(new KVP("PCR_PID", pmtSection.getPcrPid()));
+						addListJTree(kvp, pmtSection.getDescriptorList(), modus, "program_info");
+						addListJTree(kvp, pmtSection.getComponentenList(), modus, "components");
 					} else { // show all details
-						addSectionVersionsToJTree(treeNode, pmtSection, modus);
+						addSectionVersionsToJTree(kvp, pmtSection, modus);
 					}
 				}
 			}
-			t.add(treeNode);
+			t.add(kvp);
 
 		}
 		return t;
 	}
-	
+
 	static TableHeader<PMTsection, Component> buildPmtTableHeader() {
 
 		return new TableHeaderBuilder<PMTsection,Component>().
@@ -254,6 +253,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 		return pmts.get(programNumber)[0];
 	}
 
+	@Override
 	public Iterator<PMTsection[]> iterator(){
 		return pmts.values().iterator();
 	}

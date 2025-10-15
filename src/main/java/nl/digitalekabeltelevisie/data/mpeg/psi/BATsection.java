@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,7 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.*;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.*;
@@ -47,14 +46,14 @@ public class BATsection extends TableSectionExtendedSyntax{
 	private int						networkDescriptorsLength;
 	private int						transportStreamLoopLength;
 
-	public BATsection(final PsiSectionData raw_data, final PID parent){
+	public BATsection(PsiSectionData raw_data, PID parent){
 		super(raw_data, parent);
 
-		networkDescriptorsLength = Utils.getInt(raw_data.getData(), 8, 2, MASK_12BITS);
+		networkDescriptorsLength = getInt(raw_data.getData(), 8, 2, MASK_12BITS);
 
 		networkDescriptorList = DescriptorFactory.buildDescriptorList(raw_data.getData(), 10, networkDescriptorsLength,
 				this);
-		transportStreamLoopLength = Utils.getInt(raw_data.getData(), 10 + networkDescriptorsLength, 2, MASK_12BITS);
+		transportStreamLoopLength = getInt(raw_data.getData(), 10 + networkDescriptorsLength, 2, MASK_12BITS);
 		transportStreamList = buildTransportStreamList(raw_data.getData(), 12 + networkDescriptorsLength,
 				transportStreamLoopLength);
 	}
@@ -65,7 +64,7 @@ public class BATsection extends TableSectionExtendedSyntax{
 
 	@Override
 	public String toString() {
-		final StringBuilder b = new StringBuilder("BATsection section=");
+		StringBuilder b = new StringBuilder("BATsection section=");
 		b.append(getSectionNumber()).append(", lastSection=").append(getSectionLastNumber()).append(", tableType=")
 		.append(getTableType(tableId)).append(", batID=").append(getBouqetID()).append(", ");
 
@@ -92,17 +91,17 @@ public class BATsection extends TableSectionExtendedSyntax{
 		return transportStreamList.size();
 	}
 
-	private List<TransportStream> buildTransportStreamList(final byte[] data, final int i, final int programInfoLength) {
-		final List<TransportStream> r = new ArrayList<>();
+	private List<TransportStream> buildTransportStreamList(byte[] data, int i, int programInfoLength) {
+		List<TransportStream> r = new ArrayList<>();
 		int t = 0;
 		while (t < programInfoLength) {
 			
-			final int transport_stream_id = Utils.getInt(data, i + t, 2, MASK_16BITS);
-			final int original_network_id = Utils.getInt(data, i + t + 2, 2, MASK_16BITS);
-			final int transport_descriptors_length = Utils.getInt(data, i + t + 4, 2, MASK_12BITS);
+			int transport_stream_id = Utils.getInt(data, i + t, 2, MASK_16BITS);
+			int original_network_id = Utils.getInt(data, i + t + 2, 2, MASK_16BITS);
+			int transport_descriptors_length = Utils.getInt(data, i + t + 4, 2, MASK_12BITS);
 			List<Descriptor> descriptorList = DescriptorFactory.buildDescriptorList(data, i + t + 6, transport_descriptors_length, this, new DescriptorContext(original_network_id, transport_stream_id));
 			
-			final TransportStream c = new TransportStream(transport_stream_id, original_network_id, transport_descriptors_length,descriptorList);
+			TransportStream c = new TransportStream(transport_stream_id, original_network_id, transport_descriptors_length,descriptorList);
 			t += 6 + transport_descriptors_length;
 			r.add(c);
 
@@ -112,17 +111,16 @@ public class BATsection extends TableSectionExtendedSyntax{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		KVP kvp = (KVP) t.getUserObject();
+		KVP t = super.getJTreeNode(modus);
 		if(!transportStreamList.isEmpty()) {
-			kvp.addTableSource(this::getTableModel, "bat");
+			t.addTableSource(this::getTableModel, "bat");
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("network_descriptors_length", getNetworkDescriptorsLength(), null)));
-		Utils.addListJTree(t, networkDescriptorList, modus, "network_descriptors");
-		t.add(new DefaultMutableTreeNode(new KVP("transport_stream_loop_length", getTransportStreamLoopLength(), null)));
-		Utils.addListJTree(t, transportStreamList, modus, "transport_stream_loop");
+		t.add(new KVP("network_descriptors_length", getNetworkDescriptorsLength()));
+		addListJTree(t, networkDescriptorList, modus, "network_descriptors");
+		t.add(new KVP("transport_stream_loop_length", getTransportStreamLoopLength()));
+		addListJTree(t, transportStreamList, modus, "transport_stream_loop");
 		return t;
 	}
 

@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,12 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.nio.*;
 import java.util.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
@@ -81,21 +80,18 @@ public class MegaFrameInitializationPacket implements TreeNode{
 			}
 
 			@Override
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
-				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Function"));
-				t.add(new DefaultMutableTreeNode(
-						new KVP("function_tag", function_tag, txFunctionType.get(function_tag))));
-				t.add(new DefaultMutableTreeNode(new KVP("function_length", function_length, null)));
+			public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("Function");
+				t.add(new KVP("function_tag", function_tag, txFunctionType.get(function_tag)));
+				t.add(new KVP("function_length", function_length));
 				if (function_tag == 0) { // Transmitter time offset function
-					t.add(new DefaultMutableTreeNode(new KVP("time_offset", function_data,
-							time_offset + " * 100 ns")));
-
+					t.add(new KVP("time_offset", function_data, time_offset + " * 100 ns"));
 				} else if (function_tag == 4) { // Cell id function
-					t.add(new DefaultMutableTreeNode(new KVP("cell_id", cell_id, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("wait_for_enable_flag", wait_for_enable_flag, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use", reserved_future_use, null)));
+					t.add(new KVP("cell_id", cell_id));
+					t.add(new KVP("wait_for_enable_flag", wait_for_enable_flag));
+					t.add(new KVP("reserved_future_use", reserved_future_use));
 				} else {
-					t.add(new DefaultMutableTreeNode(new KVP("function_data", function_data, null)));
+					t.add(new KVP("function_data", function_data));
 				}
 
 				return t;
@@ -127,11 +123,11 @@ public class MegaFrameInitializationPacket implements TreeNode{
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("TxFunctions"));
-			t.add(new DefaultMutableTreeNode(new KVP("tx_identifier", tx_identifier, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("function_loop_length", function_loop_length, null)));
-			Utils.addListJTree(t, functionList, modus, "Functions");
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("TxFunctions");
+			t.add(new KVP("tx_identifier", tx_identifier));
+			t.add(new KVP("function_loop_length", function_loop_length));
+			addListJTree(t, functionList, modus, "Functions");
 			return t;
 		}
 
@@ -152,20 +148,17 @@ public class MegaFrameInitializationPacket implements TreeNode{
 	
 	private List<TxFunctions> txFunctionsList = new ArrayList<>();
 
-	public MegaFrameInitializationPacket(final TSPacket tsPack){
+	public MegaFrameInitializationPacket(TSPacket tsPack){
 		data=tsPack.getData();
 		individual_addressing_length = getInt(data, 16, 1, MASK_8BITS);
-		individual_addressing_byte = Arrays.copyOfRange(data,17,17+individual_addressing_length);
+		individual_addressing_byte = copyOfRange(data,17,17+individual_addressing_length);
 		int start = 0;
 		while(start < individual_addressing_length) {
 			TxFunctions txFunctions = new TxFunctions(individual_addressing_byte,start);
 			txFunctionsList.add(txFunctions);
 			start += 3 + txFunctions.getFunction_loop_length();
-			
 		}
-		
 	}
-
 
 
 	@Override
@@ -175,32 +168,32 @@ public class MegaFrameInitializationPacket implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Mega-frame Initialization Packet"));
-		t.add(new DefaultMutableTreeNode(new KVP("synchronization_id",getSynchronizationId(),getSynchronizationId()==0?"SFN synchronization":"Future use")));
-		t.add(new DefaultMutableTreeNode(new KVP("section_length",getSectionLength(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pointer",getPointer(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("periodic_flag",getPeriodicFlag(),getPeriodicFlag()==0?"aperiodic mode":"periodic mode")));
-		t.add(new DefaultMutableTreeNode(new KVP("future_use",getFutureUse(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("synchronization_time_stamp",getSynchronizationTimeStamp(),(getSynchronizationTimeStamp()/10000.0)+" ms")));
-		t.add(new DefaultMutableTreeNode(new KVP("maximum_delay",getMaximumDelay(),(getMaximumDelay()/10000.0)+" ms")));
-		final DefaultMutableTreeNode tps = new DefaultMutableTreeNode(new KVP("tps_mip",getTPS_MIP(),null));
+		KVP t = new KVP("Mega-frame Initialization Packet");
+		t.add(new KVP("synchronization_id",getSynchronizationId(),getSynchronizationId()==0?"SFN synchronization":"Future use"));
+		t.add(new KVP("section_length",getSectionLength(),null));
+		t.add(new KVP("pointer",getPointer()));
+		t.add(new KVP("periodic_flag",getPeriodicFlag(),getPeriodicFlag()==0?"aperiodic mode":"periodic mode"));
+		t.add(new KVP("future_use",getFutureUse()));
+		t.add(new KVP("synchronization_time_stamp",getSynchronizationTimeStamp(),(getSynchronizationTimeStamp()/10000.0)+" ms"));
+		t.add(new KVP("maximum_delay",getMaximumDelay(),(getMaximumDelay()/10000.0)+" ms"));
+		KVP tps = new KVP("tps_mip",getTPS_MIP());
 		t.add(tps);
-		tps.add(new DefaultMutableTreeNode(new KVP("constellation",getConstellation(),getConstellationString(getConstellation()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("hierarchy",getHierarchy(),getHierarchyString(getHierarchy()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("code_rate",getCodeRate(),getCodeRateString(getCodeRate()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("guard_interval",getGuardInterval(),getGuardIntervalString(getGuardInterval()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("transmission_mode",getTransmissionMode(),getTransmissionModeString(getTransmissionMode()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("bandwidth_channel",getBandwidthChannel(),getBandwidthChannelString(getBandwidthChannel()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("priority",getPriority(),getPriority()==0?"Low Priority TS":"Non-hierarchical or High Priority TS")));
-		tps.add(new DefaultMutableTreeNode(new KVP("DVB-H signalling",getDVBHSignalling(),getDVBHSignallingString(getDVBHSignalling()))));
-		tps.add(new DefaultMutableTreeNode(new KVP("reserved",getReserved(),null)));
+		tps.add(new KVP("constellation",getConstellation(),getConstellationString(getConstellation())));
+		tps.add(new KVP("hierarchy",getHierarchy(),getHierarchyString(getHierarchy())));
+		tps.add(new KVP("code_rate",getCodeRate(),getCodeRateString(getCodeRate())));
+		tps.add(new KVP("guard_interval",getGuardInterval(),getGuardIntervalString(getGuardInterval())));
+		tps.add(new KVP("transmission_mode",getTransmissionMode(),getTransmissionModeString(getTransmissionMode())));
+		tps.add(new KVP("bandwidth_channel",getBandwidthChannel(),getBandwidthChannelString(getBandwidthChannel())));
+		tps.add(new KVP("priority",getPriority(),getPriority()==0?"Low Priority TS":"Non-hierarchical or High Priority TS"));
+		tps.add(new KVP("DVB-H signalling",getDVBHSignalling(),getDVBHSignallingString(getDVBHSignalling())));
+		tps.add(new KVP("reserved",getReserved()));
 
-		t.add(new DefaultMutableTreeNode(new KVP("individual_addressing_length",getIndividualAddressingLength(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("individual_addressing_byte",individual_addressing_byte,null)));
+		t.add(new KVP("individual_addressing_length",getIndividualAddressingLength()));
+		t.add(new KVP("individual_addressing_byte",individual_addressing_byte));
 
-		Utils.addListJTree(t,txFunctionsList,modus,"TxFunctions");
+		addListJTree(t,txFunctionsList,modus,"TxFunctions");
 		return t;
 	}
 
@@ -240,40 +233,28 @@ public class MegaFrameInitializationPacket implements TreeNode{
 		return getInt(data, 12, 1, 0xC0)>>6;
 	}
 
-	public static String getConstellationString(final int c){
-		switch (c) {
-		case 0:
-			return "QPSK";
-		case 1:
-			return "16-QAM";
-		case 2:
-			return "64-QAM";
-		case 3:
-			return "Reserved";
-
-		default:
-			return "Illegal value";
-		}
+	public static String getConstellationString(int c){
+		return switch (c) {
+		case 0 -> "QPSK";
+		case 1 -> "16-QAM";
+		case 2 -> "64-QAM";
+		case 3 -> "Reserved";
+		default -> "Illegal value";
+		};
 	}
 
 	private int getHierarchy() {
 		return getInt(data, 12, 1, 0x38)>>3;
 	}
 
-	public static String getHierarchyString(final int c){
-		switch (c) {
-		case 0:
-			return "Non hierarchical";
-		case 1:
-			return "α = 1";
-		case 2:
-			return "α = 2";
-		case 3:
-			return "α = 4";
-
-		default:
-			return "see annex F of ETSI EN 300 744";
-		}
+	public static String getHierarchyString(int c){
+		return switch (c) {
+		case 0 -> "Non hierarchical";
+		case 1 -> "α = 1";
+		case 2 -> "α = 2";
+		case 3 -> "α = 4";
+		default -> "see annex F of ETSI EN 300 744";
+		};
 	}
 
 	public int getCodeRate() {
@@ -281,42 +262,29 @@ public class MegaFrameInitializationPacket implements TreeNode{
 	}
 
 
-	public static String getCodeRateString(final int c){
-		switch (c) {
-		case 0:
-			return "1/2";
-		case 1:
-			return "2/3";
-		case 2:
-			return "3/4";
-		case 3:
-			return "5/6";
-		case 4:
-			return "7/8";
-
-		default:
-			return "reserved";
-		}
+	public static String getCodeRateString(int c){
+		return switch (c) {
+		case 0 -> "1/2";
+		case 1 -> "2/3";
+		case 2 -> "3/4";
+		case 3 -> "5/6";
+		case 4 -> "7/8";
+		default -> "reserved";
+		};
 	}
 
 	public int getGuardInterval() {
 		return getInt(data, 13, 1, 0xC0)>>6;
 	}
 
-	public static String getGuardIntervalString(final int c){
-		switch (c) {
-		case 0:
-			return "1/32";
-		case 1:
-			return "1/16";
-		case 2:
-			return "1/8";
-		case 3:
-			return "1/4";
-
-		default:
-			return "Illegal value";
-		}
+	public static String getGuardIntervalString(int c){
+		return switch (c) {
+		case 0 -> "1/32";
+		case 1 -> "1/16";
+		case 2 -> "1/8";
+		case 3 -> "1/4";
+		default -> "Illegal value";
+		};
 	}
 
 
@@ -324,20 +292,14 @@ public class MegaFrameInitializationPacket implements TreeNode{
 		return getInt(data, 13, 1, 0x30)>>4;
 	}
 
-	public static String getTransmissionModeString(final int c){
-		switch (c) {
-		case 0:
-			return "2K mode";
-		case 1:
-			return "8K mode";
-		case 2:
-			return "see annex F of ETSI EN 300 744";
-		case 3:
-			return "reserved";
-
-		default:
-			return "Illegal value";
-		}
+	public static String getTransmissionModeString(int c){
+		return switch (c) {
+		case 0 -> "2K mode";
+		case 1 -> "8K mode";
+		case 2 -> "see annex F of ETSI EN 300 744";
+		case 3 -> "reserved";
+		default -> "Illegal value";
+		};
 	}
 
 
@@ -345,23 +307,17 @@ public class MegaFrameInitializationPacket implements TreeNode{
 		return getInt(data, 13, 1, 0x0C)>>2;
 	}
 
-	public static String getBandwidthChannelString(final int c){
-		switch (c) {
-
+	public static String getBandwidthChannelString(int c){
 		// DVBSnoop has 0 = 8MHZ, 1 = 7 MHZ.
 		// who is right???
-		case 0:
-			return "7 MHz";
-		case 1:
-			return "8 MHz";
-		case 2:
-			return "6 MHz";
-		case 3:
-			return "bandwidth optionally signalled via bandwidth_function, see clause 6.1.7 of ETSI EN 300 744";
 
-		default:
-			return "Illegal value";
-		}
+		return switch (c) {
+		case 0 -> "7 MHz";
+		case 1 -> "8 MHz";
+		case 2 -> "6 MHz";
+		case 3 -> "bandwidth optionally signalled via bandwidth_function, see clause 6.1.7 of ETSI EN 300 744";
+		default -> "Illegal value";
+		};
 	}
 
 	public int getPriority() {
@@ -373,19 +329,13 @@ public class MegaFrameInitializationPacket implements TreeNode{
 	}
 
 	public static String getDVBHSignallingString(final int c){
-		switch (c) {
-		case 0:
-			return "Time Slicing is not used, MPE-FEC not used";
-		case 1:
-			return "Time Slicing is not used, At least one elementary stream uses MPE-FEC";
-		case 2:
-			return "At least one elementary stream uses Time Slicing, MPE-FEC not used";
-		case 3:
-			return "At least one elementary stream uses Time Slicing, At least one elementary stream uses MPE-FEC";
-
-		default:
-			return "Illegal value";
-		}
+		return switch (c) {
+		case 0 -> "Time Slicing is not used, MPE-FEC not used";
+		case 1 -> "Time Slicing is not used, At least one elementary stream uses MPE-FEC";
+		case 2 -> "At least one elementary stream uses Time Slicing, MPE-FEC not used";
+		case 3 -> "At least one elementary stream uses Time Slicing, At least one elementary stream uses MPE-FEC";
+		default -> "Illegal value";
+		};
 	}
 
 	public int getReserved() {

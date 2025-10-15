@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.TreeSet;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -53,7 +52,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class SDT extends AbstractPSITabel{
 
-	public SDT(final PSI parentPSI) {
+	public SDT(PSI parentPSI) {
 		super(parentPSI);
 
 	}
@@ -64,10 +63,10 @@ public class SDT extends AbstractPSITabel{
 	// used for easy lookup of service names for current TS
 	private SDTsection [] actualTransportStreamSDT;
 
-	public void update(final SDTsection section) {
+	public void update(SDTsection section) {
 
-		final int original_network_id = section.getOriginalNetworkID();
-		final int streamId = section.getTransportStreamID();
+		int original_network_id = section.getOriginalNetworkID();
+		int streamId = section.getTransportStreamID();
 
 		Map<Integer, SDTsection[]> networkSections = networks.computeIfAbsent(original_network_id, HashMap::new);
 		SDTsection[] tsSections = networkSections.computeIfAbsent(streamId,
@@ -80,49 +79,46 @@ public class SDT extends AbstractPSITabel{
 		}
 	}
 
-	private static void addSectionToArray(final SDTsection section, SDTsection[] tsSections) {
+	private static void addSectionToArray(SDTsection section, SDTsection[] tsSections) {
 		if(tsSections[section.getSectionNumber()]==null){
 			tsSections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = tsSections[section.getSectionNumber()];
+			TableSection last = tsSections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		KVP sdtKvp = new KVP("SDT");
+		KVP t = new KVP("SDT");
 		if(!networks.isEmpty()) {
-			sdtKvp.addTableSource(this::getTableForSdt, "SDT");
+			t.addTableSource(this::getTableForSdt, "SDT");
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(sdtKvp);
 
-		final TreeSet<Integer> networksTreeSet = new TreeSet<>(networks.keySet());
+		TreeSet<Integer> networksTreeSet = new TreeSet<>(networks.keySet());
 		for (Integer orgNetworkId : networksTreeSet) {
-			final Map<Integer, SDTsection[]> networkSections = networks.get(orgNetworkId);
+			Map<Integer, SDTsection[]> networkSections = networks.get(orgNetworkId);
 
 			KVP kvpOrgNetwork = new KVP("original_network_id", orgNetworkId, Utils.getOriginalNetworkIDString(orgNetworkId));
 			kvpOrgNetwork.addTableSource(() -> getTableForOriginalNetwork(orgNetworkId), "SDT original_network_id: " + orgNetworkId);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvpOrgNetwork);
-			t.add(n);
+			t.add(kvpOrgNetwork);
 
-			final TreeSet<Integer> streamsTreeSet = new TreeSet<>(networkSections.keySet());
+			TreeSet<Integer> streamsTreeSet = new TreeSet<>(networkSections.keySet());
 			for (Integer transport_stream_id : streamsTreeSet) {
 				SDTsection[] sections = networkSections.get(transport_stream_id);
 
 				KVP kvpTsId = new KVP("transport_stream_id", transport_stream_id, null);
 				kvpTsId.addTableSource(() -> getTableForTransportStreamID(orgNetworkId, transport_stream_id),"SDT transport_stream_id: "+transport_stream_id);
 
-				final DefaultMutableTreeNode m = new DefaultMutableTreeNode(kvpTsId);
-				n.add(m);
+				kvpOrgNetwork.add(kvpTsId);
 
 				for (SDTsection section : sections) {
 					if (section != null) {
 						if (!Utils.simpleModus(modus)) {
-							addSectionVersionsToJTree(m, section, modus);
+							addSectionVersionsToJTree(kvpTsId, section, modus);
 						} else {
-							addListJTree(m, section.getServiceList(), modus, "services");
+							addListJTree(kvpTsId, section.getServiceList(), modus, "services");
 						}
 					}
 				}
@@ -133,12 +129,12 @@ public class SDT extends AbstractPSITabel{
 
 
 
-	public Optional<String> getServiceNameForActualTransportStreamOptional(final int serviceID){
+	public Optional<String> getServiceNameForActualTransportStreamOptional(int serviceID){
 		return  getServiceNameForActualTransportStreamDVBString(serviceID).map(DVBString::toString);
 
 	}
 
-	public String getServiceNameForActualTransportStream(final int serviceID){
+	public String getServiceNameForActualTransportStream(int serviceID){
 		return  getServiceNameForActualTransportStreamOptional(serviceID).orElse(null);
 
 	}
@@ -154,15 +150,15 @@ public class SDT extends AbstractPSITabel{
 				.map(ServiceDescriptor::getServiceName);
 	}
 
-	public String getServiceName(final int original_network_id, final int transport_stream_id, final int serviceID){
+	public String getServiceName(int original_network_id, int transport_stream_id, int serviceID){
 		return getServiceNameDVBString(original_network_id,transport_stream_id,serviceID).map(DVBString::toString).orElse(null);
 	}
 
-	public Optional<DVBString> getServiceNameDVBString(final ServiceIdentification serviceIdentification){
+	public Optional<DVBString> getServiceNameDVBString(ServiceIdentification serviceIdentification){
 		return getServiceNameDVBString(serviceIdentification.originalNetworkId(),serviceIdentification.transportStreamId(),serviceIdentification.serviceId());
 	}
 
-	public Optional<DVBString> getServiceNameDVBString(final int original_network_id, final int transport_stream_id, final int serviceID){
+	public Optional<DVBString> getServiceNameDVBString(int original_network_id, int transport_stream_id, int serviceID){
 
 		return getService(original_network_id,transport_stream_id,serviceID)
 				.map(SDTsection.Service::getDescriptorList)
@@ -175,13 +171,13 @@ public class SDT extends AbstractPSITabel{
 
 	}
 
-	public Optional<SDTsection.Service> getService(final int orgNetworkId, final int transportStreamID, final int serviceID){
+	public Optional<SDTsection.Service> getService(int orgNetworkId, int transportStreamID, int serviceID){
 
 		HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
 
 		if(transportStreams !=null) {
 
-			final SDTsection [] sections = transportStreams.get(transportStreamID);
+			SDTsection [] sections = transportStreams.get(transportStreamID);
 			if(sections!=null){
 				for (SDTsection section : sections) {
 					if(section!= null)  {
@@ -202,7 +198,7 @@ public class SDT extends AbstractPSITabel{
 	public int getOrgNetworkForActualTransportStream() {
 		if(actualTransportStreamSDT !=null) {
 
-			final SDTsection [] sections = actualTransportStreamSDT;
+			SDTsection [] sections = actualTransportStreamSDT;
 			for (SDTsection section : sections) {
 				if(section!= null)  {
 					return section.getOriginalNetworkID();
@@ -212,12 +208,12 @@ public class SDT extends AbstractPSITabel{
 		return -1;
 		
 	}
-	public Optional<SDTsection.Service> getServiceForActualTransportStream(final int serviceID){
+	public Optional<SDTsection.Service> getServiceForActualTransportStream(int serviceID){
 
 
 		if(actualTransportStreamSDT !=null) {
 
-			final SDTsection [] sections = actualTransportStreamSDT;
+			SDTsection [] sections = actualTransportStreamSDT;
 			for (SDTsection section : sections) {
 				if(section!= null)  {
 					for(Service service: section.getServiceList()) {
@@ -232,18 +228,18 @@ public class SDT extends AbstractPSITabel{
 		return Optional.empty();
 	}
 
-	public int getTransportStreamID(final int serviceID){
+	public int getTransportStreamID(int serviceID){
 
 
-		final TreeSet<Integer> t = new TreeSet<>(networks.keySet());
+		TreeSet<Integer> t = new TreeSet<>(networks.keySet());
 
 		for (int orgNetworkId : t) {
 
 			HashMap<Integer, SDTsection[]> transportStreams = networks.get(orgNetworkId);
-			final TreeSet<Integer> s = new TreeSet<>(transportStreams.keySet());
+			TreeSet<Integer> s = new TreeSet<>(transportStreams.keySet());
 
 			for (Integer transportStreamID : s) {
-				final SDTsection[] sections = transportStreams.get(transportStreamID);
+				SDTsection[] sections = transportStreams.get(transportStreamID);
 				if (sections != null) {
 					for (SDTsection section : sections) {
 						if (section != null) {
@@ -306,7 +302,7 @@ public class SDT extends AbstractPSITabel{
 
 	private TableModel getTableForTransportStreamID(int orgNetworkId, int tsId) {
 		FlexTableModel<SDTsection,Service> tableModel =  new FlexTableModel<>(SDT.buildSdtTableHeader());
-		final SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
+		SDTsection [] sections = networks.get(orgNetworkId).get(tsId);
 
 		fillTableForTsSDT(tableModel, sections);
 

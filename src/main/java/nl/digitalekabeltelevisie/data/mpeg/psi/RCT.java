@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2014 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,13 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.getAppTypeIDString;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -47,29 +45,30 @@ public class RCT extends AbstractPSITabel{
 		super(parent);
 	}
 
-	public void update(final RCTsection section){
+	public void update(RCTsection section){
 		pid=section.getParentPID().getPid();
 
-		final int key = section.getTableIdExtension();
+		int key = section.getTableIdExtension();
 		RCTsection[] sections = rcts.computeIfAbsent(key, k -> new RCTsection[section.getSectionLastNumber() + 1]);
 
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("RCT (Related Content Table) PID="+pid ));
-		final TreeSet<Integer> s = new TreeSet<>(rcts.keySet());
+		KVP t = new KVP("RCT (Related Content Table) PID="+pid );
+		TreeSet<Integer> s = new TreeSet<>(rcts.keySet());
 
 		for (Integer type : s) {
-			final RCTsection[] sections = rcts.get(type);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("RCT", type, getAppTypeIDString(type)));
-			for (final RCTsection tsection : sections) {
+			RCTsection[] sections = rcts.get(type);
+			KVP n =new KVP("RCT", type, getAppTypeIDString(type));
+			for (RCTsection tsection : sections) {
 				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

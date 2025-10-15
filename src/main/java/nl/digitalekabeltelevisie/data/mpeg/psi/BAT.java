@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -33,7 +33,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.*;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -49,40 +48,38 @@ public class BAT extends AbstractPSITabel{
 		super(parent);
 	}
 
-	public void update(final BATsection section){
+	public void update(BATsection section){
 
-		final int key = section.getBouqetID();
+		int key = section.getBouqetID();
 		BATsection [] sections= networks.computeIfAbsent(key, k ->  new BATsection[section.getSectionLastNumber()+1]);
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		KVP kvpBat = new KVP("BAT");
+		KVP t = new KVP("BAT");
 		if(!networks.isEmpty()) {
-			kvpBat.addTableSource(this::getTableModel, "BAT");
+			t.addTableSource(this::getTableModel, "BAT");
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvpBat);
 		for(int bouquetNo:new TreeSet<>(networks.keySet())) {
 
-			KVP kvp = new KVP("bouquet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
+			KVP n = new KVP("bouquet_id",bouquetNo, Utils.getBouquetIDString(bouquetNo));
 			if(hasTransportStreams(bouquetNo)) {
-				kvp.addTableSource(()->getTableForBouqetID(bouquetNo), "bouquet_id "+bouquetNo);
+				n.addTableSource(()->getTableForBouqetID(bouquetNo), "bouquet_id "+bouquetNo);
 			}
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(kvp);
-			final BATsection [] sections = networks.get(bouquetNo);
-			for (final BATsection tsection : sections) {
+			BATsection [] sections = networks.get(bouquetNo);
+			for (BATsection tsection : sections) {
 				if(tsection!= null){
-					if(!Utils.simpleModus(modus)){ // show all details
+					if(!simpleModus(modus)){ // show all details
 						n.add(tsection.getJTreeNode(modus));
 					}else{ // keep it simple
-						final BATsection batSection = tsection;
+						BATsection batSection = tsection;
 						addListJTree(n,batSection.getNetworkDescriptorList(),modus,"network_descriptors");
 						addListJTree(n,batSection.getTransportStreamList(),modus,"transport_stream_loop");
 					}
@@ -122,9 +119,9 @@ public class BAT extends AbstractPSITabel{
 	}
 
 	private boolean hasTransportStreams(int bouqetNo) {
-		final BATsection [] sections = networks.get(bouqetNo);
+		BATsection [] sections = networks.get(bouqetNo);
 		
-		for (final BATsection tsection : sections) {
+		for (BATsection tsection : sections) {
 			if(tsection!= null && !tsection.getTransportStreamList().isEmpty()){
 				return true;
 			}
@@ -135,9 +132,9 @@ public class BAT extends AbstractPSITabel{
 	
 	private TableModel getTableForBouqetID(int bouqetNo) {
 		FlexTableModel<BATsection,TransportStream> tableModel =  new FlexTableModel<>(buildBatTableHeader());
-		final BATsection [] sections = networks.get(bouqetNo);
+		BATsection [] sections = networks.get(bouqetNo);
 		
-		for (final BATsection tsection : sections) {
+		for (BATsection tsection : sections) {
 			if(tsection!= null){
 				tableModel.addData(tsection, tsection.getTransportStreamList());
 			}
@@ -151,7 +148,7 @@ public class BAT extends AbstractPSITabel{
 		FlexTableModel<BATsection,TransportStream> tableModel =  new FlexTableModel<>(buildBatTableHeader());
 		
 		for(BATsection[] batSections:networks.values()) {
-			for (final BATsection tsection : batSections) {
+			for (BATsection tsection : batSections) {
 				if(tsection!= null){
 					tableModel.addData(tsection, tsection.getTransportStreamList());
 				}

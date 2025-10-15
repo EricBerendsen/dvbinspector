@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -33,8 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -61,12 +59,12 @@ public class AIT extends AbstractPSITabel{
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(final int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AIT (Application Information Table) PID="+pid ));
+		final KVP t = new KVP("AIT (Application Information Table) PID="+pid );
 
 		for (Integer type : new TreeSet<>(aits.keySet())) {
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("AIT", type, getAppTypeIDString(type)));
+			KVP n = new KVP("AIT", type, getAppTypeIDString(type));
 			for (final AITsection tsection : aits.get(type)) {
 				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);

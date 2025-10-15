@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -50,15 +48,15 @@ public class INT extends AbstractPSITabel{
 		super(parent);
 	}
 
-	public void update(final INTsection section){
+	public void update(INTsection section){
 
-		final int key = section.getPlatformID();
+		int key = section.getPlatformID();
 		INTsection[] sections = networks.computeIfAbsent(key, k -> new INTsection[section.getSectionLastNumber() + 1]);
 
 		if(sections[section.getSectionNumber()]==null){
 			sections[section.getSectionNumber()] = section;
 		}else{
-			final TableSection last = sections[section.getSectionNumber()];
+			TableSection last = sections[section.getSectionNumber()];
 			updateSectionVersion(section, last);
 		}
 	}
@@ -66,15 +64,16 @@ public class INT extends AbstractPSITabel{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("INT (IP/MAC Notification Table)"));
-		final TreeSet<Integer> s = new TreeSet<>(networks.keySet());
+		KVP t = new KVP("INT (IP/MAC Notification Table)");
+		TreeSet<Integer> s = new TreeSet<>(networks.keySet());
 
 		for (Integer platformID : s) {
-			final INTsection[] sections = networks.get(platformID);
-			final DefaultMutableTreeNode n = new DefaultMutableTreeNode(new KVP("platform_id", platformID, Utils.getPlatformIDString(platformID)));
-			for (final INTsection tsection : sections) {
+			INTsection[] sections = networks.get(platformID);
+			KVP n = new KVP("platform_id", platformID, Utils.getPlatformIDString(platformID));
+			for (INTsection tsection : sections) {
 				if (tsection != null) {
 					addSectionVersionsToJTree(n, tsection, modus);
 				}

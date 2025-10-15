@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2012 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -32,42 +32,36 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
 public class UNTs extends AbstractPSITabel{
 
 
-	public UNTs(final PSI parentPSI) {
+	public UNTs(PSI parentPSI) {
 		super(parentPSI);
 
 	}
 
 	private final Map<Integer, UNT> unts = new HashMap<>();
 
-	public void update(final UNTsection section){
+	public void update(UNTsection section){
 
-		final int pid = section.getParentPID().getPid();
-		UNT  unt= unts.get(pid);
-
-		if(unt==null){
-			unt = new UNT(parentPSI);
-			unts.put(pid, unt);
-		}
+		int pid = section.getParentPID().getPid();
+		
+		UNT unt= unts.computeIfAbsent(pid, k -> new UNT(parentPSI));
 		unt.update(section);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("UNTs"));
+		KVP t = new KVP("UNTs");
 
-
-		final SortedSet<Integer> s = new TreeSet<>(unts.keySet());
+		SortedSet<Integer> s = new TreeSet<>(unts.keySet());
 
 		for (Integer pid : s) {
-			final UNT unt = unts.get(pid);
+			UNT unt = unts.get(pid);
 			t.add(unt.getJTreeNode(modus));
 
 		}

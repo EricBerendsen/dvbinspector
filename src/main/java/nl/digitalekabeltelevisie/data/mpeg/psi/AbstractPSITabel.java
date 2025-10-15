@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,8 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
@@ -56,7 +55,7 @@ public abstract class AbstractPSITabel implements TreeNode{
 	 * @param tableSection
 	 * @param modus
 	 */
-	public static void addSectionVersionsToJTree(final DefaultMutableTreeNode n, final TableSection tableSection, final int modus) {
+	public static void addSectionVersionsToJTree(final KVP n, final TableSection tableSection, final int modus) {
 		
 		n.add(tableSection.getJTreeNode(modus));
 		TableSection versions = tableSection.getNextVersion();

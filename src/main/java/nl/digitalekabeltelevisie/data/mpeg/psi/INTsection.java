@@ -4,7 +4,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -27,13 +27,12 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  * 	based on EN 301 192 § 8.4.4
  */
-
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getActionTypeString;
+import static nl.digitalekabeltelevisie.util.Utils.getPlatformIDString;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -64,19 +63,18 @@ public class INTsection extends TableSectionExtendedSyntax {
 
 
 
+		@Override
+		public KVP getJTreeNode(final int modus) {
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
+			KVP t = new KVP("target");
 
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("target"));
-
-			t.add(new DefaultMutableTreeNode(new KVP("target_descriptor_loop_length",target_descriptor_loop_length,null)));
-			Utils.addListJTree(t,target_descriptor_loop,modus,"target_descriptor_loop");
-			t.add(new DefaultMutableTreeNode(new KVP("operational_descriptor_loop_length",operational_descriptor_loop_length,null)));
-			Utils.addListJTree(t,operational_descriptor_loop,modus,"operational_descriptor_loop");
+			t.add(new KVP("target_descriptor_loop_length", target_descriptor_loop_length));
+			addListJTree(t, target_descriptor_loop, modus, "target_descriptor_loop");
+			t.add(new KVP("operational_descriptor_loop_length", operational_descriptor_loop_length));
+			addListJTree(t, operational_descriptor_loop, modus, "operational_descriptor_loop");
 
 			return t;
 		}
-
 
 
 
@@ -117,7 +115,7 @@ public class INTsection extends TableSectionExtendedSyntax {
 
 
 
-		public void setTarget_descriptor_loop(final List<Descriptor> target_descriptor_loop) {
+		public void setTarget_descriptor_loop(List<Descriptor> target_descriptor_loop) {
 			this.target_descriptor_loop = target_descriptor_loop;
 		}
 
@@ -131,7 +129,7 @@ public class INTsection extends TableSectionExtendedSyntax {
 
 
 
-		public void setTarget_descriptor_loop_length(final int target_descriptor_loop_length) {
+		public void setTarget_descriptor_loop_length(int target_descriptor_loop_length) {
 			this.target_descriptor_loop_length = target_descriptor_loop_length;
 		}
 
@@ -139,7 +137,7 @@ public class INTsection extends TableSectionExtendedSyntax {
 
 
 
-	public INTsection(final PsiSectionData raw_data, final PID parent){
+	public INTsection(PsiSectionData raw_data, PID parent){
 		super(raw_data,parent);
 
 		action_type = Utils.getInt(raw_data.getData(), 3, 1, Utils.MASK_8BITS); //tableIdExtension first byte
@@ -166,11 +164,11 @@ public class INTsection extends TableSectionExtendedSyntax {
 
 
 
-	private List<TargetLoop> buildTargetLoopList(final byte[] data, final int i, final int programInfoLength) {
-		final ArrayList<TargetLoop> r = new ArrayList<>();
+	private List<TargetLoop> buildTargetLoopList(byte[] data, int i, int programInfoLength) {
+		ArrayList<TargetLoop> r = new ArrayList<>();
 		int t =0;
 		while(t<programInfoLength){
-			final TargetLoop c = new TargetLoop();
+			TargetLoop c = new TargetLoop();
 			c.setTarget_descriptor_loop_length(Utils.getInt(data, i+t, 2, Utils.MASK_12BITS));
 			c.setTarget_descriptor_loop(DescriptorFactory.buildDescriptorList(data,i+t+2,c.getTarget_descriptor_loop_length(),this));
 
@@ -193,20 +191,19 @@ public class INTsection extends TableSectionExtendedSyntax {
 	 * @see nl.digitalekabeltelevisie.data.mpeg.psi.TableSection#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("action_type",action_type,getActionTypeString(action_type))));
-		t.add(new DefaultMutableTreeNode(new KVP("platform_id_hash",platform_id_hash,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("platform_id",platformID,getPlatformIDString(platformID))));
-		t.add(new DefaultMutableTreeNode(new KVP("processing_order",processing_order,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("platform_descriptor_loop_length",platform_descriptor_loop_length,null)));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("action_type", action_type, getActionTypeString(action_type)));
+		t.add(new KVP("platform_id_hash", platform_id_hash));
+		t.add(new KVP("platform_id", platformID, getPlatformIDString(platformID)));
+		t.add(new KVP("processing_order", processing_order));
 
-		Utils.addListJTree(t,platformdescriptorList,modus,"platform_descriptor_loop");
-		Utils.addListJTree(t,targetLoopList,modus,"target_loop");
+		addListJTree(t, platformdescriptorList, modus, "platform_descriptor_loop");
+		addListJTree(t, targetLoopList, modus, "target_loop");
 		return t;
 	}
-	
+
 	@Override
 	protected String getTableIdExtensionLabel() {
 		return "action_type (8) / platform_id_hash (8)";

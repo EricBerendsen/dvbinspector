@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2021 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,8 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -54,22 +52,18 @@ public class AITs extends AbstractPSITabel{
 
 	public void update(final AITsection section){
 
-		final int pid = section.getParentPID().getPid();
-		AIT ait = aits.get(pid);
-
-		if(ait==null){
-			ait = new AIT(parentPSI);
-			aits.put(pid, ait);
-		}
+		int pid = section.getParentPID().getPid();
+		AIT ait = aits.computeIfAbsent(pid, k -> new AIT(parentPSI));
 		ait.update(section);
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AITs"));
+		KVP t = new KVP("AITs");
 
 		for (Integer pid : new TreeSet<>(aits.keySet())) {
-			final AIT ait = aits.get(pid);
+			AIT ait = aits.get(pid);
 			t.add(ait.getJTreeNode(modus));
 
 		}

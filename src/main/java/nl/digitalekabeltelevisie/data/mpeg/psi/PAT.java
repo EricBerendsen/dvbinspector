@@ -3,7 +3,7 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2025 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -30,7 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.psi;
 import java.util.*;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
@@ -46,7 +45,7 @@ public class PAT extends AbstractPSITabel{
 	private int actualVersionNo = -1;
 
 
-	public PAT(final PSI parent){
+	public PAT(PSI parent){
 		super(parent);
 	}
 
@@ -63,7 +62,7 @@ public class PAT extends AbstractPSITabel{
 	 *
 	 * @param section
 	 */
-	public void update(final PATsection section){
+	public void update(PATsection section){
 
 
 		if(pat==null){
@@ -94,24 +93,24 @@ public class PAT extends AbstractPSITabel{
 		}
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	@Override
+	public KVP getJTreeNode(int modus) {
 
 		KVP kvp = new KVP("PAT");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
 
 		if (pat != null) {
 			kvp.addTableSource(this::getTableModel, "PAT");
 			for (PATsection element : pat) {
 				if(element!= null){
 					if(!Utils.simpleModus(modus)){ // show all versions
-						addSectionVersionsToJTree(t, element, modus);
+						addSectionVersionsToJTree(kvp, element, modus);
 					}else{ // keep it simple
-						t.add(element.getJTreeNode(modus));
+						kvp.add(element.getJTreeNode(modus));
 					}
 				}
 			}
 		}
-		return t;
+		return kvp;
 	}
 
 	public int getTransportStreamId(){
