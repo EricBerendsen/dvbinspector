@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.getCASystemIDString;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -47,29 +47,25 @@ public class TargetSmartcardDescriptor extends UNTDescriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public TargetSmartcardDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-
-		super_CA_system_id = Utils.getInt(b, offset + 2, 4, Utils.MASK_32BITS);
-		privateDataByte = Utils.copyOfRange(b, offset+6, offset+descriptorLength+2);
-
+	public TargetSmartcardDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		super_CA_system_id = getInt(b, 2, 4, Utils.MASK_32BITS);
+		privateDataByte = copyOfRange(b, 6, descriptorLength + 2);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		DefaultMutableTreeNode super_CA_system_idNode = new DefaultMutableTreeNode(new KVP("super_CA_system_id", super_CA_system_id, null));
-		int caSystemID = super_CA_system_id>>>16;
+	public KVP getJTreeNode(int modus) {
+		final KVP t = super.getJTreeNode(modus);
+		KVP super_CA_system_idNode = new KVP("super_CA_system_id", super_CA_system_id);
+		int caSystemID = super_CA_system_id >>> 16;
 		int caSubsystem_id = super_CA_system_id & Utils.MASK_16BITS;
-		super_CA_system_idNode.add(new DefaultMutableTreeNode(new KVP("CA_system_id", caSystemID, getCASystemIDString(caSystemID))));
-		super_CA_system_idNode.add(new DefaultMutableTreeNode(new KVP("CA_subsystem_id", caSubsystem_id, null)));
+		super_CA_system_idNode.add(new KVP("CA_system_id", caSystemID, getCASystemIDString(caSystemID)));
+		super_CA_system_idNode.add(new KVP("CA_subsystem_id", caSubsystem_id));
 		t.add(super_CA_system_idNode);
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
+		t.add(new KVP("private_data_byte", privateDataByte));
 		return t;
 	}
-
 
 }

@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -50,8 +50,8 @@ public class SSUEventNameDescriptor extends UNTDescriptor {
 
 	private final DVBString text;
 
-	public SSUEventNameDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public SSUEventNameDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		iso639LanguageCode = getISO8859_1String(b, 2, 3);
 		nameLength = getInt(b, 5, 1, MASK_8BITS);
 		// TS 102 006 V1.4.1 does not explicitly say this field uses coding as described
@@ -62,8 +62,8 @@ public class SSUEventNameDescriptor extends UNTDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 		t.add(new KVP("name_length", nameLength));
 		t.add(new KVP("name", name));

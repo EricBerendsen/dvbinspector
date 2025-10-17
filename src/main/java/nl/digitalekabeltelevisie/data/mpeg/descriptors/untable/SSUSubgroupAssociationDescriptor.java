@@ -27,9 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_24BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getOUIString;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -48,26 +50,22 @@ public class SSUSubgroupAssociationDescriptor extends UNTDescriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public SSUSubgroupAssociationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-
-		subgroup_tag = copyOfRange(b, offset+2, offset+descriptorLength+2);
-
-
-
+	public SSUSubgroupAssociationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		subgroup_tag = copyOfRange(b, 2, descriptorLength+2);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("subgroup_tag",subgroup_tag ,subGroupString(subgroup_tag))));
+	public KVP getJTreeNode(final int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("subgroup_tag",subgroup_tag ,subGroupString(subgroup_tag)));
 		return t;
 	}
 
-	public static String subGroupString(final byte[]b){
-		final StringBuilder s = new StringBuilder();
-		final int oui = getInt(b, 0, 3,MASK_24BITS);
-		final int subgroup_association = getInt(b, 3, 2,MASK_16BITS);
+	public static String subGroupString(byte[]b){
+		StringBuilder s = new StringBuilder();
+		int oui = getInt(b, 0, 3,MASK_24BITS);
+		int subgroup_association = getInt(b, 3, 2,MASK_16BITS);
 		s.append("OUI:").append(oui).append(", (").append(getOUIString(oui)).append("), subgroup_association=").append(subgroup_association);
 		return s.toString();
 	}

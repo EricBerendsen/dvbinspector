@@ -27,6 +27,7 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -43,8 +44,8 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class UNTDescriptor extends Descriptor {
 
-	public UNTDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public UNTDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 	}
 
 	@Override
@@ -76,6 +77,12 @@ public class UNTDescriptor extends Descriptor {
             case 0x0D -> "ssu_uri_descriptor";
             default -> "illegal descriptor tag value in UNT";
         };
+	}
+
+	
+	@Override
+	public KVP getJTreeNode(int modus) {
+		return (KVP) super.getJTreeNode(modus);
 	}
 
 

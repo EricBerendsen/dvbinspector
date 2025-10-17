@@ -27,9 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getDataBroadCastIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -47,36 +48,29 @@ public class SSULocationDescriptor extends UNTDescriptor {
 
 	/**
 	 * @param b
-	 * @param offset
 	 * @param parent
 	 */
-	public SSULocationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public SSULocationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		data_broadcast_id = getInt(b, offset + 2, 2,MASK_16BITS);
-		int t=0;
-		if(data_broadcast_id==0x000a){
-			association_tag = getInt(b, offset + 4, 2,MASK_16BITS);
-			t+=2;
+		data_broadcast_id = getInt(b, 2, 2, MASK_16BITS);
+		int t = 0;
+		if (data_broadcast_id == 0x000a) {
+			association_tag = getInt(b, 4, 2, MASK_16BITS);
+			t += 2;
 		}
-		privateDataByte = copyOfRange(b, offset+4+t, offset+descriptorLength+2);
-
-
-
+		privateDataByte = copyOfRange(b, 4 + t, descriptorLength + 2);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("data_broadcast_id", data_broadcast_id, getDataBroadCastIDString(data_broadcast_id))));
-		if(data_broadcast_id==0x000a){
-			t.add(new DefaultMutableTreeNode(new KVP("association_tag", association_tag, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("data_broadcast_id", data_broadcast_id, getDataBroadCastIDString(data_broadcast_id)));
+		if (data_broadcast_id == 0x000a) {
+			t.add(new KVP("association_tag", association_tag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
+		t.add(new KVP("private_data_byte", privateDataByte));
 		return t;
 	}
-
-
-
 
 }

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
 import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -52,7 +50,7 @@ public class MessageDescriptor extends UNTDescriptor {
 	 * @param parent
 	 */
 	public MessageDescriptor(byte[] b, TableSection parent) {
-		super(b, 0, parent);
+		super(b,parent);
 
 		descriptorNumber = Utils.getInt(b, 2, 1, 0xF0)>>4;
 		lastDescriptorNumber = Utils.getInt(b,2, 1, Utils.MASK_4BITS);
@@ -62,8 +60,8 @@ public class MessageDescriptor extends UNTDescriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("descriptor_number", descriptorNumber));
 		t.add(new KVP("last_descriptor_number", lastDescriptorNumber));
 		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));

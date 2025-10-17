@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.untable;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -50,58 +50,50 @@ public class UpdateDescriptor extends UNTDescriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public UpdateDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public UpdateDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		update_flag = Utils.getInt(b, offset + 2, 1, 0xC0)>>6;
-		update_method = Utils.getInt(b, offset + 2, 1, 0x3C)>>2;
-		update_priority = Utils.getInt(b, offset + 2, 1,Utils.MASK_2BITS);
-		privateDataByte = Utils.copyOfRange(b, offset+3, offset+descriptorLength+2);
-
-
-
+		update_flag = Utils.getInt(b, 2, 1, 0xC0) >> 6;
+		update_method = Utils.getInt(b, 2, 1, 0x3C) >> 2;
+		update_priority = Utils.getInt(b, 2, 1, Utils.MASK_2BITS);
+		privateDataByte = copyOfRange(b, 3, descriptorLength + 2);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("update_flag", update_flag, getUpdateFlagString(update_flag))));
-		t.add(new DefaultMutableTreeNode(new KVP("update_method", update_method, getUpdateMethodString(update_method))));
-		t.add(new DefaultMutableTreeNode(new KVP("update_priority", update_priority, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("update_flag", update_flag, getUpdateFlagString(update_flag)));
+		t.add(new KVP("update_method", update_method, getUpdateMethodString(update_method)));
+		t.add(new KVP("update_priority", update_priority));
+		t.add(new KVP("private_data_byte", privateDataByte));
 		return t;
 	}
 
+	public static String getUpdateFlagString(int t) {
 
-	public static String getUpdateFlagString(final int t){
-
-		switch (t) {
-		case 0x00: return"The update has to be activated manually";
-		case 0x01: return"The update may be performed automatically";
-		case 0x02: return"Reserved for future use";
-		case 0x03: return"Reserved for future use";
-
-		default:
-			return "illegal value";
-		}
+		return switch (t) {
+		case 0x00 -> "The update has to be activated manually";
+		case 0x01 -> "The update may be performed automatically";
+		case 0x02 -> "Reserved for future use";
+		case 0x03 -> "Reserved for future use";
+		default -> "illegal value";
+		};
 	}
 
-	public static String getUpdateMethodString(final int t){
+	public static String getUpdateMethodString(int t){
 
 		if((t>=0x03)&&(t<=0x07)){
 			return "reserved for future use";
 		}
 
 
-		switch (t) {
-		case 0x00: return"immediate update: performed whatever the IRD state";
-		case 0x01: return"IRD available: the update is available in the stream; it will be taken into account when it does not interfere with the normal user operation";
-		case 0x02: return"next restart: the update is available in the stream; it will be taken into account at the next IRD restart";
-		case 0x0F: return"reserved";
-
-		default:
-			return "private use";
-		}
+		return switch (t) {
+		case 0x00 -> "immediate update: performed whatever the IRD state";
+		case 0x01 -> "IRD available: the update is available in the stream; it will be taken into account when it does not interfere with the normal user operation";
+		case 0x02 -> "next restart: the update is available in the stream; it will be taken into account at the next IRD restart";
+		case 0x0F -> "reserved";
+		default -> "private use";
+		};
 	}
 
 
