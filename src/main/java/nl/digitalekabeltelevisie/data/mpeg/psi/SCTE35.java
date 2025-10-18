@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 
@@ -58,9 +56,9 @@ public class SCTE35 extends AbstractPSITabel{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SCTE-35"));
+		KVP t = new KVP("SCTE-35");
 		SortedSet<Integer> s = new TreeSet<>(spliceSections.keySet());
 
 		for (Integer pid : s) {
