@@ -27,31 +27,26 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class Mpeg4AudioDescriptor extends Descriptor {
 
-
 	private final int mpeg4_profile_and_level;
 
-
-
-	public Mpeg4AudioDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		mpeg4_profile_and_level = getInt(b, offset+2, 1, MASK_8BITS);
+	public Mpeg4AudioDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		mpeg4_profile_and_level = getInt(b, 2, 1, MASK_8BITS);
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("MPEG-4_audio_profile_and_level",mpeg4_profile_and_level,getProfileLevelString(mpeg4_profile_and_level))));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("MPEG-4_audio_profile_and_level", mpeg4_profile_and_level, getProfileLevelString(mpeg4_profile_and_level)));
 		return t;
 	}
 

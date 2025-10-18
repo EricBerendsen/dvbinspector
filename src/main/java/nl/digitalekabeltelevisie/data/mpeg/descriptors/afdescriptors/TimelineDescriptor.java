@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.math.BigInteger;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
@@ -102,33 +100,33 @@ public class TimelineDescriptor extends AFDescriptor {
 		
 		
 	}
-	
+
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("has_timestamp", has_timestamp, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("has_ntp", has_ntp, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("has_ptp", has_ptp, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("has_timecode", has_timecode, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("force_reload", force_reload, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("paused", paused, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("discontinuity", discontinuity, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("timeline_id", timeline_id, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("has_timestamp", has_timestamp));
+		t.add(new KVP("has_ntp", has_ntp));
+		t.add(new KVP("has_ptp", has_ptp));
+		t.add(new KVP("has_timecode", has_timecode));
+		t.add(new KVP("force_reload", force_reload));
+		t.add(new KVP("paused", paused));
+		t.add(new KVP("discontinuity", discontinuity));
+		t.add(new KVP("reserved", reserved));
+		t.add(new KVP("timeline_id", timeline_id));
 		if (has_timestamp != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("timescale", timescale, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("media_timestamp", media_timestamp, null)));
+			t.add(new KVP("timescale", timescale));
+			t.add(new KVP("media_timestamp", media_timestamp));
 		}
-		
-	      if (has_ntp!=0) {
-	    	  t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("has_ntp")));
-	       }
-	       if (has_ptp!=0) {
-		    	  t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("has_ptp")));
-	       }
-	       if (has_timecode!=0) {
-		    	  t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("has_timecode")));
-	       }
+
+		if (has_ntp != 0) {
+			t.add(GuiUtils.getNotImplementedKVP("has_ntp"));
+		}
+		if (has_ptp != 0) {
+			t.add(GuiUtils.getNotImplementedKVP("has_ptp"));
+		}
+		if (has_timecode != 0) {
+			t.add(GuiUtils.getNotImplementedKVP("has_timecode"));
+		}
 
 		return t;
 	}

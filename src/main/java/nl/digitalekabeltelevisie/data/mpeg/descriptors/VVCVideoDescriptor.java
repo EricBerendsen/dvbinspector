@@ -33,8 +33,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
@@ -118,91 +116,82 @@ public class VVCVideoDescriptor extends Descriptor {
 	private int reserved4;
 	private int temporal_id_max;
 
-
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public VVCVideoDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset,parent);
-		profile_idc = Utils.getInt(b, offset+2, 1, 0b1111_1110)>>1;
-		tier_flag = Utils.getInt(b, offset+2, 1, MASK_1BIT);
-		num_sub_profiles = Utils.getInt(b, offset+3, 1, MASK_8BITS);
-		int localOffset = offset + 4;
+	public VVCVideoDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		profile_idc = Utils.getInt(b, 2, 1, 0b1111_1110) >> 1;
+		tier_flag = Utils.getInt(b, 2, 1, MASK_1BIT);
+		num_sub_profiles = Utils.getInt(b, 3, 1, MASK_8BITS);
+		int localOffset = 4;
 		for (int i = 0; i < num_sub_profiles; i++) {
 			long sub_profile_idc = Utils.getLong(b, localOffset, 4, MASK_32BITS);
 			sub_profile_idc_list.add(sub_profile_idc);
 			localOffset += 4;
-			
+
 		}
-		
-		progressive_source_flag = Utils.getInt(b, localOffset, 1, 0b1000_0000)>>7;
-		interlaced_source_flag = Utils.getInt(b, localOffset, 1, 0b0100_0000)>>6;
-		non_packed_constraint_flag = Utils.getInt(b, localOffset, 1, 0b0010_0000)>>5;
-		frame_only_constraint_flag = Utils.getInt(b, localOffset, 1, 0b0001_0000)>>4;
+
+		progressive_source_flag = Utils.getInt(b, localOffset, 1, 0b1000_0000) >> 7;
+		interlaced_source_flag = Utils.getInt(b, localOffset, 1, 0b0100_0000) >> 6;
+		non_packed_constraint_flag = Utils.getInt(b, localOffset, 1, 0b0010_0000) >> 5;
+		frame_only_constraint_flag = Utils.getInt(b, localOffset, 1, 0b0001_0000) >> 4;
 		reserved_zero_4bits = Utils.getInt(b, localOffset++, 1, MASK_4BITS);
-				
+
 		level_idc = Utils.getInt(b, localOffset++, 1, MASK_8BITS);
-		
-		temporal_layer_subset_flag = Utils.getInt(b, localOffset, 1, 0b1000_0000)>>7;
-		VVC_still_present_flag = Utils.getInt(b, localOffset, 1, 0b0100_0000)>>6;
-		VVC_24hr_picture_present_flag = Utils.getInt(b, localOffset, 1, 0b0010_0000)>>5;
+
+		temporal_layer_subset_flag = Utils.getInt(b, localOffset, 1, 0b1000_0000) >> 7;
+		VVC_still_present_flag = Utils.getInt(b, localOffset, 1, 0b0100_0000) >> 6;
+		VVC_24hr_picture_present_flag = Utils.getInt(b, localOffset, 1, 0b0010_0000) >> 5;
 		reserved = Utils.getInt(b, localOffset++, 1, MASK_5BITS);
 
-		HDR_WCG_idc = Utils.getInt(b, localOffset, 1, 0b1100_0000)>>6;
-		reserved2 = Utils.getInt(b, localOffset, 1, 0b0011_0000)>>4;
+		HDR_WCG_idc = Utils.getInt(b, localOffset, 1, 0b1100_0000) >> 6;
+		reserved2 = Utils.getInt(b, localOffset, 1, 0b0011_0000) >> 4;
 		video_properties_tag = Utils.getInt(b, localOffset++, 1, MASK_4BITS);
-		
-		if ( temporal_layer_subset_flag == 1) {
-			reserved3 = Utils.getInt(b, localOffset, 1, 0b1111_1000)>>3;
+
+		if (temporal_layer_subset_flag == 1) {
+			reserved3 = Utils.getInt(b, localOffset, 1, 0b1111_1000) >> 3;
 			temporal_id_min = Utils.getInt(b, localOffset++, 1, MASK_3BITS);
-			reserved4 = Utils.getInt(b, localOffset, 1, 0b1111_1000)>>3;
+			reserved4 = Utils.getInt(b, localOffset, 1, 0b1111_1000) >> 3;
 			temporal_id_max = Utils.getInt(b, localOffset++, 1, MASK_3BITS);
 		}
 	}
-
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,general_profile_idc_list.get(profile_idc, "unknown/reserved"))));
-		t.add(new DefaultMutableTreeNode(new KVP("tier_flag",tier_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_sub_profiles",num_sub_profiles,null)));
-		
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("profile_idc", profile_idc, general_profile_idc_list.get(profile_idc, "unknown/reserved")));
+		t.add(new KVP("tier_flag", tier_flag));
+		t.add(new KVP("num_sub_profiles", num_sub_profiles));
+
 		for (int i = 0; i < num_sub_profiles; i++) {
 			long sub_profile_idc = sub_profile_idc_list.get(i);
-			t.add(new DefaultMutableTreeNode(new KVP("sub_profile_idc["+i+"]",sub_profile_idc,null)));
+			t.add(new KVP("sub_profile_idc[" + i + "]", sub_profile_idc));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("progressive_source_flag",progressive_source_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("interlaced_source_flag",interlaced_source_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("non_packed_constraint_flag",non_packed_constraint_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_only_constraint_flag",frame_only_constraint_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_4bits",reserved_zero_4bits,null)));
+		t.add(new KVP("progressive_source_flag", progressive_source_flag));
+		t.add(new KVP("interlaced_source_flag", interlaced_source_flag));
+		t.add(new KVP("non_packed_constraint_flag", non_packed_constraint_flag));
+		t.add(new KVP("frame_only_constraint_flag", frame_only_constraint_flag));
+		t.add(new KVP("reserved_zero_4bits", reserved_zero_4bits));
 
+		t.add(new KVP("level_idc", level_idc));
 
-		t.add(new DefaultMutableTreeNode(new KVP("level_idc",level_idc,null)));
-		
-		t.add(new DefaultMutableTreeNode(new KVP("temporal_layer_subset_flag",temporal_layer_subset_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("VVC_still_present_flag",VVC_still_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("VVC_24hr_picture_present_flag",VVC_24hr_picture_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		
-		t.add(new DefaultMutableTreeNode(new KVP("HDR_WCG_idc",HDR_WCG_idc,hdr_wgc_idc_list.get(HDR_WCG_idc))));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("video_properties_tag",video_properties_tag,getVideoPropertiesTagString(HDR_WCG_idc, video_properties_tag))));
-		
-		if ( temporal_layer_subset_flag == 1) {
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved3,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("temporal_id_min",temporal_id_min,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved4,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("temporal_id_max",temporal_id_max,null)));
+		t.add(new KVP("temporal_layer_subset_flag", temporal_layer_subset_flag));
+		t.add(new KVP("VVC_still_present_flag", VVC_still_present_flag));
+		t.add(new KVP("VVC_24hr_picture_present_flag", VVC_24hr_picture_present_flag));
+		t.add(new KVP("reserved", reserved));
+
+		t.add(new KVP("HDR_WCG_idc", HDR_WCG_idc, hdr_wgc_idc_list.get(HDR_WCG_idc)));
+		t.add(new KVP("reserved", reserved2));
+		t.add(new KVP("video_properties_tag", video_properties_tag, getVideoPropertiesTagString(HDR_WCG_idc, video_properties_tag)));
+
+		if (temporal_layer_subset_flag == 1) {
+			t.add(new KVP("reserved", reserved3));
+			t.add(new KVP("temporal_id_min", temporal_id_min));
+			t.add(new KVP("reserved", reserved4));
+			t.add(new KVP("temporal_id_max", temporal_id_max));
 		}
 
 		return t;
 	}
-
 
 	/**
 	 * @param hDR_WCG_idc2

@@ -31,25 +31,35 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static java.lang.Byte.toUnsignedInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.JpegXsVideoDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.MPEGExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.intable.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs.AVS3AudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.avs.AVS3VideoDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosBatSelectionDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosInformationParametersDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosTimezoneDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international.CosInformationParametersDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoPackageDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoVodDeliveryDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema.ZiggoVodURLDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus.CIProtectionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.GuidanceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.ServiceAttributeDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.EACEMStreamIdentifierDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.HDSimulcastLogicalChannelDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam.LogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.m7fastscan.*;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV1;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.nordig.NordigLogicalChannelDescriptorV2;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.opencable.EBPDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.scte.SCTEAdaptationFieldDataDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.BouquetListDescriptor;
@@ -57,7 +67,10 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.Se
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses.VirtualServiceIDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.upc.UPCLogicalChannelDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.uwa.CUVVVideoStreamDescriptor;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.AvailDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SCTE35Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.SegmentationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.scte35.TimeDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.untable.MessageDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -135,7 +148,7 @@ public final class DescriptorFactory {
 				// 
 				// TODO Make this switchable (user preferences)
 				//
-				return new EBPDescriptor(data, 0, tableSection);
+				return new EBPDescriptor(data, tableSection);
 			}
 			if (descriptorTag == 0x97) {
 				// OpenCable™ Specifications 
@@ -148,11 +161,11 @@ public final class DescriptorFactory {
 				// TODO Make this switchable (user preferences)
 				//
 				
-				return new SCTEAdaptationFieldDataDescriptor(data, 0, tableSection);
+				return new SCTEAdaptationFieldDataDescriptor(data, tableSection);
 			}
 			if (descriptorTag == 0xF3 && data[2] == 'c' && data[3] == 'u' && data[4] == 'v' && data[5] == 'v' ) {
 				// the CUVV video stream descriptor include 'cuvv' as a watermark
-				return new CUVVVideoStreamDescriptor(data, 0, tableSection); 
+				return new CUVVVideoStreamDescriptor(data, tableSection); 
 			}
 			if (descriptorTag >= 0x80 && tableSection.getTableId() >= 0xBC && tableSection.getTableId() <= 0xBE
 					&& PreferencesManager.isEnableM7Fastscan()) {
@@ -176,7 +189,7 @@ public final class DescriptorFactory {
 		} catch (final RuntimeException iae) {
 			// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 			// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
-			Descriptor d = new Descriptor(data, 0, tableSection);
+			Descriptor d = new Descriptor(data, tableSection);
 			logger.warning("Fall back for descriptor:" + toUnsignedInt(data[0]) + " ("
 					+ Descriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
@@ -237,25 +250,25 @@ public final class DescriptorFactory {
 		if (private_data_specifier == 0x600) { // UPC1
 			switch (descriptor_tag) {
 			case 0x81:
-				return new UPCLogicalChannelDescriptor(data, 0, tableSection);
+				return new UPCLogicalChannelDescriptor(data, tableSection);
 			case 0x87:
-				return new ZiggoVodDeliveryDescriptor(data, 0, tableSection);
+				return new ZiggoVodDeliveryDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier == 0x16) { // Casema / Ziggo
 			switch (descriptor_tag) {
 			case 0x87:
-				return new ZiggoVodDeliveryDescriptor(data, 0, tableSection);
+				return new ZiggoVodDeliveryDescriptor(data, tableSection);
 			case 0x93:
-				return new ZiggoVodURLDescriptor(data, 0, tableSection);
+				return new ZiggoVodURLDescriptor(data, tableSection);
 			case 0xD4:
-				return new ZiggoPackageDescriptor(data, 0, tableSection);
+				return new ZiggoPackageDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier == 0x28) { // EACEM
 			switch (descriptor_tag) {
 			case 0x83:
 				return new LogicalChannelDescriptor(data, tableSection, descriptorContext);
 			case 0x86:
-				return new EACEMStreamIdentifierDescriptor(data, 0, tableSection);
+				return new EACEMStreamIdentifierDescriptor(data, tableSection);
 			case 0x88:
 				return new HDSimulcastLogicalChannelDescriptor(data, tableSection, descriptorContext);
 			}
@@ -271,25 +284,25 @@ public final class DescriptorFactory {
 		} else if (private_data_specifier == 0x40) { // CI Plus LLP
 			switch (descriptor_tag) {
 			case 0xCE:
-				return new CIProtectionDescriptor(data, 0, tableSection);
+				return new CIProtectionDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier == 0xa4) { // Canal + International
 			switch (descriptor_tag) {
 			case 0x80:
 				return new CosBatSelectionDescriptor (data, tableSection);
 			case 0x81:
-				return new CosInformationParametersDescriptor(data, 0, tableSection);
+				return new CosInformationParametersDescriptor(data, tableSection);
 			case 0x83:
 				return new CosLogicalChannelDescriptor(data, tableSection, descriptorContext);
 			case 0x88:
-				return new CosTimezoneDescriptor(data, 0, tableSection);
+				return new CosTimezoneDescriptor(data, tableSection);
 			}
 		} else if (private_data_specifier == 0x233a) { // DTG
 			switch (descriptor_tag) {
 			case 0x83: // can not re-use LogicalChannelDescriptor from EACEM, DTG has no visible flag
 				return new nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg.LogicalChannelDescriptor(data, tableSection, descriptorContext);
 			case 0x86:
-				return new ServiceAttributeDescriptor(data, 0, tableSection);
+				return new ServiceAttributeDescriptor(data, tableSection);
 			case 0x89:
 				return new GuidanceDescriptor(data, tableSection);
 			}
@@ -324,74 +337,74 @@ public final class DescriptorFactory {
 		}
 		logger.info("Unimplemented private descriptor, private_data_specifier=" + private_data_specifier
 					+ ", descriptortag=" + descriptor_tag + ", tableSection=" + tableSection);
-		return new Descriptor(data, 0, tableSection);
+		return new Descriptor(data, tableSection);
 	}
 
 	private static Descriptor getMPEGDescriptor(final byte[] data, final TableSection tableSection) {
 		switch (toUnsignedInt(data[0])) {
 		case 0x02:
-			return new VideoStreamDescriptor(data, 0, tableSection);
+			return new VideoStreamDescriptor(data, tableSection);
 		case 0x03:
-			return new AudioStreamDescriptor(data, 0, tableSection);
+			return new AudioStreamDescriptor(data, tableSection);
 		case 0x04:
-			return new HierarchyDescriptor(data, 0, tableSection);
+			return new HierarchyDescriptor(data, tableSection);
 		case 0x05:
-			return new RegistrationDescriptor(data, 0, tableSection);
+			return new RegistrationDescriptor(data, tableSection);
 		case 0x06:
-			return new DataStreamAlignmentDescriptor(data, 0, tableSection);
+			return new DataStreamAlignmentDescriptor(data, tableSection);
 		case 0x07:
-			return new TargetBackGroundDescriptor(data, 0, tableSection);
+			return new TargetBackGroundDescriptor(data, tableSection);
 		case 0x08:
-			return new VideoWindowDescriptor(data, 0, tableSection);
+			return new VideoWindowDescriptor(data, tableSection);
 		case 0x09:
-			return new CADescriptor(data, 0, tableSection);
+			return new CADescriptor(data, tableSection);
 		case 0x0A:
-			return new ISO639LanguageDescriptor(data, 0, tableSection);
+			return new ISO639LanguageDescriptor(data, tableSection);
 		case 0x0B:
-			return new SystemClockDescriptor(data, 0, tableSection);
+			return new SystemClockDescriptor(data, tableSection);
 		case 0x0C:
-			return new MultiplexBufferUtilizationDescriptor(data, 0, tableSection);
+			return new MultiplexBufferUtilizationDescriptor(data, tableSection);
 		case 0x0D:
-			return new CopyrightDescriptor(data, 0, tableSection);
+			return new CopyrightDescriptor(data, tableSection);
 		case 0x0E:
-			return new MaximumBitrateDescriptor(data, 0, tableSection);
+			return new MaximumBitrateDescriptor(data, tableSection);
 		case 0x0F:
-			return new PrivateDataIndicatorDescriptor(data, 0, tableSection);
+			return new PrivateDataIndicatorDescriptor(data, tableSection);
 		case 0x10:
-			return new SmoothingBufferDescriptor(data, 0, tableSection);
+			return new SmoothingBufferDescriptor(data, tableSection);
 		case 0x11:
-			return new STDDescriptor(data, 0, tableSection);
+			return new STDDescriptor(data, tableSection);
 			// 0x12 IBP_descriptor as found in iso/conformance/hhi.m2t
 		case 0x12:
-			return new IBPDescriptor(data, 0, tableSection);
+			return new IBPDescriptor(data, tableSection);
 		case 0x13:
 			return new CarouselIdentifierDescriptor(data, tableSection);
 		case 0x14:
-			return new AssociationTagDescriptor(data, 0, tableSection);
+			return new AssociationTagDescriptor(data, tableSection);
 		case 0x1A:
-			return new StreamEventDescriptor(data, 0, tableSection);
+			return new StreamEventDescriptor(data, tableSection);
 		case 0x1C:
-			return new Mpeg4AudioDescriptor(data, 0, tableSection);
+			return new Mpeg4AudioDescriptor(data, tableSection);
 		case 0x25:
-			return new MetaDataPointerDescriptor(data, 0, tableSection);
+			return new MetaDataPointerDescriptor(data, tableSection);
 		case 0x26:
-			return new MetaDataDescriptor(data, 0, tableSection);
+			return new MetaDataDescriptor(data, tableSection);
 		case 0x28:
-			return new AVCVideoDescriptor(data, 0, tableSection);
+			return new AVCVideoDescriptor(data, tableSection);
 		case 0x2A:
-			return new AVCTimingAndHRDDescriptor(data, 0, tableSection);
+			return new AVCTimingAndHRDDescriptor(data, tableSection);
 		case 0x2B:
-			return new AACMpeg2Descriptor(data, 0, tableSection);
+			return new AACMpeg2Descriptor(data, tableSection);
 		case 0x32:
-			return new JPEG2000VideoDescriptor(data, 0, tableSection);
+			return new JPEG2000VideoDescriptor(data, tableSection);
 		case 0x38:
-			return new HEVCVideoDescriptor(data, 0, tableSection);
+			return new HEVCVideoDescriptor(data, tableSection);
 		case 0x39:
-			return new VVCVideoDescriptor(data, 0, tableSection);
+			return new VVCVideoDescriptor(data, tableSection);
 		case 0x3F:
 			return getMPEGExtendedDescriptor(data, tableSection);
 		default:
-			final Descriptor descriptor = new Descriptor(data, 0, tableSection);
+			final Descriptor descriptor = new Descriptor(data, tableSection);
 			logger.info("Not implemented descriptor:" + toUnsignedInt(data[0]) + " ("
 					+ Descriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
@@ -426,55 +439,55 @@ public final class DescriptorFactory {
 		switch (toUnsignedInt(data[0])) {
 
 		case 0x40:
-			return new NetworkNameDescriptor(data, 0, tableSection);
+			return new NetworkNameDescriptor(data, tableSection);
 		case 0x41:
-			return new ServiceListDescriptor(data, 0, tableSection, descriptorContext);
+			return new ServiceListDescriptor(data, tableSection, descriptorContext);
 		case 0x43:
-			return new SatelliteDeliverySystemDescriptor(data, 0, tableSection);
+			return new SatelliteDeliverySystemDescriptor(data, tableSection);
 		case 0x44:
-			return new CableDeliverySystemDescriptor(data, 0, tableSection);
+			return new CableDeliverySystemDescriptor(data, tableSection);
 		case 0x45:
-			return new VBIDataDescriptor(data, 0, tableSection);
+			return new VBIDataDescriptor(data, tableSection);
 		case 0x46: // semantics for the VBI teletext descriptor is the same as defined for the teletext descriptor
-			return new TeletextDescriptor(data, 0, tableSection);
+			return new TeletextDescriptor(data, tableSection);
 		case 0x47:
 			return new BouquetNameDescriptor(data, tableSection);
 		case 0x48:
 			return new ServiceDescriptor(data, tableSection);
 		case 0x49:
-			return new CountryAvailabilityDescriptor(data, 0, tableSection);
+			return new CountryAvailabilityDescriptor(data, tableSection);
 		case 0x4A:
 			return new LinkageDescriptor(data, tableSection);
 		case 0x4B:
-			return new NVODReferenceDescriptor(data, 0, tableSection);
+			return new NVODReferenceDescriptor(data, tableSection);
 		case 0x4C:
-			return new TimeShiftedServiceDescriptor(data, 0, tableSection);
+			return new TimeShiftedServiceDescriptor(data, tableSection);
 		case 0x4D:
 			return new ShortEventDescriptor(data, tableSection);
 		case 0x4E:
 			return new ExtendedEventDescriptor(data, tableSection);
 		case 0x4F:
-			return new TimeShiftedEventDescriptor(data, 0, tableSection);
+			return new TimeShiftedEventDescriptor(data, tableSection);
 		case 0x50:
 			return new ComponentDescriptor(data, tableSection);
 		case 0x51:
-			return new MosaicDescriptor(data, 0, tableSection);
+			return new MosaicDescriptor(data, tableSection);
 		case 0x52:
-			return new StreamIdentifierDescriptor(data, 0, tableSection);
+			return new StreamIdentifierDescriptor(data, tableSection);
 		case 0x53:
-			return new CAIdentifierDescriptor(data, 0, tableSection);
+			return new CAIdentifierDescriptor(data, tableSection);
 		case 0x54:
 			return new ContentDescriptor(data, tableSection);
 		case 0x55:
-			return new ParentalRatingDescriptor(data, 0, tableSection);
+			return new ParentalRatingDescriptor(data, tableSection);
 		case 0x56:
-			return new TeletextDescriptor(data, 0, tableSection);
+			return new TeletextDescriptor(data, tableSection);
 		case 0x58:
-			return new LocalTimeOffsetDescriptor(data, 0, tableSection);
+			return new LocalTimeOffsetDescriptor(data, tableSection);
 		case 0x59:
-			return new SubtitlingDescriptor(data, 0, tableSection);
+			return new SubtitlingDescriptor(data, tableSection);
 		case 0x5A:
-			return new TerrestrialDeliverySystemDescriptor(data, 0, tableSection);
+			return new TerrestrialDeliverySystemDescriptor(data, tableSection);
 		case 0x5B:
 			return new MultilingualNetworkNameDescriptor(data, tableSection);
 		case 0x5C:
@@ -482,56 +495,56 @@ public final class DescriptorFactory {
 		case 0x5D:
 			return new MultilingualServiceNameDescriptor(data, tableSection);
 		case 0x5F:
-			return new PrivateDataSpecifierDescriptor(data, 0, tableSection);
+			return new PrivateDataSpecifierDescriptor(data, tableSection);
 		case 0x62:
-			return new FrequencyListDescriptor(data, 0, tableSection);
+			return new FrequencyListDescriptor(data, tableSection);
 		case 0x63:
-			return new PartialTransportStreamDescriptor(data, 0, tableSection);
+			return new PartialTransportStreamDescriptor(data, tableSection);
 		case 0x64:
-			return new DataBroadcastDescriptor(data, 0, tableSection);
+			return new DataBroadcastDescriptor(data, tableSection);
 		case 0x65:
-			return new ScramblingDescriptor(data, 0, tableSection);
+			return new ScramblingDescriptor(data, tableSection);
 		case 0x66:
-			return new DataBroadcastIDDescriptor(data, 0, tableSection);
+			return new DataBroadcastIDDescriptor(data, tableSection);
 		case 0x69:
-			return new PDCDescriptor(data, 0, tableSection);
+			return new PDCDescriptor(data, tableSection);
 		case 0x6A:
-			return new AC3Descriptor(data, 0, tableSection);
+			return new AC3Descriptor(data, tableSection);
 		case 0x6B:
-			return new AncillaryDataDescriptor(data, 0, tableSection);
+			return new AncillaryDataDescriptor(data, tableSection);
 		case 0x6C:
-			return new CellListDescriptor(data, 0, tableSection);
+			return new CellListDescriptor(data, tableSection);
 		case 0x6D:
-			return new CellFrequencyLinkDescriptor(data, 0, tableSection);
+			return new CellFrequencyLinkDescriptor(data, tableSection);
 		case 0x6F:
-			return new ApplicationSignallingDescriptor(data, 0, tableSection);
+			return new ApplicationSignallingDescriptor(data, tableSection);
 		case 0x70:
-			return new AdaptationFieldDataDescriptor(data, 0, tableSection);
+			return new AdaptationFieldDataDescriptor(data, tableSection);
 		case 0x71:
 			return new ServiceIdentifierDescriptor(data, tableSection);
 		case 0x72:
-			return new ServiceAvailabilityDescriptor(data, 0, tableSection);
+			return new ServiceAvailabilityDescriptor(data, tableSection);
 		case 0x73:
-			return new DefaultAuthorityDescriptor(data, 0, tableSection);
+			return new DefaultAuthorityDescriptor(data, tableSection);
 		case 0x74:
-			return new RelatedContentDescriptor(data, 0, tableSection);
+			return new RelatedContentDescriptor(data, tableSection);
 		case 0x76:
-			return new ContentIdentifierDescriptor(data, 0, tableSection);
+			return new ContentIdentifierDescriptor(data, tableSection);
 		case 0x77:
-			return new TimeSliceFecIdentifierDescriptor(data, 0, tableSection);
+			return new TimeSliceFecIdentifierDescriptor(data, tableSection);
 		case 0x79:
-			return new S2SatelliteDeliverySystemDescriptor(data, 0, tableSection);
+			return new S2SatelliteDeliverySystemDescriptor(data, tableSection);
 		case 0x7A:
-			return new EnhancedAC3Descriptor(data, 0, tableSection);
+			return new EnhancedAC3Descriptor(data, tableSection);
 		case 0x7C:
 			return new AACDescriptor(data, tableSection);
 		case 0x7E:
-			return new FTAContentManagmentDescriptor(data, 0, tableSection);
+			return new FTAContentManagmentDescriptor(data, tableSection);
 		case 0x7F:
 			return getDVBExtendedDescriptor(data, tableSection);
 
 		default:
-			Descriptor d =  new Descriptor(data, 0, tableSection);
+			Descriptor d =  new Descriptor(data, tableSection);
 			logger.info("Not implemented descriptor:" + toUnsignedInt(data[0]) + " ("
 					+ Descriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection

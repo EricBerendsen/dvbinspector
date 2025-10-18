@@ -1,8 +1,7 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.controller.KVP;
 
 /**
  * 
@@ -38,13 +37,13 @@ public class NameDescriptor extends DSMCCDescriptor {
 	private final DVBString text_char;
 
 	public NameDescriptor(byte[] b) {
-		super(b, 0);
+		super(b);
 		text_char = new DVBString(b, 1);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("text_char",text_char));
 		return t;
 	}

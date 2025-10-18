@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
 import static nl.digitalekabeltelevisie.util.Utils.getBytes;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 /**
@@ -45,16 +43,16 @@ public class LabelDescriptor extends DSMCCDescriptor {
 
 	private byte[] label_byte;
 
-	public LabelDescriptor(final byte[] b, final int offset) {
-		super(b, offset);
-		label_byte = getBytes(b, offset + 2, descriptorLength);
+	public LabelDescriptor( byte[] b) {
+		super(b);
+		label_byte = getBytes(b, 2, descriptorLength);
 	}
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("label_byte", label_byte, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("label_byte", label_byte));
 		return t;
 	}
 

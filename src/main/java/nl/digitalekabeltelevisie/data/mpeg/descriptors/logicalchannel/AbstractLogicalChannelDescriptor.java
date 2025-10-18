@@ -130,9 +130,9 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	}
 	
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final KVP t = (KVP) super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.addTableSource(this, "logical_channels");
 
 		addListJTree(t,channelList,modus,"logical_channels",this);

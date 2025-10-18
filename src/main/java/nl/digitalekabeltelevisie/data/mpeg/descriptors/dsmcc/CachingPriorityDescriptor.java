@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 
@@ -46,34 +45,30 @@ public class CachingPriorityDescriptor extends DSMCCDescriptor {
 	private final int priority_value;
 	private final int transparency_level;
 
-	public CachingPriorityDescriptor(final byte[] b, final int offset) {
-		super(b, offset);
-		priority_value = getInt(b, offset + 2, 1,MASK_8BITS);
-		transparency_level = getInt(b, offset + 3, 1,MASK_8BITS);
+	public CachingPriorityDescriptor(byte[] b) {
+		super(b);
+		priority_value = getInt(b, 2, 1, MASK_8BITS);
+		transparency_level = getInt(b, 3, 1, MASK_8BITS);
 
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("priority_value", priority_value, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transparency_level", transparency_level, getTransParencyLevelString(transparency_level))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("priority_value", priority_value));
+		t.add(new KVP("transparency_level", transparency_level, getTransParencyLevelString(transparency_level)));
 		return t;
 	}
 
 
 
-	public static String getTransParencyLevelString(final int trans){
-		switch (trans) {
-		case 0: return "reserved";
-		case 1: return "Transparent caching";
-		case 2: return "Semi-transparent caching";
-		case 3: return "Static caching";
-
-
-		default:
-			return "reserved for future use";
-		}
+	public static String getTransParencyLevelString(int trans){
+		return switch (trans) {
+		case 0 -> "reserved";
+		case 1 -> "Transparent caching";
+		case 2 -> "Semi-transparent caching";
+		case 3 -> "Static caching";
+		default -> "reserved for future use";
+		};
 	}
 }

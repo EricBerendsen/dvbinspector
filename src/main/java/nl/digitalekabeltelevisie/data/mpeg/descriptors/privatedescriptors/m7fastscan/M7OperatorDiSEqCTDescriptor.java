@@ -34,7 +34,6 @@ import java.util.List;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
-import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -71,7 +70,7 @@ public class M7OperatorDiSEqCTDescriptor extends M7Descriptor {
 	}
 
 	
-	private List<DiSEqC> buildDiSEqCList(byte[] data, int offset, int diseqc_loop_length) {
+	private static List<DiSEqC> buildDiSEqCList(byte[] data, int offset, int diseqc_loop_length) {
 		List<DiSEqC> r = new ArrayList<>();
 		int t =0;
 		while(t<diseqc_loop_length){

@@ -27,13 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.LookUpList;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class ScramblingDescriptor extends Descriptor {
 	
@@ -53,9 +52,9 @@ public class ScramblingDescriptor extends Descriptor {
 	
 	private int scrambling_mode;
 
-	public ScramblingDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		scrambling_mode = getInt(b,offset+2,1,Utils.MASK_8BITS);
+	public ScramblingDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		scrambling_mode = getInt(b, 2, 1, Utils.MASK_8BITS);
 	}
 
 	@Override
@@ -64,9 +63,9 @@ public class ScramblingDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("scrambling_mode",scrambling_mode ,scramblingModeList.get(scrambling_mode,"Illegal value"))));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("scrambling_mode",scrambling_mode ,scramblingModeList.get(scrambling_mode,"Illegal value")));
 		return t;
 	}
 

@@ -318,8 +318,8 @@ public class AVS3AudioDescriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		KVP t = (KVP) super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("audio_codec_id", audio_codec_id, audio_codec_id_String(audio_codec_id)));
 
 		if (audio_codec_id == LOSSLESS_CODING && sampling_frequency_index == 0xF) {

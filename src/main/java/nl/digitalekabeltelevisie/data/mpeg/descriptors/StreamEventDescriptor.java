@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc.DSMCCStreamEventPayloadBinary;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -51,15 +49,14 @@ public class StreamEventDescriptor extends Descriptor {
 	
 	private DSMCCStreamEventPayloadBinary dsm_cc_stream_event_payload_binary;
 
-	public StreamEventDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		eventId = getInt(b, offset+2, 2, MASK_16BITS);
-		reserved = getInt(b, offset+4, 4, MASK_31BITS)>>1;
-		eventNPT = getLong(b, offset+7, 5, MASK_33BITS);
-		privateDataByte = getBytes(b,offset+12,descriptorLength-10);
+	public StreamEventDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		eventId = getInt(b, 2, 2, MASK_16BITS);
+		reserved = getInt(b, 4, 4, MASK_31BITS) >> 1;
+		eventNPT = getLong(b, 7, 5, MASK_33BITS);
+		privateDataByte = getBytes(b, 12, descriptorLength - 10);
 		try {
 			dsm_cc_stream_event_payload_binary = new DSMCCStreamEventPayloadBinary(privateDataByte);
-			
 		} catch (Exception e) {
 			// ignore
 		}
@@ -67,12 +64,12 @@ public class StreamEventDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("eventId",eventId ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("eventNPT",eventNPT ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("privateDataByte",privateDataByte ,null)));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("eventId",eventId));
+		t.add(new KVP("reserved",reserved));
+		t.add(new KVP("eventNPT",eventNPT));
+		t.add(new KVP("privateDataByte",privateDataByte));
 		if(dsm_cc_stream_event_payload_binary != null) {
 			t.add(dsm_cc_stream_event_payload_binary.getJTreeNode(modus));
 		}

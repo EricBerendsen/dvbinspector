@@ -27,12 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_32BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -41,7 +42,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class CellFrequencyLinkDescriptor extends Descriptor {
 
-	private final List<Cell> cellList = new ArrayList<Cell>();
+	private final List<Cell> cellList = new ArrayList<>();
 
 
 	public static class Cell implements TreeNode{
@@ -52,7 +53,7 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 		private final long frequency; // 32-bit uimsbf field giving the binary coded frequency value in multiples of 10 Hz.
 		private final int subcellInfoLoopLength;
 
-		private final List<SubCell> subCellList = new ArrayList<SubCell>();
+		private final List<SubCell> subCellList = new ArrayList<>();
 
 		public Cell(final int id,final long f,final int loop){
 			cellId = id;
@@ -60,64 +61,51 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 			subcellInfoLoopLength = loop;
 		}
 
-		public void addSubCell(final SubCell s){
+		public void addSubCell(SubCell s){
 			subCellList.add(s);
 		}
 
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("cell"));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_id",cellId,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("frequency",frequency,Descriptor.formatTerrestrialFrequency(frequency))));
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_info_loop_length",subcellInfoLoopLength,null)));
-			addListJTree(s,subCellList,modus,"sub_cell_list");
+		@Override
+		public KVP getJTreeNode(int modus) {
+			final KVP s = new KVP("cell");
+			s.add(new KVP("cell_id", cellId));
+			s.add(new KVP("frequency", frequency, Descriptor.formatTerrestrialFrequency(frequency)));
+			s.add(new KVP("subcell_info_loop_length", subcellInfoLoopLength));
+			addListJTree(s, subCellList, modus, "sub_cell_list");
 			return s;
 		}
 	}
 
-	public static class SubCell implements TreeNode{
-		/**
-		 *
-		 */
-		private final int cellIdExtension ;
-		private final long transposerFrequency; // 32-bit uimsbf field giving the binary coded frequency value in multiples of 10 Hz.
+	public static record SubCell(int cellIdExtension, long transposerFrequency) implements TreeNode{
 
-
-		public SubCell(final int id,final long f){
-			cellIdExtension = id;
-			transposerFrequency = f;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("subcell"));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_id_extension",cellIdExtension,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("transposer_frequency",transposerFrequency,Descriptor.formatTerrestrialFrequency(transposerFrequency))));
+		@Override
+		public KVP getJTreeNode(int modus){
+			KVP s=new KVP("subcell");
+			s.add(new KVP("cell_id_extension",cellIdExtension));
+			s.add(new KVP("transposer_frequency",transposerFrequency,Descriptor.formatTerrestrialFrequency(transposerFrequency)));
 			return s;
 		}
 	}
 
-	public CellFrequencyLinkDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while ((t+6)<descriptorLength) {
-			final int cell_id = getInt(b,offset+ t+2, 2, Utils.MASK_16BITS);
-			final long  freq = getLong(b, offset+t+4, 4, MASK_32BITS);
-			final int subcell_info_loop_length = getInt(b,offset+ t+8, 1, Utils.MASK_8BITS);
-			final Cell cell = new Cell(cell_id,freq, subcell_info_loop_length);
+	public CellFrequencyLinkDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while ((t + 6) < descriptorLength) {
+			final int cell_id = getInt(b, t + 2, 2, Utils.MASK_16BITS);
+			final long freq = getLong(b, t + 4, 4, MASK_32BITS);
+			final int subcell_info_loop_length = getInt(b, t + 8, 1, Utils.MASK_8BITS);
+			final Cell cell = new Cell(cell_id, freq, subcell_info_loop_length);
 			cellList.add(cell);
-			t+=7;
-			int r =0;
-			while (r<subcell_info_loop_length ) {
-				final int cell_id_extension = getInt(b,offset+ t+2+r, 1, Utils.MASK_8BITS);
-				final long  trans_freq = getLong(b, offset+t+3, 4, MASK_32BITS);
-				final SubCell s = new SubCell(cell_id_extension,trans_freq);
+			t += 7;
+			int r = 0;
+			while (r < subcell_info_loop_length) {
+				final int cell_id_extension = getInt(b, t + 2 + r, 1, Utils.MASK_8BITS);
+				final long trans_freq = getLong(b, t + 3, 4, MASK_32BITS);
+				final SubCell s = new SubCell(cell_id_extension, trans_freq);
 				cell.addSubCell(s);
-				r=r+5;
-
+				r = r + 5;
 			}
-			t=t+r;
-
+			t = t + r;
 		}
 	}
 
@@ -134,9 +122,9 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		final KVP t = super.getJTreeNode(modus);
 		addListJTree(t,cellList,modus,"cell_list");
 		return t;
 	}

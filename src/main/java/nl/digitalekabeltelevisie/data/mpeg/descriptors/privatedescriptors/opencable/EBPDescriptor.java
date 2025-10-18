@@ -29,14 +29,15 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.openc
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class EBPDescriptor extends Descriptor {
 	
@@ -88,30 +89,30 @@ public class EBPDescriptor extends Descriptor {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Partition"));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("Partition");
 			
-			t.add(new DefaultMutableTreeNode(new KVP("EBP_data_explicit_flag",EBP_data_explicit_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("representation_id_flag",representation_id_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("partition_id",partition_id,null)));
+			t.add(new KVP("EBP_data_explicit_flag",EBP_data_explicit_flag));
+			t.add(new KVP("representation_id_flag",representation_id_flag));
+			t.add(new KVP("partition_id",partition_id));
 
 			if (EBP_data_explicit_flag == 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_PID",EBP_PID,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
+				t.add(new KVP("reserved",reserved));
+				t.add(new KVP("EBP_PID",EBP_PID));
+				t.add(new KVP("reserved",reserved2));
 			} else {
-				t.add(new DefaultMutableTreeNode(new KVP("boundary_flag",boundary_flag,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_distance",EBP_distance,null)));
+				t.add(new KVP("boundary_flag",boundary_flag));
+				t.add(new KVP("EBP_distance",EBP_distance));
 				if (boundary_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("SAP_type_max",SAP_type_max,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved3,null)));
+					t.add(new KVP("SAP_type_max",SAP_type_max));
+					t.add(new KVP("reserved",reserved3));
 				} else {
-					t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved4,null)));
+					t.add(new KVP("reserved",reserved4));
 				}
 
-				t.add(new DefaultMutableTreeNode(new KVP("acquisition_time_flag",acquisition_time_flag,null)));
+				t.add(new KVP("acquisition_time_flag",acquisition_time_flag));
 				if (representation_id_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("representation_id",representation_id,null)));
+					t.add(new KVP("representation_id",representation_id));
 				}
 			}
 
@@ -129,14 +130,14 @@ public class EBPDescriptor extends Descriptor {
 	private int EBP_distance_width_minus_1;
 	private List<Partition> partitionList = new ArrayList<>();
 
-	public EBPDescriptor(byte[] bytes, int offset, TableSection parent) {
-		super(bytes, offset, parent);
+	public EBPDescriptor(byte[] bytes, TableSection parent) {
+		super(bytes, parent);
 		if (descriptorLength > 0) {
-			num_partitions = getInt(bytes, offset + 2, 1, 0b1111_1000) >> 3;
-			timescale_flag = getInt(bytes, offset + 2, 1, 0b0000_0100) >> 2;
-			reserved = getInt(bytes, offset + 2, 1, 0b0000_0011);
+			num_partitions = getInt(bytes, 2, 1, 0b1111_1000) >> 3;
+			timescale_flag = getInt(bytes, 2, 1, 0b0000_0100) >> 2;
+			reserved = getInt(bytes, 2, 1, 0b0000_0011);
 
-			int localOffset = offset + 3;
+			int localOffset = 3;
 
 			if (timescale_flag == 1) {
 				ticks_per_second = getInt(bytes, localOffset, 3, 0b1111_1111_1111_1111_1111_1000) >> 3;
@@ -152,17 +153,17 @@ public class EBPDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		 if (descriptorLength > 0)     {
-			 t.add(new DefaultMutableTreeNode(new KVP("num_partitions",num_partitions,null)));
-			 t.add(new DefaultMutableTreeNode(new KVP("timescale_flag",timescale_flag,null)));
-			 t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+			 t.add(new KVP("num_partitions",num_partitions));
+			 t.add(new KVP("timescale_flag",timescale_flag));
+			 t.add(new KVP("reserved",reserved));
 			 
 			if (timescale_flag == 1) {
-				 t.add(new DefaultMutableTreeNode(new KVP("ticks_per_second",ticks_per_second,"precision, in ticks per second, of the EBP_distance field")));
-				 t.add(new DefaultMutableTreeNode(new KVP("EBP_distance_width_minus_1",EBP_distance_width_minus_1," length, in bytes (minus one), of the EBP_distance field")));
+				 t.add(new KVP("ticks_per_second",ticks_per_second,"precision, in ticks per second, of the EBP_distance field"));
+				 t.add(new KVP("EBP_distance_width_minus_1",EBP_distance_width_minus_1," length, in bytes (minus one), of the EBP_distance field"));
 			}
 			if(!partitionList.isEmpty()) {
 				Utils.addListJTree(t, partitionList, modus, "Partitions");

@@ -27,85 +27,47 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
 public class SubtitlingDescriptor extends Descriptor{
 
-	private final List<Subtitle> subtitleList = new ArrayList<Subtitle>();
+	private final List<Subtitle> subtitleList = new ArrayList<>();
 
 
-	public static class Subtitle implements TreeNode{
-		/**
-		 *
-		 */
-		private final String iso639LanguageCode;
-		private final int subtitlingType ;
-		private final int compositionPageId;
-		private final int ancillaryPageId;
+	public  record Subtitle(String iso639LanguageCode, int subtitlingType, int compositionPageId, int ancillaryPageId) implements TreeNode{
 
-
-		public Subtitle(final String lCode, final int sType,final int sCompositionPageDd,final int aPageId){
-			iso639LanguageCode = lCode;
-			subtitlingType = sType;
-			compositionPageId = sCompositionPageDd;
-			ancillaryPageId = aPageId;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("subtitle"));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("subtitling_type",subtitlingType,getComponentType0x03String(subtitlingType))));
-			s.add(new DefaultMutableTreeNode(new KVP("composition_page_id",compositionPageId,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("ancillary_page_id",ancillaryPageId,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("subtitle");
+			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			s.add(new KVP("subtitling_type", subtitlingType, getComponentType0x03String(subtitlingType)));
+			s.add(new KVP("composition_page_id", compositionPageId));
+			s.add(new KVP("ancillary_page_id", ancillaryPageId));
 			return s;
 		}
-
-
 
 		@Override
 		public String toString(){
 			return "code:'"+iso639LanguageCode;
 		}
 
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
-
-		public int getSubtitlingType() {
-			return subtitlingType;
-		}
-
-
-		public int getCompositionPageId() {
-			return compositionPageId;
-		}
-
-
-		public int getAncillaryPageId() {
-			return ancillaryPageId;
-		}
-
-
 	}
 
-	public SubtitlingDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public SubtitlingDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int t=0;
 		while (t<descriptorLength) {
-			final String languageCode=Utils.getISO8859_1String(b, offset+2+t, 3);
-			final int subtitling_type = Utils.getInt(b, offset+5+t, 1, Utils.MASK_8BITS);
-			final int composition_page_id = Utils.getInt(b, offset+6+t, 2, Utils.MASK_16BITS);
-			final int ancillary_page_id = Utils.getInt(b, offset+8+t, 2, Utils.MASK_16BITS);
-			final Subtitle s = new Subtitle(languageCode, subtitling_type,composition_page_id,ancillary_page_id);
+			String languageCode=Utils.getISO8859_1String(b, 2+t, 3);
+			int subtitling_type = Utils.getInt(b, 5+t, 1, Utils.MASK_8BITS);
+			int composition_page_id = Utils.getInt(b, 6+t, 2, Utils.MASK_16BITS);
+			int ancillary_page_id = Utils.getInt(b, 8+t, 2, Utils.MASK_16BITS);
+			Subtitle s = new Subtitle(languageCode, subtitling_type,composition_page_id,ancillary_page_id);
 			subtitleList.add(s);
 			t+=8;
 		}
@@ -117,17 +79,14 @@ public class SubtitlingDescriptor extends Descriptor{
 		for (Subtitle subtitle : subtitleList) {
 			buf.append(subtitle.toString());
 		}
-
-
 		return buf.toString();
 	}
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		Utils.addListJTree(t,subtitleList,modus,"subtitle_list");
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		Utils.addListJTree(t, subtitleList, modus, "subtitle_list");
 		return t;
 	}
 

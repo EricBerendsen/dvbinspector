@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -41,28 +39,21 @@ public class IBPDescriptor extends Descriptor {
 	private int identical_gop_flag;
 	private int max_gop_length;
 
-
-	public IBPDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		closed_gop_flag = Utils.getInt(b, offset+2, 1, 0x80)>>7;
-		identical_gop_flag = Utils.getInt(b, offset+2, 1, 0x40)>>6;
-		max_gop_length = Utils.getInt(b, offset+2, 2, Utils.MASK_14BITS);
-
-
+	public IBPDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		closed_gop_flag = Utils.getInt(b, 2, 1, 0x80) >> 7;
+		identical_gop_flag = Utils.getInt(b, 2, 1, 0x40) >> 6;
+		max_gop_length = Utils.getInt(b, 2, 2, Utils.MASK_14BITS);
 	}
-
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("closed_gop_flag",closed_gop_flag ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("identical_gop_flag",identical_gop_flag ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("max_gop_length",max_gop_length ,null)));
-
-
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("closed_gop_flag", closed_gop_flag));
+		t.add(new KVP("identical_gop_flag", identical_gop_flag));
+		t.add(new KVP("max_gop_length", max_gop_length));
 		return t;
 	}
-
 
 	public int getClosed_gop_flag() {
 		return closed_gop_flag;

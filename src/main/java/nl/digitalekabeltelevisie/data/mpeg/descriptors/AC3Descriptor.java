@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.ac3.AbstractAC3SyncFrame;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -50,14 +48,14 @@ public class AC3Descriptor extends Descriptor {
 	private byte[] additional_info;
 
 
-	public AC3Descriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		component_type_flag = Utils.getInt(b, offset+2, 1, 0x80)>>7;
-		bsid_flag = Utils.getInt(b, offset+2, 1, 0x40)>>6;
-		mainid_flag = Utils.getInt(b, offset+2, 1, 0x20)>>5;
-		asvc_flag = Utils.getInt(b, offset+2, 1, 0x10)>>4;
-		reserved_flags = Utils.getInt(b, offset+2, 1, 0x0F);
-		int t=offset+3;
+	public AC3Descriptor( byte[] b, TableSection parent) {
+		super(b, parent);
+		component_type_flag = Utils.getInt(b, 2, 1, 0x80)>>7;
+		bsid_flag = Utils.getInt(b, 2, 1, 0x40)>>6;
+		mainid_flag = Utils.getInt(b, 2, 1, 0x20)>>5;
+		asvc_flag = Utils.getInt(b, 2, 1, 0x10)>>4;
+		reserved_flags = Utils.getInt(b, 2, 1, 0x0F);
+		int t=3;
 		if(component_type_flag!=0){
 			component_type = Utils.getInt(b, t++, 1, Utils.MASK_8BITS);
 		}
@@ -77,29 +75,29 @@ public class AC3Descriptor extends Descriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("component_type_flag",component_type_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("bsid_flag",bsid_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("mainid_flag",mainid_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("asvc_flag",asvc_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_flags",reserved_flags,null)));
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("component_type_flag",component_type_flag));
+		t.add(new KVP("bsid_flag",bsid_flag));
+		t.add(new KVP("mainid_flag",mainid_flag));
+		t.add(new KVP("asvc_flag",asvc_flag));
+		t.add(new KVP("reserved_flags",reserved_flags));
 
 		if(component_type_flag!=0){
-			t.add(new DefaultMutableTreeNode(new KVP("component_type",component_type,getComponentTypeString(component_type))));
+			t.add(new KVP("component_type",component_type,getComponentTypeString(component_type)));
 		}
 		if(bsid_flag!=0){
-			t.add(new DefaultMutableTreeNode(new KVP("bsid",bsid,AbstractAC3SyncFrame.getBsidString(bsid))));
+			t.add(new KVP("bsid",bsid,AbstractAC3SyncFrame.getBsidString(bsid)));
 		}
 		if(mainid_flag!=0){
-			t.add(new DefaultMutableTreeNode(new KVP("mainid",mainid,null)));
+			t.add(new KVP("mainid",mainid));
 		}
 		if(asvc_flag!=0){
-			t.add(new DefaultMutableTreeNode(new KVP("asvc",asvc,null)));
+			t.add(new KVP("asvc",asvc));
 		}
 		if(additional_info!=null){
-			t.add(new DefaultMutableTreeNode(new KVP("additional_info",additional_info,null)));
+			t.add(new KVP("additional_info",additional_info));
 		}
 
 		return t;

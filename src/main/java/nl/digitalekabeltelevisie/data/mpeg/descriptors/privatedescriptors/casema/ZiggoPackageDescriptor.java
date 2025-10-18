@@ -27,9 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema;
 
-import static nl.digitalekabeltelevisie.util.Utils.copyOfRange;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -82,13 +80,11 @@ public class ZiggoPackageDescriptor extends Descriptor {
 		"package 31",  // bit 31
 	};
 
-
-	public ZiggoPackageDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public ZiggoPackageDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		// packages seems to be 4 bytes, this should always work
-		packages = copyOfRange(b, offset+2, offset+2+getDescriptorLength());
+		packages = copyOfRange(b, 2, 2 + getDescriptorLength());
 	}
-
 
 	@Override
 	public String getDescriptorname(){
@@ -96,10 +92,9 @@ public class ZiggoPackageDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-
-		t.add(new DefaultMutableTreeNode(new KVP("packages",packages ,getPackagesList(packages))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("packages", packages, getPackagesList(packages)));
 		return t;
 	}
 
@@ -107,11 +102,11 @@ public class ZiggoPackageDescriptor extends Descriptor {
 	 * @param packages
 	 * @return a comma separated list of names of packages
 	 */
-	private static String getPackagesList(final byte[] packages){
-		final StringBuilder t = new StringBuilder();
-		final BitString bs = new BitString(packages);
+	private static String getPackagesList(byte[] packages){
+		StringBuilder t = new StringBuilder();
+		BitString bs = new BitString(packages);
 		for (int i = 0; i < packageNames.length; i++) {
-			final int bit = bs.getIntBitsEnd(1);
+			int bit = bs.getIntBitsEnd(1);
 			if(bit==1){
 				t.append(packageNames[i]).append(',');
 			}

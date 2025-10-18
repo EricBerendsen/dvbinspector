@@ -27,12 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -45,7 +46,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  */
 public class VBIDataDescriptor extends Descriptor {
 
-	private List<DataService> serviceList = new ArrayList<DataService>();
+	private List<DataService> serviceList = new ArrayList<>();
 
 	public static class DataService implements TreeNode{
 		private final int dataServiceId;
@@ -59,22 +60,22 @@ public class VBIDataDescriptor extends Descriptor {
 			private final int fieldParity;
 			private final int lineOffset;
 
-			VBILine(final int t){
+			VBILine(int t){
 				reserved = (t & 0xC0)>>6;
 				fieldParity = (t & 0x20)>>5;
 				lineOffset= (t & 0x1F);
 			}
 
-			public DefaultMutableTreeNode getJTreeNode(final int modus){
-				final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("vbi_line"));
-				s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("field_parity",fieldParity,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("line_offset",lineOffset,null)));
+			@Override
+			public KVP getJTreeNode(int modus) {
+				KVP s = new KVP("vbi_line");
+				s.add(new KVP("reserved", reserved));
+				s.add(new KVP("field_parity", fieldParity));
+				s.add(new KVP("line_offset", lineOffset));
 				return s;
 			}
 
 		}
-
 
 		DataService(final int id, final int length, final byte[]data){
 			this.dataServiceId = id;
@@ -86,7 +87,7 @@ public class VBIDataDescriptor extends Descriptor {
 					(dataServiceId==0x05) ||
 					(dataServiceId==0x06) ||
 					(dataServiceId==0x07)) {
-				linesList = new ArrayList<VBILine>();
+				linesList = new ArrayList<>();
 				for (int i = 0; i < data.length; i++) {
 					final VBILine line = new VBILine(getInt(data, i, 1, 0xFF));
 					linesList.add(line);
@@ -96,44 +97,40 @@ public class VBIDataDescriptor extends Descriptor {
 			}
 		}
 
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("data_service"));
-			s.add(new DefaultMutableTreeNode(new KVP("data_service_id",dataServiceId,getDataServiceIDString(dataServiceId))));
-			s.add(new DefaultMutableTreeNode(new KVP("data_service_descriptor_length",dataServiceDescriptorLength,null)));
-			if(linesList!=null){
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("data_service");
+			s.add(new KVP("data_service_id", dataServiceId, getDataServiceIDString(dataServiceId)));
+			s.add(new KVP("data_service_descriptor_length", dataServiceDescriptorLength));
+			if (linesList != null) {
 				addListJTree(s, linesList, modus, "vbi_lines");
-			}else{
-				s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+			} else {
+				s.add(new KVP("reserved", reserved));
 			}
 			return s;
 		}
 
 	}
 
-	public VBIDataDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final int serviceId = getInt(b, offset+t+2, 1,MASK_8BITS);
-			final int serviceLength = getInt(b, offset+t+3, 1,MASK_8BITS);
-			final DataService s = new DataService(serviceId,serviceLength, getBytes(b, offset+t+4, serviceLength));
+	public VBIDataDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			int serviceId = getInt(b, t + 2, 1, MASK_8BITS);
+			int serviceLength = getInt(b, t + 3, 1, MASK_8BITS);
+			DataService s = new DataService(serviceId, serviceLength, getBytes(b, t + 4, serviceLength));
 			serviceList.add(s);
-			t+=2+serviceLength;
+			t += 2 + serviceLength;
 		}
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,serviceList,modus,"data_service");
+		KVP t = super.getJTreeNode(modus);
+		addListJTree(t, serviceList, modus, "data_service");
 		return t;
 	}
-
-
 
 	/**
 	 * @param dataServiceID

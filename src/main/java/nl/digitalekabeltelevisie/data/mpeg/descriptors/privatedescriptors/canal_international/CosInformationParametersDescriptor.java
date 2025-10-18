@@ -34,8 +34,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -53,11 +51,12 @@ public class CosInformationParametersDescriptor extends Descriptor {
 	public record InformationParameter(int info_parameter_id, int info_parameter_length, byte[] info_parameter_byte) implements TreeNode{
 
 
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("InformationParameter"));
-			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_id",info_parameter_id,getInfoParameterIdDescription(info_parameter_id))));
-			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_length",info_parameter_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("info_parameter_byte",info_parameter_byte,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("InformationParameter");
+			t.add(new KVP("info_parameter_id",info_parameter_id,getInfoParameterIdDescription(info_parameter_id)));
+			t.add(new KVP("info_parameter_length",info_parameter_length));
+			t.add(new KVP("info_parameter_byte",info_parameter_byte));
 			return t;
 		}
 
@@ -72,24 +71,23 @@ public class CosInformationParametersDescriptor extends Descriptor {
 		}
 	}
 
+	public CosInformationParametersDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-	public CosInformationParametersDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		
-		int t=0;
-		while (t<descriptorLength) {
-			int info_parameter_id = getInt(b, offset+t+2, 1, MASK_8BITS);
-			int info_parameter_length = getInt(b, offset+t+3, 1, MASK_8BITS);
-			byte[] info_parameter_byte = Utils.getBytes(b, offset+t+4, info_parameter_length);
+		int t = 0;
+		while (t < descriptorLength) {
+			int info_parameter_id = getInt(b, t + 2, 1, MASK_8BITS);
+			int info_parameter_length = getInt(b, t + 3, 1, MASK_8BITS);
+			byte[] info_parameter_byte = Utils.getBytes(b, t + 4, info_parameter_length);
 			informationParameters.add(new InformationParameter(info_parameter_id, info_parameter_length, info_parameter_byte));
 			t += 2 + info_parameter_length;
 		}
 	}
-	
+
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,informationParameters,modus,"Information Parameters");
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		addListJTree(t, informationParameters, modus, "Information Parameters");
 		return t;
 	}
 

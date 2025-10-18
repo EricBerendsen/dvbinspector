@@ -27,12 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -45,47 +45,23 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 	private final List<Country> countryList = new ArrayList<>();
 
 
-	public static class Country implements TreeNode{
-		/**
-		 * 
-		 */
-		private final String countryCode;
-
-
-		public Country(final String lCode){
-			countryCode = lCode;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("country"));
-			s.add(new DefaultMutableTreeNode(new KVP("country_code",countryCode,null)));
-			return s;
-		}
-
-
-
-
-		public String getCountryCode() {
-			return countryCode;
-		}
-
+	public static record Country(String countryCode) implements TreeNode {
 
 		@Override
-		public String toString(){
-			return "code:'"+countryCode;
+		public KVP getJTreeNode(int modus) {
+			final KVP s = new KVP("country");
+			s.add(new KVP("country_code", countryCode));
+			return s;
 		}
-
-
 	}
 
-	public CountryAvailabilityDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public CountryAvailabilityDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int t=0;
-		country_availability_flag = getInt(b, offset+2, 1, 0x80)>>7;
+		country_availability_flag = getInt(b, 2, 1, 0x80)>>7;
 
 		while (t<(descriptorLength-1)) {
-			final String languageCode=getISO8859_1String(b, offset+t+3, 3);
+			final String languageCode=getISO8859_1String(b, t+3, 3);
 			final Country s = new Country(languageCode);
 			countryList.add(s);
 			t+=3;
@@ -94,7 +70,7 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (Country country : countryList) {
 			buf.append(country.toString());
 		}
@@ -103,7 +79,7 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 		return buf.toString();
 	}
 
-	public static String getCountryAvailabilityFlagString(final int flag) {
+	public static String getCountryAvailabilityFlagString(int flag) {
 		return switch (flag) {
 			case 0 -> "reception of the service is not intended";
 			case 1 -> "reception of the service is intended";
@@ -112,11 +88,11 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("country_availability_flag",country_availability_flag,getCountryAvailabilityFlagString(country_availability_flag))));
-		addListJTree(t,countryList,modus,"country_list");
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("country_availability_flag", country_availability_flag, getCountryAvailabilityFlagString(country_availability_flag)));
+		addListJTree(t, countryList, modus, "country_list");
 		return t;
 	}
 }

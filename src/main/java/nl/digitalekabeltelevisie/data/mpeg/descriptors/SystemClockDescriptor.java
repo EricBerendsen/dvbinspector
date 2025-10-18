@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_5BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_6BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -42,13 +42,13 @@ public class SystemClockDescriptor extends Descriptor {
 	private int clockAccuracyExponent;
 	private int reserved2;
 
-	public SystemClockDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		externalClockReferenceIndicator = getInt(b,offset+2,1,0x80)>>7;
-		reserved = getInt(b,offset+2,1,0x40)>>6;
-		clockAccuracyInteger = getInt(b,offset+2,1,MASK_6BITS);
-		clockAccuracyExponent = getInt(b,offset+3,1,0xE0)>>5;
-		reserved2 = getInt(b,offset+3,1,MASK_5BITS);
+	public SystemClockDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		externalClockReferenceIndicator = getInt(b, 2, 1, 0x80) >> 7;
+		reserved = getInt(b,  2, 1, 0x40) >> 6;
+		clockAccuracyInteger = getInt(b, 2, 1, MASK_6BITS);
+		clockAccuracyExponent = getInt(b, 3, 1, 0xE0) >> 5;
+		reserved2 = getInt(b, 3, 1, MASK_5BITS);
 	}
 
 	@Override
@@ -57,13 +57,13 @@ public class SystemClockDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("external_clock_reference_indicator",externalClockReferenceIndicator ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("clock_accuracy_integer",clockAccuracyInteger ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("clock_accuracy_exponent",clockAccuracyExponent ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2 ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("external_clock_reference_indicator", externalClockReferenceIndicator));
+		t.add(new KVP("reserved", reserved));
+		t.add(new KVP("clock_accuracy_integer", clockAccuracyInteger));
+		t.add(new KVP("clock_accuracy_exponent", clockAccuracyExponent));
+		t.add(new KVP("reserved", reserved2));
 		return t;
 	}
 
@@ -71,41 +71,20 @@ public class SystemClockDescriptor extends Descriptor {
 		return clockAccuracyExponent;
 	}
 
-	public void setClockAccuracyExponent(final int clockAccuracyExponent) {
-		this.clockAccuracyExponent = clockAccuracyExponent;
-	}
-
 	public int getClockAccuracyInteger() {
 		return clockAccuracyInteger;
-	}
-
-	public void setClockAccuracyInteger(final int clockAccuracyInteger) {
-		this.clockAccuracyInteger = clockAccuracyInteger;
 	}
 
 	public int getExternalClockReferenceIndicator() {
 		return externalClockReferenceIndicator;
 	}
 
-	public void setExternalClockReferenceIndicator(
-			final int externalClockReferenceIndicator) {
-		this.externalClockReferenceIndicator = externalClockReferenceIndicator;
-	}
-
 	public int getReserved() {
 		return reserved;
 	}
 
-	public void setReserved(final int reserved) {
-		this.reserved = reserved;
-	}
-
 	public int getReserved2() {
 		return reserved2;
-	}
-
-	public void setReserved2(final int reserved2) {
-		this.reserved2 = reserved2;
 	}
 
 

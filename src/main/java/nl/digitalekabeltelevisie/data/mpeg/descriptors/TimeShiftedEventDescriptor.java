@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -39,10 +38,10 @@ public class TimeShiftedEventDescriptor extends Descriptor {
 	private final int reference_service_id;
 	private final int reference_event_id;
 
-	public TimeShiftedEventDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		reference_service_id = getInt(b,offset+2,2,MASK_16BITS);
-		reference_event_id = getInt(b,offset+4,2,MASK_16BITS);
+	public TimeShiftedEventDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		reference_service_id = getInt(b, 2, 2, MASK_16BITS);
+		reference_event_id = getInt(b, 4, 2, MASK_16BITS);
 	}
 
 	@Override
@@ -51,10 +50,11 @@ public class TimeShiftedEventDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("reference_service_id",reference_service_id ,parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceNameForActualTransportStream(reference_service_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("reference_event_id",reference_event_id ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("reference_service_id", reference_service_id, parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt()
+				.getServiceNameForActualTransportStream(reference_service_id)));
+		t.add(new KVP("reference_event_id", reference_event_id));
 		return t;
 	}
 

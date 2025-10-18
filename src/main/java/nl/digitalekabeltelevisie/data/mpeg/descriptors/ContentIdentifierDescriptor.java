@@ -27,12 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -47,85 +47,65 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class ContentIdentifierDescriptor extends Descriptor {
 
-	private List<CridEntry> cridEntryList = new ArrayList<CridEntry>();
+	private List<CridEntry> cridEntryList = new ArrayList<>();
 
-	public static class CridEntry implements TreeNode{
+	public static record CridEntry(int cridType, int cridLocation, int cridLength, byte[] cridByte, int cridRef) implements TreeNode{
 
-		private final int cridType;
-		private final int cridLocation;
-		private final int cridLength;
-		private final byte[] cridByte;
-		private final int cridRef;
-
-		public CridEntry(final int cridType, final int cridLocation, final int cridLength, final byte[] cridByte, final int cridRef) {
-			super();
-			this.cridType = cridType;
-			this.cridLocation = cridLocation;
-			this.cridLength = cridLength;
-			this.cridByte = cridByte;
-			this.cridRef = cridRef;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("CRID"));
-			s.add(new DefaultMutableTreeNode(new KVP("crid_type",cridType,getCridTypeString(cridType))));
-			s.add(new DefaultMutableTreeNode(new KVP("crid_location",cridLocation,getCridLocationString(cridLocation))));
-			if(cridLocation==0){
-				s.add(new DefaultMutableTreeNode(new KVP("crid_length",cridLength,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("crid_byte",cridByte,null)));
-
-			}else if(cridLocation==1){
-				s.add(new DefaultMutableTreeNode(new KVP("crid_ref",cridRef,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("CRID");
+			s.add(new KVP("crid_type", cridType, getCridTypeString(cridType)));
+			s.add(new KVP("crid_location", cridLocation, getCridLocationString(cridLocation)));
+			if (cridLocation == 0) {
+				s.add(new KVP("crid_length", cridLength));
+				s.add(new KVP("crid_byte", cridByte));
+			} else if (cridLocation == 1) {
+				s.add(new KVP("crid_ref", cridRef));
 			}
 			return s;
 		}
 
 	}
 
+	public ContentIdentifierDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
+		int r = 0;
+		while (r < descriptorLength) {
+			byte[] crid_byte = null;
+			int crid_len = 0;
+			int cridRef = 0;
+			final int type = getInt(b, 2 + r, 1, 0xFC) >> 2;
+			final int location = getInt(b, 2 + r, 1, Utils.MASK_2BITS);
+			if (location == 0) {
+				crid_len = getInt(b, 3 + r, 1, Utils.MASK_8BITS);
+				crid_byte = copyOfRange(b, 4 + r, r + 4 + crid_len);
+				r += 2 + crid_len;
+			} else if (location == 1) {
+				cridRef = getInt(b, 3 + r, 2, Utils.MASK_16BITS);
+				r += 3;
+			} else { // location ==2 or 3, not defined, so we don't know how much data to expect.
+						// Just break out of loop..
 
-
-
-	public ContentIdentifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-
-		int r =0;
-		while (r<descriptorLength) {
-			byte[] crid_byte=null;
-			int crid_len=0;
-			int cridRef=0;
-			final int type = getInt(b,offset+2+r, 1, 0xFC)>>2;
-			final int location= getInt(b,offset+2+r, 1, Utils.MASK_2BITS);
-			if(location==0){
-				crid_len=getInt(b,offset+3+r, 1, Utils.MASK_8BITS);
-				crid_byte = Utils.copyOfRange(b, offset+4+r, offset+r+4+crid_len);
-				r+=2+crid_len;
-			}else if(location==1){
-				cridRef=getInt(b,offset+3+r, 2, Utils.MASK_16BITS);
-				r+=3;
-			}else{ // location ==2 or 3, not defined, so we don't know how much data to expect. Just break out of loop..
-
-				r+=2;
+				r += 2;
 				break;
 			}
-			final CridEntry cridEntry = new CridEntry(type, location,crid_len,crid_byte,cridRef);
+			final CridEntry cridEntry = new CridEntry(type, location, crid_len, crid_byte, cridRef);
 			cridEntryList.add(cridEntry);
 
 		}
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,cridEntryList,modus,"Crid Entries");
 		return t;
 	}
 
 
 
-	public static String getCridTypeString(final int type) {
+	public static String getCridTypeString(int type) {
 		switch (type) {
 		case 0x00 : return "No type defined";
 		case 0x01 : return "CRID references the item of content that this event is an instance of.";
@@ -144,18 +124,14 @@ public class ContentIdentifierDescriptor extends Descriptor {
 		}
 	}
 
-	public static String getCridLocationString(final int type) {
-		switch (type) {
-		case 0x00 : return "Carried explicitly within descriptor";
-		case 0x01 : return "Carried in Content Identifier Table (CIT)";
-		case 0x02 : return "DVB reserved";
-		case 0x03 : return "DVB reserved";
-
-		default:
-
-			return "Illegal value";
-
-		}
+	public static String getCridLocationString(int type) {
+		return switch (type) {
+		case 0x00 -> "Carried explicitly within descriptor";
+		case 0x01 -> "Carried in Content Identifier Table (CIT)";
+		case 0x02 -> "DVB reserved";
+		case 0x03 -> "DVB reserved";
+		default -> "Illegal value";
+		};
 	}
 
 

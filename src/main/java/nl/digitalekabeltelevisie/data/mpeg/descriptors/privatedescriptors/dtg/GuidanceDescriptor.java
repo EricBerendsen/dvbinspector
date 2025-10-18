@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.dtg;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -50,7 +48,7 @@ public class GuidanceDescriptor extends Descriptor  {
 	byte[] reserved_for_future_use;
 
 
-	public GuidanceDescriptor( byte[] b, TableSection parent) {
+	public GuidanceDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		reserved = getInt(b, 2, 1, 0xFC)>>2;
 		guidance_type = getInt(b, 2, 1, MASK_2BITS);
@@ -69,9 +67,9 @@ public class GuidanceDescriptor extends Descriptor  {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("reserved", reserved));
 		t.add(new KVP("guidance_type", guidance_type));
 		if (guidance_type == 0) {

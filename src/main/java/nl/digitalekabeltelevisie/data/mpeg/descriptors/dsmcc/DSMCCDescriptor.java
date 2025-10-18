@@ -35,7 +35,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 public class DSMCCDescriptor extends Descriptor {
 
 
-	public DSMCCDescriptor(byte[] b, int offset) {
+	public DSMCCDescriptor(byte[] b) {
 		super(b, null);
 	}
 

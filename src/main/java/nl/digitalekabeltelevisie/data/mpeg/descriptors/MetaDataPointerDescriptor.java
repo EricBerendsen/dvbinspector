@@ -28,9 +28,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-import java.util.Arrays;
-import javax.swing.tree.DefaultMutableTreeNode;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -58,9 +58,9 @@ public class MetaDataPointerDescriptor extends Descriptor {
 	private int transport_stream_location;
 	private int transport_stream_id;
 
-	public MetaDataPointerDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int localOffset = offset+2;
+	public MetaDataPointerDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int localOffset = 2;
 		metadata_application_format = getInt(b, localOffset, 2, MASK_16BITS);
 		localOffset+=2;
 		if(metadata_application_format==0xFFFF){
@@ -91,41 +91,41 @@ public class MetaDataPointerDescriptor extends Descriptor {
 			transport_stream_id = getInt(b, localOffset, 2, MASK_16BITS);
 			localOffset += 2;
 		}
-		private_data_byte = Arrays.copyOfRange(b, localOffset, offset+descriptorLength+2);
+		private_data_byte = copyOfRange(b, localOffset, descriptorLength+2);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_application_format",metadata_application_format,getMetaDataApplicationFormatString(metadata_application_format))));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("metadata_application_format",metadata_application_format,getMetaDataApplicationFormatString(metadata_application_format)));
 		if(metadata_application_format==0xFFFF){
-			t.add(new DefaultMutableTreeNode(new KVP("metadata_application_format_identifier",metadata_application_format_identifier,null)));
+			t.add(new KVP("metadata_application_format_identifier",metadata_application_format_identifier));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_format",metadata_format,getMetaDataFormatString(metadata_format))));
+		t.add(new KVP("metadata_format",metadata_format,getMetaDataFormatString(metadata_format)));
 		if(metadata_format==0xFF){
-			t.add(new DefaultMutableTreeNode(new KVP("metadata_format_identifier",metadata_format_identifier,null)));
+			t.add(new KVP("metadata_format_identifier",metadata_format_identifier));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_service_id",metadata_service_id,metadata_service_id==0xff?"the metadata is carried in a carousel.":null)));
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_locator_record_flag",metadata_locator_record_flag,metadata_locator_record_flag==1?"associated metadata is available on a location outside of a Rec. ITU-T H.222.0 | ISO/IEC 13818-1 stream, specified in a metadata_locator_record":null)));
-		t.add(new DefaultMutableTreeNode(new KVP("MPEG_carriage_flags",MPEG_carriage_flags,getMPEGCarriageFlagsString(MPEG_carriage_flags))));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+		t.add(new KVP("metadata_service_id",metadata_service_id,metadata_service_id==0xff?"the metadata is carried in a carousel.":null));
+		t.add(new KVP("metadata_locator_record_flag",metadata_locator_record_flag,metadata_locator_record_flag==1?"associated metadata is available on a location outside of a Rec. ITU-T H.222.0 | ISO/IEC 13818-1 stream, specified in a metadata_locator_record":null));
+		t.add(new KVP("MPEG_carriage_flags",MPEG_carriage_flags,getMPEGCarriageFlagsString(MPEG_carriage_flags)));
+		t.add(new KVP("reserved",reserved));
 
 		if(metadata_locator_record_flag==1){
-			t.add(new DefaultMutableTreeNode(new KVP("metadata_locator_record_length",metadata_locator_record_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("metadata_locator_record_byte",metadata_locator_record_byte,null)));
+			t.add(new KVP("metadata_locator_record_length",metadata_locator_record_length));
+			t.add(new KVP("metadata_locator_record_byte",metadata_locator_record_byte));
 		}
 		if(MPEG_carriage_flags!=3){ // 0|1|2
 			String serviceName = (MPEG_carriage_flags == 1)? 
 					getPSI().getSdt().getServiceName(transport_stream_location,transport_stream_id,program_number)
 					:getPSI().getSdt().getServiceNameForActualTransportStream(program_number);
-			t.add(new DefaultMutableTreeNode(new KVP("program_number",program_number,serviceName)));
+			t.add(new KVP("program_number",program_number,serviceName));
 		}
 		if (MPEG_carriage_flags == 1) { // '1'
-			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_location",transport_stream_location,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transport_stream_id,null)));
+			t.add(new KVP("transport_stream_location",transport_stream_location));
+			t.add(new KVP("transport_stream_id",transport_stream_id));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",private_data_byte,null)));
+		t.add(new KVP("private_data_byte",private_data_byte));
 
 		return t;
 	}

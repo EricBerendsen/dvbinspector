@@ -82,7 +82,7 @@ public class UNTDescriptor extends Descriptor {
 	
 	@Override
 	public KVP getJTreeNode(int modus) {
-		return (KVP) super.getJTreeNode(modus);
+		return super.getJTreeNode(modus);
 	}
 
 

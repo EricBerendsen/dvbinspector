@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -42,14 +40,14 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 	private final int reserved3;
 	private final int maximumOveralSmoothingBuffer;
 
-	public PartialTransportStreamDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		reserved1 = Utils.getInt(b, offset+2, 1, 0xC0)>>6;
-		peakRate = Utils.getInt(b, offset+2, 3, Utils.MASK_22BITS);
-		reserved2 = Utils.getInt(b, offset+5, 1, 0xC0)>>6;
-		minimumOveralSmoothingRate = Utils.getInt(b, offset+5, 3, Utils.MASK_22BITS);
-		reserved3 = Utils.getInt(b, offset+8, 1, 0xC0)>>6;
-		maximumOveralSmoothingBuffer = Utils.getInt(b, offset+8, 2, Utils.MASK_14BITS);
+	public PartialTransportStreamDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		reserved1 = Utils.getInt(b, 2, 1, 0xC0)>>6;
+		peakRate = Utils.getInt(b, 2, 3, Utils.MASK_22BITS);
+		reserved2 = Utils.getInt(b, 5, 1, 0xC0)>>6;
+		minimumOveralSmoothingRate = Utils.getInt(b, 5, 3, Utils.MASK_22BITS);
+		reserved3 = Utils.getInt(b, 8, 1, 0xC0)>>6;
+		maximumOveralSmoothingBuffer = Utils.getInt(b, 8, 2, Utils.MASK_14BITS);
 	}
 
 	@Override
@@ -59,15 +57,16 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 
-		t.add(new DefaultMutableTreeNode(new KVP("DVB_reserved_future_use",reserved1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("peak_rate",peakRate,getPeakRateString(peakRate))));
-		t.add(new DefaultMutableTreeNode(new KVP("DVB_reserved_future_use",reserved2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("minimum_overal_smoothing_rate",minimumOveralSmoothingRate,getMinimumOveralSmoothingRateString(minimumOveralSmoothingRate))));
-		t.add(new DefaultMutableTreeNode(new KVP("DVB_reserved_future_use",reserved3,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("maximum_overal_smoothing_buffer",maximumOveralSmoothingBuffer,getMaximumOveralSmoothingBufferString(maximumOveralSmoothingBuffer))));
+		t.add(new KVP("DVB_reserved_future_use", reserved1));
+		t.add(new KVP("peak_rate", peakRate, getPeakRateString(peakRate)));
+		t.add(new KVP("DVB_reserved_future_use", reserved2));
+		t.add(new KVP("minimum_overal_smoothing_rate", minimumOveralSmoothingRate, getMinimumOveralSmoothingRateString(minimumOveralSmoothingRate)));
+		t.add(new KVP("DVB_reserved_future_use", reserved3));
+		t.add(new KVP("maximum_overal_smoothing_buffer", maximumOveralSmoothingBuffer,
+				getMaximumOveralSmoothingBufferString(maximumOveralSmoothingBuffer)));
 
 		return t;
 	}
@@ -76,7 +75,7 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 	 * @param peakRate2
 	 * @return
 	 */
-	private static String getPeakRateString(final int peakRate2) {
+	private static String getPeakRateString(int peakRate2) {
 		return "" + (peakRate2 * 400) +" bit/s";
 	}
 
@@ -84,12 +83,11 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 	 * @param minimumOveralSmoothingRate2
 	 * @return
 	 */
-	private String getMinimumOveralSmoothingRateString(final int minimumOveralSmoothingRate2) {
+	private String getMinimumOveralSmoothingRateString(int minimumOveralSmoothingRate2) {
 		if(minimumOveralSmoothingRate2==0x3FFFFF){
 			return "undefined";
-		}else{
-			return "" + (minimumOveralSmoothingRate * 400) +" bit/s";
 		}
+		return "" + (minimumOveralSmoothingRate * 400) +" bit/s";
 	}
 
 	/**
@@ -99,9 +97,8 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 	private static String getMaximumOveralSmoothingBufferString(final int maximumOveralSmoothingBuffer2) {
 		if(maximumOveralSmoothingBuffer2==0x3FFF){
 			return "undefined";
-		}else{
-			return "" + maximumOveralSmoothingBuffer2  +" bytes";
 		}
+		return "" + maximumOveralSmoothingBuffer2  +" bytes";
 	}
 
 }

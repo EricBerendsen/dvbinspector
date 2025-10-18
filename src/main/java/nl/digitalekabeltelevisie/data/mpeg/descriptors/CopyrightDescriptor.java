@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.getBytes;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
@@ -43,29 +41,23 @@ public class CopyrightDescriptor extends Descriptor {
 	private final byte[]  copyright_identifier;
 	private final byte[]  additional_copyright_Info;
 
-	public CopyrightDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public CopyrightDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		copyright_identifier = getBytes(b,offset+2,4);
-		additional_copyright_Info = getBytes(b,offset+6,descriptorLength-4);
-
+		copyright_identifier = getBytes(b, 2, 4);
+		additional_copyright_Info = getBytes(b, 6, descriptorLength - 4);
 	}
-	
-
 
 	public byte[] getCopyrightIdentifier() {
 		return copyright_identifier;
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("copyright_identifier",copyright_identifier ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("additional_copyright_Info",additional_copyright_Info ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("copyright_identifier", copyright_identifier));
+		t.add(new KVP("additional_copyright_Info", additional_copyright_Info));
 		return t;
 	}
-
 
 }

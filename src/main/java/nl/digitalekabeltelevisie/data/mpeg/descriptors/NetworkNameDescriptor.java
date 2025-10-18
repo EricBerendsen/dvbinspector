@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -38,9 +36,9 @@ public class NetworkNameDescriptor extends Descriptor {
 
 	private final DVBString networkName;
 
-	public NetworkNameDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		networkName = new DVBString(b,offset+1);
+	public NetworkNameDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		networkName = new DVBString(b, 1);
 	}
 
 	public String getNetworkNameAsString()
@@ -54,8 +52,8 @@ public class NetworkNameDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("network_name",networkName));
 		return t;
 	}

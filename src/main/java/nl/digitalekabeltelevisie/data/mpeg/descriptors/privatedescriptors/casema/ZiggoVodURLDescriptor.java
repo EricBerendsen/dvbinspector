@@ -29,20 +29,17 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casem
 
 import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ZiggoVodURLDescriptor extends Descriptor {
 
+	private final String vodURL;
 
-	private final String  vodURL;
-
-	public ZiggoVodURLDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		vodURL =  getISO8859_1String(b,offset+2,descriptorLength);
+	public ZiggoVodURLDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		vodURL = getISO8859_1String(b, 2, descriptorLength);
 	}
 
 	public String getVodURL() {
@@ -56,9 +53,9 @@ public class ZiggoVodURLDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("vod_url",vodURL ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("vod_url", vodURL));
 		return t;
 	}
 

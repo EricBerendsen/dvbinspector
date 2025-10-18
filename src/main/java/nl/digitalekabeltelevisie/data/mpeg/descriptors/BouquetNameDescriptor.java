@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class BouquetNameDescriptor extends Descriptor{
@@ -37,7 +36,7 @@ public class BouquetNameDescriptor extends Descriptor{
 
 	private final DVBString  bouquetName;
 
-	public BouquetNameDescriptor(final byte[] b, final TableSection parent) {
+	public BouquetNameDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		bouquetName = new DVBString(b,1);
 	}
@@ -54,8 +53,8 @@ public class BouquetNameDescriptor extends Descriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("bouquet_name",bouquetName));
 		return t;
 	}

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -36,39 +34,36 @@ import nl.digitalekabeltelevisie.util.Utils;
 public class DataStreamAlignmentDescriptor extends Descriptor {
 
 	private final int alignmentType;
-	public DataStreamAlignmentDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		alignmentType = Utils.getInt(b, offset+2, 1, Utils.MASK_8BITS);
-	}
 
+	public DataStreamAlignmentDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		alignmentType = Utils.getInt(b, 2, 1, Utils.MASK_8BITS);
+	}
 
 	public int getAlignmentType() {
 		return alignmentType;
 	}
 
-	public String getAlignmentTypeString(final int alignment) {
-		switch (alignment) {
-		case 0: return "Reserved";
-		case 1: return "Slice, or video access unit";
-		case 2: return "Video access unit";
-		case 3: return "GOP, or SEQ";
-		case 4: return "SEQ";
-		default: return "Reserved";
-		}
+	public static String getAlignmentTypeString(int alignment) {
+		return switch (alignment) {
+		case 0 -> "Reserved";
+		case 1 -> "Slice, or video access unit";
+		case 2 -> "Video access unit";
+		case 3 -> "GOP, or SEQ";
+		case 4 -> "SEQ";
+		default -> "Reserved";
+		};
 	}
 
 	@Override
 	public String toString() {
-
 		return super.toString() + "alignmentType="+alignmentType;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-
-		t.add(new DefaultMutableTreeNode(new KVP("alignmentType",alignmentType ,getAlignmentTypeString(alignmentType))));
-
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("alignmentType",alignmentType ,getAlignmentTypeString(alignmentType)));
 		return t;
 	}
 }

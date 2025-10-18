@@ -27,9 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_2BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getBCD;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -46,69 +47,55 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor{
 	private String symbol_rate;
 	private int FEC_inner;
 
-
-	public SatelliteDeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-
-
-		frequency = getBCD(b, (offset*2) + 4, 8);
-		orbitalPosition = getBCD(b, (offset*2) + 12, 4);
-		westEastFlag= getInt(b, offset+ 8 , 1, 0x80)>>7;
-		polarization= getInt(b, offset+ 8 , 1, 0x60)>>5;
-		rollOff= getInt(b, offset+ 8 , 1, 0x18)>>3;
-		modulationSystem= getInt(b, offset+ 8 , 1, 0x04)>>2;
-		modulationType= getInt(b, offset+ 8 , 1, MASK_2BITS);
-		symbol_rate = getBCD(b, (offset*2)+ 18,7);
-		FEC_inner = getInt(b, offset+ 12, 1, MASK_4BITS);
-
-
+	public SatelliteDeliverySystemDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		frequency = getBCD(b, 4, 8);
+		orbitalPosition = getBCD(b, 12, 4);
+		westEastFlag = getInt(b, 8, 1, 0x80) >> 7;
+		polarization = getInt(b, 8, 1, 0x60) >> 5;
+		rollOff = getInt(b, 8, 1, 0x18) >> 3;
+		modulationSystem = getInt(b, 8, 1, 0x04) >> 2;
+		modulationType = getInt(b, 8, 1, MASK_2BITS);
+		symbol_rate = getBCD(b, 18, 7);
+		FEC_inner = getInt(b, 12, 1, MASK_4BITS);
 	}
-
 
 	public int getFEC_inner() {
 		return FEC_inner;
 	}
 
 
-	public void setFEC_inner(final int fec_inner) {
-		FEC_inner = fec_inner;
-	}
-
-
-
 	public static String getModulationString(final int mod) {
-		switch (mod) {
-		case 0x00: return "Auto";
-		case 0x01: return "QPSK";
-		case 0x02: return "8PSK";
-		case 0x03: return "16-QAM";
-		default: return "illegal value";		}
+		return switch (mod) {
+		case 0x00 -> "Auto";
+		case 0x01 -> "QPSK";
+		case 0x02 -> "8PSK";
+		case 0x03 -> "16-QAM";
+		default -> "illegal value";
+		};
 	}
 
 	public static String getPolarizationString(final int pol) {
-		switch (pol) {
-		case 0x00: return "linear - horizontal";
-		case 0x01: return "linear - vertical";
-		case 0x02: return "Circular - left";
-		case 0x03: return "Circular - right";
-		default: return "illegal value";		}
+		return switch (pol) {
+		case 0x00 -> "linear - horizontal";
+		case 0x01 -> "linear - vertical";
+		case 0x02 -> "Circular - left";
+		case 0x03 -> "Circular - right";
+		default -> "illegal value";
+		};
 	}
 
 	public static String getRollOffString(final int pol) {
-		switch (pol) {
-		case 0x00: return "\u03b1 = 0,35"; // alpha
-		case 0x01: return "\u03b1 = 0,25";
-		case 0x02: return "\u03b1 = 0,20";
-		case 0x03: return "reserved";
-		default: return "illegal value";		}
+		return switch (pol) {
+		case 0x00 -> "\u03b1 = 0,35"; // alpha
+		case 0x01 -> "\u03b1 = 0,25";
+		case 0x02 -> "\u03b1 = 0,20";
+		case 0x03 -> "reserved";
+		default -> "illegal value";
+		};
 	}
 	public String getFrequency() {
 		return frequency;
-	}
-
-
-	public void setFrequency(final String frequency) {
-		this.frequency = frequency;
 	}
 
 
@@ -117,41 +104,33 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor{
 	}
 
 
-	public void setSymbol_rate(final String symbol_rate) {
-		this.symbol_rate = symbol_rate;
-	}
-
-
 	@Override
 	public String toString() {
 		return super.toString() + "Frequency="+getFrequency()+", FEC_inner="+Descriptor.getFEC_innerString(FEC_inner);
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 
-		t.add(new DefaultMutableTreeNode(new KVP("frequency",frequency ,Descriptor.formatSatelliteFrequency(frequency))));
-		t.add(new DefaultMutableTreeNode(new KVP("orbital_position",orbitalPosition,Descriptor.formatOrbitualPosition(orbitalPosition))));
-		t.add(new DefaultMutableTreeNode(new KVP("west_east_flag",westEastFlag,getWestEastFlagString())));
-		t.add(new DefaultMutableTreeNode(new KVP("polarization",polarization,getPolarizationString(polarization))));
-		t.add(new DefaultMutableTreeNode(new KVP("modulation_system",modulationSystem,getModulationSystemString())));
-		if(modulationSystem==1){
-			t.add(new DefaultMutableTreeNode(new KVP("roll_off",rollOff,getRollOffString(rollOff))));
+		t.add(new KVP("frequency", frequency, Descriptor.formatSatelliteFrequency(frequency)));
+		t.add(new KVP("orbital_position", orbitalPosition, Descriptor.formatOrbitualPosition(orbitalPosition)));
+		t.add(new KVP("west_east_flag", westEastFlag, getWestEastFlagString()));
+		t.add(new KVP("polarization", polarization, getPolarizationString(polarization)));
+		t.add(new KVP("modulation_system", modulationSystem, getModulationSystemString()));
+		if (modulationSystem == 1) {
+			t.add(new KVP("roll_off", rollOff, getRollOffString(rollOff)));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("modulation_type",modulationType,getModulationString(modulationType))));
-		t.add(new DefaultMutableTreeNode(new KVP("symbol_rate",symbol_rate ,Descriptor.formatSymbolRate(symbol_rate))));
-		t.add(new DefaultMutableTreeNode(new KVP("FEC_inner",FEC_inner ,Descriptor.getFEC_innerString(FEC_inner))));
+		t.add(new KVP("modulation_type", modulationType, getModulationString(modulationType)));
+		t.add(new KVP("symbol_rate", symbol_rate, Descriptor.formatSymbolRate(symbol_rate)));
+		t.add(new KVP("FEC_inner", FEC_inner, Descriptor.getFEC_innerString(FEC_inner)));
 
 		return t;
 	}
 
-
 	public String getModulationSystemString() {
-		return modulationSystem==1?"DVB-S2":"DVB-S";
+		return modulationSystem == 1 ? "DVB-S2" : "DVB-S";
 	}
-
 
 	public String getWestEastFlagString() {
 		return westEastFlag==1?"east":"west";

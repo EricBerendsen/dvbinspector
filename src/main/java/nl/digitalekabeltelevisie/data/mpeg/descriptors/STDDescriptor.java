@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -38,11 +36,10 @@ public class STDDescriptor extends Descriptor {
 
 	private final int leakValidFlag;
 
-	public STDDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		leakValidFlag = Utils.getInt(b,offset+2,1,Utils.MASK_1BIT);
+	public STDDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		leakValidFlag = Utils.getInt(b, 2, 1, Utils.MASK_1BIT);
 	}
-
 
 	@Override
 	public String toString() {
@@ -50,9 +47,9 @@ public class STDDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("leak_valid_flag",leakValidFlag ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("leak_valid_flag", leakValidFlag));
 		return t;
 	}
 

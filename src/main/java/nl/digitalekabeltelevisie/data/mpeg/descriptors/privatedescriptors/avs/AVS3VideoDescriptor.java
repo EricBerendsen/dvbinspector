@@ -165,8 +165,8 @@ public class AVS3VideoDescriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = (KVP)super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("profile_id", profile_id, profile_id_String(profile_id)));
 		t.add(new KVP("level_id", level_id, level_id_String(level_id)));
 		t.add(new KVP("multiple_frame_rate_flag", multiple_frame_rate_flag));

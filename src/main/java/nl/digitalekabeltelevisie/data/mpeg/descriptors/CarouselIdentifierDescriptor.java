@@ -80,7 +80,7 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 
-		final KVP t = (KVP) super.getJTreeNode(modus);
+		final KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("carousel_id", carouselId));
 		if (descriptorLength > 4) {
 			t.add(new KVP("format_id", formatId, getFormatIDString(formatId)));
@@ -103,16 +103,12 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 		return t;
 	}
 
-	public static String getFormatIDString(final int formatID) {
-		switch (formatID) {
-		case 0x00 : return "standard boot";
-		case 0x01 : return "enhanced boot";
-
-		default:
-
-			return "unknown value";
-
-		}
+	public static String getFormatIDString(int formatID) {
+		return switch (formatID) {
+		case 0x00 -> "standard boot";
+		case 0x01 -> "enhanced boot";
+		default -> "unknown value";
+		};
 	}
 
 

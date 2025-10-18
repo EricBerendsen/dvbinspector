@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_22BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_2BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -41,12 +41,12 @@ public class SmoothingBufferDescriptor extends Descriptor {
 	private int reserved2;
 	private int sbSize;
 
-	public SmoothingBufferDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		reserved = getInt(b,offset+2,2,MASK_2BITS);
-		sbLeakRate = getInt(b,offset+2,3,MASK_22BITS);
-		reserved2 = getInt(b,offset+5,2,MASK_2BITS);
-		sbSize = getInt(b,offset+5,3,MASK_22BITS);
+	public SmoothingBufferDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		reserved = getInt(b, 2, 2, MASK_2BITS);
+		sbLeakRate = getInt(b, 2, 3, MASK_22BITS);
+		reserved2 = getInt(b, 5, 2, MASK_2BITS);
+		sbSize = getInt(b, 5, 3, MASK_22BITS);
 	}
 
 	@Override
@@ -55,46 +55,29 @@ public class SmoothingBufferDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sb_leak_rate",sbLeakRate ,KVP.formatInt(sbLeakRate*400)+" bits/second")));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2 ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sb_size",sbSize ," byte")));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("reserved", reserved));
+		t.add(new KVP("sb_leak_rate", sbLeakRate, KVP.formatInt(sbLeakRate * 400) + " bits/second"));
+		t.add(new KVP("reserved", reserved2));
+		t.add(new KVP("sb_size", sbSize, " byte"));
 		return t;
 	}
 
-
 	public int getSbLeakRate() {
 		return sbLeakRate;
-	}
-
-	public void setSbLeakRate(final int maximumBitrate) {
-		this.sbLeakRate = maximumBitrate;
 	}
 
 	public int getReserved() {
 		return reserved;
 	}
 
-	public void setReserved(final int reserverd) {
-		this.reserved = reserverd;
-	}
-
 	public int getReserved2() {
 		return reserved2;
 	}
 
-	public void setReserved2(final int reserved2) {
-		this.reserved2 = reserved2;
-	}
-
 	public int getSbSize() {
 		return sbSize;
-	}
-
-	public void setSbSize(final int sbSize) {
-		this.sbSize = sbSize;
 	}
 
 }

@@ -98,6 +98,7 @@ public class Descriptor implements TreeNode {
 		parentTableSection = parent;
 	}
 
+	@Deprecated
 	public Descriptor(final byte[] b, final int offset, final TableSection parent) {
 		this(b, parent);
 	}
@@ -360,7 +361,7 @@ public class Descriptor implements TreeNode {
 	 * This will always return a KVP, but to not break interface it still is declared as DefaultMutableTreeNode
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(final int modus) {
 
 		KVP t = new  KVP("Descriptor: " + getDescriptorname(), descriptorTag, null);
 		addGeneralDescriptorInfo(modus, t);

@@ -138,7 +138,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
 									stream().
-									map(ISO639LanguageDescriptor.Language::getIso639LanguageCode).
+									map(ISO639LanguageDescriptor.Language::iso639LanguageCode).
 									collect(Collectors.toList())),
 						String.class,
 						"iso").
@@ -147,7 +147,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								ISO639LanguageDescriptor.class,
 								iso -> iso.getLanguageList().
 									stream().
-									map(language->getAudioTypeString(language.getAudioType())).
+									map(language->getAudioTypeString(language.audioType())).
 									collect(Collectors.toList())),
 						String.class,
 						"iso").
@@ -159,7 +159,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								TeletextDescriptor.class,
 								ttd -> ttd.getTeletextList().
 									stream().
-									map(TeletextDescriptor.Teletext::getIso639LanguageCode).
+									map(TeletextDescriptor.Teletext::iso639LanguageCode).
 									collect(Collectors.toList())),
 						String.class,
 						"ttx").
@@ -168,7 +168,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								TeletextDescriptor.class,
 								teletextDescriptor -> teletextDescriptor.getTeletextList().
 									stream().
-									map(t->getTeletextTypeString(t.getTeletextType())).
+									map(t->getTeletextTypeString(t.teletextType())).
 									collect(Collectors.toList())),
 						String.class,
 						"ttx").
@@ -180,7 +180,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								SubtitlingDescriptor.class,
 								sub -> sub.getSubtitleList().
 									stream().
-									map(SubtitlingDescriptor.Subtitle::getIso639LanguageCode).
+									map(SubtitlingDescriptor.Subtitle::iso639LanguageCode).
 									collect(Collectors.toList())),
 						String.class,
 						"sub").
@@ -189,7 +189,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								SubtitlingDescriptor.class,
 								sub -> sub.getSubtitleList().
 									stream().
-									map(t->getComponentType0x03String(t.getSubtitlingType())).
+									map(t->getComponentType0x03String(t.subtitlingType())).
 									collect(Collectors.toList())),
 						String.class,
 						"sub").
@@ -201,7 +201,7 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 								ApplicationSignallingDescriptor.class,
 								app -> app.getApplicationTypeList().
 									stream().
-									map(a->getAppTypeIDString(a.getApplicationType())).
+									map(a->getAppTypeIDString(a.applicationType())).
 									collect(Collectors.toList())),
 						String.class).
 

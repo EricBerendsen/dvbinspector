@@ -1,8 +1,8 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.LookUpList;
@@ -47,18 +47,17 @@ public class ModuleLinkDescriptor extends DSMCCDescriptor {
 	private int position;
 	private int module_id;
 	
-	public ModuleLinkDescriptor(byte[] b, int offset) {
-		super(b, offset);
-		position = getInt(b, offset + 2, 1,MASK_8BITS);
-		module_id = getInt(b, offset + 3, 2,MASK_16BITS);
+	public ModuleLinkDescriptor(byte[] b) {
+		super(b);
+		position = getInt(b,  2, 1,MASK_8BITS);
+		module_id = getInt(b, 3, 2,MASK_16BITS);
 	}
 
-	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("position", position, positionList.get(position, "illegal value"))));
-		t.add(new DefaultMutableTreeNode(new KVP("module_id", module_id, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("position", position, positionList.get(position, "illegal value")));
+		t.add(new KVP("module_id", module_id));
 		return t;
 	}
 

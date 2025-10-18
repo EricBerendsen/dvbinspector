@@ -27,13 +27,15 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getAppTypeIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -45,52 +47,35 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class ApplicationSignallingDescriptor extends Descriptor{
 
-	private List<ApplicationType> applicationTypeList = new ArrayList<ApplicationType>();
+	private List<ApplicationType> applicationTypeList = new ArrayList<>();
 
-	public static class ApplicationType implements TreeNode{
-		private final int applicationType;
-		private final int aitVersionNumber;
+	public record ApplicationType(int applicationType, int aitVersionNumber) implements TreeNode {
 
-		public ApplicationType(final int applicationType, final int versionNumber) {
-			super();
-			this.applicationType = applicationType;
-			this.aitVersionNumber = versionNumber;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("AIT"));
-			s.add(new DefaultMutableTreeNode(new KVP("application_type",applicationType,getAppTypeIDString(applicationType))));
-			s.add(new DefaultMutableTreeNode(new KVP("AIT_version_number",aitVersionNumber,null)));
+		public KVP getJTreeNode(final int modus) {
+			KVP s = new KVP("AIT");
+			s.add(new KVP("application_type", applicationType, getAppTypeIDString(applicationType)));
+			s.add(new KVP("AIT_version_number", aitVersionNumber));
 			return s;
-		}
-
-		public int getApplicationType() {
-			return applicationType;
-		}
-
-		public int getAitVersionNumber() {
-			return aitVersionNumber;
 		}
 
 	}
 
-	public ApplicationSignallingDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public ApplicationSignallingDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int r =0;
 		while (r<descriptorLength) {
-			final int application_type = getInt(b,offset+ 2+r, 2, Utils.MASK_15BITS);
-			final int ait_version = getInt(b,offset+ 4+r, 1, Utils.MASK_5BITS);
+			int application_type = getInt(b, 2+r, 2, Utils.MASK_15BITS);
+			int ait_version = getInt(b, 4+r, 1, Utils.MASK_5BITS);
 
-			final ApplicationType applicationEntry = new ApplicationType(application_type,ait_version);
+			ApplicationType applicationEntry = new ApplicationType(application_type,ait_version);
 			applicationTypeList.add(applicationEntry);
 			r=r+3;
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-
+	public KVP getJTreeNode(final int modus){
+		final KVP t = super.getJTreeNode(modus);
 		addListJTree(t,applicationTypeList,modus,"Application Information Table");
 
 		return t;

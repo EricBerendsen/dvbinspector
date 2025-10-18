@@ -27,9 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.canal_international;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -67,9 +68,9 @@ public class CosBatSelectionDescriptor extends Descriptor {
 	}
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("bouquet_id", bouquet_id));
 		t.add(new KVP("selector_type", selector_type).setDescription(getSelectorTypeString(selector_type)));
 		if (selector_type == 0x01) {

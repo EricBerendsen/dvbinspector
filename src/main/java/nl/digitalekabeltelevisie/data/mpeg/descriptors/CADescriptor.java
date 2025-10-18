@@ -28,9 +28,8 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static java.util.Arrays.copyOfRange;
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getCASystemIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -41,11 +40,11 @@ public class CADescriptor extends Descriptor{
 	private int caPID;
 	private byte[] privateDataByte;
 
-	public CADescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		caSystemID = getInt(b,offset+2,2,0xFFFF);
-		caPID = getInt(b,offset+4,2,0x1FFF);
-		privateDataByte = copyOfRange(b, offset+6, offset+descriptorLength+2);
+	public CADescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		caSystemID = getInt(b, 2, 2, 0xFFFF);
+		caPID = getInt(b, 4, 2, 0x1FFF);
+		privateDataByte = copyOfRange(b, 6, descriptorLength + 2);
 	}
 
 	@Override
@@ -54,11 +53,11 @@ public class CADescriptor extends Descriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("CA_system_ID",caSystemID ,getCASystemIDString(caSystemID))));
-		t.add(new DefaultMutableTreeNode(new KVP("CA_PID",caPID ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("CA_system_ID", caSystemID, getCASystemIDString(caSystemID)));
+		t.add(new KVP("CA_PID", caPID));
+		t.add(new KVP("private_data_byte", privateDataByte));
 		return t;
 	}
 

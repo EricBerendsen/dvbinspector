@@ -27,22 +27,19 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class AdaptationFieldDataDescriptor extends Descriptor {
 
-
-
-
 	private final int adaptationFieldDataIdentifier;
-	public AdaptationFieldDataDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		adaptationFieldDataIdentifier = getInt(b,offset+2,1,MASK_8BITS);
+
+	public AdaptationFieldDataDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		adaptationFieldDataIdentifier = getInt(b, 2, 1, MASK_8BITS);
 	}
 
 	@Override
@@ -51,9 +48,9 @@ public class AdaptationFieldDataDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_data_identifier",adaptationFieldDataIdentifier ,getAdaptationFieldDataIdentifierString(adaptationFieldDataIdentifier))));
+	public KVP getJTreeNode(int modus){
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("adaptation_field_data_identifier",adaptationFieldDataIdentifier ,getAdaptationFieldDataIdentifierString(adaptationFieldDataIdentifier)));
 		return t;
 	}
 

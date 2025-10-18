@@ -108,7 +108,7 @@ public class DSMCCStreamEventPayloadBinary implements TreeNode {
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		final KVP t = new KVP("DSM-CC_stream_event_payload_binary");
+		KVP t = new KVP("DSM-CC_stream_event_payload_binary");
 		t.add(new KVP("binary", binary));
 		if (binary.length > 0) {
 			t.add(new KVP("DVB_data_length", dvb_data_length));

@@ -27,16 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import static nl.digitalekabeltelevisie.util.Utils.getUTCFormattedString;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -45,70 +43,25 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class LocalTimeOffsetDescriptor extends Descriptor {
 
-	private List<LocalTimeOffset> offsetList = new ArrayList<LocalTimeOffset>();
+	private List<LocalTimeOffset> offsetList = new ArrayList<>();
 
 
-	public static class LocalTimeOffset implements TreeNode{
-
-		private final String countryCode ;
-		private final int countryRegionId;
-		private final int localTimeOffsetPolarity ;
-		private final byte[] localTimeOffset ;
-		private final byte[] timeOfChange ;
-		private final String timeOfChangeString  ;
-		private final byte[] nextTimeOffset;
-
-		public LocalTimeOffset(final String c, final int id, final int localPolarity, final byte[] localOffset, final byte[] timeChange, final byte[] nextOffset) {
-			countryCode = c;
-			countryRegionId = id;
-			localTimeOffsetPolarity =localPolarity;
-			localTimeOffset =localOffset;
-			timeOfChange =timeChange;
-			timeOfChangeString = getUTCFormattedString(timeOfChange);
-			nextTimeOffset = nextOffset;
-
-		}
-
-		public String getCountryCode() {
-			return countryCode;
-		}
-
-		public int getCountryRegionId() {
-			return countryRegionId;
-		}
-
-
-		public int getLocalTimeOffsetPolarity() {
-			return localTimeOffsetPolarity;
-		}
-
-
-
-		public byte[] getTimeOfChange() {
-			return timeOfChange;
-		}
+	public static record LocalTimeOffset(String countryCode, int countryRegionId, int localTimeOffsetPolarity, byte[] localTimeOffset, byte[] timeOfChange, byte[] nextTimeOffset) implements TreeNode{
 
 		public String getTimeOfChangeString() {
-			return timeOfChangeString;
+			return getUTCFormattedString(timeOfChange);
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("time_offset"));
-			s.add(new DefaultMutableTreeNode(new KVP("country_code",countryCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("country_region_id",countryRegionId,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("local_time_offset_polarity",localTimeOffsetPolarity,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("local_time_offset",localTimeOffset,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("time_of_change",timeOfChange,timeOfChangeString)));
-			s.add(new DefaultMutableTreeNode(new KVP("next_time_offset",nextTimeOffset,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("time_offset");
+			s.add(new KVP("country_code", countryCode));
+			s.add(new KVP("country_region_id", countryRegionId));
+			s.add(new KVP("local_time_offset_polarity", localTimeOffsetPolarity));
+			s.add(new KVP("local_time_offset", localTimeOffset));
+			s.add(new KVP("time_of_change", timeOfChange, getTimeOfChangeString()));
+			s.add(new KVP("next_time_offset", nextTimeOffset));
 			return s;
-		}
-
-		public byte[] getLocalTimeOffset() {
-			return localTimeOffset;
-		}
-
-		public byte[] getNextTimeOffset() {
-			return nextTimeOffset;
 		}
 		
 		public String getLocalOffsetString() {
@@ -141,20 +94,21 @@ public class LocalTimeOffsetDescriptor extends Descriptor {
 
 	}
 
-	public LocalTimeOffsetDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final String countryCode = getISO8859_1String(b,offset+2+t,3);
-			final int countryRegionId = getInt(b, offset+t+5, 1, 0xFC) >>2;
-		final int localTimeOffsetPolarity = getInt(b, offset+t+5, 1, 0x01);
-		final byte[] localTimeOffset = Arrays.copyOfRange(b, offset+t+6, offset+t+8);
-		final byte[] timeOfChange = Arrays.copyOfRange(b,offset+t+8,offset+t+13 );
-		final byte[] nextTimeOffset = Arrays.copyOfRange(b, offset+t+13, offset+t+15);
+	public LocalTimeOffsetDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			String countryCode = getISO8859_1String(b, 2 + t, 3);
+			int countryRegionId = getInt(b, t + 5, 1, 0xFC) >> 2;
+			int localTimeOffsetPolarity = getInt(b, t + 5, 1, 0x01);
+			byte[] localTimeOffset = copyOfRange(b, t + 6, t + 8);
+			byte[] timeOfChange = copyOfRange(b, t + 8, t + 13);
+			byte[] nextTimeOffset = copyOfRange(b, t + 13, t + 15);
 
-		final LocalTimeOffset s = new LocalTimeOffset(countryCode,countryRegionId,localTimeOffsetPolarity,localTimeOffset,timeOfChange,nextTimeOffset);
-		offsetList.add(s);
-		t+=13;
+			LocalTimeOffset s = new LocalTimeOffset(countryCode, countryRegionId, localTimeOffsetPolarity, localTimeOffset, timeOfChange,
+					nextTimeOffset);
+			offsetList.add(s);
+			t += 13;
 		}
 	}
 
@@ -165,20 +119,17 @@ public class LocalTimeOffsetDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (int i = 0; i < getNoServices(); i++) {
 			final LocalTimeOffset s = offsetList.get(i);
-			buf.append("(").append(i).append(";").append(s.getCountryCode()).append(", time of next change").append(s.getTimeOfChangeString());
+			buf.append("(").append(i).append(";").append(s.countryCode()).append(", time of next change").append(s.getTimeOfChangeString());
 		}
-
-
 		return buf.toString();
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,offsetList,modus,"time_offset");
 		return t;
 	}

@@ -34,8 +34,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -51,34 +49,20 @@ public class ServiceAttributeDescriptor extends Descriptor {
 	List<ServiceAttribute> serviceAttributeList = new ArrayList<>();
 	
 	
-	public class ServiceAttribute implements TreeNode{
+	public record ServiceAttribute(int service_id, int reserved, int numeric_selection_flag, int visible_service_flag) implements TreeNode{
 
 
-		private int service_id;
-		private int reserved;
-		private int numeric_selection_flag;
-		private int visible_service_flag;
-		
-		
-		public ServiceAttribute(int service_id, int reserved, int numeric_selection_flag, int visible_service_flag) {
-			super();
-			this.service_id = service_id;
-			this.reserved = reserved;
-			this.numeric_selection_flag = numeric_selection_flag;
-			this.visible_service_flag = visible_service_flag;
-		}
-
-		
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Service attribute"));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",service_id,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("numeric_selection_flag",numeric_selection_flag,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("visible_service_flag",visible_service_flag,getBehaviourString(numeric_selection_flag,visible_service_flag))));
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			KVP s = new KVP("Service attribute");
+			s.add(new KVP("service_id", service_id));
+			s.add(new KVP("reserved", reserved));
+			s.add(new KVP("numeric_selection_flag", numeric_selection_flag));
+			s.add(new KVP("visible_service_flag", visible_service_flag, getBehaviourString(numeric_selection_flag, visible_service_flag)));
 			return s;
 		}
-		
-		private String getBehaviourString(int numeric_selection_flag, int visible_service_flag) {
+
+		private static String getBehaviourString(int numeric_selection_flag, int visible_service_flag) {
 			if(visible_service_flag==1) {
 				return "Service is visible and selectable";
 			}
@@ -90,30 +74,24 @@ public class ServiceAttributeDescriptor extends Descriptor {
 		
 	}
 
-
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public ServiceAttributeDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final int service_id=getInt(b, offset+2+t,2,MASK_16BITS);
-			final int reserved = getInt(b,offset+t+4,1,0b1111_1100) >>2;
-			final int numeric_selection_flag=getInt(b, offset+t+4,1,0b0000_0010)>>1;
-			final int visible_service_flag=getInt(b, offset+t+4,1,0b0000_001);
-			final ServiceAttribute s = new ServiceAttribute(service_id, reserved, numeric_selection_flag,visible_service_flag);
+	public ServiceAttributeDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			int service_id = getInt(b, 2 + t, 2, MASK_16BITS);
+			int reserved = getInt(b, t + 4, 1, 0b1111_1100) >> 2;
+			int numeric_selection_flag = getInt(b, t + 4, 1, 0b0000_0010) >> 1;
+			int visible_service_flag = getInt(b, t + 4, 1, 0b0000_001);
+			ServiceAttribute s = new ServiceAttribute(service_id, reserved, numeric_selection_flag, visible_service_flag);
 			serviceAttributeList.add(s);
-			t+=3;
+			t += 3;
 		}
 	}
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,serviceAttributeList,modus,"Service Attributes");
 		return t;
 	}

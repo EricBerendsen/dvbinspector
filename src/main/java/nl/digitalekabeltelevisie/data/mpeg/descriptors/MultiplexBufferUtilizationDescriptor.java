@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_15BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -40,11 +39,11 @@ public class MultiplexBufferUtilizationDescriptor extends Descriptor {
 	private final int ltwOffsetLowerBound;
 	private final int ltwOffsetUpperBound;
 
-	public MultiplexBufferUtilizationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		boundValidFlag = getInt(b,offset+2,1,0x80)>>7;
-		ltwOffsetLowerBound = getInt(b,offset+2,2,MASK_15BITS);
-		ltwOffsetUpperBound = getInt(b,offset+4,2,MASK_15BITS);
+	public MultiplexBufferUtilizationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		boundValidFlag = getInt(b, 2, 1, 0x80) >> 7;
+		ltwOffsetLowerBound = getInt(b, 2, 2, MASK_15BITS);
+		ltwOffsetUpperBound = getInt(b, 4, 2, MASK_15BITS);
 	}
 
 	@Override
@@ -53,11 +52,11 @@ public class MultiplexBufferUtilizationDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("bound_valid_flag",boundValidFlag ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("LTW_offset_lower_bound",ltwOffsetLowerBound ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("LTW_offset_upper_bound",ltwOffsetUpperBound ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("bound_valid_flag", boundValidFlag));
+		t.add(new KVP("LTW_offset_lower_bound", ltwOffsetLowerBound));
+		t.add(new KVP("LTW_offset_upper_bound", ltwOffsetUpperBound));
 		return t;
 	}
 

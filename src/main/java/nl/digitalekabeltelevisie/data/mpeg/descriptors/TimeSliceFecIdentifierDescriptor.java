@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -44,18 +44,15 @@ public class TimeSliceFecIdentifierDescriptor extends Descriptor {
 	private final int time_slice_fec_id;
 	private final byte[] id_selector_byte;
 
-
-
-	public TimeSliceFecIdentifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		time_slicing = Utils.getInt(b, offset+2, 1, 0x80)>>7;
-		mpe_fec = Utils.getInt(b, offset+2, 1, 0x60)>>5;
-		frame_size = Utils.getInt(b, offset+2, 1, Utils.MASK_3BITS);
-		max_burst_duration = Utils.getInt(b, offset+3, 1, Utils.MASK_8BITS);
-		max_average_rate = Utils.getInt(b, offset+4, 1, 0xF0)>>4;
-		time_slice_fec_id = Utils.getInt(b, offset+4, 1, Utils.MASK_4BITS);
-		id_selector_byte = Utils.copyOfRange(b, offset+5, offset+descriptorLength+2);
-
+	public TimeSliceFecIdentifierDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		time_slicing = Utils.getInt(b, 2, 1, 0x80) >> 7;
+		mpe_fec = Utils.getInt(b, 2, 1, 0x60) >> 5;
+		frame_size = Utils.getInt(b, 2, 1, Utils.MASK_3BITS);
+		max_burst_duration = Utils.getInt(b, 3, 1, Utils.MASK_8BITS);
+		max_average_rate = Utils.getInt(b, 4, 1, 0xF0) >> 4;
+		time_slice_fec_id = Utils.getInt(b, 4, 1, Utils.MASK_4BITS);
+		id_selector_byte = copyOfRange(b, 5, descriptorLength + 2);
 
 	}
 
@@ -65,19 +62,18 @@ public class TimeSliceFecIdentifierDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("time_slicing",time_slicing ,getTimeSlicingString(time_slicing))));
-		t.add(new DefaultMutableTreeNode(new KVP("mpe_fec",mpe_fec ,getMPE_FECtring(mpe_fec))));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_size",frame_size ,getFrameSizeString(frame_size,time_slicing,mpe_fec,time_slice_fec_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("max_burst_duration",max_burst_duration ,getMaxBurstString(max_burst_duration,time_slicing,time_slice_fec_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("max_average_rate",max_average_rate ,getMaxAvgRateString(max_average_rate,time_slice_fec_id))));
-		t.add(new DefaultMutableTreeNode(new KVP("time_slice_fec_id",time_slice_fec_id ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("id_selector_byte",id_selector_byte ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("time_slicing", time_slicing, getTimeSlicingString(time_slicing)));
+		t.add(new KVP("mpe_fec", mpe_fec, getMPE_FECtring(mpe_fec)));
+		t.add(new KVP("frame_size", frame_size, getFrameSizeString(frame_size, time_slicing, mpe_fec, time_slice_fec_id)));
+		t.add(new KVP("max_burst_duration", max_burst_duration, getMaxBurstString(max_burst_duration, time_slicing, time_slice_fec_id)));
+		t.add(new KVP("max_average_rate", max_average_rate, getMaxAvgRateString(max_average_rate, time_slice_fec_id)));
+		t.add(new KVP("time_slice_fec_id", time_slice_fec_id));
+		t.add(new KVP("id_selector_byte", id_selector_byte));
 
 		return t;
 	}
-
 
 	/**
 	 * @param max_burst_duration2

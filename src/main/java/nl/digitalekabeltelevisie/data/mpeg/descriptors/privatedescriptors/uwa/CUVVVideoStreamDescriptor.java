@@ -27,15 +27,14 @@
 
  package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.uwa;
 
- import static nl.digitalekabeltelevisie.util.Utils.*;
- 
- import javax.swing.tree.DefaultMutableTreeNode;
- 
- import nl.digitalekabeltelevisie.controller.KVP;
- import nl.digitalekabeltelevisie.util.LookUpList;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_32BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
- import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
- import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.LookUpList;
  
  public class CUVVVideoStreamDescriptor extends Descriptor {
 
@@ -53,12 +52,12 @@
 		add(0x0008, "4.0").
 		build();
 
-	public CUVVVideoStreamDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-        cuvv_tag = getInt(b, offset+2, 4, MASK_32BITS);
-        cuva_version_map = getInt(b, offset+6, 2, MASK_16BITS);
-        terminal_provide_code = getInt(b, offset+8, 2, MASK_16BITS);
-        terminal_provide_oriented_code = getInt(b, offset+10, 2, MASK_16BITS);
+	public CUVVVideoStreamDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		cuvv_tag = getInt(b, 2, 4, MASK_32BITS);
+		cuva_version_map = getInt(b, 6, 2, MASK_16BITS);
+		terminal_provide_code = getInt(b, 8, 2, MASK_16BITS);
+		terminal_provide_oriented_code = getInt(b, 10, 2, MASK_16BITS);
 	}
 
     private static String FourCC(long v){
@@ -90,12 +89,13 @@
 	}
 
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("cuvv_tag", toHexString32(cuvv_tag), FourCC(cuvv_tag))));
-		t.add(new DefaultMutableTreeNode(new KVP("cuva_version_map", cuva_version_map, VersionMap(cuva_version_map))));
-		t.add(new DefaultMutableTreeNode(new KVP("terminal_provide_code", terminal_provide_code, toHexString16(terminal_provide_code))));
-		t.add(new DefaultMutableTreeNode(new KVP("terminal_provide_oriented_code", terminal_provide_oriented_code, HighestVersion(terminal_provide_oriented_code))));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("cuvv_tag", toHexString32(cuvv_tag), FourCC(cuvv_tag)));
+		t.add(new KVP("cuva_version_map", cuva_version_map, VersionMap(cuva_version_map)));
+		t.add(new KVP("terminal_provide_code", terminal_provide_code, toHexString16(terminal_provide_code)));
+		t.add(new KVP("terminal_provide_oriented_code", terminal_provide_oriented_code, HighestVersion(terminal_provide_oriented_code)));
 		return t;
 	}
 

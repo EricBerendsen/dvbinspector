@@ -27,11 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import static java.util.Arrays.copyOfRange;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * 
@@ -43,25 +42,16 @@ public class DefaultAuthorityDescriptor extends Descriptor {
 
 	private final byte[] default_authority_byte;
 
-
-
-
-	public DefaultAuthorityDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-
-		default_authority_byte = Utils.copyOfRange(b, offset+2, offset+2+descriptorLength);
+	public DefaultAuthorityDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		default_authority_byte = copyOfRange(b, 2, 2 + descriptorLength);
 	}
-
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("default_authority_byte",default_authority_byte,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("default_authority_byte", default_authority_byte));
 		return t;
 	}
-
-
-
-
 
 }

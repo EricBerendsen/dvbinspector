@@ -29,9 +29,8 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.DVBString;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ServiceDescriptor extends Descriptor{
@@ -40,7 +39,7 @@ public class ServiceDescriptor extends Descriptor{
 	private final DVBString  serviceProviderName;
 	private final DVBString  serviceName;
 
-	public ServiceDescriptor(final byte[] b, final TableSection parent) {
+	public ServiceDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		serviceType = getInt(b, 2, 1, 0xFF);
 		serviceProviderName = new DVBString(b, 3);
@@ -58,8 +57,8 @@ public class ServiceDescriptor extends Descriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("service_type",serviceType).setDescription(getServiceTypeString(serviceType)));
 		t.add(new KVP("service_provider_name",serviceProviderName));
 		t.add(new KVP("service_name",serviceName));

@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -45,8 +43,8 @@ public class MultilingualServiceNameDescriptor extends Descriptor {
 
 	public static record ServiceName(String iso639LanguageCode, DVBString service_provider_name, DVBString service_name) implements TreeNode{
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("service_name");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("service_name");
 			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 			s.add(new KVP("service_provider_name", service_provider_name));
 			s.add(new KVP("service_name", service_name));
@@ -55,16 +53,16 @@ public class MultilingualServiceNameDescriptor extends Descriptor {
 
 	}
 
-	public MultilingualServiceNameDescriptor(final byte[] b, final TableSection parent) {
+	public MultilingualServiceNameDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		int t = 2;
 		while (t < (descriptorLength + 2)) {
-			final String languageCode = Utils.getISO8859_1String(b, t, 3);
+			String languageCode = Utils.getISO8859_1String(b, t, 3);
 			int service_provider_name_length = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
 			DVBString service_provider_name = new DVBString(b, t + 3);
 			int service_name_length = Utils.getInt(b, t + 4 + service_provider_name_length, 1, Utils.MASK_8BITS);
 			DVBString service_name = new DVBString(b, t + 4 + service_provider_name_length);
-			final ServiceName s = new ServiceName(languageCode, service_provider_name, service_name);
+			ServiceName s = new ServiceName(languageCode, service_provider_name, service_name);
 			serviceNameList.add(s);
 			t += 5 + service_provider_name_length + service_name_length;
 		}
@@ -81,12 +79,11 @@ public class MultilingualServiceNameDescriptor extends Descriptor {
 		return buf.toString();
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		Utils.addListJTree(t,serviceNameList,modus,"service_name_list");
+		KVP t = super.getJTreeNode(modus);
+		Utils.addListJTree(t, serviceNameList, modus, "service_name_list");
 		return t;
 	}
 

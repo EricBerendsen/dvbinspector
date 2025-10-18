@@ -347,7 +347,7 @@ public class LinkageDescriptor extends Descriptor {
 
 	@Override
 	public KVP getJTreeNode(final int modus){
-		final KVP t = (KVP)super.getJTreeNode(modus);
+		final KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("transport_stream_id",transportStreamId));
 		t.add(new KVP("original_network_id",originalNetworkId).setDescription(getOriginalNetworkIDString(originalNetworkId)));
 		t.add(new KVP("service_id",serviceId).setDescription(parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId)));

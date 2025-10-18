@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -40,11 +39,11 @@ public class VideoWindowDescriptor extends Descriptor {
 	private final int verticalOffset ;
 	private final int windowPriority ;
 
-	public VideoWindowDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		horizontalOffset = getInt(b,offset+2,2,0xFFFC)>>2; // first 14 bits
-		verticalOffset = getInt(b,offset+3,3,0x03FFF0)>>4; // 14 bits over 3 bytes...
-		windowPriority = getInt(b,offset+5,1,MASK_4BITS); // 4 bits
+	public VideoWindowDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		horizontalOffset = getInt(b, 2, 2, 0xFFFC) >> 2; // first 14 bits
+		verticalOffset = getInt(b, 3, 3, 0x03FFF0) >> 4; // 14 bits over 3 bytes...
+		windowPriority = getInt(b, 5, 1, MASK_4BITS); // 4 bits
 	}
 
 	@Override
@@ -53,11 +52,11 @@ public class VideoWindowDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("horizontal_offset",horizontalOffset ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vertical_offset",verticalOffset ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("window_priority",windowPriority ,null)));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("horizontal_offset",horizontalOffset));
+		t.add(new KVP("vertical_offset",verticalOffset));
+		t.add(new KVP("window_priority",windowPriority));
 		return t;
 	}
 

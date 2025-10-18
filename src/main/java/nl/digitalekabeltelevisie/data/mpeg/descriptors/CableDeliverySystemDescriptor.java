@@ -27,9 +27,10 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_4BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getBCD;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -42,67 +43,46 @@ public class CableDeliverySystemDescriptor extends Descriptor{
 	private String symbol_rate;
 	private int FEC_inner;
 
-
-	public CableDeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-
-
-		frequency = getBCD(b, (offset*2) + 4, 8);
-		FEC_outer = getInt(b, offset + 7, 1, MASK_4BITS);
-		modulation= getInt(b, offset+ 8 , 1, MASK_8BITS);
-		symbol_rate = getBCD(b, (offset*2)+ 18,7);
-		FEC_inner = getInt(b, offset+ 12, 1, MASK_4BITS);
-
-
+	public CableDeliverySystemDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		frequency = getBCD(b, 4, 8);
+		FEC_outer = getInt(b, 7, 1, MASK_4BITS);
+		modulation = getInt(b, 8, 1, MASK_8BITS);
+		symbol_rate = getBCD(b, 18, 7);
+		FEC_inner = getInt(b, 12, 1, MASK_4BITS);
 	}
-
 
 	public int getFEC_inner() {
 		return FEC_inner;
 	}
-
-
-	public void setFEC_inner(final int fec_inner) {
-		FEC_inner = fec_inner;
-	}
-
 
 	public int getFEC_outer() {
 		return FEC_outer;
 	}
 
 	public String getFEC_outerString() {
-		switch (getFEC_outer()) {
-		case 0: return "not defined";
-		case 1: return "no outer FEC coding";
-		case 2: return "RS(204/188)";
-		default: return "reserved for future use";
-		}
+		return switch (getFEC_outer()) {
+		case 0 -> "not defined";
+		case 1 -> "no outer FEC coding";
+		case 2 -> "RS(204/188)";
+		default -> "reserved for future use";
+		};
 	}
 
 	public static String getModulationString(final int mod) {
-		switch (mod) {
-		case 0x00: return "not defined";
-		case 0x01: return "16-QAM";
-		case 0x02: return "32-QAM";
-		case 0x03: return "64-QAM";
-		case 0x04: return "128-QAM";
-		case 0x05: return "256-QAM";
-		default: return "reserved for future use";		}
+		return switch (mod) {
+		case 0x00 -> "not defined";
+		case 0x01 -> "16-QAM";
+		case 0x02 -> "32-QAM";
+		case 0x03 -> "64-QAM";
+		case 0x04 -> "128-QAM";
+		case 0x05 -> "256-QAM";
+		default -> "reserved for future use";
+		};
 	}
-
-	public void setFEC_outer(final int fec_outer) {
-		FEC_outer = fec_outer;
-	}
-
 
 	public int getModulation() {
 		return modulation;
-	}
-
-
-	public void setModulation(final int modulation) {
-		this.modulation = modulation;
 	}
 
 
@@ -110,19 +90,8 @@ public class CableDeliverySystemDescriptor extends Descriptor{
 		return frequency;
 	}
 
-
-	public void setFrequency(final String frequency) {
-		this.frequency = frequency;
-	}
-
-
 	public String getSymbol_rate() {
 		return symbol_rate;
-	}
-
-
-	public void setSymbol_rate(final String symbol_rate) {
-		this.symbol_rate = symbol_rate;
 	}
 
 
@@ -133,14 +102,14 @@ public class CableDeliverySystemDescriptor extends Descriptor{
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 
-		t.add(new DefaultMutableTreeNode(new KVP("frequency",frequency ,Descriptor.formatCableFrequency(frequency))));
-		t.add(new DefaultMutableTreeNode(new KVP("FEC_outer",FEC_outer ,getFEC_outerString())));
-		t.add(new DefaultMutableTreeNode(new KVP("modulation",modulation ,getModulationString(modulation))));
-		t.add(new DefaultMutableTreeNode(new KVP("symbol_rate",symbol_rate ,Descriptor.formatSymbolRate(symbol_rate))));
-		t.add(new DefaultMutableTreeNode(new KVP("FEC_inner",FEC_inner ,Descriptor.getFEC_innerString(FEC_inner))));
+		t.add(new KVP("frequency",frequency ,Descriptor.formatCableFrequency(frequency)));
+		t.add(new KVP("FEC_outer",FEC_outer ,getFEC_outerString()));
+		t.add(new KVP("modulation",modulation ,getModulationString(modulation)));
+		t.add(new KVP("symbol_rate",symbol_rate ,Descriptor.formatSymbolRate(symbol_rate)));
+		t.add(new KVP("FEC_inner",FEC_inner ,Descriptor.getFEC_innerString(FEC_inner)));
 
 		return t;
 	}

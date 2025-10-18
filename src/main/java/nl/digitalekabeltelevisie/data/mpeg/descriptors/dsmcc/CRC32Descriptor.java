@@ -28,9 +28,8 @@
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.dsmcc;
 
 // based on 10.2.6 CRC32 descriptor, ETSI EN 301 192 V1.4.2 (2008-04)
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_32BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 
@@ -38,17 +37,17 @@ public class CRC32Descriptor extends DSMCCDescriptor {
 
 	private final long crc_32;
 
-	public CRC32Descriptor(final byte[] b, final int offset) {
-		super(b, offset);
-		crc_32 = getLong(b, offset + 2, 4,MASK_32BITS);
+	public CRC32Descriptor(byte[] b) {
+		super(b);
+		crc_32 = getLong(b, 2, 4,MASK_32BITS);
 
 	}
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("CRC_32", crc_32, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("CRC_32", crc_32));
 		return t;
 	}
 

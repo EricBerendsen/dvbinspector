@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -37,9 +36,10 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class AncillaryDataDescriptor extends Descriptor {
 
 	private final int ancillaryDataIdentifier;
-	public AncillaryDataDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		ancillaryDataIdentifier = getInt(b,offset+2,1,MASK_8BITS);
+
+	public AncillaryDataDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		ancillaryDataIdentifier = getInt(b, 2, 1, MASK_8BITS);
 	}
 
 	@Override
@@ -48,14 +48,14 @@ public class AncillaryDataDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("ancillary_data_identifier",ancillaryDataIdentifier ,ancillaryDataIdentifierString(ancillaryDataIdentifier))));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("ancillary_data_identifier",ancillaryDataIdentifier ,ancillaryDataIdentifierString(ancillaryDataIdentifier)));
 		return t;
 	}
 
-	public static String ancillaryDataIdentifierString(final int id) {
-		final StringBuilder r = new StringBuilder();
+	public static String ancillaryDataIdentifierString(int id) {
+		StringBuilder r = new StringBuilder();
 		if ((id & 0x01)!=0) {
 			r.append("DVD-Video Ancillary Data ");
 		}

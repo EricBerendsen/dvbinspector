@@ -35,8 +35,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -48,42 +46,34 @@ public class ServiceAvailabilityDescriptor extends Descriptor {
 	private int reserved;
 
 
-	private static class Cell implements TreeNode{
-		private int cell_id;
-
-		public Cell(final int cell_id){
-			this.cell_id = cell_id;
+	private static record Cell(int cell_id) implements TreeNode{
+		
+		@Override
+		public KVP getJTreeNode( int modus) {
+			return new KVP("cell_id", cell_id);
 		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("cell_id",cell_id,null));
-			return s;
-
-		}
-
 	}
 
-	public ServiceAvailabilityDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		availability_flag = getInt(b, offset + 2, 1, 0b1000_0000) >> 7;
-		reserved = getInt(b, offset + 2, 1, MASK_7BITS);
+	public ServiceAvailabilityDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		availability_flag = getInt(b, 2, 1, 0b1000_0000) >> 7;
+		reserved = getInt(b, 2, 1, MASK_7BITS);
 		int t = 0;
 		while (t < descriptorLength - 1) {
-			int cell_id = getInt(b, offset + 3 + t, 1, MASK_8BITS);
+			int cell_id = getInt(b, 3 + t, 1, MASK_8BITS);
 
-			final Cell s = new Cell(cell_id);
+			Cell s = new Cell(cell_id);
 			cellList.add(s);
 			t += 1;
 		}
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("availability_flag",availability_flag,getAvailabilityString())));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("availability_flag",availability_flag,getAvailabilityString()));
+		t.add(new KVP("reserved",reserved));
 		addListJTree(t,cellList,modus,"cell_ids");
 		return t;
 	}

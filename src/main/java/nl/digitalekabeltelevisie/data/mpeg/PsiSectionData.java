@@ -343,7 +343,7 @@ public class PsiSectionData {
 						if(dataBroadCastIDDescriptor.getDataBroadcastId()==0x0A){
 							//get all  OUIs (prob 1) and check update type
 							for(final OUIEntry oui: dataBroadCastIDDescriptor.getOuiList()){
-								final int updateType = oui.getUpdateType();
+								final int updateType = oui.updateType();
 								if((updateType==0x2)||(updateType==0x3)){
 									return true;
 								}

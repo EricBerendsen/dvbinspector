@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -55,7 +53,7 @@ public class MultilingualBouquetNameDescriptor extends Descriptor {
 
 	}
 
-	public MultilingualBouquetNameDescriptor(final byte[] b, final TableSection parent) {
+	public MultilingualBouquetNameDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		int t = 2;
 		while (t < (descriptorLength + 2)) {
@@ -79,12 +77,11 @@ public class MultilingualBouquetNameDescriptor extends Descriptor {
 		return buf.toString();
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		Utils.addListJTree(t,bouquetNameList,modus,"bouquet_name_list");
+		KVP t = super.getJTreeNode(modus);
+		Utils.addListJTree(t, bouquetNameList, modus, "bouquet_name_list");
 		return t;
 	}
 

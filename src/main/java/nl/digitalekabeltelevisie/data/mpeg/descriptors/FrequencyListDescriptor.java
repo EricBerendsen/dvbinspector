@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -54,58 +52,54 @@ public class FrequencyListDescriptor extends Descriptor {
 		}
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final long frequencyAsLong = getLong(privateData, freqOffset, 4, MASK_32BITS);
-			switch (codingType) {
+		@Override
+		public KVP getJTreeNode(int modus) {
+			long frequencyAsLong = getLong(privateData, freqOffset, 4, MASK_32BITS);
+			return switch (codingType) {
 			case 1: // satellite
-				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(getBCD(privateData, freqOffset * 2, 8))));
+				yield new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(getBCD(privateData, freqOffset * 2, 8)));
 			case 2: // cable
-				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(getBCD(privateData, freqOffset * 2, 8))));
+				yield new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(getBCD(privateData, freqOffset * 2, 8)));
 			case 3: // terrestrial
-				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, Descriptor.formatTerrestrialFrequency(frequencyAsLong)));
+				yield new KVP("centre_frequency", frequencyAsLong, Descriptor.formatTerrestrialFrequency(frequencyAsLong));
 			default:
-				return new DefaultMutableTreeNode(new KVP("centre_frequency", frequencyAsLong, null));
-			}
+				yield new KVP("centre_frequency", frequencyAsLong);
+			};
 		}
 
 	}
 
-	public FrequencyListDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		codingType=getInt(b, offset + 2,1,0x03);
-		int t=1;
-		while (t<descriptorLength) {
+	public FrequencyListDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		codingType = getInt(b, 2, 1, 0x03);
+		int t = 1;
+		while (t < descriptorLength) {
 
-			final CentreFrequency s = new CentreFrequency((offset +2+t));
+			final CentreFrequency s = new CentreFrequency((2 + t));
 			frequencyList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
-
-
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("coding_type",codingType,getCodingTypeString(codingType))));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("coding_type",codingType,getCodingTypeString(codingType)));
 		addListJTree(t,frequencyList,modus,"frequencies");
 		return t;
 	}
 
 
 
-	private static String getCodingTypeString(final int codingType) {
-		switch (codingType) {
-		case 0: return "not defined";
-		case 1: return "satellit";
-		case 2: return "cable";
-		case 3: return "terrestrial";
-
-		default:
-			return "illegal value codng_type:"+codingType;
-
-		}
+	private static String getCodingTypeString( int codingType) {
+		return switch (codingType) {
+		case 0 -> "not defined";
+		case 1 -> "satellit";
+		case 2 -> "cable";
+		case 3 -> "terrestrial";
+		default -> "illegal value codng_type:"+codingType;
+		};
 
 	}
 }

@@ -35,8 +35,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -60,30 +58,25 @@ public class CosTimezoneDescriptor extends Descriptor {
 		}
 	}
 
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public CosTimezoneDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		
-		int t=0;
-		while (t<descriptorLength) {
-			String countryCode = getISO8859_1String(b,offset+2+t,3);
-			int countryRegionId = getInt(b, offset+t+5, 1, 0xFC) >>2;
-			int reserved = getInt(b, offset+t+5, 1, MASK_2BITS);
-			DVBString regionName = new DVBString(b, offset+t+6);
+	public CosTimezoneDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+
+		int t = 0;
+		while (t < descriptorLength) {
+			String countryCode = getISO8859_1String(b, 2 + t, 3);
+			int countryRegionId = getInt(b, t + 5, 1, 0xFC) >> 2;
+			int reserved = getInt(b, t + 5, 1, MASK_2BITS);
+			DVBString regionName = new DVBString(b, t + 6);
 			TimezoneName timezoneName = new TimezoneName(countryCode, countryRegionId, reserved, regionName);
 			timezoneNames.add(timezoneName);
 			t += 5 + regionName.getLength();
-		}		
+		}
 	}
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,timezoneNames,modus,"Timezone Names");
 		return t;
 	}

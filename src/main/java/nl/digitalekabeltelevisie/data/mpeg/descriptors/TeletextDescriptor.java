@@ -27,13 +27,15 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 /**
@@ -45,77 +47,39 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  */
 public class TeletextDescriptor extends Descriptor{
 
-	private final List<Teletext> teletextList = new ArrayList<Teletext>();
+	private final List<Teletext> teletextList = new ArrayList<>();
 
 
-	public static class Teletext implements TreeNode {
-		/**
-		 *
-		 */
-		private final String iso639LanguageCode;
-		private final int teletextType ;
-		private final int teletextMagazineNumber;
-		private final int teletextPageNumber;
+	public record Teletext(String iso639LanguageCode, int teletextType, int teletextMagazineNumber, int teletextPageNumber) implements TreeNode {
 
-
-		public Teletext(final String lCode, final int tType,final int tMagazine,final int tPage){
-			iso639LanguageCode = lCode;
-			teletextType = tType;
-			teletextMagazineNumber = tMagazine;
-			teletextPageNumber = tPage;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("teletext"));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("teletext_type",teletextType,getTeletextTypeString(teletextType))));
-			s.add(new DefaultMutableTreeNode(new KVP("teletext_magazine_number",teletextMagazineNumber,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("teletext_page_number",teletextPageNumber,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("teletext");
+			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			s.add(new KVP("teletext_type", teletextType, getTeletextTypeString(teletextType)));
+			s.add(new KVP("teletext_magazine_number", teletextMagazineNumber));
+			s.add(new KVP("teletext_page_number", teletextPageNumber));
 			return s;
 		}
-
-
 
 		@Override
 		public String toString(){
 			return "code:'"+iso639LanguageCode;
 		}
 
-
-		public int getTeletextType() {
-			return teletextType;
-		}
-
-
-		public int getTeletextMagazineNumber() {
-			return teletextMagazineNumber;
-		}
-
-
-		public int getTeletextPageNumber() {
-			return teletextPageNumber;
-		}
-
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
-
 	}
 
-	public TeletextDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while ((t+4)<descriptorLength) {
-			final String languageCode=getISO8859_1String(b, offset+2+t, 3);
-			final int teletext_type = getInt(b,offset+ t+5, 1, 0xF8)>>3;
-		final int teletext_magazine_number = getInt(b, offset+t+5, 1, 0x07);
-		final int teletext__page_number = getInt(b, offset+t+6, 1, 0xFF);
-		final Teletext s = new Teletext(languageCode, teletext_type,teletext_magazine_number,teletext__page_number);
-		teletextList.add(s);
-		t+=5;
+	public TeletextDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while ((t + 4) < descriptorLength) {
+			final String languageCode = getISO8859_1String(b, 2 + t, 3);
+			final int teletext_type = getInt(b, t + 5, 1, 0xF8) >> 3;
+			final int teletext_magazine_number = getInt(b, t + 5, 1, 0x07);
+			final int teletext__page_number = getInt(b, t + 6, 1, 0xFF);
+			final Teletext s = new Teletext(languageCode, teletext_type, teletext_magazine_number, teletext__page_number);
+			teletextList.add(s);
+			t += 5;
 		}
 	}
 
@@ -125,27 +89,25 @@ public class TeletextDescriptor extends Descriptor{
 		for (Teletext teletext : teletextList) {
 			buf.append(teletext.toString());
 		}
-
-
 		return buf.toString();
 	}
 
 	public static String getTeletextTypeString(final int type) {
-		switch (type) {
-		case 0: return "reserved for future use";
-		case 1: return "initial Teletext page";
-		case 2: return "Teletext subtitle page";
-		case 3: return "additional information page";
-		case 4: return "programme schedule page";
-		case 5: return "Teletext subtitle page for hearing impaired people";
-		default: return "reserved for future use";
-		}
+		return switch (type) {
+		case 0 -> "reserved for future use";
+		case 1 -> "initial Teletext page";
+		case 2 -> "Teletext subtitle page";
+		case 3 -> "additional information page";
+		case 4 -> "programme schedule page";
+		case 5 -> "Teletext subtitle page for hearing impaired people";
+		default -> "reserved for future use";
+		};
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,teletextList,modus,"teletext_list");
 		return t;
 	}

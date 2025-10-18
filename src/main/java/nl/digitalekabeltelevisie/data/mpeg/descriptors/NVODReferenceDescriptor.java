@@ -34,34 +34,32 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.ServiceIdentification;
 
 public class NVODReferenceDescriptor extends Descriptor {
 
 	private List<ServiceIdentification> servicesList = new ArrayList<>();
-	
-	public NVODReferenceDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final int transportStreamId =getInt(b, offset+2+t,2,MASK_16BITS);
-			final int originalNetworkId =getInt(b, offset+4+t,2,MASK_16BITS);
-			final int serviceId =getInt(b, offset+6+t,2,MASK_16BITS);
+
+	public NVODReferenceDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			int transportStreamId = getInt(b, 2 + t, 2, MASK_16BITS);
+			int originalNetworkId = getInt(b, 4 + t, 2, MASK_16BITS);
+			int serviceId = getInt(b, 6 + t, 2, MASK_16BITS);
 			ServiceIdentification serviceIdentification = new ServiceIdentification(originalNetworkId, transportStreamId, serviceId);
 			servicesList.add(serviceIdentification);
-			t+=6;
+			t += 6;
 		}
 	}
-		
-		
-	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		addListJTree(t,servicesList,modus,"service_list");
+	@Override
+	public KVP getJTreeNode(int modus) {
+
+		KVP t = super.getJTreeNode(modus);
+		addListJTree(t, servicesList, modus, "service_list");
 		return t;
 	}
 

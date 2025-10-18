@@ -65,9 +65,9 @@ public final class DSMCCDescriptorFactory {
 			} catch (final RuntimeException iae) {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
-				d = new DSMCCDescriptor(data, t + offset);
-				logger.info("Fall back for descriptor:" + toUnsignedInt(data[t + offset]) + " ("
-						+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[t + offset]))
+				d = new DSMCCDescriptor(descriptorData);
+				logger.info("Fall back for descriptor:" + toUnsignedInt(descriptorData[0]) + " ("
+						+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[0]))
 						+ ")in section DSMCC data=" + d.getRawDataString()+", RuntimeException:"+iae);
 			}
 
@@ -85,31 +85,30 @@ public final class DSMCCDescriptorFactory {
 			d = new NameDescriptor(data);
 			break;
 		case 0x04:
-			d = new ModuleLinkDescriptor(data, 0);
+			d = new ModuleLinkDescriptor(data);
 			break;
 		case 0x05:
-			d = new CRC32Descriptor(data,0);
+			d = new CRC32Descriptor(data);
 			break;
 
 		case 0x09:
-			d = new CompressedModuleDescriptor(data, 0);
+			d = new CompressedModuleDescriptor(data);
 			break;
 
-
 		case 0x0A:
-			d = new SSUModuleTypeDescriptor(data, 0);
+			d = new SSUModuleTypeDescriptor(data);
 			break;
 
 		case 0x70:
-			d = new LabelDescriptor(data, 0);
+			d = new LabelDescriptor(data);
 			break;
 
 		case 0x71:
-			d = new CachingPriorityDescriptor(data, 0);
+			d = new CachingPriorityDescriptor(data);
 			break;
 
 		default:
-			d = new DSMCCDescriptor(data, 0);
+			d = new DSMCCDescriptor(data);
 			logger.info("Not implemented DSMCCDescriptor:" + toUnsignedInt(data[0]) + " ("
 					+ DSMCCDescriptor.getDescriptorname(toUnsignedInt(data[0]))
 					+ ",) data=" + d.getRawDataString());

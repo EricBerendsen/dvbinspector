@@ -27,12 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.casema;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getBCD;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -42,135 +42,66 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 public class ZiggoVodDeliveryDescriptor extends Descriptor {
 
 
-	private final List<VODChannel> channelList = new ArrayList<VODChannel>();
+	private final List<VODChannel> channelList = new ArrayList<>();
 
-	public static class VODChannel implements TreeNode{
-		private String frequency; // use as bits, BCD coded.
-		private int FEC_outer;
-		private int modulation;
-		private String symbol_rate;
-		private int FEC_inner;
-
-		public int getFEC_inner() {
-			return FEC_inner;
-		}
-
-
-		public void setFEC_inner(final int fec_inner) {
-			FEC_inner = fec_inner;
-		}
-
-
-		public int getFEC_outer() {
-			return FEC_outer;
-		}
+	public record VODChannel(String frequency,int FEC_outer,int modulation,String symbol_rate, int FEC_inner) implements TreeNode{
 
 		public String getFEC_outerString() {
-			switch (getFEC_outer()) {
-			case 0: return "not defined";
-			case 1: return "no outer FEC coding";
-			case 2: return "RS(204/188)";
-			default: return "reserved for future use";
-			}
+			return switch (FEC_outer) {
+			case 0 -> "not defined";
+			case 1 -> "no outer FEC coding";
+			case 2 -> "RS(204/188)";
+			default -> "reserved for future use";
+			};
 		}
 
 		public String getModulationString() {
-			switch (getModulation()) {
-			case 0x00: return "not defined";
-			case 0x01: return "16-QAM";
-			case 0x02: return "32-QAM";
-			case 0x03: return "64-QAM";
-			case 0x04: return "128-QAM";
-			case 0x05: return "256-QAM";
-			default: return "reserved for future use";		}
+			return switch (modulation) {
+			case 0x00 -> "not defined";
+			case 0x01 -> "16-QAM";
+			case 0x02 -> "32-QAM";
+			case 0x03 -> "64-QAM";
+			case 0x04 -> "128-QAM";
+			case 0x05 -> "256-QAM";
+			default -> "reserved for future use";
+			};
 		}
 
 		public String getFEC_innerString() {
-			switch (getFEC_inner()) {
-			case 0: return"not defined";
-			case 1: return"1/2 conv. code rate";
-			case 2: return"2/3 conv. code rate";
-			case 3: return"3/4 conv. code rate";
-			case 4: return"5/6 conv. code rate";
-			case 5: return"7/8 conv. code rate";
-			case 6: return"8/9 conv. code rate";
-			case 7: return"3/5 conv. code rate";
-			case 8: return"4/5 conv. code rate";
-			case 9: return"9/10 conv. code rate";
-			case 15: return"no conv. Coding";
-			default: return"reserved for future use";
-			}
+			return switch (FEC_inner) {
+			case 0 -> "not defined";
+			case 1 -> "1/2 conv. code rate";
+			case 2 -> "2/3 conv. code rate";
+			case 3 -> "3/4 conv. code rate";
+			case 4 -> "5/6 conv. code rate";
+			case 5 -> "7/8 conv. code rate";
+			case 6 -> "8/9 conv. code rate";
+			case 7 -> "3/5 conv. code rate";
+			case 8 -> "4/5 conv. code rate";
+			case 9 -> "9/10 conv. code rate";
+			case 15 -> "no conv. Coding";
+			default -> "reserved for future use";
+			};
 		}
-
-		public void setFEC_outer(final int fec_outer) {
-			FEC_outer = fec_outer;
-		}
-
-
-		public int getModulation() {
-			return modulation;
-		}
-
-
-		public void setModulation(final int modulation) {
-			this.modulation = modulation;
-		}
-
-
-		public String getFrequency() {
-			return frequency;
-		}
-
-
-		public void setFrequency(final String frequency) {
-			this.frequency = frequency;
-		}
-
-
-		public String getSymbol_rate() {
-			return symbol_rate;
-		}
-
-
-		public void setSymbol_rate(final String symbol_rate) {
-			this.symbol_rate = symbol_rate;
-		}
-
 
 		@Override
-		public String toString() {
-			return super.toString() + "Frequency="+getFrequency()+", FEC_outer="+getFEC_outerString()+", modulation="+getModulationString()+", Symbol Rate="+getSymbol_rate()+", FEC_inner="+getFEC_innerString();
-		}
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("VOD_channel");
 
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("VOD_channel"));
-
-			t.add(new DefaultMutableTreeNode(new KVP("frequency",frequency ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("FEC_outer",FEC_outer ,getFEC_outerString())));
-			t.add(new DefaultMutableTreeNode(new KVP("modulation",modulation ,getModulationString())));
-			t.add(new DefaultMutableTreeNode(new KVP("symbol_rate",symbol_rate ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("FEC_inner",FEC_inner ,getFEC_innerString())));
+			t.add(new KVP("frequency", frequency));
+			t.add(new KVP("FEC_outer", FEC_outer, getFEC_outerString()));
+			t.add(new KVP("modulation", modulation, getModulationString()));
+			t.add(new KVP("symbol_rate", symbol_rate));
+			t.add(new KVP("FEC_inner", FEC_inner, getFEC_innerString()));
 
 			return t;
-		}
-
-
-
-		public VODChannel(final String frequency, final int fec_outer, final int modulation, final String symbol_rate, final int fec_inner) {
-			super();
-			this.frequency = frequency;
-			FEC_outer = fec_outer;
-			this.modulation = modulation;
-			this.symbol_rate = symbol_rate;
-			FEC_inner = fec_inner;
 		}
 
 	}
 
 
-	public ZiggoVodDeliveryDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
+	public ZiggoVodDeliveryDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
 		int t=0;
 		while (t<descriptorLength) {
@@ -180,12 +111,12 @@ public class ZiggoVodDeliveryDescriptor extends Descriptor {
 			String symbol_rate;
 			int FEC_inner;
 
-			frequency = getBCD(b, 2*(offset+2+t), 8);
-			FEC_outer = getInt(b, offset+7+t, 1, 0x0f);
-			modulation= getInt(b, offset+8+t, 1, 0xff);
-			symbol_rate = getBCD(b, (offset+9+t)*2,7);
-			FEC_inner = getInt(b, offset+12+t, 1, 0x0f);
-			final VODChannel s = new VODChannel(frequency, FEC_outer, modulation, symbol_rate,FEC_inner);
+			frequency = getBCD(b, 2*(2+t), 8);
+			FEC_outer = getInt(b, 7+t, 1, 0x0f);
+			modulation= getInt(b, 8+t, 1, 0xff);
+			symbol_rate = getBCD(b, (9+t)*2,7);
+			FEC_inner = getInt(b, 12+t, 1, 0x0f);
+			VODChannel s = new VODChannel(frequency, FEC_outer, modulation, symbol_rate,FEC_inner);
 			channelList.add(s);
 
 			t=t+11;
@@ -198,11 +129,9 @@ public class ZiggoVodDeliveryDescriptor extends Descriptor {
 		return "Video On Demand delivery descriptor";
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,channelList,modus,"vod_channels");
 		return t;
 	}

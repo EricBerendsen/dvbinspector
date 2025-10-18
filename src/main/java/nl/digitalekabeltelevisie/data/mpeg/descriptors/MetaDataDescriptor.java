@@ -28,14 +28,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
+import static java.util.Arrays.copyOfRange;
 import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
-import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * Based on ISO/IEC 13818-1:2013, ch.2.6.60, and ETSI TS 102 323 V1.5.1, ch.5.3.4
@@ -76,9 +74,9 @@ public class MetaDataDescriptor extends Descriptor {
 	private byte[] private_data_byte;
 
 
-	public MetaDataDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int localOffset = offset+2;
+	public MetaDataDescriptor( byte[] b, TableSection parent) {
+		super(b, parent);
+		int localOffset = 2;
 		metadata_application_format = getInt(b, localOffset, 2, MASK_16BITS);
 		localOffset+=2;
 		if(metadata_application_format==0xFFFF){
@@ -117,46 +115,46 @@ public class MetaDataDescriptor extends Descriptor {
 			reserved2 = getBytes(b, localOffset, dec_config_identification_record_length);
 			localOffset += reserved_data_length;
 		}
-		private_data_byte = Utils.copyOfRange(b, localOffset, offset+descriptorLength+2);
+		private_data_byte = copyOfRange(b, localOffset, descriptorLength+2);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_application_format",metadata_application_format,getMetaDataApplicationFormatString(metadata_application_format))));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("metadata_application_format",metadata_application_format,getMetaDataApplicationFormatString(metadata_application_format)));
 		if(metadata_application_format==0xFFFF){
-			t.add(new DefaultMutableTreeNode(new KVP("metadata_application_format_identifier",metadata_application_format_identifier,null)));
+			t.add(new KVP("metadata_application_format_identifier",metadata_application_format_identifier));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_format",metadata_format,getMetaDataFormatString(metadata_format))));
+		t.add(new KVP("metadata_format",metadata_format,getMetaDataFormatString(metadata_format)));
 		if(metadata_format==0xFF){
-			t.add(new DefaultMutableTreeNode(new KVP("metadata_format_identifier",metadata_format_identifier,null)));
+			t.add(new KVP("metadata_format_identifier",metadata_format_identifier));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_service_id",metadata_service_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("decoder_config_flags",decoder_config_flags,getDecoderConfigFlagsString(decoder_config_flags))));
-		t.add(new DefaultMutableTreeNode(new KVP("DSM-CC_flag",dsm_cc_flag,dsm_cc_flag==1?"the stream with which this descriptor is associated is carried in an ISO/IEC 13818-6 data or object carousel":null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+		t.add(new KVP("metadata_service_id",metadata_service_id));
+		t.add(new KVP("decoder_config_flags",decoder_config_flags,getDecoderConfigFlagsString(decoder_config_flags)));
+		t.add(new KVP("DSM-CC_flag",dsm_cc_flag,dsm_cc_flag==1?"the stream with which this descriptor is associated is carried in an ISO/IEC 13818-6 data or object carousel":null));
+		t.add(new KVP("reserved",reserved));
 
 		if(dsm_cc_flag==1){
-			t.add(new DefaultMutableTreeNode(new KVP("service_identification_length",service_identification_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("service_identification_record_byte",service_identification_record_byte,null)));
+			t.add(new KVP("service_identification_length",service_identification_length));
+			t.add(new KVP("service_identification_record_byte",service_identification_record_byte));
 		}
 		if(decoder_config_flags==1){ // 001
-			t.add(new DefaultMutableTreeNode(new KVP("decoder_config_length",decoder_config_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("decoder_config_byte",decoder_config_byte,null)));
+			t.add(new KVP("decoder_config_length",decoder_config_length));
+			t.add(new KVP("decoder_config_byte",decoder_config_byte));
 		}
 		if (decoder_config_flags == 3) { // '011'
-			t.add(new DefaultMutableTreeNode(new KVP("dec_config_identification_record_length",dec_config_identification_record_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("dec_config_identification_record_byte",dec_config_identification_record_byte,null)));
+			t.add(new KVP("dec_config_identification_record_length",dec_config_identification_record_length));
+			t.add(new KVP("dec_config_identification_record_byte",dec_config_identification_record_byte));
 		}
 		if (decoder_config_flags == 4) { // '100'
-			t.add(new DefaultMutableTreeNode(new KVP("decoder_config_metadata_service_id",decoder_config_metadata_service_id,null)));
+			t.add(new KVP("decoder_config_metadata_service_id",decoder_config_metadata_service_id));
 		}
 		if ((decoder_config_flags == 5)|| (decoder_config_flags == 6)){// '101'|'110'
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_data_length",reserved_data_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
+			t.add(new KVP("reserved_data_length",reserved_data_length));
+			t.add(new KVP("reserved",reserved2));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",private_data_byte,null)));
+		t.add(new KVP("private_data_byte",private_data_byte));
 
 		return t;
 	}

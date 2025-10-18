@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -62,147 +60,61 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 			0xBBB2	// BBG Object Carousel
 	);
 
-	public static class Platform implements TreeNode{
-		/**
-		 *
-		 */
-		private final int platform_id ;
-		private final int action_type ;
-		private final int INT_versioning_flag ;
-		private final int INT_version ;
+	public static record Platform(int platform_id, int action_type, int int_versioning_flag, int int_version) implements TreeNode{
 
-
-
-		public Platform(final int platform_id, final int action_type, final int int_versioning_flag, final int int_version) {
-			super();
-			this.platform_id = platform_id;
-			this.action_type = action_type;
-			INT_versioning_flag = int_versioning_flag;
-			INT_version = int_version;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("platforms"));
-			s.add(new DefaultMutableTreeNode(new KVP("platform_id",platform_id,getPlatformIDString(platform_id))));
-			s.add(new DefaultMutableTreeNode(new KVP("action_type",action_type,getActionTypeString(action_type))));
-			s.add(new DefaultMutableTreeNode(new KVP("INT_versioning_flag",INT_versioning_flag,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("INT_version",INT_version,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("platforms");
+			s.add(new KVP("platform_id", platform_id, getPlatformIDString(platform_id)));
+			s.add(new KVP("action_type", action_type, getActionTypeString(action_type)));
+			s.add(new KVP("INT_versioning_flag", int_versioning_flag));
+			s.add(new KVP("INT_version", int_version));
 			return s;
 		}
 	}
 
 
-	public static class ApplicationType implements TreeNode{
-		private final int applicationType;
+	public static record ApplicationType(int applicationType) implements TreeNode{
 
-		public ApplicationType(final int applicationType) {
-			super();
-			this.applicationType = applicationType;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			return new DefaultMutableTreeNode(new KVP("application_type",applicationType,getAppTypeIDString(applicationType)));
+		@Override
+		public KVP getJTreeNode(final int modus){
+			return new KVP("application_type",applicationType,getAppTypeIDString(applicationType));
 		}
 
 	}
 
-	public static class MHEG5ApplicationType implements TreeNode{
-		private final int applicationTypeCode;
-		private final int boot_priority_hint;
-		private final int application_specific_data_length;
-		private final byte [] application_specific_data_byte;
+	public static record MHEG5ApplicationType(int applicationTypeCode, int boot_priority_hint, int application_specific_data_length, byte[] application_specific_data_byte) implements TreeNode{
 
-
-		public MHEG5ApplicationType(final int applicationType, final int bootPriorityHint, final int applicationSpecificDataLength, final byte[] data) {
-			super();
-			this.applicationTypeCode = applicationType;
-			this.boot_priority_hint = bootPriorityHint;
-			this.application_specific_data_length = applicationSpecificDataLength;
-			application_specific_data_byte = data;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("MHEG5ApplicationType"));
-			s.add(new DefaultMutableTreeNode(new KVP("application_type_code",applicationTypeCode,getMHEG5ApplicationTypeString(applicationTypeCode))));
-			s.add(new DefaultMutableTreeNode(new KVP("boot_priority_hint",boot_priority_hint,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("application_specific_data_length",application_specific_data_length,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("application_specific_data_byte",application_specific_data_byte,null)));
+		@Override
+		public KVP getJTreeNode(int modus){
+			KVP s=new KVP("MHEG5ApplicationType");
+			s.add(new KVP("application_type_code",applicationTypeCode,getMHEG5ApplicationTypeString(applicationTypeCode)));
+			s.add(new KVP("boot_priority_hint",boot_priority_hint));
+			s.add(new KVP("application_specific_data_length",application_specific_data_length));
+			s.add(new KVP("application_specific_data_byte",application_specific_data_byte));
 
 			return s;
 		}
 
 	}
-	public class OUIEntry implements TreeNode{
-
-		private final int oui;
-		private final int updateType;
-		private final int updateVersioningFlag;
-		private final int updateVersion;
-		private final int selectorLength;
-		private final byte[] ouiSelectorBytes;
+	public record OUIEntry( int oui,  int updateType,  int updateVersioningFlag,  int updateVersion,  int selectorLength,  byte[] ouiSelectorBytes) implements TreeNode{
 
 
 
-		public OUIEntry(final int oui, final int updateType, final int updateVersioningFlag, final int updateVersion, final int selectorLength, final byte[] selectorByte) {
-			super();
-			this.oui = oui;
-			this.updateType = updateType;
-			this.updateVersioningFlag = updateVersioningFlag;
-			this.updateVersion = updateVersion;
-			this.selectorLength = selectorLength;
-			this.ouiSelectorBytes = selectorByte;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("OUI"));
-			s.add(new DefaultMutableTreeNode(new KVP("oui",oui,Utils.getOUIString(oui))));
-			s.add(new DefaultMutableTreeNode(new KVP("update_type",updateType,getUpdateTypeString(updateType))));
-			s.add(new DefaultMutableTreeNode(new KVP("update_versioning_flag",updateVersioningFlag,updateVersioningFlag==0?"no relevant versioning information is carried in the version field":"version field reflects changes in the system software update service component"))); // ETSI TS 102 006 V1.2.1  p7.1
-			s.add(new DefaultMutableTreeNode(new KVP("update_version",updateVersion,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("selector_length",selectorLength,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("selector_bytes",ouiSelectorBytes,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("OUI");
+			s.add(new KVP("oui", oui, Utils.getOUIString(oui)));
+			s.add(new KVP("update_type", updateType, getUpdateTypeString(updateType)));
+			s.add(new KVP("update_versioning_flag", updateVersioningFlag,
+					updateVersioningFlag == 0 ? "no relevant versioning information is carried in the version field"
+							: "version field reflects changes in the system software update service component")); // ETSI TS 102 006 V1.2.1 p7.1
+			s.add(new KVP("update_version", updateVersion));
+			s.add(new KVP("selector_length", selectorLength));
+			s.add(new KVP("selector_bytes", ouiSelectorBytes));
 			return s;
 		}
 
-
-
-		public int getOui() {
-			return oui;
-		}
-
-
-
-		public byte[] getSelectorByte() {
-			return ouiSelectorBytes;
-		}
-
-
-
-		public int getSelectorLength() {
-			return selectorLength;
-		}
-
-
-
-		public int getUpdateType() {
-			return updateType;
-		}
-
-
-
-		public int getUpdateVersion() {
-			return updateVersion;
-		}
-
-
-
-		public int getUpdateVersioningFlag() {
-			return updateVersioningFlag;
-		}
 
 	}
 
@@ -220,51 +132,51 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	private int max_sections_per_datagram ;
 
 
-	public DataBroadcastIDDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		dataBroadcastId = Utils.getInt(b, offset+2, 2, Utils.MASK_16BITS);
+	public DataBroadcastIDDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		dataBroadcastId = Utils.getInt(b, 2, 2, Utils.MASK_16BITS);
 		if(dataBroadcastId==0x0005){ //en 301192 7.2.1
-			MAC_address_range = Utils.getInt(b, offset+4, 1, 0xE0)>>>5;
-			MAC_IP_mapping_flag = Utils.getInt(b, offset+4, 1, 0x10)>>>4;
-			alignment_indicator = Utils.getInt(b, offset+4, 1, 0x08)>>>3;
-			max_sections_per_datagram =Utils.getInt(b, offset+5, 1, Utils.MASK_8BITS);
+			MAC_address_range = Utils.getInt(b, 4, 1, 0xE0)>>>5;
+			MAC_IP_mapping_flag = Utils.getInt(b, 4, 1, 0x10)>>>4;
+			alignment_indicator = Utils.getInt(b, 4, 1, 0x08)>>>3;
+			max_sections_per_datagram =Utils.getInt(b, 5, 1, Utils.MASK_8BITS);
 		}else if(dataBroadcastId==0x000a){ // system software update service, TS 102 006 V1.4.1 Ch 7.1
-			OUI_data_length = getInt(b,offset+4,1,MASK_8BITS);
+			OUI_data_length = getInt(b,4,1,MASK_8BITS);
 			int r =0;
 			while (r<OUI_data_length) {
-				final int oui = getInt(b,offset+ 5+r, 3, Utils.MASK_24BITS);
-				final int updateType = getInt(b,offset+ 8+r, 1, Utils.MASK_4BITS);
-				final int updateVersioningFlag = getInt(b,offset+ 9+r, 1, 0x20)>>5;
-				final int updateVersion = getInt(b,offset+ 9+r, 1, Utils.MASK_5BITS);
-				final int selectorLength= getInt(b, offset+r+10, 1, MASK_8BITS);
-				final byte[] selector_byte = copyOfRange(b, offset+r+11, offset+r+11+selectorLength);
-				final OUIEntry ouiEntry = new OUIEntry(oui,updateType,updateVersioningFlag,updateVersion, selectorLength,selector_byte);
+				int oui = getInt(b, 5+r, 3, Utils.MASK_24BITS);
+				int updateType = getInt(b, 8+r, 1, Utils.MASK_4BITS);
+				int updateVersioningFlag = getInt(b, 9+r, 1, 0x20)>>5;
+				int updateVersion = getInt(b, 9+r, 1, Utils.MASK_5BITS);
+				int selectorLength= getInt(b, r+10, 1, MASK_8BITS);
+				byte[] selector_byte = copyOfRange(b, r+11, r+11+selectorLength);
+				OUIEntry ouiEntry = new OUIEntry(oui,updateType,updateVersioningFlag,updateVersion, selectorLength,selector_byte);
 				ouiList.add(ouiEntry);
 				r=r+6+selectorLength;
 			}
-			privateDataByte = copyOfRange(b, offset+5+r, offset+descriptorLength+2);
+			privateDataByte = copyOfRange(b, 5+r, descriptorLength+2);
 		}else if(dataBroadcastId==0x000b){ //IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
-			platform_id_data_length = getInt(b,offset+4,1,MASK_8BITS);
+			platform_id_data_length = getInt(b,4,1,MASK_8BITS);
 			int r =0;
 			while (r<platform_id_data_length) {
-				final int platform_id = getInt(b,offset+ 5+r, 3, Utils.MASK_24BITS);
-				final int action_type  = getInt(b,offset+ 8+r, 1, Utils.MASK_8BITS);
+				int platform_id = getInt(b, 5+r, 3, Utils.MASK_24BITS);
+				int action_type  = getInt(b, 8+r, 1, Utils.MASK_8BITS);
 
-				final int INT_versioning_flag = getInt(b,offset+ 9+r, 1, 0x20)>>>5;
-				final int INT_version = getInt(b,offset+ 9+r, 1, Utils.MASK_5BITS);
+				int INT_versioning_flag = getInt(b, 9+r, 1, 0x20)>>>5;
+				int INT_version = getInt(b, 9+r, 1, Utils.MASK_5BITS);
 
-				final Platform p = new Platform(platform_id,action_type,INT_versioning_flag,INT_version);
+				Platform p = new Platform(platform_id,action_type,INT_versioning_flag,INT_version);
 				platformList.add(p);
 				r=r+5;
 			}
-			privateDataByte = copyOfRange(b, offset+5+r, offset+descriptorLength+2);
+			privateDataByte = copyOfRange(b, 5+r, descriptorLength+2);
 
 
 		}else if((dataBroadcastId==0x00f0)||(dataBroadcastId==0x00f1)){ // MHP
 			int r =0;
 			while (r<(descriptorLength-2)){
-				final int at = getInt(b,offset+ 4+r, 2, Utils.MASK_15BITS);
-				final ApplicationType appT = new ApplicationType(at);
+				int at = getInt(b, 4+r, 2, Utils.MASK_15BITS);
+				ApplicationType appT = new ApplicationType(at);
 				applicationTypeList.add(appT);
 				r+=2;
 			}
@@ -272,17 +184,17 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 		}else if(dataBroadcastId==0x0106){ //ETSI ES 202 184 V2.2.1 (2011-03) 9.3.2.1 data_broadcast_id_descriptor
 			int r =0;
 			while (r<(descriptorLength-2)){
-				final int at = getInt(b,offset+ 4+r, 2, Utils.MASK_16BITS);
-				final int bootPrio = getInt(b,offset+ 6+r, 1, Utils.MASK_8BITS);
-				final int appDataLen = getInt(b,offset+ 7+r, 1, Utils.MASK_8BITS);
-				final byte [] appData = copyOfRange(b, offset+r+8, offset+r+8+appDataLen);
-				final MHEG5ApplicationType mheg5App = new MHEG5ApplicationType(at, bootPrio, appDataLen, appData);
+				int at = getInt(b, 4+r, 2, Utils.MASK_16BITS);
+				int bootPrio = getInt(b, 6+r, 1, Utils.MASK_8BITS);
+				int appDataLen = getInt(b, 7+r, 1, Utils.MASK_8BITS);
+				byte [] appData = copyOfRange(b, r+8, r+8+appDataLen);
+				MHEG5ApplicationType mheg5App = new MHEG5ApplicationType(at, bootPrio, appDataLen, appData);
 				mheg5ApplicationTypeList.add(mheg5App);
 				r=r+4+appDataLen;
 
 			}
 		}else{
-			selectorByte = copyOfRange(b, offset+4, offset+descriptorLength+2);
+			selectorByte = copyOfRange(b, 4, descriptorLength+2);
 		}
 
 	}
@@ -292,15 +204,15 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 
 
 
-	public String getUpdateTypeString(final int updateType) {
+	public static String getUpdateTypeString(int updateType) {
 
-		switch (updateType) {
-		case 0x00: return "proprietary update solution";
-		case 0x01: return "standard update carousel (i.e. without notification table) via broadcast";
-		case 0x02: return "system software Update with Notification Table (UNT) via broadcast";
-		case 0x03: return "system software update using return channel with UNT";
-		default: return "reserved for future use";
-		}
+		return switch (updateType) {
+		case 0x00 -> "proprietary update solution";
+		case 0x01 -> "standard update carousel (i.e. without notification table) via broadcast";
+		case 0x02 -> "system software Update with Notification Table (UNT) via broadcast";
+		case 0x03 -> "system software update using return channel with UNT";
+		default -> "reserved for future use";
+		};
 	}
 
 
@@ -311,34 +223,35 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 
-		t.add(new DefaultMutableTreeNode(new KVP("data_broadcast_id",dataBroadcastId ,Utils.getDataBroadCastIDString(dataBroadcastId))));
+		t.add(new KVP("data_broadcast_id", dataBroadcastId, Utils.getDataBroadCastIDString(dataBroadcastId)));
 
-		if(dataBroadcastId==0x0005){ //en 301192 7.2.1
-			t.add(new DefaultMutableTreeNode(new KVP("MAC_address_range",MAC_address_range,DataBroadcastDescriptor.getvalidMACaddressBytesString(MAC_address_range))));
-			t.add(new DefaultMutableTreeNode(new KVP("MAC_IP_mapping_flag",MAC_IP_mapping_flag,MAC_IP_mapping_flag==1?"uses IP to MAC mapping as described in RFC 1112 and RFC 2464":"mapping not defined")));
-			t.add(new DefaultMutableTreeNode(new KVP("alignment_indicator",alignment_indicator,alignment_indicator==1?"alignment in bits: 32":"alignment in bits: 8 (default)")));
-			t.add(new DefaultMutableTreeNode(new KVP("max_sections_per_datagram",max_sections_per_datagram,null)));
-		}else if(dataBroadcastId==0x000a){
-			addListJTree(t,ouiList,modus,"Systems Software Update");
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
-		}else if(dataBroadcastId==0x000b){ //IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
-			addListJTree(t,platformList,modus,"IP/MAC platform");
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",privateDataByte ,null)));
-		}else if((dataBroadcastId==0x00f0)||(dataBroadcastId==0x00f1)){ // MHP
-			addListJTree(t,applicationTypeList,modus,"application_type");
+		if (dataBroadcastId == 0x0005) { // en 301192 7.2.1
+			t.add(new KVP("MAC_address_range", MAC_address_range, DataBroadcastDescriptor.getvalidMACaddressBytesString(MAC_address_range)));
+			t.add(new KVP("MAC_IP_mapping_flag", MAC_IP_mapping_flag,
+					MAC_IP_mapping_flag == 1 ? "uses IP to MAC mapping as described in RFC 1112 and RFC 2464" : "mapping not defined"));
+			t.add(new KVP("alignment_indicator", alignment_indicator,
+					alignment_indicator == 1 ? "alignment in bits: 32" : "alignment in bits: 8 (default)"));
+			t.add(new KVP("max_sections_per_datagram", max_sections_per_datagram));
+		} else if (dataBroadcastId == 0x000a) {
+			addListJTree(t, ouiList, modus, "Systems Software Update");
+			t.add(new KVP("private_data_byte", privateDataByte));
+		} else if (dataBroadcastId == 0x000b) { // IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
+			addListJTree(t, platformList, modus, "IP/MAC platform");
+			t.add(new KVP("private_data_byte", privateDataByte));
+		} else if ((dataBroadcastId == 0x00f0) || (dataBroadcastId == 0x00f1)) { // MHP
+			addListJTree(t, applicationTypeList, modus, "application_type");
 
-		}else if(dataBroadcastId==0x0106){
-			addListJTree(t,mheg5ApplicationTypeList,modus,"MHEG5 Applications");
-		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("id_selector_bytes",selectorByte,null)));
+		} else if (dataBroadcastId == 0x0106) {
+			addListJTree(t, mheg5ApplicationTypeList, modus, "MHEG5 Applications");
+		} else {
+			t.add(new KVP("id_selector_bytes", selectorByte));
 		}
 
 		return t;
 	}
-
 
 	public boolean describesObjectCarousel() {
 		return BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(getDataBroadcastId());
@@ -347,8 +260,8 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	public boolean describesSSU() {
 		if(getDataBroadcastId()==0xa){
 			// SSU now see if there is a standard update carousel, or one with UNT
-			for(final OUIEntry entry:ouiList){
-				if ((entry.getUpdateType() == 0x01) || (entry.getUpdateType() == 0x02)) {
+			for(OUIEntry entry:ouiList){
+				if ((entry.updateType() == 0x01) || (entry.updateType() == 0x02)) {
 					return true;
 				}
 			}
@@ -404,7 +317,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 		return selectorByte;
 	}
 
-	public static String getMHEG5ApplicationTypeString(final int appType) {
+	public static String getMHEG5ApplicationTypeString(int appType) {
 
 		switch (appType) {
 		case 0x00: return "NULL_APPLICATION_TYPE";

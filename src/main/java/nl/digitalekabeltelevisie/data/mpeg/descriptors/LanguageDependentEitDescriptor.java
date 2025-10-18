@@ -47,7 +47,7 @@ public abstract class LanguageDependentEitDescriptor extends Descriptor{
 
 	@Override
 	public KVP getJTreeNode(final int modus){
-		return (KVP) super.getJTreeNode(modus);
+		return super.getJTreeNode(modus);
 	}
 
 	public abstract String getIso639LanguageCode();

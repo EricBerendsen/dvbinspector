@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_22BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_2BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -39,10 +39,10 @@ public class MaximumBitrateDescriptor extends Descriptor {
 	private int reserved;
 	private int maximumBitrate;
 
-	public MaximumBitrateDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		reserved = getInt(b,offset+2,2,MASK_2BITS);
-		maximumBitrate = getInt(b,offset+2,3,MASK_22BITS);
+	public MaximumBitrateDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		reserved = getInt(b, 2, 2, MASK_2BITS);
+		maximumBitrate = getInt(b, 2, 3, MASK_22BITS);
 	}
 
 	@Override
@@ -51,28 +51,19 @@ public class MaximumBitrateDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("maximum_bitrate",maximumBitrate ,KVP.formatInt(maximumBitrate*50)+" bytes/second")));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("reserved", reserved));
+		t.add(new KVP("maximum_bitrate", maximumBitrate, KVP.formatInt(maximumBitrate * 50) + " bytes/second"));
 		return t;
 	}
-
 
 	public int getMaximumBitrate() {
 		return maximumBitrate;
 	}
 
-	public void setMaximumBitrate(final int maximumBitrate) {
-		this.maximumBitrate = maximumBitrate;
-	}
-
 	public int getReserved() {
 		return reserved;
-	}
-
-	public void setReserved(final int reserverd) {
-		this.reserved = reserverd;
 	}
 
 }

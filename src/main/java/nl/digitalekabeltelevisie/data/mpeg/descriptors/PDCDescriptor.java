@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -43,21 +41,20 @@ public class PDCDescriptor extends Descriptor {
 	private final int minute;
 	private final int programmeIdentificationLabel;
 
-
-	public PDCDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		programmeIdentificationLabel = Utils.getInt(b, offset+2, 3,Utils.MASK_20BITS);
-		day = getInt(b,offset+2,2,0x0F80)>>7;
-		month = getInt(b,offset+3,1,0x78)>>3;
-		hour = getInt(b,offset+3,2,0x07C0)>>6;
-		minute = getInt(b,offset+4,1,Utils.MASK_6BITS);
+	public PDCDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		programmeIdentificationLabel = Utils.getInt(b, 2, 3, Utils.MASK_20BITS);
+		day = getInt(b, 2, 2, 0x0F80) >> 7;
+		month = getInt(b, 3, 1, 0x78) >> 3;
+		hour = getInt(b, 3, 2, 0x07C0) >> 6;
+		minute = getInt(b, 4, 1, Utils.MASK_6BITS);
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("programme_identification_label",programmeIdentificationLabel ,"day:"+day+" month:"+month+" hour:"+hour+" minute:"+minute)));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("programme_identification_label",programmeIdentificationLabel ,"day:"+day+" month:"+month+" hour:"+hour+" minute:"+minute));
 		return t;
 	}
 

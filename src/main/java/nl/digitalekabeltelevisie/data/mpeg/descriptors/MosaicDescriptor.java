@@ -39,7 +39,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class MosaicDescriptor extends Descriptor {
 
-	private List<LogicalCell> logicalCellList = new ArrayList<LogicalCell>();
+	private List<LogicalCell> logicalCellList = new ArrayList<>();
 
 	private int mosaicEntryPoint = 0;
 	private int numberOfHorizontalElementaryCells = 0;
@@ -83,32 +83,32 @@ public class MosaicDescriptor extends Descriptor {
 
 
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_cell"));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_cell_id",logicalCellId,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_cell_presentation_info",logicalCellPresentationInfo,getCodingOfLogicalCellPresentationInfo(logicalCellPresentationInfo))));
-			s.add(new DefaultMutableTreeNode(new KVP("elementary_cell_field_length",elementaryCellFieldLength,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("elementary_cell_ids",elementaryCellIds,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_linkage_info",cellLinkageInfo,getCodingOfCellLinkageInfo(cellLinkageInfo))));
+			final DefaultMutableTreeNode s=new KVP("logical_cell");
+			s.add(new KVP("logical_cell_id",logicalCellId));
+			s.add(new KVP("logical_cell_presentation_info",logicalCellPresentationInfo,getCodingOfLogicalCellPresentationInfo(logicalCellPresentationInfo)));
+			s.add(new KVP("elementary_cell_field_length",elementaryCellFieldLength));
+			s.add(new KVP("elementary_cell_ids",elementaryCellIds));
+			s.add(new KVP("cell_linkage_info",cellLinkageInfo,getCodingOfCellLinkageInfo(cellLinkageInfo)));
 
 
 			if(cellLinkageInfo==0x01){
-				s.add(new DefaultMutableTreeNode(new KVP("bouquet_id",bouquetId,null)));
+				s.add(new KVP("bouquet_id",bouquetId));
 			}
 			if(cellLinkageInfo==0x02){
-				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId))));
+				s.add(new KVP("original_network_id",originalNetworkId));
+				s.add(new KVP("transport_stream_id",transportStreamId));
+				s.add(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId)));
 			}
 			if(cellLinkageInfo==0x03){
-				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId))));
+				s.add(new KVP("original_network_id",originalNetworkId));
+				s.add(new KVP("transport_stream_id",transportStreamId));
+				s.add(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId)));
 			}
 			if(cellLinkageInfo==0x04){
-				s.add(new DefaultMutableTreeNode(new KVP("original_network_id",originalNetworkId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id",transportStreamId,null)));
-				s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId))));
-				s.add(new DefaultMutableTreeNode(new KVP("event",eventId,null)));
+				s.add(new KVP("original_network_id",originalNetworkId));
+				s.add(new KVP("transport_stream_id",transportStreamId));
+				s.add(new KVP("service_id",serviceId,parentTableSection.getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId)));
+				s.add(new KVP("event",eventId));
 			}
 
 			return s;
@@ -178,45 +178,46 @@ public class MosaicDescriptor extends Descriptor {
 
 	}
 
-	public MosaicDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public MosaicDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		mosaicEntryPoint = Utils.getInt(b, offset+2, 1, 0x80)>>7;
-		numberOfHorizontalElementaryCells = Utils.getInt(b, offset+2, 1, 0x70)>>4;
-		numberOfVerticalElementaryCells= Utils.getInt(b, offset+2, 1, 0x07);
-		int t=1;
-		while (t<descriptorLength) {
-			final int logical_cell_id = Utils.getInt(b, offset+t+2, 1, 0xFC)>>2;
-		final int logical_cell_presentation_info = Utils.getInt(b, offset+t+3, 1, Utils.MASK_3BITS);
-		final int elementary_cell_field_length = Utils.getInt(b, offset+t+4, 1, Utils.MASK_8BITS);
-		final byte [] elementary_cell_ids = Utils.getBytes(b, offset+t+5, elementary_cell_field_length);
-		final int cell_linkage_info=Utils.getInt(b, offset+t+5+elementary_cell_field_length, 1, Utils.MASK_8BITS);
-		final LogicalCell s = new LogicalCell(logical_cell_id,logical_cell_presentation_info,elementary_cell_field_length,elementary_cell_ids,cell_linkage_info);
-		t=t+4+elementary_cell_field_length;
-		if(cell_linkage_info==0x01){
-			s.setBouquetId(Utils.getInt(b, offset+t+2, 2, Utils.MASK_16BITS));
-			t=t+2;
-		}
-		if(cell_linkage_info==0x02){
-			s.setOriginalNetworkId(Utils.getInt(b, offset+t+2, 2, Utils.MASK_16BITS));
-			s.setTransportStreamId(Utils.getInt(b, offset+t+4, 2, Utils.MASK_16BITS));
-			s.setServiceId(Utils.getInt(b, offset+t+6, 2, Utils.MASK_16BITS));
-			t=t+6;
-		}
-		if(cell_linkage_info==0x03){
-			s.setOriginalNetworkId(Utils.getInt(b, offset+t+2, 2, Utils.MASK_16BITS));
-			s.setTransportStreamId(Utils.getInt(b, offset+t+4, 2, Utils.MASK_16BITS));
-			s.setServiceId(Utils.getInt(b, offset+t+6, 2, Utils.MASK_16BITS));
-			t=t+6;
-		}
-		if(cell_linkage_info==0x04){
-			s.setOriginalNetworkId(Utils.getInt(b, offset+t+2, 2, Utils.MASK_16BITS));
-			s.setTransportStreamId(Utils.getInt(b, offset+t+4, 2, Utils.MASK_16BITS));
-			s.setServiceId(Utils.getInt(b, offset+t+6, 2, Utils.MASK_16BITS));
-			s.setEventId(Utils.getInt(b, offset+t+8, 2, Utils.MASK_16BITS));
-			t=t+8;
-		}
-		logicalCellList.add(s);
+		mosaicEntryPoint = Utils.getInt(b, 2, 1, 0x80) >> 7;
+		numberOfHorizontalElementaryCells = Utils.getInt(b, 2, 1, 0x70) >> 4;
+		numberOfVerticalElementaryCells = Utils.getInt(b, 2, 1, 0x07);
+		int t = 1;
+		while (t < descriptorLength) {
+			int logical_cell_id = Utils.getInt(b, t + 2, 1, 0xFC) >> 2;
+			int logical_cell_presentation_info = Utils.getInt(b, t + 3, 1, Utils.MASK_3BITS);
+			int elementary_cell_field_length = Utils.getInt(b, t + 4, 1, Utils.MASK_8BITS);
+			byte[] elementary_cell_ids = Utils.getBytes(b, t + 5, elementary_cell_field_length);
+			int cell_linkage_info = Utils.getInt(b, t + 5 + elementary_cell_field_length, 1, Utils.MASK_8BITS);
+			LogicalCell logicalCell = new LogicalCell(logical_cell_id, logical_cell_presentation_info, elementary_cell_field_length,
+					elementary_cell_ids, cell_linkage_info);
+			t = t + 4 + elementary_cell_field_length;
+			if (cell_linkage_info == 0x01) {
+				logicalCell.setBouquetId(Utils.getInt(b, t + 2, 2, Utils.MASK_16BITS));
+				t = t + 2;
+			}
+			if (cell_linkage_info == 0x02) {
+				logicalCell.setOriginalNetworkId(Utils.getInt(b, t + 2, 2, Utils.MASK_16BITS));
+				logicalCell.setTransportStreamId(Utils.getInt(b, t + 4, 2, Utils.MASK_16BITS));
+				logicalCell.setServiceId(Utils.getInt(b, t + 6, 2, Utils.MASK_16BITS));
+				t = t + 6;
+			}
+			if (cell_linkage_info == 0x03) {
+				logicalCell.setOriginalNetworkId(Utils.getInt(b, t + 2, 2, Utils.MASK_16BITS));
+				logicalCell.setTransportStreamId(Utils.getInt(b, t + 4, 2, Utils.MASK_16BITS));
+				logicalCell.setServiceId(Utils.getInt(b, t + 6, 2, Utils.MASK_16BITS));
+				t = t + 6;
+			}
+			if (cell_linkage_info == 0x04) {
+				logicalCell.setOriginalNetworkId(Utils.getInt(b, t + 2, 2, Utils.MASK_16BITS));
+				logicalCell.setTransportStreamId(Utils.getInt(b, t + 4, 2, Utils.MASK_16BITS));
+				logicalCell.setServiceId(Utils.getInt(b, t + 6, 2, Utils.MASK_16BITS));
+				logicalCell.setEventId(Utils.getInt(b, t + 8, 2, Utils.MASK_16BITS));
+				t = t + 8;
+			}
+			logicalCellList.add(logicalCell);
 		}
 	}
 
@@ -233,49 +234,47 @@ public class MosaicDescriptor extends Descriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("mosaic_entry_point",mosaicEntryPoint ,mosaicEntryPoint==1?"entry point":"sub tree")));
-		t.add(new DefaultMutableTreeNode(new KVP("number_of_horizontal_elementary_cells",numberOfHorizontalElementaryCells ,getNumberOfElementaryCells(numberOfHorizontalElementaryCells))));
-
-		t.add(new DefaultMutableTreeNode(new KVP("number_of_vertical_elementary_cells",numberOfVerticalElementaryCells ,getNumberOfElementaryCells(numberOfVerticalElementaryCells))));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("mosaic_entry_point",mosaicEntryPoint ,mosaicEntryPoint==1?"entry point":"sub tree"));
+		t.add(new KVP("number_of_horizontal_elementary_cells",numberOfHorizontalElementaryCells ,getNumberOfElementaryCells(numberOfHorizontalElementaryCells)));
+		t.add(new KVP("number_of_vertical_elementary_cells",numberOfVerticalElementaryCells ,getNumberOfElementaryCells(numberOfVerticalElementaryCells)));
 		Utils.addListJTree(t,logicalCellList,modus,"logical_cell_list");
 		return t;
 	}
 
-	public static String getNumberOfElementaryCells(final int cells) {
-		switch (cells) {
-		case 0x0: return "one cell";
-		case 0x1: return "two cells";
-		case 0x2: return "three cells";
-		case 0x3: return "four cells";
-		case 0x4: return "five cells";
-		case 0x5: return "six cells";
-		case 0x6: return "seven cells";
-		case 0x7: return "eight cells";
-		default: return "illegal value";
-		}
+	public static String getNumberOfElementaryCells(int cells) {
+		return switch (cells) {
+		case 0x0 -> "one cell";
+		case 0x1 -> "two cells";
+		case 0x2 -> "three cells";
+		case 0x3 -> "four cells";
+		case 0x4 -> "five cells";
+		case 0x5 -> "six cells";
+		case 0x6 -> "seven cells";
+		case 0x7 -> "eight cells";
+		default -> "illegal value";
+		};
 	}
 
-	public static String getCodingOfLogicalCellPresentationInfo(final int info) {
-		switch (info) {
-		case 0x0: return "undefined";
-		case 0x1: return "video";
-		case 0x2: return "still picture";
-		case 0x3: return "graphics/text";
-		default: return "reserved for future use";
-		}
+	public static String getCodingOfLogicalCellPresentationInfo(int info) {
+		return switch (info) {
+		case 0x0 -> "undefined";
+		case 0x1 -> "video";
+		case 0x2 -> "still picture";
+		case 0x3 -> "graphics/text";
+		default -> "reserved for future use";
+		};
 	}
 
-	public static String getCodingOfCellLinkageInfo(final int info) {
-		switch (info) {
-		case 0x0: return "undefined";
-		case 0x1: return "bouquet related";
-		case 0x2: return "service related";
-		case 0x3: return "other mosaic related";
-		case 0x4: return "event related";
-		default: return "reserved for future use";
-		}
+	public static String getCodingOfCellLinkageInfo(int info) {
+		return switch (info) {
+		case 0x0 -> "undefined";
+		case 0x1 -> "bouquet related";
+		case 0x2 -> "service related";
+		case 0x3 -> "other mosaic related";
+		case 0x4 -> "event related";
+		default -> "reserved for future use";
+		};
 	}
 }

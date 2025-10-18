@@ -27,12 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ciplus;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static java.util.Arrays.copyOfRange;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -46,38 +48,32 @@ public class CIProtectionDescriptor extends Descriptor {
 	private int numberOfEntries;
 
 
-	private final List<BrandIdentifier> brandList = new ArrayList<BrandIdentifier>();
+	private final List<BrandIdentifier> brandList = new ArrayList<>();
 	private byte[] privateDataByte;
 
-	public static class BrandIdentifier implements TreeNode
+	public record BrandIdentifier(int brandId) implements TreeNode
 	{
-		private final int brandId;
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			return new DefaultMutableTreeNode(new KVP("cicam_brand_identifier",brandId,null));
-		}
-
-		public BrandIdentifier(final int brandId) {
-			super();
-			this.brandId = brandId;
+		@Override
+		public KVP getJTreeNode(int modus){
+			return new KVP("cicam_brand_identifier",brandId);
 		}
 	}
 
-	public CIProtectionDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		freeCIModeFlag = getInt(b,offset+2,1,0x80)>>7;
-		matchBrandFlag= getInt(b,offset+2,1,0x40)>>6;
+	public CIProtectionDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		freeCIModeFlag = getInt(b,2,1,0x80)>>7;
+		matchBrandFlag= getInt(b,2,1,0x40)>>6;
 		int t=0;
 		if(matchBrandFlag==1){
 			t=t+1;
-			numberOfEntries = getInt(b, offset+3, 1, MASK_8BITS);
+			numberOfEntries = getInt(b, 3, 1, MASK_8BITS);
 			for (int i = 0; i < numberOfEntries; i++) {
-				final BrandIdentifier bi = new BrandIdentifier(getInt(b, offset+4+(2*i), 2, MASK_16BITS));
+				BrandIdentifier bi = new BrandIdentifier(getInt(b, 4+(2*i), 2, MASK_16BITS));
 				brandList.add(bi);
 				t=t+2;
 			}
 		}
-		privateDataByte = copyOfRange(b, offset+3+t, offset+descriptorLength+2);
+		privateDataByte = copyOfRange(b, 3+t, descriptorLength+2);
 	}
 
 	@Override
@@ -87,16 +83,16 @@ public class CIProtectionDescriptor extends Descriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("free_ci_mode_flag",freeCIModeFlag ,freeCIModeFlag==1?"streams do require CI Plus protection":"streams do not require CI Plus protection")));
-		t.add(new DefaultMutableTreeNode(new KVP("match_brand_flag",matchBrandFlag ,matchBrandFlag==1?"service has chosen to set CICAM brands.":"service has no chosen CICAM brands")));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("free_ci_mode_flag",freeCIModeFlag ,freeCIModeFlag==1?"streams do require CI Plus protection":"streams do not require CI Plus protection"));
+		t.add(new KVP("match_brand_flag",matchBrandFlag ,matchBrandFlag==1?"service has chosen to set CICAM brands.":"service has no chosen CICAM brands"));
 		if(matchBrandFlag==1){
-			t.add(new DefaultMutableTreeNode(new KVP("number_of_entries", numberOfEntries ,null)));
+			t.add(new KVP("number_of_entries", numberOfEntries));
 			addListJTree(t,brandList,modus,"brand_identifier_list");
 		}
 		if((privateDataByte!=null)&&(privateDataByte.length>0)){
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_bytes",privateDataByte ,null)));
+			t.add(new KVP("private_data_bytes",privateDataByte));
 		}
 		return t;
 	}

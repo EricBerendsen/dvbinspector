@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.eaccam;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -40,12 +39,9 @@ public class EACEMStreamIdentifierDescriptor extends Descriptor {
 
 	private final int  version_byte;
 
-	public EACEMStreamIdentifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-
-		version_byte = getInt(b, offset+2, 1, MASK_8BITS);
-
-
+	public EACEMStreamIdentifierDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		version_byte = getInt(b, 2, 1, MASK_8BITS);
 	}
 
 
@@ -63,9 +59,9 @@ public class EACEMStreamIdentifierDescriptor extends Descriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("version_byte",version_byte ,"This 8 bit integer identifies the version of IEC 62216 that broadcasts conform to")));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("version_byte",version_byte ,"This 8 bit integer identifies the version of IEC 62216 that broadcasts conform to"));
 		return t;
 	}
 

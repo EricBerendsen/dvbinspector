@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -42,27 +40,26 @@ public class MultilingualNetworkNameDescriptor extends Descriptor {
 
 	private final List<NetworkName> networkNameList = new ArrayList<>();
 
-
 	public static record NetworkName(String iso639LanguageCode, DVBString network_name) implements TreeNode{
 
 		@Override
-		public KVP getJTreeNode(final int modus){
-			final KVP s = new KVP("network_name");
-			s.add(new KVP("ISO_639_language_code",iso639LanguageCode));
-			s.add(new KVP("network_name",network_name));
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("network_name");
+			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			s.add(new KVP("network_name", network_name));
 			return s;
 		}
 
 	}
 
-	public MultilingualNetworkNameDescriptor(final byte[] b, final TableSection parent) {
+	public MultilingualNetworkNameDescriptor(byte[] b, final TableSection parent) {
 		super(b, parent);
 		int t = 2;
 		while (t < (descriptorLength + 2)) {
-			final String languageCode = Utils.getISO8859_1String(b, t, 3);
+			String languageCode = Utils.getISO8859_1String(b, t, 3);
 			int network_name_length = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
 			DVBString network_name = new DVBString(b, t + 3);
-			final NetworkName s = new NetworkName(languageCode, network_name);
+			NetworkName s = new NetworkName(languageCode, network_name);
 			networkNameList.add(s);
 			t += 4 + network_name_length;
 		}
@@ -70,19 +67,18 @@ public class MultilingualNetworkNameDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (NetworkName serviceName : networkNameList) {
 			buf.append(serviceName.toString());
 		}
 		return buf.toString();
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		Utils.addListJTree(t,networkNameList,modus,"network_name_list");
+		KVP t = super.getJTreeNode(modus);
+		Utils.addListJTree(t, networkNameList, modus, "network_name_list");
 		return t;
 	}
 

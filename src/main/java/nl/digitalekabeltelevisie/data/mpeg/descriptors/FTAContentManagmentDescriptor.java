@@ -28,9 +28,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -45,24 +43,28 @@ public class FTAContentManagmentDescriptor extends Descriptor {
 	private int do_not_apply_revocation;
 
 
-	public FTAContentManagmentDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		user_defined = getInt(b, offset+2, 1, 0X80)>>7;
-		reserved_future_use = getInt(b, offset+2, 1, 0X70)>>4;
-		do_not_scramble = getInt(b, offset+2, 1, 0X08)>>3;
-		control_remote_access_over_internet = getInt(b, offset+2, 1, 0X06)>>1;
-		do_not_apply_revocation = getInt(b, offset+2, 1, 0X01);
+	public FTAContentManagmentDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		user_defined = getInt(b, 2, 1, 0X80) >> 7;
+		reserved_future_use = getInt(b, 2, 1, 0X70) >> 4;
+		do_not_scramble = getInt(b, 2, 1, 0X08) >> 3;
+		control_remote_access_over_internet = getInt(b, 2, 1, 0X06) >> 1;
+		do_not_apply_revocation = getInt(b, 2, 1, 0X01);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("user_defined",user_defined,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_future_use",reserved_future_use,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("do_not_scramble",do_not_scramble,do_not_scramble==1?"scrambling shall not be appied for the purpose of content protection":"scrambling shall be appied where applicable for content protection")));
-		t.add(new DefaultMutableTreeNode(new KVP("control_remote_access_over_internet",control_remote_access_over_internet,getControlRemoteAccesOverInternetString(control_remote_access_over_internet))));
-		t.add(new DefaultMutableTreeNode(new KVP("do_not_apply_revocation",do_not_apply_revocation,do_not_apply_revocation==1?"content revocation process shall not be applied":"content revocation process shall be applied")));
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("user_defined", user_defined));
+		t.add(new KVP("reserved_future_use", reserved_future_use));
+		t.add(new KVP("do_not_scramble", do_not_scramble,
+				do_not_scramble == 1 ? "scrambling shall not be appied for the purpose of content protection"
+						: "scrambling shall be appied where applicable for content protection"));
+		t.add(new KVP("control_remote_access_over_internet", control_remote_access_over_internet,
+				getControlRemoteAccesOverInternetString(control_remote_access_over_internet)));
+		t.add(new KVP("do_not_apply_revocation", do_not_apply_revocation,
+				do_not_apply_revocation == 1 ? "content revocation process shall not be applied" : "content revocation process shall be applied"));
 
 		return t;
 	}

@@ -35,8 +35,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -47,61 +45,38 @@ public class UPCLogicalChannelDescriptor extends Descriptor {
 
 	private List<LogicalChannel> channelList = new ArrayList<>();
 
-	public static class LogicalChannel implements TreeNode{
-		private final int city_code;
-		private final int region_code;
+	public record LogicalChannel(int city_code, int region_code, int logicalChannelNumber) implements TreeNode {
 
-		private int logicalChannelNumber;
-
-		public LogicalChannel(final int regionCode, final int cityCode, final int number){
-			city_code = cityCode;
-			region_code = regionCode;
-			logicalChannelNumber = number;
-		}
-
-		public int getLogicalChannelNumber() {
-			return logicalChannelNumber;
-		}
-
-		public void setLogicalChannelNumber(final int serviceType) {
-			this.logicalChannelNumber = serviceType;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("logical_channel " +logicalChannelNumber));
-			s.add(new DefaultMutableTreeNode(new KVP("region_code",region_code,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("city_code",city_code,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("logical_channel_number",logicalChannelNumber,null)));
+		@Override
+		public KVP getJTreeNode(final int modus) {
+			final KVP s = new KVP("logical_channel " + logicalChannelNumber);
+			s.add(new KVP("region_code", region_code));
+			s.add(new KVP("city_code", city_code));
+			s.add(new KVP("logical_channel_number", logicalChannelNumber));
 			return s;
 		}
 
-
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,channelList,modus,"logical_channels");
 		return t;
 	}
 
-
-	public UPCLogicalChannelDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final int region=getInt(b, offset+3+t,1,MASK_8BITS);
-			final int city = getInt(b,offset+t+4,2,MASK_16BITS);
-			final int chNumber=getInt(b, offset+t+6,2,MASK_16BITS);
-			final LogicalChannel s = new LogicalChannel(region, city, chNumber);
+	public UPCLogicalChannelDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			int region = getInt(b, 3 + t, 1, MASK_8BITS);
+			int city = getInt(b, t + 4, 2, MASK_16BITS);
+			int chNumber = getInt(b, t + 6, 2, MASK_16BITS);
+			LogicalChannel s = new LogicalChannel(region, city, chNumber);
 			channelList.add(s);
-			t+=6;
+			t += 6;
 		}
 	}
-
 
 	@Override
 	public String getDescriptorname(){
@@ -113,7 +88,7 @@ public class UPCLogicalChannelDescriptor extends Descriptor {
 	 */
 	public int getLogicalChannelNumber() {
 		if ((channelList!=null)&&(channelList.size()>0)) {
-			return channelList.get(0).getLogicalChannelNumber();
+			return channelList.get(0).logicalChannelNumber;
 		}
 		return -1;
 	}

@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_18BITS;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -46,39 +46,41 @@ public class S2SatelliteDeliverySystemDescriptor extends Descriptor {
 	private int scrambling_sequence_index = 0;
 	private int input_stream_identifier = 0;
 
-	public S2SatelliteDeliverySystemDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset, parent);
-		scrambling_sequence_selector = getInt(b, offset + 2, 1, 0x80) >> 7;
-		multiple_input_stream_flag = getInt(b, offset + 2, 1, 0x40) >> 6;
-		backwards_compatibility_indicator = getInt(b, offset + 2, 1, 0x20) >> 5;
-		int off = offset+3;
-		if (scrambling_sequence_selector == 1){
+	public S2SatelliteDeliverySystemDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		scrambling_sequence_selector = getInt(b, 2, 1, 0x80) >> 7;
+		multiple_input_stream_flag = getInt(b, 2, 1, 0x40) >> 6;
+		backwards_compatibility_indicator = getInt(b, 2, 1, 0x20) >> 5;
+		int off = 3;
+		if (scrambling_sequence_selector == 1) {
 			// Reserved 6 bslbf
-			scrambling_sequence_index = getInt(b, off, 3, MASK_18BITS) ;
-			off+=3;
+			scrambling_sequence_index = getInt(b, off, 3, MASK_18BITS);
+			off += 3;
 		}
-		if (multiple_input_stream_flag == 1){
-			input_stream_identifier = getInt(b, off, 1, MASK_8BITS) ;
-			off+=1;
+		if (multiple_input_stream_flag == 1) {
+			input_stream_identifier = getInt(b, off, 1, MASK_8BITS);
+			off += 1;
 		}
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 
-				t.add(new DefaultMutableTreeNode(new KVP("scrambling_sequence_selector",scrambling_sequence_selector ,scrambling_sequence_selector==1?"default scrambling sequence is not used":"default DVB-S2 physical layer scrambling sequence of index n = 0 is used")));
-				t.add(new DefaultMutableTreeNode(new KVP("multiple_input_stream_flag",multiple_input_stream_flag ,multiple_input_stream_flag==1?"multiple transport streams are conveyed":"single transport stream is carried")));
-				t.add(new DefaultMutableTreeNode(new KVP("backwards_compatibility_indicator",backwards_compatibility_indicator ,null)));
-				if (scrambling_sequence_selector == 1){
-					t.add(new DefaultMutableTreeNode(new KVP("scrambling_sequence_index",scrambling_sequence_index ,null)));
-				}
-				if (multiple_input_stream_flag == 1){
-					t.add(new DefaultMutableTreeNode(new KVP("input_stream_identifier",input_stream_identifier ,null)));
-				}
+		t.add(new KVP("scrambling_sequence_selector", scrambling_sequence_selector,
+				scrambling_sequence_selector == 1 ? "default scrambling sequence is not used"
+						: "default DVB-S2 physical layer scrambling sequence of index n = 0 is used"));
+		t.add(new KVP("multiple_input_stream_flag", multiple_input_stream_flag,
+				multiple_input_stream_flag == 1 ? "multiple transport streams are conveyed" : "single transport stream is carried"));
+		t.add(new KVP("backwards_compatibility_indicator", backwards_compatibility_indicator));
+		if (scrambling_sequence_selector == 1) {
+			t.add(new KVP("scrambling_sequence_index", scrambling_sequence_index));
+		}
+		if (multiple_input_stream_flag == 1) {
+			t.add(new KVP("input_stream_identifier", input_stream_identifier));
+		}
 
 		return t;
 	}
-
 
 }

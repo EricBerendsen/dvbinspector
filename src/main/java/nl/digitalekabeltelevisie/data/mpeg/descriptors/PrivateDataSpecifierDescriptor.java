@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -38,13 +36,10 @@ public class PrivateDataSpecifierDescriptor extends Descriptor {
 
 	private long  privateDataSpecifier;
 
-	public PrivateDataSpecifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-
-		privateDataSpecifier = Utils.getLong(b,offset+2,4,0xFFFFFFFF);
-
+	public PrivateDataSpecifierDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		privateDataSpecifier = Utils.getLong(b, 2, 4, 0xFFFFFFFF);
 	}
-
 
 	@Override
 	public String toString() {
@@ -57,15 +52,10 @@ public class PrivateDataSpecifierDescriptor extends Descriptor {
 	}
 
 
-	public void setPrivateDataSpecifier(final int privateDataSpecifier) {
-		this.privateDataSpecifier = privateDataSpecifier;
-	}
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_specifier",privateDataSpecifier ,Utils.getPrivateDataSpecString(privateDataSpecifier))));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("private_data_specifier",privateDataSpecifier ,Utils.getPrivateDataSpecString(privateDataSpecifier)));
 		return t;
 	}
 

@@ -71,7 +71,7 @@ public class BouquetListDescriptor extends Descriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus){
-		KVP kvp = (KVP)super.getJTreeNode(modus);
+		KVP kvp = super.getJTreeNode(modus);
 		kvp.addList(bouquet_names, modus,"bouquet_names");
 		return kvp;
 	}

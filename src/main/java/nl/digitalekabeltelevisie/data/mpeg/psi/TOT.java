@@ -83,7 +83,7 @@ public class TOT extends AbstractPSITabel{
 				addOptionalRepeatingGroupedColumn("country_code",
 						ltod -> ltod.getOffsetList().
 									stream().
-									map(LocalTimeOffsetDescriptor.LocalTimeOffset::getCountryCode).
+									map(LocalTimeOffsetDescriptor.LocalTimeOffset::countryCode).
 									collect(Collectors.toList()),
 						Number.class,
 						"offset").

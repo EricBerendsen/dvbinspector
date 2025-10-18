@@ -28,9 +28,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -42,21 +41,20 @@ public class AACMpeg2Descriptor extends Descriptor {
 	private int mpeg2_aac_channel_configuration;
 	private int additional_info;
 
-
-	public AACMpeg2Descriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		mpeg2_aac_profile = getInt(b, offset+2, 1, MASK_8BITS);
-		mpeg2_aac_channel_configuration = getInt(b, offset+3, 1, MASK_8BITS);
-		additional_info=getInt(b, offset+4, 1, MASK_8BITS);
+	public AACMpeg2Descriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		mpeg2_aac_profile = getInt(b, 2, 1, MASK_8BITS);
+		mpeg2_aac_channel_configuration = getInt(b, 3, 1, MASK_8BITS);
+		additional_info = getInt(b, 4, 1, MASK_8BITS);
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("MPEG-2_AAC_profile",mpeg2_aac_profile,getProfileString(mpeg2_aac_profile))));
-		t.add(new DefaultMutableTreeNode(new KVP("MPEG-2_AAC_channel_configuration",mpeg2_aac_channel_configuration,getChannelConfigurationString(mpeg2_aac_channel_configuration))));
-		t.add(new DefaultMutableTreeNode(new KVP("MPEG-2_AAC_additional_information",additional_info,getAdditionalInfoString(additional_info))));
+		final KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("MPEG-2_AAC_profile",mpeg2_aac_profile,getProfileString(mpeg2_aac_profile)));
+		t.add(new KVP("MPEG-2_AAC_channel_configuration",mpeg2_aac_channel_configuration,getChannelConfigurationString(mpeg2_aac_channel_configuration)));
+		t.add(new KVP("MPEG-2_AAC_additional_information",additional_info,getAdditionalInfoString(additional_info)));
 
 		return t;
 	}
@@ -78,7 +76,7 @@ public class AACMpeg2Descriptor extends Descriptor {
 		}
 	}
 
-	public static String getAdditionalInfoString(final int code) {
+	public static String getAdditionalInfoString(int code) {
 		switch (code) {
 
 		case 0x00:

@@ -54,7 +54,7 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 
 	private final DVBString text;
 
-	public ComponentDescriptor(final byte[] b, final TableSection parent) {
+	public ComponentDescriptor(byte[] b, final TableSection parent) {
 		super(b, parent);
 		streamContentExt = getInt(b, 2, 1, 0xF0) >> 4;
 		streamContent = getInt(b, 2, 1, MASK_4BITS);
@@ -70,8 +70,8 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("stream_content_ext", streamContentExt));
 		t.add(new KVP("stream_content", streamContent));
 		t.add(new KVP("component_type", componentType).setDescription(getStreamTypeString()));

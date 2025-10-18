@@ -38,11 +38,12 @@ public class SCTEAdaptationFieldDataDescriptor extends Descriptor {
 	// 6.3.2.3 SCTE Adaptation field data descriptor 
 	
 
-	public SCTEAdaptationFieldDataDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public SCTEAdaptationFieldDataDescriptor(byte[] b,TableSection parent) {
+		super(b, parent);
 		// 'marker' descriptor, no body
 	}
 
+	@Override
 	public String getDescriptorname() {
 		return "SCTE_adaptation_field_data_descriptor";
 	}

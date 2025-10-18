@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -41,16 +39,13 @@ public class AudioStreamDescriptor extends Descriptor {
 	private final int variableRateAudioIndicator;
 	private final int reserved;
 
-
-	public AudioStreamDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		freeFormatFlag = Utils.getInt(b, offset+2, 1, 0x80)>>7;
-		id = Utils.getInt(b, offset+2, 1, 0x40)>>6;
-		layer = Utils.getInt(b, offset+2, 1, 0x30)>>4;
-		variableRateAudioIndicator = Utils.getInt(b, offset+2, 1, 0x08)>>3;
-		reserved = Utils.getInt(b, offset+2, 1, 0x07);
-
-
+	public AudioStreamDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		freeFormatFlag = Utils.getInt(b, 2, 1, 0x80) >> 7;
+		id = Utils.getInt(b, 2, 1, 0x40) >> 6;
+		layer = Utils.getInt(b, 2, 1, 0x30) >> 4;
+		variableRateAudioIndicator = Utils.getInt(b, 2, 1, 0x08) >> 3;
+		reserved = Utils.getInt(b, 2, 1, 0x07);
 	}
 
 	@Override
@@ -59,14 +54,13 @@ public class AudioStreamDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("free_format_flag",freeFormatFlag ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ID",id ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("layer",layer ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("variable_rate_audio_indicator",variableRateAudioIndicator ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
-
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("free_format_flag", freeFormatFlag));
+		t.add(new KVP("ID", id));
+		t.add(new KVP("layer", layer));
+		t.add(new KVP("variable_rate_audio_indicator", variableRateAudioIndicator));
+		t.add(new KVP("reserved", reserved));
 
 		return t;
 	}

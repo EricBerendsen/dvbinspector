@@ -43,10 +43,10 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 	private final DVBString eventName;
 	private DVBString text;
 
-	public ShortEventDescriptor(final byte[] b, final TableSection parent) {
+	public ShortEventDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		iso639LanguageCode = getISO8859_1String(b, 2, 3);
-		final int eventNameLength = getInt(b, 5, 1, MASK_8BITS);
+		int eventNameLength = getInt(b, 5, 1, MASK_8BITS);
 		eventName = new DVBString(b, 5);
 		text = new DVBString(b, 6 + eventNameLength);
 	}
@@ -62,8 +62,8 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		if (Utils.simpleModus(modus)) {
 			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 			if (eventName.getLength() > 0) {

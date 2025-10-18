@@ -27,7 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 public class CellListDescriptor extends Descriptor {
 
-	private final List<Cell> cellList = new ArrayList<Cell>();
+	private final List<Cell> cellList = new ArrayList<>();
 
 
 	public static class Cell implements TreeNode{
@@ -58,7 +59,7 @@ public class CellListDescriptor extends Descriptor {
 		// private long frequency; // 32-bit uimsbf field giving the binary coded frequency value in multiples of 10 Hz.
 		private final int subcellInfoLoopLength;
 
-		private List<SubCell> subCellList = new ArrayList<SubCell>();
+		private List<SubCell> subCellList = new ArrayList<>();
 
 
 		public Cell(final int cellId, final int cellLatitude, final int cellLongitude, final int cellExtentOfLatitude, final int cellExtentOfLongitude, final int subcellInfoLoopLength) {
@@ -77,89 +78,73 @@ public class CellListDescriptor extends Descriptor {
 		}
 
 
+		@Override
 		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("cell"));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_id",cellId,null)));
+			final DefaultMutableTreeNode s=new KVP("cell");
+			s.add(new KVP("cell_id",cellId));
 
-			s.add(new DefaultMutableTreeNode(new KVP("cell_latitude",cellLatitude,getCellLatitudeString(cellLatitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_longitude",cellLongitude,getCellLongitudeString(cellLongitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_extent_of_latitude",cellExtentOfLatitude,getCellLatitudeString(cellExtentOfLatitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_extent_of_longitude",cellExtentOfLongitude,getCellLongitudeString(cellExtentOfLongitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_info_loop_length",subcellInfoLoopLength,null)));
+			s.add(new KVP("cell_latitude",cellLatitude,getCellLatitudeString(cellLatitude)));
+			s.add(new KVP("cell_longitude",cellLongitude,getCellLongitudeString(cellLongitude)));
+			s.add(new KVP("cell_extent_of_latitude",cellExtentOfLatitude,getCellLatitudeString(cellExtentOfLatitude)));
+			s.add(new KVP("cell_extent_of_longitude",cellExtentOfLongitude,getCellLongitudeString(cellExtentOfLongitude)));
+			s.add(new KVP("subcell_info_loop_length",subcellInfoLoopLength));
 			addListJTree(s,subCellList,modus,"sub_cell_list");
 			return s;
 		}
 	}
 
-	public static class SubCell implements TreeNode{
-		/**
-		 *
-		 */
-		private final int cellIdExtension ;
+	public static record SubCell(int cellIdExtension, int subcellLatitude, int subcellLongitude, int subcellExtentOfLatitude,
+			int subcellExtentOfLongitude) implements TreeNode {
 
-		private final int subcellLatitude;
-		private final int subcellLongitude;
-		private final int subcellExtentOfLatitude;
-		private final int subcellExtentOfLongitude;
-
-
-		public SubCell(final int cellIdExtension, final int subcellLatitude, final int subcellLongitude, final int subcellExtentOfLatitude, final int subcellExtentOfLongitude) {
-			super();
-			this.cellIdExtension = cellIdExtension;
-			this.subcellLatitude = subcellLatitude;
-			this.subcellLongitude = subcellLongitude;
-			this.subcellExtentOfLatitude = subcellExtentOfLatitude;
-			this.subcellExtentOfLongitude = subcellExtentOfLongitude;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("subcell"));
-			s.add(new DefaultMutableTreeNode(new KVP("cell_id_extension",cellIdExtension,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_latitude",subcellLatitude,getCellLatitudeString(subcellLatitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_longitude",subcellLongitude,getCellLongitudeString(subcellLongitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_extent_of_latitude",subcellExtentOfLatitude,getCellLatitudeString(subcellExtentOfLatitude))));
-			s.add(new DefaultMutableTreeNode(new KVP("subcell_extent_of_longitude",subcellExtentOfLongitude,getCellLongitudeString(subcellExtentOfLongitude))));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("subcell");
+			s.add(new KVP("cell_id_extension", cellIdExtension));
+			s.add(new KVP("subcell_latitude", subcellLatitude, getCellLatitudeString(subcellLatitude)));
+			s.add(new KVP("subcell_longitude", subcellLongitude, getCellLongitudeString(subcellLongitude)));
+			s.add(new KVP("subcell_extent_of_latitude", subcellExtentOfLatitude, getCellLatitudeString(subcellExtentOfLatitude)));
+			s.add(new KVP("subcell_extent_of_longitude", subcellExtentOfLongitude, getCellLongitudeString(subcellExtentOfLongitude)));
 			return s;
 		}
 	}
 
-	public CellListDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while ((t+9)<descriptorLength) {
+	public CellListDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while ((t + 9) < descriptorLength) {
+			int cell_id = getInt(b, t + 2, 2, Utils.MASK_16BITS);
+			int cell_latitude = getInt(b, t + 4, 2, Utils.MASK_16BITS);
+			int cell_longitude = getInt(b, t + 6, 2, Utils.MASK_16BITS);
+			int cell_extent_of_latitude = getInt(b, t + 8, 2, 0xFFF0) >> 4;
+			int cell_extent_of_longitude = getInt(b, t + 9, 2, Utils.MASK_12BITS);
+			int subcell_info_loop_length = getInt(b, t + 11, 1, Utils.MASK_8BITS);
 
-			final int cell_id = getInt(b,offset+ t+2, 2, Utils.MASK_16BITS);
-			final int cell_latitude= getInt(b,offset+ t+4, 2, Utils.MASK_16BITS);
-			final int cell_longitude = getInt(b,offset+ t+6, 2, Utils.MASK_16BITS);
-			final int cell_extent_of_latitude = getInt(b,offset+ t+8, 2, 0xFFF0)>>4;
-		final int cell_extent_of_longitude= getInt(b,offset+ t+9, 2, Utils.MASK_12BITS);
-		final int subcell_info_loop_length = getInt(b,offset+ t+11, 1, Utils.MASK_8BITS);
+			Cell cell = new Cell(cell_id, cell_latitude, cell_longitude, cell_extent_of_latitude, cell_extent_of_longitude,
+					subcell_info_loop_length);
+			cellList.add(cell);
+			t += 10;
+			int r = 0;
+			while (r < subcell_info_loop_length) {
+				int cell_id_extension = getInt(b, t + 2 + r, 1, Utils.MASK_8BITS);
+				int subcell_latitude = getInt(b, t + 3 + r, 2, Utils.MASK_16BITS);
+				int subcell_longitude = getInt(b, t + 5 + r, 2, Utils.MASK_16BITS);
+				int subcell_extent_of_latitude = getInt(b, t + 7 + r, 2, 0xFFF0) >> 4;
+				int subcell_extent_of_longitude = getInt(b, t + 8 + r, 2, Utils.MASK_12BITS);
 
-		final Cell cell = new Cell(cell_id, cell_latitude, cell_longitude,cell_extent_of_latitude,cell_extent_of_longitude,  subcell_info_loop_length);
-		cellList.add(cell);
-		t+=10;
-		int r=0;
-		while (r<subcell_info_loop_length ) {
-			final int cell_id_extension = getInt(b,offset+ t+2+r, 1, Utils.MASK_8BITS);
-			final int subcell_latitude= getInt(b,offset+ t+3+r, 2, Utils.MASK_16BITS);
-			final int subcell_longitude = getInt(b,offset+ t+5+r, 2, Utils.MASK_16BITS);
-			final int subcell_extent_of_latitude = getInt(b,offset+ t+7+r, 2, 0xFFF0)>>4;
-		final int subcell_extent_of_longitude= getInt(b,offset+ t+8+r, 2, Utils.MASK_12BITS);
+				SubCell s = new SubCell(cell_id_extension, subcell_latitude, subcell_longitude, subcell_extent_of_latitude,
+						subcell_extent_of_longitude);
+				cell.addSubCell(s);
+				r += 8;
 
-		final SubCell s = new SubCell(cell_id_extension,subcell_latitude,subcell_longitude,subcell_extent_of_latitude,subcell_extent_of_longitude);
-		cell.addSubCell(s);
-		r+=8;
-
-		}
-		t+=r;
-
+			}
+			t += r;
 		}
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
-		for (final Cell cell : cellList) {
+		StringBuilder buf = new StringBuilder(super.toString());
+		for (Cell cell : cellList) {
 			buf.append(cell.toString());
 		}
 
@@ -167,28 +152,28 @@ public class CellListDescriptor extends Descriptor {
 		return buf.toString();
 	}
 
-	public static String getCellLatitudeString(final int latitude){
+	public static String getCellLatitudeString(int latitude){
 		int c=latitude;
 		if(c>0x7FFF){
 			c=c-0x10000;
 		}
-		final float f=(((float)c)*((float)90))/0x8000;
+		float f=(((float)c)*((float)90))/0x8000;
 		return Float.toString(f) ;
 	}
 
-	public static String getCellLongitudeString(final int longitude){
+	public static String getCellLongitudeString(int longitude){
 		int c= longitude;
 		if(c>0x7FFF){
 			c=c-0x10000;
 		}
-		final float f=(((float)c)*((float)180))/0x8000;
+		float f=(((float)c)*((float)180))/0x8000;
 		return Float.toString(f) ;
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,cellList,modus,"cell_list");
 		return t;
 	}

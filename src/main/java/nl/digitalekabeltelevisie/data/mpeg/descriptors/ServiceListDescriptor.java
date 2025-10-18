@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -68,10 +67,6 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 			return serviceID;
 		}
 
-		public void setServiceID(final int serviceID) {
-			this.serviceID = serviceID;
-		}
-
 		public int getServiceType() {
 			return serviceType;
 		}
@@ -80,27 +75,20 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 			return 	Descriptor.getServiceTypeString(serviceType);
 		}
 
-
-
-		public void setServiceType(final int serviceType) {
-			this.serviceType = serviceType;
-		}
-
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-		
+		public KVP getJTreeNode(int modus) {
+
 			String nodeLabel = "service";
-			if(descriptorContext.hasOnidTsid()) {
+			if (descriptorContext.hasOnidTsid()) {
 				String serviceName = getServiceName();
-				if(serviceName != null){
-					nodeLabel = "service ("+serviceName+")";
+				if (serviceName != null) {
+					nodeLabel = "service (" + serviceName + ")";
 				}
-				
 			}
 
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP(nodeLabel));
-			s.add(new DefaultMutableTreeNode(new KVP("service_id",serviceID,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("service_type",serviceType,Descriptor.getServiceTypeString(serviceType))));
+			KVP s = new KVP(nodeLabel);
+			s.add(new KVP("service_id", serviceID));
+			s.add(new KVP("service_type", serviceType, Descriptor.getServiceTypeString(serviceType)));
 			return s;
 
 		}
@@ -129,20 +117,18 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 			}
 			return null;
 		}		
-		
-		
 	}
 
-	public ServiceListDescriptor(final byte[] b, final int offset, final TableSection parent, DescriptorContext descriptorContext) {
-		super(b, offset,parent);
+	public ServiceListDescriptor(byte[] b, TableSection parent, DescriptorContext descriptorContext) {
+		super(b, parent);
 		this.descriptorContext = descriptorContext;
-		int t=0;
-		while (t<descriptorLength) {
-			final int serviceId=getInt(b, offset+2+t,2,MASK_16BITS);
-			final int serviceType=getInt(b, offset+4+t,1,MASK_8BITS);
-			final Service s = new Service( serviceId,serviceType);
+		int t = 0;
+		while (t < descriptorLength) {
+			final int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			final int serviceType = getInt(b, 4 + t, 1, MASK_8BITS);
+			final Service s = new Service(serviceId, serviceType);
 			serviceList.add(s);
-			t+=3;
+			t += 3;
 		}
 	}
 
@@ -163,12 +149,10 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		if (t.getUserObject() instanceof KVP kvp) {
-			kvp.addTableSource(this, "service_list");
-		}
+		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this, "service_list");
 		addListJTree(t,serviceList,modus,"service_list",this);
 		return t;
 	}

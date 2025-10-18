@@ -27,13 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -44,68 +45,36 @@ public class ParentalRatingDescriptor extends Descriptor {
 	private List<Rating> ratingList = new ArrayList<>();
 
 
-	public  class Rating implements TreeNode, Comparable<Rating>{
-		/**
-		 *
-		 */
+	public record Rating(String countryCode, int rating) implements TreeNode, Comparable<Rating>{
 
-		private final String countryCode;
-		private final int rating;
-
-
-
-		public Rating(final String countryCode, final int rating) {
-			super();
-			this.countryCode = countryCode;
-			this.rating = rating;
-		}
-
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("rating"));
-			s.add(new DefaultMutableTreeNode(new KVP("country_code",countryCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("rating",rating,getRatingTypeAge(rating))));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("rating");
+			s.add(new KVP("country_code", countryCode, null));
+			s.add(new KVP("rating", rating, getRatingTypeAge(rating)));
 			return s;
 		}
 
-
-
 		@Override
-		public String toString(){
-			return getRatingTypeAge(rating)+", countryCode:"+countryCode;
+		public String toString() {
+			return getRatingTypeAge(rating) + ", countryCode:" + countryCode;
 		}
-
-
-
-		public int getRating() {
-			return rating;
-		}
-
-
-
-		public String getCountryCode() {
-			return countryCode;
-		}
-
-
 
 		@Override
 		public int compareTo(Rating o) {
-			return  Comparator.comparing(Rating::getRating)
-					.thenComparing(Rating::getCountryCode)
+			return  Comparator.comparing(Rating::rating)
+					.thenComparing(Rating::countryCode)
 					.compare(this, o);
 		}
 
-
 	}
 
-	public ParentalRatingDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public ParentalRatingDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int t=0;
 		while (t<descriptorLength) {
-			final String countryCode=getISO8859_1String(b, offset+t+2, 3);
-			final int rating = getInt(b, offset+t+5, 1, MASK_8BITS);
+			final String countryCode=getISO8859_1String(b, t+2, 3);
+			final int rating = getInt(b, t+5, 1, MASK_8BITS);
 			final Rating s = new Rating(countryCode,rating);
 			ratingList.add(s);
 			t+=4;
@@ -135,9 +104,9 @@ public class ParentalRatingDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,ratingList,modus,"rating_list");
 		return t;
 	}

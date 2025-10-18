@@ -33,18 +33,14 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  * Based on ETSI TS 102 323 V1.5.1 (2012-01) 10.3 Related content descriptor
  *
  * Just a marker, no extra impl needed
+ * 
  * @author Eric
  *
  */
 public class RelatedContentDescriptor extends Descriptor {
 
-	/**
-	 * @param b
-	 * @param offset
-	 * @param parent
-	 */
-	public RelatedContentDescriptor(byte[] b, int offset, TableSection parent) {
-		super(b, offset, parent);
+	public RelatedContentDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 	}
 
 }

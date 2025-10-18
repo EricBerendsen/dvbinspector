@@ -27,9 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -51,7 +51,7 @@ public abstract class ExtensionDescriptor extends Descriptor {
 	@Override
 	public KVP getJTreeNode(int modus){
 
-		KVP t = (KVP) super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("descriptor_tag_extension",descriptor_tag_extension).setDescription(getDescriptorTagString()));
 		t.add(new KVP("selector_byte",selector_byte));
 

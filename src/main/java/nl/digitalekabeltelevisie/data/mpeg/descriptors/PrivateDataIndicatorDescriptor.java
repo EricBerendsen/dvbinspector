@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getLong;
+import static nl.digitalekabeltelevisie.util.Utils.getPrivateDataSpecString;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -39,13 +38,10 @@ public class PrivateDataIndicatorDescriptor extends Descriptor {
 
 	private long  privateDataIndicator;
 
-	public PrivateDataIndicatorDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-
-		privateDataIndicator = getLong(b,offset+2,4,0xFFFFFFFF);
-
+	public PrivateDataIndicatorDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		privateDataIndicator = getLong(b, 2, 4, 0xFFFFFFFF);
 	}
-
 
 	@Override
 	public String toString() {
@@ -63,9 +59,9 @@ public class PrivateDataIndicatorDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_indicator",privateDataIndicator ,getPrivateDataSpecString(privateDataIndicator))));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("private_data_indicator",privateDataIndicator ,getPrivateDataSpecString(privateDataIndicator)));
 		return t;
 	}
 

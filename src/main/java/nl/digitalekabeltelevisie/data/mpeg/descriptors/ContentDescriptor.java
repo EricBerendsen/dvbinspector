@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -58,12 +56,12 @@ public class ContentDescriptor extends Descriptor {
 		super(b, parent);
 		int t = 0;
 		while (t < descriptorLength) {
-			final int cNibble1 = Utils.getInt(b, t + 2, 1, 0xF0) >> 4;
-		final int cNnibble2 = Utils.getInt(b, t + 2, 1, Utils.MASK_4BITS);
-		final int user_byte = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
-		final ContentItem s = new ContentItem(cNibble1, cNnibble2, user_byte);
-		contentList.add(s);
-		t += 2;
+			int cNibble1 = Utils.getInt(b, t + 2, 1, 0xF0) >> 4;
+			int cNnibble2 = Utils.getInt(b, t + 2, 1, Utils.MASK_4BITS);
+			int user_byte = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
+			ContentItem s = new ContentItem(cNibble1, cNnibble2, user_byte);
+			contentList.add(s);
+			t += 2;
 		}
 	}
 
@@ -78,7 +76,7 @@ public class ContentDescriptor extends Descriptor {
 		return buf.toString();
 	}
 
-	public static String getContentNibbleLevel1String(final int nibble1) {
+	public static String getContentNibbleLevel1String(int nibble1) {
 		return switch (nibble1) {
 		case 0x0 -> "undefined content";
 		case 0x1 -> "Movie/Drama:";
@@ -98,7 +96,7 @@ public class ContentDescriptor extends Descriptor {
 		};
 	}
 
-	public static String getContentNibbleLevel2String(final int nibble1,final int nibble2) {
+	public static String getContentNibbleLevel2String(int nibble1,int nibble2) {
 		return switch (nibble1) {
 		case 0x0:
 			yield "";
@@ -252,9 +250,9 @@ public class ContentDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		Utils.addListJTree(t,contentList,modus,"content_list");
 		return t;
 	}

@@ -29,9 +29,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -57,9 +55,9 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 	private int reserved;
 	private byte[] private_data_byte = new byte[0];
 
-	public JPEG2000VideoDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int byteOffset = offset+2;
+	public JPEG2000VideoDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int byteOffset = 2;
 		profile_and_level = Utils.getInt(b, byteOffset, 2, Utils.MASK_16BITS);
 		byteOffset += 2;
 
@@ -103,21 +101,21 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_and_level",profile_and_level ,getProfile_and_levelString(profile_and_level))));
-		t.add(new DefaultMutableTreeNode(new KVP("horizontal_size",horizontal_size ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vertical_size",vertical_size ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("max_bit_rate",max_bit_rate ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("max_buffer_size",max_buffer_size ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("DEN_frame_rate",DEN_frame_rate ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("NUM_frame_rate",NUM_frame_rate ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("color_specification",color_specification ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("still_mode",still_mode ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("interlaced_video",interlaced_video ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved ,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("profile_and_level", profile_and_level, getProfile_and_levelString(profile_and_level)));
+		t.add(new KVP("horizontal_size", horizontal_size));
+		t.add(new KVP("vertical_size", vertical_size));
+		t.add(new KVP("max_bit_rate", max_bit_rate));
+		t.add(new KVP("max_buffer_size", max_buffer_size));
+		t.add(new KVP("DEN_frame_rate", DEN_frame_rate));
+		t.add(new KVP("NUM_frame_rate", NUM_frame_rate));
+		t.add(new KVP("color_specification", color_specification));
+		t.add(new KVP("still_mode", still_mode));
+		t.add(new KVP("interlaced_video", interlaced_video));
+		t.add(new KVP("reserved", reserved));
 
-		t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",private_data_byte ,null)));
+		t.add(new KVP("private_data_byte", private_data_byte));
 		return t;
 	}
 
@@ -130,96 +128,48 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 	}
 
 
-	public void setProfile_and_level(final int serviceType) {
-		this.profile_and_level = serviceType;
-	}
-
 	public int getVertical_size() {
 		return vertical_size;
-	}
-
-	public void setVertical_size(final int serviceNameLength) {
-		this.vertical_size = serviceNameLength;
 	}
 
 	public int getHorizontal_size() {
 		return horizontal_size;
 	}
 
-	public void setHorizontal_size(final int serviceProviderNameLength) {
-		this.horizontal_size = serviceProviderNameLength;
-	}
-
 	public int getNUM_frame_rate() {
 		return NUM_frame_rate;
-	}
-
-	public void setNUM_frame_rate(final int NUM_frame_rate) {
-		this.NUM_frame_rate = NUM_frame_rate;
 	}
 
 	public int getMax_bit_rate() {
 		return max_bit_rate;
 	}
 
-	public void setMax_bit_rate(final int max_bit_rate) {
-		this.max_bit_rate = max_bit_rate;
-	}
-
 	public int getColor_specification() {
 		return color_specification;
-	}
-
-	public void setColor_specification(final int color_specification) {
-		this.color_specification = color_specification;
 	}
 
 	public int getDEN_frame_rate() {
 		return DEN_frame_rate;
 	}
 
-	public void setDEN_frame_rate(final int DEN_frame_rate) {
-		this.DEN_frame_rate = DEN_frame_rate;
-	}
-
 	public int getStill_mode() {
 		return still_mode;
-	}
-
-	public void setStill_mode(final int still_mode) {
-		this.still_mode = still_mode;
 	}
 
 	public int getMax_buffer_size() {
 		return max_buffer_size;
 	}
 
-	public void setMax_buffer_size(final int max_buffer_size) {
-		this.max_buffer_size = max_buffer_size;
-	}
-
 	public int getInterlaced_video() {
 		return interlaced_video;
-	}
-
-	public void setInterlaced_video(int interlaced_video) {
-		this.interlaced_video = interlaced_video;
 	}
 
 	public int getReserved() {
 		return reserved;
 	}
 
-	public void setReserved(int reserved) {
-		this.reserved = reserved;
-	}
-
 	public byte[] getPrivate_data_byte() {
 		return private_data_byte;
-	}
-
-	public void setPrivate_data_byte(byte[] private_data_byte) {
-		this.private_data_byte = private_data_byte;
 	}
 
 }

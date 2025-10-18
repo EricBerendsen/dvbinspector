@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.getBytes;
+import static nl.digitalekabeltelevisie.util.Utils.toHexString;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -43,16 +42,15 @@ public class RegistrationDescriptor extends Descriptor {
 	private final byte[]  formatIdentifier;
 	private final byte[]  additionalIdentificationInfo;
 
-	public RegistrationDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public RegistrationDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 
-		formatIdentifier = getBytes(b,offset+2,4);
+		formatIdentifier = getBytes(b, 2, 4);
 		// see http://www.smpte-ra.org/mpegreg/mpegreg.html for list
 		// TODO implement resource file for lookup?
-		additionalIdentificationInfo = getBytes(b,offset+6,descriptorLength-4);
+		additionalIdentificationInfo = getBytes(b, 6, descriptorLength - 4);
 
 	}
-
 
 	@Override
 	public String toString() {
@@ -67,10 +65,10 @@ public class RegistrationDescriptor extends Descriptor {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("format_identifier",formatIdentifier ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("additional_identification_info",additionalIdentificationInfo ,null)));
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("format_identifier",formatIdentifier));
+		t.add(new KVP("additional_identification_info",additionalIdentificationInfo));
 		return t;
 	}
 

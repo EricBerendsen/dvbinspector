@@ -27,12 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getCASystemIDString;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -40,38 +41,30 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class CAIdentifierDescriptor extends Descriptor {
 
-	private final List<CASystemId> CA_system_id = new ArrayList<CASystemId>();
+	private final List<CASystemId> CA_system_id = new ArrayList<>();
 
-	public static class CASystemId implements TreeNode{
-		private final int ca_system_id;
+	public static record CASystemId(int ca_system_id) implements TreeNode{
 
-		public CASystemId(final int ca_system_id) {
-			super();
-			this.ca_system_id = ca_system_id;
-		}
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			return new DefaultMutableTreeNode(new KVP("CA_system_id",ca_system_id ,getCASystemIDString(ca_system_id)));
+		@Override
+		public KVP getJTreeNode(int modus){
+			return new KVP("CA_system_id",ca_system_id ,getCASystemIDString(ca_system_id));
 		}
 	}
 
-
-
-	public CAIdentifierDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
+	public CAIdentifierDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
 		int t=0;
 		while(t<descriptorLength){
-			final int caSystemID = getInt(b, offset + 2 + t, 2, MASK_16BITS);
-			final CASystemId caID= new CASystemId(caSystemID);
+			int caSystemID = getInt(b,  2 + t, 2, MASK_16BITS);
+			CASystemId caID= new CASystemId(caSystemID);
 			CA_system_id.add(caID);
 			t+=2;
 		}
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,CA_system_id,modus,"CA_system_id");
 		return t;
 	}

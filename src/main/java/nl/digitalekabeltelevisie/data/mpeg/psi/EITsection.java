@@ -225,9 +225,9 @@ public class EITsection extends TableSectionExtendedSyntax{
 				List<Rating> ratingList = ratingDesc.getRatingList();
 				for(Rating c:ratingList){
 					r1.append("Rating: ").
-						append(c.getCountryCode()).
+						append(c.countryCode()).
 						append(": ").
-						append(ParentalRatingDescriptor.getRatingTypeAge(c.getRating())).
+						append(ParentalRatingDescriptor.getRatingTypeAge(c.rating())).
 						append("<br>");
 				}
 				r1.append("<br>");

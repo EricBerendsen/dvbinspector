@@ -73,8 +73,8 @@ public class SCTE35Descriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = (KVP) super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("identifier",identifier));
 		return t;
 	}

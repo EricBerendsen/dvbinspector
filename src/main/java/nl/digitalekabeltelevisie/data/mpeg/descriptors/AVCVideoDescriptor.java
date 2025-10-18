@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pes.video264.Seq_parameter_set_data.getProfileIdcString;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -59,44 +57,44 @@ public class AVCVideoDescriptor extends Descriptor {
 	private final int reserved;
 
 
-	public AVCVideoDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		profile_idc = Utils.getInt(b, offset+2, 1, Utils.MASK_8BITS);
-		constraint_set0_flag = Utils.getInt(b, offset+3, 1, 0x80)>>7;
-		constraint_set1_flag = Utils.getInt(b, offset+3, 1, 0x40)>>6;
-		constraint_set2_flag = Utils.getInt(b, offset+3, 1, 0x20)>>5;
-		constraint_set3_flag = Utils.getInt(b, offset+3, 1, 0x10)>>4;
-		constraint_set4_flag = Utils.getInt(b, offset+3, 1, 0x08)>>3;
-		constraint_set5_flag = Utils.getInt(b, offset+3, 1, 0x04)>>2;
-		AVC_compatible_flags = Utils.getInt(b, offset+3, 1, Utils.MASK_2BITS);
-		level_idc = Utils.getInt(b, offset+4, 1, Utils.MASK_8BITS);
-		AVC_still_present = Utils.getInt(b, offset+5, 1, 0x80)>>7;
-		AVC_24_hour_picture_flag = Utils.getInt(b, offset+5, 1, 0x40)>>6;
-		frame_packing_SEI_not_present_flag = Utils.getInt(b, offset+5, 1, 0x20)>>5;
-		reserved = Utils.getInt(b, offset+5, 1, Utils.MASK_5BITS);
+	public AVCVideoDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		profile_idc = Utils.getInt(b, 2, 1, Utils.MASK_8BITS);
+		constraint_set0_flag = Utils.getInt(b, 3, 1, 0x80)>>7;
+		constraint_set1_flag = Utils.getInt(b, 3, 1, 0x40)>>6;
+		constraint_set2_flag = Utils.getInt(b, 3, 1, 0x20)>>5;
+		constraint_set3_flag = Utils.getInt(b, 3, 1, 0x10)>>4;
+		constraint_set4_flag = Utils.getInt(b, 3, 1, 0x08)>>3;
+		constraint_set5_flag = Utils.getInt(b, 3, 1, 0x04)>>2;
+		AVC_compatible_flags = Utils.getInt(b, 3, 1, Utils.MASK_2BITS);
+		level_idc = Utils.getInt(b, 4, 1, Utils.MASK_8BITS);
+		AVC_still_present = Utils.getInt(b, 5, 1, 0x80)>>7;
+		AVC_24_hour_picture_flag = Utils.getInt(b, 5, 1, 0x40)>>6;
+		frame_packing_SEI_not_present_flag = Utils.getInt(b, 5, 1, 0x20)>>5;
+		reserved = Utils.getInt(b, 5, 1, Utils.MASK_5BITS);
 	}
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,getProfileIdcString(profile_idc))));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set0_flag",constraint_set0_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set1_flag",constraint_set1_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set2_flag",constraint_set2_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set3_flag",constraint_set3_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set4_flag",constraint_set4_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set5_flag",constraint_set5_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("AVC_compatible_flags",AVC_compatible_flags,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("level_idc",level_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("AVC_still_present",AVC_still_present,AVC_still_present==1?"may include AVC still pictures":"shall not contain AVC still pictures")));
-		t.add(new DefaultMutableTreeNode(new KVP("AVC_24_hour_picture_flag",AVC_24_hour_picture_flag,AVC_24_hour_picture_flag==1?"may contain AVC 24-hour pictures":"shall not contain any AVC 24-hour picture")));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_packing_SEI_not_present_flag",frame_packing_SEI_not_present_flag,
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("profile_idc",profile_idc,getProfileIdcString(profile_idc)));
+		t.add(new KVP("constraint_set0_flag",constraint_set0_flag));
+		t.add(new KVP("constraint_set1_flag",constraint_set1_flag));
+		t.add(new KVP("constraint_set2_flag",constraint_set2_flag));
+		t.add(new KVP("constraint_set3_flag",constraint_set3_flag));
+		t.add(new KVP("constraint_set4_flag",constraint_set4_flag));
+		t.add(new KVP("constraint_set5_flag",constraint_set5_flag));
+		t.add(new KVP("AVC_compatible_flags",AVC_compatible_flags));
+		t.add(new KVP("level_idc",level_idc));
+		t.add(new KVP("AVC_still_present",AVC_still_present,AVC_still_present==1?"may include AVC still pictures":"shall not contain AVC still pictures"));
+		t.add(new KVP("AVC_24_hour_picture_flag",AVC_24_hour_picture_flag,AVC_24_hour_picture_flag==1?"may contain AVC 24-hour pictures":"shall not contain any AVC 24-hour picture"));
+		t.add(new KVP("frame_packing_SEI_not_present_flag",frame_packing_SEI_not_present_flag,
             frame_packing_SEI_not_present_flag == 0 ?
             "frame packing arrangement SEI message is present within the coded video sequence" :
-            "no frame packing arrangement SEI message within the coded video sequence")));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+            "no frame packing arrangement SEI message within the coded video sequence"));
+		t.add(new KVP("reserved",reserved));
 		return t;
 	}
 }

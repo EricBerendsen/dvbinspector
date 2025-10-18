@@ -27,72 +27,43 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 public class ISO639LanguageDescriptor extends Descriptor{
 
-	private final List<Language> languageList = new ArrayList<Language>();
+	private final List<Language> languageList = new ArrayList<>();
 
 
-	public static class Language implements TreeNode{
-		/**
-		 *
-		 */
-		private final String iso639LanguageCode;
-		/**
-		 *
-		 */
-		private final int audioType;
-
-
-		public Language(final String lCode, final int audioT){
-			iso639LanguageCode = lCode;
-			audioType = audioT;
-		}
-
-
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("language"));
-			s.add(new DefaultMutableTreeNode(new KVP("ISO_639_language_code",iso639LanguageCode,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("audio_type",audioType,getAudioTypeString(audioType))));
-			return s;
-		}
-
-
-		public int getAudioType() {
-			return audioType;
-		}
-
-
-		public String getIso639LanguageCode() {
-			return iso639LanguageCode;
-		}
-
+	public record Language(String iso639LanguageCode, int audioType) implements TreeNode{
 
 		@Override
-		public String toString(){
-			return "code:'"+iso639LanguageCode+"', audio:"+audioType;
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("language");
+			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
+			s.add(new KVP("audio_type", audioType, getAudioTypeString(audioType)));
+			return s;
 		}
-
-
 	}
 
-	public ISO639LanguageDescriptor(final byte[] b, final int offset, final TableSection parent) {
-		super(b, offset,parent);
-		int t=0;
-		while (t<descriptorLength) {
-			final String languageCode=getISO8859_1String(b, offset+t+2, 3);
-			final int audio = getInt(b, offset+t+5, 1, MASK_8BITS);
+	public ISO639LanguageDescriptor(byte[] b, TableSection parent) {
+		super(b, parent);
+		int t = 0;
+		while (t < descriptorLength) {
+			final String languageCode = getISO8859_1String(b, t + 2, 3);
+			final int audio = getInt(b, t + 5, 1, MASK_8BITS);
 			final Language s = new Language(languageCode, audio);
 			languageList.add(s);
-			t+=4;
+			t += 4;
 		}
 	}
 
@@ -107,7 +78,7 @@ public class ISO639LanguageDescriptor extends Descriptor{
 		return buf.toString();
 	}
 
-	public static String getAudioTypeString(final int audio) {
+	public static String getAudioTypeString(int audio) {
 		switch (audio) {
 		case 0: return "Undefined";
 		case 1: return "Clean effects";
@@ -122,9 +93,9 @@ public class ISO639LanguageDescriptor extends Descriptor{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,languageList,modus,"language_list");
 		return t;
 	}
