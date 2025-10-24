@@ -356,10 +356,6 @@ public class Descriptor implements TreeNode {
 	}
 
 
-
-	/**
-	 * This will always return a KVP, but to not break interface it still is declared as DefaultMutableTreeNode
-	 */
 	@Override
 	public KVP getJTreeNode(final int modus) {
 
