@@ -28,9 +28,10 @@
 package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.getErrorKVP;
-import static nl.digitalekabeltelevisie.util.Utils.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
+import static nl.digitalekabeltelevisie.util.Utils.printTimebase90kHz;
+import static nl.digitalekabeltelevisie.util.Utils.showPtsModus;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -233,8 +234,8 @@ public class PesPacketData  implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus){
-		return 	getJTreeNode(modus,new KVP("PES Packet"));
+	public KVP getJTreeNode(final int modus){
+		return getJTreeNode(modus,new KVP("PES Packet"));
 	}
 
 	/**

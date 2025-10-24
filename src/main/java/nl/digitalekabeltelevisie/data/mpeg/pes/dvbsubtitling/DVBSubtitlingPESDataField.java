@@ -29,17 +29,24 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
+import java.awt.image.WritableRaster;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.*;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
 import nl.digitalekabeltelevisie.gui.ImageSource;
@@ -154,9 +161,9 @@ public class DVBSubtitlingPESDataField extends PesPacketData implements ImageSou
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("DVBSubtitlingSegments").addImageSource(this, "DVBSubtitlingSegments"));
+		KVP s = getJTreeNode(modus,new KVP("DVBSubtitlingSegments").addImageSource(this, "DVBSubtitlingSegments"));
 		if(pesDataLen>0) { // PES packet with more than just header
 			s.add(new KVP("data_identifier",data_identifier).setDescription(getDataIDString(data_identifier)));
 			if(data_identifier==0x20){ // For DVB subtitle streams the data_identifier field shall be coded with the value 0x20. 300 743 V1.3.1 p.20

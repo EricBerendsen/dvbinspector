@@ -1,18 +1,16 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.smpte;
 
-import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.util.BitSource;
-import nl.digitalekabeltelevisie.util.Utils;
-import nl.digitalekabeltelevisie.controller.KVP;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
+import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class Smpte2038PesDataField extends PesPacketData {
 
-	final private List<AncillaryDataPacket> ancDataPackets = new ArrayList<AncillaryDataPacket>();
+	final private List<AncillaryDataPacket> ancDataPackets = new ArrayList<>();
 
 	/**
 	 * Constructor for SMPTE2038 Packet
@@ -37,8 +35,8 @@ public class Smpte2038PesDataField extends PesPacketData {
 	/**
 	 * Handle display of SMPTE 2038 Pes Packet and create node with Ancillary data
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus, new KVP("SMPTE 2038 PES Packet"));
+	public KVP getJTreeNode(int modus) {
+		KVP s = getJTreeNode(modus, new KVP("SMPTE 2038 PES Packet"));
 		Utils.addListJTree(s, ancDataPackets, modus, "Ancillary Data");
 		return s;
 	}

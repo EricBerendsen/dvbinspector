@@ -29,9 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xPESDataField;
 
@@ -40,17 +38,16 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xPESDataField;
  *
  */
 
-public class Video266PESDataField extends H26xPESDataField<H266NALUnit> implements TreeNode {
+public class Video266PESDataField extends H26xPESDataField<H266NALUnit>{
 
 	public Video266PESDataField(final PesPacketData pesPacket) {
 		super(pesPacket);
 
 	}
 
-
-
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video H.266 PES Packet"));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s = getJTreeNode(modus,new KVP("Video H.266 PES Packet"));
 		addListJTree(s,nalUnits,modus,"NAL Units");
 		return s;
 

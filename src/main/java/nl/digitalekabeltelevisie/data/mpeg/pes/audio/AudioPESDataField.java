@@ -27,10 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
-import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
 /**
@@ -38,7 +35,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
  *
  */
 
-public class AudioPESDataField extends PesPacketData implements TreeNode {
+public class AudioPESDataField extends PesPacketData {
 
 
 	public AudioPESDataField(final PesPacketData pesPacket) {
@@ -52,11 +49,8 @@ public class AudioPESDataField extends PesPacketData implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Audio PES Packet"));
-
-		return s;
+	public KVP getJTreeNode(int modus) {
+		return getJTreeNode(modus,new KVP("Audio PES Packet"));
 	}
 
 

@@ -29,9 +29,8 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.ArrayList;
+import java.util.List;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -66,12 +65,9 @@ public class Audio144963PESDataField extends PesPacketData{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Audio 14496-3 PES Packet"));
-		
+	public KVP getJTreeNode(int modus) {
+		KVP s = getJTreeNode(modus,new KVP("Audio 14496-3 PES Packet"));
 		addListJTree(s, audioSyncStreamList, modus, "AudioSyncStreams");
-
 		return s;
 	}
 

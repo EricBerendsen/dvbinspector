@@ -40,7 +40,7 @@ public abstract class H26xPESDataField<E extends AbstractNALUnit> extends PesPac
 
 	protected abstract E createNALUnitInstance( byte[] data, int i, int j);
 
-	protected List<E> nalUnits = new ArrayList<E>();
+	protected List<E> nalUnits = new ArrayList<>();
 
 	/**
 	 * @param pesPacket

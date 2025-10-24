@@ -29,11 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.logging.Logger;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xPESDataField;
 
@@ -42,30 +38,20 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xPESDataField;
  *
  */
 
-public class Video14496PESDataField extends H26xPESDataField<NALUnit> implements TreeNode {
-
-	private static final Logger	logger	= Logger.getLogger(Video14496PESDataField.class.getName());
-
+public class Video14496PESDataField extends H26xPESDataField<NALUnit> {
 
 	public Video14496PESDataField(final PesPacketData pesPacket) {
 		super(pesPacket);
 
 	}
 
-
-
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video 14496 PES Packet"));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s = getJTreeNode(modus,new KVP("Video 14496 PES Packet"));
 		addListJTree(s,nalUnits,modus,"NAL Units");
 		return s;
-
 	}
 
-
-
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.video264.H26xPESDataField#createInstance(byte[], int, int)
-	 */
 	@Override
 	protected NALUnit createNALUnitInstance(final byte[] data, final int i, final int j) {
 		return new NALUnit(data, i, j);

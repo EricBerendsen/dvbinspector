@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ac3;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -51,8 +49,9 @@ public class AC3PESDataField extends PesPacketData implements TreeNode {
 
 
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			return super.getJTreeNode(modus,new KVP("AC-3 PES Packet"));
+	@Override
+	public KVP getJTreeNode(int modus) {
+			return getJTreeNode(modus,new KVP("AC-3 PES Packet"));
 	}
 
 }

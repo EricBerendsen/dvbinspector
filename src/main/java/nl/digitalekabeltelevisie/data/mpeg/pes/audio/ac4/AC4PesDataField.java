@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 
@@ -61,8 +59,9 @@ public class AC4PesDataField extends PesPacketData {
 	}
 	
 	
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		DefaultMutableTreeNode jTreeNode = super.getJTreeNode(modus,new KVP("AC-4 PES Packet"));
+	@Override
+	public KVP getJTreeNode(final int modus) {
+		KVP jTreeNode = getJTreeNode(modus,new KVP("AC-4 PES Packet"));
 		addListJTree(jTreeNode, ac4SyncFrames, modus, "AC4 SyncFrames");
 		return jTreeNode;
 }

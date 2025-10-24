@@ -26,13 +26,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ttml;
 *
 */
 
-import static nl.digitalekabeltelevisie.util.Utils.MASK_16BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_32BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_40BITS;
-import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
-import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
-import static nl.digitalekabeltelevisie.util.Utils.getInt;
-import static nl.digitalekabeltelevisie.util.Utils.getLong;
+import static nl.digitalekabeltelevisie.util.Utils.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,8 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -114,22 +106,18 @@ public class TtmlPesDataField extends PesPacketData {
 			}
 		}
 
-		
-		
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus) {
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("Ttml Segment"));
-			s.add(new DefaultMutableTreeNode(new KVP("segment_type",segment_type,segmentTypeList.get(segment_type))));
-			s.add(new DefaultMutableTreeNode(new KVP("segment_length",segment_length,null)));
-			s.add(new DefaultMutableTreeNode(new KVP("segment_data_field",segment_data_field,null)));
-			KVP xmlKvp = new KVP("xml",xml,null);
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("Ttml Segment");
+			s.add(new KVP("segment_type", segment_type, segmentTypeList.get(segment_type)));
+			s.add(new KVP("segment_length", segment_length));
+			s.add(new KVP("segment_data_field", segment_data_field));
+			KVP xmlKvp = new KVP("xml", xml);
 			xmlKvp.addXMLSource(this, "Ttml Segment");
-			s.add(new DefaultMutableTreeNode(xmlKvp));
+			s.add(xmlKvp);
 			return s;
-			
+
 		}
-
-
 
 		@Override
 		public String getXML() {
@@ -164,13 +152,13 @@ public class TtmlPesDataField extends PesPacketData {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Ttml Subtitling PES Packet"));
-		s.add(new DefaultMutableTreeNode(new KVP("segment_mediatime",segment_mediatime,"(* 100 microseconds)")));
-		s.add(new DefaultMutableTreeNode(new KVP("num_of_segments",num_of_segments,null)));
+		KVP s = getJTreeNode(modus,new KVP("Ttml Subtitling PES Packet"));
+		s.add(new KVP("segment_mediatime",segment_mediatime,"(* 100 microseconds)"));
+		s.add(new KVP("num_of_segments",num_of_segments));
 		addListJTree(s,segmentList,modus,"Segments");
-		s.add(new DefaultMutableTreeNode(new KVP("crc_32",crc_32,crc32Failed?"error in CRC Check":null)));
+		s.add(new KVP("crc_32",crc_32,crc32Failed?"error in CRC Check":null));
 
 
 		return s;
