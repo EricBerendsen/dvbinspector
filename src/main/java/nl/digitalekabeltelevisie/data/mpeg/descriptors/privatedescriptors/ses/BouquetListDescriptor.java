@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.ses;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.DVBString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -46,7 +44,7 @@ public class BouquetListDescriptor extends Descriptor {
 	public record BouquetName(DVBString name) implements TreeNode{
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public KVP getJTreeNode(int modus) {
 			return new KVP("bouquet_name", name);
 		}
 		

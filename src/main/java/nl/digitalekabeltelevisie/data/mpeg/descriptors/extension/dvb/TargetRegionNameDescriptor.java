@@ -27,12 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addToList;
+import static nl.digitalekabeltelevisie.util.Utils.getISO8859_1String;
+import static nl.digitalekabeltelevisie.util.Utils.getString;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -77,16 +77,16 @@ public class TargetRegionNameDescriptor extends DVBExtensionDescriptor {
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t =  new DefaultMutableTreeNode(new KVP("TargetRegionName"));
-			t.add(new DefaultMutableTreeNode(new KVP("region_dept",region_dept,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("region_name_length",region_name_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("region_name",region_name,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("primary_region_code",primary_region_code,null)));
-			if(region_dept>=2){
-				t.add(new DefaultMutableTreeNode(new KVP("secondary_region_code",secondary_region_code,null)));
-				if(region_dept==3){
-					t.add(new DefaultMutableTreeNode(new KVP("tertiary_region_code",tertiary_region_code,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("TargetRegionName");
+			t.add(new KVP("region_dept", region_dept));
+			t.add(new KVP("region_name_length", region_name_length));
+			t.add(new KVP("region_name", region_name));
+			t.add(new KVP("primary_region_code", primary_region_code));
+			if (region_dept >= 2) {
+				t.add(new KVP("secondary_region_code", secondary_region_code));
+				if (region_dept == 3) {
+					t.add(new KVP("tertiary_region_code", tertiary_region_code));
 				}
 			}
 			return t;

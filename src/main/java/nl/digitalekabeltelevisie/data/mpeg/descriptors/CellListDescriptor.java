@@ -33,8 +33,6 @@ import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -79,8 +77,8 @@ public class CellListDescriptor extends Descriptor {
 
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new KVP("cell");
+		public KVP getJTreeNode(int modus){
+			KVP s=new KVP("cell");
 			s.add(new KVP("cell_id",cellId));
 
 			s.add(new KVP("cell_latitude",cellLatitude,getCellLatitudeString(cellLatitude)));

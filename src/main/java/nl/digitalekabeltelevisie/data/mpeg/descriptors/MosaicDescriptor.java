@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -82,8 +80,9 @@ public class MosaicDescriptor extends Descriptor {
 
 
 
-		public DefaultMutableTreeNode getJTreeNode(final int modus){
-			final DefaultMutableTreeNode s=new KVP("logical_cell");
+		@Override
+		public KVP getJTreeNode(int modus){
+			KVP s = new KVP("logical_cell");
 			s.add(new KVP("logical_cell_id",logicalCellId));
 			s.add(new KVP("logical_cell_presentation_info",logicalCellPresentationInfo,getCodingOfLogicalCellPresentationInfo(logicalCellPresentationInfo)));
 			s.add(new KVP("elementary_cell_field_length",elementaryCellFieldLength));

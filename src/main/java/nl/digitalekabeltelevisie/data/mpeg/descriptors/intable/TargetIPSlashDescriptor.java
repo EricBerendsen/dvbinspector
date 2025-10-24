@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.intable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
@@ -48,11 +46,10 @@ public class TargetIPSlashDescriptor extends INTDescriptor {
 	public static record IPAdress(byte[] IPv4_addr, int IPv4_slash_mask) implements TreeNode {
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode s = new DefaultMutableTreeNode(
-					new KVP("ip-adress(es) " + Utils.formatIPNumber(IPv4_addr) + "/" + IPv4_slash_mask));
-			s.add(new DefaultMutableTreeNode(new KVP("IPv4_addr", IPv4_addr, Utils.formatIPNumber(IPv4_addr))));
-			s.add(new DefaultMutableTreeNode(new KVP("IPv4_slash_mask", IPv4_slash_mask, null)));
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("ip-adress(es) " + Utils.formatIPNumber(IPv4_addr) + "/" + IPv4_slash_mask);
+			s.add(new KVP("IPv4_addr", IPv4_addr, Utils.formatIPNumber(IPv4_addr)));
+			s.add(new KVP("IPv4_slash_mask", IPv4_slash_mask));
 			return s;
 		}
 
