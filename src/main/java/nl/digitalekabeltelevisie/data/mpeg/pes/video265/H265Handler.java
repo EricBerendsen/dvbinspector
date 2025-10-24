@@ -29,22 +29,29 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.awt.image.BufferedImage;
-import java.util.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.*;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.StackedBarRenderer;
 import org.jfree.data.general.DefaultKeyedValues2DDataset;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.ChartLabel;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Filler_data_rbsp;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.H26xHandler;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Sei_rbsp;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
@@ -159,17 +166,13 @@ public class H265Handler extends H26xHandler<Video265PESDataField, H265NALUnit> 
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.265 PES Data").addImageSource(this, "Frames"));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("H.265 PES Data").addImageSource(this, "Frames");
 		addListJTree(s,pesPackets,modus,"PES Packets");
 		addCCDataToTree(modus, s);
 
 		return s;
 	}
-
-
-
-
 
 	@Override
 	protected Video265PESDataField createH26xPESDataField(PesPacketData pesData) {

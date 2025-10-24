@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -141,8 +139,8 @@ public class GeneralPesHandler extends GeneralPidHandler{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("PES Data"));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("PES Data");
 		addListJTree(s,pesPackets,modus,"PES Packets");
 
 		return s;

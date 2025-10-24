@@ -27,8 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.dvbsubtitling;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 
@@ -58,20 +57,14 @@ public class DVBSubtitleHandler extends GeneralPesHandler{
 
 	}
 
-	
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode s=super.getJTreeNode(modus);
-
-		if(titles!=null){
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		if (titles != null) {
 			s.add(titles.getJTreeNode(modus));
 		}
 		return s;
 	}
-
 
 	public Titles getTitles() {
 		return titles;

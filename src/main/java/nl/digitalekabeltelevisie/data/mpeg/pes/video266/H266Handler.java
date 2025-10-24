@@ -35,8 +35,6 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
@@ -82,8 +80,9 @@ public class H266Handler extends H26xHandler<Video266PESDataField, H266NALUnit> 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("H.266 PES Data").addImageSource(this, "Frames"));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("H.266 PES Data").addImageSource(this, "Frames");
 		addListJTree(s, pesPackets, modus, "PES Packets");
 		addCCDataToTree(modus, s);
 

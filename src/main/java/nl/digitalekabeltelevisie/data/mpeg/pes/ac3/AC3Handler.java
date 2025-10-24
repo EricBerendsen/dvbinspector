@@ -29,13 +29,13 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.ac3;
 
 
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 /**
@@ -49,7 +49,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 */
 public class AC3Handler extends GeneralPesHandler{
 
-	private final List<AC3SyncFrame> ac3Frames = new ArrayList<AC3SyncFrame>();
+	private final List<AC3SyncFrame> ac3Frames = new ArrayList<>();
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#processPesDataBytes(int, byte[], int, int)
@@ -81,8 +81,8 @@ public class AC3Handler extends GeneralPesHandler{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
 		addListJTree(s, ac3Frames, modus, "AC3 SyncFrames");
 		return s;
 	}

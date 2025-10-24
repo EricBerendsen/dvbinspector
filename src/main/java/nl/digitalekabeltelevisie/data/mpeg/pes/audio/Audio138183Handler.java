@@ -27,7 +27,7 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -43,14 +43,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.SwingWorker;
-import javax.swing.tree.DefaultMutableTreeNode;
 
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.Decoder;
-import javazoom.jl.decoder.Header;
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.decoder.Obuffer;
-import javazoom.jl.decoder.SampleBuffer;
+import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
 import javazoom.jl.player.FactoryRegistry;
 import javazoom.jl.player.advanced.AdvancedPlayer;
@@ -59,7 +53,8 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds.UECP;
-import nl.digitalekabeltelevisie.gui.*;
+import nl.digitalekabeltelevisie.gui.DVBtree;
+import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
  * @author Eric Berendsen
@@ -207,7 +202,7 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(final int modus) {
 
 		kvp = new KVP("PES Data").addImageSource(this, "audio");
 		if(swPlayer==null){
@@ -219,21 +214,17 @@ public class Audio138183Handler extends GeneralPesHandler implements ImageSource
 			objectMenu.setActionCommand(DVBtree.STOP);
 			kvp.setSubMenuAndOwner(objectMenu,this);
 		}
-
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(kvp);
-
-		addListJTree(s,pesPackets,modus,"PES Packets");
-
-		addListJTree(s, audioAccessUnits, modus, "Audio Access Units");
+		addListJTree(kvp,pesPackets,modus,"PES Packets");
+		addListJTree(kvp, audioAccessUnits, modus, "Audio Access Units");
 		if((ancillaryDataIdentifier & 0x40)!=0) {// RDS via UECP
-			final DefaultMutableTreeNode rdsNode = new DefaultMutableTreeNode(new KVP("RDS"));
-			s.add(rdsNode);
-			rdsNode.add(new DefaultMutableTreeNode(new KVP("RDS Data",rdsData,null)));
+			KVP rdsNode = new KVP("RDS");
+			kvp.add(rdsNode);
+			rdsNode.add(new KVP("RDS Data",rdsData));
 			final UECP uecp = new UECP(rdsData);
 			rdsNode.add(uecp.getJTreeNode(modus));
 		}
 
-		return s;
+		return kvp;
 	}
 
 

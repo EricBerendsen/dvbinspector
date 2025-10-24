@@ -53,11 +53,11 @@ public class T2miPidHandler extends GeneralPidHandler {
 	private Map<Integer, List<T2miPacket>> plps = new HashMap<>();
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("T2MI"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("T2MI");
 		addListJTree(t,t2miPackets,modus,"T2MI Packets");
-		DefaultMutableTreeNode plpsTree = new DefaultMutableTreeNode(new KVP("PLPs"));
-		final Iterator<Integer> plpIter = new TreeSet<Integer>(plps.keySet()).iterator();
+		KVP plpsTree =new KVP("PLPs");
+		final Iterator<Integer> plpIter = new TreeSet<>(plps.keySet()).iterator();
 		while(plpIter.hasNext()){
 			final Integer plpId=plpIter.next();
 			List<T2miPacket> itemList = plps.get(plpId);
@@ -155,7 +155,7 @@ public class T2miPidHandler extends GeneralPidHandler {
 	private void handleT2miPacket(T2miPacket packet) {
 		t2miPackets.add(packet);
 		if(packet.getPacketType()==0) { // Baseband frame
-			int plpId = ((BasebandFramePayload)packet.getPayload()).getPlpId();
+			int plpId = packet.getPayload().getPlpId();
 			List<T2miPacket> plpList = plps.computeIfAbsent(plpId,k ->new ArrayList<>());
 			plpList.add(packet);
 		}

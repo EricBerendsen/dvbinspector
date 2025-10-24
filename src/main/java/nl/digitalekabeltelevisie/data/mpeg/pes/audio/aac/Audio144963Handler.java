@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler;
@@ -44,8 +42,6 @@ public class Audio144963Handler extends GeneralPesHandler{
 	final static int LEFT_MARGIN = 60;
 	final static int LEGEND_HEIGHT = 20;
 	final static int GRAPH_HEIGHT = 400;
-
-	private KVP kvp = null;
 	private StreamMuxConfig streamMuxConfig;
 
 	/**
@@ -67,13 +63,10 @@ public class Audio144963Handler extends GeneralPesHandler{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-
-		kvp = new KVP("PES Data");
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(kvp);
-
-		addListJTree(s,pesPackets,modus,"PES Packets");
-		return s;
+	public KVP getJTreeNode(final int modus) {
+		KVP kvp = new KVP("PES Data");
+		addListJTree(kvp,pesPackets,modus,"PES Packets");
+		return kvp;
 	}
 
 	public void setStreamMuxConfig(StreamMuxConfig streamMuxConfig) {

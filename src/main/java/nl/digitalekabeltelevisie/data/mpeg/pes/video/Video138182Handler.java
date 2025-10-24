@@ -31,24 +31,28 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Paint;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.*;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DefaultKeyedValues2DDataset;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.ChartLabel;
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.*;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler;
 import nl.digitalekabeltelevisie.gui.ImageSource;
 
 /**
@@ -72,7 +76,8 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 		  public DifferenceBarRenderer() {
 		    super();
 		  }
-		  public Paint getItemPaint(int x_row, int x_col) {
+		  @Override
+		public Paint getItemPaint(int x_row, int x_col) {
 		    CategoryDataset l_jfcDataset = getPlot().getDataset();
 		    ChartLabel l_colKey = (ChartLabel)l_jfcDataset.getColumnKey(x_col);
 		    if("I".equals(l_colKey.getLabel())){
@@ -157,8 +162,9 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPesHandler#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("13818-2 PES Data").addImageSource(this, "Frames"));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("13818-2 PES Data").addImageSource(this, "Frames");
 		addListJTree(s,pesPackets,modus,"PES Packets");
 		addCCDataToTree(modus, s);
 		
@@ -203,9 +209,9 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 	@Override
 	public BufferedImage getImage() {
 
-		List<ChartLabel> labels = new ArrayList<ChartLabel>();
+		List<ChartLabel> labels = new ArrayList<>();
 		ChartLabel label = null;
-		List<Integer> frameSize  = new ArrayList<Integer>();
+		List<Integer> frameSize  = new ArrayList<>();
 
 			int length = 0;
 			int count = 0;
@@ -284,6 +290,7 @@ public class Video138182Handler extends VideoHandler implements ImageSource{
 	/**
 	 * 
 	 */
+	@Override
 	protected void collectCEA708Data() {
 		for(PesPacketData pesPacket :pesPackets) {
 			final VideoPESDataField videoPesPacket = (VideoPESDataField)pesPacket;
