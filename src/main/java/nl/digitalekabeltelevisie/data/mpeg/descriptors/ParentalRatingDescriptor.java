@@ -73,9 +73,9 @@ public class ParentalRatingDescriptor extends Descriptor {
 		super(b, parent);
 		int t=0;
 		while (t<descriptorLength) {
-			final String countryCode=getISO8859_1String(b, t+2, 3);
-			final int rating = getInt(b, t+5, 1, MASK_8BITS);
-			final Rating s = new Rating(countryCode,rating);
+			String countryCode=getISO8859_1String(b, t+2, 3);
+			int rating = getInt(b, t+5, 1, MASK_8BITS);
+			Rating s = new Rating(countryCode,rating);
 			ratingList.add(s);
 			t+=4;
 		}
@@ -83,7 +83,7 @@ public class ParentalRatingDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (Rating rating : ratingList) {
 			buf.append(rating.toString());
 		}
@@ -92,7 +92,7 @@ public class ParentalRatingDescriptor extends Descriptor {
 		return buf.toString();
 	}
 
-	public static String getRatingTypeAge(final int type) {
+	public static String getRatingTypeAge(int type) {
 
 		if(type==0){
 			return "undefined";

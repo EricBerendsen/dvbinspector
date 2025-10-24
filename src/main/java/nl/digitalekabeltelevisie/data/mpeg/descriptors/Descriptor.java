@@ -90,7 +90,7 @@ public class Descriptor implements TreeNode {
 	 * @param offset
 	 * @param parent
 	 */
-	public Descriptor(final byte[] b, final TableSection parent) {
+	public Descriptor(byte[] b, TableSection parent) {
 		privateData = b;
 
 		descriptorTag = toUnsignedInt(b[0]);
@@ -99,7 +99,7 @@ public class Descriptor implements TreeNode {
 	}
 
 	@Deprecated
-	public Descriptor(final byte[] b, final int offset, final TableSection parent) {
+	public Descriptor(byte[] b, int offset, TableSection parent) {
 		this(b, parent);
 	}
 
@@ -119,7 +119,7 @@ public class Descriptor implements TreeNode {
 		return getDescriptorname(descriptorTag, parentTableSection);
 	}
 
-	public static String getDescriptorname(final int tag, final TableSection tableSection) {
+	public static String getDescriptorname(int tag, TableSection tableSection) {
 
 		return switch (tag) {
 			case 0 -> "Reserved";
@@ -357,7 +357,7 @@ public class Descriptor implements TreeNode {
 
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
 		KVP t = new  KVP("Descriptor: " + getDescriptorname(), descriptorTag, null);
 		addGeneralDescriptorInfo(modus, t);
@@ -368,7 +368,7 @@ public class Descriptor implements TreeNode {
 	 * @param modus
 	 * @param t
 	 */
-	protected void addGeneralDescriptorInfo(final int modus, final DefaultMutableTreeNode t) {
+	protected void addGeneralDescriptorInfo(int modus, DefaultMutableTreeNode t) {
 		if (!Utils.simpleModus(modus)) { // not simple layout, so show
 			// details
 			t.add(new KVP("descriptor_tag", descriptorTag, getDescriptorname()));
@@ -380,7 +380,7 @@ public class Descriptor implements TreeNode {
 		}
 	}
 
-	public static String getFEC_innerString(final int fecInner) {
+	public static String getFEC_innerString(int fecInner) {
 		return switch (fecInner) {
 			case 0 -> "not defined";
 			case 1 -> "1/2 conv. code rate";
@@ -397,24 +397,24 @@ public class Descriptor implements TreeNode {
 		};
 	}
 
-	public static String formatCableFrequency(final String f) {
+	public static String formatCableFrequency(String f) {
 		return stripLeadingZeros(f.substring(0, 4) + '.' + f.substring(4, 8) + " MHz");
 	}
 
-	public static String formatCableFrequencyList(final String f) {
+	public static String formatCableFrequencyList(String f) {
 		return stripLeadingZeros(f.substring(1, 4) + '.' + f.substring(4, 8));
 	}
 
-	public static String formatSatelliteFrequency(final String f) {
+	public static String formatSatelliteFrequency(String f) {
 		return stripLeadingZeros(f.substring(0, 3) + '.' + f.substring(3, 8) + " GHz");
 	}
 
-	public static String formatOrbitualPosition(final String f) {
+	public static String formatOrbitualPosition(String f) {
 		return stripLeadingZeros(f.substring(0, 3) + '.' + f.charAt(3) + "°");
 	}
 
-	public static String formatTerrestrialFrequency(final long f) {
-		final StringBuilder s = new StringBuilder();
+	public static String formatTerrestrialFrequency(long f) {
+		StringBuilder s = new StringBuilder();
 		String freq = Long.toString(f * 10);
 		if (freq.length() < 7) {
 			freq = "0000000".substring(freq.length()) + freq;
@@ -424,11 +424,11 @@ public class Descriptor implements TreeNode {
 		return stripLeadingZeros(s.toString());
 	}
 
-	public static String formatSymbolRate(final String f) {
+	public static String formatSymbolRate(String f) {
 		return stripLeadingZeros(f.substring(0, 3) + '.' + f.substring(3, 7) + " Msymbol/s");
 	}
 
-	public static String getServiceTypeString(final int serviceType) {
+	public static String getServiceTypeString(int serviceType) {
 
 		return switch (serviceType) {
 			case 0x00 -> "reserved for future use";
@@ -483,7 +483,7 @@ public class Descriptor implements TreeNode {
 
 	}
 
-	public static String getComponentDescriptorString(final int stream_content,final int stream_content_ext, final int component_type) {
+	public static String getComponentDescriptorString(int stream_content, int stream_content_ext, int component_type) {
 		switch (stream_content) {
 		case 0x00:
 			return "reserved for future use";
@@ -550,7 +550,7 @@ public class Descriptor implements TreeNode {
 	 * @param component_type
 	 * @return
 	 */
-	public static String getComponentType0x09String(final int stream_content_ext, final int component_type) {
+	public static String getComponentType0x09String(int stream_content_ext, int component_type) {
 		return switch (stream_content_ext) {
 			case 0x00 -> switch (component_type) {
 				case 0x00 -> "HEVC Main Profile high definition video, 50 Hz";
@@ -623,8 +623,8 @@ public class Descriptor implements TreeNode {
 	 * @param component_type
 	 * @return
 	 */
-	public static String getNextGenerationAudioComponentTypeString(final int component_type) {
-		final StringBuilder res = new StringBuilder();
+	public static String getNextGenerationAudioComponentTypeString(int component_type) {
+		StringBuilder res = new StringBuilder();
 		if((component_type & 0b0100_0000) != 0) {
 			res.append("content is pre-rendered for consumption with headphones, ");
 		}
@@ -651,7 +651,7 @@ public class Descriptor implements TreeNode {
 		return res.toString();
 	}
 
-	public static String getComponentType0x01String(final int component_type) {
+	public static String getComponentType0x01String(int component_type) {
 		return switch (component_type) {
 			case 0x00 -> "reserved for future use";
 			case 0x01 -> "MPEG-2 video, 4:3 aspect ratio, 25 Hz";
@@ -683,7 +683,7 @@ public class Descriptor implements TreeNode {
 		};
 	}
 
-	public static String getComponentType0x02String(final int component_type) {
+	public static String getComponentType0x02String(int component_type) {
 		return switch (component_type) {
 			case 0x00 -> "reserved for future use";
 			case 0x01 -> "MPEG-1 Layer 2 audio, single mono channel";
@@ -712,7 +712,7 @@ public class Descriptor implements TreeNode {
 		};
 	}
 
-	public static String getComponentType0x03String(final int component_type) {
+	public static String getComponentType0x03String(int component_type) {
 		return switch (component_type) {
 			case 0x00 -> "reserved for future use";
 			case 0x01 -> "EBU Teletext subtitles";
@@ -763,7 +763,7 @@ public class Descriptor implements TreeNode {
 		};
 	}
 
-	public static String getComponentType0x05String(final int component_type) {
+	public static String getComponentType0x05String(int component_type) {
 		return switch (component_type) {
 			case 0x00 -> "reserved for future use";
 			case 0x01 -> "H.264/AVC standard definition video, 4:3 aspect ratio, 25 Hz";
@@ -802,7 +802,7 @@ public class Descriptor implements TreeNode {
 		};
 	}
 
-	public static String getComponentType0x06String(final int component_type) {
+	public static String getComponentType0x06String(int component_type) {
 		return switch (component_type) {
 			case 0x00 -> "reserved for future use";
 			case 0x01 -> "HE-AAC audio, single mono channel";
@@ -845,10 +845,10 @@ public class Descriptor implements TreeNode {
 	 * @return List off all descriptors matching u
 	 */
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(final Iterable<? extends Descriptor> descriptorList, final Class<U> u ) {
+	public static <U extends Descriptor> List<U> findGenericDescriptorsInList(Iterable<? extends Descriptor> descriptorList, Class<U> u ) {
 
-		final List<U> result = new ArrayList<>();
-		for (final Descriptor element : descriptorList) {
+		List<U> result = new ArrayList<>();
+		for (Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				result.add((U) element);
 			}
@@ -867,8 +867,8 @@ public class Descriptor implements TreeNode {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor> Object findDescriptorApplyFunc(final Iterable<Descriptor> descriptorList, final Class<U> u , final Function<U, Object> fun) {
-		for (final Descriptor element : descriptorList) {
+	public static <U extends Descriptor> Object findDescriptorApplyFunc(Iterable<Descriptor> descriptorList, Class<U> u , Function<U, Object> fun) {
+		for (Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				return fun.apply((U) element);
 			}
@@ -877,8 +877,8 @@ public class Descriptor implements TreeNode {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <U extends Descriptor, V extends Object> List<V> findDescriptorApplyListFunc(final Iterable<Descriptor> descriptorList, final Class<U> u , final Function<U, List<V>> fun) {
-		for (final Descriptor element : descriptorList) {
+	public static <U extends Descriptor, V extends Object> List<V> findDescriptorApplyListFunc(Iterable<Descriptor> descriptorList, Class<U> u , Function<U, List<V>> fun) {
+		for (Descriptor element : descriptorList) {
 			if (element.getClass().equals(u)) {
 				return fun.apply((U) element);
 			}
@@ -894,7 +894,7 @@ public class Descriptor implements TreeNode {
 	 * @param profile_and_level
 	 * @return
 	 */
-	public static String getProfileLevelString(final int profile_and_level) {
+	public static String getProfileLevelString(int profile_and_level) {
 		return switch (profile_and_level) {
 			case 0x10 -> "Main profile, level 1";
 			case 0x11 -> "Main profile, level 2";
@@ -952,15 +952,15 @@ public class Descriptor implements TreeNode {
 		};
 	}
 
-	protected static String getMPEGCarriageFlagsString(final int mPEG_carriage_flags) {
+	protected static String getMPEGCarriageFlagsString(int mPEG_carriage_flags) {
 		return mpeg_carriage_flags_list.get(mPEG_carriage_flags);
 	}
 
-	protected static String getMetaDataApplicationFormatString(final int metadata_application_format) {
+	protected static String getMetaDataApplicationFormatString(int metadata_application_format) {
 		return metadata_application_format_list.get(metadata_application_format);
 	}
 
-	public static String getMetaDataFormatString(final int metadata_format) {
+	public static String getMetaDataFormatString(int metadata_format) {
 		return metadata_format_list.get(metadata_format);
 	}
 

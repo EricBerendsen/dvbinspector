@@ -15,8 +15,8 @@ public class AvailDescriptor extends SCTE35Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("provider_avail_id", provider_avail_id));
 		return t;
 	}

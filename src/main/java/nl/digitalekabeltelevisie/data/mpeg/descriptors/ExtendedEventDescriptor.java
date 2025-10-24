@@ -41,7 +41,7 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 
 	public static record Item(DVBString itemDescription, DVBString item) implements TreeNode{
 		@Override
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 			KVP s;
 			if (simpleModus(modus)) {
 				s = new KVP("item", itemDescription + ": " + item, null);
@@ -64,7 +64,7 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 
 	private final DVBString text;
 
-	public ExtendedEventDescriptor(final byte[] b, final TableSection parent) {
+	public ExtendedEventDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		descriptorNumber = getInt(b, 2, 1, 0xF0)>>4;
 		lastDescriptorNumber = getInt(b, 2, 1, MASK_4BITS);
@@ -73,12 +73,12 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 
 		int t=7;
 		while (t<(lengthOfItems + 7)) {
-			final int item_description_length = getInt(b, t, 1, MASK_8BITS);
-			final DVBString item_descripton=new DVBString(b, t);
-			final int item_length = getInt(b, t+1+item_description_length, 1, MASK_8BITS);
-			final DVBString item=new DVBString(b, t+1+item_description_length);
+			int item_description_length = getInt(b, t, 1, MASK_8BITS);
+			DVBString item_descripton=new DVBString(b, t);
+			int item_length = getInt(b, t+1+item_description_length, 1, MASK_8BITS);
+			DVBString item=new DVBString(b, t+1+item_description_length);
 
-			final Item i = new Item(item_descripton,item);
+			Item i = new Item(item_descripton,item);
 			itemList.add(i);
 			t+=2+item_description_length+item_length;
 		}
@@ -98,8 +98,8 @@ public class ExtendedEventDescriptor extends LanguageDependentEitDescriptor{
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		if (simpleModus(modus)) {
 			t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 			addListJTree(t, itemList, modus, "items");

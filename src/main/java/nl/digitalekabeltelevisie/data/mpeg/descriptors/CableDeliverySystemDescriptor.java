@@ -61,7 +61,7 @@ public class CableDeliverySystemDescriptor extends Descriptor{
 	}
 
 	public String getFEC_outerString() {
-		return switch (getFEC_outer()) {
+		return switch (FEC_outer) {
 		case 0 -> "not defined";
 		case 1 -> "no outer FEC coding";
 		case 2 -> "RS(204/188)";
@@ -69,7 +69,7 @@ public class CableDeliverySystemDescriptor extends Descriptor{
 		};
 	}
 
-	public static String getModulationString(final int mod) {
+	public static String getModulationString(int mod) {
 		return switch (mod) {
 		case 0x00 -> "not defined";
 		case 0x01 -> "16-QAM";
@@ -97,7 +97,7 @@ public class CableDeliverySystemDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		return super.toString() + "Frequency="+getFrequency()+", FEC_outer="+getFEC_outerString()+", modulation="+getModulationString(modulation)+", Symbol Rate="+getSymbol_rate()+", FEC_inner="+Descriptor.getFEC_innerString(FEC_inner);
+		return super.toString() + "Frequency="+ frequency +", FEC_outer="+getFEC_outerString()+", modulation="+getModulationString(modulation)+", Symbol Rate="+ symbol_rate +", FEC_inner="+Descriptor.getFEC_innerString(FEC_inner);
 	}
 
 

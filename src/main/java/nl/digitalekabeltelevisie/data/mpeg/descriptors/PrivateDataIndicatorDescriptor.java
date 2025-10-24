@@ -54,7 +54,7 @@ public class PrivateDataIndicatorDescriptor extends Descriptor {
 	}
 
 
-	public void setPrivateDataIndicator(final int privateDataSpecifier) {
+	public void setPrivateDataIndicator(int privateDataSpecifier) {
 		this.privateDataIndicator = privateDataSpecifier;
 	}
 

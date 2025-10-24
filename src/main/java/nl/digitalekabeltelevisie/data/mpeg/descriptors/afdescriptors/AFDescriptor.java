@@ -47,7 +47,7 @@ public class AFDescriptor extends Descriptor {
 	 * @param offset
 	 * @param parent
 	 */
-	public AFDescriptor(final byte[] b) {
+	public AFDescriptor(byte[] b) {
 		super(b, null);
 	}
 
@@ -56,7 +56,7 @@ public class AFDescriptor extends Descriptor {
 		return getDescriptorname(descriptorTag);
 	}
 
-	public static String getDescriptorname(final int tag){
+	public static String getDescriptorname(int tag){
 
 
 		if((tag>=0x00)&&(tag<=0x03)){
@@ -66,22 +66,22 @@ public class AFDescriptor extends Descriptor {
 			return "Rec. ITU-T H.222.0 | ISO/IEC 13818-1 Reserved";
 		}
 
-		switch (tag) {
-		case 0x04: return "Timeline Descriptor";
-		case 0x05: return "Location Descriptor";
-		case 0x06: return "BaseURL Descriptor";
-		case 0x07: return "Cets_byte_range_descriptor"; //ISO/IEC 13818-1:2015/Amd.1/Cor.2:2016 (E)
-		case 0x08: return "MPEG-H_3dAudio_extStreamID_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
-		case 0x09: return "AF_MPEG-H_3dAudio_multi-stream_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
-		case 0x0a: return "AF_MPEG-H_3dAudio_command_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
-		case 0x0b: return "Boundary Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
-		case 0x0c: return "Labeling Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
-		case 0x0d: return "HEVC_tile_substream_af_descriptor"; //ISO/IEC 13818-1:2021 - Rec. ITU-T H.222.0 (06/2021)
-		default:
-
-			return "User Private";
-
-		}
+        return switch (tag) {
+            case 0x04 -> "Timeline Descriptor";
+            case 0x05 -> "Location Descriptor";
+            case 0x06 -> "BaseURL Descriptor";
+            case 0x07 -> "Cets_byte_range_descriptor"; //ISO/IEC 13818-1:2015/Amd.1/Cor.2:2016 (E)
+            case 0x08 ->
+                    "MPEG-H_3dAudio_extStreamID_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+            case 0x09 ->
+                    "AF_MPEG-H_3dAudio_multi-stream_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+            case 0x0a ->
+                    "AF_MPEG-H_3dAudio_command_descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+            case 0x0b -> "Boundary Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+            case 0x0c -> "Labeling Descriptor"; //Rec. ITU-T H.222.0 (2014)/Amd.7 (03/2017) – Prepublished version
+            case 0x0d -> "HEVC_tile_substream_af_descriptor"; //ISO/IEC 13818-1:2021 - Rec. ITU-T H.222.0 (06/2021)
+            default -> "User Private";
+        };
 	}
 
 

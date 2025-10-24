@@ -55,7 +55,7 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 
 		private final List<SubCell> subCellList = new ArrayList<>();
 
-		public Cell(final int id,final long f,final int loop){
+		public Cell(int id, long f, int loop){
 			cellId = id;
 			frequency = f;
 			subcellInfoLoopLength = loop;
@@ -67,7 +67,7 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			final KVP s = new KVP("cell");
+			KVP s = new KVP("cell");
 			s.add(new KVP("cell_id", cellId));
 			s.add(new KVP("frequency", frequency, Descriptor.formatTerrestrialFrequency(frequency)));
 			s.add(new KVP("subcell_info_loop_length", subcellInfoLoopLength));
@@ -91,17 +91,17 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 		super(b, parent);
 		int t = 0;
 		while ((t + 6) < descriptorLength) {
-			final int cell_id = getInt(b, t + 2, 2, Utils.MASK_16BITS);
-			final long freq = getLong(b, t + 4, 4, MASK_32BITS);
-			final int subcell_info_loop_length = getInt(b, t + 8, 1, Utils.MASK_8BITS);
-			final Cell cell = new Cell(cell_id, freq, subcell_info_loop_length);
+			int cell_id = getInt(b, t + 2, 2, Utils.MASK_16BITS);
+			long freq = getLong(b, t + 4, 4, MASK_32BITS);
+			int subcell_info_loop_length = getInt(b, t + 8, 1, Utils.MASK_8BITS);
+			Cell cell = new Cell(cell_id, freq, subcell_info_loop_length);
 			cellList.add(cell);
 			t += 7;
 			int r = 0;
 			while (r < subcell_info_loop_length) {
-				final int cell_id_extension = getInt(b, t + 2 + r, 1, Utils.MASK_8BITS);
-				final long trans_freq = getLong(b, t + 3, 4, MASK_32BITS);
-				final SubCell s = new SubCell(cell_id_extension, trans_freq);
+				int cell_id_extension = getInt(b, t + 2 + r, 1, Utils.MASK_8BITS);
+				long trans_freq = getLong(b, t + 3, 4, MASK_32BITS);
+				SubCell s = new SubCell(cell_id_extension, trans_freq);
 				cell.addSubCell(s);
 				r = r + 5;
 			}
@@ -111,7 +111,7 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (Cell cell : cellList) {
 			buf.append(cell.toString());
 		}
@@ -122,9 +122,9 @@ public class CellFrequencyLinkDescriptor extends Descriptor {
 
 
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,cellList,modus,"cell_list");
 		return t;
 	}

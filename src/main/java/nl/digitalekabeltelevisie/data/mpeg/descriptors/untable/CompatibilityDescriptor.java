@@ -47,12 +47,12 @@ public class CompatibilityDescriptor implements TreeNode {
 
 	private final List<CompDescriptor> descriptors = new ArrayList<>();
 
-	public static record CompDescriptor(int descriptorType, int descriptorLength, int specifierType, int specifierData, int model, int version,
-			int subDescriptorCount, List<SubDescriptor> subDescriptors) implements TreeNode {
+	public record CompDescriptor(int descriptorType, int descriptorLength, int specifierType, int specifierData, int model, int version,
+                                 int subDescriptorCount, List<SubDescriptor> subDescriptors) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP t = new KVP("Descriptor: " + getDescriptorTypeString(descriptorType));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("Descriptor: " + getDescriptorTypeString(descriptorType));
 
 			t.add(new KVP("descriptorType", descriptorType, getDescriptorTypeString(descriptorType)));
 			t.add(new KVP("descriptorLength", descriptorLength));
@@ -65,7 +65,7 @@ public class CompatibilityDescriptor implements TreeNode {
 			return t;
 		}
 
-		private static String getSpecifierTypeString(final int specifierType2) {
+		private static String getSpecifierTypeString(int specifierType2) {
 			if (specifierType2 == 0) {
 				return "ISO/IEC 13818-6 reserved";
 			} else if (specifierType2 == 1) {
@@ -84,7 +84,7 @@ public class CompatibilityDescriptor implements TreeNode {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			final KVP t = new KVP("SubDescriptor");
+			KVP t = new KVP("SubDescriptor");
 
 			t.add(new KVP("subDescriptorType", subDescriptorType));
 			t.add(new KVP("subDescriptorLength", subDescriptorLength));
@@ -96,7 +96,7 @@ public class CompatibilityDescriptor implements TreeNode {
 	/**
 	 *
 	 */
-	public CompatibilityDescriptor(final byte[] data, final int offset) {
+	public CompatibilityDescriptor(byte[] data, int offset) {
 		compatibilityDescriptorLength = Utils.getInt(data, offset, 2, Utils.MASK_16BITS);
 		if (compatibilityDescriptorLength > 0) {
 			compatibilityDescriptorCount = Utils.getInt(data, offset + 2, 2, Utils.MASK_16BITS);

@@ -52,7 +52,7 @@ public class MultilingualNetworkNameDescriptor extends Descriptor {
 
 	}
 
-	public MultilingualNetworkNameDescriptor(byte[] b, final TableSection parent) {
+	public MultilingualNetworkNameDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		int t = 2;
 		while (t < (descriptorLength + 2)) {

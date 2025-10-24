@@ -37,6 +37,7 @@ import nl.digitalekabeltelevisie.util.LookUpList;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
+@SuppressWarnings("ALL")
 public class AVS3AudioDescriptor extends Descriptor {
 
 	private int audio_codec_id = 0;                   // 4 bits
@@ -225,16 +226,15 @@ public class AVS3AudioDescriptor extends Descriptor {
 		case GENERAL_FULL_RATE_CODING:
 			nn_type = getInt(b, ofs, 1, 0b11100000) >>> 5;
 			content_type = getInt(b, ofs++, 1, MASK_4BITS);
-			if (content_type == CHANNEL_SIGNAL)
-				channel_number_index = getInt(b, ofs++, 1, 0b11111110) >>> 1;
-			else if (content_type == OBJECT_SIGNAL)
-				object_channel_number = getInt(b, ofs++, 1, 0b11111110) >>> 1;
-			else if (content_type == HYBRID_SIGNAL) {
-				channel_number_index = getInt(b, ofs++, 1, 0b11111110) >>> 1;
-				object_channel_number = getInt(b, ofs++, 1, 0b11111110) >>> 1;
-			}
-			else if (content_type == HOA_SIGNAL)
-				hoa_order = getInt(b, ofs++, 1, 0b11110000) >>> 4;
+            switch (content_type) {
+                case CHANNEL_SIGNAL -> channel_number_index = getInt(b, ofs++, 1, 0b11111110) >>> 1;
+                case OBJECT_SIGNAL -> object_channel_number = getInt(b, ofs++, 1, 0b11111110) >>> 1;
+                case HYBRID_SIGNAL -> {
+                    channel_number_index = getInt(b, ofs++, 1, 0b11111110) >>> 1;
+                    object_channel_number = getInt(b, ofs++, 1, 0b11111110) >>> 1;
+                }
+                case HOA_SIGNAL -> hoa_order = getInt(b, ofs++, 1, 0b11110000) >>> 4;
+            }
 			total_bitrate = getInt(b, ofs, 2, MASK_16BITS);
 			ofs+=2;
 			break;
@@ -290,7 +290,7 @@ public class AVS3AudioDescriptor extends Descriptor {
 	}
 
 	private static final String object_channel_number_String(int object_channel_number) {
-		return new String( Integer.toString(object_channel_number+1) + " object" + (object_channel_number+1 == 1 ? "" : "s") );
+		return Integer.toString(object_channel_number + 1) + " object" + (object_channel_number + 1 == 1 ? "" : "s");
 	}
 
 	private static final String nn_type_String(int nn_type) {

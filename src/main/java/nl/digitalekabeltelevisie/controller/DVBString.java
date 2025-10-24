@@ -145,7 +145,7 @@ public class DVBString {
 		if(0x20<=fb)
 		{
 			return "default (ISO 6937, latin)";
-		}else if((0x01<=fb)&&(fb<=0x1F)){
+		}else if(0x01<=fb){
 			switch (fb) {
 			case 0x01:
 				return "ISO/IEC 8859-5";

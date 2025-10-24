@@ -81,7 +81,7 @@ public class TimeSliceFecIdentifierDescriptor extends Descriptor {
 	 * @param time_slice_fec_id2
 	 * @return
 	 */
-	private static String getMaxBurstString(final int max_burst_duration2, final int time_slicing2, final int time_slice_fec_id2) {
+	private static String getMaxBurstString(int max_burst_duration2, int time_slicing2, int time_slice_fec_id2) {
 		if(time_slicing2==0){
 			return "reserved for future use";
 		}else if(time_slice_fec_id2==0){
@@ -97,28 +97,28 @@ public class TimeSliceFecIdentifierDescriptor extends Descriptor {
 	 * @param time_slice_fec_id2
 	 * @return
 	 */
-	private static String getFrameSizeString(final int frame_size2, final int time_slicing2, final int mpe_fec2, final int time_slice_fec_id2) {
+	private static String getFrameSizeString(int frame_size2, int time_slicing2, int mpe_fec2, int time_slice_fec_id2) {
 		String r = "";
 		if(time_slice_fec_id2==0){
 			if(time_slicing2==1){
 				r = "Max Burst Size:";
-				switch (frame_size2) {
-				case 0: r=r+ "512 kbits "; break;
-				case 1: r=r+ "1024 kbits "; break;
-				case 2: r=r+ "1536 kbits "; break;
-				case 3: r=r+ "2048 kbits "; break;
-				default: r=r+ "reserved for future use ";
-				}
+                r = switch (frame_size2) {
+                    case 0 -> r + "512 kbits ";
+                    case 1 -> r + "1024 kbits ";
+                    case 2 -> r + "1536 kbits ";
+                    case 3 -> r + "2048 kbits ";
+                    default -> r + "reserved for future use ";
+                };
 			}
 			if(mpe_fec2==1){
 				r= r+"MPE-FEC Frame rows:";
-				switch (frame_size2) {
-				case 0: r=r+ "256"; break;
-				case 1: r=r+ "512"; break;
-				case 2: r=r+ "768"; break;
-				case 3: r=r+ "1024"; break;
-				default: r=r+ "reserved for future use";
-				}
+                r = switch (frame_size2) {
+                    case 0 -> r + "256";
+                    case 1 -> r + "512";
+                    case 2 -> r + "768";
+                    case 3 -> r + "1024";
+                    default -> r + "reserved for future use";
+                };
 			}
 		}else{
 			r="undefined";
@@ -128,25 +128,25 @@ public class TimeSliceFecIdentifierDescriptor extends Descriptor {
 	}
 
 
-	private static String getMaxAvgRateString(final int max_avg_r, final int time_slice_fec_id2) {
+	private static String getMaxAvgRateString(int max_avg_r, int time_slice_fec_id2) {
 		if(time_slice_fec_id2==0){
-			switch (max_avg_r) {
-			case 0: return "16 kbps";
-			case 1: return "32 kbps";
-			case 2: return "64 kbps";
-			case 3: return "128 kbps";
-			case 4: return "256 kbps";
-			case 5: return "512 kbps";
-			case 6: return "1024 kbps";
-			case 7: return "2048 kbps";
-			default: return "reserved for future use ";
-			}
+            return switch (max_avg_r) {
+                case 0 -> "16 kbps";
+                case 1 -> "32 kbps";
+                case 2 -> "64 kbps";
+                case 3 -> "128 kbps";
+                case 4 -> "256 kbps";
+                case 5 -> "512 kbps";
+                case 6 -> "1024 kbps";
+                case 7 -> "2048 kbps";
+                default -> "reserved for future use ";
+            };
 		}
 		return "undefined";
 	}
 
 
-	public static String getTimeSlicingString(final int time_slicing) {
+	public static String getTimeSlicingString(int time_slicing) {
 		if(time_slicing==1){
 			return "Time Slicing being used";
 		}
@@ -155,12 +155,12 @@ public class TimeSliceFecIdentifierDescriptor extends Descriptor {
 
 
 
-	public static String getMPE_FECtring(final int m) {
-		switch (m) {
-		case 0: return "MPE-FEC not used";
-		case 1: return "MPE-FEC used";
-		default: return "reserved for future use";
-		}
+	public static String getMPE_FECtring(int m) {
+        return switch (m) {
+            case 0 -> "MPE-FEC not used";
+            case 1 -> "MPE-FEC used";
+            default -> "reserved for future use";
+        };
 	}
 
 

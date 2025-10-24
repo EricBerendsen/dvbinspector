@@ -74,90 +74,90 @@ public class MetaDataDescriptor extends Descriptor {
 	private byte[] private_data_byte;
 
 
-	public MetaDataDescriptor( byte[] b, TableSection parent) {
-		super(b, parent);
-		int localOffset = 2;
-		metadata_application_format = getInt(b, localOffset, 2, MASK_16BITS);
-		localOffset+=2;
-		if(metadata_application_format==0xFFFF){
-			metadata_application_format_identifier = getLong(b, localOffset, 4, MASK_32BITS);
-			localOffset+=4;
-		}
-		metadata_format = getInt(b, localOffset++, 1, MASK_8BITS);
-		if(metadata_format==0xFF){
-			metadata_format_identifier  = getLong(b, localOffset, 4, MASK_32BITS);
-			localOffset+=4;
-		}
-		metadata_service_id = getInt(b, localOffset++, 1, MASK_8BITS);
-		decoder_config_flags = getInt(b, localOffset, 1, 0xE0)>>5;
-		dsm_cc_flag = getInt(b, localOffset, 1, 0x10)>>4;
-		reserved = getInt(b, localOffset++, 1, MASK_4BITS);
-		if(dsm_cc_flag==1){
-			service_identification_length = getInt(b, localOffset++, 1, MASK_8BITS);
-			service_identification_record_byte = getBytes(b, localOffset, service_identification_length);
-			localOffset += service_identification_length;
-		}
-		if(decoder_config_flags==1){ // 001
-			decoder_config_length = getInt(b, localOffset++, 1, MASK_8BITS);
-			decoder_config_byte = getBytes(b, localOffset, decoder_config_length);
-			localOffset += decoder_config_length;
-		}
-		if (decoder_config_flags == 3) { // '011'
-			dec_config_identification_record_length = getInt(b, localOffset++, 1, MASK_8BITS);
-			dec_config_identification_record_byte = getBytes(b, localOffset, dec_config_identification_record_length);
-			localOffset += dec_config_identification_record_length;
-		}
-		if (decoder_config_flags == 4) { // '100'
-			decoder_config_metadata_service_id = getInt(b, localOffset++, 1, MASK_8BITS);
-		}
-		if ((decoder_config_flags == 5)|| (decoder_config_flags == 6)){// '101'|'110'
-			reserved_data_length = getInt(b, localOffset++, 1, MASK_8BITS);
-			reserved2 = getBytes(b, localOffset, dec_config_identification_record_length);
-			localOffset += reserved_data_length;
-		}
-		private_data_byte = copyOfRange(b, localOffset, descriptorLength+2);
-	}
+    public MetaDataDescriptor(byte[] b, TableSection parent) {
+        super(b, parent);
+        int localOffset = 2;
+        metadata_application_format = getInt(b, localOffset, 2, MASK_16BITS);
+        localOffset += 2;
+        if (metadata_application_format == 0xFFFF) {
+            metadata_application_format_identifier = getLong(b, localOffset, 4, MASK_32BITS);
+            localOffset += 4;
+        }
+        metadata_format = getInt(b, localOffset++, 1, MASK_8BITS);
+        if (metadata_format == 0xFF) {
+            metadata_format_identifier = getLong(b, localOffset, 4, MASK_32BITS);
+            localOffset += 4;
+        }
+        metadata_service_id = getInt(b, localOffset++, 1, MASK_8BITS);
+        decoder_config_flags = getInt(b, localOffset, 1, 0xE0) >> 5;
+        dsm_cc_flag = getInt(b, localOffset, 1, 0x10) >> 4;
+        reserved = getInt(b, localOffset++, 1, MASK_4BITS);
+        if (dsm_cc_flag == 1) {
+            service_identification_length = getInt(b, localOffset++, 1, MASK_8BITS);
+            service_identification_record_byte = getBytes(b, localOffset, service_identification_length);
+            localOffset += service_identification_length;
+        }
+        if (decoder_config_flags == 0b001) {
+            decoder_config_length = getInt(b, localOffset++, 1, MASK_8BITS);
+            decoder_config_byte = getBytes(b, localOffset, decoder_config_length);
+            localOffset += decoder_config_length;
+        }
+        if (decoder_config_flags == 0b011) {
+            dec_config_identification_record_length = getInt(b, localOffset++, 1, MASK_8BITS);
+            dec_config_identification_record_byte = getBytes(b, localOffset, dec_config_identification_record_length);
+            localOffset += dec_config_identification_record_length;
+        }
+        if (decoder_config_flags == 0b100) {
+            decoder_config_metadata_service_id = getInt(b, localOffset++, 1, MASK_8BITS);
+        }
+        if ((decoder_config_flags == 0b101) || (decoder_config_flags == 0b110)) {
+            reserved_data_length = getInt(b, localOffset++, 1, MASK_8BITS);
+            reserved2 = getBytes(b, localOffset, reserved_data_length);
+            localOffset += reserved_data_length;
+        }
+        private_data_byte = copyOfRange(b, localOffset, descriptorLength + 2);
+    }
 
 	@Override
-	public KVP getJTreeNode(int modus){
+    public KVP getJTreeNode(int modus) {
 
-		KVP t = super.getJTreeNode(modus);
-		t.add(new KVP("metadata_application_format",metadata_application_format,getMetaDataApplicationFormatString(metadata_application_format)));
-		if(metadata_application_format==0xFFFF){
-			t.add(new KVP("metadata_application_format_identifier",metadata_application_format_identifier));
-		}
-		t.add(new KVP("metadata_format",metadata_format,getMetaDataFormatString(metadata_format)));
-		if(metadata_format==0xFF){
-			t.add(new KVP("metadata_format_identifier",metadata_format_identifier));
-		}
-		t.add(new KVP("metadata_service_id",metadata_service_id));
-		t.add(new KVP("decoder_config_flags",decoder_config_flags,getDecoderConfigFlagsString(decoder_config_flags)));
-		t.add(new KVP("DSM-CC_flag",dsm_cc_flag,dsm_cc_flag==1?"the stream with which this descriptor is associated is carried in an ISO/IEC 13818-6 data or object carousel":null));
-		t.add(new KVP("reserved",reserved));
+        KVP t = super.getJTreeNode(modus);
+        t.add(new KVP("metadata_application_format", metadata_application_format, getMetaDataApplicationFormatString(metadata_application_format)));
+        if (metadata_application_format == 0xFFFF) {
+            t.add(new KVP("metadata_application_format_identifier", metadata_application_format_identifier));
+        }
+        t.add(new KVP("metadata_format", metadata_format, getMetaDataFormatString(metadata_format)));
+        if (metadata_format == 0xFF) {
+            t.add(new KVP("metadata_format_identifier", metadata_format_identifier));
+        }
+        t.add(new KVP("metadata_service_id", metadata_service_id));
+        t.add(new KVP("decoder_config_flags", decoder_config_flags, getDecoderConfigFlagsString(decoder_config_flags)));
+        t.add(new KVP("DSM-CC_flag", dsm_cc_flag, dsm_cc_flag == 1 ? "the stream with which this descriptor is associated is carried in an ISO/IEC 13818-6 data or object carousel" : null));
+        t.add(new KVP("reserved", reserved));
 
-		if(dsm_cc_flag==1){
-			t.add(new KVP("service_identification_length",service_identification_length));
-			t.add(new KVP("service_identification_record_byte",service_identification_record_byte));
-		}
-		if(decoder_config_flags==1){ // 001
-			t.add(new KVP("decoder_config_length",decoder_config_length));
-			t.add(new KVP("decoder_config_byte",decoder_config_byte));
-		}
-		if (decoder_config_flags == 3) { // '011'
-			t.add(new KVP("dec_config_identification_record_length",dec_config_identification_record_length));
-			t.add(new KVP("dec_config_identification_record_byte",dec_config_identification_record_byte));
-		}
-		if (decoder_config_flags == 4) { // '100'
-			t.add(new KVP("decoder_config_metadata_service_id",decoder_config_metadata_service_id));
-		}
-		if ((decoder_config_flags == 5)|| (decoder_config_flags == 6)){// '101'|'110'
-			t.add(new KVP("reserved_data_length",reserved_data_length));
-			t.add(new KVP("reserved",reserved2));
-		}
-		t.add(new KVP("private_data_byte",private_data_byte));
+        if (dsm_cc_flag == 1) {
+            t.add(new KVP("service_identification_length", service_identification_length));
+            t.add(new KVP("service_identification_record_byte", service_identification_record_byte));
+        }
+        if (decoder_config_flags == 0b001) {
+            t.add(new KVP("decoder_config_length", decoder_config_length));
+            t.add(new KVP("decoder_config_byte", decoder_config_byte));
+        }
+        if (decoder_config_flags == 0b011) {
+            t.add(new KVP("dec_config_identification_record_length", dec_config_identification_record_length));
+            t.add(new KVP("dec_config_identification_record_byte", dec_config_identification_record_byte));
+        }
+        if (decoder_config_flags == 0b100) {
+            t.add(new KVP("decoder_config_metadata_service_id", decoder_config_metadata_service_id));
+        }
+        if ((decoder_config_flags == 0b101) || (decoder_config_flags == 0b110)) {
+            t.add(new KVP("reserved_data_length", reserved_data_length));
+            t.add(new KVP("reserved", reserved2));
+        }
+        t.add(new KVP("private_data_byte", private_data_byte));
 
-		return t;
-	}
+        return t;
+    }
 
 	public static String getDecoderConfigFlagsString(int decoder_config_flags){
 		return decoder_config_flags_list.get(decoder_config_flags);

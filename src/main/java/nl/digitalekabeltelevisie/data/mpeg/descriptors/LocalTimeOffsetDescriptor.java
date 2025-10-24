@@ -121,7 +121,7 @@ public class LocalTimeOffsetDescriptor extends Descriptor {
 	public String toString() {
 		StringBuilder buf = new StringBuilder(super.toString());
 		for (int i = 0; i < getNoServices(); i++) {
-			final LocalTimeOffset s = offsetList.get(i);
+			LocalTimeOffset s = offsetList.get(i);
 			buf.append("(").append(i).append(";").append(s.countryCode()).append(", time of next change").append(s.getTimeOfChangeString());
 		}
 		return buf.toString();

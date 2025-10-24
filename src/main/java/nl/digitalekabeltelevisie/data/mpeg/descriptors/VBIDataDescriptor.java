@@ -77,7 +77,7 @@ public class VBIDataDescriptor extends Descriptor {
 
 		}
 
-		DataService(final int id, final int length, final byte[]data){
+		DataService(int id, int length, byte[]data){
 			this.dataServiceId = id;
 			this.dataServiceDescriptorLength = length;
 
@@ -89,7 +89,7 @@ public class VBIDataDescriptor extends Descriptor {
 					(dataServiceId==0x07)) {
 				linesList = new ArrayList<>();
 				for (int i = 0; i < data.length; i++) {
-					final VBILine line = new VBILine(getInt(data, i, 1, 0xFF));
+					VBILine line = new VBILine(getInt(data, i, 1, 0xFF));
 					linesList.add(line);
 				}
 			}else{
@@ -136,21 +136,18 @@ public class VBIDataDescriptor extends Descriptor {
 	 * @param dataServiceID
 	 * @return String with description of the VBI service type
 	 */
-	public static String getDataServiceIDString(final int dataServiceID){
-		switch (dataServiceID) {
-		case 0x00 : return "reserved for future use";
-		case 0x01 : return "EBU teletext (Requires additional teletext_descriptor)";
-		case 0x02 : return "inverted teletext";
-		case 0x03 : return "reserved";
-		case 0x04 : return "VPS";
-		case 0x05 : return "WSS";
-		case 0x06 : return "Closed Captioning";
-		case 0x07 : return "monochrome 4:2:2 samples";
-		default:
-			return "reserved for future use";
-
-
-		}
+	public static String getDataServiceIDString(int dataServiceID){
+        return switch (dataServiceID) {
+            case 0x00 -> "reserved for future use";
+            case 0x01 -> "EBU teletext (Requires additional teletext_descriptor)";
+            case 0x02 -> "inverted teletext";
+            case 0x03 -> "reserved";
+            case 0x04 -> "VPS";
+            case 0x05 -> "WSS";
+            case 0x06 -> "Closed Captioning";
+            case 0x07 -> "monochrome 4:2:2 samples";
+            default -> "reserved for future use";
+        };
 
 	}
 }

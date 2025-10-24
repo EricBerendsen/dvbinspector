@@ -41,7 +41,7 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class GeneralPSITable extends AbstractPSITabel{
 	
-	public class TableSectionOccurrence{
+	public static class TableSectionOccurrence{
 
 		private final int packetNo;
 		private final TableSection tableSection;

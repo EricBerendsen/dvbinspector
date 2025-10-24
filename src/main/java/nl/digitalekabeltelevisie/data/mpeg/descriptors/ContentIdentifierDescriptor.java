@@ -75,8 +75,8 @@ public class ContentIdentifierDescriptor extends Descriptor {
 			byte[] crid_byte = null;
 			int crid_len = 0;
 			int cridRef = 0;
-			final int type = getInt(b, 2 + r, 1, 0xFC) >> 2;
-			final int location = getInt(b, 2 + r, 1, Utils.MASK_2BITS);
+			int type = getInt(b, 2 + r, 1, 0xFC) >> 2;
+			int location = getInt(b, 2 + r, 1, Utils.MASK_2BITS);
 			if (location == 0) {
 				crid_len = getInt(b, 3 + r, 1, Utils.MASK_8BITS);
 				crid_byte = copyOfRange(b, 4 + r, r + 4 + crid_len);
@@ -90,7 +90,7 @@ public class ContentIdentifierDescriptor extends Descriptor {
 				r += 2;
 				break;
 			}
-			final CridEntry cridEntry = new CridEntry(type, location, crid_len, crid_byte, cridRef);
+			CridEntry cridEntry = new CridEntry(type, location, crid_len, crid_byte, cridRef);
 			cridEntryList.add(cridEntry);
 
 		}

@@ -83,7 +83,7 @@ public class ZiggoPackageDescriptor extends Descriptor {
 	public ZiggoPackageDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		// packages seems to be 4 bytes, this should always work
-		packages = copyOfRange(b, 2, 2 + getDescriptorLength());
+		packages = copyOfRange(b, 2, 2 + descriptorLength);
 	}
 
 	@Override
@@ -105,12 +105,12 @@ public class ZiggoPackageDescriptor extends Descriptor {
 	private static String getPackagesList(byte[] packages){
 		StringBuilder t = new StringBuilder();
 		BitString bs = new BitString(packages);
-		for (int i = 0; i < packageNames.length; i++) {
-			int bit = bs.getIntBitsEnd(1);
-			if(bit==1){
-				t.append(packageNames[i]).append(',');
-			}
-		}
+        for (String packageName : packageNames) {
+            int bit = bs.getIntBitsEnd(1);
+            if (bit == 1) {
+                t.append(packageName).append(',');
+            }
+        }
 		// remove last comma ','
 		if(t.length()>0){
 			t.delete(t.length()-1, t.length());

@@ -54,7 +54,7 @@ public class HDSimulcastLogicalChannelDescriptor extends AbstractLogicalChannelD
 			int reserved = getInt(b, t + 4, 1, 0x7C) >> 2;
 			int chNumber = getInt(b, t + 4, 2, 0x03FF);
 
-			final LogicalChannel s = new LogicalChannel(serviceId, visisble, reserved, chNumber);
+			LogicalChannel s = new LogicalChannel(serviceId, visisble, reserved, chNumber);
 			channelList.add(s);
 			t += 4;
 		}

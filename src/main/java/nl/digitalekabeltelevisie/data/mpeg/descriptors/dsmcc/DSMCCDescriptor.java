@@ -32,6 +32,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
  * @author Eric Berendsen
  *
  */
+@SuppressWarnings("ALL")
 public class DSMCCDescriptor extends Descriptor {
 
 

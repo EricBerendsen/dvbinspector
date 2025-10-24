@@ -49,7 +49,7 @@ public class AdaptationFieldDataDescriptor extends Descriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus){
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("adaptation_field_data_identifier",adaptationFieldDataIdentifier ,getAdaptationFieldDataIdentifierString(adaptationFieldDataIdentifier)));
 		return t;
 	}

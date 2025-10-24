@@ -31,6 +31,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
+@SuppressWarnings("ALL")
 public class DVBExtensionDescriptor extends ExtensionDescriptor {
 
 	public DVBExtensionDescriptor(byte[] b, TableSection parent) {

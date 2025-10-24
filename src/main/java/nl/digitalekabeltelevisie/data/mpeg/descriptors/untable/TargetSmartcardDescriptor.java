@@ -57,7 +57,7 @@ public class TargetSmartcardDescriptor extends UNTDescriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		KVP super_CA_system_idNode = new KVP("super_CA_system_id", super_CA_system_id);
 		int caSystemID = super_CA_system_id >>> 16;
 		int caSubsystem_id = super_CA_system_id & Utils.MASK_16BITS;

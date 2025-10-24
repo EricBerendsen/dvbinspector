@@ -36,6 +36,7 @@ import nl.digitalekabeltelevisie.util.LookUpList;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
+@SuppressWarnings("ALL")
 public class AVS3VideoDescriptor extends Descriptor {
 
 	private final int profile_id;						// 8 bits

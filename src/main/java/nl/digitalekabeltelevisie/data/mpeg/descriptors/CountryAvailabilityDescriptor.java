@@ -49,7 +49,7 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			final KVP s = new KVP("country");
+			KVP s = new KVP("country");
 			s.add(new KVP("country_code", countryCode));
 			return s;
 		}
@@ -61,8 +61,8 @@ public class CountryAvailabilityDescriptor extends Descriptor {
 		country_availability_flag = getInt(b, 2, 1, 0x80)>>7;
 
 		while (t<(descriptorLength-1)) {
-			final String languageCode=getISO8859_1String(b, t+3, 3);
-			final Country s = new Country(languageCode);
+			String languageCode=getISO8859_1String(b, t+3, 3);
+			Country s = new Country(languageCode);
 			countryList.add(s);
 			t+=3;
 		}

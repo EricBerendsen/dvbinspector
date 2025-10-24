@@ -65,7 +65,7 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor{
 	}
 
 
-	public static String getModulationString(final int mod) {
+	public static String getModulationString(int mod) {
 		return switch (mod) {
 		case 0x00 -> "Auto";
 		case 0x01 -> "QPSK";
@@ -75,7 +75,7 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor{
 		};
 	}
 
-	public static String getPolarizationString(final int pol) {
+	public static String getPolarizationString(int pol) {
 		return switch (pol) {
 		case 0x00 -> "linear - horizontal";
 		case 0x01 -> "linear - vertical";
@@ -85,7 +85,7 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor{
 		};
 	}
 
-	public static String getRollOffString(final int pol) {
+	public static String getRollOffString(int pol) {
 		return switch (pol) {
 		case 0x00 -> "\u03b1 = 0,35"; // alpha
 		case 0x01 -> "\u03b1 = 0,25";
@@ -106,7 +106,7 @@ public class SatelliteDeliverySystemDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		return super.toString() + "Frequency="+getFrequency()+", FEC_inner="+Descriptor.getFEC_innerString(FEC_inner);
+		return super.toString() + "Frequency="+ frequency +", FEC_inner="+Descriptor.getFEC_innerString(FEC_inner);
 	}
 
 	@Override

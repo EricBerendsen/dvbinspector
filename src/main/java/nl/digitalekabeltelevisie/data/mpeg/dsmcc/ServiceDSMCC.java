@@ -300,7 +300,7 @@ public class ServiceDSMCC implements TreeNode {
 		List<Descriptor> moduleDescriptors = biopModInfo.getDescriptors();
 		if((moduleDescriptors!=null)&&(!moduleDescriptors.isEmpty())){
 			List<CompressedModuleDescriptor> compressedModuleDescriptorsList = Descriptor.findGenericDescriptorsInList(moduleDescriptors, CompressedModuleDescriptor.class); //Descriptor: compressed_module_descriptor: 0x9 (9)
-			if((compressedModuleDescriptorsList!=null)&&(!compressedModuleDescriptorsList.isEmpty())){ // comrpession used
+			if(!compressedModuleDescriptorsList.isEmpty()){ // comrpession used
 				CompressedModuleDescriptor compressedModuleDescriptor =  compressedModuleDescriptorsList.getFirst();
 				int original_size = (int)compressedModuleDescriptor.getOriginal_size();
 				res = decompress(rawData, original_size);

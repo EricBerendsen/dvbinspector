@@ -58,7 +58,7 @@ public class ShortEventDescriptor extends LanguageDependentEitDescriptor{
 
 	@Override
 	public String toString() {
-		return super.toString() + ",eventName="+eventName.toString()+",ISO_639_language_code="+getIso639LanguageCode();
+		return super.toString() + ",eventName="+eventName.toString()+",ISO_639_language_code="+ iso639LanguageCode;
 	}
 
 	@Override

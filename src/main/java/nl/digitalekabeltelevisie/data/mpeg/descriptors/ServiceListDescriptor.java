@@ -58,7 +58,7 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 		private int serviceID;
 		private int serviceType;
 
-		public Service(final int id, final int type){
+		public Service(int id, int type){
 			serviceID = id;
 			serviceType = type;
 		}
@@ -124,9 +124,9 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 		this.descriptorContext = descriptorContext;
 		int t = 0;
 		while (t < descriptorLength) {
-			final int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
-			final int serviceType = getInt(b, 4 + t, 1, MASK_8BITS);
-			final Service s = new Service(serviceId, serviceType);
+			int serviceId = getInt(b, 2 + t, 2, MASK_16BITS);
+			int serviceType = getInt(b, 4 + t, 1, MASK_8BITS);
+			Service s = new Service(serviceId, serviceType);
 			serviceList.add(s);
 			t += 3;
 		}
@@ -139,9 +139,9 @@ public class ServiceListDescriptor extends Descriptor implements TableSource {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (int i = 0; i < getNoServices(); i++) {
-			final Service s = serviceList.get(i);
+			Service s = serviceList.get(i);
 			buf.append("(").append(i).append(";").append(s.getServiceID()).append(":").append(s.getServiceTypeString()).append("),");
 		}
 

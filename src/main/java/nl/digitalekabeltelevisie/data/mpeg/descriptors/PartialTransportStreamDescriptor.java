@@ -76,7 +76,7 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 	 * @return
 	 */
 	private static String getPeakRateString(int peakRate2) {
-		return "" + (peakRate2 * 400) +" bit/s";
+		return (peakRate2 * 400) +" bit/s";
 	}
 
 	/**
@@ -87,18 +87,18 @@ public class PartialTransportStreamDescriptor extends Descriptor {
 		if(minimumOveralSmoothingRate2==0x3FFFFF){
 			return "undefined";
 		}
-		return "" + (minimumOveralSmoothingRate * 400) +" bit/s";
+		return (minimumOveralSmoothingRate * 400) +" bit/s";
 	}
 
 	/**
 	 * @param minimumOveralSmoothingRate2
 	 * @return
 	 */
-	private static String getMaximumOveralSmoothingBufferString(final int maximumOveralSmoothingBuffer2) {
+	private static String getMaximumOveralSmoothingBufferString(int maximumOveralSmoothingBuffer2) {
 		if(maximumOveralSmoothingBuffer2==0x3FFF){
 			return "undefined";
 		}
-		return "" + maximumOveralSmoothingBuffer2  +" bytes";
+		return maximumOveralSmoothingBuffer2  +" bytes";
 	}
 
 }

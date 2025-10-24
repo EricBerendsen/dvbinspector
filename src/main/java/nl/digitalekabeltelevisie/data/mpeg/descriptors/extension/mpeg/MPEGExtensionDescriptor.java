@@ -31,6 +31,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.ExtensionDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
+@SuppressWarnings("ALL")
 public class MPEGExtensionDescriptor extends ExtensionDescriptor {
 
 	public MPEGExtensionDescriptor(byte[] b, TableSection parent) {

@@ -104,7 +104,7 @@ public class CIProtectionDescriptor extends Descriptor {
 		return privateDataByte;
 	}
 
-	public void setPrivateDataByte(final byte[] privateDataByte) {
+	public void setPrivateDataByte(byte[] privateDataByte) {
 		this.privateDataByte = privateDataByte;
 	}
 

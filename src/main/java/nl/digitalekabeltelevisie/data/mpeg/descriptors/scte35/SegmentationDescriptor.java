@@ -216,8 +216,8 @@ public class SegmentationDescriptor extends SCTE35Descriptor {
 
 	
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("segmentation_event_id", segmentation_event_id));
 		t.add(new KVP("segmentation_event_cancel_indicator", segmentation_event_cancel_indicator,
 				segmentation_event_cancel_indicator == 1 ? "a previously sent segmentation event has been cancelled"

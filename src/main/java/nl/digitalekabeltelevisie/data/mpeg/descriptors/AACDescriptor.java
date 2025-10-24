@@ -44,7 +44,7 @@ public class AACDescriptor extends Descriptor {
 	
 	private byte[] additional_info;
 
-	public AACDescriptor(final byte[] b, final TableSection parent) {
+	public AACDescriptor(byte[] b, TableSection parent) {
 		super(b ,parent);
 		profile_and_level = getInt(b, 2, 1, MASK_8BITS);
 		if(descriptorLength > 1){
@@ -62,9 +62,9 @@ public class AACDescriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("profile_and_level",profile_and_level,getProfileLevelString(profile_and_level)));
 		if(descriptorLength > 1){
 			t.add(new KVP("AAC_type_flag",aac_type_flag));

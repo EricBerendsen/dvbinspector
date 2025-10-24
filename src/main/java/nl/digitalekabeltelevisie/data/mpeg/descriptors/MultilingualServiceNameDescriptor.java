@@ -70,7 +70,7 @@ public class MultilingualServiceNameDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (ServiceName serviceName : serviceNameList) {
 			buf.append(serviceName.toString());
 		}

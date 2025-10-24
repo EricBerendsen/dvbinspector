@@ -37,6 +37,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
  * @author Eric Berendsen
  *
  */
+@SuppressWarnings("ALL")
 public class SCTE35Descriptor extends Descriptor {
 	
 	private final byte[]  identifier;
@@ -57,19 +58,16 @@ public class SCTE35Descriptor extends Descriptor {
 		return SCTE35Descriptor.getDescriptorname(descriptorTag, parentTableSection);
 	}
 
-	public static String getDescriptorname(final int tag, final TableSection tableSection){
+	public static String getDescriptorname(int tag, TableSection tableSection){
 
-		switch (tag) {
-		case 0x00: return "avail_descriptor"; 
-		case 0x01: return "DTMF_descriptor";
-		case 0x02: return "segmentation_descriptor"; 
-		case 0x03: return "time_descriptor";
-		case 0x04: return "audio_descriptor";
-		default:
-
-			return "Reserved for future SCTE splice_descriptors";
-
-		}
+        return switch (tag) {
+            case 0x00 -> "avail_descriptor";
+            case 0x01 -> "DTMF_descriptor";
+            case 0x02 -> "segmentation_descriptor";
+            case 0x03 -> "time_descriptor";
+            case 0x04 -> "audio_descriptor";
+            default -> "Reserved for future SCTE splice_descriptors";
+        };
 	}
 
 	@Override

@@ -60,7 +60,7 @@ public class CellListDescriptor extends Descriptor {
 		private List<SubCell> subCellList = new ArrayList<>();
 
 
-		public Cell(final int cellId, final int cellLatitude, final int cellLongitude, final int cellExtentOfLatitude, final int cellExtentOfLongitude, final int subcellInfoLoopLength) {
+		public Cell(int cellId, int cellLatitude, int cellLongitude, int cellExtentOfLatitude, int cellExtentOfLongitude, int subcellInfoLoopLength) {
 			super();
 			this.cellId = cellId;
 			this.cellLatitude = cellLatitude;
@@ -71,7 +71,7 @@ public class CellListDescriptor extends Descriptor {
 		}
 
 
-		public void addSubCell(final SubCell s){
+		public void addSubCell(SubCell s){
 			subCellList.add(s);
 		}
 

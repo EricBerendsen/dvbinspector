@@ -51,7 +51,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	/**
 	 * broadcast IDs that will be interpreted as indicating an object carousel.
 	 */
-	private static Set<Integer> BROADCASTIDS_WITH_OBJECT_CAROUSEL = Set.of(
+	private static final Set<Integer> BROADCASTIDS_WITH_OBJECT_CAROUSEL = Set.of(
 			0x0007, // DVB object carousel
 			0x00f0,	// MHP Object
 			0x0106,	// MHEG5(The Digital Network)
@@ -77,7 +77,7 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	public static record ApplicationType(int applicationType) implements TreeNode{
 
 		@Override
-		public KVP getJTreeNode(final int modus){
+		public KVP getJTreeNode(int modus){
 			return new KVP("application_type",applicationType,getAppTypeIDString(applicationType));
 		}
 
@@ -135,67 +135,72 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 	public DataBroadcastIDDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		dataBroadcastId = Utils.getInt(b, 2, 2, Utils.MASK_16BITS);
-		if(dataBroadcastId==0x0005){ //en 301192 7.2.1
-			MAC_address_range = Utils.getInt(b, 4, 1, 0xE0)>>>5;
-			MAC_IP_mapping_flag = Utils.getInt(b, 4, 1, 0x10)>>>4;
-			alignment_indicator = Utils.getInt(b, 4, 1, 0x08)>>>3;
-			max_sections_per_datagram =Utils.getInt(b, 5, 1, Utils.MASK_8BITS);
-		}else if(dataBroadcastId==0x000a){ // system software update service, TS 102 006 V1.4.1 Ch 7.1
-			OUI_data_length = getInt(b,4,1,MASK_8BITS);
-			int r =0;
-			while (r<OUI_data_length) {
-				int oui = getInt(b, 5+r, 3, Utils.MASK_24BITS);
-				int updateType = getInt(b, 8+r, 1, Utils.MASK_4BITS);
-				int updateVersioningFlag = getInt(b, 9+r, 1, 0x20)>>5;
-				int updateVersion = getInt(b, 9+r, 1, Utils.MASK_5BITS);
-				int selectorLength= getInt(b, r+10, 1, MASK_8BITS);
-				byte[] selector_byte = copyOfRange(b, r+11, r+11+selectorLength);
-				OUIEntry ouiEntry = new OUIEntry(oui,updateType,updateVersioningFlag,updateVersion, selectorLength,selector_byte);
-				ouiList.add(ouiEntry);
-				r=r+6+selectorLength;
-			}
-			privateDataByte = copyOfRange(b, 5+r, descriptorLength+2);
-		}else if(dataBroadcastId==0x000b){ //IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
-			platform_id_data_length = getInt(b,4,1,MASK_8BITS);
-			int r =0;
-			while (r<platform_id_data_length) {
-				int platform_id = getInt(b, 5+r, 3, Utils.MASK_24BITS);
-				int action_type  = getInt(b, 8+r, 1, Utils.MASK_8BITS);
+        switch (dataBroadcastId) {
+            case 0x0005 -> {
+                MAC_address_range = Utils.getInt(b, 4, 1, 0xE0) >>> 5;
+                MAC_IP_mapping_flag = Utils.getInt(b, 4, 1, 0x10) >>> 4;
+                alignment_indicator = Utils.getInt(b, 4, 1, 0x08) >>> 3;
+                max_sections_per_datagram = Utils.getInt(b, 5, 1, Utils.MASK_8BITS);
+            }
+            case 0x000a -> { // system software update service, TS 102 006 V1.4.1 Ch 7.1
+                OUI_data_length = getInt(b, 4, 1, MASK_8BITS);
+                int r = 0;
+                while (r < OUI_data_length) {
+                    int oui = getInt(b, 5 + r, 3, Utils.MASK_24BITS);
+                    int updateType = getInt(b, 8 + r, 1, Utils.MASK_4BITS);
+                    int updateVersioningFlag = getInt(b, 9 + r, 1, 0x20) >> 5;
+                    int updateVersion = getInt(b, 9 + r, 1, Utils.MASK_5BITS);
+                    int selectorLength = getInt(b, r + 10, 1, MASK_8BITS);
+                    byte[] selector_byte = copyOfRange(b, r + 11, r + 11 + selectorLength);
+                    OUIEntry ouiEntry = new OUIEntry(oui, updateType, updateVersioningFlag, updateVersion, selectorLength, selector_byte);
+                    ouiList.add(ouiEntry);
+                    r = r + 6 + selectorLength;
+                }
+                privateDataByte = copyOfRange(b, 5 + r, descriptorLength + 2);
+            }
+            case 0x000b -> { //IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
+                platform_id_data_length = getInt(b, 4, 1, MASK_8BITS);
+                int r = 0;
+                while (r < platform_id_data_length) {
+                    int platform_id = getInt(b, 5 + r, 3, Utils.MASK_24BITS);
+                    int action_type = getInt(b, 8 + r, 1, Utils.MASK_8BITS);
 
-				int INT_versioning_flag = getInt(b, 9+r, 1, 0x20)>>>5;
-				int INT_version = getInt(b, 9+r, 1, Utils.MASK_5BITS);
+                    int INT_versioning_flag = getInt(b, 9 + r, 1, 0x20) >>> 5;
+                    int INT_version = getInt(b, 9 + r, 1, Utils.MASK_5BITS);
 
-				Platform p = new Platform(platform_id,action_type,INT_versioning_flag,INT_version);
-				platformList.add(p);
-				r=r+5;
-			}
-			privateDataByte = copyOfRange(b, 5+r, descriptorLength+2);
+                    Platform p = new Platform(platform_id, action_type, INT_versioning_flag, INT_version);
+                    platformList.add(p);
+                    r = r + 5;
+                }
+                privateDataByte = copyOfRange(b, 5 + r, descriptorLength + 2);
 
 
-		}else if((dataBroadcastId==0x00f0)||(dataBroadcastId==0x00f1)){ // MHP
-			int r =0;
-			while (r<(descriptorLength-2)){
-				int at = getInt(b, 4+r, 2, Utils.MASK_15BITS);
-				ApplicationType appT = new ApplicationType(at);
-				applicationTypeList.add(appT);
-				r+=2;
-			}
+            }
+            case 0x00f0, 0x00f1 -> { // MHP
+                int r = 0;
+                while (r < (descriptorLength - 2)) {
+                    int at = getInt(b, 4 + r, 2, Utils.MASK_15BITS);
+                    ApplicationType appT = new ApplicationType(at);
+                    applicationTypeList.add(appT);
+                    r += 2;
+                }
 
-		}else if(dataBroadcastId==0x0106){ //ETSI ES 202 184 V2.2.1 (2011-03) 9.3.2.1 data_broadcast_id_descriptor
-			int r =0;
-			while (r<(descriptorLength-2)){
-				int at = getInt(b, 4+r, 2, Utils.MASK_16BITS);
-				int bootPrio = getInt(b, 6+r, 1, Utils.MASK_8BITS);
-				int appDataLen = getInt(b, 7+r, 1, Utils.MASK_8BITS);
-				byte [] appData = copyOfRange(b, r+8, r+8+appDataLen);
-				MHEG5ApplicationType mheg5App = new MHEG5ApplicationType(at, bootPrio, appDataLen, appData);
-				mheg5ApplicationTypeList.add(mheg5App);
-				r=r+4+appDataLen;
+            }
+            case 0x0106 -> { //ETSI ES 202 184 V2.2.1 (2011-03) 9.3.2.1 data_broadcast_id_descriptor
+                int r = 0;
+                while (r < (descriptorLength - 2)) {
+                    int at = getInt(b, 4 + r, 2, Utils.MASK_16BITS);
+                    int bootPrio = getInt(b, 6 + r, 1, Utils.MASK_8BITS);
+                    int appDataLen = getInt(b, 7 + r, 1, Utils.MASK_8BITS);
+                    byte[] appData = copyOfRange(b, r + 8, r + 8 + appDataLen);
+                    MHEG5ApplicationType mheg5App = new MHEG5ApplicationType(at, bootPrio, appDataLen, appData);
+                    mheg5ApplicationTypeList.add(mheg5App);
+                    r = r + 4 + appDataLen;
 
-			}
-		}else{
-			selectorByte = copyOfRange(b, 4, descriptorLength+2);
-		}
+                }
+            }
+            default -> selectorByte = copyOfRange(b, 4, descriptorLength + 2);
+        }
 
 	}
 
@@ -228,37 +233,38 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 
 		t.add(new KVP("data_broadcast_id", dataBroadcastId, Utils.getDataBroadCastIDString(dataBroadcastId)));
 
-		if (dataBroadcastId == 0x0005) { // en 301192 7.2.1
-			t.add(new KVP("MAC_address_range", MAC_address_range, DataBroadcastDescriptor.getvalidMACaddressBytesString(MAC_address_range)));
-			t.add(new KVP("MAC_IP_mapping_flag", MAC_IP_mapping_flag,
-					MAC_IP_mapping_flag == 1 ? "uses IP to MAC mapping as described in RFC 1112 and RFC 2464" : "mapping not defined"));
-			t.add(new KVP("alignment_indicator", alignment_indicator,
-					alignment_indicator == 1 ? "alignment in bits: 32" : "alignment in bits: 8 (default)"));
-			t.add(new KVP("max_sections_per_datagram", max_sections_per_datagram));
-		} else if (dataBroadcastId == 0x000a) {
-			addListJTree(t, ouiList, modus, "Systems Software Update");
-			t.add(new KVP("private_data_byte", privateDataByte));
-		} else if (dataBroadcastId == 0x000b) { // IP/MAC_notification_info structure ETSI EN 301 192 V1.4.2
-			addListJTree(t, platformList, modus, "IP/MAC platform");
-			t.add(new KVP("private_data_byte", privateDataByte));
-		} else if ((dataBroadcastId == 0x00f0) || (dataBroadcastId == 0x00f1)) { // MHP
-			addListJTree(t, applicationTypeList, modus, "application_type");
-
-		} else if (dataBroadcastId == 0x0106) {
-			addListJTree(t, mheg5ApplicationTypeList, modus, "MHEG5 Applications");
-		} else {
-			t.add(new KVP("id_selector_bytes", selectorByte));
-		}
+        switch (dataBroadcastId) {
+            case 0x0005 -> {
+                t.add(new KVP("MAC_address_range", MAC_address_range, DataBroadcastDescriptor.getvalidMACaddressBytesString(MAC_address_range)));
+                t.add(new KVP("MAC_IP_mapping_flag", MAC_IP_mapping_flag,
+                        MAC_IP_mapping_flag == 1 ? "uses IP to MAC mapping as described in RFC 1112 and RFC 2464" : "mapping not defined"));
+                t.add(new KVP("alignment_indicator", alignment_indicator,
+                        alignment_indicator == 1 ? "alignment in bits: 32" : "alignment in bits: 8 (default)"));
+                t.add(new KVP("max_sections_per_datagram", max_sections_per_datagram));
+            }
+            case 0x000a -> {
+                addListJTree(t, ouiList, modus, "Systems Software Update");
+                t.add(new KVP("private_data_byte", privateDataByte));
+            }
+            case 0x000b -> {
+                addListJTree(t, platformList, modus, "IP/MAC platform");
+                t.add(new KVP("private_data_byte", privateDataByte));
+            }
+            case 0x00f0, 0x00f1 ->  // MHP
+                    addListJTree(t, applicationTypeList, modus, "application_type");
+            case 0x0106 -> addListJTree(t, mheg5ApplicationTypeList, modus, "MHEG5 Applications");
+            default -> t.add(new KVP("id_selector_bytes", selectorByte));
+        }
 
 		return t;
 	}
 
 	public boolean describesObjectCarousel() {
-		return BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(getDataBroadcastId());
+		return BROADCASTIDS_WITH_OBJECT_CAROUSEL.contains(dataBroadcastId);
 	}
 
 	public boolean describesSSU() {
-		if(getDataBroadcastId()==0xa){
+		if(dataBroadcastId ==0xa){
 			// SSU now see if there is a standard update carousel, or one with UNT
 			for(OUIEntry entry:ouiList){
 				if ((entry.updateType() == 0x01) || (entry.updateType() == 0x02)) {
@@ -319,12 +325,12 @@ public class DataBroadcastIDDescriptor extends Descriptor {
 
 	public static String getMHEG5ApplicationTypeString(int appType) {
 
-		switch (appType) {
-		case 0x00: return "NULL_APPLICATION_TYPE";
-		case 0x0101: return "UK_PROFILE_LAUNCH";
-		case 0x0505: return "UK_PROFILE_BASELINE_1";
-		default: return "unknown";
-		}
+        return switch (appType) {
+            case 0x00 -> "NULL_APPLICATION_TYPE";
+            case 0x0101 -> "UK_PROFILE_LAUNCH";
+            case 0x0505 -> "UK_PROFILE_BASELINE_1";
+            default -> "unknown";
+        };
 	}
 
 

@@ -47,7 +47,7 @@ public class FrequencyListDescriptor extends Descriptor {
 		private final int freqOffset; // use depends on codingtype
 
 
-		public CentreFrequency(final int freqOffset){
+		public CentreFrequency(int freqOffset){
 			this.freqOffset = freqOffset;
 		}
 
@@ -56,15 +56,14 @@ public class FrequencyListDescriptor extends Descriptor {
 		public KVP getJTreeNode(int modus) {
 			long frequencyAsLong = getLong(privateData, freqOffset, 4, MASK_32BITS);
 			return switch (codingType) {
-			case 1: // satellite
-				yield new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(getBCD(privateData, freqOffset * 2, 8)));
-			case 2: // cable
-				yield new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(getBCD(privateData, freqOffset * 2, 8)));
-			case 3: // terrestrial
-				yield new KVP("centre_frequency", frequencyAsLong, Descriptor.formatTerrestrialFrequency(frequencyAsLong));
-			default:
-				yield new KVP("centre_frequency", frequencyAsLong);
-			};
+                case 1 -> // satellite
+                        new KVP("centre_frequency", frequencyAsLong, formatSatelliteFrequency(getBCD(privateData, freqOffset * 2, 8)));
+                case 2 -> // cable
+                        new KVP("centre_frequency", frequencyAsLong, formatCableFrequency(getBCD(privateData, freqOffset * 2, 8)));
+                case 3 -> // terrestrial
+                        new KVP("centre_frequency", frequencyAsLong, Descriptor.formatTerrestrialFrequency(frequencyAsLong));
+                default -> new KVP("centre_frequency", frequencyAsLong);
+            };
 		}
 
 	}
@@ -75,7 +74,7 @@ public class FrequencyListDescriptor extends Descriptor {
 		int t = 1;
 		while (t < descriptorLength) {
 
-			final CentreFrequency s = new CentreFrequency((2 + t));
+			CentreFrequency s = new CentreFrequency((2 + t));
 			frequencyList.add(s);
 			t += 4;
 		}

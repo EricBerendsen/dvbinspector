@@ -48,8 +48,8 @@ public class LogicalChannelDescriptor extends AbstractLogicalChannelDescriptor {
 		}
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP(createNodeLabel(service_id, logical_channel_number));
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP(createNodeLabel(service_id, logical_channel_number));
 			s.add(new KVP("service_id", service_id));
 			s.add(new KVP("reserved", reserved));
 			s.add(new KVP("logical_channel_number", logical_channel_number));

@@ -75,9 +75,9 @@ public class AC3Descriptor extends Descriptor {
 
 
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("component_type_flag",component_type_flag));
 		t.add(new KVP("bsid_flag",bsid_flag));
 		t.add(new KVP("mainid_flag",mainid_flag));
@@ -103,8 +103,8 @@ public class AC3Descriptor extends Descriptor {
 		return t;
 	}
 
-	public static String getComponentTypeString(final int type){
-		final StringBuilder s = new StringBuilder();
+	public static String getComponentTypeString(int type){
+		StringBuilder s = new StringBuilder();
 		if((type&0x80)==0x80){
 			s.append("Enhanced AC-3, ");
 		}else{

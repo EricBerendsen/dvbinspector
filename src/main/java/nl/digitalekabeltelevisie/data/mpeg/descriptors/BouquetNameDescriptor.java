@@ -49,7 +49,7 @@ public class BouquetNameDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		return super.toString() + "bouquetName="+getBouquetName().toString();
+		return super.toString() + "bouquetName="+ bouquetName.toString();
 	}
 
 	@Override

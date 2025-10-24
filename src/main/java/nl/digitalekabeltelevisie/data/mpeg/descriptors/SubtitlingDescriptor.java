@@ -75,7 +75,7 @@ public class SubtitlingDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (Subtitle subtitle : subtitleList) {
 			buf.append(subtitle.toString());
 		}

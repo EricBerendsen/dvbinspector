@@ -63,8 +63,8 @@ public class IPMACStreamLocationDescriptor extends INTDescriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus){
-		final KVP treeNode = super.getJTreeNode(modus);
-		final var psi = parentTableSection.getParentPID().getParentTransportStream().getPsi();
+		KVP treeNode = super.getJTreeNode(modus);
+		var psi = parentTableSection.getParentPID().getParentTransportStream().getPsi();
 		treeNode.add(new KVP("network_id",networkId ,psi.getNit().getNetworkName(networkId)));
 		treeNode.add(new KVP("original_network_id",originalNetworkId ,Utils.getOriginalNetworkIDString(originalNetworkId)));
 		treeNode.add(new KVP("transport_stream_id",transportStreamId));

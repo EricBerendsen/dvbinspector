@@ -20,8 +20,8 @@ public class TimeDescriptor extends SCTE35Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("TAI_seconds", TAI_seconds));
 		t.add(new KVP("TAI_ns", TAI_ns));
 		t.add(new KVP("UTC_offset", UTC_offset));

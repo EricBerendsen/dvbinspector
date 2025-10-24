@@ -51,7 +51,7 @@ public class ApplicationSignallingDescriptor extends Descriptor{
 
 	public record ApplicationType(int applicationType, int aitVersionNumber) implements TreeNode {
 
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 			KVP s = new KVP("AIT");
 			s.add(new KVP("application_type", applicationType, getAppTypeIDString(applicationType)));
 			s.add(new KVP("AIT_version_number", aitVersionNumber));
@@ -74,8 +74,8 @@ public class ApplicationSignallingDescriptor extends Descriptor{
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		addListJTree(t,applicationTypeList,modus,"Application Information Table");
 
 		return t;

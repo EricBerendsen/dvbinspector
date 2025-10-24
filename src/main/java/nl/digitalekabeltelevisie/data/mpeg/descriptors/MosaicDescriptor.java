@@ -69,7 +69,7 @@ public class MosaicDescriptor extends Descriptor {
 		 * @param elementary_cell_ids
 		 * @param cell_linkage_info
 		 */
-		public LogicalCell(final int logical_cell_id, final int logical_cell_presentation_info, final int elementary_cell_field_length, final byte[] elementary_cell_ids, final int cell_linkage_info) {
+		public LogicalCell(int logical_cell_id, int logical_cell_presentation_info, int elementary_cell_field_length, byte[] elementary_cell_ids, int cell_linkage_info) {
 			super();
 			logicalCellId = logical_cell_id;
 			logicalCellPresentationInfo = logical_cell_presentation_info;
@@ -121,7 +121,7 @@ public class MosaicDescriptor extends Descriptor {
 
 
 
-		public void setBouquetId(final int bouquetId) {
+		public void setBouquetId(int bouquetId) {
 			this.bouquetId = bouquetId;
 		}
 
@@ -133,7 +133,7 @@ public class MosaicDescriptor extends Descriptor {
 
 
 
-		public void setEventId(final int eventId) {
+		public void setEventId(int eventId) {
 			this.eventId = eventId;
 		}
 
@@ -145,7 +145,7 @@ public class MosaicDescriptor extends Descriptor {
 
 
 
-		public void setOriginalNetworkId(final int originalNetworkId) {
+		public void setOriginalNetworkId(int originalNetworkId) {
 			this.originalNetworkId = originalNetworkId;
 		}
 
@@ -157,7 +157,7 @@ public class MosaicDescriptor extends Descriptor {
 
 
 
-		public void setServiceId(final int serviceId) {
+		public void setServiceId(int serviceId) {
 			this.serviceId = serviceId;
 		}
 
@@ -169,7 +169,7 @@ public class MosaicDescriptor extends Descriptor {
 
 
 
-		public void setTransportStreamId(final int transportStreamId) {
+		public void setTransportStreamId(int transportStreamId) {
 			this.transportStreamId = transportStreamId;
 		}
 
@@ -222,7 +222,7 @@ public class MosaicDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (LogicalCell logicalCell : logicalCellList) {
 			buf.append(logicalCell.toString());
 		}

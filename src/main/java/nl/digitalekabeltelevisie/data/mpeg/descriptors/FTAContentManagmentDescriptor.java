@@ -69,20 +69,15 @@ public class FTAContentManagmentDescriptor extends Descriptor {
 		return t;
 	}
 
-	public static String getControlRemoteAccesOverInternetString(final int control_remote_access_over_internet) {
-		switch (control_remote_access_over_internet) {
-
-		case 0x00:
-			 return "Redistribution over the Internet is enabled";
-		case 0x01:
-			return "Redistribution over the Internet is enabled but only within a managed domain";
-		case 0x02:
-			 return "Redistribution over the Internet is enabled but only within a managed domain and after a certain short period of time (e.g. 24 hours)";
-		case 0x03:
-			return "Redistribution over the Internet is not allowed with the following exception: Redistribution over the Internet within a managed domain is enabled after a specified long (possibly indefinite) period of time";
-		default:
-			return "Illegal value";
-
-		}
+	public static String getControlRemoteAccesOverInternetString(int control_remote_access_over_internet) {
+        return switch (control_remote_access_over_internet) {
+            case 0x00 -> "Redistribution over the Internet is enabled";
+            case 0x01 -> "Redistribution over the Internet is enabled but only within a managed domain";
+            case 0x02 ->
+                    "Redistribution over the Internet is enabled but only within a managed domain and after a certain short period of time (e.g. 24 hours)";
+            case 0x03 ->
+                    "Redistribution over the Internet is not allowed with the following exception: Redistribution over the Internet within a managed domain is enabled after a specified long (possibly indefinite) period of time";
+            default -> "Illegal value";
+        };
 	}
 }

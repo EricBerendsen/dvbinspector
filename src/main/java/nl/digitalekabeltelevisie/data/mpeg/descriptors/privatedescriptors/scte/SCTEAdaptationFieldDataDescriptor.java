@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors.privatedescriptors.scte;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
+@SuppressWarnings("ALL")
 public class SCTEAdaptationFieldDataDescriptor extends Descriptor {
 	
 	// based on ANSI/SCTE 128 2010-a 

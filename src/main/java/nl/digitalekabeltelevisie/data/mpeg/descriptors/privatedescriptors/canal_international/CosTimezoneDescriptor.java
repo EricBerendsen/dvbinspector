@@ -48,8 +48,8 @@ public class CosTimezoneDescriptor extends Descriptor {
 	public record TimezoneName(String country_code, int country_region_id, int reserved, DVBString region_name) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("TimezoneName");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("TimezoneName");
 			s.add(new KVP("country_code", country_code));
 			s.add(new KVP("country_region_id", country_region_id));
 			s.add(new KVP("reserved", reserved, null));

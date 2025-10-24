@@ -89,18 +89,18 @@ public final class DescriptorFactory {
 	private static final Logger	logger	= Logger.getLogger(DescriptorFactory.class.getName());
 
 
-	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len,
-			final TableSection tableSection) {
+	public static List<Descriptor> buildDescriptorList(byte[] data, int offset, int len,
+                                                       TableSection tableSection) {
 		
 		DescriptorContext descriptorContext = new DescriptorContext();
 		return buildDescriptorList(data, offset, len, tableSection, descriptorContext);
 	
 	}
 
-	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len,
-			final TableSection tableSection, DescriptorContext descriptorContext) {
+	public static List<Descriptor> buildDescriptorList(byte[] data, int offset, int len,
+                                                       TableSection tableSection, DescriptorContext descriptorContext) {
 		descriptorContext.setPrivate_data_specifier(PreferencesManager.getDefaultPrivateDataSpecifier());
-		final List<Descriptor> r = new ArrayList<>();
+		List<Descriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
@@ -119,7 +119,7 @@ public final class DescriptorFactory {
 
 			t += d.getDescriptorLength() + 2;
 			r.add(d);
-			if (d instanceof final PrivateDataSpecifierDescriptor privateDescriptor) {
+			if (d instanceof PrivateDataSpecifierDescriptor privateDescriptor) {
 				descriptorContext.setPrivate_data_specifier(privateDescriptor.getPrivateDataSpecifier());
 			}
 		}
@@ -134,9 +134,9 @@ public final class DescriptorFactory {
 	 * @param descriptorContext
 	 * @return
 	 */
-	private static Descriptor getDescriptor(final byte[] data, final TableSection tableSection,
-											DescriptorContext descriptorContext) {
-		final int descriptorTag = toUnsignedInt(data[0]);
+	private static Descriptor getDescriptor(byte[] data, TableSection tableSection,
+                                            DescriptorContext descriptorContext) {
+		int descriptorTag = toUnsignedInt(data[0]);
 		try {
 			if(descriptorTag == 0xE9) {
 				// OpenCable™ Specifications 
@@ -186,7 +186,7 @@ public final class DescriptorFactory {
 			}
 			return  getPrivateDVBSIDescriptor(data, tableSection, descriptorContext);
 			
-		} catch (final RuntimeException iae) {
+		} catch (RuntimeException iae) {
 			// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 			// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
 			Descriptor d = new Descriptor(data, tableSection);
@@ -205,33 +205,26 @@ public final class DescriptorFactory {
 	 * @param tableSection
 	 * @return
 	 */
-	private static Descriptor getM7Descriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getM7Descriptor(byte[] data, TableSection tableSection) {
 		int descriptorTag = toUnsignedInt(data[0]);
-		switch (descriptorTag) {
-		case 0x83:
-			return new M7LogicalChannelDescriptor(data, tableSection);
-		case 0x84:
-			return new M7OperatorNameDescriptor(data, tableSection);
-		case 0x85:
-			return new M7OperatorSublistNameDescriptor(data, tableSection);
-		case 0x86:
-			return new M7OperatorPreferencesDescriptor(data, tableSection);
-		case 0x87:
-			return new M7OperatorDiSEqCTDescriptor(data, tableSection);
-		case 0x88:
-			return new M7OperatorOptionsDescriptor(data, tableSection);
-		case 0x89:
-			return new M7NagraBrandIdDescriptor(data, tableSection);
-		case 0x8A:
-			return new M7OttBrandIdDescriptor(data, tableSection);
-		default:
-			Descriptor d = new M7Descriptor(data, tableSection);
-			logger.info("Not implemented M7Descriptor:" + descriptorTag + " ("
-					+ M7Descriptor.getDescriptorname(descriptorTag) + ")in section "
-					+ TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data="
-					+ d.getRawDataString());
-			return d;
-		}
+        return switch (descriptorTag) {
+            case 0x83 -> new M7LogicalChannelDescriptor(data, tableSection);
+            case 0x84 -> new M7OperatorNameDescriptor(data, tableSection);
+            case 0x85 -> new M7OperatorSublistNameDescriptor(data, tableSection);
+            case 0x86 -> new M7OperatorPreferencesDescriptor(data, tableSection);
+            case 0x87 -> new M7OperatorDiSEqCTDescriptor(data, tableSection);
+            case 0x88 -> new M7OperatorOptionsDescriptor(data, tableSection);
+            case 0x89 -> new M7NagraBrandIdDescriptor(data, tableSection);
+            case 0x8A -> new M7OttBrandIdDescriptor(data, tableSection);
+            default -> {
+                Descriptor d = new M7Descriptor(data, tableSection);
+                logger.info("Not implemented M7Descriptor:" + descriptorTag + " ("
+                        + M7Descriptor.getDescriptorname(descriptorTag) + ")in section "
+                        + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data="
+                        + d.getRawDataString());
+                yield d;
+            }
+        };
 
 	}
 
@@ -242,11 +235,11 @@ public final class DescriptorFactory {
 	 * @param DescriptorContext
 	 * @return
 	 */
-	private static Descriptor getPrivateDVBSIDescriptor(final byte[] data, final TableSection tableSection,
-														final DescriptorContext descriptorContext) {
+	private static Descriptor getPrivateDVBSIDescriptor(byte[] data, TableSection tableSection,
+                                                        DescriptorContext descriptorContext) {
 
-		final long private_data_specifier = descriptorContext.getPrivate_data_specifier();
-		final int descriptor_tag =  toUnsignedInt(data[0]);
+		long private_data_specifier = descriptorContext.getPrivate_data_specifier();
+		int descriptor_tag =  toUnsignedInt(data[0]);
 		if (private_data_specifier == 0x600) { // UPC1
 			switch (descriptor_tag) {
 			case 0x81:
@@ -340,7 +333,7 @@ public final class DescriptorFactory {
 		return new Descriptor(data, tableSection);
 	}
 
-	private static Descriptor getMPEGDescriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getMPEGDescriptor(byte[] data, TableSection tableSection) {
 		switch (toUnsignedInt(data[0])) {
 		case 0x02:
 			return new VideoStreamDescriptor(data, tableSection);
@@ -404,7 +397,7 @@ public final class DescriptorFactory {
 		case 0x3F:
 			return getMPEGExtendedDescriptor(data, tableSection);
 		default:
-			final Descriptor descriptor = new Descriptor(data, tableSection);
+			Descriptor descriptor = new Descriptor(data, tableSection);
 			logger.info("Not implemented descriptor:" + toUnsignedInt(data[0]) + " ("
 					+ Descriptor.getDescriptorname(toUnsignedInt(data[0]), tableSection)
 					+ ")in section " + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection
@@ -414,11 +407,11 @@ public final class DescriptorFactory {
 		}
 	}
 	
-	private static MPEGExtensionDescriptor getMPEGExtendedDescriptor(final byte[] data,
-																	 final TableSection tableSection) {
+	private static MPEGExtensionDescriptor getMPEGExtendedDescriptor(byte[] data,
+                                                                     TableSection tableSection) {
 
 		
-		final int descriptor_tag_extension = toUnsignedInt(data[2]);
+		int descriptor_tag_extension = toUnsignedInt(data[2]);
 		switch(descriptor_tag_extension){
 		
 		case 0x03:
@@ -435,7 +428,7 @@ public final class DescriptorFactory {
 
 	}
 
-	private static Descriptor getDVBSIDescriptor(final byte[] data, final TableSection tableSection, DescriptorContext descriptorContext) {
+	private static Descriptor getDVBSIDescriptor(byte[] data, TableSection tableSection, DescriptorContext descriptorContext) {
 		switch (toUnsignedInt(data[0])) {
 
 		case 0x40:
@@ -559,10 +552,10 @@ public final class DescriptorFactory {
 	 * @param tableSection
 	 * @return
 	 */
-	private static DVBExtensionDescriptor getDVBExtendedDescriptor(final byte[] data,
-																   final TableSection tableSection) {
+	private static DVBExtensionDescriptor getDVBExtendedDescriptor(byte[] data,
+                                                                   TableSection tableSection) {
 
-		final int descriptor_tag_extension = toUnsignedInt(data[2]);
+		int descriptor_tag_extension = toUnsignedInt(data[2]);
 		switch(descriptor_tag_extension){
 
 		case 0x04:
@@ -614,7 +607,7 @@ public final class DescriptorFactory {
 	// Note that descriptor tags from 0x00 to 0x3F share a common descriptor name space with UNT descriptors
 	// (see ETSI TS 102 006 [18]).
 
-	private static Descriptor getINTDescriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getINTDescriptor(byte[] data, TableSection tableSection) {
 
 		switch (toUnsignedInt(data[0])) {
 		case 0x0C:
@@ -635,7 +628,7 @@ public final class DescriptorFactory {
 
 	}
 
-	private static Descriptor getUNTDescriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getUNTDescriptor(byte[] data, TableSection tableSection) {
 		switch (toUnsignedInt(data[0])) {
 		case 0x01:
 			return new SchedulingDescriptor(data, tableSection);
@@ -661,7 +654,7 @@ public final class DescriptorFactory {
 		}
 	}
 
-	private static Descriptor getAITDescriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getAITDescriptor(byte[] data, TableSection tableSection) {
 		switch (toUnsignedInt(data[0])) {
 		case 0x00:
 			return new ApplicationDescriptor(data, tableSection);
@@ -691,7 +684,7 @@ public final class DescriptorFactory {
 			}
 	}
 
-	private static Descriptor getSCTE35Descriptor(final byte[] data, final TableSection tableSection) {
+	private static Descriptor getSCTE35Descriptor(byte[] data, TableSection tableSection) {
 
 		switch (toUnsignedInt(data[0])) {
 		case 0x00:

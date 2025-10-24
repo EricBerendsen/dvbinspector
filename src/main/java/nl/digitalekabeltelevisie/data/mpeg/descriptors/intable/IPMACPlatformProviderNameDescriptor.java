@@ -56,7 +56,7 @@ public class IPMACPlatformProviderNameDescriptor extends INTDescriptor {
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 		t.add(new KVP("platform name", text));
 		return t;

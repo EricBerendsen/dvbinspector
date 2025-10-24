@@ -92,9 +92,9 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 		}
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 		
-			final KVP s = new KVP(createNodeLabel(service_id, logical_channel_number));
+			KVP s = new KVP(createNodeLabel(service_id, logical_channel_number));
 			s.add(new KVP("service_id", service_id  ));
 			s.add(new KVP("visible_service_flag", visible_service_flag  ));
 			s.add(new KVP("reserved", reserved  ));
@@ -143,8 +143,8 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
-		for (final LogicalChannelInterface s : channelList) {
+		StringBuilder buf = new StringBuilder(super.toString());
+		for (LogicalChannelInterface s : channelList) {
 			buf.append(s.toString());
 		}
 
@@ -184,7 +184,7 @@ public abstract class AbstractLogicalChannelDescriptor extends Descriptor implem
 	}
 	
 	public Integer getLCN(int serviceId) {
-		for (AbstractLogicalChannel channel : getChannelList()) {
+		for (AbstractLogicalChannel channel : channelList) {
 			if (channel.getService_id() == serviceId) {
 				return channel.getLogical_channel_number();
 			}

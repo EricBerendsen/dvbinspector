@@ -43,6 +43,7 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.SpliceInfoSection;
 /**
  * 
  */
+@SuppressWarnings("ALL")
 public class DSMCCStreamEventPayloadBinary implements TreeNode {
 	
 	private byte[] binary;

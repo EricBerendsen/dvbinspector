@@ -64,9 +64,9 @@ public class TargetIPSlashDescriptor extends INTDescriptor {
 		super(b, parent);
 		int t = 0;
 		while (t<descriptorLength) {
-			final byte[] adress = Utils.getBytes(b, 2+t, 4);
-			final int mask  = Utils.getInt(b, 6+t, 1, 0xFF);
-			final IPAdress a = new IPAdress(adress,mask);
+			byte[] adress = Utils.getBytes(b, 2+t, 4);
+			int mask  = Utils.getInt(b, 6+t, 1, 0xFF);
+			IPAdress a = new IPAdress(adress,mask);
 			ipList.add(a);
 			t+=5;
 		}
@@ -75,7 +75,7 @@ public class TargetIPSlashDescriptor extends INTDescriptor {
 	@Override
 	public KVP getJTreeNode(int modus){
 
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		Utils.addListJTree(t,ipList,modus,"ip_list");
 		return t;
 	}

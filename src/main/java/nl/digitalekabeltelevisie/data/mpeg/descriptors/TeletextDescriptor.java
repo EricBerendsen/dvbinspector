@@ -73,11 +73,11 @@ public class TeletextDescriptor extends Descriptor{
 		super(b, parent);
 		int t = 0;
 		while ((t + 4) < descriptorLength) {
-			final String languageCode = getISO8859_1String(b, 2 + t, 3);
-			final int teletext_type = getInt(b, t + 5, 1, 0xF8) >> 3;
-			final int teletext_magazine_number = getInt(b, t + 5, 1, 0x07);
-			final int teletext__page_number = getInt(b, t + 6, 1, 0xFF);
-			final Teletext s = new Teletext(languageCode, teletext_type, teletext_magazine_number, teletext__page_number);
+			String languageCode = getISO8859_1String(b, 2 + t, 3);
+			int teletext_type = getInt(b, t + 5, 1, 0xF8) >> 3;
+			int teletext_magazine_number = getInt(b, t + 5, 1, 0x07);
+			int teletext__page_number = getInt(b, t + 6, 1, 0xFF);
+			Teletext s = new Teletext(languageCode, teletext_type, teletext_magazine_number, teletext__page_number);
 			teletextList.add(s);
 			t += 5;
 		}
@@ -85,14 +85,14 @@ public class TeletextDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (Teletext teletext : teletextList) {
 			buf.append(teletext.toString());
 		}
 		return buf.toString();
 	}
 
-	public static String getTeletextTypeString(final int type) {
+	public static String getTeletextTypeString(int type) {
 		return switch (type) {
 		case 0 -> "reserved for future use";
 		case 1 -> "initial Teletext page";

@@ -74,7 +74,7 @@ public class TerrestrialDeliverySystemDescriptor extends Descriptor{
 
 	}
 
-	public static String getBandwidtString(final int b) {
+	public static String getBandwidtString(int b) {
 		return switch (b) {
 		case 0 -> "8 MHz";
 		case 1 -> "7 MHz";
@@ -84,7 +84,7 @@ public class TerrestrialDeliverySystemDescriptor extends Descriptor{
 		};
 	}
 
-	public static String getPriorityString(final int p) {
+	public static String getPriorityString(int p) {
 		return switch (p) {
 		case 0x00 -> "LP (low priority)";
 		case 0x01 -> "HP (high priority)";
@@ -98,7 +98,7 @@ public class TerrestrialDeliverySystemDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		return super.toString() + "Frequency=" + getFrequency() + ", priority=" + getPriorityString(priority);
+		return super.toString() + "Frequency=" + frequency + ", priority=" + getPriorityString(priority);
 	}
 
 	@Override

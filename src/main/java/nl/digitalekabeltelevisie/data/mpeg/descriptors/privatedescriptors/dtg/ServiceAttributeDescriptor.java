@@ -53,7 +53,7 @@ public class ServiceAttributeDescriptor extends Descriptor {
 
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
+		public KVP getJTreeNode(int modus) {
 			KVP s = new KVP("Service attribute");
 			s.add(new KVP("service_id", service_id));
 			s.add(new KVP("reserved", reserved));

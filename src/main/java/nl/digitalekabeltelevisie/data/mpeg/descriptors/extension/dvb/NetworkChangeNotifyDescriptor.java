@@ -78,17 +78,17 @@ public class NetworkChangeNotifyDescriptor extends DVBExtensionDescriptor {
 		@Override
 		public KVP getJTreeNode(int modus) {
 			KVP tn=new KVP("change");
-			tn.add(new KVP("network_change_id", getChangeId()));
-			tn.add(new KVP("network_change_version", getChangeVersion()));
+			tn.add(new KVP("network_change_id", changeId));
+			tn.add(new KVP("network_change_version", changeVersion));
 			tn.add(new KVP("start_time_of_change", getStartTime(), Utils.getUTCFormattedString(getStartTime())));
-			tn.add(new KVP("change_duration", getDuration(), Utils.formatDuration(getDuration())));
-			tn.add(new KVP("receiver_category", getReceiverCategory(), receiverCategoryToString(getReceiverCategory())));
-			tn.add(new KVP("invariant_ts_present", getInvariantTsPresent()));
-			tn.add(new KVP("change_type", getChangeType(), changeTypeToString(getChangeType())));
-			tn.add(new KVP("message_id", getMessageId()));
-			if(getInvariantTsPresent() == 1) {
-				tn.add(new KVP("invariant_ts_tsid ", getInvariantTsTsId()));
-				tn.add(new KVP("invariant_ts_onid ", getInvariantTsOnId()));
+			tn.add(new KVP("change_duration", duration, Utils.formatDuration(duration)));
+			tn.add(new KVP("receiver_category", receiverCategory, receiverCategoryToString(receiverCategory)));
+			tn.add(new KVP("invariant_ts_present", invariantTsPresent));
+			tn.add(new KVP("change_type", changeType, changeTypeToString(changeType)));
+			tn.add(new KVP("message_id", messageId));
+			if(invariantTsPresent == 1) {
+				tn.add(new KVP("invariant_ts_tsid ", invariantTsTsId));
+				tn.add(new KVP("invariant_ts_onid ", invariantTsOnId));
 			}
 			return tn;
 		}

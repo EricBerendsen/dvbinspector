@@ -46,7 +46,7 @@ public abstract class LanguageDependentEitDescriptor extends Descriptor{
 
 
 	@Override
-	public KVP getJTreeNode(final int modus){
+	public KVP getJTreeNode(int modus){
 		return super.getJTreeNode(modus);
 	}
 

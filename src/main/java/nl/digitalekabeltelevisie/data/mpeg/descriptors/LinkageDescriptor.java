@@ -57,8 +57,8 @@ public class LinkageDescriptor extends Descriptor {
 	public static record OUIEntry(int oui, int selectorLength, byte[] selectorByte) implements TreeNode{
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("OUI");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("OUI");
 			s.add(new KVP("oui", oui).setDescription(getOUIString(oui)));
 			s.add(new KVP("selector_length", selectorLength));
 			s.add(new KVP("selector_bytes", selectorByte));
@@ -74,17 +74,17 @@ public class LinkageDescriptor extends Descriptor {
 		private final int platformId;
 		private List<PlatformName> platformNameList = new ArrayList<>();
 
-		public Platform(final int pID){
+		public Platform(int pID){
 			platformId = pID;
 		}
-		public void addPlatformName(final PlatformName s){
+		public void addPlatformName(PlatformName s){
 			platformNameList.add(s);
 		}
 
 
 		@Override
-		public KVP getJTreeNode(final int modus){
-			final KVP s= new KVP("platforms");
+		public KVP getJTreeNode(int modus){
+			KVP s= new KVP("platforms");
 			s.add(new KVP("platform_id",platformId).setDescription(getPlatformIDString(platformId)));
 			addListJTree(s,platformNameList,modus,"platform_name_loop");
 			return s;
@@ -94,8 +94,8 @@ public class LinkageDescriptor extends Descriptor {
 	public static record PlatformName(String iso639LanguageCode, DVBString platformName) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("platform_name");
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("platform_name");
 			s.add(new KVP("ISO_639_language_code", iso639LanguageCode));
 			s.add(new KVP("platform_name", platformName));
 			return s;
@@ -105,8 +105,8 @@ public class LinkageDescriptor extends Descriptor {
 	public static record NordigBootLoader(int manufacturer_id, byte[] version_id, long private_id, byte[] start_time) implements TreeNode{
 
 		@Override
-		public KVP getJTreeNode(final int modus){
-			final KVP s=new KVP("bootloader");
+		public KVP getJTreeNode(int modus){
+			KVP s=new KVP("bootloader");
 			s.add(new KVP("manufacturer_id",manufacturer_id));
 			s.add(new KVP("version_id",version_id));
 			s.add(new KVP("private_id",private_id));
@@ -117,7 +117,7 @@ public class LinkageDescriptor extends Descriptor {
 	
 	//EN 303 560 V1.1.1 (2018-05) 5.3.2.2.2
 	
-	public class FontInfo implements TreeNode{
+	public final class FontInfo implements TreeNode{
 		
 		private int essential_font_download_flag;
 		private int font_id;
@@ -129,7 +129,7 @@ public class LinkageDescriptor extends Descriptor {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			final KVP s = new KVP("Donwloadable Font");
+			KVP s = new KVP("Donwloadable Font");
 			s.add(new KVP("essential_font_download_flag", essential_font_download_flag).setDescription(
 					essential_font_download_flag == 1 ? "font is required to present these subtitles" : "font is a supplementary font"));
 			s.add(new KVP("font_id", font_id));
@@ -144,7 +144,7 @@ public class LinkageDescriptor extends Descriptor {
 
 		@Override
 		public KVP getJTreeNode(int modus) {
-			final KVP s = new KVP("M7BrandHomeTransponder");
+			KVP s = new KVP("M7BrandHomeTransponder");
 			s.add(new KVP("operator_network_id", operator_network_id));
 			s.add(new KVP("operator_sublist_id", operator_sublist_id));
 			s.add(new KVP("home_transport_stream_id", home_transport_stream_id));
@@ -228,11 +228,11 @@ public class LinkageDescriptor extends Descriptor {
 			OUI_data_length = getInt(b, 9,1,MASK_8BITS);
 			int r =0;
 			while (r<OUI_data_length) {
-				final int oui = getInt(b,  10+r, 3, Utils.MASK_24BITS);
-				final int selectorLength= getInt(b,  r+13, 1, MASK_8BITS);
-				final byte[] selector_byte = copyOfRange(b,  r+14,  r+14+selectorLength);
+				int oui = getInt(b,  10+r, 3, Utils.MASK_24BITS);
+				int selectorLength= getInt(b,  r+13, 1, MASK_8BITS);
+				byte[] selector_byte = copyOfRange(b,  r+14,  r+14+selectorLength);
 
-				final OUIEntry ouiEntry = new OUIEntry(oui,selectorLength,selector_byte);
+				OUIEntry ouiEntry = new OUIEntry(oui,selectorLength,selector_byte);
 				ouiList.add(ouiEntry);
 				r=r+4+selectorLength;
 			}
@@ -244,15 +244,15 @@ public class LinkageDescriptor extends Descriptor {
 			platformIdDataLength =	getInt(b, 9,1,MASK_8BITS);
 			int r =0;
 			while (r<platformIdDataLength) {
-				final int platform_id = getInt(b,  10+r, 3, Utils.MASK_24BITS);
-				final Platform p = new Platform(platform_id);
+				int platform_id = getInt(b,  10+r, 3, Utils.MASK_24BITS);
+				Platform p = new Platform(platform_id);
 				platformList.add(p);
-				final int platform_name_loop_length= getInt(b,  r+13, 1, MASK_8BITS);
+				int platform_name_loop_length= getInt(b,  r+13, 1, MASK_8BITS);
 				int t=0;
 				while(t<platform_name_loop_length){
-					final String languageCode=getISO8859_1String(b,  r+t+14, 3);
-					final DVBString platformName = new DVBString(b, r+t+17);
-					final PlatformName pName = new PlatformName(languageCode, platformName);
+					String languageCode=getISO8859_1String(b,  r+t+14, 3);
+					DVBString platformName = new DVBString(b, r+t+17);
+					PlatformName pName = new PlatformName(languageCode, platformName);
 					p.addPlatformName(pName);
 					t+=4+platformName.getLength();
 				}
@@ -294,7 +294,7 @@ public class LinkageDescriptor extends Descriptor {
 				byte[] version_id = copyOfRange(b,  s+2,  s+10); // 64 bits, 8 bytes
 				long private_id = getLong(b,  s+10, 4, MASK_32BITS);
 				byte[] start_time =  copyOfRange(b,  s+14,  s+19);
-				final NordigBootLoader nordigBootLoader = new NordigBootLoader(manufacturer_id, version_id, private_id, start_time);
+				NordigBootLoader nordigBootLoader = new NordigBootLoader(manufacturer_id, version_id, private_id, start_time);
 				bootLoaderList.add(nordigBootLoader);
 				s +=19;
 			}
@@ -346,8 +346,8 @@ public class LinkageDescriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus){
-		final KVP t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus){
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("transport_stream_id",transportStreamId));
 		t.add(new KVP("original_network_id",originalNetworkId).setDescription(getOriginalNetworkIDString(originalNetworkId)));
 		t.add(new KVP("service_id",serviceId).setDescription(parentTableSection.getParentPID().getParentTransportStream().getPsi().getSdt().getServiceName(originalNetworkId,transportStreamId,serviceId)));
@@ -419,7 +419,7 @@ public class LinkageDescriptor extends Descriptor {
 		return privateDataByte;
 	}
 
-	public static String getLinkageTypeString(final int linkageType) {
+	public static String getLinkageTypeString(int linkageType) {
 		switch (linkageType) {
 		case 0x00 : return "reserved for future use";
 		case 0x01 : return "information service";
@@ -471,39 +471,30 @@ public class LinkageDescriptor extends Descriptor {
 	}
 
 
-	public static String getTableTypeString(final int tableType) {
-		switch (tableType) {
-		case 0x00 : return "not defined";
-		case 0x01 : return "NIT";
-		case 0x02 : return "BAT";
-
-		default:
-
-			return "reserved for future use";
-
-		}
+	public static String getTableTypeString(int tableType) {
+        return switch (tableType) {
+            case 0x00 -> "not defined";
+            case 0x01 -> "NIT";
+            case 0x02 -> "BAT";
+            default -> "reserved for future use";
+        };
 	}
 
-	public static String getHandOverString(final int handOver) {
-		switch (handOver) {
-		case 0x00 : return "reserved for future use";
-		case 0x01 : return "DVB hand-over to an identical service in a neighbouring country";
-		case 0x02 : return "DVB hand-over to a local variation of the same service";
-		case 0x03 : return "DVB hand-over to an associated service";
-		default:
-			return "reserved for future use";
-		}
+	public static String getHandOverString(int handOver) {
+        return switch (handOver) {
+            case 0x00 -> "reserved for future use";
+            case 0x01 -> "DVB hand-over to an identical service in a neighbouring country";
+            case 0x02 -> "DVB hand-over to a local variation of the same service";
+            case 0x03 -> "DVB hand-over to an associated service";
+            default -> "reserved for future use";
+        };
 	}
-	public static String getOriginTypeString(final int originType) {
-		switch (originType) {
-		case 0x00 : return "NIT";
-		case 0x01 : return "SDT";
-
-		default:
-
-			return "illegal value";
-
-		}
+	public static String getOriginTypeString(int originType) {
+        return switch (originType) {
+            case 0x00 -> "NIT";
+            case 0x01 -> "SDT";
+            default -> "illegal value";
+        };
 	}
 
 	public int getBouquetID() {

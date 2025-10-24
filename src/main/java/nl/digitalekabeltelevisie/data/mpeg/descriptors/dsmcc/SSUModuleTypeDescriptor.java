@@ -51,15 +51,12 @@ public class SSUModuleTypeDescriptor extends DSMCCDescriptor {
 
 
 
-	public static String getSSUModuleTypeString(final int trans){
-		switch (trans) {
-		case 0: return "executable module type";
-		case 1: return "memory mapped code module type";
-		case 2: return "data module type";
-
-
-		default:
-			return "reserved for future use";
-		}
+	public static String getSSUModuleTypeString(int trans){
+        return switch (trans) {
+            case 0 -> "executable module type";
+            case 1 -> "memory mapped code module type";
+            case 2 -> "data module type";
+            default -> "reserved for future use";
+        };
 	}
 }

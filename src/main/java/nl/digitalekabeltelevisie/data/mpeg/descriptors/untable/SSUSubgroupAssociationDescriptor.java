@@ -56,7 +56,7 @@ public class SSUSubgroupAssociationDescriptor extends UNTDescriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("subgroup_tag",subgroup_tag ,subGroupString(subgroup_tag)));
 		return t;

@@ -49,7 +49,7 @@ public class ZiggoVodURLDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		return super.toString() + "vod_url="+getVodURL();
+		return super.toString() + "vod_url="+ vodURL;
 	}
 
 	@Override

@@ -47,8 +47,8 @@ public final class AFDescriptorFactory {
 	private static final Logger	logger	= Logger.getLogger(AFDescriptorFactory.class.getName());
 
 
-	public static List<AFDescriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {
-		final List<AFDescriptor> r = new ArrayList<>();
+	public static List<AFDescriptor> buildDescriptorList(byte[] data, int offset, int len) {
+		List<AFDescriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
@@ -67,7 +67,7 @@ public final class AFDescriptorFactory {
 			try {
 				d = getAFDescriptor(descriptorData);
 
-			} catch (final RuntimeException iae) {
+			} catch (RuntimeException iae) {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
 				d = new AFDescriptor(data);
@@ -83,7 +83,7 @@ public final class AFDescriptorFactory {
 		return r;
 	}
 
-	private static AFDescriptor getAFDescriptor(final byte[] data) {
+	private static AFDescriptor getAFDescriptor(byte[] data) {
 		AFDescriptor d;
 		switch (toUnsignedInt(data[0])) {
 		case 0x04:

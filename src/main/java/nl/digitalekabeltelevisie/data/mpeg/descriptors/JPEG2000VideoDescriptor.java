@@ -82,7 +82,7 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 		color_specification = Utils.getInt(b, byteOffset, 1, Utils.MASK_16BITS);
 		byteOffset += 1;
 
-		final byte aByte = (byte)Utils.getInt(b, byteOffset, 1, Utils.MASK_16BITS);
+		byte aByte = (byte)Utils.getInt(b, byteOffset, 1, Utils.MASK_16BITS);
 		byteOffset += 1;
 
 		still_mode = Utils.getBit(aByte, 1);
@@ -123,7 +123,7 @@ public class JPEG2000VideoDescriptor extends Descriptor {
 		return profile_and_level;
 	}
 
-	public static String getProfile_and_levelString(final int profile_and_level) {
+	public static String getProfile_and_levelString(int profile_and_level) {
 		return ""; ///TODO
 	}
 

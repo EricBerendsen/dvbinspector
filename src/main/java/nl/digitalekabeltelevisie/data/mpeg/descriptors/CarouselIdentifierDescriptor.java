@@ -53,7 +53,7 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 
 	private byte[] objectKeyData;
 
-	public CarouselIdentifierDescriptor(final byte[] b, final TableSection parent) {
+	public CarouselIdentifierDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		carouselId = Utils.getLong(b, 2, 4, Utils.MASK_32BITS);
 		if (descriptorLength > 4) {
@@ -78,9 +78,9 @@ public class CarouselIdentifierDescriptor extends Descriptor {
 	}
 
 	@Override
-	public KVP getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("carousel_id", carouselId));
 		if (descriptorLength > 4) {
 			t.add(new KVP("format_id", formatId, getFormatIDString(formatId)));

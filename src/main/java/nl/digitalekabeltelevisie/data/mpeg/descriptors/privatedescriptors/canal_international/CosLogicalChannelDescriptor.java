@@ -49,8 +49,8 @@ public class CosLogicalChannelDescriptor extends AbstractLogicalChannelDescripto
 		}
 		
 		@Override
-		public KVP getJTreeNode(final int modus){
-			final KVP s=(new KVP(createNodeLabel(service_id, logical_channel_number)));
+		public KVP getJTreeNode(int modus){
+			KVP s=(new KVP(createNodeLabel(service_id, logical_channel_number)));
 			s.add(new KVP("service_id",service_id));
 			s.add(new KVP("visible_service_flag",visible_service_flag));
 			s.add(new KVP("free_access_flag",free_access_flag));

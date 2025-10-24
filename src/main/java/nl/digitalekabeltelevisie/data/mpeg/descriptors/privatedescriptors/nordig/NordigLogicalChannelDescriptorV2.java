@@ -45,6 +45,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLo
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 //based on NorDig Unified ver 2.3  12.2.9.3 NorDig private; Logical Channel Descriptor (version 2)
+@SuppressWarnings("ALL")
 public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDescriptor {
 
 	private List<ChannelList> channelLists = new ArrayList<>();
@@ -78,7 +79,7 @@ public class NordigLogicalChannelDescriptorV2 extends AbstractLogicalChannelDesc
 		super(b, parent, descriptorContext);
 		int t = 0;
 		while (t < descriptorLength) {
-			final int channel_list_id = getInt(b, 2 + t, 1, MASK_8BITS);
+			int channel_list_id = getInt(b, 2 + t, 1, MASK_8BITS);
 			DVBString channel_list_name = new DVBString(b, t + 3);
 			t += 2 + channel_list_name.getLength();
 			String country_code = getISO8859_1String(b, t + 2, 3);

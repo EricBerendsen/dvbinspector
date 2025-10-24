@@ -36,12 +36,13 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.logicalchannel.AbstractLo
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
 //based on NorDig Unified ver 2.3 12.2.9.2 NorDig private; Logical Channel Descriptor (version 1)
+@SuppressWarnings("ALL")
 public class NordigLogicalChannelDescriptorV1 extends AbstractLogicalChannelDescriptor {
 
 
 	public class LogicalChannel extends AbstractLogicalChannel{
 
-		public LogicalChannel(final int service_id, final int visible_service, final int reserved, final int logical_channel_number){
+		public LogicalChannel(int service_id, int visible_service, int reserved, int logical_channel_number){
 			super(service_id, visible_service, reserved, logical_channel_number);
 
 		}

@@ -54,7 +54,7 @@ public class ComponentDescriptor extends LanguageDependentEitDescriptor{
 
 	private final DVBString text;
 
-	public ComponentDescriptor(byte[] b, final TableSection parent) {
+	public ComponentDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
 		streamContentExt = getInt(b, 2, 1, 0xF0) >> 4;
 		streamContent = getInt(b, 2, 1, MASK_4BITS);

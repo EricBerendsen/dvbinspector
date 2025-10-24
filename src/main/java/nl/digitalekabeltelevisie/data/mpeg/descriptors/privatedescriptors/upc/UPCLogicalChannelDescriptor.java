@@ -40,6 +40,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
+@SuppressWarnings("ALL")
 public class UPCLogicalChannelDescriptor extends Descriptor {
 
 
@@ -48,8 +49,8 @@ public class UPCLogicalChannelDescriptor extends Descriptor {
 	public record LogicalChannel(int city_code, int region_code, int logicalChannelNumber) implements TreeNode {
 
 		@Override
-		public KVP getJTreeNode(final int modus) {
-			final KVP s = new KVP("logical_channel " + logicalChannelNumber);
+		public KVP getJTreeNode(int modus) {
+			KVP s = new KVP("logical_channel " + logicalChannelNumber);
 			s.add(new KVP("region_code", region_code));
 			s.add(new KVP("city_code", city_code));
 			s.add(new KVP("logical_channel_number", logicalChannelNumber));
@@ -88,7 +89,7 @@ public class UPCLogicalChannelDescriptor extends Descriptor {
 	 */
 	public int getLogicalChannelNumber() {
 		if ((channelList!=null)&&(channelList.size()>0)) {
-			return channelList.get(0).logicalChannelNumber;
+			return channelList.getFirst().logicalChannelNumber;
 		}
 		return -1;
 	}

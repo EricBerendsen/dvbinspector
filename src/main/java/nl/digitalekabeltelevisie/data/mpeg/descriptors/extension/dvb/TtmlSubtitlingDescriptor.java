@@ -38,6 +38,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
+@SuppressWarnings("ALL")
 public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 
     public record Font(int font_id) implements TreeNode {

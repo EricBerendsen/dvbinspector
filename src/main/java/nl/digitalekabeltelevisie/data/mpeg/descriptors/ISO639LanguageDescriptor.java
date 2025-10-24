@@ -59,9 +59,9 @@ public class ISO639LanguageDescriptor extends Descriptor{
 		super(b, parent);
 		int t = 0;
 		while (t < descriptorLength) {
-			final String languageCode = getISO8859_1String(b, t + 2, 3);
-			final int audio = getInt(b, t + 5, 1, MASK_8BITS);
-			final Language s = new Language(languageCode, audio);
+			String languageCode = getISO8859_1String(b, t + 2, 3);
+			int audio = getInt(b, t + 5, 1, MASK_8BITS);
+			Language s = new Language(languageCode, audio);
 			languageList.add(s);
 			t += 4;
 		}
@@ -69,7 +69,7 @@ public class ISO639LanguageDescriptor extends Descriptor{
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (Language language : languageList) {
 			buf.append(language.toString());
 		}
@@ -79,17 +79,18 @@ public class ISO639LanguageDescriptor extends Descriptor{
 	}
 
 	public static String getAudioTypeString(int audio) {
-		switch (audio) {
-		case 0: return "Undefined";
-		case 1: return "Clean effects";
-		case 2: return "Hearing impaired";
-		case 3: return "Visual impaired commentary";
-		default:
-			if ((audio >= 0x04) && (audio <= 0x7F)){
-				return "User Private";
-			}
-			return "Reserved";
-		}
+        return switch (audio) {
+            case 0 -> "Undefined";
+            case 1 -> "Clean effects";
+            case 2 -> "Hearing impaired";
+            case 3 -> "Visual impaired commentary";
+            default -> {
+                if ((audio >= 0x04) && (audio <= 0x7F)) {
+                    yield "User Private";
+                }
+                yield "Reserved";
+            }
+        };
 	}
 
 	@Override

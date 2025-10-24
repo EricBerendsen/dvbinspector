@@ -33,6 +33,7 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
  * @author Eric
  *
  */
+@SuppressWarnings("ALL")
 public interface LogicalChannelInterface extends TreeNode{
 	
 	public int getService_id();

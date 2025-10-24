@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 
+@SuppressWarnings("ALL")
 public final class DSMCCDescriptorFactory {
 
 
@@ -49,8 +50,8 @@ public final class DSMCCDescriptorFactory {
 	private static final Logger	logger	= Logger.getLogger(DSMCCDescriptorFactory.class.getName());
 
 
-	public static List<Descriptor> buildDescriptorList(final byte[] data, final int offset, final int len) {
-		final List<Descriptor> r = new ArrayList<>();
+	public static List<Descriptor> buildDescriptorList(byte[] data, int offset, int len) {
+		List<Descriptor> r = new ArrayList<>();
 		int t = 0;
 
 		while (t < len) {
@@ -62,7 +63,7 @@ public final class DSMCCDescriptorFactory {
 			try {
 				d = getDSMCCDescriptor(descriptorData);
 
-			} catch (final RuntimeException iae) {
+			} catch (RuntimeException iae) {
 				// this can happen because there is an error in our code (constructor of a descriptor), OR the stream is invalid.
 				// fall back to a standard Descriptor (this is highly unlikely to fail), so processing can continue
 				d = new DSMCCDescriptor(descriptorData);

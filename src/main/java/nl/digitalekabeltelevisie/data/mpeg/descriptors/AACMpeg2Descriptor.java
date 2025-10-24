@@ -51,7 +51,7 @@ public class AACMpeg2Descriptor extends Descriptor {
 	@Override
 	public KVP getJTreeNode(int modus){
 
-		final KVP t = super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(new KVP("MPEG-2_AAC_profile",mpeg2_aac_profile,getProfileString(mpeg2_aac_profile)));
 		t.add(new KVP("MPEG-2_AAC_channel_configuration",mpeg2_aac_channel_configuration,getChannelConfigurationString(mpeg2_aac_channel_configuration)));
 		t.add(new KVP("MPEG-2_AAC_additional_information",additional_info,getAdditionalInfoString(additional_info)));
@@ -59,55 +59,35 @@ public class AACMpeg2Descriptor extends Descriptor {
 		return t;
 	}
 
-	public static String getProfileString(final int profile) {
-		switch (profile) {
-
-		case 0x00:
-			 return "Main profile";
-		case 0x01:
-			return "Low Complexity profile (LC)";
-		case 0x02:
-			 return "Scalable Sampling Rate profile (SSR)";
-		case 0x03:
-			return "Reserved";
-		default:
-			return "Unknown";
-
-		}
+	public static String getProfileString(int profile) {
+        return switch (profile) {
+            case 0x00 -> "Main profile";
+            case 0x01 -> "Low Complexity profile (LC)";
+            case 0x02 -> "Scalable Sampling Rate profile (SSR)";
+            case 0x03 -> "Reserved";
+            default -> "Unknown";
+        };
 	}
 
 	public static String getAdditionalInfoString(int code) {
-		switch (code) {
-
-		case 0x00:
-			 return "AAC data according to ISO/IEC 13818-7:2003";
-		case 0x01:
-			return "AAC data with Bandwidth Extension data present according to ISO/IEC 13818-7:2003/AMD1:2004";
-		default:
-			return "Reserved";
-		}
+        return switch (code) {
+            case 0x00 -> "AAC data according to ISO/IEC 13818-7:2003";
+            case 0x01 -> "AAC data with Bandwidth Extension data present according to ISO/IEC 13818-7:2003/AMD1:2004";
+            default -> "Reserved";
+        };
 	}
 
-	public static String getChannelConfigurationString(final int code) {
-		switch (code) {
-
-		case 0x01:
-			 return "Mono (center front speaker)";
-		case 0x02:
-			return "Stereo (left, right front speakers)";
-		case 0x03:
-			 return "3 speakers (center front speaker left, right front speakers)";
-		case 0x04:
-			return "4 speakers (center front speaker left, right center front speakers, rear surround)";
-		case 0x05:
-			return "5 speakers (center front speaker left, right front speakers, left surround, right surround rear speakers)";
-		case 0x06:
-			return "5.1";
-		case 0x07:
-			return "7.1";
-		default:
-			return "Unknown configuration";
-
-		}
+	public static String getChannelConfigurationString(int code) {
+        return switch (code) {
+            case 0x01 -> "Mono (center front speaker)";
+            case 0x02 -> "Stereo (left, right front speakers)";
+            case 0x03 -> "3 speakers (center front speaker left, right front speakers)";
+            case 0x04 -> "4 speakers (center front speaker left, right center front speakers, rear surround)";
+            case 0x05 ->
+                    "5 speakers (center front speaker left, right front speakers, left surround, right surround rear speakers)";
+            case 0x06 -> "5.1";
+            case 0x07 -> "7.1";
+            default -> "Unknown configuration";
+        };
 	}
 }

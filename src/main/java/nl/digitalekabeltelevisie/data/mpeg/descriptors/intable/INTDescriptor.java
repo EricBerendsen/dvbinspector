@@ -66,30 +66,25 @@ public class INTDescriptor extends Descriptor {
 	public static String getDescriptorname(int tag, TableSection tableSection){
 
 
-
-		switch (tag) {
-		case 0x00: return "reserved";
-		case 0x06: return "target_smartcard_descriptor";
-		case 0x07: return "target_MAC_address_descriptor";
-		case 0x08: return "target_serial_number_descriptor";
-		case 0x09: return "target_IP_address_descriptor";
-		case 0x0A: return "target_IPv6_address_descriptor";
-		case 0x0C: return "IP/MAC_platform_name_descriptor";
-		case 0x0D: return "IP/MAC_platform_provider_name_descriptor";
-		case 0x0E: return "target_MAC_address_range_descriptor";
-		case 0x0F: return "target_IP_slash_descriptor";
-		case 0x10: return "target_IP_source_slash_descriptor";
-		case 0x11: return "target_IPv6_slash_descriptor";
-		case 0x12: return "target_IPv6_source_slash_descriptor";
-		case 0x13: return "IP/MAC_stream_location_descriptor";
-		case 0x14: return "ISP_access_mode_descriptor";
-		case 0x15: return "IP/MAC_generic_stream_location_descriptor";
-
-		default:
-
-			return "illegal descriptor tag value in INT";
-
-		}
+        return switch (tag) {
+            case 0x00 -> "reserved";
+            case 0x06 -> "target_smartcard_descriptor";
+            case 0x07 -> "target_MAC_address_descriptor";
+            case 0x08 -> "target_serial_number_descriptor";
+            case 0x09 -> "target_IP_address_descriptor";
+            case 0x0A -> "target_IPv6_address_descriptor";
+            case 0x0C -> "IP/MAC_platform_name_descriptor";
+            case 0x0D -> "IP/MAC_platform_provider_name_descriptor";
+            case 0x0E -> "target_MAC_address_range_descriptor";
+            case 0x0F -> "target_IP_slash_descriptor";
+            case 0x10 -> "target_IP_source_slash_descriptor";
+            case 0x11 -> "target_IPv6_slash_descriptor";
+            case 0x12 -> "target_IPv6_source_slash_descriptor";
+            case 0x13 -> "IP/MAC_stream_location_descriptor";
+            case 0x14 -> "ISP_access_mode_descriptor";
+            case 0x15 -> "IP/MAC_generic_stream_location_descriptor";
+            default -> "illegal descriptor tag value in INT";
+        };
 	}
 
 

@@ -44,8 +44,8 @@ public class MultilingualBouquetNameDescriptor extends Descriptor {
 	public static record BouquetName(String iso639LanguageCode, DVBString bouquet_name) implements TreeNode{
 
 		@Override
-		public KVP getJTreeNode(final int modus){
-			final KVP s=new KVP("bouquet_name");
+		public KVP getJTreeNode(int modus){
+			KVP s=new KVP("bouquet_name");
 			s.add(new KVP("ISO_639_language_code",iso639LanguageCode));
 			s.add(new KVP("network_name",bouquet_name));
 			return s;
@@ -57,10 +57,10 @@ public class MultilingualBouquetNameDescriptor extends Descriptor {
 		super(b, parent);
 		int t = 2;
 		while (t < (descriptorLength + 2)) {
-			final String languageCode = Utils.getISO8859_1String(b, t, 3);
+			String languageCode = Utils.getISO8859_1String(b, t, 3);
 			int bouquet_name_length = Utils.getInt(b, t + 3, 1, Utils.MASK_8BITS);
 			DVBString bouquet_name = new DVBString(b, t + 3);
-			final BouquetName s = new BouquetName(languageCode, bouquet_name);
+			BouquetName s = new BouquetName(languageCode, bouquet_name);
 			bouquetNameList.add(s);
 			t += 4 + bouquet_name_length;
 		}
@@ -68,7 +68,7 @@ public class MultilingualBouquetNameDescriptor extends Descriptor {
 
 	@Override
 	public String toString() {
-		final StringBuilder buf = new StringBuilder(super.toString());
+		StringBuilder buf = new StringBuilder(super.toString());
 		for (BouquetName serviceName : bouquetNameList) {
 			buf.append(serviceName.toString());
 		}

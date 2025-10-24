@@ -33,6 +33,7 @@ import static nl.digitalekabeltelevisie.util.Utils.toHexString;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 
+@SuppressWarnings("PublicStaticArrayField")
 public class RegistrationDescriptor extends Descriptor {
 
 	public static final byte[] SCTE_35 = {'C','U','E','I'};

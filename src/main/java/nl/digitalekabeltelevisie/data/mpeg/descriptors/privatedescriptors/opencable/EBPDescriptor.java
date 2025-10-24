@@ -62,7 +62,7 @@ public class EBPDescriptor extends Descriptor {
 		private int acquisition_time_flag;
 		private long representation_id;
 
-		public Partition(BitSource bitSource, int ebp_distance_width) {
+		private Partition(BitSource bitSource, int ebp_distance_width) {
 			EBP_data_explicit_flag = bitSource.readBits(1);
 			representation_id_flag = bitSource.readBits(1);
 			partition_id = bitSource.readBits(5);
