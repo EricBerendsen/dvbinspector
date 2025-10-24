@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -64,12 +62,12 @@ public class VideoMPEG2Section implements TreeNode{
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP(VideoPESDataField.getSectionTypeString(startCode)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP(VideoPESDataField.getSectionTypeString(startCode));
 
-		t.add(new DefaultMutableTreeNode(new KVP("length",getLength(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("start_code",startCode,VideoPESDataField.getStartCodeString(startCode))));
-		t.add(new DefaultMutableTreeNode(new KVP("data",data,offset,getLength(),null)));
+		t.add(new KVP("length",getLength()));
+		t.add(new KVP("start_code",startCode,VideoPESDataField.getStartCodeString(startCode)));
+		t.add(new KVP("data",data,offset,getLength()));
 		return t;
 	}
 
@@ -97,8 +95,7 @@ public class VideoMPEG2Section implements TreeNode{
 	public String toString(){
 		if(startCode==0){
 			return VideoPESDataField.getSectionTypeString(startCode)+" ("+((PictureHeader)this).getPictureCodingTypeShortString()+")";
-		}else{
-			return VideoPESDataField.getSectionTypeString(startCode);
 		}
+		return VideoPESDataField.getSectionTypeString(startCode);
 	}
 }

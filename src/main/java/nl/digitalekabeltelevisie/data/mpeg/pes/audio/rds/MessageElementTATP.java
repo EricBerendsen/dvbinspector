@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -45,12 +43,12 @@ public class MessageElementTATP extends MessageElement {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element TA/TP"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Data Set Number",getDataSetNumber(),MessageElement.getDataSetNumberString(getDataSetNumber()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Program Service Number",getProgramServiceNumber(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Data",getTATP(),getTATPString(getTATP()))));
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element TA/TP");
+		messageElement.add(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Data Set Number",getDataSetNumber(),MessageElement.getDataSetNumberString(getDataSetNumber())));
+		messageElement.add(new KVP("Program Service Number",getProgramServiceNumber()));
+		messageElement.add(new KVP("Message Data",getTATP(),getTATPString(getTATP())));
 
 		return messageElement;
 	}

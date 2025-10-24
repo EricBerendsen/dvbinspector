@@ -206,95 +206,95 @@ public class SlHdrInfo implements TreeNode {
 	@Override
 	public DefaultMutableTreeNode getJTreeNode(int modus) {
 		
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("sl_hdr_info"));
-		t.add(new DefaultMutableTreeNode(new KVP("terminal_provider_oriented_code_message_idc",terminal_provider_oriented_code_message_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_mode_value_minus1",sl_hdr_mode_value_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_spec_major_version_idc",sl_hdr_spec_major_version_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_spec_minor_version_idc",sl_hdr_spec_minor_version_idc,null)));
+		KVP t = new KVP("sl_hdr_info");
+		t.add(new KVP("terminal_provider_oriented_code_message_idc",terminal_provider_oriented_code_message_idc));
+		t.add(new KVP("sl_hdr_mode_value_minus1",sl_hdr_mode_value_minus1));
+		t.add(new KVP("sl_hdr_spec_major_version_idc",sl_hdr_spec_major_version_idc));
+		t.add(new KVP("sl_hdr_spec_minor_version_idc",sl_hdr_spec_minor_version_idc));
 
-		t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_cancel_flag",sl_hdr_cancel_flag,null)));
+		t.add(new KVP("sl_hdr_cancel_flag",sl_hdr_cancel_flag));
 
 		if (sl_hdr_cancel_flag != 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_persistence_flag",sl_hdr_persistence_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("coded_picture_info_present_flag",coded_picture_info_present_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("target_picture_info_present_flag",target_picture_info_present_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_info_present_flag",src_mdcv_info_present_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_extension_present_flag",sl_hdr_extension_present_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sl_hdr_payload_mode",sl_hdr_payload_mode,null)));
+			t.add(new KVP("sl_hdr_persistence_flag",sl_hdr_persistence_flag));
+			t.add(new KVP("coded_picture_info_present_flag",coded_picture_info_present_flag));
+			t.add(new KVP("target_picture_info_present_flag",target_picture_info_present_flag));
+			t.add(new KVP("src_mdcv_info_present_flag",src_mdcv_info_present_flag));
+			t.add(new KVP("sl_hdr_extension_present_flag",sl_hdr_extension_present_flag));
+			t.add(new KVP("sl_hdr_payload_mode",sl_hdr_payload_mode));
 			
 			if (coded_picture_info_present_flag == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("coded_picture_primaries",coded_picture_primaries,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("coded_picture_max_luminance",coded_picture_max_luminance,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("coded_picture_min_luminance",coded_picture_min_luminance,null)));
+				t.add(new KVP("coded_picture_primaries",coded_picture_primaries));
+				t.add(new KVP("coded_picture_max_luminance",coded_picture_max_luminance));
+				t.add(new KVP("coded_picture_min_luminance",coded_picture_min_luminance));
 			}
 			if (target_picture_info_present_flag == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("target_picture_primaries",target_picture_primaries,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("target_picture_max_luminance",target_picture_max_luminance,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("target_picture_min_luminance",target_picture_min_luminance,null)));
+				t.add(new KVP("target_picture_primaries",target_picture_primaries));
+				t.add(new KVP("target_picture_max_luminance",target_picture_max_luminance));
+				t.add(new KVP("target_picture_min_luminance",target_picture_min_luminance));
 			}
 
 			if (src_mdcv_info_present_flag == 1) {
 				for (int c = 0; c < 3; c++) {
-					t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_primaries_x["+c+"]",src_mdcv_primaries_x[c],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_primaries_y["+c+"]",src_mdcv_primaries_y[c],null)));
+					t.add(new KVP("src_mdcv_primaries_x["+c+"]",src_mdcv_primaries_x[c]));
+					t.add(new KVP("src_mdcv_primaries_y["+c+"]",src_mdcv_primaries_y[c]));
 				}
-				t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_ref_white_x",src_mdcv_ref_white_x,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_ref_white_y",src_mdcv_ref_white_y,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_max_mastering_luminance",src_mdcv_max_mastering_luminance,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("src_mdcv_min_mastering_luminance",src_mdcv_min_mastering_luminance,null)));
+				t.add(new KVP("src_mdcv_ref_white_x",src_mdcv_ref_white_x));
+				t.add(new KVP("src_mdcv_ref_white_y",src_mdcv_ref_white_y));
+				t.add(new KVP("src_mdcv_max_mastering_luminance",src_mdcv_max_mastering_luminance));
+				t.add(new KVP("src_mdcv_min_mastering_luminance",src_mdcv_min_mastering_luminance));
 			}
 			for (int i = 0; i < 4; i++) {
-				t.add(new DefaultMutableTreeNode(new KVP("matrix_coefficient_value["+i+"]",matrix_coefficient_value[i],null)));
+				t.add(new KVP("matrix_coefficient_value["+i+"]",matrix_coefficient_value[i]));
 			}
 			for (int i = 0; i < 2; i++) {
-				t.add(new DefaultMutableTreeNode(new KVP("chroma_to_luma_injection["+i+"]",chroma_to_luma_injection[i],null)));
+				t.add(new KVP("chroma_to_luma_injection["+i+"]",chroma_to_luma_injection[i]));
 			}
 			for (int i = 0; i < 3; i++) {
-				t.add(new DefaultMutableTreeNode(new KVP("k_coefficient_value["+i+"]",k_coefficient_value[i],null)));
+				t.add(new KVP("k_coefficient_value["+i+"]",k_coefficient_value[i]));
 			}
 
 			if (sl_hdr_payload_mode == 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("tone_mapping_input_signal_black_level_offset",tone_mapping_input_signal_black_level_offset,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("tone_mapping_input_signal_white_level_offset",tone_mapping_input_signal_white_level_offset,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("shadow_gain_control",shadow_gain_control,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("highlight_gain_control",highlight_gain_control,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("mid_tone_width_adjustment_factor",mid_tone_width_adjustment_factor,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("tone_mapping_output_fine_tuning_num_val",tone_mapping_output_fine_tuning_num_val,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("saturation_gain_num_val",saturation_gain_num_val,null)));
+				t.add(new KVP("tone_mapping_input_signal_black_level_offset",tone_mapping_input_signal_black_level_offset));
+				t.add(new KVP("tone_mapping_input_signal_white_level_offset",tone_mapping_input_signal_white_level_offset));
+				t.add(new KVP("shadow_gain_control",shadow_gain_control));
+				t.add(new KVP("highlight_gain_control",highlight_gain_control));
+				t.add(new KVP("mid_tone_width_adjustment_factor",mid_tone_width_adjustment_factor));
+				t.add(new KVP("tone_mapping_output_fine_tuning_num_val",tone_mapping_output_fine_tuning_num_val));
+				t.add(new KVP("saturation_gain_num_val",saturation_gain_num_val));
 				
 				for (int i = 0; i < tone_mapping_output_fine_tuning_num_val; i++) {
-					t.add(new DefaultMutableTreeNode(new KVP("tone_mapping_output_fine_tuning_x["+i+"]",tone_mapping_output_fine_tuning_x[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("tone_mapping_output_fine_tuning_y["+i+"]",tone_mapping_output_fine_tuning_y[i],null)));
+					t.add(new KVP("tone_mapping_output_fine_tuning_x["+i+"]",tone_mapping_output_fine_tuning_x[i]));
+					t.add(new KVP("tone_mapping_output_fine_tuning_y["+i+"]",tone_mapping_output_fine_tuning_y[i]));
 				}
 
 				for (int i = 0; i < saturation_gain_num_val; i++) {
-					t.add(new DefaultMutableTreeNode(new KVP("saturation_gain_x["+i+"]",saturation_gain_x[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("saturation_gain_y["+i+"]",saturation_gain_y[i],null)));
+					t.add(new KVP("saturation_gain_x["+i+"]",saturation_gain_x[i]));
+					t.add(new KVP("saturation_gain_y["+i+"]",saturation_gain_y[i]));
 				}
 			}else if (sl_hdr_payload_mode == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("lm_uniform_sampling_flag",lm_uniform_sampling_flag,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("luminance_mapping_num_val",luminance_mapping_num_val,null)));
+				t.add(new KVP("lm_uniform_sampling_flag",lm_uniform_sampling_flag));
+				t.add(new KVP("luminance_mapping_num_val",luminance_mapping_num_val));
 				
 				for (int i = 0; i < luminance_mapping_num_val; i++) {
 
 					if (lm_uniform_sampling_flag == 0) {
-						t.add(new DefaultMutableTreeNode(new KVP("luminance_mapping_x["+i+"]",luminance_mapping_x[i],null)));
+						t.add(new KVP("luminance_mapping_x["+i+"]",luminance_mapping_x[i]));
 					}
-					t.add(new DefaultMutableTreeNode(new KVP("luminance_mapping_y["+i+"]",luminance_mapping_y[i],null)));
+					t.add(new KVP("luminance_mapping_y["+i+"]",luminance_mapping_y[i]));
 				}
 				
-				t.add(new DefaultMutableTreeNode(new KVP("cc_uniform_sampling_flag",cc_uniform_sampling_flag,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("colour_correction_num_val",colour_correction_num_val,null)));
+				t.add(new KVP("cc_uniform_sampling_flag",cc_uniform_sampling_flag));
+				t.add(new KVP("colour_correction_num_val",colour_correction_num_val));
 				for (int i = 0; i < colour_correction_num_val; i++) {
 					if (cc_uniform_sampling_flag == 0) {
-						t.add(new DefaultMutableTreeNode(new KVP("colour_correction_x["+i+"]",colour_correction_x[i],null)));
+						t.add(new KVP("colour_correction_x["+i+"]",colour_correction_x[i]));
 					}
-					t.add(new DefaultMutableTreeNode(new KVP("colour_correction_y["+i+"]",colour_correction_y[i],null)));
+					t.add(new KVP("colour_correction_y["+i+"]",colour_correction_y[i]));
 				}
 			}
 			
 			if(gamutMappingParamsOrSlHdrExtensionPresent) {
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("GamutMappingEnabledFlag or sl_hdr_extension_present_flag set")));
+				t.add(GuiUtils.getNotImplementedKVP("GamutMappingEnabledFlag or sl_hdr_extension_present_flag set"));
 			}
 
 			

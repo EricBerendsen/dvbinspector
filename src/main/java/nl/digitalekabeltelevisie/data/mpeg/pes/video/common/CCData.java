@@ -27,13 +27,15 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video.common;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 
 public class CCData implements TreeNode{
 
@@ -42,7 +44,7 @@ public class CCData implements TreeNode{
 	private final int zero_bit;
 	private final int cc_count;
 	private final int reserved2;
-	private final List<Construct> constructs = new ArrayList<Construct>();
+	private final List<Construct> constructs = new ArrayList<>();
 	private final int marker_bits;
 
 
@@ -65,16 +67,16 @@ public class CCData implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("cc_data()"));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("process_cc_data_flag",process_cc_data_flag,process_cc_data_flag==1?"cc_data shall be parsed and its meaning processed":"cc_data shall be discarded")));
-		t.add(new DefaultMutableTreeNode(new KVP("zero_bit",zero_bit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cc_count",cc_count,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("cc_data()");
+		t.add(new KVP("reserved",reserved));
+		t.add(new KVP("process_cc_data_flag",process_cc_data_flag,process_cc_data_flag==1?"cc_data shall be parsed and its meaning processed":"cc_data shall be discarded"));
+		t.add(new KVP("zero_bit",zero_bit));
+		t.add(new KVP("cc_count",cc_count));
+		t.add(new KVP("reserved",reserved2));
 		addListJTree(t,constructs,modus,"CC Constructs");
-		//t.add(new DefaultMutableTreeNode(new KVP("constructs",constructs)));
-		t.add(new DefaultMutableTreeNode(new KVP("marker_bits",marker_bits,null)));
+		//t.add(new KVP("constructs",constructs)));
+		t.add(new KVP("marker_bits",marker_bits));
 		return t;
 	}
 

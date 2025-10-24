@@ -32,8 +32,6 @@ import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.JpegXsVideoDescriptor;
 import nl.digitalekabeltelevisie.util.BitSource;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 /**
  * @author Simon Provost
  */
@@ -72,7 +70,7 @@ public class JpegXsDataField extends PesPacketData {
     }
 
     @Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 		final KVP jxes_node = new KVP("JPEG-XS payload");
 		jxes_node.add(new KVP("JXES Length", jxes_length));
 		jxes_node.add(new KVP("JXES Box Code", jxes_box_code).setDescription("\"jxes\""));
@@ -87,7 +85,7 @@ public class JpegXsDataField extends PesPacketData {
 		jxes_node.add(new KVP("video_full_range_flag", video_full_range_flag));
 		jxes_node.add(new KVP("tcod", tcod));
 
-		final DefaultMutableTreeNode parent_node = super.getJTreeNode(modus, new KVP("JPEG-XS PES Packet"));
+		final KVP parent_node = super.getJTreeNode(modus, new KVP("JPEG-XS PES Packet"));
 		parent_node.add(jxes_node);
 		return parent_node;
 	}

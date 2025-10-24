@@ -34,11 +34,10 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.LookUpList;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class Cea608 {
 
@@ -358,7 +357,7 @@ public class Cea608 {
 	}
 
 	
-	protected void addCCDataToTree(final int modus, final DefaultMutableTreeNode s) {
+	protected void addCCDataToTree(final int modus, final KVP s) {
 		if(!allCcData.isEmpty()) {
 			addRawCCDataToTree(modus, s);
 		}
@@ -371,20 +370,20 @@ public class Cea608 {
 	/**
 	 * @param s
 	 */
-	void addXDSToTree(final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode xdsTree = new DefaultMutableTreeNode(new KVP("XDS"));
+	void addXDSToTree(KVP s) {
+		KVP xdsTree = new KVP("XDS");
 		s.add(xdsTree);
 		for(Entry<Integer, Map<Integer, List<byte[]>>> xdsEntry: xdsData.entrySet()) {
 			final Integer classValue = xdsEntry.getKey();
-			DefaultMutableTreeNode classNode = new DefaultMutableTreeNode(new KVP("class",classValue,Construct.xds_class.get(classValue, "unknown")));
+			KVP classNode = new KVP("class",classValue,Construct.xds_class.get(classValue, "unknown"));
 			xdsTree.add(classNode);
 			for(Entry<Integer, List<byte[]>> typeList :xdsEntry.getValue().entrySet()) {
 				
 				final Integer typeValue = typeList.getKey();
-				DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(new KVP("type",typeValue,Construct.getTypeDescription(classValue,typeValue)));
+				KVP typeNode = new KVP("type",typeValue,Construct.getTypeDescription(classValue,typeValue));
 				classNode.add(typeNode);
 				for(byte[] value :typeList.getValue()) {
-					DefaultMutableTreeNode valueNode = new DefaultMutableTreeNode(new KVP("value",value,getFormatter(classValue, typeValue) .apply(value)));
+					KVP valueNode = new KVP("value",value,getFormatter(classValue, typeValue) .apply(value));
 					typeNode.add(valueNode);
 				}
 			}
@@ -396,8 +395,8 @@ public class Cea608 {
 	 * @param modus
 	 * @param s
 	 */
-	void addRawCCDataToTree(final int modus, final DefaultMutableTreeNode s) {
-		final DefaultMutableTreeNode ccDataTree = new DefaultMutableTreeNode(new KVP("cc_data"));
+	void addRawCCDataToTree(final int modus, final KVP s) {
+		KVP ccDataTree = new KVP("cc_data");
 		s.add(ccDataTree);
 		for( Entry<Integer, Map<Long, List<Construct>>> typeEntry:allCcData.entrySet()) {
 			final Map<Long, List<Construct>> typeEntryValue = typeEntry.getValue();
@@ -409,7 +408,7 @@ public class Cea608 {
 					collect(Collectors.joining("<br>")),
 					"cc_data"
 					);
-			DefaultMutableTreeNode typeNode = new DefaultMutableTreeNode(typeNodeKvp);
+			KVP typeNode = typeNodeKvp;
 			ccDataTree.add(typeNode);
 			
 			for(Entry<Long, List<Construct>> ptsEntry: typeEntryValue.entrySet()) {
@@ -422,7 +421,7 @@ public class Cea608 {
 								);
 				
 				
-				DefaultMutableTreeNode ptsNode = new DefaultMutableTreeNode(kvp);
+				KVP ptsNode = kvp;
 				typeNode.add(ptsNode);
 				for(Construct construct:constructList) {
 					ptsNode.add(construct.getJTreeNode(modus));

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -45,17 +43,17 @@ public class MessageElementRealTimeClock extends MessageElement {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element Real Time Clock"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Year",getYear(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Month",getMonth(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Date",getDate(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Hours",getHours(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Minutes",getMinutes(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Seconds",getSeconds(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Centiseconds",getCentiseconds(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Local Time Offset",getLocalTimeOffset(),null)));
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element Real Time Clock");
+		messageElement.add(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Year",getYear()));
+		messageElement.add(new KVP("Month",getMonth()));
+		messageElement.add(new KVP("Date",getDate()));
+		messageElement.add(new KVP("Hours",getHours()));
+		messageElement.add(new KVP("Minutes",getMinutes()));
+		messageElement.add(new KVP("Seconds",getSeconds()));
+		messageElement.add(new KVP("Centiseconds",getCentiseconds()));
+		messageElement.add(new KVP("Local Time Offset",getLocalTimeOffset()));
 
 		return messageElement;
 	}

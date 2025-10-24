@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -73,13 +71,14 @@ public class UECP implements TreeNode {
 		}
 	}
 
-	private final List<Frame> frames = new ArrayList<Frame>();
+	private final List<Frame> frames = new ArrayList<>();
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode uecp = new DefaultMutableTreeNode(new KVP("UECP"));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP uecp = new KVP("UECP");
 		addListJTree(uecp,frames,modus,"Frames");
 		return uecp;
 	}

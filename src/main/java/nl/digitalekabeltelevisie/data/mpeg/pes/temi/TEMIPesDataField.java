@@ -67,7 +67,7 @@ import nl.digitalekabeltelevisie.util.Utils;
 
 	@Override
 	public KVP getJTreeNode(int modus) {
-		KVP s = (KVP) getJTreeNode(modus, new KVP("TEMI PES Packet"));
+		KVP s = getJTreeNode(modus, new KVP("TEMI PES Packet"));
 		if (pesDataLen > 0) { // PES packet with more than just header
 			s.add(new KVP("CRC_flag", crc_flag));
 			s.addList(afDescriptors, modus, "af_descriptors");

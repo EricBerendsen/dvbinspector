@@ -27,11 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video.common;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_14BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 
 public class BarData implements TreeNode{
 
@@ -83,28 +83,28 @@ public class BarData implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("bar_data()"));
-		t.add(new DefaultMutableTreeNode(new KVP("top_bar_flag",top_bar_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("bottom_bar_flag",bottom_bar_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("left_bar_flag",left_bar_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("right_bar_flag",right_bar_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("bar_data()");
+		t.add(new KVP("top_bar_flag",top_bar_flag));
+		t.add(new KVP("bottom_bar_flag",bottom_bar_flag));
+		t.add(new KVP("left_bar_flag",left_bar_flag));
+		t.add(new KVP("right_bar_flag",right_bar_flag));
+		t.add(new KVP("reserved",reserved));
 		if (top_bar_flag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("marker_bits",marker_bits_top,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("line_number_end_of_top_bar",line_number_end_of_top_bar,null)));
+			t.add(new KVP("marker_bits",marker_bits_top));
+			t.add(new KVP("line_number_end_of_top_bar",line_number_end_of_top_bar));
 		}
 		if (bottom_bar_flag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("marker_bits",marker_bits_bottom,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("line_number_start_of_bottom_bar",line_number_start_of_bottom_bar,null)));
+			t.add(new KVP("marker_bits",marker_bits_bottom));
+			t.add(new KVP("line_number_start_of_bottom_bar",line_number_start_of_bottom_bar));
 		}
 		if (left_bar_flag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("marker_bits",marker_bits_left,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pixel_number_end_of_left_bar",pixel_number_end_of_left_bar,null)));
+			t.add(new KVP("marker_bits",marker_bits_left));
+			t.add(new KVP("pixel_number_end_of_left_bar",pixel_number_end_of_left_bar));
 		}
 		if (right_bar_flag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("marker_bits",marker_bits_right,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pixel_number_start_of_right_bar",pixel_number_start_of_right_bar,null)));
+			t.add(new KVP("marker_bits",marker_bits_right));
+			t.add(new KVP("pixel_number_start_of_right_bar",pixel_number_start_of_right_bar));
 		}
 		return t;
 	}

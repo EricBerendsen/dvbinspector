@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 
@@ -77,7 +75,7 @@ public class PictureHeader extends VideoMPEG2Section {
 	private int forward_f_code;
 	private int full_pel_backward_vector;
 	private int backward_f_code;
-	private final List<ExtraInformationPicture> extraPicture = new ArrayList<PictureHeader.ExtraInformationPicture>();
+	private final List<ExtraInformationPicture> extraPicture = new ArrayList<>();
 	private final int extra_bit_picture;
 
 	/**
@@ -111,25 +109,25 @@ public class PictureHeader extends VideoMPEG2Section {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("temporal_reference",temporal_reference,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("picture_coding_type",picture_coding_type,getPictureCodingTypeString(picture_coding_type))));
-		t.add(new DefaultMutableTreeNode(new KVP("vbv_delay",vbv_delay,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("temporal_reference",temporal_reference));
+		t.add(new KVP("picture_coding_type",picture_coding_type,getPictureCodingTypeString(picture_coding_type)));
+		t.add(new KVP("vbv_delay",vbv_delay));
 		if ((picture_coding_type == 2) || (picture_coding_type == 3)) {
-			t.add(new DefaultMutableTreeNode(new KVP("full_pel_forward_vector",full_pel_forward_vector,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("forward_f_code",forward_f_code,null)));
+			t.add(new KVP("full_pel_forward_vector",full_pel_forward_vector));
+			t.add(new KVP("forward_f_code",forward_f_code));
 		}
 		if ( picture_coding_type == 3 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("full_pel_backward_vector",full_pel_backward_vector,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("backward_f_code",backward_f_code,null)));
+			t.add(new KVP("full_pel_backward_vector",full_pel_backward_vector));
+			t.add(new KVP("backward_f_code",backward_f_code));
 		}
 		for(final ExtraInformationPicture pic :extraPicture){
-			t.add(new DefaultMutableTreeNode(new KVP("extra_bit_picture",pic.getExtra_bit_picture(),null)));
-			t.add(new DefaultMutableTreeNode(new KVP("extra_information_picture",pic.getExtra_information_picture(),null)));
+			t.add(new KVP("extra_bit_picture",pic.getExtra_bit_picture()));
+			t.add(new KVP("extra_information_picture",pic.getExtra_information_picture()));
 
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("extra_bit_picture",extra_bit_picture,null)));
+		t.add(new KVP("extra_bit_picture",extra_bit_picture));
 		return t;
 	}
 

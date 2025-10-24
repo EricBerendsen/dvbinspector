@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -45,10 +43,10 @@ public class MessageElementCTOnOff extends MessageElement {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element CT On/Off"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Enable/Disable",getCt(),getCt()==1?"Enable":"Disable")));
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element CT On/Off");
+		messageElement.add(new KVP("Message Element Code", getMessageElementCode(), MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Enable/Disable", getCt(), getCt() == 1 ? "Enable" : "Disable"));
 
 		return messageElement;
 	}

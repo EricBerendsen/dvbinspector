@@ -28,15 +28,14 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 import static java.lang.Byte.toUnsignedInt;
-import static nl.digitalekabeltelevisie.data.mpeg.pes.video.ExtensionHeader.*;
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.data.mpeg.pes.video.ExtensionHeader.getExtensionStartCodeIdentifierString;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -51,7 +50,7 @@ import nl.digitalekabeltelevisie.gui.ImageSource;
 public class VideoPESDataField extends PesPacketData implements TreeNode, ImageSource {
 
 
-	private final List<VideoMPEG2Section> sections= new ArrayList<VideoMPEG2Section>();
+	private final List<VideoMPEG2Section> sections= new ArrayList<>();
 
 	private static final Logger logger = Logger.getLogger(VideoPESDataField.class.getName());
 
@@ -104,9 +103,9 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final List<VideoMPEG2Section> picts = findSectionInList(sections, 0);
-		final StringBuilder type = new StringBuilder();
+	public KVP getJTreeNode(int modus) {
+		List<VideoMPEG2Section> picts = findSectionInList(sections, 0);
+		StringBuilder type = new StringBuilder();
 		if((picts!=null)&&(picts.size()>0)){
 			type.append(" (Pictures ");
 			for(final VideoMPEG2Section section: picts) {
@@ -114,7 +113,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			}
 			type.append(")");
 		}
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus,new KVP("Video PES Packet"+type).addImageSource(this, "Frame"));
+		KVP s = super.getJTreeNode(modus,new KVP("Video PES Packet"+type).addImageSource(this, "Frame"));
 		addListJTree(s,sections,modus,"Sections");
 		return s;
 	}
@@ -200,7 +199,7 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 	 */
 	public static List<VideoMPEG2Section> findSectionInList(final List<VideoMPEG2Section> sectionList, final int startCode) {
 
-		final List<VideoMPEG2Section> result = new ArrayList<VideoMPEG2Section>();
+		final List<VideoMPEG2Section> result = new ArrayList<>();
 		for (final VideoMPEG2Section element : sectionList) {
 			if (element.getStartCode() == startCode) {
 				result.add(element);
@@ -235,9 +234,8 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			mpvDecoder.decodeArray(data, false, false, false, 0);
 
 			return mpvDecoder.getImage();
-		}else{
-			return null;
 		}
+		return null;
 
 	}
 
@@ -259,9 +257,8 @@ public class VideoPESDataField extends PesPacketData implements TreeNode, ImageS
 			mpvDecoder.decodeArray(data, false, false, false, 0);
 
 			return mpvDecoder.getImage(w,h);
-		}else{
-			return null;
 		}
+		return null;
 
 	}
 

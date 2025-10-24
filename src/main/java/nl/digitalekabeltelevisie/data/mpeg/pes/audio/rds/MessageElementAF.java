@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -42,17 +40,17 @@ public class MessageElementAF extends MessageElement {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element AF"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Data Set Number",getDataSetNumber(),MessageElement.getDataSetNumberString(getDataSetNumber()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Program Service Number",getProgramServiceNumber(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Data Length",getMessageElementDataLength(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Start Location (High)",getStartLocationHigh(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Start Location (Low)",getStartLocationLow(),null)));
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element AF");
+		messageElement.add(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Data Set Number",getDataSetNumber(),MessageElement.getDataSetNumberString(getDataSetNumber())));
+		messageElement.add(new KVP("Program Service Number",getProgramServiceNumber()));
+		messageElement.add(new KVP("Message Element Data Length",getMessageElementDataLength()));
+		messageElement.add(new KVP("Start Location (High)",getStartLocationHigh()));
+		messageElement.add(new KVP("Start Location (Low)",getStartLocationLow()));
 		for (int i = 0; i < (getMessageElementDataLength()-2); i++) {
 			final int afCode = Utils.getInt(data, st+6+i, 1, Utils.MASK_8BITS);
-			messageElement.add(new DefaultMutableTreeNode(new KVP("AF Data",afCode,getAFDataString(afCode))));
+			messageElement.add(new KVP("AF Data",afCode,getAFDataString(afCode)));
 
 
 		}

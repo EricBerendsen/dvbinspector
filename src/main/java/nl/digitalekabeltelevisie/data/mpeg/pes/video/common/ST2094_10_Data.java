@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -123,32 +121,32 @@ public class ST2094_10_Data implements TreeNode {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ext_dm_data_block"));
-			t.add(new DefaultMutableTreeNode(new KVP("ext_block_length",ext_block_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ext_block_level",ext_block_level,ext_block_level_list.get(ext_block_level))));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("ext_dm_data_block");
+			t.add(new KVP("ext_block_length",ext_block_length));
+			t.add(new KVP("ext_block_level",ext_block_level,ext_block_level_list.get(ext_block_level)));
 
 			if( ext_block_level == 1 ) {
-				t.add(new DefaultMutableTreeNode(new KVP("min_PQ",min_PQ,"minimum luminance value of current picture in 12-bit PQ encoding")));
-				t.add(new DefaultMutableTreeNode(new KVP("max_PQ",max_PQ,"maximum luminance value of current picture in 12-bit PQ encoding")));
-				t.add(new DefaultMutableTreeNode(new KVP("avg_PQ",avg_PQ,"midpoint luminance value of current picture in 12-bit PQ encoding")));
+				t.add(new KVP("min_PQ",min_PQ,"minimum luminance value of current picture in 12-bit PQ encoding"));
+				t.add(new KVP("max_PQ",max_PQ,"maximum luminance value of current picture in 12-bit PQ encoding"));
+				t.add(new KVP("avg_PQ",avg_PQ,"midpoint luminance value of current picture in 12-bit PQ encoding"));
 			} 
 
 			if( ext_block_level == 2 ) {
-				t.add(new DefaultMutableTreeNode(new KVP("target_max_PQ",target_max_PQ,"maximum luminance value of a target display in 12-bit PQ encoding")));
-				t.add(new DefaultMutableTreeNode(new KVP("trim_slope",trim_slope,"slope metadata")));
-				t.add(new DefaultMutableTreeNode(new KVP("trim_offset",trim_offset,"offset metadata")));
-				t.add(new DefaultMutableTreeNode(new KVP("trim_power",trim_power,"power metadata")));
-				t.add(new DefaultMutableTreeNode(new KVP("trim_chroma_weight",trim_chroma_weight," chroma weight metadata")));
-				t.add(new DefaultMutableTreeNode(new KVP("trim_saturation_gain",trim_saturation_gain,"saturation gain metadata")));
-				t.add(new DefaultMutableTreeNode(new KVP("ms_weight",ms_weight,"reserved for future specification")));
+				t.add(new KVP("target_max_PQ",target_max_PQ,"maximum luminance value of a target display in 12-bit PQ encoding"));
+				t.add(new KVP("trim_slope",trim_slope,"slope metadata"));
+				t.add(new KVP("trim_offset",trim_offset,"offset metadata"));
+				t.add(new KVP("trim_power",trim_power,"power metadata"));
+				t.add(new KVP("trim_chroma_weight",trim_chroma_weight," chroma weight metadata"));
+				t.add(new KVP("trim_saturation_gain",trim_saturation_gain,"saturation gain metadata"));
+				t.add(new KVP("ms_weight",ms_weight,"reserved for future specification"));
 			}
 			
 			if( ext_block_level == 5 ) {
-				t.add(new DefaultMutableTreeNode(new KVP("active_area_left_offset",active_area_left_offset,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("active_area_right_offset",active_area_right_offset,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("active_area_top_offset",active_area_top_offset,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("active_area_bottom_offset",active_area_bottom_offset,null)));
+				t.add(new KVP("active_area_left_offset",active_area_left_offset));
+				t.add(new KVP("active_area_right_offset",active_area_right_offset));
+				t.add(new KVP("active_area_top_offset",active_area_top_offset));
+				t.add(new KVP("active_area_bottom_offset",active_area_bottom_offset));
 			} 
 			
 			return t;
@@ -183,13 +181,13 @@ public class ST2094_10_Data implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ST2094-10_data()"));
-		t.add(new DefaultMutableTreeNode(new KVP("app_identifier",app_identifier,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("app_version",app_version,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("metadata_refresh_flag",metadata_refresh_flag,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ST2094-10_data()");
+		t.add(new KVP("app_identifier",app_identifier));
+		t.add(new KVP("app_version",app_version));
+		t.add(new KVP("metadata_refresh_flag",metadata_refresh_flag));
 		if(metadata_refresh_flag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("num_ext_blocks",num_ext_blocks,null)));
+			t.add(new KVP("num_ext_blocks",num_ext_blocks));
 			addListJTree(t,ext_dm_data_blockList,modus,"CC ext_dm_data_block_list");
 		}
 		return t;

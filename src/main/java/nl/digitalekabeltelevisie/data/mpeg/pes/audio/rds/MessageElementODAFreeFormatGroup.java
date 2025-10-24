@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -45,12 +43,12 @@ public class MessageElementODAFreeFormatGroup extends MessageElement {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element ODA Free Format Group"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Application Group Type Code",getApplicationGroupTypeCode(),(getApplicationGroupTypeCode()==0?"Group Version A":"Group Version B"))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Buffer Configuration",getBufferConfiguration(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Block 2,3,4",data, st+3,5,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element ODA Free Format Group");
+		messageElement.add(new KVP("Message Element Code", getMessageElementCode(), MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Application Group Type Code", getApplicationGroupTypeCode(), (getApplicationGroupTypeCode()==0?"Group Version A":"Group Version B")));
+		messageElement.add(new KVP("Buffer Configuration", getBufferConfiguration()));
+		messageElement.add(new KVP("Block 2,3,4", data,  st+3, 5));
 
 
 		return messageElement;

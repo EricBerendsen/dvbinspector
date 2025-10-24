@@ -130,7 +130,7 @@ public class EBUPESDataField extends PesPacketData {
 	 */
 	@Override
 	public KVP getJTreeNode(int modus) {
-		KVP s = (KVP) getJTreeNode(modus, new KVP("EBU PES Packet"));
+		KVP s = getJTreeNode(modus, new KVP("EBU PES Packet"));
 		s.add(new KVP("data_identifier",data_identifier,getDataIDString(data_identifier)));
 
 		addListJTree(s,fieldList,modus,"fields");

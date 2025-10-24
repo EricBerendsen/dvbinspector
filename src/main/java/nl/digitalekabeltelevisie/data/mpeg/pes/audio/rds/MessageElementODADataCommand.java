@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -45,13 +43,12 @@ public class MessageElementODADataCommand extends MessageElement {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element ODA Data Command"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Data Length",getMessageElementDataLength(),null)));
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element ODA Data Command");
+		messageElement.add(new KVP("Message Element Code", getMessageElementCode(), MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Message Element Data Length", getMessageElementDataLength()));
 		// TODO
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Data",data, st+2,getMessageElementDataLength(),null)));
-
+		messageElement.add(new KVP("Data", data, st + 2, getMessageElementDataLength()));
 
 		return messageElement;
 	}

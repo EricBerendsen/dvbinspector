@@ -26,8 +26,6 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -45,12 +43,13 @@ public class MessageElement implements TreeNode{
 		this.st = start;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode messageElement = new DefaultMutableTreeNode(new KVP("Message Element"));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Data Set Number",getDataSetNumber(),MessageElement.getDataSetNumberString(getDataSetNumber()))));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Program Service Number",getProgramServiceNumber(),null)));
-		messageElement.add(new DefaultMutableTreeNode(new KVP("Message Element Data Length",getMessageElementDataLength(),null)));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP messageElement = new KVP("Message Element");
+		messageElement.add(new KVP("Message Element Code",getMessageElementCode(),MessageElement.getMessageElementCodeString(getMessageElementCode())));
+		messageElement.add(new KVP("Data Set Number",getDataSetNumber(),MessageElement.getDataSetNumberString(getDataSetNumber())));
+		messageElement.add(new KVP("Program Service Number",getProgramServiceNumber()));
+		messageElement.add(new KVP("Message Element Data Length",getMessageElementDataLength()));
 		return messageElement;
 	}
 
@@ -104,80 +103,79 @@ public class MessageElement implements TreeNode{
 			return "Astra ADR 3) special commands";
 		}
 
-		switch (mec) {
-		case 0x01: return "PI";
-		case 0x02: return "PS";
-		case 0x03: return "TA/TP";
-		case 0x04: return "DI";
-		case 0x05: return "MS";
-		case 0x06: return "PIN";
-		case 0x07: return "PTY";
-		case 0x08: return "Paging call with numeric message (10 digits)";
-		case 0x09: return "Real time clock correction";
-		case 0x0A: return "RT";
-		case 0x0B: return "PSN enable/disable";
-		case 0x0C: return "Paging call without message";
-		case 0x0D: return "Real time clock";
-		case 0x0E: return "RDS level";
-		case 0x0F: return "ARI area (BK)";
-		case 0x10: return "International paging with functions message";
-		case 0x11: return "International paging with numeric message (15 digits)";
-		case 0x12: return "Transmitter network group designation";
-		case 0x13: return "AF";
-		case 0x14: return "EON - AF";
-		case 0x15: return "EON - TA control";
-		case 0x16: return "Group sequence";
-		case 0x17: return "Request message";
-		case 0x18: return "Message acknowledgment";
-		case 0x19: return "CT On/Off";
-		case 0x1A: return "Slow Labeling codes";
-		case 0x1B: return "Paging call with alphanumeric message (80 characters)";
-		case 0x1C: return "Data set select";
-		case 0x1D: return "Reference input select";
-		case 0x1E: return "RDS On/Off";
-		case 0x1F: return "ARI level";
-		case 0x20: return "Paging call with numeric message (18 digits)";
-		case 0x21: return "ARI On/Off";
-		case 0x22: return "RDS phase";
-		case 0x23: return "Site address";
-		case 0x24: return "Free-format group";
-		case 0x25: return "IH";
-		case 0x26: return "TDC";
-		case 0x27: return "Encoder address";
-		case 0x28: return "Make PSN list";
-		case 0x29: return "Group variant code sequence";
-		case 0x2A: return "TA control";
-		case 0x2B: return "EWS";
-		case 0x2C: return "Communication mode";
-		case 0x2D: return "Manufacturer's specific command";
-		case 0x2E: return "Linkage information";
-		case 0x2F: return "PS character code table selection";
-		case 0x30: return "TMC";
-		case 0x31: return "EPP transmitter information";
-		case 0x32: return "EPP call without additional message";
-		case 0x33: return "EPP national and international call with alphanumeric message";
-		case 0x34: return "EPP national and international call with variable length numeric message";
-		case 0x35: return "EPP national and international call with variable length functions message";
-		case 0x38: return "Extended group sequence";
-		case 0x3A: return "Encoder Access Right";
-		case 0x3B: return "Communications Port Configuration - Mode";
-		case 0x3C: return "Communications Port Configuration - Speed";
-		case 0x3D: return "Communications Port Configuration - Timeout";
-		case 0x3E: return "PTYN";
-		case 0x40: return "ODA configuration and short message command";
-		case 0x41: return "ODA identification group usage sequence";
-		case 0x42: return "ODA free-format group";
-		case 0x43: return "ODA relative priority group sequence";
-		case 0x44: return "ODA “Burst mode” control";
-		case 0x45: return "ODA “Spinning Wheel” timing control";
-		case 0x46: return "ODA Data / Radiotext Plus tags"; //http://cvs.tuxbox.org/tuxbox/apps/tuxbox/enigma/src/rds_text.cpp?rev=1.4&view=markup
-		case 0x47: return "ODA Data command access right";
-		case 0x48: return "DAB Dynamic Label command";
-		case 0xAA: return "DAB Dynamic Label message (DL)";
-		case 0xDA: return "RASS"; //http://cvs.tuxbox.org/tuxbox/apps/tuxbox/neutrino/src/driver/radiotext.cpp?rev=1.6&view=markup
-		default:
-			return "illegal value";
-		}
+		return switch (mec) {
+		case 0x01 -> "PI";
+		case 0x02 -> "PS";
+		case 0x03 -> "TA/TP";
+		case 0x04 -> "DI";
+		case 0x05 -> "MS";
+		case 0x06 -> "PIN";
+		case 0x07 -> "PTY";
+		case 0x08 -> "Paging call with numeric message (10 digits)";
+		case 0x09 -> "Real time clock correction";
+		case 0x0A -> "RT";
+		case 0x0B -> "PSN enable/disable";
+		case 0x0C -> "Paging call without message";
+		case 0x0D -> "Real time clock";
+		case 0x0E -> "RDS level";
+		case 0x0F -> "ARI area (BK)";
+		case 0x10 -> "International paging with functions message";
+		case 0x11 -> "International paging with numeric message (15 digits)";
+		case 0x12 -> "Transmitter network group designation";
+		case 0x13 -> "AF";
+		case 0x14 -> "EON - AF";
+		case 0x15 -> "EON - TA control";
+		case 0x16 -> "Group sequence";
+		case 0x17 -> "Request message";
+		case 0x18 -> "Message acknowledgment";
+		case 0x19 -> "CT On/Off";
+		case 0x1A -> "Slow Labeling codes";
+		case 0x1B -> "Paging call with alphanumeric message (80 characters)";
+		case 0x1C -> "Data set select";
+		case 0x1D -> "Reference input select";
+		case 0x1E -> "RDS On/Off";
+		case 0x1F -> "ARI level";
+		case 0x20 -> "Paging call with numeric message (18 digits)";
+		case 0x21 -> "ARI On/Off";
+		case 0x22 -> "RDS phase";
+		case 0x23 -> "Site address";
+		case 0x24 -> "Free-format group";
+		case 0x25 -> "IH";
+		case 0x26 -> "TDC";
+		case 0x27 -> "Encoder address";
+		case 0x28 -> "Make PSN list";
+		case 0x29 -> "Group variant code sequence";
+		case 0x2A -> "TA control";
+		case 0x2B -> "EWS";
+		case 0x2C -> "Communication mode";
+		case 0x2D -> "Manufacturer's specific command";
+		case 0x2E -> "Linkage information";
+		case 0x2F -> "PS character code table selection";
+		case 0x30 -> "TMC";
+		case 0x31 -> "EPP transmitter information";
+		case 0x32 -> "EPP call without additional message";
+		case 0x33 -> "EPP national and international call with alphanumeric message";
+		case 0x34 -> "EPP national and international call with variable length numeric message";
+		case 0x35 -> "EPP national and international call with variable length functions message";
+		case 0x38 -> "Extended group sequence";
+		case 0x3A -> "Encoder Access Right";
+		case 0x3B -> "Communications Port Configuration - Mode";
+		case 0x3C -> "Communications Port Configuration - Speed";
+		case 0x3D -> "Communications Port Configuration - Timeout";
+		case 0x3E -> "PTYN";
+		case 0x40 -> "ODA configuration and short message command";
+		case 0x41 -> "ODA identification group usage sequence";
+		case 0x42 -> "ODA free-format group";
+		case 0x43 -> "ODA relative priority group sequence";
+		case 0x44 -> "ODA “Burst mode” control";
+		case 0x45 -> "ODA “Spinning Wheel” timing control";
+		case 0x46 -> "ODA Data / Radiotext Plus tags"; //http://cvs.tuxbox.org/tuxbox/apps/tuxbox/enigma/src/rds_text.cpp?rev=1.4&view=markup
+		case 0x47 -> "ODA Data command access right";
+		case 0x48 -> "DAB Dynamic Label command";
+		case 0xAA -> "DAB Dynamic Label message (DL)";
+		case 0xDA -> "RASS"; //http://cvs.tuxbox.org/tuxbox/apps/tuxbox/neutrino/src/driver/radiotext.cpp?rev=1.6&view=markup
+		default -> "illegal value";
+		};
 	}
 
 	public int getStart() {

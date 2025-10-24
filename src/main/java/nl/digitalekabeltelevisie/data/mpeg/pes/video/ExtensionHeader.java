@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 
@@ -55,9 +53,9 @@ public class ExtensionHeader extends VideoMPEG2Section {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("extension_start_code_identifier",extension_start_code_identifier,getExtensionStartCodeIdentifierString(extension_start_code_identifier))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("extension_start_code_identifier",extension_start_code_identifier,getExtensionStartCodeIdentifierString(extension_start_code_identifier)));
 		return t;
 	}
 

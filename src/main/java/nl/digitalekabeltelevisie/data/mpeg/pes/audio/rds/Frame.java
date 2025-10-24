@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.rds;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -76,15 +74,16 @@ public class Frame implements TreeNode {
 
 	private final MessageElement messageElement; // TODO now only one per Frame, should be more
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode frame = new DefaultMutableTreeNode(new KVP("Frame ("+MessageElement.getMessageElementCodeString(messageElement.getMessageElementCode())+")"));
-		frame.add(new DefaultMutableTreeNode(new KVP("data",data,start,(stop-start)+1,null)));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP frame = new KVP("Frame ("+MessageElement.getMessageElementCodeString(messageElement.getMessageElementCode())+")");
+		frame.add(new KVP("data",data,start,(stop-start)+1));
 
-		frame.add(new DefaultMutableTreeNode(new KVP("Start Code",getStart(),null)));
-		frame.add(new DefaultMutableTreeNode(new KVP("Addres",getAddres(),null)));
-		frame.add(new DefaultMutableTreeNode(new KVP("Sequence Counter",getSequenceCounter(),null)));
-		frame.add(new DefaultMutableTreeNode(new KVP("Message field length",getMessageFieldLength(),null)));
-		frame.add(new DefaultMutableTreeNode(new KVP("Cyclic Redundancy Check",getCyclicRedundancyCheck(),null)));
+		frame.add(new KVP("Start Code",getStart()));
+		frame.add(new KVP("Addres",getAddres()));
+		frame.add(new KVP("Sequence Counter",getSequenceCounter()));
+		frame.add(new KVP("Message field length",getMessageFieldLength()));
+		frame.add(new KVP("Cyclic Redundancy Check",getCyclicRedundancyCheck()));
 		frame.add(messageElement.getJTreeNode(modus));
 		return frame;
 	}

@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -116,18 +114,18 @@ public class AuxiliaryData implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Auxilary data",data,offset, len,isAFD?"Active Format Description":null));
-		t.add(new DefaultMutableTreeNode(new KVP("user_identifier",user_identifier,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Auxilary data",data,offset, len,isAFD?"Active Format Description":null);
+		t.add(new KVP("user_identifier",user_identifier));
 		if(isAFD){
-			t.add(new DefaultMutableTreeNode(new KVP("active_format_flag",active_format_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved2,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("active_format",active_format,getActiveFormatString(active_format))));
+			t.add(new KVP("active_format_flag",active_format_flag));
+			t.add(new KVP("reserved",reserved));
+			t.add(new KVP("reserved",reserved2));
+			t.add(new KVP("active_format",active_format,getActiveFormatString(active_format)));
 		}
 		if(isDVB1data){
-			t.add(new DefaultMutableTreeNode(new KVP("user_data_type_code",user_data_type_code,getUserDataTypeString(user_data_type_code))));
-			t.add(new DefaultMutableTreeNode(new KVP("user_data_type_structure",user_data_type_structure,null)));
+			t.add(new KVP("user_data_type_code",user_data_type_code,getUserDataTypeString(user_data_type_code)));
+			t.add(new KVP("user_data_type_structure",user_data_type_structure));
 			if(user_data_type_code==0x06){ // bardata
 				t.add(barData.getJTreeNode(modus));
 			}else if(user_data_type_code==0x03){

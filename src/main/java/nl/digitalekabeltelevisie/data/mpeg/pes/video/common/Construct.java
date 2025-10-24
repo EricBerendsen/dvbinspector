@@ -27,14 +27,15 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video.common;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.HTMLSource;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
@@ -281,16 +282,15 @@ public class Construct implements TreeNode, HTMLSource{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		KVP kvp = new KVP("construct");
-		kvp.addHTMLSource(this, "Construct");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-		t.add(new DefaultMutableTreeNode(new KVP("one_bit",one_bit,"shall be '1' to maintain backwards compatibility with previous versions of CEA-708-C")));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cc_valid",cc_valid,cc_valid==1?"the two closed caption data bytes that follow are valid":"the two data bytes are invalid")));
-		t.add(new DefaultMutableTreeNode(new KVP("cc_type",cc_type, Construct.cc_type_list.get(cc_type))));
-		t.add(new DefaultMutableTreeNode(new KVP("cc_data_1",cc_data_1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cc_data_2",cc_data_2,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("construct");
+		t.addHTMLSource(this, "Construct");
+		t.add(new KVP("one_bit",one_bit,"shall be '1' to maintain backwards compatibility with previous versions of CEA-708-C"));
+		t.add(new KVP("reserved",reserved));
+		t.add(new KVP("cc_valid",cc_valid,cc_valid==1?"the two closed caption data bytes that follow are valid":"the two data bytes are invalid"));
+		t.add(new KVP("cc_type",cc_type, Construct.cc_type_list.get(cc_type)));
+		t.add(new KVP("cc_data_1",cc_data_1));
+		t.add(new KVP("cc_data_2",cc_data_2));
 
 		return t;
 	}

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 
@@ -72,19 +70,19 @@ public class SequenceDisplayExtension extends ExtensionHeader {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.setUserObject(new KVP("Sequence Display extension")); //  Ugly hack to overwrite the name given in the super-super class,
-		t.add(new DefaultMutableTreeNode(new KVP("video_format",video_format,getVideoFormatString(video_format))));
-		t.add(new DefaultMutableTreeNode(new KVP("colour_description",colour_description,null)));
+		t.add(new KVP("video_format",video_format,getVideoFormatString(video_format)));
+		t.add(new KVP("colour_description",colour_description));
 		if(colour_description==1){
-			t.add(new DefaultMutableTreeNode(new KVP("colour_primaries",colour_primaries,getColourPrimariesString(colour_primaries))));
-			t.add(new DefaultMutableTreeNode(new KVP("transfer_characteristics",transfer_characteristics,getTransferCharacteristicsString(transfer_characteristics))));
-			t.add(new DefaultMutableTreeNode(new KVP("matrix_coefficients",matrix_coefficients,getMatrixCoefficientsString(matrix_coefficients))));
+			t.add(new KVP("colour_primaries",colour_primaries,getColourPrimariesString(colour_primaries)));
+			t.add(new KVP("transfer_characteristics",transfer_characteristics,getTransferCharacteristicsString(transfer_characteristics)));
+			t.add(new KVP("matrix_coefficients",matrix_coefficients,getMatrixCoefficientsString(matrix_coefficients)));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("display_horizontal_size",display_horizontal_size,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("marker_bit",marker_bit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("display_vertical_size",display_vertical_size,null)));
+		t.add(new KVP("display_horizontal_size",display_horizontal_size));
+		t.add(new KVP("marker_bit",marker_bit));
+		t.add(new KVP("display_vertical_size",display_vertical_size));
 
 		return t;
 	}

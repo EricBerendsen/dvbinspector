@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -87,29 +85,29 @@ public class SequenceHeader extends VideoMPEG2Section {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("horizontal_size_value",horizontal_size_value,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vertical_size_value",vertical_size_value,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("aspect_ratio_information",aspect_ratio_information,Utils.getAspectRatioInformationString(aspect_ratio_information))));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_rate_code",frame_rate_code,getFrameRateCodeString(frame_rate_code))));
-		t.add(new DefaultMutableTreeNode(new KVP("bit_rate_value",bit_rate_value,(bit_rate_value*400)+" bit/s")));
-		t.add(new DefaultMutableTreeNode(new KVP("marker_bit",marker_bit,"should be 1")));
-		t.add(new DefaultMutableTreeNode(new KVP("vbv_buffer_size_value",vbv_buffer_size_value,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constrained_parameters_flag",constrained_parameters_flag,"has no meaning in the ISO13818-2 specification and shall have the value 0")));
-		t.add(new DefaultMutableTreeNode(new KVP("load_intra_quantiser_matrix",load_intra_quantiser_matrix,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("horizontal_size_value",horizontal_size_value));
+		t.add(new KVP("vertical_size_value",vertical_size_value));
+		t.add(new KVP("aspect_ratio_information",aspect_ratio_information,Utils.getAspectRatioInformationString(aspect_ratio_information)));
+		t.add(new KVP("frame_rate_code",frame_rate_code,getFrameRateCodeString(frame_rate_code)));
+		t.add(new KVP("bit_rate_value",bit_rate_value,(bit_rate_value*400)+" bit/s"));
+		t.add(new KVP("marker_bit",marker_bit,"should be 1"));
+		t.add(new KVP("vbv_buffer_size_value",vbv_buffer_size_value));
+		t.add(new KVP("constrained_parameters_flag",constrained_parameters_flag,"has no meaning in the ISO13818-2 specification and shall have the value 0"));
+		t.add(new KVP("load_intra_quantiser_matrix",load_intra_quantiser_matrix));
 		if(load_intra_quantiser_matrix==1){
-			final DefaultMutableTreeNode intra_quantiser_matrixNode = new DefaultMutableTreeNode(new KVP("intra_quantiser_matrix"));
+			KVP intra_quantiser_matrixNode = new KVP("intra_quantiser_matrix");
 			for (int i = 0; i < intra_quantiser_matrix.length; i++) {
-				intra_quantiser_matrixNode.add(new DefaultMutableTreeNode(new KVP("intra_quantiser_matrix["+i+"]",intra_quantiser_matrix[i],null)));
+				intra_quantiser_matrixNode.add(new KVP("intra_quantiser_matrix["+i+"]",intra_quantiser_matrix[i]));
 			}
 			t.add(intra_quantiser_matrixNode);
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("load_non_intra_quantiser_matrix",load_non_intra_quantiser_matrix,null)));
+		t.add(new KVP("load_non_intra_quantiser_matrix",load_non_intra_quantiser_matrix));
 		if(load_non_intra_quantiser_matrix==1){
-			final DefaultMutableTreeNode non_intra_quantiser_matrixNode = new DefaultMutableTreeNode(new KVP("non_intra_quantiser_matrix"));
+			KVP non_intra_quantiser_matrixNode = new KVP("non_intra_quantiser_matrix");
 			for (int i = 0; i < non_intra_quantiser_matrix.length; i++) {
-				non_intra_quantiser_matrixNode.add(new DefaultMutableTreeNode(new KVP("non_intra_quantiser_matrix["+i+"]",non_intra_quantiser_matrix[i],null)));
+				non_intra_quantiser_matrixNode.add(new KVP("non_intra_quantiser_matrix["+i+"]",non_intra_quantiser_matrix[i]));
 			}
 			t.add(non_intra_quantiser_matrixNode);
 

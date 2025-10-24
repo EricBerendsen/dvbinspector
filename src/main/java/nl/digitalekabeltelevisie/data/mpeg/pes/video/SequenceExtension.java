@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -73,19 +71,19 @@ public class SequenceExtension extends ExtensionHeader {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.setUserObject(new KVP("Sequence extension")); //  Ugly hack to overwrite the name given in the super-super class,
-		t.add(new DefaultMutableTreeNode(new KVP("profile_and_level_indication",profile_and_level_indication,getProfileLevelString(profile_and_level_indication))));
-		t.add(new DefaultMutableTreeNode(new KVP("progressive_sequence",progressive_sequence,progressive_sequence==1?"video sequence contains only progressive framepictures":"video sequence may contain both framepictures and field-pictures, and frame-picture may be progressive or interlaced frames")));
-		t.add(new DefaultMutableTreeNode(new KVP("chroma_format",chroma_format,getChromaFormatString(chroma_format))));
-		t.add(new DefaultMutableTreeNode(new KVP("horizontal_size_extension",horizontal_size_extension,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vertical_size_extension",vertical_size_extension,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("bit_rate_extension",bit_rate_extension,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vbv_buffer_size_extension",vbv_buffer_size_extension,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("low_delay",low_delay,low_delay==1?"sequence does not contain any B-pictures":"sequence may contain B-pictures")));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_rate_extension_n",frame_rate_extension_n,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_rate_extension_d",frame_rate_extension_d,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.setLabel("Sequence extension"); //  Ugly hack to overwrite the name given in the super-super class,
+		t.add(new KVP("profile_and_level_indication",profile_and_level_indication,getProfileLevelString(profile_and_level_indication)));
+		t.add(new KVP("progressive_sequence",progressive_sequence,progressive_sequence==1?"video sequence contains only progressive framepictures":"video sequence may contain both framepictures and field-pictures, and frame-picture may be progressive or interlaced frames"));
+		t.add(new KVP("chroma_format",chroma_format,getChromaFormatString(chroma_format)));
+		t.add(new KVP("horizontal_size_extension",horizontal_size_extension));
+		t.add(new KVP("vertical_size_extension",vertical_size_extension));
+		t.add(new KVP("bit_rate_extension",bit_rate_extension));
+		t.add(new KVP("vbv_buffer_size_extension",vbv_buffer_size_extension));
+		t.add(new KVP("low_delay",low_delay,low_delay==1?"sequence does not contain any B-pictures":"sequence may contain B-pictures"));
+		t.add(new KVP("frame_rate_extension_n",frame_rate_extension_n));
+		t.add(new KVP("frame_rate_extension_d",frame_rate_extension_d));
 		return t;
 	}
 

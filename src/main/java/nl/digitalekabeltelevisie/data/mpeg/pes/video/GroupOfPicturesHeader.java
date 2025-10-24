@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -60,11 +58,11 @@ public class GroupOfPicturesHeader extends VideoMPEG2Section {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
-		t.add(new DefaultMutableTreeNode(new KVP("time_code",time_code,getTimeCodeString(time_code))));
-		t.add(new DefaultMutableTreeNode(new KVP("closed_gop",closed_gop,closed_gop==1?"following B-pictures have been encoded using only backward prediction or intra coding":null)));
-		t.add(new DefaultMutableTreeNode(new KVP("broken_link",broken_link,broken_link==1?"consecutive B-Pictures (if any) immediately following the first coded I-frame following the group of picture header may not be correctly decoded because the reference frame which is used for prediction is not available":null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
+		t.add(new KVP("time_code",time_code,getTimeCodeString(time_code)));
+		t.add(new KVP("closed_gop",closed_gop,closed_gop==1?"following B-pictures have been encoded using only backward prediction or intra coding":null));
+		t.add(new KVP("broken_link",broken_link,broken_link==1?"consecutive B-Pictures (if any) immediately following the first coded I-frame following the group of picture header may not be correctly decoded because the reference frame which is used for prediction is not available":null));
 		return t;
 	}
 

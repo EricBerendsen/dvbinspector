@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 
@@ -96,34 +94,34 @@ public class PictureCodingExtension extends ExtensionHeader {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.setUserObject(new KVP("Picture Coding Extension")); //  Ugly hack to overwrite the name given in the super-super class,
-		t.add(new DefaultMutableTreeNode(new KVP("f_code[0][0], forward horizontal",forward_horizontal_f_code,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("f_code[0][1], forward vertical",forward_vertical_f_code,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("f_code[1][0], backward horizontal",backward_horizontal_f_code,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("f_code[1][1], backward vertical",backward_vertical_f_code,null)));
+		t.add(new KVP("f_code[0][0], forward horizontal",forward_horizontal_f_code));
+		t.add(new KVP("f_code[0][1], forward vertical",forward_vertical_f_code));
+		t.add(new KVP("f_code[1][0], backward horizontal",backward_horizontal_f_code));
+		t.add(new KVP("f_code[1][1], backward vertical",backward_vertical_f_code));
 
-		t.add(new DefaultMutableTreeNode(new KVP("intra_dc_precision",intra_dc_precision,(8+intra_dc_precision)+" bits")));
-		t.add(new DefaultMutableTreeNode(new KVP("picture_structure",picture_structure,getPictureStructureString(picture_structure))));
-		t.add(new DefaultMutableTreeNode(new KVP("top_field_first",top_field_first,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_pred_frame_dct",frame_pred_frame_dct,(frame_pred_frame_dct==1?"only frame-DCT and frame prediction are used":""))));
+		t.add(new KVP("intra_dc_precision",intra_dc_precision,(8+intra_dc_precision)+" bits"));
+		t.add(new KVP("picture_structure",picture_structure,getPictureStructureString(picture_structure)));
+		t.add(new KVP("top_field_first",top_field_first));
+		t.add(new KVP("frame_pred_frame_dct",frame_pred_frame_dct,(frame_pred_frame_dct==1?"only frame-DCT and frame prediction are used":"")));
 
-		t.add(new DefaultMutableTreeNode(new KVP("concealment_motion_vectors",concealment_motion_vectors,(concealment_motion_vectors==1?"motion vectors are coded in intra macroblocks":"no motion vectors are coded in intra macroblocks"))));
-		t.add(new DefaultMutableTreeNode(new KVP("q_scale_type",q_scale_type,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("intra_vlc_format",intra_vlc_format,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("alternate_scan",alternate_scan,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("repeat_first_field",repeat_first_field,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("chroma_420_type",chroma_420_type,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("progressive_frame",progressive_frame,(progressive_frame==1?"the two fields (of the frame) are from the same time instant as one another":"the two fields of the frame are interlaced fields in which an interval of time of the field period exists between (corresponding spatial samples) of the two fields"))));
-		t.add(new DefaultMutableTreeNode(new KVP("composite_display_flag",composite_display_flag,null)));
+		t.add(new KVP("concealment_motion_vectors",concealment_motion_vectors,(concealment_motion_vectors==1?"motion vectors are coded in intra macroblocks":"no motion vectors are coded in intra macroblocks")));
+		t.add(new KVP("q_scale_type",q_scale_type));
+		t.add(new KVP("intra_vlc_format",intra_vlc_format));
+		t.add(new KVP("alternate_scan",alternate_scan));
+		t.add(new KVP("repeat_first_field",repeat_first_field));
+		t.add(new KVP("chroma_420_type",chroma_420_type));
+		t.add(new KVP("progressive_frame",progressive_frame,(progressive_frame==1?"the two fields (of the frame) are from the same time instant as one another":"the two fields of the frame are interlaced fields in which an interval of time of the field period exists between (corresponding spatial samples) of the two fields")));
+		t.add(new KVP("composite_display_flag",composite_display_flag));
 		if ( composite_display_flag ==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("v_axis",v_axis,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("field_sequence",field_sequence,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sub_carrier",sub_carrier,null)));
+			t.add(new KVP("v_axis",v_axis));
+			t.add(new KVP("field_sequence",field_sequence));
+			t.add(new KVP("sub_carrier",sub_carrier));
 
-			t.add(new DefaultMutableTreeNode(new KVP("burst_amplitude",burst_amplitude,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sub_carrier_phase",sub_carrier_phase,null)));
+			t.add(new KVP("burst_amplitude",burst_amplitude));
+			t.add(new KVP("sub_carrier_phase",sub_carrier_phase));
 
 		}
 

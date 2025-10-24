@@ -29,8 +29,7 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video;
 
 import static nl.digitalekabeltelevisie.util.Utils.indexOf;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
 
 
@@ -65,8 +64,8 @@ public class UserData extends VideoMPEG2Section {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = super.getJTreeNode(modus);
+	public KVP getJTreeNode(int modus) {
+		KVP t = super.getJTreeNode(modus);
 		t.add(auxData.getJTreeNode(modus));
 		return t;
 	}

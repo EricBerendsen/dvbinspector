@@ -232,6 +232,7 @@ public class PesPacketData  implements TreeNode{
 	 * Keep this to satisfy interface TreeNode. Children should call getJTreeNode(final int modus, KVP titleKVP) explicitly
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
+	@Override
 	public DefaultMutableTreeNode getJTreeNode(final int modus){
 		return 	getJTreeNode(modus,new KVP("PES Packet"));
 	}
@@ -242,7 +243,7 @@ public class PesPacketData  implements TreeNode{
 	 * @param titleKVP
 	 * @return
 	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus, final KVP kvp) {
+	public KVP getJTreeNode(final int modus, final KVP kvp) {
 
 		final PesHeader phv = getPesHeader();
 		if(showPtsModus(modus)&& hasPTS(phv)){ // PTS present, so decorate top node with it
@@ -309,9 +310,8 @@ public class PesPacketData  implements TreeNode{
 	public boolean isComplete(){
 		if(noBytes==0){
 			return false;
-		}else {
-			return ((noBytes+6)==bytesRead);
 		}
+		return ((noBytes+6)==bytesRead);
 	}
 
 
