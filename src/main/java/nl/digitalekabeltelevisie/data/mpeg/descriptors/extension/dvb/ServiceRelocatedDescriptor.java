@@ -43,7 +43,7 @@ public class ServiceRelocatedDescriptor extends DVBExtensionDescriptor {
 
 	public ServiceRelocatedDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
-		int localOffset = PRIVATE_DATA_OFFSET;
+		int localOffset = PRIVATE_DATA_OFFSET + 1;
 		old_original_network_id = getInt(b, localOffset, 2, MASK_16BITS);
 		localOffset += 2;
 		old_transport_stream_id = getInt(b, localOffset, 2, MASK_16BITS);

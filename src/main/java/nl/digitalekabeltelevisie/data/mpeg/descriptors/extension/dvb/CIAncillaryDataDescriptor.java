@@ -38,7 +38,7 @@ public class CIAncillaryDataDescriptor extends DVBExtensionDescriptor {
 
 	public CIAncillaryDataDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
-		ancillary_data_byte = copyOfRange(b, PRIVATE_DATA_OFFSET, PRIVATE_DATA_OFFSET + descriptorLength - 1);
+		ancillary_data_byte = copyOfRange(b, PRIVATE_DATA_OFFSET + 1, PRIVATE_DATA_OFFSET + descriptorLength);
 	}
 
 	@Override

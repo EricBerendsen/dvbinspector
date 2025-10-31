@@ -38,7 +38,6 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.LookUpList;
 
-@SuppressWarnings("ALL")
 public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 
     public record Font(int font_id) implements TreeNode {
@@ -178,7 +177,7 @@ public class TtmlSubtitlingDescriptor extends DVBExtensionDescriptor {
 
 	public TtmlSubtitlingDescriptor(byte[] b, TableSection parent) {
 		super(b, parent);
-		int localOffset = PRIVATE_DATA_OFFSET;
+		int localOffset = PRIVATE_DATA_OFFSET + 1; // skip descriptor_tag_extension
 		iso639LanguageCode = getISO8859_1String(b, localOffset, 3);
 		localOffset +=3;
 		subtitle_purpose = getInt(b, localOffset, 1, 0b1111_1100)>>2;
