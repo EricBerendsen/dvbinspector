@@ -499,6 +499,8 @@ public final class DescriptorFactory {
 			return new ScramblingDescriptor(data, tableSection);
 		case 0x66:
 			return new DataBroadcastIDDescriptor(data, tableSection);
+		case 0x67:
+			return new TransportStreamDescriptor(data, tableSection);
 		case 0x69:
 			return new PDCDescriptor(data, tableSection);
 		case 0x6A:

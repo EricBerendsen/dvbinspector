@@ -98,11 +98,6 @@ public class Descriptor implements TreeNode {
 		parentTableSection = parent;
 	}
 
-	@Deprecated
-	public Descriptor(byte[] b, int offset, TableSection parent) {
-		this(b, parent);
-	}
-
 	public int getDescriptorLength() {
 		return descriptorLength;
 	}
