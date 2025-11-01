@@ -76,7 +76,7 @@ public class ExternalApplicationAuthorizationDescriptor extends AITDescriptor {
 		while (t < descriptorLength) {
 			byte[] application_identifier = Arrays.copyOfRange(b, t + 2, t + 2 + 6); // application_identifier = 48 bits
 
-			int application_priority = getInt(b, t + 2 + 6 + 1, 1, MASK_8BITS);
+			int application_priority = getInt(b, t + 2 + 6, 1, MASK_8BITS);
 
 			ExternalAuthorization s = new ExternalAuthorization(application_identifier, application_priority);
 			externalAuthorizations.add(s);
