@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.*;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.util.*;
 
@@ -157,17 +155,17 @@ public class StreamMuxConfig implements TreeNode {
 			}
 
 			@Override
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
-				DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("LayerConfig"));
-				t.add(new DefaultMutableTreeNode(new KVP("useSameConfig",useSameConfig,null)));
+			public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("LayerConfig");
+				t.add(new KVP("useSameConfig",useSameConfig));
 				if (useSameConfig == 0) {
 					if (audioMuxVersion == 0) {
 						t.add(audioSpecificConfig.getJTreeNode(modus));
 					}
 				}				
-				t.add(new DefaultMutableTreeNode(new KVP("frameLengthType[streamID ["+prog+"]["+ lay+"]]",frameLengthType[streamID [prog][ lay]],frameLengthTypeList.get(frameLengthType[streamID [prog][ lay]]))));
+				t.add(new KVP("frameLengthType[streamID ["+prog+"]["+ lay+"]]",frameLengthType[streamID [prog][ lay]],frameLengthTypeList.get(frameLengthType[streamID [prog][ lay]])));
 				if (frameLengthType[streamID[prog][lay]] == 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("latmBufferFullness[streamID["+prog+"]["+ lay+"]]",latmBufferFullness[streamID[prog][lay]],null)));
+					t.add(new KVP("latmBufferFullness[streamID["+prog+"]["+ lay+"]]",latmBufferFullness[streamID[prog][lay]]));
 				}
 				
 				return t;
@@ -188,9 +186,9 @@ public class StreamMuxConfig implements TreeNode {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ProgramConfig"));
-			t.add(new DefaultMutableTreeNode(new KVP("numLayer",numLayer,"number of Layers:"+(numLayer+1))));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("ProgramConfig");
+			t.add(new KVP("numLayer",numLayer,"number of Layers:"+(numLayer+1)));
 			addListJTree(t, layerConfigList, modus, "layerConfigs");
 			return t;
 		}
@@ -262,26 +260,26 @@ public class StreamMuxConfig implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("StreamMuxConfig"));
-		t.add(new DefaultMutableTreeNode(new KVP("audioMuxVersion",audioMuxVersion,(audioMuxVersion==0)?"audioMuxVersionA = 0":null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("StreamMuxConfig");
+		t.add(new KVP("audioMuxVersion",audioMuxVersion,(audioMuxVersion==0)?"audioMuxVersionA = 0":null));
 		if(audioMuxVersion == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("audioMuxVersionA",audioMuxVersionA,null)));
+			t.add(new KVP("audioMuxVersionA",audioMuxVersionA));
 		}
 		if(audioMuxVersionA == 0) {
 			if (audioMuxVersion == 1 ) {
-				t.add(new DefaultMutableTreeNode(getNotImplementedKVP("taraBufferFullness = LatmGetValue()")));
+				t.add(getNotImplementedKVP("taraBufferFullness = LatmGetValue()"));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("allStreamsSameTimeFraming",allStreamsSameTimeFraming,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("numSubFrames",numSubFrames,"number of SubFrames:"+(numSubFrames+1))));
-			t.add(new DefaultMutableTreeNode(new KVP("numProgram",numProgram,"number of Programs:"+(numProgram+1))));
+			t.add(new KVP("allStreamsSameTimeFraming",allStreamsSameTimeFraming));
+			t.add(new KVP("numSubFrames",numSubFrames,"number of SubFrames:"+(numSubFrames+1)));
+			t.add(new KVP("numProgram",numProgram,"number of Programs:"+(numProgram+1)));
 			addListJTree(t, programConfigList, modus, "ProgramConfigs");
 
-			t.add(new DefaultMutableTreeNode(new KVP("otherDataPresent",otherDataPresent,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("crcCheckPresent",crcCheckPresent,null)));
+			t.add(new KVP("otherDataPresent",otherDataPresent));
+			t.add(new KVP("crcCheckPresent",crcCheckPresent));
 			
 			if (crcCheckPresent ==1) {
-				t.add(new DefaultMutableTreeNode(new KVP("crcCheckSum",crcCheckSum,null)));
+				t.add(new KVP("crcCheckSum",crcCheckSum));
 			}
 
 		}

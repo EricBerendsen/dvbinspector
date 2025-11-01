@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -51,10 +49,10 @@ public class AudioSyncStream implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AudioSyncStream"));
-		t.add(new DefaultMutableTreeNode(new KVP("syncword",syncword,"should be 0x2B7")));
-		t.add(new DefaultMutableTreeNode(new KVP("audioMuxLengthBytes",audioMuxLengthBytes,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("AudioSyncStream");
+		t.add(new KVP("syncword",syncword,"should be 0x2B7"));
+		t.add(new KVP("audioMuxLengthBytes",audioMuxLengthBytes));
 		t.add(audioMuxElement.getJTreeNode(modus));
 		
 		return t;

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -154,32 +152,27 @@ public class AudioAccessUnit implements TreeNode {
 		}
 	}
 
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("Frame"));
-		s.add(new DefaultMutableTreeNode(new KVP("data",data, start,getFrameSize(),null)));
-		s.add(new DefaultMutableTreeNode(new KVP("len",getFrameSize(), null)));
-		s.add(new DefaultMutableTreeNode(new KVP("pts",pts, printTimebase90kHz(pts))));
-		s.add(new DefaultMutableTreeNode(new KVP("syncWord",syncWord, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("id",id, id==1?"MPEG audio":"extension to lower sampling frequencies")));
-		s.add(new DefaultMutableTreeNode(new KVP("layer",layer, getLayerString(layer))));
-		s.add(new DefaultMutableTreeNode(new KVP("protection_bit",protection_bit, protection_bit==1?"no redundancy":"redundancy has been added")));
-		s.add(new DefaultMutableTreeNode(new KVP("bit_rate_index",bit_rate_index, getBitrateString(id,layer, bit_rate_index))));
-		s.add(new DefaultMutableTreeNode(new KVP("sampling_frequency",sampling_frequency_index, getSamplingFrequencyString(id,sampling_frequency_index))));
-		s.add(new DefaultMutableTreeNode(new KVP("padding_bit",padding_bit, padding_bit==1?"frame contains an additional slot to adjust the mean bitrate to the sampling frequency":"No padding")));
-		s.add(new DefaultMutableTreeNode(new KVP("private_bit",private_bit, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("mode",mode, getModeString(mode))));
-		s.add(new DefaultMutableTreeNode(new KVP("mode_extension",mode_extension, getModeExtensionString(layer, mode, mode_extension))));
-		s.add(new DefaultMutableTreeNode(new KVP("copyright",copyright, copyright==1?"copyright protected":"no copyright")));
-		s.add(new DefaultMutableTreeNode(new KVP("original/home",original_home, original_home==1?"original":"copy")));
-		s.add(new DefaultMutableTreeNode(new KVP("emphasis",emphasis, getEmphasisString(emphasis))));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("Frame");
+		s.add(new KVP("data",data, start,getFrameSize()));
+		s.add(new KVP("len",getFrameSize()));
+		s.add(new KVP("pts",pts, printTimebase90kHz(pts)));
+		s.add(new KVP("syncWord",syncWord));
+		s.add(new KVP("id",id, id==1?"MPEG audio":"extension to lower sampling frequencies"));
+		s.add(new KVP("layer",layer, getLayerString(layer)));
+		s.add(new KVP("protection_bit",protection_bit, protection_bit==1?"no redundancy":"redundancy has been added"));
+		s.add(new KVP("bit_rate_index",bit_rate_index, getBitrateString(id,layer, bit_rate_index)));
+		s.add(new KVP("sampling_frequency",sampling_frequency_index, getSamplingFrequencyString(id,sampling_frequency_index)));
+		s.add(new KVP("padding_bit",padding_bit, padding_bit==1?"frame contains an additional slot to adjust the mean bitrate to the sampling frequency":"No padding"));
+		s.add(new KVP("private_bit",private_bit));
+		s.add(new KVP("mode",mode, getModeString(mode)));
+		s.add(new KVP("mode_extension",mode_extension, getModeExtensionString(layer, mode, mode_extension)));
+		s.add(new KVP("copyright",copyright, copyright==1?"copyright protected":"no copyright"));
+		s.add(new KVP("original/home",original_home, original_home==1?"original":"copy"));
+		s.add(new KVP("emphasis",emphasis, getEmphasisString(emphasis)));
 		if (protection_bit==0){
-			s.add(new DefaultMutableTreeNode(new KVP("crc_check",getInt(data, start+4, 2, Utils.MASK_16BITS), null)));
+			s.add(new KVP("crc_check",getInt(data, start+4, 2, Utils.MASK_16BITS)));
 		}
 
 
@@ -192,75 +185,51 @@ public class AudioAccessUnit implements TreeNode {
 		if(mode!=1){ // no joint_stereo
 			return null;
 		}else if(layer==01){  // layer 3 is coded as 01
-			switch (mode_extension) {
-			case 0:
-				return "intensity_stereo: off, ms_stereo: off";
-			case 1:
-				return "intensity_stereo: on, ms_stereo: off";
-			case 2:
-				return "intensity_stereo: off, ms_stereo: on";
-			case 3:
-				return "intensity_stereo: on, ms_stereo: on";
-			default:
-				return "Illegal value";
-			}
+			return switch (mode_extension) {
+			case 0 -> "intensity_stereo: off, ms_stereo: off";
+			case 1 -> "intensity_stereo: on, ms_stereo: off";
+			case 2 -> "intensity_stereo: off, ms_stereo: on";
+			case 3 -> "intensity_stereo: on, ms_stereo: on";
+			default -> "Illegal value";
+			};
 		}else{ // layer 1 or 2
-			switch (mode_extension) {
-			case 0:
-				return "subbands 4-31 in intensity_stereo, bound==4";
-			case 1:
-				return "subbands 8-31 in intensity_stereo, bound==8";
-			case 2:
-				return "subbands 12-31 in intensity_stereo, bound==12";
-			case 3:
-				return "subbands 16-31 in intensity_stereo, bound==16";
-			default:
-				return "Illegal value";
-			}
+			return switch (mode_extension) {
+			case 0 -> "subbands 4-31 in intensity_stereo, bound==4";
+			case 1 -> "subbands 8-31 in intensity_stereo, bound==8";
+			case 2 -> "subbands 12-31 in intensity_stereo, bound==12";
+			case 3 -> "subbands 16-31 in intensity_stereo, bound==16";
+			default -> "Illegal value";
+			};
 
 		}
 	}
 
 	public static String getLayerString(final int layer) {
-		switch (layer) {
-
-		case 0x1:
-			return "Layer III";
-		case 0x2:
-			return "Layer II";
-		case 0x3:
-			return "Layer I";
-		default:
-			return "reserved";
-		}
+		return switch (layer) {
+		case 0x1 -> "Layer III";
+		case 0x2 -> "Layer II";
+		case 0x3 -> "Layer I";
+		default -> "reserved";
+		};
 	}
 
 
 	public static String getSamplingFrequencyString(final int id, final int sampling_frequency_index) {
 
 		if(id==1) {
-			switch (sampling_frequency_index) {
-			case 0x0:
-				return "44.1 kHz";
-			case 0x1:
-				return "48 kHz";
-			case 0x2:
-				return "32 kHz";
-			default:
-				return "reserved";
-			}
-		}else{ // id==0,low bitrate
-			switch (sampling_frequency_index) {
-			case 0x0:
-				return "22.05 kHz";
-			case 0x1:
-				return "24 kHz";
-			case 0x2:
-				return "16 kHz";
-			default:
-				return "reserved";
-			}
+			return switch (sampling_frequency_index) {
+			case 0x0 -> "44.1 kHz";
+			case 0x1 -> "48 kHz";
+			case 0x2 -> "32 kHz";
+			default -> "reserved";
+			};
 		}
+		return switch (sampling_frequency_index) {
+		case 0x0 -> "22.05 kHz";
+		case 0x1 -> "24 kHz";
+		case 0x2 -> "16 kHz";
+		default -> "reserved";
+		};
 	}
 
 	public int getSamplingFrequency(){
@@ -270,253 +239,141 @@ public class AudioAccessUnit implements TreeNode {
 	public static int getSamplingFrequency(final int id, final int sampling_frequency_index) {
 
 		if(id==1) {
-			switch (sampling_frequency_index) {
-			case 0x0:
-				return 44100;
-			case 0x1:
-				return 48000;
-			case 0x2:
-				return 32000;
-			default:
-				throw new IllegalArgumentException("id:"+id+",sampling_frequency_index:"+sampling_frequency_index);
-			}
-		}else{ // id==0,low bitrate
-			switch (sampling_frequency_index) {
-			case 0x0:
-				return 22050;
-			case 0x1:
-				return 24000;
-			case 0x2:
-				return 16000;
-			default:
-				throw new IllegalArgumentException("id:"+id+",sampling_frequency_index:"+sampling_frequency_index);
-			}
+			return switch (sampling_frequency_index) {
+			case 0x0 -> 44100;
+			case 0x1 -> 48000;
+			case 0x2 -> 32000;
+			default -> throw new IllegalArgumentException("id:"+id+",sampling_frequency_index:"+sampling_frequency_index);
+			};
 		}
+		return switch (sampling_frequency_index) {
+		case 0x0 -> 22050;
+		case 0x1 -> 24000;
+		case 0x2 -> 16000;
+		default -> throw new IllegalArgumentException("id:"+id+",sampling_frequency_index:"+sampling_frequency_index);
+		};
 	}
 
 	public static String getModeString(final int mode) {
-		switch (mode) {
-
-		case 0x0:
-			return "stereo";
-		case 0x1:
-			return "joint_stereo (intensity_stereo and/or ms_stereo)";
-		case 0x2:
-			return "dual_channel";
-		case 0x3:
-			return "single_channel";
-		default:
-			return "illegal value";
-		}
+		return switch (mode) {
+		case 0x0 -> "stereo";
+		case 0x1 -> "joint_stereo (intensity_stereo and/or ms_stereo)";
+		case 0x2 -> "dual_channel";
+		case 0x3 -> "single_channel";
+		default -> "illegal value";
+		};
 	}
 
 	public static String getEmphasisString(final int emphasis) {
-		switch (emphasis) {
-
-		case 0x0:
-			return "no emphasis";
-		case 0x1:
-			return "50/15 microsec. emphasis";
-		case 0x2:
-			return "reserved";
-		case 0x3:
-			return "CCITT J.17";
-		default:
-			return "illegal value";
-		}
+		return switch (emphasis) {
+		case 0x0 -> "no emphasis";
+		case 0x1 -> "50/15 microsec. emphasis";
+		case 0x2 -> "reserved";
+		case 0x3 -> "CCITT J.17";
+		default -> "illegal value";
+		};
 	}
 
 	public static String getBitrateString(final int id,final int layer, final int bit_rate_index) {
 
 		if(id==1){
-			switch (layer) {
-			case 0x1:
-				// "Layer III";
-				switch (bit_rate_index) {
-
-				case 0x0:
-					return "free format";
-				case 0x1:
-					return "32 kbit/s";
-				case 0x2:
-					return "40 kbit/s";
-				case 0x3:
-					return "48 kbit/s";
-				case 0x4:
-					return "56 kbit/s";
-				case 0x5:
-					return "64 kbit/s";
-				case 0x6:
-					return "80 kbit/s";
-				case 0x7:
-					return "96 kbit/s";
-				case 0x8:
-					return "112 kbit/s";
-				case 0x9:
-					return "128 kbit/s";
-				case 0xa:
-					return "160 kbit/s";
-				case 0xb:
-					return "192 kbit/s";
-				case 0xc:
-					return "224 kbit/s";
-				case 0xd:
-					return "256 kbit/s";
-				case 0xe:
-					return "320 kbit/s";
-				default:
-					return "Illegal combination layer/ bitrate";
-				}
-			case 0x2:
-				// "Layer II";
-				switch (bit_rate_index) {
-				case 0x0:
-					return "free format";
-				case 0x1:
-					return "32 kbit/s";
-				case 0x2:
-					return "48 kbit/s";
-				case 0x3:
-					return "56 kbit/s";
-				case 0x4:
-					return "64 kbit/s";
-				case 0x5:
-					return "80 kbit/s";
-				case 0x6:
-					return "96 kbit/s";
-				case 0x7:
-					return "112 kbit/s";
-				case 0x8:
-					return "128 kbit/s";
-				case 0x9:
-					return "160 kbit/s";
-				case 0xa:
-					return "192 kbit/s";
-				case 0xb:
-					return "224 kbit/s";
-				case 0xc:
-					return "256 kbit/s";
-				case 0xd:
-					return "320 kbit/s";
-				case 0xe:
-					return "384 kbit/s";
-				default:
-					return "Illegal combination layer/ bitrate";
-				}
-
-			case 0x3:
-				// "Layer I";
-				switch (bit_rate_index) {
-				case 0x0:
-					return "free format";
-				case 0x1:
-					return "32 kbit/s";
-				case 0x2:
-					return "64 kbit/s";
-				case 0x3:
-					return "96 kbit/s";
-				case 0x4:
-					return "128 kbit/s";
-				case 0x5:
-					return "160 kbit/s";
-				case 0x6:
-					return "192 kbit/s";
-				case 0x7:
-					return "224 kbit/s";
-				case 0x8:
-					return "256 kbit/s";
-				case 0x9:
-					return "288 kbit/s";
-				case 0xa:
-					return "320 kbit/s";
-				case 0xb:
-					return "352 kbit/s";
-				case 0xc:
-					return "384 kbit/s";
-				case 0xd:
-					return "416 kbit/s";
-				case 0xe:
-					return "448 kbit/s";
-				default:
-					return "Illegal combination layer/ bitrate";
-				}
-			default:
-				return "Illegal combination layer/ bitrate";
-			}
-		}else{ // id==0, low bitrate iso13818-3
-			if(layer==0x3){ // layer 1
-				switch (bit_rate_index) {
-				case 0x0:
-					return "free format";
-				case 0x1:
-					return "32 kbit/s";
-				case 0x2:
-					return "48 kbit/s";
-				case 0x3:
-					return "56 kbit/s";
-				case 0x4:
-					return "64 kbit/s";
-				case 0x5:
-					return "80 kbit/s";
-				case 0x6:
-					return "96 kbit/s";
-				case 0x7:
-					return "112 kbit/s";
-				case 0x8:
-					return "128 kbit/s";
-				case 0x9:
-					return "144 kbit/s";
-				case 0xa:
-					return "160 kbit/s";
-				case 0xb:
-					return "176 kbit/s";
-				case 0xc:
-					return "192 kbit/s";
-				case 0xd:
-					return "224 kbit/s";
-				case 0xe:
-					return "256 kbit/s";
-				default:
-					return "forbidden bit_rate_index";
-				}
-
-			}else{ //layer 2 or 3
-				switch (bit_rate_index) {
-				case 0x0:
-					return "free format";
-				case 0x1:
-					return "8 kbit/s";
-				case 0x2:
-					return "16 kbit/s";
-				case 0x3:
-					return "24 kbit/s";
-				case 0x4:
-					return "32 kbit/s";
-				case 0x5:
-					return "40 kbit/s";
-				case 0x6:
-					return "48 kbit/s";
-				case 0x7:
-					return "56 kbit/s";
-				case 0x8:
-					return "64 kbit/s";
-				case 0x9:
-					return "80 kbit/s";
-				case 0xa:
-					return "96 kbit/s";
-				case 0xb:
-					return "112 kbit/s";
-				case 0xc:
-					return "128 kbit/s";
-				case 0xd:
-					return "144 kbit/s";
-				case 0xe:
-					return "160 kbit/s";
-				default:
-					return "forbidden bit_rate_index";
-				}
-			}
+			return switch (layer) {
+			case 0x1 -> switch (bit_rate_index) {
+							case 0x0 -> "free format";
+							case 0x1 -> "32 kbit/s";
+							case 0x2 -> "40 kbit/s";
+							case 0x3 -> "48 kbit/s";
+							case 0x4 -> "56 kbit/s";
+							case 0x5 -> "64 kbit/s";
+							case 0x6 -> "80 kbit/s";
+							case 0x7 -> "96 kbit/s";
+							case 0x8 -> "112 kbit/s";
+							case 0x9 -> "128 kbit/s";
+							case 0xa -> "160 kbit/s";
+							case 0xb -> "192 kbit/s";
+							case 0xc -> "224 kbit/s";
+							case 0xd -> "256 kbit/s";
+							case 0xe -> "320 kbit/s";
+							default -> "Illegal combination layer/ bitrate";
+							};
+			case 0x2 -> switch (bit_rate_index) {
+							case 0x0 -> "free format";
+							case 0x1 -> "32 kbit/s";
+							case 0x2 -> "48 kbit/s";
+							case 0x3 -> "56 kbit/s";
+							case 0x4 -> "64 kbit/s";
+							case 0x5 -> "80 kbit/s";
+							case 0x6 -> "96 kbit/s";
+							case 0x7 -> "112 kbit/s";
+							case 0x8 -> "128 kbit/s";
+							case 0x9 -> "160 kbit/s";
+							case 0xa -> "192 kbit/s";
+							case 0xb -> "224 kbit/s";
+							case 0xc -> "256 kbit/s";
+							case 0xd -> "320 kbit/s";
+							case 0xe -> "384 kbit/s";
+							default -> "Illegal combination layer/ bitrate";
+							};
+			case 0x3 -> switch (bit_rate_index) {
+							case 0x0 -> "free format";
+							case 0x1 -> "32 kbit/s";
+							case 0x2 -> "64 kbit/s";
+							case 0x3 -> "96 kbit/s";
+							case 0x4 -> "128 kbit/s";
+							case 0x5 -> "160 kbit/s";
+							case 0x6 -> "192 kbit/s";
+							case 0x7 -> "224 kbit/s";
+							case 0x8 -> "256 kbit/s";
+							case 0x9 -> "288 kbit/s";
+							case 0xa -> "320 kbit/s";
+							case 0xb -> "352 kbit/s";
+							case 0xc -> "384 kbit/s";
+							case 0xd -> "416 kbit/s";
+							case 0xe -> "448 kbit/s";
+							default -> "Illegal combination layer/ bitrate";
+							};
+			default -> "Illegal combination layer/ bitrate";
+			};
 		}
+		if(layer==0x3){ // layer 1
+			return switch (bit_rate_index) {
+			case 0x0 -> "free format";
+			case 0x1 -> "32 kbit/s";
+			case 0x2 -> "48 kbit/s";
+			case 0x3 -> "56 kbit/s";
+			case 0x4 -> "64 kbit/s";
+			case 0x5 -> "80 kbit/s";
+			case 0x6 -> "96 kbit/s";
+			case 0x7 -> "112 kbit/s";
+			case 0x8 -> "128 kbit/s";
+			case 0x9 -> "144 kbit/s";
+			case 0xa -> "160 kbit/s";
+			case 0xb -> "176 kbit/s";
+			case 0xc -> "192 kbit/s";
+			case 0xd -> "224 kbit/s";
+			case 0xe -> "256 kbit/s";
+			default -> "forbidden bit_rate_index";
+			};
+
+		}
+		return switch (bit_rate_index) {
+		case 0x0 -> "free format";
+		case 0x1 -> "8 kbit/s";
+		case 0x2 -> "16 kbit/s";
+		case 0x3 -> "24 kbit/s";
+		case 0x4 -> "32 kbit/s";
+		case 0x5 -> "40 kbit/s";
+		case 0x6 -> "48 kbit/s";
+		case 0x7 -> "56 kbit/s";
+		case 0x8 -> "64 kbit/s";
+		case 0x9 -> "80 kbit/s";
+		case 0xa -> "96 kbit/s";
+		case 0xb -> "112 kbit/s";
+		case 0xc -> "128 kbit/s";
+		case 0xd -> "144 kbit/s";
+		case 0xe -> "160 kbit/s";
+		default -> "forbidden bit_rate_index";
+		};
 	}
 
 	/**

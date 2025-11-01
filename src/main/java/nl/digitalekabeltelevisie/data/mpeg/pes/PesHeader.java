@@ -580,8 +580,8 @@ public class PesHeader implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Pes Header"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Pes Header");
 		addToJtree(t, modus);
 		return t;
 	}

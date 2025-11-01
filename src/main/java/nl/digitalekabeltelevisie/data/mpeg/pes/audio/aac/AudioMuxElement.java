@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac;
 
 import java.util.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.util.BitSource;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
@@ -77,10 +75,10 @@ public class AudioMuxElement implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AudioMuxElement("+muxConfigPresent+")"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("AudioMuxElement("+muxConfigPresent+")");
 		if( muxConfigPresent == 1 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("useSameStreamMux",useSameStreamMux,null)));
+			t.add(new KVP("useSameStreamMux",useSameStreamMux));
 			if(useSameStreamMux != 1) {
 				t.add(streamMuxConfig.getJTreeNode(modus));
 			}

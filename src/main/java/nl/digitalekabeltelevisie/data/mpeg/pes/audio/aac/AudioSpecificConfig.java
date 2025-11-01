@@ -31,8 +31,6 @@ import static nl.digitalekabeltelevisie.gui.utils.GuiUtils.getNotImplementedKVP;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.util.*;
 
@@ -173,14 +171,14 @@ public class AudioSpecificConfig implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AudioSpecificConfig"));
-		t.add(new DefaultMutableTreeNode(new KVP("audioObjectType",audioObjectType,audio_object_type_list.get(audioObjectType))));
-		t.add(new DefaultMutableTreeNode(new KVP("samplingFrequencyIndex",samplingFrequencyIndex,samplingFrequencyList.get(samplingFrequencyIndex))));
-		if ( samplingFrequencyIndex==0xf ) {
-			t.add(new DefaultMutableTreeNode(new KVP("samplingFrequency",samplingFrequency,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("AudioSpecificConfig");
+		t.add(new KVP("audioObjectType", audioObjectType, audio_object_type_list.get(audioObjectType)));
+		t.add(new KVP("samplingFrequencyIndex", samplingFrequencyIndex, samplingFrequencyList.get(samplingFrequencyIndex)));
+		if (samplingFrequencyIndex == 0xf) {
+			t.add(new KVP("samplingFrequency", samplingFrequency));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("channelConfiguration",channelConfiguration,null)));
+		t.add(new KVP("channelConfiguration", channelConfiguration));
 		switch (audioObjectType) {
 		case 1:
 		case 2:
@@ -198,7 +196,7 @@ public class AudioSpecificConfig implements TreeNode {
 			break;
 
 		default:
-			t.add(new DefaultMutableTreeNode(getNotImplementedKVP("not implemented audioObjectType:"+audioObjectType)));
+			t.add(getNotImplementedKVP("not implemented audioObjectType:" + audioObjectType));
 			break;
 		}
 

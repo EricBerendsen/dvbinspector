@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.StreamMuxConfig.ProgramConfig;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -69,8 +67,8 @@ public class PayloadMux implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PayloadMux"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("PayloadMux");
 		
 		if (streamMuxConfig.getAllStreamsSameTimeFraming() == 1) { 
 			int[][] streamID = streamMuxConfig.getStreamID();
@@ -79,11 +77,11 @@ public class PayloadMux implements TreeNode {
 				ProgramConfig programConfig = programConfigList.get(prog);
 				for (int lay = 0; lay <= programConfig.getNumLayer(); lay++) {    
 					byte[] payload = payLoadList[streamID[prog][lay]];
-					t.add(new DefaultMutableTreeNode(new KVP("payload [streamID["+prog+"]["+lay+"]]",payload,"streamID["+prog+"]["+lay+"]]="+streamID[prog][ lay])));
+					t.add(new KVP("payload [streamID["+prog+"]["+lay+"]]",payload,"streamID["+prog+"]["+lay+"]]="+streamID[prog][ lay]));
 				}
 			}
 		} else {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("! allStreamsSameTimeFraming")));
+			t.add(GuiUtils.getNotImplementedKVP("! allStreamsSameTimeFraming"));
 		}
 				
 		return t;

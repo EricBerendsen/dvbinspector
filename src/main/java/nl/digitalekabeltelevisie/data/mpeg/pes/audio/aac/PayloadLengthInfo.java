@@ -30,8 +30,6 @@
 
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.audio.aac.StreamMuxConfig.ProgramConfig;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -71,9 +69,9 @@ public class PayloadLengthInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 		
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PayloadLengthInfo"));
+		KVP t = new KVP("PayloadLengthInfo");
 		
 		if (streamMuxConfig.getAllStreamsSameTimeFraming() == 1) { 
 			int[][] streamID = streamMuxConfig.getStreamID();
@@ -83,9 +81,9 @@ public class PayloadLengthInfo implements TreeNode {
 				ProgramConfig programConfig = programConfigList.get(prog);
 				for (int lay = 0; lay <= programConfig.getNumLayer(); lay++) {       
 					if ( frameLengthType[streamID[prog][ lay]] == 0) { 
-						t.add(new DefaultMutableTreeNode(new KVP("MuxSlotLengthBytes[streamID["+prog+"]["+lay+"]]",
+						t.add(new KVP("MuxSlotLengthBytes[streamID["+prog+"]["+lay+"]]",
 								muxSlotLengthBytes[streamID[prog][ lay]],
-								"streamID["+prog+"]["+lay+"]]="+streamID[prog][ lay])));
+								"streamID["+prog+"]["+lay+"]]="+streamID[prog][ lay]));
 					} else {
 //						if ( frameLengthType[streamID[prog][ lay]] == 5 ||
 //							frameLengthType[streamID[prog][ lay]] == 7 ||

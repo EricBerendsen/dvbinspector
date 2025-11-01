@@ -28,8 +28,6 @@
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 // based on ftp://ftp.tnt.uni-hannover.de/pub/MPEG/audio/mpeg4/documents/w2803/w2803_n.pdf
 // chapter 8.1
 // ISO/IEC 14496-3:/Amd.1:1999(E)  Coding of audio-visual objects – Part 3: Audio
@@ -90,23 +88,23 @@ public class GASpecificConfig implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("GASpecificConfig"));
-		t.add(new DefaultMutableTreeNode(new KVP("FrameLength",frameLength,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("DependsOnCoreCoder",dependsOnCoreCoder,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("GASpecificConfig");
+		t.add(new KVP("FrameLength",frameLength));
+		t.add(new KVP("DependsOnCoreCoder",dependsOnCoreCoder));
 		if(dependsOnCoreCoder == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("coreCoderDelay",coreCoderDelay,null)));
+			t.add(new KVP("coreCoderDelay",coreCoderDelay));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("ExtensionFlag",extensionFlag,null)));
+		t.add(new KVP("ExtensionFlag",extensionFlag));
 		if ( channelConfiguration == 0) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("program_config_element")));
+			t.add(GuiUtils.getNotImplementedKVP("program_config_element"));
 		}
 
 		if ((audioObjectType == 6) || (audioObjectType == 20)) { 
-			t.add(new DefaultMutableTreeNode(new KVP("layerNr",layerNr,null)));
+			t.add(new KVP("layerNr",layerNr));
 		}
 		if (extensionFlag ==1) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("extensionFlag ==1")));
+			t.add(GuiUtils.getNotImplementedKVP("extensionFlag ==1"));
 		}
 		return t;
 	}
