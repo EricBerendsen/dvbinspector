@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -121,36 +119,36 @@ public class L1PreSignallingData implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode l1cpre = new DefaultMutableTreeNode(new KVP("L1-Pre Signalling data "));
+	public KVP getJTreeNode(int modus) {
+		KVP l1cpre = new KVP("L1-Pre Signalling data ");
 		
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("type",type,type_list.get(type))));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("bwt_ext",bwt_ext,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("s1",s1,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("s2",s2,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_repetition_flag",l1_repetition_flag,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("guard_interval",guard_interval,guard_interval_list.get(guard_interval))));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("papr",papr,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_mod",l1_mod,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_cod",l1_cod,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_fec_type",l1_fec_type,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_post_size",l1_post_size,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_post_info_size",l1_post_info_size,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("pilot_pattern",pilot_pattern,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("tx_id_availability",tx_id_availability,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("cell_id",cell_id,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("network_id",network_id,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("t2_system_id",t2_system_id,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("num_t2_frames",num_t2_frames,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("num_data_symbols",num_data_symbols,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("regen_flag",regen_flag,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_post_extension",l1_post_extension,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("num_rf",num_rf,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("current_rf_idx",current_rf_idx,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("t2_version",t2_version,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("l1_post_scrambled",l1_post_scrambled,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("t2_base_lite",t2_base_lite,null)));
-		l1cpre.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
+		l1cpre.add(new KVP("type",type,type_list.get(type)));
+		l1cpre.add(new KVP("bwt_ext",bwt_ext));
+		l1cpre.add(new KVP("s1",s1));
+		l1cpre.add(new KVP("s2",s2));
+		l1cpre.add(new KVP("l1_repetition_flag",l1_repetition_flag));
+		l1cpre.add(new KVP("guard_interval",guard_interval,guard_interval_list.get(guard_interval)));
+		l1cpre.add(new KVP("papr",papr));
+		l1cpre.add(new KVP("l1_mod",l1_mod));
+		l1cpre.add(new KVP("l1_cod",l1_cod));
+		l1cpre.add(new KVP("l1_fec_type",l1_fec_type));
+		l1cpre.add(new KVP("l1_post_size",l1_post_size));
+		l1cpre.add(new KVP("l1_post_info_size",l1_post_info_size));
+		l1cpre.add(new KVP("pilot_pattern",pilot_pattern));
+		l1cpre.add(new KVP("tx_id_availability",tx_id_availability));
+		l1cpre.add(new KVP("cell_id",cell_id));
+		l1cpre.add(new KVP("network_id",network_id));
+		l1cpre.add(new KVP("t2_system_id",t2_system_id));
+		l1cpre.add(new KVP("num_t2_frames",num_t2_frames));
+		l1cpre.add(new KVP("num_data_symbols",num_data_symbols));
+		l1cpre.add(new KVP("regen_flag",regen_flag));
+		l1cpre.add(new KVP("l1_post_extension",l1_post_extension));
+		l1cpre.add(new KVP("num_rf",num_rf));
+		l1cpre.add(new KVP("current_rf_idx",current_rf_idx));
+		l1cpre.add(new KVP("t2_version",t2_version));
+		l1cpre.add(new KVP("l1_post_scrambled",l1_post_scrambled));
+		l1cpre.add(new KVP("t2_base_lite",t2_base_lite));
+		l1cpre.add(new KVP("reserved",reserved));
 		return l1cpre;
 	}
 

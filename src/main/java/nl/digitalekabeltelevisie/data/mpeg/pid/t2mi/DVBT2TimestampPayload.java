@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.*;
 
@@ -50,12 +48,12 @@ public class DVBT2TimestampPayload extends Payload {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode payloadNode = new DefaultMutableTreeNode(new KVP("payload"));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("bw",getBW(),getBWString(getBW()))));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("seconds_since_2000",getSecondsSince2000(),null)));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("subseconds",getSubSeconds(),null)));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("utco",getUtco(),null)));
+	public KVP getJTreeNode(int modus) {
+		KVP payloadNode = new KVP("payload");
+		payloadNode.add(new KVP("bw",getBW(),getBWString(getBW())));
+		payloadNode.add(new KVP("seconds_since_2000",getSecondsSince2000()));
+		payloadNode.add(new KVP("subseconds",getSubSeconds()));
+		payloadNode.add(new KVP("utco",getUtco()));
 		return payloadNode;
 	}
 

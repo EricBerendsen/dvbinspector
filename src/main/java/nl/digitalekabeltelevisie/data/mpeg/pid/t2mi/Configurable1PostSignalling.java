@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -50,10 +48,10 @@ public class Configurable1PostSignalling implements TreeNode {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("rf_idx:"+rf_idx+", frequency:"+frequency ));
-			t.add(new DefaultMutableTreeNode(new KVP("rf_idx",rf_idx,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("frequency",frequency,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("rf_idx:" + rf_idx + ", frequency:" + frequency);
+			t.add(new KVP("rf_idx", rf_idx));
+			t.add(new KVP("frequency", frequency));
 			return t;
 		}
 
@@ -117,29 +115,29 @@ public class Configurable1PostSignalling implements TreeNode {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("PLP"));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_id", plp_id, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_type", plp_type, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_payload_type", plp_payload_type, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ff_flag", ff_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("first_rf_idx", first_rf_idx, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("first_frame_idx", first_frame_idx, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_group_id", plp_group_id, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_cod", plp_cod, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_mod", plp_mod, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_rotation", plp_rotation, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_fec_type", plp_fec_type, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_num_blocks_max", plp_num_blocks_max, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("frame_interval", frame_interval, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_il_length", time_il_length, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_il_type", time_il_type, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("in_band_a_flag", in_band_a_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("in_band_b_flag", in_band_b_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("reserved_1", reserved_1, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("plp_mode", plp_mode, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("static_flag", static_flag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("static_padding_flag", static_padding_flag, null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("PLP");
+			t.add(new KVP("plp_id", plp_id));
+			t.add(new KVP("plp_type", plp_type));
+			t.add(new KVP("plp_payload_type", plp_payload_type));
+			t.add(new KVP("ff_flag", ff_flag));
+			t.add(new KVP("first_rf_idx", first_rf_idx));
+			t.add(new KVP("first_frame_idx", first_frame_idx));
+			t.add(new KVP("plp_group_id", plp_group_id));
+			t.add(new KVP("plp_cod", plp_cod));
+			t.add(new KVP("plp_mod", plp_mod));
+			t.add(new KVP("plp_rotation", plp_rotation));
+			t.add(new KVP("plp_fec_type", plp_fec_type));
+			t.add(new KVP("plp_num_blocks_max", plp_num_blocks_max));
+			t.add(new KVP("frame_interval", frame_interval));
+			t.add(new KVP("time_il_length", time_il_length));
+			t.add(new KVP("time_il_type", time_il_type));
+			t.add(new KVP("in_band_a_flag", in_band_a_flag));
+			t.add(new KVP("in_band_b_flag", in_band_b_flag));
+			t.add(new KVP("reserved_1", reserved_1));
+			t.add(new KVP("plp_mode", plp_mode));
+			t.add(new KVP("static_flag", static_flag));
+			t.add(new KVP("static_padding_flag", static_padding_flag));
 			return t;
 		}
 
@@ -241,10 +239,10 @@ public class Configurable1PostSignalling implements TreeNode {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AUX"));
-			t.add(new DefaultMutableTreeNode(new KVP("aux_stream_type", aux_stream_type, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("aux_private_conf", aux_private_conf, null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("AUX");
+			t.add(new KVP("aux_stream_type", aux_stream_type));
+			t.add(new KVP("aux_private_conf", aux_private_conf));
 			return t;
 		}
 
@@ -306,27 +304,27 @@ public class Configurable1PostSignalling implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Configurable L1-post signalling"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Configurable L1-post signalling");
 		
-		t.add(new DefaultMutableTreeNode(new KVP("sub_slices_per_frame",sub_slices_per_frame,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_plp",num_plp,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_aux",num_aux,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("aux_config_rfu",aux_config_rfu,null)));
+		t.add(new KVP("sub_slices_per_frame",sub_slices_per_frame));
+		t.add(new KVP("num_plp",num_plp));
+		t.add(new KVP("num_aux",num_aux));
+		t.add(new KVP("aux_config_rfu",aux_config_rfu));
 		
 		
 		Utils.addListJTree(t,frequencyList,modus,"Frequencies");
 		
 		if((l1PreSignallingData.getS2() & 0b1) ==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("fef_type",fef_type,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("fef_length",fef_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("fef_interval",fef_interval,null)));
+			t.add(new KVP("fef_type",fef_type));
+			t.add(new KVP("fef_length",fef_length));
+			t.add(new KVP("fef_interval",fef_interval));
 		}
 
 		Utils.addListJTree(t,plpList,modus,"PLPs");
 
-		t.add(new DefaultMutableTreeNode(new KVP("fef_length_msb",fef_length_msb,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_2",reserved_2,null)));
+		t.add(new KVP("fef_length_msb",fef_length_msb));
+		t.add(new KVP("reserved_2",reserved_2));
 		
 		Utils.addListJTree(t,auxList,modus,"AUXs");
 

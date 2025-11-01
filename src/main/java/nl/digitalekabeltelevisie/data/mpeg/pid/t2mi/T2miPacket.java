@@ -30,11 +30,11 @@ package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.LookUpList;
+import nl.digitalekabeltelevisie.util.Utils;
 
 
 public class T2miPacket implements TreeNode {
@@ -90,17 +90,17 @@ public class T2miPacket implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("T2MI Packet ("+getPacketTypeString(getPacketType())+")"));
-		t.add(new DefaultMutableTreeNode(new KVP("Start TS Packet No", packetNo, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("data", data, null)));
-		t.add(new DefaultMutableTreeNode(
-				new KVP("packet_type", getPacketType(), getPacketTypeString(getPacketType()))));
-		t.add(new DefaultMutableTreeNode(new KVP("packet_count", getPacketCount(), null)));
-		t.add(new DefaultMutableTreeNode(new KVP("superframe_idx", getSuperframeIdx(), null)));
-		t.add(new DefaultMutableTreeNode(new KVP("t2mi_stream_id", getT2miStreamId(), null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("T2MI Packet ("+getPacketTypeString(getPacketType())+")");
+		t.add(new KVP("Start TS Packet No", packetNo));
+		t.add(new KVP("data", data));
+		t.add(
+				new KVP("packet_type", getPacketType(), getPacketTypeString(getPacketType())));
+		t.add(new KVP("packet_count", getPacketCount()));
+		t.add(new KVP("superframe_idx", getSuperframeIdx()));
+		t.add(new KVP("t2mi_stream_id", getT2miStreamId()));
 		int payloadLenBits = getPayloadLen();
-		t.add(new DefaultMutableTreeNode(new KVP("payload_len", payloadLenBits, getLenInBytes(payloadLenBits))));
+		t.add(new KVP("payload_len", payloadLenBits, getLenInBytes(payloadLenBits)));
 		t.add(payload.getJTreeNode(modus));
 		long crcResult = getCRCresult();
 		String crcMsg = null;
@@ -109,7 +109,7 @@ public class T2miPacket implements TreeNode {
 					+ getPacketType());
 			crcMsg = "CRC check failed!";
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("crc32", data, data.length - 4, 4, crcMsg)));
+		t.add(new KVP("crc32", data, data.length - 4, 4, crcMsg));
 		return t;
 	}
 

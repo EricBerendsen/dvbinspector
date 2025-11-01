@@ -29,11 +29,10 @@ package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPacket.getLenInBytes;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.LookUpList;
 
 public class L1CurrentT2MIPacketsPayload extends Payload {
 
@@ -68,22 +67,21 @@ public class L1CurrentT2MIPacketsPayload extends Payload {
 
 	}
 	
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode payloadNode = new DefaultMutableTreeNode(new KVP("payload"));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("frame_idx",getFrameIdx(),null)));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("freq_source",getFreqSource(),getFreqSourceString(getFreqSource()))));
-		DefaultMutableTreeNode l1currentData = new DefaultMutableTreeNode(new KVP("L1-current_data"));
+	public KVP getJTreeNode(int modus) {
+		KVP payloadNode = new KVP("payload");
+		payloadNode.add(new KVP("frame_idx", getFrameIdx()));
+		payloadNode.add(new KVP("freq_source", getFreqSource(), getFreqSourceString(getFreqSource())));
+		KVP l1currentData = new KVP("L1-current_data");
 		payloadNode.add(l1currentData);
 		l1currentData.add(l1PreSignallingData.getJTreeNode(modus));
-		l1currentData.add(new DefaultMutableTreeNode(new KVP("L1CONF_LEN",l1ConfLen,getLenInBytes(l1ConfLen))));
+		l1currentData.add(new KVP("L1CONF_LEN", l1ConfLen, getLenInBytes(l1ConfLen)));
 		l1currentData.add(configurable1PostSignalling.getJTreeNode(modus));
-		l1currentData.add(new DefaultMutableTreeNode(new KVP("L1DYN_CURR_LEN",l1DynCurrLen,getLenInBytes(l1DynCurrLen))));
+		l1currentData.add(new KVP("L1DYN_CURR_LEN", l1DynCurrLen, getLenInBytes(l1DynCurrLen)));
 		l1currentData.add(dynamicL1PostSignalling.getJTreeNode(modus));
-		l1currentData.add(new DefaultMutableTreeNode(new KVP("L1EXT_LEN",l1ExtLen,getLenInBytes(l1ExtLen))));
-		if(l1ExtLen!=0){
-			l1currentData.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("L1-post extension field")));
+		l1currentData.add(new KVP("L1EXT_LEN", l1ExtLen, getLenInBytes(l1ExtLen)));
+		if (l1ExtLen != 0) {
+			l1currentData.add(GuiUtils.getNotImplementedKVP("L1-post extension field"));
 		}
 		return payloadNode;
 	}

@@ -47,8 +47,8 @@ public class Payload implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode payloadNode = new DefaultMutableTreeNode(new KVP("payload"));
+	public KVP getJTreeNode(int modus) {
+		KVP payloadNode = new KVP("payload");
 		payloadNode.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP(packetType)));
 		return payloadNode;
 	}

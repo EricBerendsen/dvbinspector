@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPacket.getLenInBytes;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.*;
 
@@ -53,29 +51,29 @@ public class BasebandFramePayload extends Payload {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode payloadNode = new DefaultMutableTreeNode(new KVP("payload"));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("frame_idx", getFrameIdx(), null)));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("plp_id", getPlpId(), null)));
-		payloadNode.add(new DefaultMutableTreeNode(new KVP("intl_frame_start", getIntlFrameStart(), null)));
+	public KVP getJTreeNode(int modus) {
+		KVP payloadNode = new KVP("payload");
+		payloadNode.add(new KVP("frame_idx", getFrameIdx()));
+		payloadNode.add(new KVP("plp_id", getPlpId()));
+		payloadNode.add(new KVP("intl_frame_start", getIntlFrameStart()));
 		
-		DefaultMutableTreeNode bbframeNode = new DefaultMutableTreeNode(new KVP("BBFRAME"));
+		KVP bbframeNode = new KVP("BBFRAME");
 		
-		DefaultMutableTreeNode matypeNode = new DefaultMutableTreeNode(new KVP("MATYPE", getMATYPE(), null));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("StreamType TS/GS", getTSGS(), stream_type_list.get(getTSGS()))));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("SingleInputStream SIS/MIS", getSISMIS(), getSISMIS()==1?"single":"multiple")));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("ConstantCodingAndModulation CCM/ACM ", getCCMACM(), getCCMACM()==1?"CCM":"ACM")));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("InputStreamSyncIndicator ISSYI", getISSYI(), getISSYI()==1?"active":"not-active")));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("NullPacketDeletion NPD", getNPD(), getNPD()==1?"active":"not-active")));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("RO", getRO(), null)));
-		matypeNode.add(new DefaultMutableTreeNode(new KVP("MAT2 (ISI/PLP_ID)", getMATYPE2(), null)));
+		KVP matypeNode = new KVP("MATYPE", getMATYPE());
+		matypeNode.add(new KVP("StreamType TS/GS", getTSGS(), stream_type_list.get(getTSGS())));
+		matypeNode.add(new KVP("SingleInputStream SIS/MIS", getSISMIS(), getSISMIS()==1?"single":"multiple"));
+		matypeNode.add(new KVP("ConstantCodingAndModulation CCM/ACM ", getCCMACM(), getCCMACM()==1?"CCM":"ACM"));
+		matypeNode.add(new KVP("InputStreamSyncIndicator ISSYI", getISSYI(), getISSYI()==1?"active":"not-active"));
+		matypeNode.add(new KVP("NullPacketDeletion NPD", getNPD(), getNPD()==1?"active":"not-active"));
+		matypeNode.add(new KVP("RO", getRO()));
+		matypeNode.add(new KVP("MAT2 (ISI/PLP_ID)", getMATYPE2()));
 		bbframeNode.add(matypeNode);
 		
-		bbframeNode.add(new DefaultMutableTreeNode(new KVP("UPL", getUPL(), "User Packet Length "+getLenInBytes(getUPL()))));
-		bbframeNode.add(new DefaultMutableTreeNode(new KVP("DFL", getDFL(), "Data Field Length "+getLenInBytes(getDFL()))));
-		bbframeNode.add(new DefaultMutableTreeNode(new KVP("SYNC", getSYNC(), "copy of the User Packet Sync-byte")));
-		bbframeNode.add(new DefaultMutableTreeNode(new KVP("SYNCD", getSYNCD(), "distance in bits from the beginning of the DATA FIELD and the first UP from this frame"+T2miPacket.getLenInBytes(getSYNCD()))));
-		bbframeNode.add(new DefaultMutableTreeNode(new KVP("CRC-8 MODE", getCRC8(), null)));
+		bbframeNode.add(new KVP("UPL", getUPL(), "User Packet Length "+getLenInBytes(getUPL())));
+		bbframeNode.add(new KVP("DFL", getDFL(), "Data Field Length "+getLenInBytes(getDFL())));
+		bbframeNode.add(new KVP("SYNC", getSYNC(), "copy of the User Packet Sync-byte"));
+		bbframeNode.add(new KVP("SYNCD", getSYNCD(), "distance in bits from the beginning of the DATA FIELD and the first UP from this frame"+T2miPacket.getLenInBytes(getSYNCD())));
+		bbframeNode.add(new KVP("CRC-8 MODE", getCRC8()));
 
 		payloadNode.add(bbframeNode);
 

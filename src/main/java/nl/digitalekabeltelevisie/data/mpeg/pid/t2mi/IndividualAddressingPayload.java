@@ -27,14 +27,17 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
+import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.util.BitSource;
+import nl.digitalekabeltelevisie.util.LookUpList;
+import nl.digitalekabeltelevisie.util.Utils;
 
 public class IndividualAddressingPayload extends Payload{
 
@@ -56,14 +59,13 @@ public class IndividualAddressingPayload extends Payload{
 			}
 
 			@Override
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
-				DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Function"));
-				t.add(new DefaultMutableTreeNode(
-						new KVP("function_tag", function_tag, function_type_list.get(function_tag))));
-				t.add(new DefaultMutableTreeNode(new KVP("function_length", function_length,
-						" defines the total length of the function() in bytes, including the function_tag, function_length and function_body() fields")));
+			public KVP getJTreeNode(int modus) {
+				KVP t = new KVP("Function");
+				t.add(new KVP("function_tag", function_tag, function_type_list.get(function_tag)));
+				t.add(new KVP("function_length", function_length,
+						" defines the total length of the function() in bytes, including the function_tag, function_length and function_body() fields"));
 				if (body != null) {
-					t.add(new DefaultMutableTreeNode(new KVP("body", body, null)));
+					t.add(new KVP("body", body));
 				}
 				return t;
 			}
@@ -110,10 +112,10 @@ public class IndividualAddressingPayload extends Payload{
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("IndividualAddressingData"));
-			t.add(new DefaultMutableTreeNode(new KVP("tx_identifier", tx_identifier, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("function_loop_length", function_loop_length, null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("IndividualAddressingData");
+			t.add(new KVP("tx_identifier", tx_identifier));
+			t.add(new KVP("function_loop_length", function_loop_length));
 			Utils.addListJTree(t, functionList, modus, "Functions");
 			return t;
 		}
@@ -157,11 +159,11 @@ public class IndividualAddressingPayload extends Payload{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode payloadNode = new DefaultMutableTreeNode(new KVP("payload"));
+	public KVP getJTreeNode(int modus) {
+		KVP payloadNode = new KVP("payload");
 
-		payloadNode.add(new DefaultMutableTreeNode(
-				new KVP("individual_addressing_length", individual_addressing_length, null)));
+		payloadNode.add(
+				new KVP("individual_addressing_length", individual_addressing_length));
 
 		Utils.addListJTree(payloadNode, individualAddressingDataList, modus, "Individual addressing");
 		return payloadNode;
