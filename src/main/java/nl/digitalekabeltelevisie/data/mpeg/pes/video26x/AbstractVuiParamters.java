@@ -23,8 +23,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -155,78 +153,75 @@ public class AbstractVuiParamters {
 	/**
 	 * @param t
 	 */
-	protected void addCommonFields(final DefaultMutableTreeNode t) {
-		t.add(new DefaultMutableTreeNode(new KVP("aspect_ratio_info_present_flag",aspect_ratio_info_present_flag,null)));
+	protected void addCommonFields(KVP t) {
+		t.add(new KVP("aspect_ratio_info_present_flag",aspect_ratio_info_present_flag));
 		if( aspect_ratio_info_present_flag!=0 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("aspect_ratio_idc",aspect_ratio_idc,getAspectRationIdcString(aspect_ratio_idc))));
+			t.add(new KVP("aspect_ratio_idc",aspect_ratio_idc,getAspectRationIdcString(aspect_ratio_idc)));
 			if( aspect_ratio_idc == 255 ) { //Extended_SAR
-				t.add(new DefaultMutableTreeNode(new KVP("sar_width",sar_width,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sar_height",sar_height,null)));
+				t.add(new KVP("sar_width",sar_width));
+				t.add(new KVP("sar_height",sar_height));
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("overscan_info_present_flag",overscan_info_present_flag,null)));
+		t.add(new KVP("overscan_info_present_flag",overscan_info_present_flag));
 		if( overscan_info_present_flag!=0 ){
-			t.add(new DefaultMutableTreeNode(new KVP("overscan_appropriate_flag",overscan_appropriate_flag,overscan_appropriate_flag==1?"suitable for display using overscan":"output should not be displayed using overscan")));
+			t.add(new KVP("overscan_appropriate_flag",overscan_appropriate_flag,overscan_appropriate_flag==1?"suitable for display using overscan":"output should not be displayed using overscan"));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("video_signal_type_present_flag",video_signal_type_present_flag,null)));
+		t.add(new KVP("video_signal_type_present_flag",video_signal_type_present_flag));
 		if( video_signal_type_present_flag!=0 ){
-			t.add(new DefaultMutableTreeNode(new KVP("video_format",video_format,getVideoFormatString(video_format))));
+			t.add(new KVP("video_format",video_format,getVideoFormatString(video_format)));
 	
-			t.add(new DefaultMutableTreeNode(new KVP("video_full_range_flag",video_full_range_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("colour_description_present_flag",colour_description_present_flag,null)));
+			t.add(new KVP("video_full_range_flag",video_full_range_flag));
+			t.add(new KVP("colour_description_present_flag",colour_description_present_flag));
 			if( colour_description_present_flag!=0 ) {
-				t.add(new DefaultMutableTreeNode(new KVP("colour_primaries",colour_primaries,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("transfer_characteristics",transfer_characteristics,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("matrix_coefficients",matrix_coefficients,null)));
+				t.add(new KVP("colour_primaries",colour_primaries));
+				t.add(new KVP("transfer_characteristics",transfer_characteristics));
+				t.add(new KVP("matrix_coefficients",matrix_coefficients));
 			}
 		}
 	
-		t.add(new DefaultMutableTreeNode(new KVP("chroma_loc_info_present_flag",chroma_loc_info_present_flag,null)));
+		t.add(new KVP("chroma_loc_info_present_flag",chroma_loc_info_present_flag));
 		if( chroma_loc_info_present_flag!=0) {
-			t.add(new DefaultMutableTreeNode(new KVP("chroma_sample_loc_type_top_field",chroma_sample_loc_type_top_field,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("chroma_sample_loc_type_bottom_field",chroma_sample_loc_type_bottom_field,null)));
+			t.add(new KVP("chroma_sample_loc_type_top_field",chroma_sample_loc_type_top_field));
+			t.add(new KVP("chroma_sample_loc_type_bottom_field",chroma_sample_loc_type_bottom_field));
 		}
 	}
 
 	public static String getAspectRationIdcString(final int aspect_ratio_idc) {
 
-		switch (aspect_ratio_idc) {
-		case 0 : return "Unspecified";
-		case 1 : return "1:1 (square)";
-		case 2 : return "12:11";
-		case 3 : return "10:11";
-		case 4 : return "16:11";
-		case 5 : return "40:33";
-		case 6 : return "24:11";
-		case 7 : return "20:11";
-		case 8 : return "32:11";
-		case 9 : return "80:33";
-		case 10 : return "18:11";
-		case 11 : return "15:11";
-		case 12 : return "64:33";
-		case 13 : return "160:99";
-		case 14 : return "4:3";
-		case 15 : return "3:2";
-		case 16 : return "2:1";
-		case 255 : return "Extended_SAR";
-
-		default:
-			return "reserved";
-		}
+		return switch (aspect_ratio_idc) {
+		case 0 -> "Unspecified";
+		case 1 -> "1:1 (square)";
+		case 2 -> "12:11";
+		case 3 -> "10:11";
+		case 4 -> "16:11";
+		case 5 -> "40:33";
+		case 6 -> "24:11";
+		case 7 -> "20:11";
+		case 8 -> "32:11";
+		case 9 -> "80:33";
+		case 10 -> "18:11";
+		case 11 -> "15:11";
+		case 12 -> "64:33";
+		case 13 -> "160:99";
+		case 14 -> "4:3";
+		case 15 -> "3:2";
+		case 16 -> "2:1";
+		case 255 -> "Extended_SAR";
+		default -> "reserved";
+		};
 	}
 
 	public static String getVideoFormatString(final int video_format) {
 	
-		switch (video_format) {
-		case 0  : return "Component";
-		case 1  : return "PAL";
-		case 2  : return "NTSC";
-		case 3  : return "SECAM";
-		case 4  : return "MAC";
-		case 5  : return "Unspecified video format";
-		default:
-			return "reserved";
-		}
+		return switch (video_format) {
+		case 0 -> "Component";
+		case 1 -> "PAL";
+		case 2 -> "NTSC";
+		case 3 -> "SECAM";
+		case 4 -> "MAC";
+		case 5 -> "Unspecified video format";
+		default -> "reserved";
+		};
 	}
 
 }
