@@ -56,7 +56,7 @@ public class DSMCC_StreamDescriptorList extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP t = (KVP)super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.addList(descriptorList, modus, "descriptors");
 		return t;
 	}

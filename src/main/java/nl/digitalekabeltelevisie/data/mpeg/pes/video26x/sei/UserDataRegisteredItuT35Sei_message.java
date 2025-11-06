@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei;
 
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.SlHdrInfo;
@@ -76,28 +74,24 @@ public class UserDataRegisteredItuT35Sei_message extends Sei_message {
 
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("UserDataRegisteredItuT35Sei_message")));
-		s.add(new DefaultMutableTreeNode(new KVP("itu_t_t35_country_code",itu_t_t35_country_code,Utils.getItu35CountryCodeString(itu_t_t35_country_code))));
-		if(itu_t_t35_country_code == 0xFF){
-			s.add(new DefaultMutableTreeNode(new KVP("itu_t_t35_country_code_extension_byte",itu_t_t35_country_code_extension_byte,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		s.add(new KVP("UserDataRegisteredItuT35Sei_message"));
+		s.add(new KVP("itu_t_t35_country_code", itu_t_t35_country_code, Utils.getItu35CountryCodeString(itu_t_t35_country_code)));
+		if (itu_t_t35_country_code == 0xFF) {
+			s.add(new KVP("itu_t_t35_country_code_extension_byte", itu_t_t35_country_code_extension_byte));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("Itu_t_t35_provider_code",Itu_t_t35_provider_code,null)));
-		if((itu_t_t35_country_code==0xB5)
-				&& (Itu_t_t35_provider_code==0x31)){
+		s.add(new KVP("Itu_t_t35_provider_code", Itu_t_t35_provider_code));
+		if ((itu_t_t35_country_code == 0xB5) && (Itu_t_t35_provider_code == 0x31)) {
 			s.add(auxData.getJTreeNode(modus));
 		}
-		if((itu_t_t35_country_code==0xB5)
-				&& (Itu_t_t35_provider_code==0x3a)){
-			s.add(new DefaultMutableTreeNode(new KVP("SL-HDR data (Annex A of TS 103 433-1)")));
+		if ((itu_t_t35_country_code == 0xB5) && (Itu_t_t35_provider_code == 0x3a)) {
+			s.add(new KVP("SL-HDR data (Annex A of TS 103 433-1)"));
 			s.add(sl_hdr_info.getJTreeNode(modus));
 		}
 		return s;
 	}
-
 
 	public int getItu_t_t35_country_code() {
 		return itu_t_t35_country_code;

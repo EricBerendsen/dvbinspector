@@ -32,8 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -305,83 +303,83 @@ public class Video_parameter_set_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("video_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_video_parameter_set_id",vps_video_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_max_layers_minus1",vps_max_layers_minus1,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("video_parameter_set_rbsp");
+		t.add(new KVP("vps_video_parameter_set_id",vps_video_parameter_set_id));
+		t.add(new KVP("vps_max_layers_minus1",vps_max_layers_minus1));
 
-		t.add(new DefaultMutableTreeNode(new KVP("vps_max_sublayers_minus1",vps_max_sublayers_minus1,null)));
+		t.add(new KVP("vps_max_sublayers_minus1",vps_max_sublayers_minus1));
 		if (vps_max_layers_minus1 > 0 && vps_max_sublayers_minus1 > 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("vps_default_ptl_dpb_hrd_max_tid_flag",vps_default_ptl_dpb_hrd_max_tid_flag,null)));
+			t.add(new KVP("vps_default_ptl_dpb_hrd_max_tid_flag",vps_default_ptl_dpb_hrd_max_tid_flag));
 		}
 		if (vps_max_layers_minus1 > 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("vps_all_independent_layers_flag",vps_all_independent_layers_flag,null)));
+			t.add(new KVP("vps_all_independent_layers_flag",vps_all_independent_layers_flag));
 		}
 		
 		for (int i = 0; i <= vps_max_layers_minus1; i++) {
-			DefaultMutableTreeNode vps_layer_id_node = new DefaultMutableTreeNode(new KVP("vps_layer_id["+i+"]",vps_layer_id[i],null));
+			KVP vps_layer_id_node = new KVP("vps_layer_id["+i+"]",vps_layer_id[i]);
 			t.add(vps_layer_id_node);
 			if (i > 0 && (vps_all_independent_layers_flag == 0)) {
-				vps_layer_id_node.add(new DefaultMutableTreeNode(new KVP("vps_independent_layer_flag["+i+"]",vps_independent_layer_flag[i],null)));
+				vps_layer_id_node.add(new KVP("vps_independent_layer_flag["+i+"]",vps_independent_layer_flag[i]));
 				if (vps_independent_layer_flag[i] == 0) {
-					vps_layer_id_node.add(new DefaultMutableTreeNode(new KVP("vps_max_tid_ref_present_flag["+i+"]",vps_max_tid_ref_present_flag[i],null)));
+					vps_layer_id_node.add(new KVP("vps_max_tid_ref_present_flag["+i+"]",vps_max_tid_ref_present_flag[i]));
 					for (int j = 0; j < i; j++) {
-						vps_layer_id_node.add(new DefaultMutableTreeNode(new KVP("vps_direct_ref_layer_flag["+i+"]["+j+"]",vps_direct_ref_layer_flag[i][j],null)));
+						vps_layer_id_node.add(new KVP("vps_direct_ref_layer_flag["+i+"]["+j+"]",vps_direct_ref_layer_flag[i][j]));
 						if (vps_max_tid_ref_present_flag[i] != 0 && vps_direct_ref_layer_flag[i][j] != 0)
-							vps_layer_id_node.add(new DefaultMutableTreeNode(new KVP("vps_max_tid_il_ref_pics_plus1["+i+"]["+j+"]",vps_max_tid_il_ref_pics_plus1[i][j],null)));
+							vps_layer_id_node.add(new KVP("vps_max_tid_il_ref_pics_plus1["+i+"]["+j+"]",vps_max_tid_il_ref_pics_plus1[i][j]));
 					}
 				}
 			}
 		}
 		if (vps_max_layers_minus1 > 0) {
 			if (vps_all_independent_layers_flag != 0) {
-				t.add(new DefaultMutableTreeNode(
-						new KVP("vps_each_layer_is_an_ols_flag", vps_each_layer_is_an_ols_flag, null)));
+				t.add(
+						new KVP("vps_each_layer_is_an_ols_flag", vps_each_layer_is_an_ols_flag));
 			}
 			if (vps_each_layer_is_an_ols_flag == 0) {
 				if (vps_all_independent_layers_flag == 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("vps_ols_mode_idc", vps_ols_mode_idc, null)));
+					t.add(new KVP("vps_ols_mode_idc", vps_ols_mode_idc));
 				}
 				if (vps_ols_mode_idc == 2) {
-					final DefaultMutableTreeNode vps_num_output_layer_sets_minus2_node = new DefaultMutableTreeNode(
-							new KVP("vps_num_output_layer_sets_minus2", vps_num_output_layer_sets_minus2, null));
+					KVP vps_num_output_layer_sets_minus2_node = 
+							new KVP("vps_num_output_layer_sets_minus2", vps_num_output_layer_sets_minus2);
 					t.add(vps_num_output_layer_sets_minus2_node);
 					for (int i = 1; i <= vps_num_output_layer_sets_minus2 + 1; i++) {
 						for (int j = 0; j <= vps_max_layers_minus1; j++) {
-							vps_num_output_layer_sets_minus2_node.add(new DefaultMutableTreeNode(
+							vps_num_output_layer_sets_minus2_node.add(
 									new KVP("vps_ols_output_layer_flag[" + i + "][" + j + "]",
-											vps_ols_output_layer_flag[i][j], null)));
+											vps_ols_output_layer_flag[i][j]));
 						}
 					}
 				}
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("vps_num_ptls_minus1", vps_num_ptls_minus1, null)));
+			t.add(new KVP("vps_num_ptls_minus1", vps_num_ptls_minus1));
 		}	
 		
 		for (int i = 0; i <= vps_num_ptls_minus1; i++) {
 			if (i > 0)
-				t.add(new DefaultMutableTreeNode(new KVP("vps_pt_present_flag["+i+"]",vps_pt_present_flag[i],null)));
+				t.add(new KVP("vps_pt_present_flag["+i+"]",vps_pt_present_flag[i]));
 			if (vps_default_ptl_dpb_hrd_max_tid_flag == 0)
-				t.add(new DefaultMutableTreeNode(new KVP("vps_ptl_max_tid["+i+"]",vps_ptl_max_tid[i],null)));
+				t.add(new KVP("vps_ptl_max_tid["+i+"]",vps_ptl_max_tid[i]));
 		}
 		Utils.addListJTree(t, profile_tier_level_list, modus, "profile_tier_level(s)");
 
 		
 		for (int i = 0; i < TotalNumOlss; i++) {
 			if (vps_num_ptls_minus1 > 0 && vps_num_ptls_minus1 + 1 != TotalNumOlss) {
-				t.add(new DefaultMutableTreeNode(new KVP("vps_ols_ptl_idx["+i+"]",vps_ols_ptl_idx[i],null)));
+				t.add(new KVP("vps_ols_ptl_idx["+i+"]",vps_ols_ptl_idx[i]));
 			}
 		}
 		
-		t.add(new DefaultMutableTreeNode(new KVP("vps_each_layer_is_an_ols_flag", vps_each_layer_is_an_ols_flag, null)));
+		t.add(new KVP("vps_each_layer_is_an_ols_flag", vps_each_layer_is_an_ols_flag));
 
 		
 		if(vps_each_layer_is_an_ols_flag == 0) {
 			
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("if(!vps_each_layer_is_an_ols_flag)")));
+			t.add(GuiUtils.getNotImplementedKVP("if(!vps_each_layer_is_an_ols_flag)"));
 			return t; // ignore rest
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("vps_extension_data_flag", vps_extension_data_flag, null)));
+		t.add(new KVP("vps_extension_data_flag", vps_extension_data_flag));
 
 		
 		return t;

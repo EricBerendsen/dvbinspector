@@ -33,8 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -191,51 +189,51 @@ public class AC4Toc implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_toc"));
-		t.add(new DefaultMutableTreeNode(new KVP("bitstream_version",bitstream_version,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sequence_counter",sequence_counter,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("b_wait_frames",b_wait_frames,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ac4_toc");
+		t.add(new KVP("bitstream_version",bitstream_version));
+		t.add(new KVP("sequence_counter",sequence_counter));
+		t.add(new KVP("b_wait_frames",b_wait_frames));
 		
 		if (b_wait_frames==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("wait_frames",wait_frames,null)));
+			t.add(new KVP("wait_frames",wait_frames));
 			if (wait_frames > 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("br_code",br_code,null)));
+				t.add(new KVP("br_code",br_code));
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("fs_index",fs_index,fs_index==0?"44,1 kHz":"48 kHz")));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_rate_index",frame_rate_index,frame_rate_index_list.get(frame_rate_index))));
+		t.add(new KVP("fs_index",fs_index,fs_index==0?"44,1 kHz":"48 kHz"));
+		t.add(new KVP("frame_rate_index",frame_rate_index,frame_rate_index_list.get(frame_rate_index)));
 
-		t.add(new DefaultMutableTreeNode(new KVP("b_iframe_global",b_iframe_global,null)));
+		t.add(new KVP("b_iframe_global",b_iframe_global));
 
-		t.add(new DefaultMutableTreeNode(new KVP("b_single_presentation",b_single_presentation,b_single_presentation==1?"n_presentations = 1":null)));
+		t.add(new KVP("b_single_presentation",b_single_presentation,b_single_presentation==1?"n_presentations = 1":null));
 		
 		if (b_single_presentation!=1) {
-			t.add(new DefaultMutableTreeNode(new KVP("b_more_presentations",b_more_presentations,b_more_presentations==0?"n_presentations = 0":null)));
+			t.add(new KVP("b_more_presentations",b_more_presentations,b_more_presentations==0?"n_presentations = 0":null));
 			
 			if (b_more_presentations==1) {
-				t.add(new DefaultMutableTreeNode(new KVP("n_presentations",n_presentations,null)));
+				t.add(new KVP("n_presentations",n_presentations));
 			}
 
 		}
 		
-		t.add(new DefaultMutableTreeNode(new KVP("b_payload_base",b_payload_base,null)));
+		t.add(new KVP("b_payload_base",b_payload_base));
 		if (b_payload_base==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("payload_base_minus1",payload_base_minus1,"payload_base="+payload_base)));
+			t.add(new KVP("payload_base_minus1",payload_base_minus1,"payload_base="+payload_base));
 		}
 		
 		if (bitstream_version <= 1) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("bitstream_version <= 1")));
+			t.add(GuiUtils.getNotImplementedKVP("bitstream_version <= 1"));
 //			for (int i = 0; i < n_presentations; i++) {
 //				// ac4_presentation_info(bs);
 //			}
 		} else {
-			t.add(new DefaultMutableTreeNode(new KVP("b_program_id",b_program_id,null)));
+			t.add(new KVP("b_program_id",b_program_id));
 			if (b_program_id == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("short_program_id",short_program_id,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("b_program_uuid_present",b_program_uuid_present,null)));
+				t.add(new KVP("short_program_id",short_program_id));
+				t.add(new KVP("b_program_uuid_present",b_program_uuid_present));
 				if (b_program_uuid_present == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("program_uuid",program_uuid,null)));
+					t.add(new KVP("program_uuid",program_uuid));
 				}
 			}
 			addListJTree(t, ac4_presentation_v1_infoList, modus, "ac4_presentation_v1_info(s)");

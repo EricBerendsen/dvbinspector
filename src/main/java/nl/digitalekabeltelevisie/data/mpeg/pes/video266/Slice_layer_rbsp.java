@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
@@ -57,9 +55,9 @@ public class Slice_layer_rbsp extends RBSP {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("slice_header"));
-			final DefaultMutableTreeNode sh_picture_header_in_slice_header_flag_node = new DefaultMutableTreeNode(new KVP("sh_picture_header_in_slice_header_flag",sh_picture_header_in_slice_header_flag,null));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("slice_header");
+			KVP sh_picture_header_in_slice_header_flag_node = new KVP("sh_picture_header_in_slice_header_flag",sh_picture_header_in_slice_header_flag);
 			t.add(sh_picture_header_in_slice_header_flag_node);
 			if( sh_picture_header_in_slice_header_flag != 0) {
 				sh_picture_header_in_slice_header_flag_node.add(picture_header_structure.getJTreeNode(modus));
@@ -78,8 +76,8 @@ public class Slice_layer_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("slice_layer_rbsp"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("slice_layer_rbsp");
 		t.add(slice_header.getJTreeNode(modus));
 		return t;
 	}

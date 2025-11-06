@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.util.LookUpList;
@@ -59,12 +57,13 @@ public class Adaptation_parameter_set_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("adaptation_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("aps_params_type",aps_params_type,aps_params_type_list.get(aps_params_type, "Reserved"))));
-		t.add(new DefaultMutableTreeNode(new KVP("aps_adaptation_parameter_set_id",aps_adaptation_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("aps_chroma_present_flag",aps_chroma_present_flag,aps_chroma_present_flag==1?"APS NAL unit could include chroma related syntax elements":"APS NAL unit does not include chroma related syntax elements")));
-
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("adaptation_parameter_set_rbsp");
+		t.add(new KVP("aps_params_type", aps_params_type, aps_params_type_list.get(aps_params_type, "Reserved")));
+		t.add(new KVP("aps_adaptation_parameter_set_id", aps_adaptation_parameter_set_id));
+		t.add(new KVP("aps_chroma_present_flag", aps_chroma_present_flag,
+				aps_chroma_present_flag == 1 ? "APS NAL unit could include chroma related syntax elements"
+						: "APS NAL unit does not include chroma related syntax elements"));
 
 		return t;
 	}

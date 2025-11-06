@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -76,12 +74,12 @@ public class PCR implements TreeNode{
 
 
 
-	public DefaultMutableTreeNode getJTreeNode(int modus, String label) {
-		DefaultMutableTreeNode t= new DefaultMutableTreeNode(new KVP(label,getProgram_clock_reference(),printPCRTime(getProgram_clock_reference())));
+	public KVP getJTreeNode(int modus, String label) {
+		KVP t= new KVP(label,getProgram_clock_reference(),printPCRTime(getProgram_clock_reference()));
 
-		t.add(new DefaultMutableTreeNode(new KVP("program_clock_reference_base",program_clock_reference_base,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved",reserved,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("program_clock_reference_extension",program_clock_reference_extension,null)));
+		t.add(new KVP("program_clock_reference_base",program_clock_reference_base));
+		t.add(new KVP("reserved",reserved));
+		t.add(new KVP("program_clock_reference_extension",program_clock_reference_extension));
 		return t;
 	}
 
@@ -90,7 +88,7 @@ public class PCR implements TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 		return  getJTreeNode(modus, "PCR") ;
 	}
 

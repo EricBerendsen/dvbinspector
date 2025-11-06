@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video.common;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -204,7 +202,7 @@ public class SlHdrInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 		
 		KVP t = new KVP("sl_hdr_info");
 		t.add(new KVP("terminal_provider_oriented_code_message_idc",terminal_provider_oriented_code_message_idc));

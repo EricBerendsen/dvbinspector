@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -49,15 +47,12 @@ public class Slice_header implements TreeNode {
 		pic_parameter_set_id = bitSource.ue();	
 	}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("slice_header"));
-		s.add(new DefaultMutableTreeNode(new KVP("first_mb_in_slice",first_mb_in_slice,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("slice_type",slice_type,getSlice_typeString(slice_type))));
-		s.add(new DefaultMutableTreeNode(new KVP("pic_parameter_set_id",pic_parameter_set_id,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("slice_header");
+		s.add(new KVP("first_mb_in_slice", first_mb_in_slice));
+		s.add(new KVP("slice_type", slice_type, getSlice_typeString(slice_type)));
+		s.add(new KVP("pic_parameter_set_id", pic_parameter_set_id));
 		return s;
 	}
 	

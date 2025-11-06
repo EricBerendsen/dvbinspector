@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 
@@ -44,7 +43,7 @@ public class ScalingListData implements TreeNode {
 	int[] [] [] scalingList = new int [4][6][64];
 	
 	// This time it is easiest to build tree in constructor, because of many helper vars in definition
-	DefaultMutableTreeNode result = new DefaultMutableTreeNode(new KVP("scaling_list_data"));
+	KVP result = new KVP("scaling_list_data");
 	
 	public ScalingListData(BitSource bs) {
 
@@ -52,25 +51,25 @@ public class ScalingListData implements TreeNode {
 			for (int matrixId = 0; matrixId < 6; matrixId += (sizeId == 3) ? 3 : 1) {
 				int u = bs.u(1);
 				scaling_list_pred_mode_flag[sizeId][matrixId] = u;
-				result.add(new DefaultMutableTreeNode(new KVP("scaling_list_pred_mode_flag["+sizeId+"]["+matrixId+"]",u,null)));
+				result.add(new KVP("scaling_list_pred_mode_flag["+sizeId+"]["+matrixId+"]",u));
 				if (scaling_list_pred_mode_flag[sizeId][matrixId] == 0) {
 					int ue = bs.ue();
 					scaling_list_pred_matrix_id_delta[sizeId][matrixId] = ue;
-					result.add(new DefaultMutableTreeNode(new KVP("scaling_list_pred_matrix_id_delta["+sizeId+"]["+matrixId+"]",ue,null)));
+					result.add(new KVP("scaling_list_pred_matrix_id_delta["+sizeId+"]["+matrixId+"]",ue));
 				} else {
 					int nextCoef = 8;
 					int coefNum = Math.min(64, (1 << (4 + (sizeId << 1))));
 					if (sizeId > 1) {
 						int se = bs.se();
 						scaling_list_dc_coef_minus8[sizeId - 2][matrixId] = se;
-						result.add(new DefaultMutableTreeNode(new KVP("scaling_list_dc_coef_minus8["+(sizeId - 2)+"]["+matrixId+"]",se,null)));
+						result.add(new KVP("scaling_list_dc_coef_minus8["+(sizeId - 2)+"]["+matrixId+"]",se));
 						nextCoef = scaling_list_dc_coef_minus8[sizeId - 2][matrixId] + 8;
 					}
 					for (int i = 0; i < coefNum; i++) {
 						int se = bs.se();
 						int scaling_list_delta_coef = se;
-						result.add(new DefaultMutableTreeNode(new KVP("scaling_list_delta_coef", se,
-								"(sizeId:" + sizeId + ", matrixId:" + matrixId + ", i:" + i + ")")));
+						result.add(new KVP("scaling_list_delta_coef", se,
+								"(sizeId:" + sizeId + ", matrixId:" + matrixId + ", i:" + i + ")"));
 
 						nextCoef = (nextCoef + scaling_list_delta_coef + 256) % 256;
 						scalingList[sizeId][matrixId][i] = nextCoef;
@@ -82,9 +81,7 @@ public class ScalingListData implements TreeNode {
 	
 	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		
-
+	public KVP getJTreeNode(int modus) {
 		return result;
 	}
 

@@ -27,10 +27,9 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
@@ -236,122 +235,115 @@ public class Seq_parameter_set_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("seq_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_video_parameter_set_id",sps_video_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_max_sub_layers_minus1",sps_max_sub_layers_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_temporal_id_nesting_flag",sps_temporal_id_nesting_flag,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("seq_parameter_set_rbsp");
+		t.add(new KVP("sps_video_parameter_set_id",sps_video_parameter_set_id));
+		t.add(new KVP("sps_max_sub_layers_minus1",sps_max_sub_layers_minus1));
+		t.add(new KVP("sps_temporal_id_nesting_flag",sps_temporal_id_nesting_flag));
 
 		t.add(profile_tier_level.getJTreeNode(modus));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_seq_parameter_set_id",sps_seq_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("chroma_format_idc",chroma_format_idc,getChroma_format_idcString(chroma_format_idc))));
-
+		t.add(new KVP("sps_seq_parameter_set_id",sps_seq_parameter_set_id));
+		t.add(new KVP("chroma_format_idc",chroma_format_idc,getChroma_format_idcString(chroma_format_idc)));
 
 		if( chroma_format_idc == 3 ){
-			t.add(new DefaultMutableTreeNode(new KVP("separate_colour_plane_flag",separate_colour_plane_flag,null)));
+			t.add(new KVP("separate_colour_plane_flag",separate_colour_plane_flag));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("pic_width_in_luma_samples",pic_width_in_luma_samples,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_height_in_luma_samples",pic_height_in_luma_samples,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("conformance_window_flag",conformance_window_flag,null)));
+		t.add(new KVP("pic_width_in_luma_samples",pic_width_in_luma_samples));
+		t.add(new KVP("pic_height_in_luma_samples",pic_height_in_luma_samples));
+		t.add(new KVP("conformance_window_flag",conformance_window_flag));
 
 
 		if( conformance_window_flag==1 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("conf_win_left_offset",conf_win_left_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("conf_win_right_offset",conf_win_right_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("conf_win_top_offset",conf_win_top_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("conf_win_bottom_offset",conf_win_bottom_offset,null)));
+			t.add(new KVP("conf_win_left_offset",conf_win_left_offset));
+			t.add(new KVP("conf_win_right_offset",conf_win_right_offset));
+			t.add(new KVP("conf_win_top_offset",conf_win_top_offset));
+			t.add(new KVP("conf_win_bottom_offset",conf_win_bottom_offset));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("bit_depth_luma_minus8",bit_depth_luma_minus8,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("bit_depth_chroma_minus8",bit_depth_chroma_minus8,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("log2_max_pic_order_cnt_lsb_minus4",log2_max_pic_order_cnt_lsb_minus4,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_sub_layer_ordering_info_present_flag",sps_sub_layer_ordering_info_present_flag,null)));
-
-
-
+		t.add(new KVP("bit_depth_luma_minus8",bit_depth_luma_minus8));
+		t.add(new KVP("bit_depth_chroma_minus8",bit_depth_chroma_minus8));
+		t.add(new KVP("log2_max_pic_order_cnt_lsb_minus4",log2_max_pic_order_cnt_lsb_minus4));
+		t.add(new KVP("sps_sub_layer_ordering_info_present_flag",sps_sub_layer_ordering_info_present_flag));
 
 		for (int i = ((sps_sub_layer_ordering_info_present_flag == 1) ? 0 : sps_max_sub_layers_minus1); i <= sps_max_sub_layers_minus1; i++) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_max_dec_pic_buffering_minus1["+i+"]",sps_max_dec_pic_buffering_minus1[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_max_num_reorder_pics["+i+"]",sps_max_num_reorder_pics[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_max_latency_increase_plus1["+i+"]",sps_max_latency_increase_plus1[i],null)));
+			t.add(new KVP("sps_max_dec_pic_buffering_minus1["+i+"]",sps_max_dec_pic_buffering_minus1[i]));
+			t.add(new KVP("sps_max_num_reorder_pics["+i+"]",sps_max_num_reorder_pics[i]));
+			t.add(new KVP("sps_max_latency_increase_plus1["+i+"]",sps_max_latency_increase_plus1[i]));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("log2_min_luma_coding_block_size_minus3",log2_min_luma_coding_block_size_minus3,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("log2_diff_max_min_luma_coding_block_size",log2_diff_max_min_luma_coding_block_size,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("log2_min_luma_transform_block_size_minus2",log2_min_luma_transform_block_size_minus2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("log2_diff_max_min_luma_transform_block_size",log2_diff_max_min_luma_transform_block_size,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("max_transform_hierarchy_depth_inter",max_transform_hierarchy_depth_inter,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("max_transform_hierarchy_depth_intra",max_transform_hierarchy_depth_intra,null)));
+		t.add(new KVP("log2_min_luma_coding_block_size_minus3",log2_min_luma_coding_block_size_minus3));
+		t.add(new KVP("log2_diff_max_min_luma_coding_block_size",log2_diff_max_min_luma_coding_block_size));
+		t.add(new KVP("log2_min_luma_transform_block_size_minus2",log2_min_luma_transform_block_size_minus2));
+		t.add(new KVP("log2_diff_max_min_luma_transform_block_size",log2_diff_max_min_luma_transform_block_size));
+		t.add(new KVP("max_transform_hierarchy_depth_inter",max_transform_hierarchy_depth_inter));
+		t.add(new KVP("max_transform_hierarchy_depth_intra",max_transform_hierarchy_depth_intra));
 
-		t.add(new DefaultMutableTreeNode(new KVP("scaling_list_enabled_flag",scaling_list_enabled_flag,null)));
-
+		t.add(new KVP("scaling_list_enabled_flag",scaling_list_enabled_flag));
 
 		if(scaling_list_enabled_flag==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_list_data_present_flag_present_flag",sps_scaling_list_data_present_flag,null)));
+			t.add(new KVP("sps_scaling_list_data_present_flag_present_flag",sps_scaling_list_data_present_flag));
 			if(sps_scaling_list_data_present_flag==1){
 				t.add(sps_scaling_list_data.getJTreeNode(modus));
 			}
 		}
 
-
-		t.add(new DefaultMutableTreeNode(new KVP("amp_enabled_flag",amp_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sample_adaptive_offset_enabled_flag",sample_adaptive_offset_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pcm_enabled_flag",pcm_enabled_flag,null)));
-
+		t.add(new KVP("amp_enabled_flag",amp_enabled_flag));
+		t.add(new KVP("sample_adaptive_offset_enabled_flag",sample_adaptive_offset_enabled_flag));
+		t.add(new KVP("pcm_enabled_flag",pcm_enabled_flag));
 
 		if(pcm_enabled_flag==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("pcm_sample_bit_depth_luma_minus1",pcm_sample_bit_depth_luma_minus1,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pcm_sample_bit_depth_chroma_minus1",pcm_sample_bit_depth_chroma_minus1,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("log2_min_pcm_luma_coding_block_size_minus3",log2_min_pcm_luma_coding_block_size_minus3,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("log2_diff_max_min_pcm_luma_coding_block_size",log2_diff_max_min_pcm_luma_coding_block_size,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pcm_loop_filter_disabled_flag",pcm_loop_filter_disabled_flag,null)));
+			t.add(new KVP("pcm_sample_bit_depth_luma_minus1",pcm_sample_bit_depth_luma_minus1));
+			t.add(new KVP("pcm_sample_bit_depth_chroma_minus1",pcm_sample_bit_depth_chroma_minus1));
+			t.add(new KVP("log2_min_pcm_luma_coding_block_size_minus3",log2_min_pcm_luma_coding_block_size_minus3));
+			t.add(new KVP("log2_diff_max_min_pcm_luma_coding_block_size",log2_diff_max_min_pcm_luma_coding_block_size));
+			t.add(new KVP("pcm_loop_filter_disabled_flag",pcm_loop_filter_disabled_flag));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("num_short_term_ref_pic_sets",num_short_term_ref_pic_sets,null)));
+		t.add(new KVP("num_short_term_ref_pic_sets",num_short_term_ref_pic_sets));
 		if (num_short_term_ref_pic_sets != 0) {
 			Utils.addListJTree(t, stRefPicSetList, modus, "st_ref_pic_sets");
 
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("long_term_ref_pics_present_flag",long_term_ref_pics_present_flag,null)));
+		t.add(new KVP("long_term_ref_pics_present_flag",long_term_ref_pics_present_flag));
 
 		if( long_term_ref_pics_present_flag==1 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("num_long_term_ref_pics_sps",num_long_term_ref_pics_sps,null)));
+			t.add(new KVP("num_long_term_ref_pics_sps",num_long_term_ref_pics_sps));
 			if(num_long_term_ref_pics_sps!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("num_long_term_ref_pics_sps!=0")));
+				t.add(GuiUtils.getNotImplementedKVP("num_long_term_ref_pics_sps!=0"));
 				return t;
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_temporal_mvp_enabled_flag",sps_temporal_mvp_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("strong_intra_smoothing_enabled_flag",strong_intra_smoothing_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vui_parameters_present_flag",vui_parameters_present_flag,null)));
+		t.add(new KVP("sps_temporal_mvp_enabled_flag",sps_temporal_mvp_enabled_flag));
+		t.add(new KVP("strong_intra_smoothing_enabled_flag",strong_intra_smoothing_enabled_flag));
+		t.add(new KVP("vui_parameters_present_flag",vui_parameters_present_flag));
 		if(vui_parameters_present_flag==1){
 			t.add(vui_parameters.getJTreeNode(modus));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_extension_present_flag",sps_extension_present_flag,null)));
+		t.add(new KVP("sps_extension_present_flag",sps_extension_present_flag));
 
 		if( sps_extension_present_flag !=0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_range_extension_flag",sps_range_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_multilayer_extension_flag",sps_multilayer_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_3d_extension_flag",sps_3d_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_scc_extension_flag",sps_scc_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_extension_4bits",sps_extension_4bits,null)));
+			t.add(new KVP("sps_range_extension_flag",sps_range_extension_flag));
+			t.add(new KVP("sps_multilayer_extension_flag",sps_multilayer_extension_flag));
+			t.add(new KVP("sps_3d_extension_flag",sps_3d_extension_flag));
+			t.add(new KVP("sps_scc_extension_flag",sps_scc_extension_flag));
+			t.add(new KVP("sps_extension_4bits",sps_extension_4bits));
 
 			if(sps_range_extension_flag!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_range_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("sps_range_extension()"));
 				return t;
 			}
 			if(sps_multilayer_extension_flag!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_multilayer_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("sps_multilayer_extension()"));
 				return t;
 			}
 			if(sps_3d_extension_flag!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_3d_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("sps_3d_extension()"));
 				return t;
 			}
 			if(sps_scc_extension_flag!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("sps_scc_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("sps_scc_extension()"));
 				return t;
 			}
 		}

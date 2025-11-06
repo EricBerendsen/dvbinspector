@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
@@ -65,12 +63,12 @@ public class Decoding_capability_information_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("decoding_capability_information_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("dci_reserved_zero_4bits",dci_reserved_zero_4bits,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("dci_num_ptls_minus1",dci_num_ptls_minus1,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("decoding_capability_information_rbsp");
+		t.add(new KVP("dci_reserved_zero_4bits", dci_reserved_zero_4bits));
+		t.add(new KVP("dci_num_ptls_minus1", dci_num_ptls_minus1));
 		addListJTree(t, profile_tier_level_list, modus, "profile_tier_level_list");
-		t.add(new DefaultMutableTreeNode(new KVP("dci_extension_flag",dci_extension_flag,null)));
+		t.add(new KVP("dci_extension_flag", dci_extension_flag));
 		return t;
 	}
 

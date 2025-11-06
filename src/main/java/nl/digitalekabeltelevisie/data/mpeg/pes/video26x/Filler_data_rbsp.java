@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 
 /**
@@ -47,13 +45,10 @@ public class Filler_data_rbsp extends RBSP {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("filler_data_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("ff_byte count",fillerCount,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("filler_data_rbsp");
+		t.add(new KVP("ff_byte count", fillerCount));
 		return t;
 	}
 

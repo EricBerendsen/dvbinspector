@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -63,20 +61,20 @@ public class PictureHeaderStructure implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("picture_header_structure"));
-		t.add(new DefaultMutableTreeNode(new KVP("ph_gdr_or_irap_pic_flag",ph_gdr_or_irap_pic_flag,ph_gdr_or_irap_pic_flag==1?"current picture is a GDR or IRAP picture":"current picture is not a GDR")));
-		t.add(new DefaultMutableTreeNode(new KVP("ph_non_ref_pic_flag",ph_non_ref_pic_flag,ph_non_ref_pic_flag == 1?"current picture is never used as a reference picture":"current picture might or might not be used as a reference picture")));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("picture_header_structure");
+		t.add(new KVP("ph_gdr_or_irap_pic_flag",ph_gdr_or_irap_pic_flag,ph_gdr_or_irap_pic_flag==1?"current picture is a GDR or IRAP picture":"current picture is not a GDR"));
+		t.add(new KVP("ph_non_ref_pic_flag",ph_non_ref_pic_flag,ph_non_ref_pic_flag == 1?"current picture is never used as a reference picture":"current picture might or might not be used as a reference picture"));
 		 
 		if (ph_gdr_or_irap_pic_flag != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("ph_gdr_pic_flag",ph_gdr_pic_flag,ph_gdr_pic_flag == 1?"current picture is a GDR picture":"current picture is not a GDR picture")));
+			t.add(new KVP("ph_gdr_pic_flag",ph_gdr_pic_flag,ph_gdr_pic_flag == 1?"current picture is a GDR picture":"current picture is not a GDR picture"));
 		}
-		final DefaultMutableTreeNode ph_inter_slice_allowed_flag_node = new DefaultMutableTreeNode(new KVP("ph_inter_slice_allowed_flag",ph_inter_slice_allowed_flag,ph_inter_slice_allowed_flag == 0?"all coded slices of the picture have sh_slice_type equal to 2.":"there might or might not be one or more coded slices in the picture that have sh_slice_type equal to 0 or 1"));
+		KVP ph_inter_slice_allowed_flag_node = new KVP("ph_inter_slice_allowed_flag",ph_inter_slice_allowed_flag,ph_inter_slice_allowed_flag == 0?"all coded slices of the picture have sh_slice_type equal to 2.":"there might or might not be one or more coded slices in the picture that have sh_slice_type equal to 0 or 1");
 		t.add(ph_inter_slice_allowed_flag_node);
 		if (ph_inter_slice_allowed_flag != 0) {
-			ph_inter_slice_allowed_flag_node.add(new DefaultMutableTreeNode(new KVP("ph_intra_slice_allowed_flag",ph_intra_slice_allowed_flag,ph_intra_slice_allowed_flag == 0?"all coded slices of the picture have sh_slice_type equal to 0 or 1":"there might or might not be one or more coded slices in the picture that have sh_slice_type equal to 2")));
+			ph_inter_slice_allowed_flag_node.add(new KVP("ph_intra_slice_allowed_flag",ph_intra_slice_allowed_flag,ph_intra_slice_allowed_flag == 0?"all coded slices of the picture have sh_slice_type equal to 0 or 1":"there might or might not be one or more coded slices in the picture that have sh_slice_type equal to 2"));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("ph_pic_parameter_set_id",ph_pic_parameter_set_id,null)));
+		t.add(new KVP("ph_pic_parameter_set_id", ph_pic_parameter_set_id));
 
 		return t;
 	}

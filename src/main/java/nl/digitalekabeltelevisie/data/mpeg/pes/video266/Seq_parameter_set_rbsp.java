@@ -29,9 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
 
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
@@ -99,37 +96,37 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public KVP getJTreeNode(int modus) {
 			
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ref_pic_list_struct(listIdx="+listIdx+", rplsIdx="+rplsIdx+")"));
-			t.add(new DefaultMutableTreeNode(new KVP("num_ref_entries["+listIdx+"]["+rplsIdx+"]",num_ref_entries[listIdx][rplsIdx],null)));
+			KVP t = new KVP("ref_pic_list_struct(listIdx="+listIdx+", rplsIdx="+rplsIdx+")");
+			t.add(new KVP("num_ref_entries["+listIdx+"]["+rplsIdx+"]",num_ref_entries[listIdx][rplsIdx]));
 
 			final int num_ref_entries_listIdx_rplsIdx = num_ref_entries[listIdx][rplsIdx];
 			
 			if( sps_long_term_ref_pics_flag!=0 && rplsIdx < sps_num_ref_pic_lists[ listIdx ] && num_ref_entries_listIdx_rplsIdx > 0 ) {
-				t.add(new DefaultMutableTreeNode(new KVP("ltrp_in_header_flag["+listIdx+"]["+rplsIdx+"]",ltrp_in_header_flag[listIdx][rplsIdx],null)));
+				t.add(new KVP("ltrp_in_header_flag["+listIdx+"]["+rplsIdx+"]",ltrp_in_header_flag[listIdx][rplsIdx]));
 			}
 
 			for (int i = 0; i < num_ref_entries_listIdx_rplsIdx; i++) {
 				
-				DefaultMutableTreeNode entryNode = new DefaultMutableTreeNode(new KVP("entry: "+i));
+				KVP entryNode = new KVP("entry: "+i);
 				t.add(entryNode);
 				if (sps_inter_layer_prediction_enabled_flag != 0) {
-					entryNode.add(new DefaultMutableTreeNode(new KVP("inter_layer_ref_pic_flag["+listIdx+"]["+rplsIdx+"]["+i+"]",inter_layer_ref_pic_flag[listIdx][rplsIdx][i],null)));
+					entryNode.add(new KVP("inter_layer_ref_pic_flag["+listIdx+"]["+rplsIdx+"]["+i+"]",inter_layer_ref_pic_flag[listIdx][rplsIdx][i]));
 				}
 				if (inter_layer_ref_pic_flag[listIdx][rplsIdx][i] == 0) {
 					if (sps_long_term_ref_pics_flag != 0) {
-						entryNode.add(new DefaultMutableTreeNode(new KVP("st_ref_pic_flag["+listIdx+"]["+rplsIdx+"]["+i+"]",st_ref_pic_flag[listIdx][rplsIdx][i],null)));
+						entryNode.add(new KVP("st_ref_pic_flag["+listIdx+"]["+rplsIdx+"]["+i+"]",st_ref_pic_flag[listIdx][rplsIdx][i]));
 					}
 					if (st_ref_pic_flag[listIdx][rplsIdx][i] != 0) {
-						entryNode.add(new DefaultMutableTreeNode(new KVP("abs_delta_poc_st["+listIdx+"]["+rplsIdx+"]["+i+"]",abs_delta_poc_st[listIdx][rplsIdx][i],null)));
+						entryNode.add(new KVP("abs_delta_poc_st["+listIdx+"]["+rplsIdx+"]["+i+"]",abs_delta_poc_st[listIdx][rplsIdx][i]));
 						if (AbsDeltaPocSt(listIdx, rplsIdx, i) > 0) {
-							entryNode.add(new DefaultMutableTreeNode(new KVP("strp_entry_sign_flag["+listIdx+"]["+rplsIdx+"]["+i+"]",strp_entry_sign_flag[listIdx][rplsIdx][i],null)));
+							entryNode.add(new KVP("strp_entry_sign_flag["+listIdx+"]["+rplsIdx+"]["+i+"]",strp_entry_sign_flag[listIdx][rplsIdx][i]));
 						}
 					} else if (ltrp_in_header_flag[listIdx][rplsIdx] == 0)
-						entryNode.add(new DefaultMutableTreeNode(new KVP("rpls_poc_lsb_lt["+listIdx+"]["+rplsIdx+"]["+i+"]",rpls_poc_lsb_lt[listIdx][rplsIdx][i],null)));
+						entryNode.add(new KVP("rpls_poc_lsb_lt["+listIdx+"]["+rplsIdx+"]["+i+"]",rpls_poc_lsb_lt[listIdx][rplsIdx][i]));
 				} else {
-					entryNode.add(new DefaultMutableTreeNode(new KVP("ilrp_idx["+listIdx+"]["+rplsIdx+"]["+i+"]",ilrp_idx[listIdx][rplsIdx][i],null)));
+					entryNode.add(new KVP("ilrp_idx["+listIdx+"]["+rplsIdx+"]["+i+"]",ilrp_idx[listIdx][rplsIdx][i]));
 				}
 			}
 
@@ -186,34 +183,28 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("general_timing_hrd_parameters"));
-
-
-			t.add(new DefaultMutableTreeNode(new KVP("num_units_in_tick",num_units_in_tick,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_scale",time_scale,getClockTickString(num_units_in_tick, time_scale))));
-			t.add(new DefaultMutableTreeNode(new KVP("general_nal_hrd_params_present_flag",general_nal_hrd_params_present_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_vcl_hrd_params_present_flag",general_vcl_hrd_params_present_flag,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("general_timing_hrd_parameters");
+			t.add(new KVP("num_units_in_tick",num_units_in_tick));
+			t.add(new KVP("time_scale",time_scale,getClockTickString(num_units_in_tick, time_scale)));
+			t.add(new KVP("general_nal_hrd_params_present_flag",general_nal_hrd_params_present_flag));
+			t.add(new KVP("general_vcl_hrd_params_present_flag",general_vcl_hrd_params_present_flag));
 
 			if (general_nal_hrd_params_present_flag != 0 || general_vcl_hrd_params_present_flag != 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("general_same_pic_timing_in_all_ols_flag",general_same_pic_timing_in_all_ols_flag,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("general_du_hrd_params_present_flag",general_du_hrd_params_present_flag,null)));
+				t.add(new KVP("general_same_pic_timing_in_all_ols_flag",general_same_pic_timing_in_all_ols_flag));
+				t.add(new KVP("general_du_hrd_params_present_flag",general_du_hrd_params_present_flag));
 				if (general_du_hrd_params_present_flag != 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("tick_divisor_minus2",tick_divisor_minus2,null)));
+					t.add(new KVP("tick_divisor_minus2",tick_divisor_minus2));
 				}
-				t.add(new DefaultMutableTreeNode(new KVP("bit_rate_scale",bit_rate_scale,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("cpb_size_scale",cpb_size_scale,null)));
+				t.add(new KVP("bit_rate_scale",bit_rate_scale));
+				t.add(new KVP("cpb_size_scale",cpb_size_scale));
 				if (general_du_hrd_params_present_flag != 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("cpb_size_du_scale",cpb_size_du_scale,null)));
+					t.add(new KVP("cpb_size_du_scale",cpb_size_du_scale));
 				}
-				t.add(new DefaultMutableTreeNode(new KVP("hrd_cpb_cnt_minus1",hrd_cpb_cnt_minus1,null)));
+				t.add(new KVP("hrd_cpb_cnt_minus1",hrd_cpb_cnt_minus1));
 			}
-			
-
 			return t;
 		}
-
 	}
 
 	public class OlsTimingHrdParameters implements TreeNode{
@@ -273,32 +264,32 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ols_timing_hrd_parameters(firstSubLayer="+firstSubLayer+", MaxSubLayersVal="+maxSubLayersVal+")"));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("ols_timing_hrd_parameters(firstSubLayer="+firstSubLayer+", MaxSubLayersVal="+maxSubLayersVal+")");
 			
 			for (int i = firstSubLayer; i <= maxSubLayersVal; i++) {
-				final DefaultMutableTreeNode fixed_pic_rate_general_flagNode = new DefaultMutableTreeNode(new KVP("fixed_pic_rate_general_flag["+i+"]",fixed_pic_rate_general_flag[i] ,null));
+				KVP fixed_pic_rate_general_flagNode = new KVP("fixed_pic_rate_general_flag["+i+"]",fixed_pic_rate_general_flag[i] );
 				t.add(fixed_pic_rate_general_flagNode);
 
 				if (fixed_pic_rate_general_flag[i] == 0) {
-					fixed_pic_rate_general_flagNode.add(new DefaultMutableTreeNode(new KVP("fixed_pic_rate_within_cvs_flag["+i+"]",fixed_pic_rate_within_cvs_flag[i] ,null)));
+					fixed_pic_rate_general_flagNode.add(new KVP("fixed_pic_rate_within_cvs_flag["+i+"]",fixed_pic_rate_within_cvs_flag[i] ));
 				}
 				if (fixed_pic_rate_within_cvs_flag[i] != 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("elemental_duration_in_tc_minus1["+i+"]",elemental_duration_in_tc_minus1[i],null)));
+					t.add(new KVP("elemental_duration_in_tc_minus1["+i+"]",elemental_duration_in_tc_minus1[i]));
 				}
 				else if ((general_timing_hrd_parameters.general_nal_hrd_params_present_flag != 0
 						|| general_timing_hrd_parameters.general_vcl_hrd_params_present_flag != 0)
 						&& general_timing_hrd_parameters.hrd_cpb_cnt_minus1 == 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("low_delay_hrd_flag["+i+"]",low_delay_hrd_flag[i],null)));
+					t.add(new KVP("low_delay_hrd_flag["+i+"]",low_delay_hrd_flag[i]));
 				}
 
 				 if( general_timing_hrd_parameters.general_nal_hrd_params_present_flag !=0) {
-					final DefaultMutableTreeNode general_nal_hrd_params_present_flagNode = new DefaultMutableTreeNode(new KVP("if( general_nal_hrd_params_present_flag)"));
+					KVP general_nal_hrd_params_present_flagNode = new KVP("if( general_nal_hrd_params_present_flag)");
 					t.add(general_nal_hrd_params_present_flagNode);
 					general_nal_hrd_params_present_flagNode.add(nal_sublayer_hrd_parameters[i].getJTreeNode(modus));
 				 }
 				 if( general_timing_hrd_parameters.general_vcl_hrd_params_present_flag !=0) {
-						final DefaultMutableTreeNode general_vcl_hrd_params_present_flagNode = new DefaultMutableTreeNode(new KVP("if( general_vcl_hrd_params_present_flag)"));
+						KVP general_vcl_hrd_params_present_flagNode = new KVP("if( general_vcl_hrd_params_present_flag)");
 						t.add(general_vcl_hrd_params_present_flagNode);
 						general_vcl_hrd_params_present_flagNode.add(vcl_sublayer_hrd_parameters[i].getJTreeNode(modus));
 				 }
@@ -343,16 +334,16 @@ public class Seq_parameter_set_rbsp extends RBSP {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("sublayer_hrd_parameters( subLayerId="+subLayerId+")"));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("sublayer_hrd_parameters( subLayerId="+subLayerId+")");
 			for (int j = 0; j <= general_timing_hrd_parameters.hrd_cpb_cnt_minus1; j++) {
-				t.add(new DefaultMutableTreeNode(new KVP("bit_rate_value_minus1["+subLayerId+"]["+j+"]",bit_rate_value_minus1[subLayerId][j],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("cpb_size_value_minus1["+subLayerId+"]["+j+"]",cpb_size_value_minus1[subLayerId][j],null)));
+				t.add(new KVP("bit_rate_value_minus1["+subLayerId+"]["+j+"]",bit_rate_value_minus1[subLayerId][j]));
+				t.add(new KVP("cpb_size_value_minus1["+subLayerId+"]["+j+"]",cpb_size_value_minus1[subLayerId][j]));
 				if (general_timing_hrd_parameters.general_du_hrd_params_present_flag != 0) {
-					t.add(new DefaultMutableTreeNode(new KVP("cpb_size_du_value_minus1["+subLayerId+"]["+j+"]",cpb_size_du_value_minus1[subLayerId][j],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("bit_rate_du_value_minus1["+subLayerId+"]["+j+"]",bit_rate_du_value_minus1[subLayerId][j],null)));
+					t.add(new KVP("cpb_size_du_value_minus1["+subLayerId+"]["+j+"]",cpb_size_du_value_minus1[subLayerId][j]));
+					t.add(new KVP("bit_rate_du_value_minus1["+subLayerId+"]["+j+"]",bit_rate_du_value_minus1[subLayerId][j]));
 				}
-				t.add(new DefaultMutableTreeNode(new KVP("cbr_flag["+subLayerId+"]["+j+"]",cbr_flag[subLayerId][j],null)));
+				t.add(new KVP("cbr_flag["+subLayerId+"]["+j+"]",cbr_flag[subLayerId][j]));
 			}
 
 			return t;
@@ -1044,379 +1035,369 @@ public class Seq_parameter_set_rbsp extends RBSP {
 			vuiParameters = new VUIParameters(sps_vui_payload_size_minus1+1, bitSource);
 		}		
 		
-		
 		// sps_extension_flag etc not supported
 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("seq_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_seq_parameter_set_id",sps_seq_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_video_parameter_set_id",sps_video_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_max_sublayers_minus1",sps_max_sublayers_minus1,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("seq_parameter_set_rbsp");
+		t.add(new KVP("sps_seq_parameter_set_id",sps_seq_parameter_set_id));
+		t.add(new KVP("sps_video_parameter_set_id",sps_video_parameter_set_id));
+		t.add(new KVP("sps_max_sublayers_minus1",sps_max_sublayers_minus1));
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_chroma_format_idc",sps_chroma_format_idc,getSpsChromaFormatIdcString(sps_chroma_format_idc))));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_log2_ctu_size_minus5",sps_log2_ctu_size_minus5,null)));
-		final DefaultMutableTreeNode sps_ptl_dpb_hrd_params_present_flagNode = new DefaultMutableTreeNode(new KVP("sps_ptl_dpb_hrd_params_present_flag",sps_ptl_dpb_hrd_params_present_flag,null));
+		t.add(new KVP("sps_chroma_format_idc",sps_chroma_format_idc,getSpsChromaFormatIdcString(sps_chroma_format_idc)));
+		t.add(new KVP("sps_log2_ctu_size_minus5",sps_log2_ctu_size_minus5));
+		KVP sps_ptl_dpb_hrd_params_present_flagNode = new KVP("sps_ptl_dpb_hrd_params_present_flag",sps_ptl_dpb_hrd_params_present_flag);
 		t.add(sps_ptl_dpb_hrd_params_present_flagNode);
 		if( sps_ptl_dpb_hrd_params_present_flag ==1) {
 			sps_ptl_dpb_hrd_params_present_flagNode.add(profile_tier_level.getJTreeNode(modus));
 		}
 		
-		t.add(new DefaultMutableTreeNode(new KVP("sps_gdr_enabled_flag",sps_gdr_enabled_flag,null)));
+		t.add(new KVP("sps_gdr_enabled_flag",sps_gdr_enabled_flag));
 
-		final DefaultMutableTreeNode sps_ref_pic_resampling_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_ref_pic_resampling_enabled_flag",sps_ref_pic_resampling_enabled_flag,null));
+		KVP sps_ref_pic_resampling_enabled_flagNode = new KVP("sps_ref_pic_resampling_enabled_flag",sps_ref_pic_resampling_enabled_flag);
 		t.add(sps_ref_pic_resampling_enabled_flagNode);
 		if (sps_ref_pic_resampling_enabled_flag == 1) {
-			sps_ref_pic_resampling_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_res_change_in_clvs_allowed_flag",sps_res_change_in_clvs_allowed_flag,null)));
+			sps_ref_pic_resampling_enabled_flagNode.add(new KVP("sps_res_change_in_clvs_allowed_flag",sps_res_change_in_clvs_allowed_flag));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_pic_width_max_in_luma_samples",sps_pic_width_max_in_luma_samples,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_pic_height_max_in_luma_samples",sps_pic_height_max_in_luma_samples,null)));
-		final DefaultMutableTreeNode sps_conformance_window_flagNode = new DefaultMutableTreeNode(new KVP("sps_conformance_window_flag",sps_conformance_window_flag,null));
+		t.add(new KVP("sps_pic_width_max_in_luma_samples",sps_pic_width_max_in_luma_samples));
+		t.add(new KVP("sps_pic_height_max_in_luma_samples",sps_pic_height_max_in_luma_samples));
+		KVP sps_conformance_window_flagNode = new KVP("sps_conformance_window_flag",sps_conformance_window_flag);
 		t.add(sps_conformance_window_flagNode);
-
 		
 		if (sps_conformance_window_flag == 1) {
-			sps_conformance_window_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_conf_win_left_offset",sps_conf_win_left_offset,null)));
-			sps_conformance_window_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_conf_win_right_offset",sps_conf_win_right_offset,null)));
-			sps_conformance_window_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_conf_win_top_offset",sps_conf_win_top_offset,null)));
-			sps_conformance_window_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_conf_win_bottom_offset",sps_conf_win_bottom_offset,null)));
+			sps_conformance_window_flagNode.add(new KVP("sps_conf_win_left_offset",sps_conf_win_left_offset));
+			sps_conformance_window_flagNode.add(new KVP("sps_conf_win_right_offset",sps_conf_win_right_offset));
+			sps_conformance_window_flagNode.add(new KVP("sps_conf_win_top_offset",sps_conf_win_top_offset));
+			sps_conformance_window_flagNode.add(new KVP("sps_conf_win_bottom_offset",sps_conf_win_bottom_offset));
 		}
-		final DefaultMutableTreeNode sps_subpic_info_present_flag_node = new DefaultMutableTreeNode(new KVP("sps_subpic_info_present_flag",sps_subpic_info_present_flag,null));
+		KVP sps_subpic_info_present_flag_node = new KVP("sps_subpic_info_present_flag",sps_subpic_info_present_flag);
 		t.add(sps_subpic_info_present_flag_node);
 
 		if (sps_subpic_info_present_flag == 1) {
 			
-			final DefaultMutableTreeNode sps_num_subpics_minus1_node = new DefaultMutableTreeNode(new KVP("sps_num_subpics_minus1",sps_num_subpics_minus1,null));
+			KVP sps_num_subpics_minus1_node = new KVP("sps_num_subpics_minus1",sps_num_subpics_minus1);
 			sps_subpic_info_present_flag_node.add(sps_num_subpics_minus1_node);
 
 			if (sps_num_subpics_minus1 > 0) {
-				sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_independent_subpics_flag",sps_independent_subpics_flag,null)));
-				sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_same_size_flag",sps_subpic_same_size_flag,null)));
+				sps_num_subpics_minus1_node.add(new KVP("sps_independent_subpics_flag",sps_independent_subpics_flag));
+				sps_num_subpics_minus1_node.add(new KVP("sps_subpic_same_size_flag",sps_subpic_same_size_flag));
 			}
-			
-
 			
 			for (int i = 0; sps_num_subpics_minus1 > 0 && i <= sps_num_subpics_minus1; i++) {
 				if (sps_subpic_same_size_flag == 0 || i == 0) {
 					if (i > 0 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
-						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_ctu_top_left_x["+i+"]",sps_subpic_ctu_top_left_x[i],null)));
+						sps_num_subpics_minus1_node.add(new KVP("sps_subpic_ctu_top_left_x["+i+"]",sps_subpic_ctu_top_left_x[i]));
 					}
 					if (i > 0 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
-						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_ctu_top_left_y["+i+"]",sps_subpic_ctu_top_left_y[i],null)));
+						sps_num_subpics_minus1_node.add(new KVP("sps_subpic_ctu_top_left_y["+i+"]",sps_subpic_ctu_top_left_y[i]));
 					}
 					if (i < sps_num_subpics_minus1 && sps_pic_width_max_in_luma_samples > CtbSizeY) {
-						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_width_minus1["+i+"]",sps_subpic_width_minus1[i],null)));
+						sps_num_subpics_minus1_node.add(new KVP("sps_subpic_width_minus1["+i+"]",sps_subpic_width_minus1[i]));
 					}
 					if (i < sps_num_subpics_minus1 && sps_pic_height_max_in_luma_samples > CtbSizeY) {
-						sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_height_minus1["+i+"]",sps_subpic_height_minus1[i],null)));
+						sps_num_subpics_minus1_node.add(new KVP("sps_subpic_height_minus1["+i+"]",sps_subpic_height_minus1[i]));
 					}
 				}
 				if (sps_independent_subpics_flag == 0) {
-					sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_treated_as_pic_flag["+i+"]",sps_subpic_treated_as_pic_flag[i],null)));
-					sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_loop_filter_across_subpic_enabled_flag["+i+"]",sps_loop_filter_across_subpic_enabled_flag[i],null)));
+					sps_num_subpics_minus1_node.add(new KVP("sps_subpic_treated_as_pic_flag["+i+"]",sps_subpic_treated_as_pic_flag[i]));
+					sps_num_subpics_minus1_node.add(new KVP("sps_loop_filter_across_subpic_enabled_flag["+i+"]",sps_loop_filter_across_subpic_enabled_flag[i]));
 				}
 			}
-			sps_num_subpics_minus1_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_id_len_minus1",sps_subpic_id_len_minus1,null)));
-			final DefaultMutableTreeNode sps_subpic_id_mapping_explicitly_signalled_flag_node = new DefaultMutableTreeNode(new KVP("sps_subpic_id_mapping_explicitly_signalled_flag",sps_subpic_id_mapping_explicitly_signalled_flag,null));
+			sps_num_subpics_minus1_node.add(new KVP("sps_subpic_id_len_minus1",sps_subpic_id_len_minus1));
+			KVP sps_subpic_id_mapping_explicitly_signalled_flag_node = new KVP("sps_subpic_id_mapping_explicitly_signalled_flag",sps_subpic_id_mapping_explicitly_signalled_flag);
 			sps_num_subpics_minus1_node.add(sps_subpic_id_mapping_explicitly_signalled_flag_node);
 			if (sps_subpic_id_mapping_explicitly_signalled_flag == 1) {
-				final DefaultMutableTreeNode sps_subpic_id_mapping_present_flag_node = new DefaultMutableTreeNode(new KVP("sps_subpic_id_mapping_present_flag",sps_subpic_id_mapping_present_flag,null));
+				KVP sps_subpic_id_mapping_present_flag_node = new KVP("sps_subpic_id_mapping_present_flag",sps_subpic_id_mapping_present_flag);
 				sps_subpic_id_mapping_explicitly_signalled_flag_node.add(sps_subpic_id_mapping_present_flag_node);
 				if (sps_subpic_id_mapping_present_flag == 1) {
 					for (int i = 0; i <= sps_num_subpics_minus1; i++) {
-						sps_subpic_id_mapping_present_flag_node.add(new DefaultMutableTreeNode(new KVP("sps_subpic_id["+i+"]",sps_subpic_id[i],null)));
+						sps_subpic_id_mapping_present_flag_node.add(new KVP("sps_subpic_id["+i+"]",sps_subpic_id[i]));
 					}
 				}
 			}
 		}
 		
 		
-		t.add(new DefaultMutableTreeNode(new KVP("sps_bitdepth_minus8",sps_bitdepth_minus8,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_entropy_coding_sync_enabled_flag",sps_entropy_coding_sync_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_entry_point_offsets_present_flag",sps_entry_point_offsets_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_log2_max_pic_order_cnt_lsb_minus4",sps_log2_max_pic_order_cnt_lsb_minus4,null)));
-		final DefaultMutableTreeNode sps_poc_msb_cycle_flagNode = new DefaultMutableTreeNode(new KVP("sps_poc_msb_cycle_flag",sps_poc_msb_cycle_flag,null));
+		t.add(new KVP("sps_bitdepth_minus8",sps_bitdepth_minus8));
+		t.add(new KVP("sps_entropy_coding_sync_enabled_flag",sps_entropy_coding_sync_enabled_flag));
+		t.add(new KVP("sps_entry_point_offsets_present_flag",sps_entry_point_offsets_present_flag));
+		t.add(new KVP("sps_log2_max_pic_order_cnt_lsb_minus4",sps_log2_max_pic_order_cnt_lsb_minus4));
+		KVP sps_poc_msb_cycle_flagNode = new KVP("sps_poc_msb_cycle_flag",sps_poc_msb_cycle_flag);
 		t.add(sps_poc_msb_cycle_flagNode);
 		
 		if (sps_poc_msb_cycle_flag == 1) {
-			sps_poc_msb_cycle_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_poc_msb_cycle_len_minus1",sps_poc_msb_cycle_len_minus1,null)));
+			sps_poc_msb_cycle_flagNode.add(new KVP("sps_poc_msb_cycle_len_minus1",sps_poc_msb_cycle_len_minus1));
 		}
 
-		final DefaultMutableTreeNode sps_num_extra_ph_bytesNode = new DefaultMutableTreeNode(new KVP("sps_num_extra_ph_bytes",sps_num_extra_ph_bytes,null));
+		KVP sps_num_extra_ph_bytesNode = new KVP("sps_num_extra_ph_bytes",sps_num_extra_ph_bytes);
 		t.add(sps_num_extra_ph_bytesNode);
 		for (int i = 0; i < (sps_num_extra_ph_bytes * 8); i++) {
-			sps_num_extra_ph_bytesNode.add(new DefaultMutableTreeNode(new KVP("sps_extra_ph_bit_present_flag["+i+"]",sps_extra_ph_bit_present_flag[i],null)));
+			sps_num_extra_ph_bytesNode.add(new KVP("sps_extra_ph_bit_present_flag["+i+"]",sps_extra_ph_bit_present_flag[i]));
 		}
 		
-		final DefaultMutableTreeNode sps_num_extra_sh_bytesNode = new DefaultMutableTreeNode(new KVP("sps_num_extra_sh_bytes",sps_num_extra_sh_bytes,null));
+		KVP sps_num_extra_sh_bytesNode = new KVP("sps_num_extra_sh_bytes",sps_num_extra_sh_bytes);
 		t.add(sps_num_extra_sh_bytesNode);
 		for (int i = 0; i < (sps_num_extra_sh_bytes * 8); i++) {
-			sps_num_extra_sh_bytesNode.add(new DefaultMutableTreeNode(new KVP("sps_extra_sh_bit_present_flag["+i+"]",sps_extra_sh_bit_present_flag[i],null)));
+			sps_num_extra_sh_bytesNode.add(new KVP("sps_extra_sh_bit_present_flag["+i+"]",sps_extra_sh_bit_present_flag[i]));
 		}
 
 
 		if (sps_ptl_dpb_hrd_params_present_flag == 1) {
 			if (sps_max_sublayers_minus1 > 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("sps_sublayer_dpb_params_flag",sps_sublayer_dpb_params_flag,null)));
+				t.add(new KVP("sps_sublayer_dpb_params_flag",sps_sublayer_dpb_params_flag));
 			}
 			t.add(dpb_parameters.getJTreeNode(modus));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_log2_min_luma_coding_block_size_minus2",sps_log2_min_luma_coding_block_size_minus2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_partition_constraints_override_enabled_flag",sps_partition_constraints_override_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_min_qt_min_cb_intra_slice_luma",sps_log2_diff_min_qt_min_cb_intra_slice_luma,null)));
+		t.add(new KVP("sps_log2_min_luma_coding_block_size_minus2",sps_log2_min_luma_coding_block_size_minus2));
+		t.add(new KVP("sps_partition_constraints_override_enabled_flag",sps_partition_constraints_override_enabled_flag));
+		t.add(new KVP("sps_log2_diff_min_qt_min_cb_intra_slice_luma",sps_log2_diff_min_qt_min_cb_intra_slice_luma));
 
-		final DefaultMutableTreeNode sps_max_mtt_hierarchy_depth_intra_slice_lumaNode = new DefaultMutableTreeNode(new KVP("sps_max_mtt_hierarchy_depth_intra_slice_luma",sps_max_mtt_hierarchy_depth_intra_slice_luma,null));
+		KVP sps_max_mtt_hierarchy_depth_intra_slice_lumaNode = new KVP("sps_max_mtt_hierarchy_depth_intra_slice_luma",sps_max_mtt_hierarchy_depth_intra_slice_luma);
 		t.add(sps_max_mtt_hierarchy_depth_intra_slice_lumaNode);
 		
 		
 		if (sps_max_mtt_hierarchy_depth_intra_slice_luma != 0) {
-			sps_max_mtt_hierarchy_depth_intra_slice_lumaNode.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_max_bt_min_qt_intra_slice_luma",sps_log2_diff_max_bt_min_qt_intra_slice_luma,null)));
-			sps_max_mtt_hierarchy_depth_intra_slice_lumaNode.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_max_tt_min_qt_intra_slice_luma",sps_log2_diff_max_tt_min_qt_intra_slice_luma,null)));
+			sps_max_mtt_hierarchy_depth_intra_slice_lumaNode.add(new KVP("sps_log2_diff_max_bt_min_qt_intra_slice_luma",sps_log2_diff_max_bt_min_qt_intra_slice_luma));
+			sps_max_mtt_hierarchy_depth_intra_slice_lumaNode.add(new KVP("sps_log2_diff_max_tt_min_qt_intra_slice_luma",sps_log2_diff_max_tt_min_qt_intra_slice_luma));
 		}
 		if (sps_chroma_format_idc != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_qtbtt_dual_tree_intra_flag",sps_qtbtt_dual_tree_intra_flag,null)));
+			t.add(new KVP("sps_qtbtt_dual_tree_intra_flag",sps_qtbtt_dual_tree_intra_flag));
 		}
 		if (sps_qtbtt_dual_tree_intra_flag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_min_qt_min_cb_intra_slice_chroma",sps_log2_diff_min_qt_min_cb_intra_slice_chroma,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_max_mtt_hierarchy_depth_intra_slice_chroma",sps_max_mtt_hierarchy_depth_intra_slice_chroma,null)));
+			t.add(new KVP("sps_log2_diff_min_qt_min_cb_intra_slice_chroma",sps_log2_diff_min_qt_min_cb_intra_slice_chroma));
+			t.add(new KVP("sps_max_mtt_hierarchy_depth_intra_slice_chroma",sps_max_mtt_hierarchy_depth_intra_slice_chroma));
 			if (sps_max_mtt_hierarchy_depth_intra_slice_chroma != 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_max_bt_min_qt_intra_slice_chroma",sps_log2_diff_max_bt_min_qt_intra_slice_chroma,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_max_tt_min_qt_intra_slice_chroma",sps_log2_diff_max_tt_min_qt_intra_slice_chroma,null)));
+				t.add(new KVP("sps_log2_diff_max_bt_min_qt_intra_slice_chroma",sps_log2_diff_max_bt_min_qt_intra_slice_chroma));
+				t.add(new KVP("sps_log2_diff_max_tt_min_qt_intra_slice_chroma",sps_log2_diff_max_tt_min_qt_intra_slice_chroma));
 			}
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_min_qt_min_cb_inter_slice",sps_log2_diff_min_qt_min_cb_inter_slice,null)));
-		final DefaultMutableTreeNode sps_max_mtt_hierarchy_depth_inter_sliceNode = new DefaultMutableTreeNode(new KVP("sps_max_mtt_hierarchy_depth_inter_slice",sps_max_mtt_hierarchy_depth_inter_slice,null));
+		t.add(new KVP("sps_log2_diff_min_qt_min_cb_inter_slice",sps_log2_diff_min_qt_min_cb_inter_slice));
+		KVP sps_max_mtt_hierarchy_depth_inter_sliceNode = new KVP("sps_max_mtt_hierarchy_depth_inter_slice",sps_max_mtt_hierarchy_depth_inter_slice);
 		t.add(sps_max_mtt_hierarchy_depth_inter_sliceNode);
 		
 		if (sps_max_mtt_hierarchy_depth_inter_slice != 0) {
-			sps_max_mtt_hierarchy_depth_inter_sliceNode.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_max_bt_min_qt_inter_slice",sps_log2_diff_max_bt_min_qt_inter_slice,null)));
-			sps_max_mtt_hierarchy_depth_inter_sliceNode.add(new DefaultMutableTreeNode(new KVP("sps_log2_diff_max_tt_min_qt_inter_slice",sps_log2_diff_max_tt_min_qt_inter_slice,null)));
+			sps_max_mtt_hierarchy_depth_inter_sliceNode.add(new KVP("sps_log2_diff_max_bt_min_qt_inter_slice",sps_log2_diff_max_bt_min_qt_inter_slice));
+			sps_max_mtt_hierarchy_depth_inter_sliceNode.add(new KVP("sps_log2_diff_max_tt_min_qt_inter_slice",sps_log2_diff_max_tt_min_qt_inter_slice));
 		}
 		
 		if (CtbSizeY > 32) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_max_luma_transform_size_64_flag",sps_max_luma_transform_size_64_flag,null)));
+			t.add(new KVP("sps_max_luma_transform_size_64_flag",sps_max_luma_transform_size_64_flag));
 		}
 
-		final DefaultMutableTreeNode sps_transform_skip_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_transform_skip_enabled_flag",sps_transform_skip_enabled_flag,null));
+		KVP sps_transform_skip_enabled_flagNode = new KVP("sps_transform_skip_enabled_flag",sps_transform_skip_enabled_flag);
 		t.add(sps_transform_skip_enabled_flagNode);
 		if (sps_transform_skip_enabled_flag == 1) {
-			sps_transform_skip_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_log2_transform_skip_max_size_minus2",sps_log2_transform_skip_max_size_minus2,null)));
-			sps_transform_skip_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_bdpcm_enabled_flag",sps_bdpcm_enabled_flag,null)));
+			sps_transform_skip_enabled_flagNode.add(new KVP("sps_log2_transform_skip_max_size_minus2",sps_log2_transform_skip_max_size_minus2));
+			sps_transform_skip_enabled_flagNode.add(new KVP("sps_bdpcm_enabled_flag",sps_bdpcm_enabled_flag));
 		}
-		final DefaultMutableTreeNode sps_mts_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_mts_enabled_flag",sps_mts_enabled_flag,null));
+		KVP sps_mts_enabled_flagNode = new KVP("sps_mts_enabled_flag",sps_mts_enabled_flag);
 		t.add(sps_mts_enabled_flagNode);
 		if (sps_mts_enabled_flag == 1) {
-			sps_mts_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_explicit_mts_intra_enabled_flag",sps_explicit_mts_intra_enabled_flag,null)));
-			sps_mts_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_explicit_mts_inter_enabled_flag",sps_explicit_mts_inter_enabled_flag,null)));
+			sps_mts_enabled_flagNode.add(new KVP("sps_explicit_mts_intra_enabled_flag",sps_explicit_mts_intra_enabled_flag));
+			sps_mts_enabled_flagNode.add(new KVP("sps_explicit_mts_inter_enabled_flag",sps_explicit_mts_inter_enabled_flag));
 		}
 
 		
-		t.add(new DefaultMutableTreeNode(new KVP("sps_lfnst_enabled_flag",sps_lfnst_enabled_flag,null)));
+		t.add(new KVP("sps_lfnst_enabled_flag",sps_lfnst_enabled_flag));
 		if (sps_chroma_format_idc != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_joint_cbcr_enabled_flag",sps_joint_cbcr_enabled_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_same_qp_table_for_chroma_flag",sps_same_qp_table_for_chroma_flag,null)));
+			t.add(new KVP("sps_joint_cbcr_enabled_flag",sps_joint_cbcr_enabled_flag));
+			t.add(new KVP("sps_same_qp_table_for_chroma_flag",sps_same_qp_table_for_chroma_flag));
 
 			for (int i = 0; i < numQpTables; i++) {
-				t.add(new DefaultMutableTreeNode(new KVP("sps_qp_table_start_minus26["+i+"]" ,sps_qp_table_start_minus26[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sps_num_points_in_qp_table_minus1["+i+"]" ,sps_num_points_in_qp_table_minus1[i],null)));
+				t.add(new KVP("sps_qp_table_start_minus26["+i+"]" ,sps_qp_table_start_minus26[i]));
+				t.add(new KVP("sps_num_points_in_qp_table_minus1["+i+"]" ,sps_num_points_in_qp_table_minus1[i]));
 				for (int j = 0; j <= sps_num_points_in_qp_table_minus1[i]; j++) {
-					t.add(new DefaultMutableTreeNode(new KVP("sps_delta_qp_in_val_minus1["+i+"]["+j+"]" ,sps_delta_qp_in_val_minus1[i][j],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sps_delta_qp_diff_val["+i+"]["+j+"]" ,sps_delta_qp_diff_val[i][j],null)));
+					t.add(new KVP("sps_delta_qp_in_val_minus1["+i+"]["+j+"]" ,sps_delta_qp_in_val_minus1[i][j]));
+					t.add(new KVP("sps_delta_qp_diff_val["+i+"]["+j+"]" ,sps_delta_qp_diff_val[i][j]));
 				}
 			}
 		}
 		
 		
 		
-		t.add(new DefaultMutableTreeNode(new KVP("sps_sao_enabled_flag",sps_sao_enabled_flag,null)));
-		final DefaultMutableTreeNode sps_alf_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_alf_enabled_flag",sps_alf_enabled_flag,null));
+		t.add(new KVP("sps_sao_enabled_flag",sps_sao_enabled_flag));
+		KVP sps_alf_enabled_flagNode = new KVP("sps_alf_enabled_flag",sps_alf_enabled_flag);
 		t.add(sps_alf_enabled_flagNode);
 		if (sps_alf_enabled_flag == 1 && sps_chroma_format_idc != 0) {
-			sps_alf_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_ccalf_enabled_flag",sps_ccalf_enabled_flag,null)));
+			sps_alf_enabled_flagNode.add(new KVP("sps_ccalf_enabled_flag",sps_ccalf_enabled_flag));
 		}
 
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_lmcs_enabled_flag",sps_lmcs_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_weighted_pred_flag",sps_weighted_pred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_weighted_bipred_flag",sps_weighted_bipred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_long_term_ref_pics_flag",sps_long_term_ref_pics_flag,null)));
+		t.add(new KVP("sps_lmcs_enabled_flag",sps_lmcs_enabled_flag));
+		t.add(new KVP("sps_weighted_pred_flag",sps_weighted_pred_flag));
+		t.add(new KVP("sps_weighted_bipred_flag",sps_weighted_bipred_flag));
+		t.add(new KVP("sps_long_term_ref_pics_flag",sps_long_term_ref_pics_flag));
 		
 		if (sps_video_parameter_set_id > 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_inter_layer_prediction_enabled_flag",sps_inter_layer_prediction_enabled_flag,null)));
+			t.add(new KVP("sps_inter_layer_prediction_enabled_flag",sps_inter_layer_prediction_enabled_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_idr_rpl_present_flag",sps_idr_rpl_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_rpl1_same_as_rpl0_flag",sps_rpl1_same_as_rpl0_flag,null)));
+		t.add(new KVP("sps_idr_rpl_present_flag",sps_idr_rpl_present_flag));
+		t.add(new KVP("sps_rpl1_same_as_rpl0_flag",sps_rpl1_same_as_rpl0_flag));
 
-		
 		final int num_sps_lists = (sps_rpl1_same_as_rpl0_flag!=0) ? 1 : 2;
 		
-		
 		for(int i = 0; i < num_sps_lists; i++ ) {
-			
-			DefaultMutableTreeNode refPicList = new DefaultMutableTreeNode(new KVP("sps_num_ref_pic_lists["+i+"]",sps_num_ref_pic_lists[i] ,null));
+			KVP refPicList = new KVP("sps_num_ref_pic_lists["+i+"]",sps_num_ref_pic_lists[i] );
 			t.add(refPicList);
-
 			for(int j = 0; j < sps_num_ref_pic_lists[i]; j++) {
 				refPicList.add(refPicListStructList[i][j].getJTreeNode(modus));
 			}
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_ref_wraparound_enabled_flag",sps_ref_wraparound_enabled_flag,null)));
+		t.add(new KVP("sps_ref_wraparound_enabled_flag",sps_ref_wraparound_enabled_flag));
 		
-
-		final DefaultMutableTreeNode sps_temporal_mvp_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_temporal_mvp_enabled_flag",sps_temporal_mvp_enabled_flag,null));
+		KVP sps_temporal_mvp_enabled_flagNode = new KVP("sps_temporal_mvp_enabled_flag",sps_temporal_mvp_enabled_flag);
 		t.add(sps_temporal_mvp_enabled_flagNode);
 		if (sps_temporal_mvp_enabled_flag != 0) {
-			sps_temporal_mvp_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_sbtmvp_enabled_flag",sps_sbtmvp_enabled_flag,null)));
+			sps_temporal_mvp_enabled_flagNode.add(new KVP("sps_sbtmvp_enabled_flag",sps_sbtmvp_enabled_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_amvr_enabled_flag",sps_amvr_enabled_flag,null)));
-		final DefaultMutableTreeNode sps_bdof_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_bdof_enabled_flag",sps_bdof_enabled_flag,null));
+		t.add(new KVP("sps_amvr_enabled_flag",sps_amvr_enabled_flag));
+		KVP sps_bdof_enabled_flagNode = new KVP("sps_bdof_enabled_flag",sps_bdof_enabled_flag);
 		t.add(sps_bdof_enabled_flagNode);
 		if (sps_bdof_enabled_flag != 0) {
-			sps_bdof_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_bdof_control_present_in_ph_flag",sps_bdof_control_present_in_ph_flag,null)));
+			sps_bdof_enabled_flagNode.add(new KVP("sps_bdof_control_present_in_ph_flag",sps_bdof_control_present_in_ph_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_smvd_enabled_flag",sps_smvd_enabled_flag,null)));
-		final DefaultMutableTreeNode sps_dmvr_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_dmvr_enabled_flag",sps_dmvr_enabled_flag,null));
+		t.add(new KVP("sps_smvd_enabled_flag",sps_smvd_enabled_flag));
+		KVP sps_dmvr_enabled_flagNode = new KVP("sps_dmvr_enabled_flag",sps_dmvr_enabled_flag);
 		t.add(sps_dmvr_enabled_flagNode);
 		if (sps_dmvr_enabled_flag != 0) {
-			sps_dmvr_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_dmvr_control_present_in_ph_flag",sps_dmvr_control_present_in_ph_flag,null)));
+			sps_dmvr_enabled_flagNode.add(new KVP("sps_dmvr_control_present_in_ph_flag",sps_dmvr_control_present_in_ph_flag));
 		}
-		final DefaultMutableTreeNode sps_mmvd_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_mmvd_enabled_flag",sps_mmvd_enabled_flag,null));
+		KVP sps_mmvd_enabled_flagNode = new KVP("sps_mmvd_enabled_flag",sps_mmvd_enabled_flag);
 		t.add(sps_mmvd_enabled_flagNode);
 		if (sps_mmvd_enabled_flag != 0) {
-			sps_mmvd_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_mmvd_fullpel_only_enabled_flag",sps_mmvd_fullpel_only_enabled_flag,null)));
+			sps_mmvd_enabled_flagNode.add(new KVP("sps_mmvd_fullpel_only_enabled_flag",sps_mmvd_fullpel_only_enabled_flag));
 		}
 		
-		
-		t.add(new DefaultMutableTreeNode(new KVP("sps_six_minus_max_num_merge_cand",sps_six_minus_max_num_merge_cand,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_sbt_enabled_flag",sps_sbt_enabled_flag,null)));
-		final DefaultMutableTreeNode sps_affine_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_affine_enabled_flag",sps_affine_enabled_flag,null));
+		t.add(new KVP("sps_six_minus_max_num_merge_cand",sps_six_minus_max_num_merge_cand));
+		t.add(new KVP("sps_sbt_enabled_flag",sps_sbt_enabled_flag));
+		KVP sps_affine_enabled_flagNode = new KVP("sps_affine_enabled_flag",sps_affine_enabled_flag);
 		t.add(sps_affine_enabled_flagNode);
 		if (sps_affine_enabled_flag != 0) {
-			sps_affine_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_five_minus_max_num_subblock_merge_cand",sps_five_minus_max_num_subblock_merge_cand,null)));
-			final DefaultMutableTreeNode sps_6param_affine_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_6param_affine_enabled_flag",sps_6param_affine_enabled_flag,null));
+			sps_affine_enabled_flagNode.add(new KVP("sps_five_minus_max_num_subblock_merge_cand",sps_five_minus_max_num_subblock_merge_cand));
+			KVP sps_6param_affine_enabled_flagNode = new KVP("sps_6param_affine_enabled_flag",sps_6param_affine_enabled_flag);
 			sps_affine_enabled_flagNode.add(sps_6param_affine_enabled_flagNode);
 			if (sps_amvr_enabled_flag != 0) {
-				sps_6param_affine_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_affine_amvr_enabled_flag",sps_affine_amvr_enabled_flag,null)));
+				sps_6param_affine_enabled_flagNode.add(new KVP("sps_affine_amvr_enabled_flag",sps_affine_amvr_enabled_flag));
 			}
-			final DefaultMutableTreeNode sps_affine_prof_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_affine_prof_enabled_flag",sps_affine_prof_enabled_flag,null));
+			KVP sps_affine_prof_enabled_flagNode = new KVP("sps_affine_prof_enabled_flag",sps_affine_prof_enabled_flag);
 			sps_affine_enabled_flagNode.add(sps_affine_prof_enabled_flagNode);
 			if (sps_affine_prof_enabled_flag != 0) {
-				sps_affine_prof_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_prof_control_present_in_ph_flag",sps_prof_control_present_in_ph_flag,null)));
+				sps_affine_prof_enabled_flagNode.add(new KVP("sps_prof_control_present_in_ph_flag",sps_prof_control_present_in_ph_flag));
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_bcw_enabled_flag",sps_bcw_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_ciip_enabled_flag",sps_ciip_enabled_flag,null)));
+		t.add(new KVP("sps_bcw_enabled_flag",sps_bcw_enabled_flag));
+		t.add(new KVP("sps_ciip_enabled_flag",sps_ciip_enabled_flag));
 
 		int MaxNumMergeCand = 6 - sps_six_minus_max_num_merge_cand;
 		
 		if (MaxNumMergeCand >= 2) {
-			final DefaultMutableTreeNode sps_gpm_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_gpm_enabled_flag",sps_gpm_enabled_flag,null));
+			KVP sps_gpm_enabled_flagNode = new KVP("sps_gpm_enabled_flag",sps_gpm_enabled_flag);
 			t.add(sps_gpm_enabled_flagNode);
 			if (sps_gpm_enabled_flag != 0 && MaxNumMergeCand >= 3) {
-				sps_gpm_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_max_num_merge_cand_minus_max_num_gpm_cand",sps_max_num_merge_cand_minus_max_num_gpm_cand,null)));
+				sps_gpm_enabled_flagNode.add(new KVP("sps_max_num_merge_cand_minus_max_num_gpm_cand",sps_max_num_merge_cand_minus_max_num_gpm_cand));
 			}
 		}
 		
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_log2_parallel_merge_level_minus2",sps_log2_parallel_merge_level_minus2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_isp_enabled_flag",sps_isp_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_mrl_enabled_flag",sps_mrl_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_mip_enabled_flag",sps_mip_enabled_flag,null)));
+		t.add(new KVP("sps_log2_parallel_merge_level_minus2",sps_log2_parallel_merge_level_minus2));
+		t.add(new KVP("sps_isp_enabled_flag",sps_isp_enabled_flag));
+		t.add(new KVP("sps_mrl_enabled_flag",sps_mrl_enabled_flag));
+		t.add(new KVP("sps_mip_enabled_flag",sps_mip_enabled_flag));
 
 
 		if (sps_chroma_format_idc != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_cclm_enabled_flag",sps_cclm_enabled_flag,null)));
+			t.add(new KVP("sps_cclm_enabled_flag",sps_cclm_enabled_flag));
 		}
 		if (sps_chroma_format_idc == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_chroma_horizontal_collocated_flag",sps_chroma_horizontal_collocated_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sps_chroma_vertical_collocated_flag",sps_chroma_vertical_collocated_flag,null)));
+			t.add(new KVP("sps_chroma_horizontal_collocated_flag",sps_chroma_horizontal_collocated_flag));
+			t.add(new KVP("sps_chroma_vertical_collocated_flag",sps_chroma_vertical_collocated_flag));
 		}
 
 		
 		
-		t.add(new DefaultMutableTreeNode(new KVP("sps_palette_enabled_flag",sps_palette_enabled_flag,null)));
+		t.add(new KVP("sps_palette_enabled_flag",sps_palette_enabled_flag));
 		if (sps_chroma_format_idc == 3 && sps_max_luma_transform_size_64_flag == 0)
-			t.add(new DefaultMutableTreeNode(new KVP("sps_act_enabled_flag",sps_act_enabled_flag,null)));
+			t.add(new KVP("sps_act_enabled_flag",sps_act_enabled_flag));
 		if (sps_transform_skip_enabled_flag != 0 || sps_palette_enabled_flag != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_min_qp_prime_ts",sps_min_qp_prime_ts,null)));
+			t.add(new KVP("sps_min_qp_prime_ts",sps_min_qp_prime_ts));
 		}
-		final DefaultMutableTreeNode sps_ibc_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_ibc_enabled_flag",sps_ibc_enabled_flag,null));
+		KVP sps_ibc_enabled_flagNode = new KVP("sps_ibc_enabled_flag",sps_ibc_enabled_flag);
 		t.add(sps_ibc_enabled_flagNode);
 		if (sps_ibc_enabled_flag != 0) {
-			sps_ibc_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_six_minus_max_num_ibc_merge_cand",sps_six_minus_max_num_ibc_merge_cand,null)));
+			sps_ibc_enabled_flagNode.add(new KVP("sps_six_minus_max_num_ibc_merge_cand",sps_six_minus_max_num_ibc_merge_cand));
 		}
-		final DefaultMutableTreeNode sps_ladf_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_ladf_enabled_flag",sps_ladf_enabled_flag,null));
+		KVP sps_ladf_enabled_flagNode = new KVP("sps_ladf_enabled_flag",sps_ladf_enabled_flag);
 		t.add(sps_ladf_enabled_flagNode);
 
 
 		
 		if (sps_ladf_enabled_flag != 0) {
-			sps_ladf_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_num_ladf_intervals_minus2",sps_num_ladf_intervals_minus2,null)));
-			sps_ladf_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_ladf_lowest_interval_qp_offset",sps_ladf_lowest_interval_qp_offset,null)));
+			sps_ladf_enabled_flagNode.add(new KVP("sps_num_ladf_intervals_minus2",sps_num_ladf_intervals_minus2));
+			sps_ladf_enabled_flagNode.add(new KVP("sps_ladf_lowest_interval_qp_offset",sps_ladf_lowest_interval_qp_offset));
 			
 			for (int i = 0; i < sps_num_ladf_intervals_minus2 + 1; i++) {
-				sps_ladf_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_ladf_qp_offset["+i+"]",sps_ladf_qp_offset[i],null)));
-				sps_ladf_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_ladf_delta_threshold_minus1["+i+"]",sps_ladf_delta_threshold_minus1[i],null)));
+				sps_ladf_enabled_flagNode.add(new KVP("sps_ladf_qp_offset["+i+"]",sps_ladf_qp_offset[i]));
+				sps_ladf_enabled_flagNode.add(new KVP("sps_ladf_delta_threshold_minus1["+i+"]",sps_ladf_delta_threshold_minus1[i]));
 			}
 		}
 		
-		final DefaultMutableTreeNode sps_explicit_scaling_list_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_explicit_scaling_list_enabled_flag",sps_explicit_scaling_list_enabled_flag,null));
+		KVP sps_explicit_scaling_list_enabled_flagNode = new KVP("sps_explicit_scaling_list_enabled_flag",sps_explicit_scaling_list_enabled_flag);
 		t.add(sps_explicit_scaling_list_enabled_flagNode);
 		if (sps_lfnst_enabled_flag != 0 && sps_explicit_scaling_list_enabled_flag != 0) {
-			sps_explicit_scaling_list_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_scaling_matrix_for_lfnst_disabled_flag",sps_scaling_matrix_for_lfnst_disabled_flag,null)));
+			sps_explicit_scaling_list_enabled_flagNode.add(new KVP("sps_scaling_matrix_for_lfnst_disabled_flag",sps_scaling_matrix_for_lfnst_disabled_flag));
 		}
 		if (sps_act_enabled_flag != 0 && sps_explicit_scaling_list_enabled_flag != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_matrix_for_alternative_colour_space_disabled_flag",sps_scaling_matrix_for_alternative_colour_space_disabled_flag,null)));
+			t.add(new KVP("sps_scaling_matrix_for_alternative_colour_space_disabled_flag",sps_scaling_matrix_for_alternative_colour_space_disabled_flag));
 		}
 		if (sps_scaling_matrix_for_alternative_colour_space_disabled_flag != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("sps_scaling_matrix_designated_colour_space_flag",sps_scaling_matrix_designated_colour_space_flag,null)));
+			t.add(new KVP("sps_scaling_matrix_designated_colour_space_flag",sps_scaling_matrix_designated_colour_space_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("sps_dep_quant_enabled_flag",sps_dep_quant_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sps_sign_data_hiding_enabled_flag",sps_sign_data_hiding_enabled_flag,null)));
-		final DefaultMutableTreeNode sps_virtual_boundaries_enabled_flagNode = new DefaultMutableTreeNode(new KVP("sps_virtual_boundaries_enabled_flag",sps_virtual_boundaries_enabled_flag,null));
+		t.add(new KVP("sps_dep_quant_enabled_flag",sps_dep_quant_enabled_flag));
+		t.add(new KVP("sps_sign_data_hiding_enabled_flag",sps_sign_data_hiding_enabled_flag));
+		KVP sps_virtual_boundaries_enabled_flagNode = new KVP("sps_virtual_boundaries_enabled_flag",sps_virtual_boundaries_enabled_flag);
 		t.add(sps_virtual_boundaries_enabled_flagNode);
 
 		
 		
 		if (sps_virtual_boundaries_enabled_flag != 0) {
-			final DefaultMutableTreeNode sps_virtual_boundaries_present_flagNode = new DefaultMutableTreeNode(new KVP("sps_virtual_boundaries_present_flag",sps_virtual_boundaries_present_flag,null));
+			KVP sps_virtual_boundaries_present_flagNode = new KVP("sps_virtual_boundaries_present_flag",sps_virtual_boundaries_present_flag);
 			sps_virtual_boundaries_enabled_flagNode.add(sps_virtual_boundaries_present_flagNode);
 			if (sps_virtual_boundaries_present_flag != 0) {
-				sps_virtual_boundaries_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_num_ver_virtual_boundaries",sps_num_ver_virtual_boundaries,null)));
+				sps_virtual_boundaries_enabled_flagNode.add(new KVP("sps_num_ver_virtual_boundaries",sps_num_ver_virtual_boundaries));
 				for (int i = 0; i < sps_num_ver_virtual_boundaries; i++) {
-					sps_virtual_boundaries_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_virtual_boundary_pos_x_minus1["+i+"]",sps_virtual_boundary_pos_x_minus1[i],null)));
+					sps_virtual_boundaries_enabled_flagNode.add(new KVP("sps_virtual_boundary_pos_x_minus1["+i+"]",sps_virtual_boundary_pos_x_minus1[i]));
 				}
-				sps_virtual_boundaries_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_num_hor_virtual_boundaries",sps_num_hor_virtual_boundaries,null)));
+				sps_virtual_boundaries_enabled_flagNode.add(new KVP("sps_num_hor_virtual_boundaries",sps_num_hor_virtual_boundaries));
 				for (int i = 0; i < sps_num_hor_virtual_boundaries; i++) {
-					sps_virtual_boundaries_enabled_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_virtual_boundary_pos_y_minus1["+i+"]",sps_virtual_boundary_pos_y_minus1[i],null)));
+					sps_virtual_boundaries_enabled_flagNode.add(new KVP("sps_virtual_boundary_pos_y_minus1["+i+"]",sps_virtual_boundary_pos_y_minus1[i]));
 				}
 			}
 		}			
 
 		
 		if (sps_ptl_dpb_hrd_params_present_flag != 0) {
-			final DefaultMutableTreeNode sps_timing_hrd_params_present_flagNode = new DefaultMutableTreeNode(new KVP("sps_timing_hrd_params_present_flag",sps_timing_hrd_params_present_flag,null));
+			KVP sps_timing_hrd_params_present_flagNode = new KVP("sps_timing_hrd_params_present_flag",sps_timing_hrd_params_present_flag);
 			t.add(sps_timing_hrd_params_present_flagNode);
 			if (sps_timing_hrd_params_present_flag != 0) {
 				sps_timing_hrd_params_present_flagNode.add(general_timing_hrd_parameters.getJTreeNode(modus));
 				if (sps_max_sublayers_minus1 > 0) {
-					sps_timing_hrd_params_present_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_sublayer_cpb_params_present_flag",sps_sublayer_cpb_params_present_flag,null)));
+					sps_timing_hrd_params_present_flagNode.add(new KVP("sps_sublayer_cpb_params_present_flag",sps_sublayer_cpb_params_present_flag));
 				}
 				sps_timing_hrd_params_present_flagNode.add(ols_timing_hrd_parameters.getJTreeNode(modus));
 			}
 		}			
 
-		t.add(new DefaultMutableTreeNode(new KVP("sps_field_seq_flag",sps_field_seq_flag,null)));
-		final DefaultMutableTreeNode sps_vui_parameters_present_flagNode = new DefaultMutableTreeNode(new KVP("sps_vui_parameters_present_flag",sps_vui_parameters_present_flag,null));
+		t.add(new KVP("sps_field_seq_flag",sps_field_seq_flag));
+		KVP sps_vui_parameters_present_flagNode = new KVP("sps_vui_parameters_present_flag",sps_vui_parameters_present_flag);
 		t.add(sps_vui_parameters_present_flagNode);
 		
 		if (sps_vui_parameters_present_flag != 0) {
-			sps_vui_parameters_present_flagNode.add(new DefaultMutableTreeNode(new KVP("sps_vui_payload_size_minus1",sps_vui_payload_size_minus1,null)));
+			sps_vui_parameters_present_flagNode.add(new KVP("sps_vui_payload_size_minus1",sps_vui_payload_size_minus1));
 			sps_vui_parameters_present_flagNode.add(vuiParameters.getJTreeNode(modus));
 		}
 		

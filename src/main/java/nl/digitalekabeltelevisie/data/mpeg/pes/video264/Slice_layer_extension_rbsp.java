@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -74,18 +72,18 @@ public class Slice_layer_extension_rbsp extends RBSP {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("slice_layer_extension_rbsp"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("slice_layer_extension_rbsp");
 		
 		if( svc_extension_flag == 1 ) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("svc_extension_flag == 1")));
+			t.add(GuiUtils.getNotImplementedKVP("svc_extension_flag == 1"));
 //			slice_header_in_scalable_extension( ) /* specified in Annex G */
 //			if( slice_skip_flag !=1 ){
 //				slice_data_in_scalable_extension( ) /* specified in Annex G */
 //			}
 		} else if( avc_3d_extension_flag == 1 ) {
 			//logger.warning("avc_3d_extension_flag == 1 not implemented");
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("avc_3d_extension_flag == 1")));
+			t.add(GuiUtils.getNotImplementedKVP("avc_3d_extension_flag == 1"));
 //			slice_header_in_3davc_extension( ) /* specified in Annex J */
 //			slice_data_in_3davc_extension( ) /* specified in Annex J */
 		} else {

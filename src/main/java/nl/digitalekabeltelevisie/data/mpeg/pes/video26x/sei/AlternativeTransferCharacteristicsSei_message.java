@@ -1,7 +1,5 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -26,10 +24,10 @@ public class AlternativeTransferCharacteristicsSei_message extends Sei_message {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("preferred_transfer_characteristics",
-				preferred_transfer_characteristics, getDescription(preferred_transfer_characteristics))));
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		s.add(new KVP("preferred_transfer_characteristics",
+				preferred_transfer_characteristics, getDescription(preferred_transfer_characteristics)));
 
 		return s;
 	}

@@ -27,10 +27,11 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.AbstractNALUnit;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Filler_data_rbsp;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Sei_rbsp;
 
 public class H265NALUnit extends AbstractNALUnit implements TreeNode {
 
@@ -57,18 +58,19 @@ public class H265NALUnit extends AbstractNALUnit implements TreeNode {
 		createRBSP();
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NALUnit ("+nal_unit_type.name()+" "+ nal_unit_type.getDescription()+")"));
-		t.add(new DefaultMutableTreeNode(new KVP("bytes",bytes,offset,numBytesInNALunit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("numBytesInNALunit",numBytesInNALunit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("forbidden_zero_bit",forbidden_zero_bit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("nal_unit_type",nal_unit_type.getType(),nal_unit_type.getDescription())));
-		t.add(new DefaultMutableTreeNode(new KVP("nuh_layer_id",nuh_layer_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("nuh_temporal_id_plus1",nuh_temporal_id_plus1,null)));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("NALUnit (" + nal_unit_type.name() + " " + nal_unit_type.getDescription() + ")");
+		t.add(new KVP("bytes", bytes, offset, numBytesInNALunit));
+		t.add(new KVP("numBytesInNALunit", numBytesInNALunit));
+		t.add(new KVP("forbidden_zero_bit", forbidden_zero_bit));
+		t.add(new KVP("nal_unit_type", nal_unit_type.getType(), nal_unit_type.getDescription()));
+		t.add(new KVP("nuh_layer_id", nuh_layer_id));
+		t.add(new KVP("nuh_temporal_id_plus1", nuh_temporal_id_plus1));
 
-		t.add(new DefaultMutableTreeNode(new KVP("rbsp_byte",rbsp_byte,0,numBytesInRBSP,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("NumBytesInRBSP",numBytesInRBSP,null)));
-		if(rbsp!=null){
+		t.add(new KVP("rbsp_byte", rbsp_byte, 0, numBytesInRBSP));
+		t.add(new KVP("NumBytesInRBSP", numBytesInRBSP));
+		if (rbsp != null) {
 			t.add(rbsp.getJTreeNode(modus));
 		}
 		return t;

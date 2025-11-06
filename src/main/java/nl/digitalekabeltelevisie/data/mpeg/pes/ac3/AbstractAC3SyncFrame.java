@@ -223,10 +223,8 @@ public class AbstractAC3SyncFrame {
 	public static String getFrmsizecodString(final int fscod, final int frmsizecod) {
 		if((fscod>=0) && (fscod<3) && (frmsizecod>=0) && (frmsizecod <=37)){
 			return "Nominal bit rate: "+ac3_bitrate_index[frmsizecod>>>1]+", words/syncframe: "+ac3_size_table[fscod][frmsizecod];
-		}else{
-			return "illegal values for fscod: "+fscod+" or frmsizecod: "+frmsizecod;
 		}
-
+		return "illegal values for fscod: "+fscod+" or frmsizecod: "+frmsizecod;
 	}
 
 	public static String getBsModString(final int bsmod, final int acmod) {

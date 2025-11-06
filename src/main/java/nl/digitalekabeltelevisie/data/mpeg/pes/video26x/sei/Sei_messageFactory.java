@@ -45,7 +45,7 @@ public class Sei_messageFactory {
 
 	public static List<Sei_message> buildSei_messageList(BitSource bitSource){
 
-		sei_messages = new ArrayList<Sei_message>();
+		sei_messages = new ArrayList<>();
 		while((bitSource.available()>=8)&&( bitSource.nextBits(8)!= 0x80)){ // 0x80
 			// TODO implement fall back } catch (final RuntimeException iae) {
 			// in case there is an error in our code (constructor of a Sei_message), OR the stream is invalid.

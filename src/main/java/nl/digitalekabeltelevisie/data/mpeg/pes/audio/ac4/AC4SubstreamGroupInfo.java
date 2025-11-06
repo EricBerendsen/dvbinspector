@@ -33,8 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -73,12 +71,13 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 			this.ac4_substream_info_chan = ac4_substream_info_chan;
 		}
 
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("channel__coded_substream"));
-			t.add(new DefaultMutableTreeNode(new KVP("sus_ver",sus_ver,null)));
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("channel__coded_substream");
+			t.add(new KVP("sus_ver", sus_ver));
 			t.add(ac4_substream_info_chan.getJTreeNode(modus));
 			if (b_hsf_ext == 1) {
-				t.add(ac4HsfExtSubstreamInfo.getJTreeNode(modus));				
+				t.add(ac4HsfExtSubstreamInfo.getJTreeNode(modus));
 			}
 
 			return t;
@@ -99,16 +98,16 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 		private Ac4HsfExtSubstreamInfo ac4HsfExtSubstreamInfo;
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("substream"));
-			t.add(new DefaultMutableTreeNode(new KVP("b_ajoc",b_ajoc,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("substream");
+			t.add(new KVP("b_ajoc", b_ajoc));
 			if (b_ajoc == 1) {
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("ac4_substream_info_ajoc")));
-			}else {
+				t.add(GuiUtils.getNotImplementedKVP("ac4_substream_info_ajoc"));
+			} else {
 				t.add(ac4_substream_info_obj.getJTreeNode(modus));
 			}
 			if (b_hsf_ext == 1) {
-				t.add(ac4HsfExtSubstreamInfo.getJTreeNode(modus));				
+				t.add(ac4HsfExtSubstreamInfo.getJTreeNode(modus));
 			}
 
 			return t;
@@ -236,31 +235,31 @@ public class AC4SubstreamGroupInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_substream_group_info"));
-		t.add(new DefaultMutableTreeNode(new KVP("b_substreams_present",b_substreams_present,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("b_hsf_ext",b_hsf_ext,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("b_single_substream",b_single_substream,b_single_substream == 1?"n_lf_substreams = 1":null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ac4_substream_group_info");
+		t.add(new KVP("b_substreams_present", b_substreams_present));
+		t.add(new KVP("b_hsf_ext", b_hsf_ext));
+		t.add(new KVP("b_single_substream", b_single_substream, b_single_substream == 1 ? "n_lf_substreams = 1" : null));
 
 		if (b_single_substream != 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("n_lf_substreams_minus2",n_lf_substreams_minus2,"n_lf_substreams = "+n_lf_substreams)));
+			t.add(new KVP("n_lf_substreams_minus2", n_lf_substreams_minus2, "n_lf_substreams = " + n_lf_substreams));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("b_channel_coded",b_channel_coded,b_channel_coded==1?"substreams contain channel-based audio":null)));
+		t.add(new KVP("b_channel_coded", b_channel_coded, b_channel_coded == 1 ? "substreams contain channel-based audio" : null));
 		if (b_channel_coded == 1) {
 			addListJTree(t, channel_coded_substreams, modus, "channel coded substreams");
 			// TODO if (b_hsf_ext) {
 			// ac4_hsf_ext_substream_info(b_substreams_present); not implemented
 			// }
-		}else {
-			t.add(new DefaultMutableTreeNode(new KVP("b_oamd_substream",b_oamd_substream,null)));
-			if (b_oamd_substream ==1 ) {
+		} else {
+			t.add(new KVP("b_oamd_substream", b_oamd_substream));
+			if (b_oamd_substream == 1) {
 				t.add(oamd_substream_info.getJTreeNode(modus));
 			}
 			addListJTree(t, substreams, modus, "A-JOC coded/direct-coded substreams");
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("b_content_type",b_content_type,null)));
-		
-		if(b_content_type == 1) {
+		t.add(new KVP("b_content_type", b_content_type));
+
+		if (b_content_type == 1) {
 			t.add(content_type.getJTreeNode(modus));
 		}
 

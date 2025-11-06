@@ -39,8 +39,8 @@ import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 
 public class ViewContext {
 
-	private List<ChartLabel> shown = new ArrayList<ChartLabel>();
-	private List<ChartLabel> notShown = new ArrayList<ChartLabel>();
+	private List<ChartLabel> shown = new ArrayList<>();
+	private List<ChartLabel> notShown = new ArrayList<>();
 
 	private int startPacket ;
 	private int endPacket;

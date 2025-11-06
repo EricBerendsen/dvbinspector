@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
@@ -46,8 +44,8 @@ public class Picture_header_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("picture_header_rbsp"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("picture_header_rbsp");
 		t.add(picture_header_structure.getJTreeNode(modus));
 		return t;
 	}

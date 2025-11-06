@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.Sei_message;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei.Sei_messageFactory;
@@ -57,8 +55,8 @@ public class Sei_rbsp extends RBSP {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("sei_rbsp"));
+	public KVP getJTreeNode(final int modus) {
+		KVP s= new KVP("sei_rbsp");
 		addListJTree(s,sei_messages,modus,"sei_messages");
 		return s;
 	}

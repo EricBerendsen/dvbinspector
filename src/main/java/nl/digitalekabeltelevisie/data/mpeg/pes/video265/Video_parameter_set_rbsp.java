@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -129,55 +127,55 @@ public class Video_parameter_set_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Video_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_video_parameter_set_id",vps_video_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_base_layer_internal_flag",vps_base_layer_internal_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_base_layer_available_flag",vps_base_layer_available_flag,getBaseLayerDescription(vps_base_layer_internal_flag,vps_base_layer_available_flag))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Video_parameter_set_rbsp");
+		t.add(new KVP("vps_video_parameter_set_id",vps_video_parameter_set_id));
+		t.add(new KVP("vps_base_layer_internal_flag",vps_base_layer_internal_flag));
+		t.add(new KVP("vps_base_layer_available_flag",vps_base_layer_available_flag,getBaseLayerDescription(vps_base_layer_internal_flag,vps_base_layer_available_flag)));
 
 
-		t.add(new DefaultMutableTreeNode(new KVP("vps_max_layers_minus1",vps_max_layers_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_max_sub_layers_minus1",vps_max_sub_layers_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_temporal_id_nesting_flag",vps_temporal_id_nesting_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_reserved_0xffff_16bits",vps_reserved_0xffff_16bits,null)));
+		t.add(new KVP("vps_max_layers_minus1",vps_max_layers_minus1));
+		t.add(new KVP("vps_max_sub_layers_minus1",vps_max_sub_layers_minus1));
+		t.add(new KVP("vps_temporal_id_nesting_flag",vps_temporal_id_nesting_flag));
+		t.add(new KVP("vps_reserved_0xffff_16bits",vps_reserved_0xffff_16bits));
 		t.add(profile_tier_level.getJTreeNode(modus));
 
 
-		t.add(new DefaultMutableTreeNode(new KVP("vps_sub_layer_ordering_info_present_flag",vps_sub_layer_ordering_info_present_flag,null)));
+		t.add(new KVP("vps_sub_layer_ordering_info_present_flag",vps_sub_layer_ordering_info_present_flag));
 
 
 		for(int i = ( (vps_sub_layer_ordering_info_present_flag!=0) ? 0 : vps_max_sub_layers_minus1 ); i <= vps_max_sub_layers_minus1; i++ ) {
-			t.add(new DefaultMutableTreeNode(new KVP("vps_max_dec_pic_buffering_minus1["+i+"]",vps_max_dec_pic_buffering_minus1[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("vps_max_num_reorder_pics["+i+"]",vps_max_num_reorder_pics[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("vps_max_latency_increase_plus1["+i+"]",vps_max_latency_increase_plus1[i],null)));
+			t.add(new KVP("vps_max_dec_pic_buffering_minus1["+i+"]",vps_max_dec_pic_buffering_minus1[i]));
+			t.add(new KVP("vps_max_num_reorder_pics["+i+"]",vps_max_num_reorder_pics[i]));
+			t.add(new KVP("vps_max_latency_increase_plus1["+i+"]",vps_max_latency_increase_plus1[i]));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("vps_max_layer_id",vps_max_layer_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vps_num_layer_sets_minus1",vps_num_layer_sets_minus1,null)));
+		t.add(new KVP("vps_max_layer_id",vps_max_layer_id));
+		t.add(new KVP("vps_num_layer_sets_minus1",vps_num_layer_sets_minus1));
 		for(int i = 1; i <= vps_num_layer_sets_minus1; i++ ){
 			for(int j = 0; j <= vps_max_layer_id; j++ ){
-				t.add(new DefaultMutableTreeNode(new KVP("layer_id_included_flag["+i+"]["+j+"]",layer_id_included_flag[i][j],null)));
+				t.add(new KVP("layer_id_included_flag["+i+"]["+j+"]",layer_id_included_flag[i][j]));
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("vps_timing_info_present_flag",vps_timing_info_present_flag,null)));
+		t.add(new KVP("vps_timing_info_present_flag",vps_timing_info_present_flag));
 		if( vps_timing_info_present_flag!=0 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("vps_num_units_in_tick",vps_num_units_in_tick,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("vps_time_scale",vps_time_scale,getClockTickString(vps_num_units_in_tick, vps_time_scale))));
-			t.add(new DefaultMutableTreeNode(new KVP("vps_poc_proportional_to_timing_flag",vps_poc_proportional_to_timing_flag,null)));
+			t.add(new KVP("vps_num_units_in_tick",vps_num_units_in_tick));
+			t.add(new KVP("vps_time_scale",vps_time_scale,getClockTickString(vps_num_units_in_tick, vps_time_scale)));
+			t.add(new KVP("vps_poc_proportional_to_timing_flag",vps_poc_proportional_to_timing_flag));
 			if( vps_poc_proportional_to_timing_flag!=0 ){
-				t.add(new DefaultMutableTreeNode(new KVP("vps_num_ticks_poc_diff_one_minus1",vps_num_ticks_poc_diff_one_minus1,null)));
+				t.add(new KVP("vps_num_ticks_poc_diff_one_minus1",vps_num_ticks_poc_diff_one_minus1));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("vps_num_hrd_parameters",vps_num_hrd_parameters,null)));
+			t.add(new KVP("vps_num_hrd_parameters",vps_num_hrd_parameters));
 			for(int i = 0; i < vps_num_hrd_parameters; i++ ) {
-				t.add(new DefaultMutableTreeNode(new KVP("hrd_layer_set_idx["+i+"]",hrd_layer_set_idx[i],null)));
+				t.add(new KVP("hrd_layer_set_idx["+i+"]",hrd_layer_set_idx[i]));
 				if( i > 0 ){
 					cprms_present_flag[ i ] = bitSource.u(1);
-					t.add(new DefaultMutableTreeNode(new KVP("cprms_present_flag["+i+"]",cprms_present_flag[i],null)));
+					t.add(new KVP("cprms_present_flag["+i+"]",cprms_present_flag[i]));
 				}
 				t.add(hrd_parameters[i].getJTreeNode(modus));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("vps_extension_flag",vps_extension_flag,null)));
+			t.add(new KVP("vps_extension_flag",vps_extension_flag));
 			if(vps_extension_flag!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("vps_extension_data_flag")));
+				t.add(GuiUtils.getNotImplementedKVP("vps_extension_data_flag"));
 				return t;
 			}
 		}

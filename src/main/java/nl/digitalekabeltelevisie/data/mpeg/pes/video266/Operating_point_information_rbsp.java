@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
@@ -63,16 +61,16 @@ public class Operating_point_information_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("operating_point_information_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("opi_ols_info_present_flag",opi_ols_info_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("opi_htid_info_present_flag",opi_htid_info_present_flag,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("operating_point_information_rbsp");
+		t.add(new KVP("opi_ols_info_present_flag", opi_ols_info_present_flag));
+		t.add(new KVP("opi_htid_info_present_flag", opi_htid_info_present_flag));
 		if (opi_ols_info_present_flag != 0)
-			t.add(new DefaultMutableTreeNode(new KVP("opi_ols_idx",opi_ols_idx,null)));
+			t.add(new KVP("opi_ols_idx", opi_ols_idx));
 		if (opi_htid_info_present_flag != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("opi_htid_plus1",opi_htid_plus1,null)));
+			t.add(new KVP("opi_htid_plus1", opi_htid_plus1));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("opi_extension_flag",opi_extension_flag,null)));
+		t.add(new KVP("opi_extension_flag", opi_extension_flag));
 		return t;
 	}
 

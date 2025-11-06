@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -125,52 +123,52 @@ public class VUIParameters implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("vui_parameters(payloadSize:"+payloadSize+")"));
-		t.add(new DefaultMutableTreeNode(new KVP("vui_progressive_source_flag",vui_progressive_source_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vui_interlaced_source_flag",vui_interlaced_source_flag,getSourceFlagsDescription(vui_progressive_source_flag,vui_interlaced_source_flag))));
-		t.add(new DefaultMutableTreeNode(new KVP("vui_non_packed_constraint_flag",vui_non_packed_constraint_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("vui_non_projected_constraint_flag",vui_non_projected_constraint_flag,null)));
+		KVP t = new KVP("vui_parameters(payloadSize:"+payloadSize+")");
+		t.add(new KVP("vui_progressive_source_flag",vui_progressive_source_flag));
+		t.add(new KVP("vui_interlaced_source_flag",vui_interlaced_source_flag,getSourceFlagsDescription(vui_progressive_source_flag,vui_interlaced_source_flag)));
+		t.add(new KVP("vui_non_packed_constraint_flag",vui_non_packed_constraint_flag));
+		t.add(new KVP("vui_non_projected_constraint_flag",vui_non_projected_constraint_flag));
 
-		final DefaultMutableTreeNode vui_aspect_ratio_info_present_flag_node = new DefaultMutableTreeNode(new KVP("vui_aspect_ratio_info_present_flag",vui_aspect_ratio_info_present_flag,null));
+		KVP vui_aspect_ratio_info_present_flag_node = new KVP("vui_aspect_ratio_info_present_flag",vui_aspect_ratio_info_present_flag);
 
 		t.add(vui_aspect_ratio_info_present_flag_node);
 		if (vui_aspect_ratio_info_present_flag != 0) {
-			vui_aspect_ratio_info_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_aspect_ratio_constant_flag",vui_aspect_ratio_constant_flag,null)));
-			final DefaultMutableTreeNode vui_aspect_ratio_idcNode = new DefaultMutableTreeNode(new KVP("vui_aspect_ratio_idc",vui_aspect_ratio_idc,null));
+			vui_aspect_ratio_info_present_flag_node.add(new KVP("vui_aspect_ratio_constant_flag",vui_aspect_ratio_constant_flag));
+			KVP vui_aspect_ratio_idcNode = new KVP("vui_aspect_ratio_idc",vui_aspect_ratio_idc);
 			vui_aspect_ratio_info_present_flag_node.add(vui_aspect_ratio_idcNode);
 			
 			if (vui_aspect_ratio_idc == 255) {
-				vui_aspect_ratio_idcNode.add(new DefaultMutableTreeNode(new KVP("vui_sar_width",vui_sar_width,null)));
-				vui_aspect_ratio_idcNode.add(new DefaultMutableTreeNode(new KVP("vui_sar_height",vui_sar_height,null)));
+				vui_aspect_ratio_idcNode.add(new KVP("vui_sar_width",vui_sar_width));
+				vui_aspect_ratio_idcNode.add(new KVP("vui_sar_height",vui_sar_height));
 			}
 		}
 		
-		final DefaultMutableTreeNode vui_overscan_info_present_flag_node = new DefaultMutableTreeNode(new KVP("vui_overscan_info_present_flag",vui_overscan_info_present_flag,null));
+		KVP vui_overscan_info_present_flag_node = new KVP("vui_overscan_info_present_flag",vui_overscan_info_present_flag);
 		t.add(vui_overscan_info_present_flag_node);
 		if (vui_overscan_info_present_flag != 0) {
-			vui_overscan_info_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_overscan_appropriate_flag",vui_overscan_appropriate_flag,null)));
+			vui_overscan_info_present_flag_node.add(new KVP("vui_overscan_appropriate_flag",vui_overscan_appropriate_flag));
 		}
 
-		final DefaultMutableTreeNode vui_colour_description_present_flag_node = new DefaultMutableTreeNode(new KVP("vui_colour_description_present_flag",vui_colour_description_present_flag,null));
+		KVP vui_colour_description_present_flag_node = new KVP("vui_colour_description_present_flag",vui_colour_description_present_flag);
 		t.add(vui_colour_description_present_flag_node);
 		if (vui_colour_description_present_flag != 0) {
-			vui_colour_description_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_colour_primaries",vui_colour_primaries,colour_primaries_list.get(vui_colour_primaries))));
-			vui_colour_description_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_transfer_characteristics",vui_transfer_characteristics,null)));
-			vui_colour_description_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_matrix_coeffs",vui_matrix_coeffs,null)));
-			vui_colour_description_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_full_range_flag",vui_full_range_flag,null)));
+			vui_colour_description_present_flag_node.add(new KVP("vui_colour_primaries",vui_colour_primaries,colour_primaries_list.get(vui_colour_primaries)));
+			vui_colour_description_present_flag_node.add(new KVP("vui_transfer_characteristics",vui_transfer_characteristics));
+			vui_colour_description_present_flag_node.add(new KVP("vui_matrix_coeffs",vui_matrix_coeffs));
+			vui_colour_description_present_flag_node.add(new KVP("vui_full_range_flag",vui_full_range_flag));
 		}
 		
-		final DefaultMutableTreeNode vui_chroma_loc_info_present_flag_node = new DefaultMutableTreeNode(new KVP("vui_chroma_loc_info_present_flag",vui_chroma_loc_info_present_flag,null));
+		KVP vui_chroma_loc_info_present_flag_node = new KVP("vui_chroma_loc_info_present_flag",vui_chroma_loc_info_present_flag);
 		t.add(vui_chroma_loc_info_present_flag_node);
 
 		if (vui_chroma_loc_info_present_flag != 0) {
 			if (vui_progressive_source_flag != 0 && vui_interlaced_source_flag == 0) {
-				vui_chroma_loc_info_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_chroma_sample_loc_type_frame",vui_chroma_sample_loc_type_frame,null)));
+				vui_chroma_loc_info_present_flag_node.add(new KVP("vui_chroma_sample_loc_type_frame",vui_chroma_sample_loc_type_frame));
 			} else {
-				vui_chroma_loc_info_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_chroma_sample_loc_type_top_field",vui_chroma_sample_loc_type_top_field,null)));
-				vui_chroma_loc_info_present_flag_node.add(new DefaultMutableTreeNode(new KVP("vui_chroma_sample_loc_type_bottom_field",vui_chroma_sample_loc_type_bottom_field,null)));
+				vui_chroma_loc_info_present_flag_node.add(new KVP("vui_chroma_sample_loc_type_top_field",vui_chroma_sample_loc_type_top_field));
+				vui_chroma_loc_info_present_flag_node.add(new KVP("vui_chroma_sample_loc_type_bottom_field",vui_chroma_sample_loc_type_bottom_field));
 			}
 		}
 

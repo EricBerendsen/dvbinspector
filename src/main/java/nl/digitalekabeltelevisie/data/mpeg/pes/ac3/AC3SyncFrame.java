@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ac3;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -139,92 +137,92 @@ public class AC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("AC3 SyncFrame"));
-		s.add(new DefaultMutableTreeNode(new KVP("syncword",syncword,"must be 0x0B77")));
-		s.add(new DefaultMutableTreeNode(new KVP("crc1",crc1,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("fscod",fscod,"Sample rate code: "+getSampleRateCodeString(fscod))));
-		s.add(new DefaultMutableTreeNode(new KVP("frmsizecod",frmsizecod,"Frame size code: "+getFrmsizecodString(fscod, frmsizecod))));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("AC3 SyncFrame");
+		s.add(new KVP("syncword", syncword, "must be 0x0B77"));
+		s.add(new KVP("crc1", crc1));
+		s.add(new KVP("fscod", fscod, "Sample rate code: " + getSampleRateCodeString(fscod)));
+		s.add(new KVP("frmsizecod", frmsizecod, "Frame size code: " + getFrmsizecodString(fscod, frmsizecod)));
 
-		s.add(new DefaultMutableTreeNode(new KVP("bsid",bsid,getBsidString(bsid))));
-		s.add(new DefaultMutableTreeNode(new KVP("bsmod",bsmod,"Bit stream mode: "+getBsModString(bsmod, acmod))));
-		s.add(new DefaultMutableTreeNode(new KVP("acmod",acmod,"Audio coding mode: "+getACModString(acmod))));
-		if(((acmod & 0x1)!=0) && (acmod != 0x1)){ /* if 3 front channels */
-			s.add(new DefaultMutableTreeNode(new KVP("cmixlev",cmixlev,"Centre mix level: "+getCentreMixLevelString(cmixlev))));
+		s.add(new KVP("bsid", bsid, getBsidString(bsid)));
+		s.add(new KVP("bsmod", bsmod, "Bit stream mode: " + getBsModString(bsmod, acmod)));
+		s.add(new KVP("acmod", acmod, "Audio coding mode: " + getACModString(acmod)));
+		if (((acmod & 0x1) != 0) && (acmod != 0x1)) { /* if 3 front channels */
+			s.add(new KVP("cmixlev", cmixlev, "Centre mix level: " + getCentreMixLevelString(cmixlev)));
 		}
-		if((acmod & 0x4)!=0){ /* if a surround channel exists */
-			s.add(new DefaultMutableTreeNode(new KVP("surmixlev",surmixlev,"Surround mix level: "+getSurroundMixLevelString(surmixlev))));
+		if ((acmod & 0x4) != 0) { /* if a surround channel exists */
+			s.add(new KVP("surmixlev", surmixlev, "Surround mix level: " + getSurroundMixLevelString(surmixlev)));
 		}
-		if(acmod == 0x2){ /* if in 2/0 mode */
-			s.add(new DefaultMutableTreeNode(new KVP("dsurmod",dsurmod,"Dolby Surround mode: "+getDsurmodString(dsurmod))));
+		if (acmod == 0x2) { /* if in 2/0 mode */
+			s.add(new KVP("dsurmod", dsurmod, "Dolby Surround mode: " + getDsurmodString(dsurmod)));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("lfeon",lfeon,getLfeOnString(lfeon))));
+		s.add(new KVP("lfeon", lfeon, getLfeOnString(lfeon)));
 
-		s.add(new DefaultMutableTreeNode(new KVP("dialnorm",dialnorm,getDialNormString(dialnorm))));
-		s.add(new DefaultMutableTreeNode(new KVP("compre",compre,getCompreString(compre))));
-		if(compre==1){
-			s.add(new DefaultMutableTreeNode(new KVP("compr",compr,"Compression gain word")));
+		s.add(new KVP("dialnorm", dialnorm, getDialNormString(dialnorm)));
+		s.add(new KVP("compre", compre, getCompreString(compre)));
+		if (compre == 1) {
+			s.add(new KVP("compr", compr, "Compression gain word"));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("langcode",langcode,langcode==1?"Language code exists":"langcod does not exist in the bit stream")));
-		if(langcode==1){
-			s.add(new DefaultMutableTreeNode(new KVP("langcod",langcod,null)));
+		s.add(new KVP("langcode", langcode, langcode == 1 ? "Language code exists" : "langcod does not exist in the bit stream"));
+		if (langcode == 1) {
+			s.add(new KVP("langcod", langcod));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("audprodie",audprodie,audprodie==1?"mixlevel and roomtyp fields exist":"No audio production information exists")));
-		if(audprodie==1){
-			s.add(new DefaultMutableTreeNode(new KVP("mixlevel",mixlevel,"Mixing level: "+(80+mixlevel)+" dB")));
-			s.add(new DefaultMutableTreeNode(new KVP("roomtyp","Room type: "+roomtyp,getRoomTypeString(roomtyp))));
+		s.add(new KVP("audprodie", audprodie, audprodie == 1 ? "mixlevel and roomtyp fields exist" : "No audio production information exists"));
+		if (audprodie == 1) {
+			s.add(new KVP("mixlevel", mixlevel, "Mixing level: " + (80 + mixlevel) + " dB"));
+			s.add(new KVP("roomtyp", "Room type: " + roomtyp, getRoomTypeString(roomtyp)));
 		}
 		if(acmod == 0){ /* if 1+1 mode (dual mono, so some items need a second value) */
-			s.add(new DefaultMutableTreeNode(new KVP("dialnorm2",dialnorm2,getDialNormString(dialnorm2))));
-			s.add(new DefaultMutableTreeNode(new KVP("compre2",compr2e,compr2e==1?"Compression gain word exists":"No compression gain word exists")));
+			s.add(new KVP("dialnorm2",dialnorm2,getDialNormString(dialnorm2)));
+			s.add(new KVP("compre2",compr2e,compr2e==1?"Compression gain word exists":"No compression gain word exists"));
 			if(compr2e==1){
-				s.add(new DefaultMutableTreeNode(new KVP("compr2",compr2,"Compression gain word")));
+				s.add(new KVP("compr2",compr2,"Compression gain word"));
 			}
-			s.add(new DefaultMutableTreeNode(new KVP("langcod2e",langcod2e,"Language code exists")));
+			s.add(new KVP("langcod2e",langcod2e,"Language code exists"));
 			if(langcod2e==1){
-				s.add(new DefaultMutableTreeNode(new KVP("langcod2",langcod2,null)));
+				s.add(new KVP("langcod2",langcod2));
 			}
-			s.add(new DefaultMutableTreeNode(new KVP("audprodi2e",audprodi2e,audprodi2e==1?"following two data fields exist indicating information about the audio production for Ch2":"No audio production information exists for Ch2")));
+			s.add(new KVP("audprodi2e",audprodi2e,audprodi2e==1?"following two data fields exist indicating information about the audio production for Ch2":"No audio production information exists for Ch2"));
 			if(audprodi2e==1){
-				s.add(new DefaultMutableTreeNode(new KVP("mixlevel2",mixlevel2,"peak mixing level during the final audio mixing session: "+(80+mixlevel2)+" dB")));
-				s.add(new DefaultMutableTreeNode(new KVP("roomtyp2",roomtyp2,getRoomTypeString(roomtyp))));
+				s.add(new KVP("mixlevel2",mixlevel2,"peak mixing level during the final audio mixing session: "+(80+mixlevel2)+" dB"));
+				s.add(new KVP("roomtyp2",roomtyp2,getRoomTypeString(roomtyp)));
 			}
 		}
 
-		s.add(new DefaultMutableTreeNode(new KVP("copyrightb",copyrightb,copyrightb==1?"protected by copyright":"not indicated as protected")));
-		s.add(new DefaultMutableTreeNode(new KVP("origbs",origbs,origbs==1?"original bit stream":"copy of another bit stream")));
+		s.add(new KVP("copyrightb",copyrightb,copyrightb==1?"protected by copyright":"not indicated as protected"));
+		s.add(new KVP("origbs",origbs,origbs==1?"original bit stream":"copy of another bit stream"));
 		if(bsid!=6){ // normal syntax
 
-			s.add(new DefaultMutableTreeNode(new KVP("timecod1e",timecod1e,null)));
+			s.add(new KVP("timecod1e",timecod1e));
 			if(timecod1e==1) {
-				s.add(new DefaultMutableTreeNode(new KVP("timecod1",timecod1,null)));
+				s.add(new KVP("timecod1",timecod1));
 			}
-			s.add(new DefaultMutableTreeNode(new KVP("timecod2e",timecod2e,null)));
+			s.add(new KVP("timecod2e",timecod2e));
 			if(timecod2e==1) {
-				s.add(new DefaultMutableTreeNode(new KVP("timecod2",timecod2,null)));
+				s.add(new KVP("timecod2",timecod2));
 			}
 		}else{  // Alternate bit stream syntax
-			s.add(new DefaultMutableTreeNode(new KVP("xbsi1e",xbsi1e,"Extra bitstream information #1 "+doesExistString(xbsi1e))));
+			s.add(new KVP("xbsi1e",xbsi1e,"Extra bitstream information #1 "+doesExistString(xbsi1e)));
 			if(xbsi1e==1){
-				s.add(new DefaultMutableTreeNode(new KVP("dmixmod",dmixmod,"Preferred stereo downmix mode: "+getDmixmodString(dmixmod))));
-				s.add(new DefaultMutableTreeNode(new KVP("ltrtcmixlev",ltrtcmixlev,"Lt/Rt center mix level: "+getCmixlevString(ltrtcmixlev))));
-				s.add(new DefaultMutableTreeNode(new KVP("ltrtsurmixlev",ltrtsurmixlev,"Lt/Rt surround mix level: "+getSurmixlevString(ltrtsurmixlev))));
-				s.add(new DefaultMutableTreeNode(new KVP("lorocmixlev",lorocmixlev,"Lo/Ro center mix level: "+getCmixlevString(lorocmixlev))));
-				s.add(new DefaultMutableTreeNode(new KVP("lorosurmixlev",lorosurmixlev,"Lo/Ro surround mix level: "+getSurmixlevString(lorosurmixlev))));
+				s.add(new KVP("dmixmod",dmixmod,"Preferred stereo downmix mode: "+getDmixmodString(dmixmod)));
+				s.add(new KVP("ltrtcmixlev",ltrtcmixlev,"Lt/Rt center mix level: "+getCmixlevString(ltrtcmixlev)));
+				s.add(new KVP("ltrtsurmixlev",ltrtsurmixlev,"Lt/Rt surround mix level: "+getSurmixlevString(ltrtsurmixlev)));
+				s.add(new KVP("lorocmixlev",lorocmixlev,"Lo/Ro center mix level: "+getCmixlevString(lorocmixlev)));
+				s.add(new KVP("lorosurmixlev",lorosurmixlev,"Lo/Ro surround mix level: "+getSurmixlevString(lorosurmixlev)));
 			}
-			s.add(new DefaultMutableTreeNode(new KVP("xbsi2e",xbsi2e,"Extra bit stream information #2 "+doesExistString(xbsi2e))));
+			s.add(new KVP("xbsi2e",xbsi2e,"Extra bit stream information #2 "+doesExistString(xbsi2e)));
 			if(xbsi2e==1){
-				s.add(new DefaultMutableTreeNode(new KVP("dsurexmod",dsurexmod,"Dolby Surround EX mode: "+getDsurexmodString(dsurexmod))));
-				s.add(new DefaultMutableTreeNode(new KVP("dheadphonmod",dheadphonmod,"Dolby Headphone mode: "+getDheadphonmodString(dheadphonmod))));
-				s.add(new DefaultMutableTreeNode(new KVP("adconvtyp",adconvtyp,"A/D converter type: "+(adconvtyp==1?"HDCD":"standard"))));
-				s.add(new DefaultMutableTreeNode(new KVP("xbsi2",xbsi2,"Extra bit stream information, reserved for future assignment. shall be set to 0")));
-				s.add(new DefaultMutableTreeNode(new KVP("encinfo",encinfo,"Encoder information, reserved for use by the encoder")));
+				s.add(new KVP("dsurexmod",dsurexmod,"Dolby Surround EX mode: "+getDsurexmodString(dsurexmod)));
+				s.add(new KVP("dheadphonmod",dheadphonmod,"Dolby Headphone mode: "+getDheadphonmodString(dheadphonmod)));
+				s.add(new KVP("adconvtyp",adconvtyp,"A/D converter type: "+(adconvtyp==1?"HDCD":"standard")));
+				s.add(new KVP("xbsi2",xbsi2,"Extra bit stream information, reserved for future assignment. shall be set to 0"));
+				s.add(new KVP("encinfo",encinfo,"Encoder information, reserved for use by the encoder"));
 			}
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("addbsie",addbsie,addbsie==1?"Additional bit stream information exists":"Additional bit stream information does not exist")));
+		s.add(new KVP("addbsie",addbsie,addbsie==1?"Additional bit stream information exists":"Additional bit stream information does not exist"));
 		if(addbsie==1)
 		{
-			s.add(new DefaultMutableTreeNode(new KVP("addbsil",addbsil,"Additional bit stream information length")));
+			s.add(new KVP("addbsil",addbsil,"Additional bit stream information length"));
 		}
 		return s;
 	}

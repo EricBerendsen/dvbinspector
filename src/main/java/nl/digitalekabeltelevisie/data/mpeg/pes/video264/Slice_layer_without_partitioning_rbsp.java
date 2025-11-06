@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
@@ -50,8 +48,8 @@ public class Slice_layer_without_partitioning_rbsp extends RBSP {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("slice_layer_without_partitioning_rbsp"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("slice_layer_without_partitioning_rbsp");
 		t.add(slice_header.getJTreeNode(modus));
 		return t;
 	}

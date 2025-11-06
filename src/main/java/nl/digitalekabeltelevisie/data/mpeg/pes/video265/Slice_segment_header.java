@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Slice_segment_header implements TreeNode {
@@ -53,14 +52,13 @@ public class Slice_segment_header implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("slice_segment_header"));
-		t.add(new DefaultMutableTreeNode(new KVP("first_slice_segment_in_pic_flag",first_slice_segment_in_pic_flag,null)));
-		if (nal_unit_type.getType() >= NALUnitType.BLA_W_LP.getType()
-				&& nal_unit_type.getType() <= NALUnitType.RSV_IRAP_VCL23.getType()) {
-			t.add(new DefaultMutableTreeNode(new KVP("no_output_of_prior_pics_flag",no_output_of_prior_pics_flag,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("slice_segment_header");
+		t.add(new KVP("first_slice_segment_in_pic_flag", first_slice_segment_in_pic_flag));
+		if (nal_unit_type.getType() >= NALUnitType.BLA_W_LP.getType() && nal_unit_type.getType() <= NALUnitType.RSV_IRAP_VCL23.getType()) {
+			t.add(new KVP("no_output_of_prior_pics_flag", no_output_of_prior_pics_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("slice_pic_parameter_set_id",slice_pic_parameter_set_id,null)));
+		t.add(new KVP("slice_pic_parameter_set_id", slice_pic_parameter_set_id));
 
 		return t;
 	}

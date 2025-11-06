@@ -42,8 +42,6 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.PesHeader;
@@ -320,7 +318,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			if((getPayloadUnitStartIndicator()==1)&&(getTransportScramblingControl()==0)){
 				final PesHeader pesHeaderView = getPesHeader();
 				if((pesHeaderView!=null)&&(pesHeaderView.isValidPesHeader())){
-					final DefaultMutableTreeNode treeNode = pesHeaderView.getJTreeNode(0);
+					KVP treeNode = pesHeaderView.getJTreeNode(0);
 					Utils.appendHeader(s, "Pes Header:", PES_HEADER_COLOR);
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					s.append("</span>");
@@ -352,29 +350,29 @@ public class TSPacket implements HTMLSource, TreeNode{
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
 		KVP kvp = new KVP(buildNodeLabel());
 		kvp.addHTMLSource(this, "TS Packet");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-		addMainPacketDetails(modus, t);
+
+		addMainPacketDetails(modus, kvp);
 		if(buffer.length>PAYLOAD_PACKET_LENGTH){
-			t.add(new DefaultMutableTreeNode(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH, null)));
+			kvp.add(new KVP("FEC/timestamp",buffer,PAYLOAD_PACKET_LENGTH ,buffer.length - PAYLOAD_PACKET_LENGTH));
 		}
-		return t;
+		return kvp;
 	}
 
-	protected void addMainPacketDetails(final int modus, final DefaultMutableTreeNode t) {
-		t.add(new DefaultMutableTreeNode(new KVP("sync_byte",getSyncByte() ,"Should be 0x47")));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_error_indicator",getTransportErrorIndicator() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("payload_unit_start_indicator",getPayloadUnitStartIndicator() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_priority",getTransportPriority() ,null)));
+	protected void addMainPacketDetails(int modus, KVP t) {
+		t.add(new KVP("sync_byte",getSyncByte() ,"Should be 0x47"));
+		t.add(new KVP("transport_error_indicator",getTransportErrorIndicator()));
+		t.add(new KVP("payload_unit_start_indicator",getPayloadUnitStartIndicator()));
+		t.add(new KVP("transport_priority",getTransportPriority()));
 
-		t.add(new DefaultMutableTreeNode(new KVP("PID",getPID() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",getTransportScramblingControl() ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_control",getAdaptationFieldControl() ,getAdaptationFieldControlString())));
+		t.add(new KVP("PID",getPID()));
+		t.add(new KVP("transport_scrambling_control",getTransportScramblingControl()));
+		t.add(new KVP("adaptation_field_control",getAdaptationFieldControl() ,getAdaptationFieldControlString()));
 
-		t.add(new DefaultMutableTreeNode(new KVP("continuity_counter",getContinuityCounter() ,null)));
+		t.add(new KVP("continuity_counter",getContinuityCounter()));
 
 		AdaptationField adaptationField = null;
 		try{
@@ -384,7 +382,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			}
 		}catch(RuntimeException re){ // might be some error in adaptation field, it is not well protected
 			adaptationField = null;
-			t.add(new DefaultMutableTreeNode(getErrorKVP(ERROR_PARSING_ADAPTATION_FIELD)));
+			t.add(getErrorKVP(ERROR_PARSING_ADAPTATION_FIELD));
 		}
 
 		if(hasPayload()) {
@@ -392,7 +390,7 @@ public class TSPacket implements HTMLSource, TreeNode{
 			if(adaptationField!=null){
 				payloadStart = 5+adaptationField.getAdaptation_field_length();
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("data_byte",buffer,payloadStart ,PAYLOAD_PACKET_LENGTH - payloadStart, null)));
+			t.add(new KVP("data_byte",buffer,payloadStart ,PAYLOAD_PACKET_LENGTH - payloadStart));
 			if((getPayloadUnitStartIndicator()==1)&&(getTransportScramblingControl()==0)){
 				final PesHeader pesHeaderView = getPesHeader();
 				if((pesHeaderView !=null)&&(pesHeaderView.isValidPesHeader())){

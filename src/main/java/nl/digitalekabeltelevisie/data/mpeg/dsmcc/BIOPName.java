@@ -32,8 +32,6 @@ import static java.util.Arrays.copyOfRange;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -44,20 +42,19 @@ import nl.digitalekabeltelevisie.util.Utils;
  */
 public class BIOPName implements TreeNode {
 
-	public record NameComponent(int id_length, byte[] id_data_byte, int kind_length,
-								byte[] kind_data_byte) implements TreeNode {
-			public NameComponent {
+	public record NameComponent(int id_length, byte[] id_data_byte, int kind_length, byte[] kind_data_byte) implements TreeNode {
+		public NameComponent {
 		}
 
-			public DefaultMutableTreeNode getJTreeNode(int modus) {
-				DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NameComponent"));
-				t.add(new DefaultMutableTreeNode(new KVP("id_length", id_length, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("id_data_byte", id_data_byte, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("kind_length", kind_length, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("kind_data_byte", kind_data_byte, null)));
-				return t;
-			}
-
+		@Override
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("NameComponent");
+			t.add(new KVP("id_length", id_length));
+			t.add(new KVP("id_data_byte", id_data_byte));
+			t.add(new KVP("kind_length", kind_length));
+			t.add(new KVP("kind_data_byte", kind_data_byte));
+			return t;
+		}
 
 	}
 
@@ -89,6 +86,7 @@ public class BIOPName implements TreeNode {
 	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 	 */
 
+	@Override
 	public KVP getJTreeNode(int modus) {
 		KVP t = new KVP("BIOP::Name");
 		t.add(new KVP("nameComponents_count",nameComponents_count));

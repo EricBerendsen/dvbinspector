@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -86,38 +84,38 @@ public class Subset_seq_parameter_set_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("seq_parameter_set_rbsp"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("seq_parameter_set_rbsp");
 		seqParameterSetData.addToJTree(t,modus);
 
 		int profile_idc = seqParameterSetData.getProfile_idc();
 		
 		if((profile_idc == 83) || (profile_idc == 86)) {
 			//seq_parameter_set_svc_extension( ) /* specified in Annex G */
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("seq_parameter_set_svc_extension")));
+			t.add(GuiUtils.getNotImplementedKVP("seq_parameter_set_svc_extension"));
 //			svc_vui_parameters_present_flag = bitSource.u(1);
 //			if(svc_vui_parameters_present_flag == 1){
 //				//svc_vui_parameters_extension( ) /* specified in Annex G */
 //				logger.warning("svc_vui_parameters_extension not implemented");
 //			}
 		}else if((profile_idc == 118) || (profile_idc == 128) || (profile_idc == 134)){
-			t.add(new DefaultMutableTreeNode(new KVP("bit_equal_to_one",bit_equal_to_one,null)));
+			t.add(new KVP("bit_equal_to_one",bit_equal_to_one));
 			t.add(seq_parameter_set_mvc_extension.getJTreeNode(modus,profile_idc));
-			t.add(new DefaultMutableTreeNode(new KVP("mvc_vui_parameters_present_flag",mvc_vui_parameters_present_flag,null)));
+			t.add(new KVP("mvc_vui_parameters_present_flag",mvc_vui_parameters_present_flag));
 			if(mvc_vui_parameters_present_flag == 1){
 				t.add(mvc_vui_parameters_extension.getJTreeNode(modus));
 			}
 		} else if(profile_idc == 138) {
-			t.add(new DefaultMutableTreeNode(new KVP("bit_equal_to_one",bit_equal_to_one,null)));
+			t.add(new KVP("bit_equal_to_one",bit_equal_to_one));
 			//seq_parameter_set_mvcd_extension( ) /* specified in Annex I */
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("seq_parameter_set_mvcd_extension")));
+			t.add(GuiUtils.getNotImplementedKVP("seq_parameter_set_mvcd_extension"));
 		} else if( profile_idc == 139 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("bit_equal_to_one",bit_equal_to_one,null)));
+			t.add(new KVP("bit_equal_to_one",bit_equal_to_one));
 			//seq_parameter_set_mvcd_extension( ) /* specified in Annex I */
 			//seq_parameter_set_3davc_extension( ) /* specified in Annex J */
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("seq_parameter_set_3davc_extension")));
+			t.add(GuiUtils.getNotImplementedKVP("seq_parameter_set_3davc_extension"));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("additional_extension2_flag",additional_extension2_flag,null)));
+		t.add(new KVP("additional_extension2_flag",additional_extension2_flag));
 		return t;
 	}
 

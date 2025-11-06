@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -70,13 +68,13 @@ public class DpdParameters implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
+	public KVP getJTreeNode(int modus) {
 		
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("dpb_parameters( MaxSubLayersMinus1="+maxSubLayersMinus1 +", , subLayerInfoFlag ="+subLayerInfoFlag+")"));
+		KVP t = new KVP("dpb_parameters( MaxSubLayersMinus1="+maxSubLayersMinus1 +", , subLayerInfoFlag ="+subLayerInfoFlag+")");
 		for (int i = (subLayerInfoFlag == 1 ? 0 : maxSubLayersMinus1); i <= maxSubLayersMinus1; i++) {
-			t.add(new DefaultMutableTreeNode(new KVP("dpb_max_dec_pic_buffering_minus1["+i+"]",dpb_max_dec_pic_buffering_minus1[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("dpb_max_num_reorder_pics["+i+"]",dpb_max_num_reorder_pics[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("dpb_max_latency_increase_plus1["+i+"]",dpb_max_latency_increase_plus1[i],null)));
+			t.add(new KVP("dpb_max_dec_pic_buffering_minus1["+i+"]",dpb_max_dec_pic_buffering_minus1[i]));
+			t.add(new KVP("dpb_max_num_reorder_pics["+i+"]",dpb_max_num_reorder_pics[i]));
+			t.add(new KVP("dpb_max_latency_increase_plus1["+i+"]",dpb_max_latency_increase_plus1[i]));
 		}
 
 		return t;

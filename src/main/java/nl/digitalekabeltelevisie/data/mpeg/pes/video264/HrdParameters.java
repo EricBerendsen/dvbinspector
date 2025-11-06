@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -54,11 +52,11 @@ public class HrdParameters implements TreeNode {
 		private int cbr_flag;
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("CPB"));
-			t.add(new DefaultMutableTreeNode(new KVP("bit_rate_value_minus1",bit_rate_value_minus1,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("cpb_size_value_minus1",cpb_size_value_minus1,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("cbr_flag",cbr_flag,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("CPB");
+			t.add(new KVP("bit_rate_value_minus1", bit_rate_value_minus1));
+			t.add(new KVP("cpb_size_value_minus1", cpb_size_value_minus1));
+			t.add(new KVP("cbr_flag", cbr_flag));
 
 			return t;
 		}
@@ -68,7 +66,7 @@ public class HrdParameters implements TreeNode {
 	private int cpb_cnt_minus1;
 	private int bit_rate_scale;
 	private int cpb_size_scale;
-	private List<CPB> cpbs = new ArrayList<HrdParameters.CPB>();
+	private List<CPB> cpbs = new ArrayList<>();
 
 	private int initial_cpb_removal_delay_length_minus1;
 	private int cpb_removal_delay_length_minus1;
@@ -94,20 +92,19 @@ public class HrdParameters implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("hrd_parameters"));
-		t.add(new DefaultMutableTreeNode(new KVP("cpb_cnt_minus1",cpb_cnt_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("bit_rate_scale",bit_rate_scale,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cpb_size_scale",cpb_size_scale,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("hrd_parameters");
+		t.add(new KVP("cpb_cnt_minus1",cpb_cnt_minus1));
+		t.add(new KVP("bit_rate_scale",bit_rate_scale));
+		t.add(new KVP("cpb_size_scale",cpb_size_scale));
 		addListJTree(t,cpbs,modus,"CPBs");
 
-		t.add(new DefaultMutableTreeNode(new KVP("initial_cpb_removal_delay_length_minus1",initial_cpb_removal_delay_length_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cpb_removal_delay_length_minus1",cpb_removal_delay_length_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("dpb_output_delay_length_minus1",dpb_output_delay_length_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("time_offset_length",time_offset_length,null)));
+		t.add(new KVP("initial_cpb_removal_delay_length_minus1",initial_cpb_removal_delay_length_minus1));
+		t.add(new KVP("cpb_removal_delay_length_minus1",cpb_removal_delay_length_minus1));
+		t.add(new KVP("dpb_output_delay_length_minus1",dpb_output_delay_length_minus1));
+		t.add(new KVP("time_offset_length",time_offset_length));
 
 		return t;
 	}
-
 
 }

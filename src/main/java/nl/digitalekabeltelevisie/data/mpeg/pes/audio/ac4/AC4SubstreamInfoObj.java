@@ -29,11 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -171,59 +166,59 @@ public class AC4SubstreamInfoObj extends AC4SubstreamInfo implements TreeNode {
 		
 		
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_substream_info_obj"));
-		t.add(new DefaultMutableTreeNode(new KVP("n_objects_code",n_objects_code,n_objects_code_list.get(n_objects_code))));
-		t.add(new DefaultMutableTreeNode(new KVP("b_dynamic_objects",b_dynamic_objects,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ac4_substream_info_obj");
+		t.add(new KVP("n_objects_code",n_objects_code,n_objects_code_list.get(n_objects_code)));
+		t.add(new KVP("b_dynamic_objects",b_dynamic_objects));
 		
 		if (b_dynamic_objects==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("b_lfe",b_lfe,null)));
+			t.add(new KVP("b_lfe",b_lfe));
 		}else {
-			t.add(new DefaultMutableTreeNode(new KVP("b_bed_objects",b_bed_objects,null)));
+			t.add(new KVP("b_bed_objects",b_bed_objects));
 			if (b_bed_objects==1) {
-				t.add(new DefaultMutableTreeNode(new KVP("b_bed_start",b_bed_start,null)));
+				t.add(new KVP("b_bed_start",b_bed_start));
 				if (b_bed_start==1) {
-					t.add(new DefaultMutableTreeNode(new KVP("b_ch_assign_code",b_ch_assign_code,null)));
+					t.add(new KVP("b_ch_assign_code",b_ch_assign_code));
 					if (b_ch_assign_code==1) {
-						t.add(new DefaultMutableTreeNode(new KVP("bed_chan_assign_code",bed_chan_assign_code,bed_chan_assign_code_list.get(bed_chan_assign_code))));
+						t.add(new KVP("bed_chan_assign_code",bed_chan_assign_code,bed_chan_assign_code_list.get(bed_chan_assign_code)));
 					} else {
-						t.add(new DefaultMutableTreeNode(new KVP("b_nonstd_bed_channel_assignment",b_nonstd_bed_channel_assignment,null)));
+						t.add(new KVP("b_nonstd_bed_channel_assignment",b_nonstd_bed_channel_assignment));
 						if (b_nonstd_bed_channel_assignment == 1) {
-							t.add(new DefaultMutableTreeNode(new KVP("nonstd_bed_channel_assignment_mask",nonstd_bed_channel_assignment_mask,null)));
+							t.add(new KVP("nonstd_bed_channel_assignment_mask",nonstd_bed_channel_assignment_mask));
 						} else {
-							t.add(new DefaultMutableTreeNode(new KVP("std_bed_channel_assignment_mask",std_bed_channel_assignment_mask,null)));
+							t.add(new KVP("std_bed_channel_assignment_mask",std_bed_channel_assignment_mask));
 						}
 					}
 				}
 			} else { // (b_bed_objects!=1) {
-				t.add(new DefaultMutableTreeNode(new KVP("b_isf",b_isf,null)));
+				t.add(new KVP("b_isf",b_isf));
 				if (b_isf == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("b_isf_start",b_isf_start,null)));
+					t.add(new KVP("b_isf_start",b_isf_start));
 					if (b_isf_start == 1) {
-						t.add(new DefaultMutableTreeNode(new KVP("isf_config",isf_config,null)));
+						t.add(new KVP("isf_config",isf_config));
 					}
 				}	else {
-					t.add(new DefaultMutableTreeNode(new KVP("res_bytes",res_bytes,null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved_data",reserved_data,null)));
+					t.add(new KVP("res_bytes",res_bytes));
+					t.add(new KVP("reserved_data",reserved_data));
 				}
 			} // if (b_bed_objects==1)
 		}
 		
 		if (parentAc4Toc.getFs_index() == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("b_sf_multiplier",b_sf_multiplier,null)));
+			t.add(new KVP("b_sf_multiplier",b_sf_multiplier));
 			if (b_sf_multiplier == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("sf_multiplier",sf_multiplier,null)));
+				t.add(new KVP("sf_multiplier",sf_multiplier));
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("b_bitrate_info",b_bitrate_info,null)));
+		t.add(new KVP("b_bitrate_info",b_bitrate_info));
 		if (b_bitrate_info == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("bitrate_indicator",bitrate_indicator,null)));
+			t.add(new KVP("bitrate_indicator",bitrate_indicator));
 		}
 
 		addListJTree(t, b_audio_ndot_list, modus, "b_audio_ndots");
 		
 		if (b_substreams_present == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
+			t.add(new KVP("substream_index",substream_index));
 		}
 		return t;
 	}

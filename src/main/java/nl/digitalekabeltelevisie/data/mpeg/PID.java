@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -529,37 +528,36 @@ public class PID implements TreeNode{
 		this.parentTransportStream = parentTransportStream;
 	}
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final KVP kvp=new KVP("pid",getPid(),getLabelMaker().toString());
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP t=new KVP("pid",getPid(),getLabelMaker().toString());
 		if((generalPidHandler!=null)&&(!scrambled)){
-			final JMenuItem pesMenu = new JMenuItem(generalPidHandler.getMenuDescription());
+			JMenuItem pesMenu = new JMenuItem(generalPidHandler.getMenuDescription());
 			pesMenu.setActionCommand(DVBtree.PARSE);
-			kvp.setSubMenuAndOwner(pesMenu,this);
+			t.setSubMenuAndOwner(pesMenu,this);
 		}
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-
-		t.add(new DefaultMutableTreeNode(new KVP("packets",getPackets(),null)));
-		t.add(new DefaultMutableTreeNode(new KVP("duplicate packets",dup_packets,null)));
-		final KVP continuityErrorsKvp = new KVP("continuity errors",continuity_errors_count,null);
+		t.add(new KVP("packets",getPackets()));
+		t.add(new KVP("duplicate packets",dup_packets));
+		KVP continuityErrorsKvp = new KVP("continuity errors",continuity_errors_count);
 		continuityErrorsKvp.addHTMLSource(()->createHtmlList(continuityErrors),"Continuity Errors");
-		t.add(new DefaultMutableTreeNode(continuityErrorsKvp));
+		t.add(continuityErrorsKvp);
 
 
-		t.add(new DefaultMutableTreeNode(new KVP("transport_scrambling_control",Boolean.toString(scrambled),null)));
+		t.add(new KVP("transport_scrambling_control",Boolean.toString(scrambled)));
 		if(!scrambled){
-			t.add(new DefaultMutableTreeNode(new KVP("type",getTypeString(),null)));
+			t.add(new KVP("type",getTypeString()));
 		}
 		if(firstPCR!=null){
-			t.add(new DefaultMutableTreeNode(new KVP("First PCR",firstPCR.getProgram_clock_reference(),printPCRTime(firstPCR.getProgram_clock_reference()))));
-			t.add(new DefaultMutableTreeNode(new KVP("First PCR packet",firstPCRpacketNo,getParentTransportStream().getPacketTime(firstPCRpacketNo))));
+			t.add(new KVP("First PCR",firstPCR.getProgram_clock_reference(),printPCRTime(firstPCR.getProgram_clock_reference())));
+			t.add(new KVP("First PCR packet",firstPCRpacketNo,getParentTransportStream().getPacketTime(firstPCRpacketNo)));
 		}
 		if(lastPCR!=null){
-			t.add(new DefaultMutableTreeNode(new KVP("Last PCR",lastPCR.getProgram_clock_reference(),printPCRTime(lastPCR.getProgram_clock_reference()))));
-			t.add(new DefaultMutableTreeNode(new KVP("Last PCR packet",lastPCRpacketNo, getParentTransportStream().getPacketTime(lastPCRpacketNo))));
-			t.add(new DefaultMutableTreeNode(new KVP("PCR_count",pcr_count ,getRepetitionRate(pcr_count,lastPCRpacketNo,firstPCRpacketNo))));
+			t.add(new KVP("Last PCR",lastPCR.getProgram_clock_reference(),printPCRTime(lastPCR.getProgram_clock_reference())));
+			t.add(new KVP("Last PCR packet",lastPCRpacketNo, getParentTransportStream().getPacketTime(lastPCRpacketNo)));
+			t.add(new KVP("PCR_count",pcr_count ,getRepetitionRate(pcr_count,lastPCRpacketNo,firstPCRpacketNo)));
 		}
 		if(bitRate!= -1){
-			t.add(new DefaultMutableTreeNode(new KVP("TS bitrate based on PCR",bitRate,null)));
+			t.add(new KVP("TS bitrate based on PCR",bitRate));
 		}
 		if(type==PSI){
 			t.add(psi.getJTreeNode(modus));

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -60,10 +58,10 @@ public class ContentLightLevelInformationSei_message extends Sei_message {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
-		s.add(new DefaultMutableTreeNode(new KVP("max_content_light_level",max_content_light_level,getCdm2x(max_content_light_level))));
-		s.add(new DefaultMutableTreeNode(new KVP("max_pic_average_light_level",max_pic_average_light_level,getCdm2x(max_pic_average_light_level))));
+	public KVP getJTreeNode(int modus) {
+		KVP s=super.getJTreeNode(modus);
+		s.add(new KVP("max_content_light_level",max_content_light_level,getCdm2x(max_content_light_level)));
+		s.add(new KVP("max_pic_average_light_level",max_pic_average_light_level,getCdm2x(max_pic_average_light_level)));
 
 		return s;
 	}

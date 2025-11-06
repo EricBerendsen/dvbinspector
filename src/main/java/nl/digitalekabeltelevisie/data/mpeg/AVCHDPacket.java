@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.*;
 import java.awt.Color;
 import java.util.Arrays;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.RangeHashMap;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -70,21 +68,19 @@ public class AVCHDPacket extends TSPacket {
 		return arrivalTimestamp;
 	}
 	
-	
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
+	public KVP getJTreeNode(int modus) {
 
-		final KVP kvp = new KVP(buildNodeLabel());
+		KVP kvp = new KVP(buildNodeLabel());
 		kvp.addHTMLSource(this, "AVCHD Packet");
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(kvp);
-		final DefaultMutableTreeNode tpHeaderNode = new DefaultMutableTreeNode(new KVP("tp_extra_header",tp_extra_header,null));
-		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Copy_permission_indicator",getCopyPermissionIndicator(),null)));
-		tpHeaderNode.add(new DefaultMutableTreeNode(new KVP("Arrival_time_stamp",arrivalTimestamp,printPCRTime(arrivalTimestamp))));
-		t.add(tpHeaderNode);
-		addMainPacketDetails(modus, t);
-		return t;
+		KVP tpHeaderNode = new KVP("tp_extra_header", tp_extra_header);
+		tpHeaderNode.add(new KVP("Copy_permission_indicator", getCopyPermissionIndicator()));
+		tpHeaderNode.add(new KVP("Arrival_time_stamp", arrivalTimestamp, printPCRTime(arrivalTimestamp)));
+		kvp.add(tpHeaderNode);
+		addMainPacketDetails(modus, kvp);
+		return kvp;
 	}
-	
+
 	@Override
 	public String getHTML() {
 		final StringBuilder s = new StringBuilder();

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes;
 
 import static nl.digitalekabeltelevisie.util.Utils.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PesPacketData;
@@ -91,18 +89,18 @@ public class PesHeader implements TreeNode {
 		
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
+		public KVP getJTreeNode(int modus) {
 			
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AD_descriptor"));
-			t.add(new DefaultMutableTreeNode(new KVP("AD_descriptor_length", ad_descriptor_length, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("AD_text_tag", ad_text_tag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("version_text_tag", version_text_tag, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("AD_fade_byte", ad_fade_byte, null)));
-			t.add(new DefaultMutableTreeNode(new KVP("AD_pan_byte", ad_pan_byte, null)));
+			KVP t = new KVP("AD_descriptor");
+			t.add(new KVP("AD_descriptor_length", ad_descriptor_length));
+			t.add(new KVP("AD_text_tag", ad_text_tag));
+			t.add(new KVP("version_text_tag", version_text_tag));
+			t.add(new KVP("AD_fade_byte", ad_fade_byte));
+			t.add(new KVP("AD_pan_byte", ad_pan_byte));
 			if (version_text_tag == 0x32) {
-				t.add(new DefaultMutableTreeNode(new KVP("AD_gain_byte center", ad_gain_byte_center, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("AD_gain_byte front", ad_gain_byte_front, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("AD_gain_byte surround", ad_gain_byte_surround, null)));
+				t.add(new KVP("AD_gain_byte center", ad_gain_byte_center));
+				t.add(new KVP("AD_gain_byte front", ad_gain_byte_front));
+				t.add(new KVP("AD_gain_byte surround", ad_gain_byte_surround));
 			}
 
 			return t;
@@ -293,79 +291,75 @@ public class PesHeader implements TreeNode {
 		return pes_packet_length;
 	}
 
-	public void addToJtree(final DefaultMutableTreeNode t, final int modus) {
+	public void addToJtree(KVP t, final int modus) {
 
 		try {
-			t.add(new DefaultMutableTreeNode(
-					new KVP("stream_id", stream_id, PesHeader.getStreamIDDescription(stream_id))));
-			t.add(new DefaultMutableTreeNode(new KVP("PES_packet_length", pes_packet_length, null)));
+			t.add(new KVP("stream_id", stream_id, PesHeader.getStreamIDDescription(stream_id)));
+			t.add(new KVP("PES_packet_length", pes_packet_length));
 			if (hasExtendedHeader(stream_id)) {
 
-				t.add(new DefaultMutableTreeNode(new KVP("markerBits", markerBits, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("pes_scrambling_control", pes_scrambling_control,
-						pes_scrambling_control == 0 ? "Not scrambled" : "User-defined")));
-				t.add(new DefaultMutableTreeNode(
-						new KVP("pes_priority", pes_priority, pes_priority == 1 ? "higher" : "normal")));
-				t.add(new DefaultMutableTreeNode(new KVP("data_alignment_indicator", data_alignment_indicator,
+				t.add(new KVP("markerBits", markerBits));
+				t.add(new KVP("pes_scrambling_control", pes_scrambling_control,
+						pes_scrambling_control == 0 ? "Not scrambled" : "User-defined"));
+				t.add(new KVP("pes_priority", pes_priority, pes_priority == 1 ? "higher" : "normal"));
+				t.add(new KVP("data_alignment_indicator", data_alignment_indicator,
 						data_alignment_indicator == 1
 								? "PES packet header is immediately followed by the video start code or audio syncword indicated in the data_stream_alignment_descriptor"
-								: "alignment not defined")));
-				t.add(new DefaultMutableTreeNode(
-						new KVP("copyright", copyright, copyright == 1 ? "packet payload is protected by copyright"
-								: "not defined whether the material is protected by copyright")));
-				t.add(new DefaultMutableTreeNode(new KVP("original_or_copy", original_or_copy,
+								: "alignment not defined"));
+				t.add(new KVP("copyright", copyright, copyright == 1 ? "packet payload is protected by copyright"
+								: "not defined whether the material is protected by copyright"));
+				t.add(new KVP("original_or_copy", original_or_copy,
 						original_or_copy == 1 ? "contents of the associated PES packet payload is an original"
-								: "contents of the associated PES packet payload is a copy")));
+								: "contents of the associated PES packet payload is a copy"));
 
-				t.add(new DefaultMutableTreeNode(
-						new KVP("pts_dts_flags", pts_dts_flags, PesHeader.getPts_dts_flagsString(pts_dts_flags))));
-				t.add(new DefaultMutableTreeNode(new KVP("escr_flag", escr_flag,
-						escr_flag == 1 ? "ESCR base and extension fields are present" : "no ESCR fields are present")));
-				t.add(new DefaultMutableTreeNode(new KVP("es_rate_flag", es_rate_flag,
-						es_rate_flag == 1 ? "ES_rate field is present" : "no ES_rate field is present")));
-				t.add(new DefaultMutableTreeNode(new KVP("dsm_trick_mode_flag", dsm_trick_mode_flag,
+				t.add(new KVP("pts_dts_flags", pts_dts_flags, PesHeader.getPts_dts_flagsString(pts_dts_flags)));
+				t.add(new KVP("escr_flag", escr_flag,
+						escr_flag == 1 ? "ESCR base and extension fields are present" : "no ESCR fields are present"));
+				t.add(new KVP("es_rate_flag", es_rate_flag,
+						es_rate_flag == 1 ? "ES_rate field is present" : "no ES_rate field is present"));
+				t.add(new KVP("dsm_trick_mode_flag", dsm_trick_mode_flag,
 						dsm_trick_mode_flag == 1 ? "8-bit trick mode field is present"
-								: "8-bit trick mode field is not present")));
-				t.add(new DefaultMutableTreeNode(new KVP("additional_copy_info_flag", additional_copy_info_flag,
+								: "8-bit trick mode field is not present"));
+				t.add(new KVP("additional_copy_info_flag", additional_copy_info_flag,
 						additional_copy_info_flag == 1 ? "additional_copy_info field is present"
-								: "additional_copy_info field is not present")));
-				t.add(new DefaultMutableTreeNode(new KVP("pes_crc_flag", pes_crc_flag,
-						pes_crc_flag == 1 ? "CRC field is present" : "CRC field is not present")));
-				t.add(new DefaultMutableTreeNode(new KVP("pes_extension_flag", pes_extension_flag,
-						pes_extension_flag == 1 ? "extension field is present" : "extension field is not present")));
-				t.add(new DefaultMutableTreeNode(new KVP("pes_header_data_length", pes_header_data_length, null)));
+								: "additional_copy_info field is not present"));
+				t.add(new KVP("pes_crc_flag", pes_crc_flag,
+						pes_crc_flag == 1 ? "CRC field is present" : "CRC field is not present"));
+				t.add(new KVP("pes_extension_flag", pes_extension_flag,
+						pes_extension_flag == 1 ? "extension field is present" : "extension field is not present"));
+				t.add(new KVP("pes_header_data_length", pes_header_data_length));
 				if (hasPTS(pts_dts_flags)) {
-					t.add(new DefaultMutableTreeNode(new KVP("pts", pts, printTimebase90kHz(pts))));
+					t.add(new KVP("pts", pts, printTimebase90kHz(pts)));
 				}
 				if (pts_dts_flags == 3) {
-					t.add(new DefaultMutableTreeNode(new KVP("dts", dts, printTimebase90kHz(dts))));
+					t.add(new KVP("dts", dts, printTimebase90kHz(dts)));
 				}
 				if (escr_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("escr", escr, null)));
+					t.add(new KVP("escr", escr));
 				}
 				if (es_rate_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("es_rate", es_rate, null)));
+					t.add(new KVP("es_rate", es_rate));
 				}
 				if (dsm_trick_mode_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("trick_mode_control", trick_mode_control, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("trick_mode_detail", trick_mode_detail, null)));
+					t.add(new KVP("trick_mode_control", trick_mode_control));
+					t.add(new KVP("trick_mode_detail", trick_mode_detail));
 				}
 				if (additional_copy_info_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("additional_copy_info", additional_copy_info, null)));
+					t.add(new KVP("additional_copy_info", additional_copy_info));
 				}
 				if (pes_crc_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("previous_PES_packet_CRC", previous_PES_packet_CRC, null)));
+					t.add(new KVP("previous_PES_packet_CRC", previous_PES_packet_CRC));
 				}
 				
 				if ( pes_extension_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("PES_private_data_flag", pes_private_data_flag, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("pack_header_field_flag", pack_header_field_flag, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("program_packet_sequence_counter_flag", program_packet_sequence_counter_flag, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("P-STD_buffer_flag", p_std_buffer_flag, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("PES_extension_flag_2", pes_extension_flag_2, null)));
+					t.add(new KVP("PES_private_data_flag", pes_private_data_flag));
+					t.add(new KVP("pack_header_field_flag", pack_header_field_flag));
+					t.add(new KVP("program_packet_sequence_counter_flag", program_packet_sequence_counter_flag));
+					t.add(new KVP("P-STD_buffer_flag", p_std_buffer_flag));
+					t.add(new KVP("reserved", reserved));
+					t.add(new KVP("PES_extension_flag_2", pes_extension_flag_2));
 					if ( pes_private_data_flag == 1) {
-						DefaultMutableTreeNode privateDataNode = new DefaultMutableTreeNode(new KVP("PES_private_data", pes_private_data, null));
+						KVP privateDataNode = new KVP("PES_private_data", pes_private_data);
 						t.add(privateDataNode);
 						if(adDescriptor != null) {
 							privateDataNode.add(adDescriptor.getJTreeNode(modus));
@@ -373,32 +367,32 @@ public class PesHeader implements TreeNode {
 					}
 					
 					if (pack_header_field_flag == 1) {
-						t.add(new DefaultMutableTreeNode(new KVP("pack_field_length", pack_field_length, null)));
-						t.add(new DefaultMutableTreeNode(new KVP("pack_header", pack_header, null)));
+						t.add(new KVP("pack_field_length", pack_field_length));
+						t.add(new KVP("pack_header", pack_header));
 					}
 					
 					if (program_packet_sequence_counter_flag == 1) {
-						t.add(new DefaultMutableTreeNode(new KVP("program_packet_sequence_counter", program_packet_sequence_counter, null)));
-						t.add(new DefaultMutableTreeNode(new KVP("MPEG1_MPEG2_identifier", mpeg1_mpeg2_identifier, null)));
-						t.add(new DefaultMutableTreeNode(new KVP("original_stuff_length", original_stuff_length, null)));
+						t.add(new KVP("program_packet_sequence_counter", program_packet_sequence_counter));
+						t.add(new KVP("MPEG1_MPEG2_identifier", mpeg1_mpeg2_identifier));
+						t.add(new KVP("original_stuff_length", original_stuff_length));
 					}
 
 					if (p_std_buffer_flag == 1) {
-						t.add(new DefaultMutableTreeNode(new KVP("P-STD_buffer_scale", p_std_buffer_scale, null)));
-						t.add(new DefaultMutableTreeNode(new KVP("P-STD_buffer_size", p_std_buffer_size, null)));
+						t.add(new KVP("P-STD_buffer_scale", p_std_buffer_scale));
+						t.add(new KVP("P-STD_buffer_size", p_std_buffer_size));
 					}
 					if (pes_extension_flag_2 == 1) {
 
-						t.add(new DefaultMutableTreeNode(new KVP("pes_extension_field_length", pes_extension_field_length, null)));
-						t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension_flag", stream_id_extension_flag, null)));
+						t.add(new KVP("pes_extension_field_length", pes_extension_field_length));
+						t.add(new KVP("stream_id_extension_flag", stream_id_extension_flag));
 
 						if ( stream_id_extension_flag == 0) { 
-							t.add(new DefaultMutableTreeNode(new KVP("stream_id_extension", stream_id_extension, getStreamIdExtensionString(stream_id_extension))));
+							t.add(new KVP("stream_id_extension", stream_id_extension, getStreamIdExtensionString(stream_id_extension)));
 						}else {
-							t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved_extension2, null)));
-							t.add(new DefaultMutableTreeNode(new KVP("tref_extension_flag", tref_extension_flag, null)));
+							t.add(new KVP("reserved", reserved_extension2));
+							t.add(new KVP("tref_extension_flag", tref_extension_flag));
 							if(tref_extension_flag == 0) {
-								t.add(new DefaultMutableTreeNode(new KVP("TREF", tref, printTimebase90kHz(tref))));
+								t.add(new KVP("TREF", tref, printTimebase90kHz(tref)));
 							}
 						}
 					}						
@@ -407,7 +401,7 @@ public class PesHeader implements TreeNode {
 
 			}
 		} catch (Exception e) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getErrorKVP("Error parsing PESHeader")));
+			t.add(GuiUtils.getErrorKVP("Error parsing PESHeader"));
 
 		}
 	}

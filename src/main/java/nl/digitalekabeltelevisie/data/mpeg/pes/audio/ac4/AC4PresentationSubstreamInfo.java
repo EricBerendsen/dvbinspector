@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -57,11 +55,11 @@ public class AC4PresentationSubstreamInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode ac4_presentation_substream_info_node = new DefaultMutableTreeNode(new KVP("ac4_presentation_substream_info"));
-		ac4_presentation_substream_info_node.add(new DefaultMutableTreeNode(new KVP("b_alternative",b_alternative,null)));
-		ac4_presentation_substream_info_node.add(new DefaultMutableTreeNode(new KVP("b_pres_ndot",b_pres_ndot,null)));
-		ac4_presentation_substream_info_node.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP ac4_presentation_substream_info_node = new KVP("ac4_presentation_substream_info");
+		ac4_presentation_substream_info_node.add(new KVP("b_alternative", b_alternative));
+		ac4_presentation_substream_info_node.add(new KVP("b_pres_ndot", b_pres_ndot));
+		ac4_presentation_substream_info_node.add(new KVP("substream_index", substream_index));
 		return ac4_presentation_substream_info_node;
 	}
 

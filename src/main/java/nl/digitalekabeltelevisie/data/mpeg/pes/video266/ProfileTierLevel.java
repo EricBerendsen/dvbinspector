@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -128,35 +126,35 @@ public class ProfileTierLevel implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Profile_tier_level(profileTierPresentFlag="+profileTierPresentFlag+", max_num_sub_layers_minus1="+max_num_sub_layers_minus1+")"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Profile_tier_level(profileTierPresentFlag="+profileTierPresentFlag+", max_num_sub_layers_minus1="+max_num_sub_layers_minus1+")");
 		if(profileTierPresentFlag==1)
 		{
-			t.add(new DefaultMutableTreeNode(new KVP("general_profile_idc",general_profile_idc,general_profile_idc_list.get(general_profile_idc, "unknown/reserved"))));
-			t.add(new DefaultMutableTreeNode(new KVP("general_tier_flag",general_tier_flag,null)));
+			t.add(new KVP("general_profile_idc",general_profile_idc,general_profile_idc_list.get(general_profile_idc, "unknown/reserved")));
+			t.add(new KVP("general_tier_flag",general_tier_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("general_level_idc",general_level_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ptl_frame_only_constraint_flag",ptl_frame_only_constraint_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ptl_multilayer_enabled_flag",ptl_multilayer_enabled_flag,null)));
+		t.add(new KVP("general_level_idc",general_level_idc));
+		t.add(new KVP("ptl_frame_only_constraint_flag",ptl_frame_only_constraint_flag));
+		t.add(new KVP("ptl_multilayer_enabled_flag",ptl_multilayer_enabled_flag));
 
 		if( profileTierPresentFlag ==1) {
 			t.add(general_constraints_info.getJTreeNode(modus));
 		}
 		
 		for(int i = max_num_sub_layers_minus1 - 1; i >= 0; i-- ) {
-			t.add(new DefaultMutableTreeNode(new KVP("ptl_sublayer_level_present_flag["+i+"]",ptl_sublayer_level_present_flag[ i ] ,null)));
+			t.add(new KVP("ptl_sublayer_level_present_flag["+i+"]",ptl_sublayer_level_present_flag[ i ]));
 		}
 
 		for (int i = max_num_sub_layers_minus1 - 1; i >= 0; i--) {
 			if (ptl_sublayer_level_present_flag[i] == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("sublayer_level_idc["+i+"]",sublayer_level_idc[ i ] ,null)));
+				t.add(new KVP("sublayer_level_idc["+i+"]",sublayer_level_idc[ i ]));
 			}
 		}
 
 		if (profileTierPresentFlag == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("ptl_num_sub_profiles",ptl_num_sub_profiles,null)));
+			t.add(new KVP("ptl_num_sub_profiles",ptl_num_sub_profiles));
 			for (int i = 0; i < ptl_num_sub_profiles; i++) {
-				t.add(new DefaultMutableTreeNode(new KVP("general_sub_profile_idc["+i+"]",general_sub_profile_idc[ i ] ,null)));
+				t.add(new KVP("general_sub_profile_idc["+i+"]",general_sub_profile_idc[ i ]));
 			}
 		}
 

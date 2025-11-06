@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
@@ -75,20 +74,17 @@ public class SubLayerHRDParameters implements TreeNode {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("SubLayerHRDParameters(i="+subLayerId+")"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("SubLayerHRDParameters(i="+subLayerId+")");
 		for(int i = 0; i <= CpbCnt; i++ ) {
-			t.add(new DefaultMutableTreeNode(new KVP("bit_rate_value_minus1["+i+"]",bit_rate_value_minus1[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("cpb_size_value_minus1["+i+"]",cpb_size_value_minus1[i],null)));
+			t.add(new KVP("bit_rate_value_minus1["+i+"]",bit_rate_value_minus1[i]));
+			t.add(new KVP("cpb_size_value_minus1["+i+"]",cpb_size_value_minus1[i]));
 			if( sub_pic_hrd_params_present_flag!=0 ) {
-				t.add(new DefaultMutableTreeNode(new KVP("cpb_size_du_value_minus1["+i+"]",cpb_size_du_value_minus1[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("bit_rate_du_value_minus1["+i+"]",bit_rate_du_value_minus1[i],null)));
+				t.add(new KVP("cpb_size_du_value_minus1["+i+"]",cpb_size_du_value_minus1[i]));
+				t.add(new KVP("bit_rate_du_value_minus1["+i+"]",bit_rate_du_value_minus1[i]));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("cbr_flag["+i+"]",cbr_flag[i],null)));
+			t.add(new KVP("cbr_flag["+i+"]",cbr_flag[i]));
 		}
 
 		return t;

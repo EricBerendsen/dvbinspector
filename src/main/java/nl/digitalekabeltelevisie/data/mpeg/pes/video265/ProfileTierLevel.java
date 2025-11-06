@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
@@ -250,36 +249,36 @@ public class ProfileTierLevel implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Profile_tier_level(fprofilePresentFlag="+profilePresentFlag+", max_num_sub_layers_minus1="+max_num_sub_layers_minus1+")"));
-		t.add(new DefaultMutableTreeNode(new KVP("general_profile_space",general_profile_space,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("general_tier_flag",general_tier_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("general_profile_idc",general_profile_idc,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Profile_tier_level(fprofilePresentFlag="+profilePresentFlag+", max_num_sub_layers_minus1="+max_num_sub_layers_minus1+")");
+		t.add(new KVP("general_profile_space",general_profile_space));
+		t.add(new KVP("general_tier_flag",general_tier_flag));
+		t.add(new KVP("general_profile_idc",general_profile_idc));
 		for (int j = 0; j < 32; j++) {
-			t.add(new DefaultMutableTreeNode(new KVP("general_profile_compatibility_flag["+j+"]",general_profile_compatibility_flag[j],null)));
+			t.add(new KVP("general_profile_compatibility_flag["+j+"]",general_profile_compatibility_flag[j]));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("general_progressive_source_flag",general_progressive_source_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("general_interlaced_source_flag",general_interlaced_source_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("general_non_packed_constraint_flag",general_non_packed_constraint_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("general_frame_only_constraint_flag",general_frame_only_constraint_flag,null)));
+		t.add(new KVP("general_progressive_source_flag",general_progressive_source_flag));
+		t.add(new KVP("general_interlaced_source_flag",general_interlaced_source_flag));
+		t.add(new KVP("general_non_packed_constraint_flag",general_non_packed_constraint_flag));
+		t.add(new KVP("general_frame_only_constraint_flag",general_frame_only_constraint_flag));
 
 		if((general_profile_idc == 4) || (general_profile_compatibility_flag[ 4 ]==1)
 				|| (general_profile_idc == 5) || (general_profile_compatibility_flag[5]==1)
 				|| (general_profile_idc == 6) || (general_profile_compatibility_flag[6]==1)
 				|| (general_profile_idc == 7) || (general_profile_compatibility_flag[7]==1))
 		{
-			t.add(new DefaultMutableTreeNode(new KVP("general_max_12bit_constraint_flag",general_max_12bit_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_max_10bit_constraint_flag",general_max_10bit_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_max_8bit_constraint_flag",general_max_8bit_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_max_422chroma_constraint_flag",general_max_422chroma_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_max_420chroma_constraint_flag",general_max_420chroma_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_max_monochrome_constraint_flag",general_max_monochrome_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_intra_constraint_flag",general_intra_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_one_picture_only_constraint_flag",general_one_picture_only_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_lower_bit_rate_constraint_flag",general_lower_bit_rate_constraint_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("general_reserved_zero_34bits",general_reserved_zero_34bits,null)));
+			t.add(new KVP("general_max_12bit_constraint_flag",general_max_12bit_constraint_flag));
+			t.add(new KVP("general_max_10bit_constraint_flag",general_max_10bit_constraint_flag));
+			t.add(new KVP("general_max_8bit_constraint_flag",general_max_8bit_constraint_flag));
+			t.add(new KVP("general_max_422chroma_constraint_flag",general_max_422chroma_constraint_flag));
+			t.add(new KVP("general_max_420chroma_constraint_flag",general_max_420chroma_constraint_flag));
+			t.add(new KVP("general_max_monochrome_constraint_flag",general_max_monochrome_constraint_flag));
+			t.add(new KVP("general_intra_constraint_flag",general_intra_constraint_flag));
+			t.add(new KVP("general_one_picture_only_constraint_flag",general_one_picture_only_constraint_flag));
+			t.add(new KVP("general_lower_bit_rate_constraint_flag",general_lower_bit_rate_constraint_flag));
+			t.add(new KVP("general_reserved_zero_34bits",general_reserved_zero_34bits));
 		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("general_reserved_zero_43bits",general_reserved_zero_43bits,null)));
+			t.add(new KVP("general_reserved_zero_43bits",general_reserved_zero_43bits));
 		}
 
 		if(((general_profile_idc >= 1) &&(general_profile_idc <= 5 ))
@@ -289,52 +288,52 @@ public class ProfileTierLevel implements TreeNode{
 				|| (general_profile_compatibility_flag[4]==1)
 				|| (general_profile_compatibility_flag[5]==1)) /* The number of bits in this syntax structure is not affected by this condition */
 		{
-			t.add(new DefaultMutableTreeNode(new KVP("general_inbld_flag",general_inbld_flag,null)));
+			t.add(new KVP("general_inbld_flag",general_inbld_flag));
 		}else{
-			t.add(new DefaultMutableTreeNode(new KVP("general_reserved_zero_bit",general_reserved_zero_bit,null)));
+			t.add(new KVP("general_reserved_zero_bit",general_reserved_zero_bit));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("general_level_idc",general_level_idc,null)));
+		t.add(new KVP("general_level_idc",general_level_idc));
 
 		for (int i = 0; i < max_num_sub_layers_minus1; i++) {
-			t.add(new DefaultMutableTreeNode(new KVP("sub_layer_profile_present_flag["+i+"]",sub_layer_profile_present_flag[i],null)));
-			t.add(new DefaultMutableTreeNode(new KVP("sub_layer_level_present_flag["+i+"]",sub_layer_level_present_flag[i],null)));
+			t.add(new KVP("sub_layer_profile_present_flag["+i+"]",sub_layer_profile_present_flag[i]));
+			t.add(new KVP("sub_layer_level_present_flag["+i+"]",sub_layer_level_present_flag[i]));
 		}
 		if( max_num_sub_layers_minus1 > 0 ) {
 			for(int i = max_num_sub_layers_minus1; i < 8; i++ ) {
-				t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_2bits["+i+"]",reserved_zero_2bits[i],null)));
+				t.add(new KVP("reserved_zero_2bits["+i+"]",reserved_zero_2bits[i]));
 			}
 		}
 
 		for(int i = 0; i < max_num_sub_layers_minus1; i++ ) {
 			if (sub_layer_profile_present_flag[i] == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_profile_space["+i+"]",sub_layer_profile_space[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_tier_flag["+i+"]",sub_layer_tier_flag[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_profile_idc["+i+"]",sub_layer_profile_idc[i],null)));
+				t.add(new KVP("sub_layer_profile_space["+i+"]",sub_layer_profile_space[i]));
+				t.add(new KVP("sub_layer_tier_flag["+i+"]",sub_layer_tier_flag[i]));
+				t.add(new KVP("sub_layer_profile_idc["+i+"]",sub_layer_profile_idc[i]));
 				for (int j = 0; j < 32; j++) {
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_profile_compatibility_flag["+i+"]["+j+"]",sub_layer_profile_compatibility_flag[i][j],null)));
+					t.add(new KVP("sub_layer_profile_compatibility_flag["+i+"]["+j+"]",sub_layer_profile_compatibility_flag[i][j]));
 				}
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_progressive_source_flag["+i+"]",sub_layer_progressive_source_flag[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_interlaced_source_flag["+i+"]",sub_layer_interlaced_source_flag[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_non_packed_constraint_flag["+i+"]",sub_layer_non_packed_constraint_flag[i],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_frame_only_constraint_flag["+i+"]",sub_layer_frame_only_constraint_flag[i],null)));
+				t.add(new KVP("sub_layer_progressive_source_flag["+i+"]",sub_layer_progressive_source_flag[i]));
+				t.add(new KVP("sub_layer_interlaced_source_flag["+i+"]",sub_layer_interlaced_source_flag[i]));
+				t.add(new KVP("sub_layer_non_packed_constraint_flag["+i+"]",sub_layer_non_packed_constraint_flag[i]));
+				t.add(new KVP("sub_layer_frame_only_constraint_flag["+i+"]",sub_layer_frame_only_constraint_flag[i]));
 				if ((sub_layer_profile_idc[i] == 4) || (sub_layer_profile_compatibility_flag[i][4] == 1)
 						|| (sub_layer_profile_idc[i] == 5) || (sub_layer_profile_compatibility_flag[i][5] == 1)
 						|| (sub_layer_profile_idc[i] == 6) || (sub_layer_profile_compatibility_flag[i][6] == 1)
 						|| (sub_layer_profile_idc[i] == 7) || (sub_layer_profile_compatibility_flag[i][7] == 1)) {
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_12bit_constraint_flag["+i+"]",sub_layer_max_12bit_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_10bit_constraint_flag["+i+"]",sub_layer_max_10bit_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_8bit_constraint_flag["+i+"]",sub_layer_max_8bit_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_422chroma_constraint_flag["+i+"]",sub_layer_max_422chroma_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_420chroma_constraint_flag["+i+"]",sub_layer_max_420chroma_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_monochrome_constraint_flag["+i+"]",sub_layer_max_monochrome_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_intra_constraint_flag["+i+"]",sub_layer_intra_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_one_picture_only_constraint_flag["+i+"]",sub_layer_one_picture_only_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_lower_bit_rate_constraint_flag["+i+"]",sub_layer_lower_bit_rate_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_max_monochrome_constraint_flag["+i+"]",sub_layer_max_monochrome_constraint_flag[i],null)));
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_reserved_zero_34bits["+i+"]",sub_layer_reserved_zero_34bits[i],null)));
+					t.add(new KVP("sub_layer_max_12bit_constraint_flag["+i+"]",sub_layer_max_12bit_constraint_flag[i]));
+					t.add(new KVP("sub_layer_max_10bit_constraint_flag["+i+"]",sub_layer_max_10bit_constraint_flag[i]));
+					t.add(new KVP("sub_layer_max_8bit_constraint_flag["+i+"]",sub_layer_max_8bit_constraint_flag[i]));
+					t.add(new KVP("sub_layer_max_422chroma_constraint_flag["+i+"]",sub_layer_max_422chroma_constraint_flag[i]));
+					t.add(new KVP("sub_layer_max_420chroma_constraint_flag["+i+"]",sub_layer_max_420chroma_constraint_flag[i]));
+					t.add(new KVP("sub_layer_max_monochrome_constraint_flag["+i+"]",sub_layer_max_monochrome_constraint_flag[i]));
+					t.add(new KVP("sub_layer_intra_constraint_flag["+i+"]",sub_layer_intra_constraint_flag[i]));
+					t.add(new KVP("sub_layer_one_picture_only_constraint_flag["+i+"]",sub_layer_one_picture_only_constraint_flag[i]));
+					t.add(new KVP("sub_layer_lower_bit_rate_constraint_flag["+i+"]",sub_layer_lower_bit_rate_constraint_flag[i]));
+					t.add(new KVP("sub_layer_max_monochrome_constraint_flag["+i+"]",sub_layer_max_monochrome_constraint_flag[i]));
+					t.add(new KVP("sub_layer_reserved_zero_34bits["+i+"]",sub_layer_reserved_zero_34bits[i]));
 				} else{
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_reserved_zero_43bits["+i+"]",sub_layer_reserved_zero_43bits[i],null)));
+					t.add(new KVP("sub_layer_reserved_zero_43bits["+i+"]",sub_layer_reserved_zero_43bits[i]));
 				}
 				// EB changed sub_layer_profile_compatibility_flag[ 1 ] of spec to sub_layer_profile_compatibility_flag[i][1], best guess..
 				if( ((sub_layer_profile_idc[i] >= 1)&& (sub_layer_profile_idc[i] <= 5 ))
@@ -343,13 +342,13 @@ public class ProfileTierLevel implements TreeNode{
 						||(sub_layer_profile_compatibility_flag[i][3]==1)
 						||(sub_layer_profile_compatibility_flag[i][4]==1)
 						||(sub_layer_profile_compatibility_flag[i][5]==1)){ /* The number of bits in this syntax structure is not affected by this condition */
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_inbld_flag["+i+"]",sub_layer_inbld_flag[i],null)));
+					t.add(new KVP("sub_layer_inbld_flag["+i+"]",sub_layer_inbld_flag[i]));
 				}else{
-					t.add(new DefaultMutableTreeNode(new KVP("sub_layer_reserved_zero_bit["+i+"]",sub_layer_reserved_zero_bit[i],null)));
+					t.add(new KVP("sub_layer_reserved_zero_bit["+i+"]",sub_layer_reserved_zero_bit[i]));
 				}
 			}
 			if( sub_layer_level_present_flag[i]==1 ){
-				t.add(new DefaultMutableTreeNode(new KVP("sub_layer_level_idc["+i+"]",sub_layer_level_idc[i],null)));
+				t.add(new KVP("sub_layer_level_idc["+i+"]",sub_layer_level_idc[i]));
 			}
 		}
 

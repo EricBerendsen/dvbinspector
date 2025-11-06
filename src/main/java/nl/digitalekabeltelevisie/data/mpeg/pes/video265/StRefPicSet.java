@@ -29,13 +29,9 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 // based on 7.3.7 Short-term reference picture set syntax  Rec. ITU-T H.265 v5 (02/2018) 
-
-
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -103,32 +99,32 @@ public class StRefPicSet implements TreeNode {
 	
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Short-term reference picture set st_ref_pic_set("+stRpsIdx+")"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Short-term reference picture set st_ref_pic_set("+stRpsIdx+")");
 		
 		if (stRpsIdx != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("inter_ref_pic_set_prediction_flag",inter_ref_pic_set_prediction_flag,null)));
+			t.add(new KVP("inter_ref_pic_set_prediction_flag",inter_ref_pic_set_prediction_flag));
 		}
 
 		if(notImplemented) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("if( inter_ref_pic_set_prediction_flag ) {")));
+			t.add(GuiUtils.getNotImplementedKVP("if( inter_ref_pic_set_prediction_flag ) {"));
 			return t;
 		}
 		if( inter_ref_pic_set_prediction_flag !=0) {
 		} else {
-			t.add(new DefaultMutableTreeNode(new KVP("num_negative_pics",num_negative_pics,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("num_positive_pics",num_positive_pics,null)));
+			t.add(new KVP("num_negative_pics",num_negative_pics));
+			t.add(new KVP("num_positive_pics",num_positive_pics));
 			delta_poc_s0_minus1 = new int[num_negative_pics];
 			used_by_curr_pic_s0_flag = new int[num_negative_pics];
 			for(int i = 0; i < num_negative_pics; i++ ) {
-				t.add(new DefaultMutableTreeNode(new KVP("delta_poc_s0_minus1["+ i +"]",delta_poc_s0_minus1[ i ],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("used_by_curr_pic_s0_flag["+ i +"]",used_by_curr_pic_s0_flag[ i ],null)));
+				t.add(new KVP("delta_poc_s0_minus1["+ i +"]",delta_poc_s0_minus1[ i ]));
+				t.add(new KVP("used_by_curr_pic_s0_flag["+ i +"]",used_by_curr_pic_s0_flag[ i ]));
 			}
 			delta_poc_s1_minus1 = new int[num_positive_pics];
 			used_by_curr_pic_s1_flag = new int[num_positive_pics];
 			for(int i = 0; i < num_positive_pics; i++ ) {
-				t.add(new DefaultMutableTreeNode(new KVP("delta_poc_s1_minus1["+ i +"]",delta_poc_s1_minus1[ i ],null)));
-				t.add(new DefaultMutableTreeNode(new KVP("used_by_curr_pic_s1_flag["+ i +"]",used_by_curr_pic_s1_flag[ i ],null)));
+				t.add(new KVP("delta_poc_s1_minus1["+ i +"]",delta_poc_s1_minus1[ i ]));
+				t.add(new KVP("used_by_curr_pic_s1_flag["+ i +"]",used_by_curr_pic_s1_flag[ i ]));
 			}
 			
 		}

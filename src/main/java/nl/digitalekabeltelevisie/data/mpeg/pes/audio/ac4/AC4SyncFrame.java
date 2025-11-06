@@ -1,35 +1,5 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-/**
-*
-*  http://www.digitalekabeltelevisie.nl/dvb_inspector
-*
-*  This code is Copyright 2009-2020 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
-*
-*  This file is part of DVB Inspector.
-*
-*  DVB Inspector is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, either version 3 of the License, or
-*  (at your option) any later version.
-*
-*  DVB Inspector is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with DVB Inspector.  If not, see <http://www.gnu.org/licenses/>.
-*
-*  The author requests that he be notified of any application, applet, or
-*  other binary that makes use of this code, but that's more out of curiosity
-*  than anything and is not required.
-*
-*/
-
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -70,18 +40,18 @@ public class AC4SyncFrame implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("AC4SyncFrame"));
-		t.add(new DefaultMutableTreeNode(new KVP("sync_word",sync_word,getSyncWordString(sync_word))));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_size",frame_size,null)));
-		if(frame_size==0xFFFF) {
-			t.add(new DefaultMutableTreeNode(new KVP("frame_size2",frame_size2,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("AC4SyncFrame");
+		t.add(new KVP("sync_word", sync_word, getSyncWordString(sync_word)));
+		t.add(new KVP("frame_size", frame_size));
+		if (frame_size == 0xFFFF) {
+			t.add(new KVP("frame_size2", frame_size2));
 		}
 		t.add(raw_ac4_frame.getJTreeNode(modus));
 		if (sync_word == 0xAC41) {
-			t.add(new DefaultMutableTreeNode(new KVP("crc_word",crc_word,null)));
+			t.add(new KVP("crc_word", crc_word));
 		}
-		
+
 		return t;
 	}
 

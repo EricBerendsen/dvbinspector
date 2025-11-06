@@ -30,8 +30,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -55,8 +53,8 @@ public abstract class AC4SubstreamInfo {
 		}
 
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("b_audio_ndot",b_audio_ndot,null));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("b_audio_ndot", b_audio_ndot);
 			return t;
 		}
 	}

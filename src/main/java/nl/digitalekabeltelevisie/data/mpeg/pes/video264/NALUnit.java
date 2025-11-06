@@ -27,13 +27,13 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.AbstractNALUnit;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Filler_data_rbsp;
+import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.Sei_rbsp;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
-public class NALUnit extends AbstractNALUnit implements TreeNode {
+public class NALUnit extends AbstractNALUnit {
 
 	private final int forbidden_zero_bit;
 	private final int nal_ref_idc;
@@ -75,19 +75,10 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 				nalUnitHeaderMvcExtension = new NalUnitHeaderMvcExtension(bs);
 			}
 		}
-		
 		readRBSPBytes();
-
 		createRBSP();
-
-
-
 	}
 
-
-	/**
-	 * 
-	 */
 	@Override
 	protected void createRBSP() {
 		if(nal_unit_type==1){
@@ -117,31 +108,31 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 	}
 
 
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("NALUnit ("+getNALUnitTypeString(nal_unit_type)+")"));
-		t.add(new DefaultMutableTreeNode(new KVP("bytes",bytes,offset,numBytesInNALunit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("numBytesInNALunit",numBytesInNALunit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("forbidden_zero_bit",forbidden_zero_bit,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("nal_ref_idc",nal_ref_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("nal_unit_type",nal_unit_type,getNALUnitTypeString(nal_unit_type))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("NALUnit ("+getNALUnitTypeString(nal_unit_type)+")");
+		t.add(new KVP("bytes",bytes,offset,numBytesInNALunit));
+		t.add(new KVP("numBytesInNALunit",numBytesInNALunit));
+		t.add(new KVP("forbidden_zero_bit",forbidden_zero_bit));
+		t.add(new KVP("nal_ref_idc",nal_ref_idc));
+		t.add(new KVP("nal_unit_type",nal_unit_type,getNALUnitTypeString(nal_unit_type)));
 
 		if( (nal_unit_type == 14) || (nal_unit_type == 20) || (nal_unit_type == 21) ) {
 			if(nal_unit_type != 21 ){
-				t.add(new DefaultMutableTreeNode(new KVP("svc_extension_flag",svc_extension_flag,null)));
+				t.add(new KVP("svc_extension_flag",svc_extension_flag));
 			}else{
-				t.add(new DefaultMutableTreeNode(new KVP("avc_3d_extension_flag",avc_3d_extension_flag,null)));
+				t.add(new KVP("avc_3d_extension_flag",avc_3d_extension_flag));
 			}
 			if( svc_extension_flag==1 ) {
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("nal_unit_header_svc_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("nal_unit_header_svc_extension()"));
 			} else if( avc_3d_extension_flag==1 ) {
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("nal_unit_header_3davc_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("nal_unit_header_3davc_extension()"));
 			} else {
 				t.add(nalUnitHeaderMvcExtension.getJTreeNode(modus));
 			}
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("rbsp_byte",rbsp_byte,0,numBytesInRBSP,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("NumBytesInRBSP",numBytesInRBSP,null)));
+		t.add(new KVP("rbsp_byte",rbsp_byte,0,numBytesInRBSP));
+		t.add(new KVP("NumBytesInRBSP",numBytesInRBSP));
 		if(rbsp!=null){
 			t.add(rbsp.getJTreeNode(modus));
 		}
@@ -151,39 +142,35 @@ public class NALUnit extends AbstractNALUnit implements TreeNode {
 
 	public String getNALUnitTypeString(final int nal_unit_type) {
 
-		switch (nal_unit_type) {
-		case 0: return "Unspecified";
-		case 1: return "Coded slice of a non-IDR picture";
-		case 2 : return "Coded slice data partition A";
-		case 3 : return "Coded slice data partition B";
-		case 4 : return "Coded slice data partition C";
-		case 5 : return "Coded slice of an IDR picture";
-		case 6 : return "Supplemental enhancement information (SEI)";
-		case 7 : return "Sequence parameter set";
-		case 8 : return "Picture parameter set";
-		case 9 : return "Access unit delimiter";
-		case 10 : return "End of sequence";
-		case 11 : return "End of stream";
-		case 12 : return "Filler data";
-		case 13 : return "Sequence parameter set extension";
-		case 14 : return "Prefix NAL unit";
-		case 15 : return "Subset sequence parameter set";
-		case 16 : return "Depth parameter set";
-		case 19 : return "Coded slice of an auxiliary coded picture without partitioning";
-		case 20 : return "Coded slice extension";
-		case 21 : return "Coded slice extension for a depth view component or a 3D-AVC texture view component";
-
-		// RFC 6184 RTP Payload Format for H.264 Video
-		// https://tools.ietf.org/html/rfc6184#section-5.2
-		case 24 : return "Single-time aggregation packet without DON (STAP-A) RFC 6184";
-		case 25 : return "Single-time aggregation packet including DON (STAP-B) RFC 6184";
-		case 26 : return "Multi-time aggregation packet (MTAP16) RFC 6184";
-		case 27 : return "Multi-time aggregation packet (MTAP24) RFC 6184";
-		case 28 : return "Fragmentation unit (FU-A) RFC 6184";
-		case 29 : return "Fragmentation unit (FU-B) RFC 6184";
-		default:
-			return "reserved";
-		}
+		return switch (nal_unit_type) {
+		case 0 -> "Unspecified";
+		case 1 -> "Coded slice of a non-IDR picture";
+		case 2 -> "Coded slice data partition A";
+		case 3 -> "Coded slice data partition B";
+		case 4 -> "Coded slice data partition C";
+		case 5 -> "Coded slice of an IDR picture";
+		case 6 -> "Supplemental enhancement information (SEI)";
+		case 7 -> "Sequence parameter set";
+		case 8 -> "Picture parameter set";
+		case 9 -> "Access unit delimiter";
+		case 10 -> "End of sequence";
+		case 11 -> "End of stream";
+		case 12 -> "Filler data";
+		case 13 -> "Sequence parameter set extension";
+		case 14 -> "Prefix NAL unit";
+		case 15 -> "Subset sequence parameter set";
+		case 16 -> "Depth parameter set";
+		case 19 -> "Coded slice of an auxiliary coded picture without partitioning";
+		case 20 -> "Coded slice extension";
+		case 21 -> "Coded slice extension for a depth view component or a 3D-AVC texture view component";
+		case 24 -> "Single-time aggregation packet without DON (STAP-A) RFC 6184";
+		case 25 -> "Single-time aggregation packet including DON (STAP-B) RFC 6184";
+		case 26 -> "Multi-time aggregation packet (MTAP16) RFC 6184";
+		case 27 -> "Multi-time aggregation packet (MTAP24) RFC 6184";
+		case 28 -> "Fragmentation unit (FU-A) RFC 6184";
+		case 29 -> "Fragmentation unit (FU-B) RFC 6184";
+		default -> "reserved";
+		};
 	}
 
 	public int getForbidden_zero_bit() {

@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -67,20 +65,16 @@ public class AC4SgiSpecifier implements TreeNode {
 		}
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_sgi_specifier"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ac4_sgi_specifier");
 		if (bitstream_version == 1) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("ac4_substream_group_info")));
-		}else {
-			t.add(new DefaultMutableTreeNode(new KVP("group_index",group_index,null)));
+			t.add(GuiUtils.getNotImplementedKVP("ac4_substream_group_info"));
+		} else {
+			t.add(new KVP("group_index", group_index));
 		}
 		return t;
 	}
-
-
 
 	public int getGroup_index() {
 		return group_index;

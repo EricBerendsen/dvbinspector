@@ -1,7 +1,5 @@
 package nl.digitalekabeltelevisie.util;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 
@@ -54,11 +52,11 @@ public record ServiceIdentification(int originalNetworkId, int transportStreamId
 	 * service_id
 	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("Service Identification (onid:" + originalNetworkId + ",tsid:" + transportStreamId + ",sid:" + serviceId + ")"));
-		s.add(new DefaultMutableTreeNode(new KVP("transport_stream_id", transportStreamId, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("original_network_id", originalNetworkId, null)));
-		s.add(new DefaultMutableTreeNode(new KVP("service_id", serviceId, null)));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("Service Identification (onid:" + originalNetworkId + ",tsid:" + transportStreamId + ",sid:" + serviceId + ")");
+		s.add(new KVP("transport_stream_id", transportStreamId));
+		s.add(new KVP("original_network_id", originalNetworkId));
+		s.add(new KVP("service_id", serviceId));
 		return s;
 	}
 }

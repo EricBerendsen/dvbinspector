@@ -32,8 +32,6 @@ import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -45,17 +43,11 @@ import nl.digitalekabeltelevisie.util.BitSource;
 public class SubstreamIndexTable implements TreeNode {
 	
 	
-	class SubStreamSize implements TreeNode{
-		private int substream_size;
-
-		SubStreamSize(int substream_size){
-			this.substream_size = substream_size;
-		}
+	record SubStreamSize(int substream_size)  implements TreeNode{
 		
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("substream_size",substream_size,null));
-			return t;
+		public KVP getJTreeNode(int modus) {
+			return new KVP("substream_size",substream_size);
 		}
 	}
 
@@ -91,10 +83,10 @@ public class SubstreamIndexTable implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("substream_index_table"));
-		t.add(new DefaultMutableTreeNode(new KVP("n_substreams", n_substreams, null)));
-		t.add(new DefaultMutableTreeNode(new KVP("b_size_present", b_size_present, (n_substreams != 1) ? "implied" : null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("substream_index_table");
+		t.add(new KVP("n_substreams", n_substreams));
+		t.add(new KVP("b_size_present", b_size_present, (n_substreams != 1) ? "implied" : null));
 		addListJTree(t, subStreamSizes, modus, "subStreamSizes");
 
 		return t;

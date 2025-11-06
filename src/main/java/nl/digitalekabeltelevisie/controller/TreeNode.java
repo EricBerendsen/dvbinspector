@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.controller;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.gui.DVBtree;
 
 /**
@@ -39,5 +37,5 @@ import nl.digitalekabeltelevisie.gui.DVBtree;
  */
 public interface TreeNode {
 
-	DefaultMutableTreeNode getJTreeNode(int modus);
+	KVP getJTreeNode(int modus);
 }

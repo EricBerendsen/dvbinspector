@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video266;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -61,11 +59,11 @@ public class GeneralConstraintsInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("general_constraints_info"));
-		t.add(new DefaultMutableTreeNode(new KVP("gci_present_flag",gci_present_flag,gci_present_flag==0?"no additional syntax elements are present in general_constraints_info":"additional syntax elements are present in general_constraints_info")));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("general_constraints_info");
+		t.add(new KVP("gci_present_flag",gci_present_flag,gci_present_flag==0?"no additional syntax elements are present in general_constraints_info":"additional syntax elements are present in general_constraints_info"));
 		if(gci_present_flag==1) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("gci_present_flag==1")));
+			t.add(GuiUtils.getNotImplementedKVP("gci_present_flag==1"));
 		}
 		return t;
 	}

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -205,99 +203,95 @@ public class Pic_parameter_set_rbsp extends RBSP {
 		}
 	}
 
-
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Pic_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("pps_pic_parameter_set_id",pps_pic_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("ps_seq_parameter_set_id",ps_seq_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("dependent_slice_segments_enabled_flag",dependent_slice_segments_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("output_flag_present_flag",output_flag_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_extra_slice_header_bits",num_extra_slice_header_bits,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("sign_data_hiding_enabled_flag",sign_data_hiding_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cabac_init_present_flag",cabac_init_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_ref_idx_l0_default_active_minus1",num_ref_idx_l0_default_active_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_ref_idx_l1_default_active_minus1",num_ref_idx_l1_default_active_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("init_qp_minus26",init_qp_minus26,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constrained_intra_pred_flag",constrained_intra_pred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transform_skip_enabled_flag",transform_skip_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("cu_qp_delta_enabled_flag",cu_qp_delta_enabled_flag,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("Pic_parameter_set_rbsp");
+		t.add(new KVP("pps_pic_parameter_set_id",pps_pic_parameter_set_id));
+		t.add(new KVP("ps_seq_parameter_set_id",ps_seq_parameter_set_id));
+		t.add(new KVP("dependent_slice_segments_enabled_flag",dependent_slice_segments_enabled_flag));
+		t.add(new KVP("output_flag_present_flag",output_flag_present_flag));
+		t.add(new KVP("num_extra_slice_header_bits",num_extra_slice_header_bits));
+		t.add(new KVP("sign_data_hiding_enabled_flag",sign_data_hiding_enabled_flag));
+		t.add(new KVP("cabac_init_present_flag",cabac_init_present_flag));
+		t.add(new KVP("num_ref_idx_l0_default_active_minus1",num_ref_idx_l0_default_active_minus1));
+		t.add(new KVP("num_ref_idx_l1_default_active_minus1",num_ref_idx_l1_default_active_minus1));
+		t.add(new KVP("init_qp_minus26",init_qp_minus26));
+		t.add(new KVP("constrained_intra_pred_flag",constrained_intra_pred_flag));
+		t.add(new KVP("transform_skip_enabled_flag",transform_skip_enabled_flag));
+		t.add(new KVP("cu_qp_delta_enabled_flag",cu_qp_delta_enabled_flag));
 		if( cu_qp_delta_enabled_flag == 1 ){
-			t.add(new DefaultMutableTreeNode(new KVP("diff_cu_qp_delta_depth",diff_cu_qp_delta_depth,null)));
+			t.add(new KVP("diff_cu_qp_delta_depth",diff_cu_qp_delta_depth));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("pps_cb_qp_offset",pps_cb_qp_offset,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pps_cr_qp_offset",pps_cr_qp_offset,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pps_slice_chroma_qp_offsets_present_flag",pps_slice_chroma_qp_offsets_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("weighted_pred_flag",weighted_pred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("weighted_bipred_flag",weighted_bipred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transquant_bypass_enabled_flag",transquant_bypass_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("tiles_enabled_flag",tiles_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("entropy_coding_sync_enabled_flag",entropy_coding_sync_enabled_flag,null)));
+		t.add(new KVP("pps_cb_qp_offset",pps_cb_qp_offset));
+		t.add(new KVP("pps_cr_qp_offset",pps_cr_qp_offset));
+		t.add(new KVP("pps_slice_chroma_qp_offsets_present_flag",pps_slice_chroma_qp_offsets_present_flag));
+		t.add(new KVP("weighted_pred_flag",weighted_pred_flag));
+		t.add(new KVP("weighted_bipred_flag",weighted_bipred_flag));
+		t.add(new KVP("transquant_bypass_enabled_flag",transquant_bypass_enabled_flag));
+		t.add(new KVP("tiles_enabled_flag",tiles_enabled_flag));
+		t.add(new KVP("entropy_coding_sync_enabled_flag",entropy_coding_sync_enabled_flag));
 
 
 		if( tiles_enabled_flag ==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("num_tile_columns_minus1",num_tile_columns_minus1,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("num_tile_rows_minus1",num_tile_rows_minus1,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("uniform_spacing_flag",uniform_spacing_flag,null)));
+			t.add(new KVP("num_tile_columns_minus1",num_tile_columns_minus1));
+			t.add(new KVP("num_tile_rows_minus1",num_tile_rows_minus1));
+			t.add(new KVP("uniform_spacing_flag",uniform_spacing_flag));
 			if( uniform_spacing_flag ==0) {
 				for(int i = 0; i < num_tile_columns_minus1; i++ ){
-					t.add(new DefaultMutableTreeNode(new KVP("column_width_minus1["+i+"]",column_width_minus1[ i ],null)));
+					t.add(new KVP("column_width_minus1["+i+"]",column_width_minus1[ i ]));
 				}
 				for(int i = 0; i < num_tile_rows_minus1; i++ ){
-					t.add(new DefaultMutableTreeNode(new KVP("row_height_minus1["+i+"]",row_height_minus1[ i ],null)));
+					t.add(new KVP("row_height_minus1["+i+"]",row_height_minus1[ i ]));
 				}
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("loop_filter_across_tiles_enabled_flag",loop_filter_across_tiles_enabled_flag,null)));
+			t.add(new KVP("loop_filter_across_tiles_enabled_flag",loop_filter_across_tiles_enabled_flag));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("pps_loop_filter_across_slices_enabled_flag",pps_loop_filter_across_slices_enabled_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("deblocking_filter_control_present_flag",deblocking_filter_control_present_flag,null)));
+		t.add(new KVP("pps_loop_filter_across_slices_enabled_flag",pps_loop_filter_across_slices_enabled_flag));
+		t.add(new KVP("deblocking_filter_control_present_flag",deblocking_filter_control_present_flag));
 
 		if (deblocking_filter_control_present_flag != 0) {
-			t.add(new DefaultMutableTreeNode(new KVP("deblocking_filter_override_enabled_flag",deblocking_filter_override_enabled_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pps_deblocking_filter_disabled_flag",pps_deblocking_filter_disabled_flag,null)));
+			t.add(new KVP("deblocking_filter_override_enabled_flag",deblocking_filter_override_enabled_flag));
+			t.add(new KVP("pps_deblocking_filter_disabled_flag",pps_deblocking_filter_disabled_flag));
 			if (pps_deblocking_filter_disabled_flag == 0) {
-				t.add(new DefaultMutableTreeNode(new KVP("pps_beta_offset_div2",pps_beta_offset_div2,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("pps_tc_offset_div2",pps_tc_offset_div2,null)));
+				t.add(new KVP("pps_beta_offset_div2",pps_beta_offset_div2));
+				t.add(new KVP("pps_tc_offset_div2",pps_tc_offset_div2));
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("pps_scaling_list_data_present_flag",pps_scaling_list_data_present_flag,null)));
+		t.add(new KVP("pps_scaling_list_data_present_flag",pps_scaling_list_data_present_flag));
 		if(pps_scaling_list_data_present_flag==1){
 			t.add(pps_scaling_list_data.getJTreeNode(modus));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("lists_modification_present_flag",lists_modification_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("log2_parallel_merge_level_minus2",log2_parallel_merge_level_minus2,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("slice_segment_header_extension_present_flag",slice_segment_header_extension_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pps_extension_present_flag",pps_extension_present_flag,null)));
+		t.add(new KVP("lists_modification_present_flag",lists_modification_present_flag));
+		t.add(new KVP("log2_parallel_merge_level_minus2",log2_parallel_merge_level_minus2));
+		t.add(new KVP("slice_segment_header_extension_present_flag",slice_segment_header_extension_present_flag));
+		t.add(new KVP("pps_extension_present_flag",pps_extension_present_flag));
 		if( pps_extension_present_flag ==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("pps_range_extension_flag",pps_range_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pps_multilayer_extension_flag",pps_multilayer_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pps_3d_extension_flag",pps_3d_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pps_scc_extension_flag",pps_scc_extension_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("pps_extension_4bits",pps_extension_4bits,null)));
+			t.add(new KVP("pps_range_extension_flag",pps_range_extension_flag));
+			t.add(new KVP("pps_multilayer_extension_flag",pps_multilayer_extension_flag));
+			t.add(new KVP("pps_3d_extension_flag",pps_3d_extension_flag));
+			t.add(new KVP("pps_scc_extension_flag",pps_scc_extension_flag));
+			t.add(new KVP("pps_extension_4bits",pps_extension_4bits));
 			if(pps_range_extension_flag==1){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pps_range_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("pps_range_extension()"));
 				return t;
 			}
 			if(pps_multilayer_extension_flag==1){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pps_multilayer_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("pps_multilayer_extension()"));
 				return t;
 			}
 			if(pps_3d_extension_flag==1){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pps_3d_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("pps_3d_extension()"));
 				return t;
 			}
 			if(pps_scc_extension_flag==1){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pps_scc_extension()")));
+				t.add(GuiUtils.getNotImplementedKVP("pps_scc_extension()"));
 				return t;
 			}
 			if(pps_extension_4bits!=0){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("ppps_extension_data_flag")));
+				t.add(GuiUtils.getNotImplementedKVP("ppps_extension_data_flag"));
 				return t;
 			}
 		}

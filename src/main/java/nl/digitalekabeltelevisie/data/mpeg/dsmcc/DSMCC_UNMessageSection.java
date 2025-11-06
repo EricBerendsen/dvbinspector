@@ -395,7 +395,7 @@ public class DSMCC_UNMessageSection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP t = (KVP)super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.setUserObject(new KVP(isDSI()?"DSI":"DII"));
 		t.add(header.getJTreeNode(modus));
 		if(isDSI()){ // DSI

@@ -29,18 +29,14 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video265;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.AbstractVuiParamters;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class H265VuiParameters extends AbstractVuiParamters implements TreeNode {
 
 	private final int sps_max_sub_layers_minus1;
-
-
-
 
 	private final int neutral_chroma_indication_flag;
 	private final int field_seq_flag;
@@ -114,45 +110,44 @@ public class H265VuiParameters extends AbstractVuiParamters implements TreeNode 
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("vui_parameters"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("vui_parameters");
 		addCommonFields(t);
-		t.add(new DefaultMutableTreeNode(new KVP("neutral_chroma_indication_flag",neutral_chroma_indication_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("field_seq_flag",field_seq_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_field_info_present_flag",frame_field_info_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("default_display_window_flag",default_display_window_flag,null)));
+		t.add(new KVP("neutral_chroma_indication_flag",neutral_chroma_indication_flag));
+		t.add(new KVP("field_seq_flag",field_seq_flag));
+		t.add(new KVP("frame_field_info_present_flag",frame_field_info_present_flag));
+		t.add(new KVP("default_display_window_flag",default_display_window_flag));
 		if( default_display_window_flag==1 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("def_disp_win_left_offset",def_disp_win_left_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("def_disp_win_right_offset",def_disp_win_right_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("def_disp_win_top_offset",def_disp_win_top_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("def_disp_win_bottom_offset",def_disp_win_bottom_offset,null)));
+			t.add(new KVP("def_disp_win_left_offset",def_disp_win_left_offset));
+			t.add(new KVP("def_disp_win_right_offset",def_disp_win_right_offset));
+			t.add(new KVP("def_disp_win_top_offset",def_disp_win_top_offset));
+			t.add(new KVP("def_disp_win_bottom_offset",def_disp_win_bottom_offset));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("vui_timing_info_present_flag",vui_timing_info_present_flag,null)));
+		t.add(new KVP("vui_timing_info_present_flag",vui_timing_info_present_flag));
 
-
-		if( vui_timing_info_present_flag==1 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("vui_num_units_in_tick",vui_num_units_in_tick,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("vui_time_scale",vui_time_scale,getClockTickString(vui_num_units_in_tick, vui_time_scale) )));
-			t.add(new DefaultMutableTreeNode(new KVP("vui_poc_proportional_to_timing_flag",vui_poc_proportional_to_timing_flag,null)));
-			if( vui_poc_proportional_to_timing_flag==1 ){
-				t.add(new DefaultMutableTreeNode(new KVP("vui_num_ticks_poc_diff_one_minus1",vui_num_ticks_poc_diff_one_minus1,null)));
+		if (vui_timing_info_present_flag == 1) {
+			t.add(new KVP("vui_num_units_in_tick", vui_num_units_in_tick));
+			t.add(new KVP("vui_time_scale", vui_time_scale, getClockTickString(vui_num_units_in_tick, vui_time_scale)));
+			t.add(new KVP("vui_poc_proportional_to_timing_flag", vui_poc_proportional_to_timing_flag));
+			if (vui_poc_proportional_to_timing_flag == 1) {
+				t.add(new KVP("vui_num_ticks_poc_diff_one_minus1", vui_num_ticks_poc_diff_one_minus1));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("vui_hrd_parameters_present_flag",vui_hrd_parameters_present_flag,null)));
-			if(vui_hrd_parameters_present_flag==1){
+			t.add(new KVP("vui_hrd_parameters_present_flag", vui_hrd_parameters_present_flag));
+			if (vui_hrd_parameters_present_flag == 1) {
 				t.add(hrd_parameters.getJTreeNode(modus));
 			}
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("bitstream_restriction_flag",bitstream_restriction_flag,null)));
+		t.add(new KVP("bitstream_restriction_flag",bitstream_restriction_flag));
 		if(bitstream_restriction_flag!=0){
-			t.add(new DefaultMutableTreeNode(new KVP("tiles_fixed_structure_flag",tiles_fixed_structure_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("motion_vectors_over_pic_boundaries_flag",motion_vectors_over_pic_boundaries_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("restricted_ref_pic_lists_flag",restricted_ref_pic_lists_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("min_spatial_segmentation_idc",min_spatial_segmentation_idc,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("max_bytes_per_pic_denom",max_bytes_per_pic_denom,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("max_bits_per_min_cu_denom",max_bits_per_min_cu_denom,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("log2_max_mv_length_horizontal",log2_max_mv_length_horizontal,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("log2_max_mv_length_vertical",log2_max_mv_length_vertical,null)));
+			t.add(new KVP("tiles_fixed_structure_flag",tiles_fixed_structure_flag));
+			t.add(new KVP("motion_vectors_over_pic_boundaries_flag",motion_vectors_over_pic_boundaries_flag));
+			t.add(new KVP("restricted_ref_pic_lists_flag",restricted_ref_pic_lists_flag));
+			t.add(new KVP("min_spatial_segmentation_idc",min_spatial_segmentation_idc));
+			t.add(new KVP("max_bytes_per_pic_denom",max_bytes_per_pic_denom));
+			t.add(new KVP("max_bits_per_min_cu_denom",max_bits_per_min_cu_denom));
+			t.add(new KVP("log2_max_mv_length_horizontal",log2_max_mv_length_horizontal));
+			t.add(new KVP("log2_max_mv_length_vertical",log2_max_mv_length_vertical));
 		}
 
 		return t;

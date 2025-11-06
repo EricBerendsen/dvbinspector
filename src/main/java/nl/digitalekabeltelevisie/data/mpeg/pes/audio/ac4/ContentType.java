@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -82,19 +80,19 @@ public class ContentType implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("content_type"));
-		t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("content_classifier",content_classifier,content_classifier_list.get(content_classifier)))));
-		t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("b_language_indicator",b_language_indicator,null))));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("content_type");
+		t.add(new KVP("content_classifier",content_classifier,content_classifier_list.get(content_classifier)));
+		t.add(new KVP("b_language_indicator",b_language_indicator));
 
 		if (b_language_indicator == 1) { 
-			t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("b_serialized_language_tag",b_serialized_language_tag,null))));
+			t.add(new KVP("b_serialized_language_tag",b_serialized_language_tag));
 			if (b_serialized_language_tag == 1) { 
-				t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("b_start_tag",b_start_tag,null))));
-				t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("language_tag_chunk",language_tag_chunk,null))));
+				t.add(new KVP("b_start_tag",b_start_tag));
+				t.add(new KVP("language_tag_chunk",language_tag_chunk));
 			} else {
-				t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("n_language_tag_bytes",n_language_tag_bytes,null))));
-				t.add(new DefaultMutableTreeNode(new DefaultMutableTreeNode(new KVP("language_tag_bytes",language_tag_bytes,null))));
+				t.add(new KVP("n_language_tag_bytes",n_language_tag_bytes));
+				t.add(new KVP("language_tag_bytes",language_tag_bytes));
 			}
 		}
 

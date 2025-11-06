@@ -27,9 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class Sei_message implements TreeNode{
@@ -66,11 +65,11 @@ public class Sei_message implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("Sei_message: "+getPayloadTypeString(payloadType),payloadType,null));
-		s.add(new DefaultMutableTreeNode(new KVP("payloadType",payloadType,getPayloadTypeString(payloadType))));
-		s.add(new DefaultMutableTreeNode(new KVP("payloadSize",payloadSize,null)));
-		s.add(new DefaultMutableTreeNode(new KVP("sei_payload",payload,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("Sei_message: " + getPayloadTypeString(payloadType), payloadType);
+		s.add(new KVP("payloadType", payloadType, getPayloadTypeString(payloadType)));
+		s.add(new KVP("payloadSize", payloadSize));
+		s.add(new KVP("sei_payload", payload));
 		return s;
 	}
 

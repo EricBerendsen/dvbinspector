@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -55,8 +53,8 @@ public class RawAC4Frame implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("raw_ac4_frame"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("raw_ac4_frame");
 		t.add(ac4Toc.getJTreeNode(modus));
 		return t;
 	}

@@ -130,7 +130,7 @@ public class DSMCC_DownLoadDataMessageSection extends TableSectionExtendedSyntax
 	@Override
 	public KVP getJTreeNode(int modus) {
 
-		KVP t = (KVP)super.getJTreeNode(modus);
+		KVP t = super.getJTreeNode(modus);
 		t.add(header.getJTreeNode(modus));
 		t.add(new KVP("moduleId",moduleId));
 		t.add(new KVP("moduleVersion",moduleVersion));
@@ -158,9 +158,8 @@ public class DSMCC_DownLoadDataMessageSection extends TableSectionExtendedSyntax
 		default:
 			if((dsmccType>=0x80)&&(dsmccType<=0xff)){
 				return "User Defined message type";
-			}else {
-				return "reserved";
 			}
+			return "reserved";
 
 		}
 	}

@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -298,104 +297,100 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
 		 */
 		@Override
-		public DefaultMutableTreeNode getJTreeNode(int modus) {
-			DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("Private Data Field ("+getDataFieldTagString(data_field_tag)+")"));
-			t.add(new DefaultMutableTreeNode(new KVP("data_field_tag",data_field_tag,getDataFieldTagString(data_field_tag))));
-			t.add(new DefaultMutableTreeNode(new KVP("data_field_length",data_field_length,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("data_field_data", data_byte,2,data_field_length,null)));
+		public KVP getJTreeNode(int modus) {
+			KVP t = new KVP("Private Data Field ("+getDataFieldTagString(data_field_tag)+")");
+			t.add(new KVP("data_field_tag",data_field_tag,getDataFieldTagString(data_field_tag)));
+			t.add(new KVP("data_field_length",data_field_length));
+			t.add(new KVP("data_field_data", data_byte,2,data_field_length));
 
 			if(data_field_tag==0x01){ // Announcement Switching Data
-				t.add(new DefaultMutableTreeNode(new KVP("announcement_switching_flag_field",announcement_switching_flag_field,null)));
+				t.add(new KVP("announcement_switching_flag_field",announcement_switching_flag_field));
 			}else if(data_field_tag==0x02){ //AU_information
 				if(data_field_length>0){
-					t.add(new DefaultMutableTreeNode(new KVP("AU_coding_format",AU_coding_format,getAU_coding_formatString(AU_coding_format))));
-					t.add(new DefaultMutableTreeNode(new KVP("AU_coding_type_information",AU_coding_type_information,null)));
+					t.add(new KVP("AU_coding_format",AU_coding_format,getAU_coding_formatString(AU_coding_format)));
+					t.add(new KVP("AU_coding_type_information",AU_coding_type_information));
 					if(data_field_length>1){
-						t.add(new DefaultMutableTreeNode(new KVP("AU_ref_pic_idc",AU_ref_pic_idc,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("AU_pic_struct",AU_pic_struct,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("AU_PTS_present_flag",AU_PTS_present_flag,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("AU_profile_info_present_flag",AU_profile_info_present_flag,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("AU_stream_info_present_flag",AU_stream_info_present_flag,null)));
-						t.add(new DefaultMutableTreeNode(new KVP("AU_trick_mode_info_present_flag",AU_trick_mode_info_present_flag,null)));
+						t.add(new KVP("AU_ref_pic_idc",AU_ref_pic_idc));
+						t.add(new KVP("AU_pic_struct",AU_pic_struct));
+						t.add(new KVP("AU_PTS_present_flag",AU_PTS_present_flag));
+						t.add(new KVP("AU_profile_info_present_flag",AU_profile_info_present_flag));
+						t.add(new KVP("AU_stream_info_present_flag",AU_stream_info_present_flag));
+						t.add(new KVP("AU_trick_mode_info_present_flag",AU_trick_mode_info_present_flag));
 						if(AU_PTS_present_flag == 1){
-							t.add(new DefaultMutableTreeNode(new KVP("AU_PTS_32",AU_PTS_32,null)));
+							t.add(new KVP("AU_PTS_32",AU_PTS_32));
 						}
 						if(AU_stream_info_present_flag == 1){
-							t.add(new DefaultMutableTreeNode(new KVP("Reserved",reserved,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_frame_rate_code",AU_frame_rate_code,getAUFrameRateCodeString(AU_frame_rate_code))));
+							t.add(new KVP("Reserved",reserved));
+							t.add(new KVP("AU_frame_rate_code",AU_frame_rate_code,getAUFrameRateCodeString(AU_frame_rate_code)));
 						}
 						if (AU_profile_info_present_flag == 1) {
-							t.add(new DefaultMutableTreeNode(new KVP("AU_profile",AU_profile,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_constraint_set0_flag",AU_constraint_set0_flag,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_constraint_set1_flag",AU_constraint_set1_flag,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_constraint_set2_flag",AU_constraint_set2_flag,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_AVC_compatible_flags",AU_AVC_compatible_flags,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_level",AU_level,null)));
+							t.add(new KVP("AU_profile",AU_profile));
+							t.add(new KVP("AU_constraint_set0_flag",AU_constraint_set0_flag));
+							t.add(new KVP("AU_constraint_set1_flag",AU_constraint_set1_flag));
+							t.add(new KVP("AU_constraint_set2_flag",AU_constraint_set2_flag));
+							t.add(new KVP("AU_AVC_compatible_flags",AU_AVC_compatible_flags));
+							t.add(new KVP("AU_level",AU_level));
 						}
 						if (AU_trick_mode_info_present_flag == 1) {
-							t.add(new DefaultMutableTreeNode(new KVP("AU_max_I_picture_size",AU_max_I_picture_size,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_nominal_I_period",AU_nominal_I_period,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_max_I_period",AU_max_I_period,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("Reserved",reserved2,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_level",AU_level,null)));
+							t.add(new KVP("AU_max_I_picture_size",AU_max_I_picture_size));
+							t.add(new KVP("AU_nominal_I_period",AU_nominal_I_period));
+							t.add(new KVP("AU_max_I_period",AU_max_I_period));
+							t.add(new KVP("Reserved",reserved2));
+							t.add(new KVP("AU_level",AU_level));
 						}
 						if(extraDataPresent){
-							t.add(new DefaultMutableTreeNode(new KVP("AU_Pulldown_info_present_flag",AU_Pulldown_info_present_flag,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_reserved_zero",AU_reserved_zero,null)));
-							t.add(new DefaultMutableTreeNode(new KVP("AU_flags_extension_1",AU_flags_extension_1,null)));
+							t.add(new KVP("AU_Pulldown_info_present_flag",AU_Pulldown_info_present_flag));
+							t.add(new KVP("AU_reserved_zero",AU_reserved_zero));
+							t.add(new KVP("AU_flags_extension_1",AU_flags_extension_1));
 							if(AU_flags_extension_1==1){
-								t.add(new DefaultMutableTreeNode(new KVP("AU_reserved",AU_reserved,null)));
+								t.add(new KVP("AU_reserved",AU_reserved));
 							}
 						}
 						if(AU_reserved_byte!=null){
-							t.add(new DefaultMutableTreeNode(new KVP("AU_reserved_byte",AU_reserved_byte,null)));
+							t.add(new KVP("AU_reserved_byte",AU_reserved_byte));
 						}
 					}
 				}
 			} else if (data_field_tag == 0xDF) {
-				t.add(new DefaultMutableTreeNode(new KVP("format_identifier", formatIdentifier, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_fragment_flag", EBP_fragment_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_segment_flag", EBP_segment_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_SAP_flag", EBP_SAP_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_flag", EBP_grouping_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_time_flag", EBP_time_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_concealment_flag", EBP_concealment_flag, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved, null)));
-				t.add(new DefaultMutableTreeNode(new KVP("EBP_extension_flag", EBP_extension_flag, null)));
+				t.add(new KVP("format_identifier", formatIdentifier));
+				t.add(new KVP("EBP_fragment_flag", EBP_fragment_flag));
+				t.add(new KVP("EBP_segment_flag", EBP_segment_flag));
+				t.add(new KVP("EBP_SAP_flag", EBP_SAP_flag));
+				t.add(new KVP("EBP_grouping_flag", EBP_grouping_flag));
+				t.add(new KVP("EBP_time_flag", EBP_time_flag));
+				t.add(new KVP("EBP_concealment_flag", EBP_concealment_flag));
+				t.add(new KVP("reserved", reserved));
+				t.add(new KVP("EBP_extension_flag", EBP_extension_flag));
 				if (EBP_extension_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("EBP_ext_partition_flag", EBP_ext_partition_flag, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved2, null)));
+					t.add(new KVP("EBP_ext_partition_flag", EBP_ext_partition_flag));
+					t.add(new KVP("reserved", reserved2));
 				}
 				if (EBP_SAP_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("EBP_SAP_type", EBP_SAP_type, null)));
-					t.add(new DefaultMutableTreeNode(new KVP("reserved", reserved3, null)));
+					t.add(new KVP("EBP_SAP_type", EBP_SAP_type));
+					t.add(new KVP("reserved", reserved3));
 				}
 
-				 
 				if (EBP_grouping_flag == 1) {
-					DefaultMutableTreeNode list = new DefaultMutableTreeNode(new KVP("GroupingList"));
-					for(Integer grouping:groupingList) {
+					KVP list = new KVP("GroupingList");
+					for (Integer grouping : groupingList) {
 						EBP_grouping_ext_flag = (grouping & 0b1000_0000) >> 7;
 						int EBP_grouping_id = (grouping & 0b0111_1111);
-						list.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_ext_flag", EBP_grouping_ext_flag, null)));
-						list.add(new DefaultMutableTreeNode(new KVP("EBP_grouping_id", EBP_grouping_id, null)));
+						list.add(new KVP("EBP_grouping_ext_flag", EBP_grouping_ext_flag));
+						list.add(new KVP("EBP_grouping_id", EBP_grouping_id));
 					}
 					t.add(list);
 				}
 
-				
 				if (EBP_time_flag == 1) {
-					t.add(new DefaultMutableTreeNode(new KVP("EBP_acquisition_time", EBP_acquisition_time, new NtpTimeStamp(EBP_acquisition_time).toUTCString())));
-				}		
-				
-				if (EBP_ext_partition_flag==1 ){
-					t.add(new DefaultMutableTreeNode(new KVP("EBP_ext_partitions", EBP_ext_partitions , null)));
-
+					t.add(new KVP("EBP_acquisition_time", EBP_acquisition_time, new NtpTimeStamp(EBP_acquisition_time).toUTCString()));
 				}
-				
+
+				if (EBP_ext_partition_flag == 1) {
+					t.add(new KVP("EBP_ext_partitions", EBP_ext_partitions));
+				}
 
 			} else {
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("data_field_tag=="+data_field_tag)));
+				t.add(GuiUtils.getNotImplementedKVP("data_field_tag=="+data_field_tag));
 			}
 			return t;
 		}
@@ -412,16 +407,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			return data_field_tag;
 		}
 
-		public void setData_field_tag(int data_field_tag) {
-			this.data_field_tag = data_field_tag;
-		}
-
 		public int getData_field_length() {
 			return data_field_length;
-		}
-
-		public void setData_field_length(int data_field_length) {
-			this.data_field_length = data_field_length;
 		}
 
 		public byte[] getData_byte() {
@@ -682,20 +669,8 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		return adaptation_field_extension_flag;
 	}
 
-
-	public void setAdaptation_field_extension_flag(
-			final boolean adaptation_field_extension_flag) {
-		this.adaptation_field_extension_flag = adaptation_field_extension_flag;
-	}
-
-
 	public int getAdaptation_field_length() {
 		return adaptation_field_length;
-	}
-
-
-	public void setAdaptation_field_length(final int adaptation_field_length) {
-		this.adaptation_field_length = adaptation_field_length;
 	}
 
 
@@ -703,71 +678,28 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		return discontinuity_indicator;
 	}
 
-
-	public void setDiscontinuity_indicator(final boolean discontinuity_indicator) {
-		this.discontinuity_indicator = discontinuity_indicator;
-	}
-
-
 	public boolean isElementary_stream_priority_indicator() {
 		return elementary_stream_priority_indicator;
 	}
-
-
-	public void setElementary_stream_priority_indicator(
-			final boolean elementary_stream_priority_indicator) {
-		this.elementary_stream_priority_indicator = elementary_stream_priority_indicator;
-	}
-
 
 	public boolean isOPCR_flag() {
 		return OPCR_flag;
 	}
 
-
-	public void setOPCR_flag(final boolean opcr_flag) {
-		OPCR_flag = opcr_flag;
-	}
-
-
 	public PCR getOriginal_program_clock_reference() {
 		return original_program_clock_reference;
 	}
-
-
-	public void setOriginal_program_clock_reference(
-			final PCR original_program_clock_reference_base) {
-		this.original_program_clock_reference = original_program_clock_reference_base;
-	}
-
 
 	public boolean isPCR_flag() {
 		return PCR_flag;
 	}
 
-
-	public void setPCR_flag(final boolean pcr_flag) {
-		PCR_flag = pcr_flag;
-	}
-
-
 	public PCR getProgram_clock_reference() {
 		return program_clock_reference;
 	}
 
-
-	public void setProgram_clock_reference(final PCR program_clock_reference_base) {
-		this.program_clock_reference = program_clock_reference_base;
-	}
-
-
 	public boolean isRandom_access_indicator() {
 		return random_access_indicator;
-	}
-
-
-	public void setRandom_access_indicator(final boolean random_access_indicator) {
-		this.random_access_indicator = random_access_indicator;
 	}
 
 
@@ -775,21 +707,9 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		return splicing_point_flag;
 	}
 
-
-	public void setSplicing_point_flag(final boolean splicing_point_flag) {
-		this.splicing_point_flag = splicing_point_flag;
-	}
-
-
 	public boolean isTransport_private_data_flag() {
 		return transport_private_data_flag;
 	}
-
-
-	public void setTransport_private_data_flag(final boolean transport_private_data_flag) {
-		this.transport_private_data_flag = transport_private_data_flag;
-	}
-
 
 	/* (non-Javadoc)
 	 * @see nl.digitalekabeltelevisie.gui.HTMLSource#getHTML()
@@ -825,7 +745,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			s.append("<br>private_data_byte: ").append("0x").append(toHexString(private_data_byte)).append(" \"").append(
 					toSafeString(private_data_byte)).append("\"");
 			for (PrivateDataField privatedataField : privatedataFields) {
-				final DefaultMutableTreeNode treeNode = privatedataField.getJTreeNode(0);
+				KVP treeNode = privatedataField.getJTreeNode(0);
 				s.append("<br><br><b>").append(getDataFieldTagString(privatedataField.getData_field_tag())).append("</b>");
 				s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 				
@@ -854,7 +774,7 @@ public class AdaptationField implements HTMLSource, TreeNode{
 			}
 			if(!af_descriptor_not_present_flag){
 				for (Descriptor afDescriptor : afDescriptorList) {
-					final DefaultMutableTreeNode treeNode = afDescriptor.getJTreeNode(0);
+					KVP treeNode = afDescriptor.getJTreeNode(0);
 					s.append("<br><br><b>").append(afDescriptor.getDescriptorname()).append("</b>");
 					s.append("<br>").append(Utils.getChildrenAsHTML(treeNode));
 					
@@ -865,69 +785,62 @@ public class AdaptationField implements HTMLSource, TreeNode{
 		return s.toString();
 	}
 
-
-	/* (non-Javadoc)
-	 * @see nl.digitalekabeltelevisie.controller.TreeNode#getJTreeNode(int)
-	 */
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("adaptation_field"));
-		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_length",getAdaptation_field_length() ,null)));
-		if(getAdaptation_field_length()==0){
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("adaptation_field");
+		t.add(new KVP("adaptation_field_length", getAdaptation_field_length()));
+		if (getAdaptation_field_length() == 0) {
 			return t;
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("discontinuity_indicator",getBooleanAsInt(discontinuity_indicator) ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("random_access_indicator",getBooleanAsInt(random_access_indicator) ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("elementary_stream_priority_indicator",getBooleanAsInt(elementary_stream_priority_indicator) ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("PCR_flag",getBooleanAsInt(PCR_flag) ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("OPCR_flag",getBooleanAsInt(OPCR_flag) ,null)));
+		t.add(new KVP("discontinuity_indicator", getBooleanAsInt(discontinuity_indicator)));
+		t.add(new KVP("random_access_indicator", getBooleanAsInt(random_access_indicator)));
+		t.add(new KVP("elementary_stream_priority_indicator", getBooleanAsInt(elementary_stream_priority_indicator)));
+		t.add(new KVP("PCR_flag", getBooleanAsInt(PCR_flag)));
+		t.add(new KVP("OPCR_flag", getBooleanAsInt(OPCR_flag)));
 
-		t.add(new DefaultMutableTreeNode(new KVP("splicing_point_flag",getBooleanAsInt(splicing_point_flag) ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("transport_private_data_flag",getBooleanAsInt(transport_private_data_flag) ,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_extension_flag",getBooleanAsInt(adaptation_field_extension_flag) ,null)));
+		t.add(new KVP("splicing_point_flag", getBooleanAsInt(splicing_point_flag)));
+		t.add(new KVP("transport_private_data_flag", getBooleanAsInt(transport_private_data_flag)));
+		t.add(new KVP("adaptation_field_extension_flag", getBooleanAsInt(adaptation_field_extension_flag)));
 
-		if(PCR_flag){
+		if (PCR_flag) {
 			t.add(program_clock_reference.getJTreeNode(modus, "PCR"));
 		}
 
-		if(OPCR_flag){
+		if (OPCR_flag) {
 			t.add(original_program_clock_reference.getJTreeNode(modus, "OPCR"));
 		}
 
-
-		if(splicing_point_flag){
-			t.add(new DefaultMutableTreeNode(new KVP("splice_countdown",splice_countdown ,null)));
+		if (splicing_point_flag) {
+			t.add(new KVP("splice_countdown", splice_countdown));
 		}
-		if(transport_private_data_flag){
-			t.add(new DefaultMutableTreeNode(new KVP("transport_private_data_length",transport_private_data_length ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("private_data_byte",private_data_byte ,null)));
-			Utils.addListJTree(t,privatedataFields,modus,"Private Data Fields");
-
-
+		if (transport_private_data_flag) {
+			t.add(new KVP("transport_private_data_length", transport_private_data_length));
+			t.add(new KVP("private_data_byte", private_data_byte));
+			Utils.addListJTree(t, privatedataFields, modus, "Private Data Fields");
 		}
 
-		if(adaptation_field_extension_flag){
-			t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_extension_length",adaptation_field_extension_length ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("adaptation_field_extension_byte",adaptation_field_extension_byte ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("ltw_flag",getBooleanAsInt(ltw_flag) ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("piecewise_rate_flag",getBooleanAsInt(piecewise_rate_flag) ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("seamless_splice_flag",getBooleanAsInt(seamless_splice_flag) ,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("af_descriptor_not_present_flag",getBooleanAsInt(af_descriptor_not_present_flag) ,null)));
-			
-			if(ltw_flag){
-				t.add(new DefaultMutableTreeNode(new KVP("ltw_valid_flag",getBooleanAsInt(ltw_valid_flag) ,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("ltw_offset",ltw_offset ,null)));
+		if (adaptation_field_extension_flag) {
+			t.add(new KVP("adaptation_field_extension_length", adaptation_field_extension_length));
+			t.add(new KVP("adaptation_field_extension_byte", adaptation_field_extension_byte));
+			t.add(new KVP("ltw_flag", getBooleanAsInt(ltw_flag)));
+			t.add(new KVP("piecewise_rate_flag", getBooleanAsInt(piecewise_rate_flag)));
+			t.add(new KVP("seamless_splice_flag", getBooleanAsInt(seamless_splice_flag)));
+			t.add(new KVP("af_descriptor_not_present_flag", getBooleanAsInt(af_descriptor_not_present_flag)));
+
+			if (ltw_flag) {
+				t.add(new KVP("ltw_valid_flag", getBooleanAsInt(ltw_valid_flag)));
+				t.add(new KVP("ltw_offset", ltw_offset));
 			}
-			if(piecewise_rate_flag){
-				t.add(new DefaultMutableTreeNode(new KVP("piecewise_rate",piecewise_rate,null)));
+			if (piecewise_rate_flag) {
+				t.add(new KVP("piecewise_rate", piecewise_rate));
 
 			}
-			if(seamless_splice_flag){
-				t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("seamless_splice_flag")));
+			if (seamless_splice_flag) {
+				t.add(GuiUtils.getNotImplementedKVP("seamless_splice_flag"));
 
 			}
-			if(!af_descriptor_not_present_flag){
-				Utils.addListJTree(t,afDescriptorList,modus,"af_descriptors");
+			if (!af_descriptor_not_present_flag) {
+				Utils.addListJTree(t, afDescriptorList, modus, "af_descriptors");
 			}
 		}
 

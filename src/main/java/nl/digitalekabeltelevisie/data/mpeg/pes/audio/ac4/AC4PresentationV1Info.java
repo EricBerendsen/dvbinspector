@@ -34,8 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -283,92 +281,92 @@ public class AC4PresentationV1Info implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_presentation_v1_info"));
-		t.add(new DefaultMutableTreeNode(new KVP("b_single_substream_group",b_single_substream_group,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ac4_presentation_v1_info");
+		t.add(new KVP("b_single_substream_group",b_single_substream_group));
 		if (b_single_substream_group != 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("presentation_config",presentation_config,null)));
+			t.add(new KVP("presentation_config",presentation_config));
 		}
 		if (parentAc4Toc.getBitstream_version() != 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("presentation_version",presentation_version,null)));
+			t.add(new KVP("presentation_version",presentation_version));
 		}
 		
 		if (b_single_substream_group != 1 && presentation_config == 6) {
-			t.add(new DefaultMutableTreeNode(new KVP("b_add_emdf_substreams",b_add_emdf_substreams,"(implied)")));
+			t.add(new KVP("b_add_emdf_substreams",b_add_emdf_substreams,"(implied)"));
 		} else {
 			if (parentAc4Toc.getBitstream_version() != 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("mdcompat",mdcompat,null)));
+				t.add(new KVP("mdcompat",mdcompat));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("b_presentation_id",b_presentation_id,null)));
+			t.add(new KVP("b_presentation_id",b_presentation_id));
 			if (b_presentation_id ==1) {
-				t.add(new DefaultMutableTreeNode(new KVP("presentation_id",presentation_id,null)));
+				t.add(new KVP("presentation_id",presentation_id));
 			}
 			
 			t.add(getFrameRateMultiplyInfoNode());
 			t.add(getFrameRateFractionsInfoNode());
 			t.add(emdf_info.getJTreeNode(modus));
 			
-			t.add(new DefaultMutableTreeNode(new KVP("b_presentation_filter",b_presentation_filter,null)));
+			t.add(new KVP("b_presentation_filter",b_presentation_filter));
 			
 			if (b_presentation_filter == 1) {
-				t.add(new DefaultMutableTreeNode(new KVP("b_enable_presentation",b_enable_presentation,null)));
+				t.add(new KVP("b_enable_presentation",b_enable_presentation));
 			}
 			if (b_single_substream_group == 1) {
 				t.add(ac4_sgi_specifier_list.get(0).getJTreeNode(modus) );
-				t.add(new DefaultMutableTreeNode(new KVP("n_substream_groups",n_substream_groups,null)));
+				t.add(new KVP("n_substream_groups",n_substream_groups));
 			}else {
-				t.add(new DefaultMutableTreeNode(new KVP("b_multi_pid",b_multi_pid,null)));
-				t.add(new DefaultMutableTreeNode(new KVP("presentation_config",presentation_config,presentation_config_list.get(presentation_config, "Reserved"))));
+				t.add(new KVP("b_multi_pid",b_multi_pid));
+				t.add(new KVP("presentation_config",presentation_config,presentation_config_list.get(presentation_config, "Reserved")));
 				if(presentation_config==5) {
-					t.add(new DefaultMutableTreeNode(new KVP("n_substream_groups_minus2",n_substream_groups_minus2,null)));
+					t.add(new KVP("n_substream_groups_minus2",n_substream_groups_minus2));
 				}
 				
 				addListJTree(t, ac4_sgi_specifier_list, modus, "ac4_sgi_specifier(s)");
-				t.add(new DefaultMutableTreeNode(new KVP("n_substream_groups",n_substream_groups,null)));
+				t.add(new KVP("n_substream_groups",n_substream_groups));
 				if(presentation_config>5) {
-					t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("presentation_config>5, /* EMDF and other data */, presentation_config_ext_info()")));
+					t.add(GuiUtils.getNotImplementedKVP("presentation_config>5, /* EMDF and other data */, presentation_config_ext_info()"));
 					return t;
 				}
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("b_pre_virtualized",b_pre_virtualized,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("b_add_emdf_substreams",b_add_emdf_substreams,null)));
+			t.add(new KVP("b_pre_virtualized",b_pre_virtualized));
+			t.add(new KVP("b_add_emdf_substreams",b_add_emdf_substreams));
 			t.add(ac4_presentation_substream_info.getJTreeNode(modus));
 			
 		}
 		if (b_add_emdf_substreams==1) {
-			t.add(new DefaultMutableTreeNode(new KVP("n_add_emdf_substreams",n_add_emdf_substreams,null)));
+			t.add(new KVP("n_add_emdf_substreams",n_add_emdf_substreams));
 			addListJTree(t, substreamsEmdfInfo, modus, "emdf_info(s)");
 		}
 
 		return t;
 	}
 
-	private DefaultMutableTreeNode getFrameRateFractionsInfoNode() {
-		DefaultMutableTreeNode frame_rate_fractions_info_node = new DefaultMutableTreeNode(new KVP("frame_rate_fractions_info (frame_rate_fraction)",frame_rate_fraction,null));
+	private KVP getFrameRateFractionsInfoNode() {
+		KVP frame_rate_fractions_info_node = new KVP("frame_rate_fractions_info (frame_rate_fraction)",frame_rate_fraction);
 		
 		if(Arrays.asList(5, 6, 7, 8, 9).contains(parentAc4Toc.getFrame_rate_index())) { // if (frame_rate_index in [5, 6, 7, 8, 9])
 			if (frame_rate_factor == 1) {
-				frame_rate_fractions_info_node.add(new DefaultMutableTreeNode(new KVP("b_frame_rate_fraction",b_frame_rate_fraction,null)));
+				frame_rate_fractions_info_node.add(new KVP("b_frame_rate_fraction",b_frame_rate_fraction));
 			}
 		}
 		if(Arrays.asList(10, 11, 12).contains(parentAc4Toc.getFrame_rate_index())) { //if (frame_rate_index in [10, 11, 12]) {
-			frame_rate_fractions_info_node.add(new DefaultMutableTreeNode(new KVP("b_frame_rate_fraction",b_frame_rate_fraction,null)));
+			frame_rate_fractions_info_node.add(new KVP("b_frame_rate_fraction",b_frame_rate_fraction));
 			if (b_frame_rate_fraction == 1) {
-				frame_rate_fractions_info_node.add(new DefaultMutableTreeNode(new KVP("b_frame_rate_fraction_is_4",b_frame_rate_fraction_is_4,null)));
+				frame_rate_fractions_info_node.add(new KVP("b_frame_rate_fraction_is_4",b_frame_rate_fraction_is_4));
 			}
 		}
 		return frame_rate_fractions_info_node;
 	}
 
-	private DefaultMutableTreeNode getFrameRateMultiplyInfoNode() {
-		DefaultMutableTreeNode frame_rate_multiply_info_node = new DefaultMutableTreeNode(new KVP("frame_rate_multiply_info (frame_rate_factor)",frame_rate_factor,null));
+	private KVP getFrameRateMultiplyInfoNode() {
+		KVP frame_rate_multiply_info_node = new KVP("frame_rate_multiply_info (frame_rate_factor)",frame_rate_factor);
 		switch (parentAc4Toc.getFrame_rate_index()) {
 		case 2:
 		case 3:
 		case 4:
-			frame_rate_multiply_info_node.add(new DefaultMutableTreeNode(new KVP("b_multiplier",b_multiplier,null)));
+			frame_rate_multiply_info_node.add(new KVP("b_multiplier",b_multiplier));
 			if (b_multiplier==1) {
-				frame_rate_multiply_info_node.add(new DefaultMutableTreeNode(new KVP("multiplier_bit",multiplier_bit,null)));
+				frame_rate_multiply_info_node.add(new KVP("multiplier_bit",multiplier_bit));
 			}
 		break;
 		case 0:
@@ -376,7 +374,7 @@ public class AC4PresentationV1Info implements TreeNode {
 		case 7:
 		case 8:
 		case 9:
-			frame_rate_multiply_info_node.add(new DefaultMutableTreeNode(new KVP("b_multiplier",b_multiplier,null)));
+			frame_rate_multiply_info_node.add(new KVP("b_multiplier",b_multiplier));
 		break;
 		default:
 		break;

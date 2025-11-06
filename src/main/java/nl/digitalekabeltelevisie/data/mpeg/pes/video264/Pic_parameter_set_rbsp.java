@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 
@@ -135,41 +133,41 @@ public class Pic_parameter_set_rbsp extends RBSP {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("pic_parameter_set_rbsp"));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_parameter_set_id",pic_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("seq_parameter_set_id",seq_parameter_set_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("entropy_coding_mode_flag",entropy_coding_mode_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_order_present_flag",pic_order_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_slice_groups_minus1",num_slice_groups_minus1,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("pic_parameter_set_rbsp");
+		t.add(new KVP("pic_parameter_set_id", pic_parameter_set_id));
+		t.add(new KVP("seq_parameter_set_id", seq_parameter_set_id));
+		t.add(new KVP("entropy_coding_mode_flag", entropy_coding_mode_flag));
+		t.add(new KVP("pic_order_present_flag", pic_order_present_flag));
+		t.add(new KVP("num_slice_groups_minus1", num_slice_groups_minus1));
 
-		t.add(new DefaultMutableTreeNode(new KVP("num_ref_idx_l0_active_minus1",num_ref_idx_l0_active_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("num_ref_idx_l1_active_minus1",num_ref_idx_l1_active_minus1,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("weighted_pred_flag",weighted_pred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("weighted_bipred_idc",weighted_bipred_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_init_qp_minus26",pic_init_qp_minus26,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_init_qs_minus26",pic_init_qs_minus26,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("chroma_qp_index_offset",chroma_qp_index_offset,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("deblocking_filter_control_present_flag",deblocking_filter_control_present_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constrained_intra_pred_flag",constrained_intra_pred_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("redundant_pic_cnt_present_flag",redundant_pic_cnt_present_flag,null)));
+		t.add(new KVP("num_ref_idx_l0_active_minus1", num_ref_idx_l0_active_minus1));
+		t.add(new KVP("num_ref_idx_l1_active_minus1", num_ref_idx_l1_active_minus1));
+		t.add(new KVP("weighted_pred_flag", weighted_pred_flag));
+		t.add(new KVP("weighted_bipred_idc", weighted_bipred_idc));
+		t.add(new KVP("pic_init_qp_minus26", pic_init_qp_minus26));
+		t.add(new KVP("pic_init_qs_minus26", pic_init_qs_minus26));
+		t.add(new KVP("chroma_qp_index_offset", chroma_qp_index_offset));
+		t.add(new KVP("deblocking_filter_control_present_flag", deblocking_filter_control_present_flag));
+		t.add(new KVP("constrained_intra_pred_flag", constrained_intra_pred_flag));
+		t.add(new KVP("redundant_pic_cnt_present_flag", redundant_pic_cnt_present_flag));
 
-		t.add(new DefaultMutableTreeNode(new KVP("transform_8x8_mode_flag",transform_8x8_mode_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_scaling_matrix_present_flag",pic_scaling_matrix_present_flag,null)));
-		if( pic_scaling_matrix_present_flag!=0 ){
-			for( int i = 0; i < (6 + (2* transform_8x8_mode_flag)); i++ ) {
-				t.add(new DefaultMutableTreeNode(new KVP("pic_scaling_list_present_flag["+i+"]",pic_scaling_list_present_flag[ i ],null)));
-				if( pic_scaling_list_present_flag[ i ]!=0 ){
-					if( i < 6 ){
-						t.add(getScalingListJTree( delta_scale[i], i, 16,deltas_read[i]));
-					}else{
-						t.add(getScalingListJTree( delta_scale[i], i, 64,deltas_read[i]));
+		t.add(new KVP("transform_8x8_mode_flag", transform_8x8_mode_flag));
+		t.add(new KVP("pic_scaling_matrix_present_flag", pic_scaling_matrix_present_flag));
+		if (pic_scaling_matrix_present_flag != 0) {
+			for (int i = 0; i < (6 + (2 * transform_8x8_mode_flag)); i++) {
+				t.add(new KVP("pic_scaling_list_present_flag[" + i + "]", pic_scaling_list_present_flag[i]));
+				if (pic_scaling_list_present_flag[i] != 0) {
+					if (i < 6) {
+						t.add(getScalingListJTree(delta_scale[i], i, 16, deltas_read[i]));
+					} else {
+						t.add(getScalingListJTree(delta_scale[i], i, 64, deltas_read[i]));
 					}
 				}
 			}
 
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("second_chroma_qp_index_offset",second_chroma_qp_index_offset,null)));
+		t.add(new KVP("second_chroma_qp_index_offset", second_chroma_qp_index_offset));
 
 		return t;
 	}

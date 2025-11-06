@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -60,11 +58,11 @@ public class OamdSubstreamInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode oamd_substream_info_node = new DefaultMutableTreeNode(new KVP("oamd_substream_info"));
-		oamd_substream_info_node.add(new DefaultMutableTreeNode(new KVP("b_oamd_ndot",b_oamd_ndot,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP oamd_substream_info_node = new KVP("oamd_substream_info");
+		oamd_substream_info_node.add(new KVP("b_oamd_ndot", b_oamd_ndot));
 		if (b_substreams_present == 1) {
-			oamd_substream_info_node.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
+			oamd_substream_info_node.add(new KVP("substream_index", substream_index));
 		}
 		return oamd_substream_info_node;
 	}

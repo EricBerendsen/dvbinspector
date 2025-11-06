@@ -26,8 +26,6 @@
  */
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.Utils;
@@ -68,13 +66,13 @@ public class AncillaryData implements TreeNode{
 
 	}
 
-
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=new DefaultMutableTreeNode(new KVP("AncillaryData"));
-		s.add(new DefaultMutableTreeNode(new KVP("sync",sync,getSync(sync))));
-		s.add(new DefaultMutableTreeNode(new KVP("data_field_length",data_field_length,null)));
-		if(data_byte!=null){
-			s.add(new DefaultMutableTreeNode(new KVP("data_byte",data_byte,null)));
+	@Override
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("AncillaryData");
+		s.add(new KVP("sync", sync, getSync(sync)));
+		s.add(new KVP("data_field_length", data_field_length));
+		if (data_byte != null) {
+			s.add(new KVP("data_byte", data_byte));
 
 		}
 

@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -58,10 +56,10 @@ public class Ac4HsfExtSubstreamInfo implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("ac4_hsf_ext_substream_info(b_substreams_present="+b_substreams_present));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("ac4_hsf_ext_substream_info(b_substreams_present=" + b_substreams_present);
 		if (b_substreams_present == 1) {
-			t.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
+			t.add(new KVP("substream_index", substream_index));
 		}
 		return t;
 	}

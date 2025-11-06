@@ -110,28 +110,24 @@ public class EmdfInfo implements TreeNode {
 		}
 	}
 
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		DefaultMutableTreeNode emdf_info_node = new DefaultMutableTreeNode(new KVP("emdf_info"));
-		emdf_info_node.add(new DefaultMutableTreeNode(new KVP("emdf_version",emdf_version,null)));
-		emdf_info_node.add(new DefaultMutableTreeNode(new KVP("key_id",key_id,null)));
-		emdf_info_node.add(new DefaultMutableTreeNode(new KVP("b_emdf_payloads_substream_info",b_emdf_payloads_substream_info,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP emdf_info_node = new KVP("emdf_info");
+		emdf_info_node.add(new KVP("emdf_version", emdf_version));
+		emdf_info_node.add(new KVP("key_id", key_id));
+		emdf_info_node.add(new KVP("b_emdf_payloads_substream_info", b_emdf_payloads_substream_info));
 
-		if (b_emdf_payloads_substream_info ==1) { 
-			emdf_info_node.add(new DefaultMutableTreeNode(new KVP("substream_index",substream_index,null)));
+		if (b_emdf_payloads_substream_info == 1) {
+			emdf_info_node.add(new KVP("substream_index", substream_index));
 		}
 
-		
-		DefaultMutableTreeNode emdf_protection_node = new DefaultMutableTreeNode(new KVP("emdf_protection"));
-		emdf_protection_node.add(new DefaultMutableTreeNode(new KVP("protection_length_primary",protection_length_primary,protection_length_list.get(protection_length_primary))));
-		emdf_protection_node.add(new DefaultMutableTreeNode(new KVP("protection_length_secondary",protection_length_secondary,protection_length_list.get(protection_length_secondary))));
-		
-		emdf_protection_node.add(new DefaultMutableTreeNode(new KVP("protection_bits_primary",protection_bits_primary,null)));
-		emdf_protection_node.add(new DefaultMutableTreeNode(new KVP("protection_bits_secondary",protection_bits_secondary,null)));
-		
-		
-		
+		DefaultMutableTreeNode emdf_protection_node = new KVP("emdf_protection");
+		emdf_protection_node.add(new KVP("protection_length_primary", protection_length_primary, protection_length_list.get(protection_length_primary)));
+		emdf_protection_node.add(new KVP("protection_length_secondary", protection_length_secondary, protection_length_list.get(protection_length_secondary)));
+
+		emdf_protection_node.add(new KVP("protection_bits_primary", protection_bits_primary));
+		emdf_protection_node.add(new KVP("protection_bits_secondary", protection_bits_secondary));
+
 		emdf_info_node.add(emdf_protection_node);
 		return emdf_info_node;
 	}

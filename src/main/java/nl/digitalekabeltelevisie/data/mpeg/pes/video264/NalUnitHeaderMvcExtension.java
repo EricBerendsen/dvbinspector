@@ -1,8 +1,7 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
 
 public class NalUnitHeaderMvcExtension implements TreeNode{
@@ -26,15 +25,15 @@ public class NalUnitHeaderMvcExtension implements TreeNode{
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("nal_unit_header_mvc_extension"));
-		t.add(new DefaultMutableTreeNode(new KVP("non_idr_flag",non_idr_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("priority_id",priority_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("view_id",view_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("temporal_id",temporal_id,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("anchor_pic_flag",anchor_pic_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("inter_view_flag",inter_view_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_one_bit",reserved_one_bit,null)));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("nal_unit_header_mvc_extension");
+		t.add(new KVP("non_idr_flag", non_idr_flag));
+		t.add(new KVP("priority_id", priority_id));
+		t.add(new KVP("view_id", view_id));
+		t.add(new KVP("temporal_id", temporal_id));
+		t.add(new KVP("anchor_pic_flag", anchor_pic_flag));
+		t.add(new KVP("inter_view_flag", inter_view_flag));
+		t.add(new KVP("reserved_one_bit", reserved_one_bit));
 
 		return t;
 	}

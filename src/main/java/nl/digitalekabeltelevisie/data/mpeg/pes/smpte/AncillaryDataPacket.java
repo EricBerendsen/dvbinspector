@@ -8,7 +8,6 @@ import nl.digitalekabeltelevisie.controller.TreeNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 
 public class AncillaryDataPacket implements TreeNode {
 
@@ -19,7 +18,7 @@ public class AncillaryDataPacket implements TreeNode {
     private final int DID;
     private final int SDID;
     private final int data_count;
-    private final List<DataWord> user_data_word = new ArrayList<DataWord>();
+    private final List<DataWord> user_data_word = new ArrayList<>();
     private final int checksum_word;
 
     /**
@@ -28,8 +27,8 @@ public class AncillaryDataPacket implements TreeNode {
     public record DataWord(int dataWord) implements TreeNode {
 
         @Override
-        public DefaultMutableTreeNode getJTreeNode(int modus) {
-            return new DefaultMutableTreeNode(new KVP("user_data_word", dataWord, "8 LSB: " + (dataWord & 0xFF)));
+        public KVP getJTreeNode(int modus) {
+            return new KVP("user_data_word", dataWord, "8 LSB: " + (dataWord & 0xFF));
         }
     }
 
@@ -99,27 +98,27 @@ public class AncillaryDataPacket implements TreeNode {
     }
 
     @Override
-    public DefaultMutableTreeNode getJTreeNode(int modus) {
-        final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("Ancillary Data Packet"));
-        s.add(new DefaultMutableTreeNode(new KVP("b0", b0, null)));
+    public KVP getJTreeNode(int modus) {
+        KVP s = new KVP("Ancillary Data Packet");
+        s.add(new KVP("b0", b0));
 
-        s.add(new DefaultMutableTreeNode(new KVP("c_not_y_channelFlag", c_not_y_channel_flag,
+        s.add(new KVP("c_not_y_channelFlag", c_not_y_channel_flag,
                 "SD streams: should be 0 / HD streams:"
                         + (c_not_y_channel_flag == 1 ? " ANC data corresponds to the color difference channel"
-                                : " ANC data corresponds to the luminance channel"))));
+                                : " ANC data corresponds to the luminance channel")));
 
-        s.add(new DefaultMutableTreeNode(new KVP("line_number", line_number, null)));
-        s.add(new DefaultMutableTreeNode(new KVP("horizontal_offset", horizontal_offset, null)));
-        s.add(new DefaultMutableTreeNode(new KVP("DID", DID, "8 LSB: " + (DID & 0xFF))));
-        s.add(new DefaultMutableTreeNode(new KVP("SDID", SDID, "8 LSB: " + (SDID & 0xFF))));
-        s.add(new DefaultMutableTreeNode(new KVP("data_count", data_count, "8 LSB: " + (data_count & 0xFF))));
+        s.add(new KVP("line_number", line_number));
+        s.add(new KVP("horizontal_offset", horizontal_offset));
+        s.add(new KVP("DID", DID, "8 LSB: " + (DID & 0xFF)));
+        s.add(new KVP("SDID", SDID, "8 LSB: " + (SDID & 0xFF)));
+        s.add(new KVP("data_count", data_count, "8 LSB: " + (data_count & 0xFF)));
 
         // create a folder for user_data_word
-        final DefaultMutableTreeNode d = new DefaultMutableTreeNode(new KVP("User data words"));
+        KVP d = new KVP("User data words");
         Utils.addListJTree(d, user_data_word, modus, "User data words");
         s.add(d);
 
-        s.add(new DefaultMutableTreeNode(new KVP("checksum_word", checksum_word, null)));
+        s.add(new KVP("checksum_word", checksum_word));
         return s;
     }
 }

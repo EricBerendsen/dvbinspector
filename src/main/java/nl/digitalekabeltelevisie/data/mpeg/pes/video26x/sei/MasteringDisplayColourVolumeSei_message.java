@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x.sei;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -72,16 +70,18 @@ public class MasteringDisplayColourVolumeSei_message extends Sei_message {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s=super.getJTreeNode(modus);
-		for(int c = 0; c < 3; c++ ) {
-			s.add(new DefaultMutableTreeNode(new KVP("display_primaries_x["+c+"]",display_primaries_x[c],getCdm2x(display_primaries_x[c]))));
-			s.add(new DefaultMutableTreeNode(new KVP("display_primaries_y["+c+"]",display_primaries_y[c],getCdm2y(display_primaries_y[c]))));
+	public KVP getJTreeNode(int modus) {
+		KVP s = super.getJTreeNode(modus);
+		for (int c = 0; c < 3; c++) {
+			s.add(new KVP("display_primaries_x[" + c + "]", display_primaries_x[c], getCdm2x(display_primaries_x[c])));
+			s.add(new KVP("display_primaries_y[" + c + "]", display_primaries_y[c], getCdm2y(display_primaries_y[c])));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("white_point_x",white_point_x,getCdm2x(white_point_x))));
-		s.add(new DefaultMutableTreeNode(new KVP("white_point_y",white_point_y,getCdm2y(white_point_y))));
-		s.add(new DefaultMutableTreeNode(new KVP("max_display_mastering_luminance",max_display_mastering_luminance,getMax_display_mastering_luminanceString(max_display_mastering_luminance))));
-		s.add(new DefaultMutableTreeNode(new KVP("min_display_mastering_luminance",min_display_mastering_luminance,getMin_display_mastering_luminance(min_display_mastering_luminance))));
+		s.add(new KVP("white_point_x", white_point_x, getCdm2x(white_point_x)));
+		s.add(new KVP("white_point_y", white_point_y, getCdm2y(white_point_y)));
+		s.add(new KVP("max_display_mastering_luminance", max_display_mastering_luminance,
+				getMax_display_mastering_luminanceString(max_display_mastering_luminance)));
+		s.add(new KVP("min_display_mastering_luminance", min_display_mastering_luminance,
+				getMin_display_mastering_luminance(min_display_mastering_luminance)));
 
 		return s;
 	}
@@ -90,7 +90,7 @@ public class MasteringDisplayColourVolumeSei_message extends Sei_message {
 	 * @param min_display_mastering_luminance2
 	 * @return
 	 */
-	private String getMin_display_mastering_luminance(int min_display_mastering_luminance) {
+	private static String getMin_display_mastering_luminance(int min_display_mastering_luminance) {
 		if(min_display_mastering_luminance>=1 && min_display_mastering_luminance<=50_000) {
 			return String.format("%.4f cd/m²", 0.0001 * min_display_mastering_luminance);
 		}
@@ -101,7 +101,7 @@ public class MasteringDisplayColourVolumeSei_message extends Sei_message {
 	 * @param max_display_mastering_luminance2
 	 * @return
 	 */
-	private String getMax_display_mastering_luminanceString(int max_display_mastering_luminance) {
+	private static String getMax_display_mastering_luminanceString(int max_display_mastering_luminance) {
 		if(max_display_mastering_luminance>=50_000 && max_display_mastering_luminance<=100_000_000) {
 			return String.format("%.4f cd/m²", 0.0001 * max_display_mastering_luminance);
 		}

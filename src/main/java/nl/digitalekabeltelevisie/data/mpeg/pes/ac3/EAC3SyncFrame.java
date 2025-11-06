@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.ac3;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -322,130 +320,127 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 		}
 	}
 
-
-
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode s = new DefaultMutableTreeNode(new KVP("EAC3 SyncFrame"));
-		s.add(new DefaultMutableTreeNode(new KVP("syncword",syncword,"must be 0x0B77")));
-		s.add(new DefaultMutableTreeNode(new KVP("strmtyp",strmtyp,"Stream type: "+getStreamTypeString(strmtyp))));
-		s.add(new DefaultMutableTreeNode(new KVP("substreamid",substreamid,"Substream identification")));
-		s.add(new DefaultMutableTreeNode(new KVP("frmsiz",frmsiz,"Frame size in 16 bit words: "+(frmsiz+1))));
-		s.add(new DefaultMutableTreeNode(new KVP("fscod",fscod,"Sample rate code: "+getSampleRateCodeString(fscod))));
+	public KVP getJTreeNode(int modus) {
+		KVP s = new KVP("EAC3 SyncFrame");
+		s.add(new KVP("syncword",syncword,"must be 0x0B77"));
+		s.add(new KVP("strmtyp",strmtyp,"Stream type: "+getStreamTypeString(strmtyp)));
+		s.add(new KVP("substreamid",substreamid,"Substream identification"));
+		s.add(new KVP("frmsiz",frmsiz,"Frame size in 16 bit words: "+(frmsiz+1)));
+		s.add(new KVP("fscod",fscod,"Sample rate code: "+getSampleRateCodeString(fscod)));
 		if(fscod == 0x3)
 		{
-			s.add(new DefaultMutableTreeNode(new KVP("fscod2",fscod2,"Reduced sampling rate: "+getReducedSampleRateCodeString(fscod2))));
+			s.add(new KVP("fscod2",fscod2,"Reduced sampling rate: "+getReducedSampleRateCodeString(fscod2)));
 		}else{
-			s.add(new DefaultMutableTreeNode(new KVP("numblkscod",numblkscod,getNumblkscodString(numblkscod))));
+			s.add(new KVP("numblkscod",numblkscod,getNumblkscodString(numblkscod)));
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("acmod",acmod,"Audio coding mode: "+ getACModString(acmod))));
-		s.add(new DefaultMutableTreeNode(new KVP("lfeon",lfeon,getLfeOnString(lfeon))));
+		s.add(new KVP("acmod",acmod,"Audio coding mode: "+ getACModString(acmod)));
+		s.add(new KVP("lfeon",lfeon,getLfeOnString(lfeon)));
 
-		s.add(new DefaultMutableTreeNode(new KVP("bsid",bsid,getBsidString(bsid))));
-		s.add(new DefaultMutableTreeNode(new KVP("dialnorm",dialnorm,getDialNormString(dialnorm))));
-		s.add(new DefaultMutableTreeNode(new KVP("compre",compre,getCompreString(compre))));
+		s.add(new KVP("bsid",bsid,getBsidString(bsid)));
+		s.add(new KVP("dialnorm",dialnorm,getDialNormString(dialnorm)));
+		s.add(new KVP("compre",compre,getCompreString(compre)));
 		if(compre==1){
-			s.add(new DefaultMutableTreeNode(new KVP("compr",compr,"Compression gain word")));
+			s.add(new KVP("compr",compr,"Compression gain word"));
 		}
 		if(acmod == 0){ /* if 1+1 mode (dual mono, so some items need a second value) */
-			s.add(new DefaultMutableTreeNode(new KVP("dialnorm2",dialnorm2,"Dialogue normalization: "+((dialnorm==0)?"Reserved":"-"+dialnorm+" dB"))));
-			s.add(new DefaultMutableTreeNode(new KVP("compre2",compr2e,compr2e==1?"Compression gain word exists":"No compression gain word exists")));
+			s.add(new KVP("dialnorm2",dialnorm2,"Dialogue normalization: "+((dialnorm==0)?"Reserved":"-"+dialnorm+" dB")));
+			s.add(new KVP("compre2",compr2e,compr2e==1?"Compression gain word exists":"No compression gain word exists"));
 			if(compr2e==1){
-				s.add(new DefaultMutableTreeNode(new KVP("compr2",compr2,"Compression gain word")));
+				s.add(new KVP("compr2",compr2,"Compression gain word"));
 			}
 		}
 		if(strmtyp == 0x1){ /* if dependent stream */
-			s.add(new DefaultMutableTreeNode(new KVP("chanmape",chanmape,"Custom channel map "+doesExistString(chanmape)+" (Only dependent substreams can have a custom channel map)")));
+			s.add(new KVP("chanmape",chanmape,"Custom channel map "+doesExistString(chanmape)+" (Only dependent substreams can have a custom channel map)"));
 			if(chanmape==1) {
-				s.add(new DefaultMutableTreeNode(new KVP("chanmap",chanmap,null)));
-				s.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("chanmap")));
+				s.add(new KVP("chanmap",chanmap));
+				s.add(GuiUtils.getNotImplementedKVP("chanmap"));
 			}
 		}
-		s.add(new DefaultMutableTreeNode(new KVP("mixmdate",mixmdate,mixmdate==1?"mixing metadata exists":"mixing metadata does not exist")));
+		s.add(new KVP("mixmdate",mixmdate,mixmdate==1?"mixing metadata exists":"mixing metadata does not exist"));
 
 		if(mixmdate==1) /* mixing metadata */
 		{
 			if(acmod > 0x2) /* if more than 2 channels */ {
-				s.add(new DefaultMutableTreeNode(new KVP("dmixmod",dmixmod,"Preferred stereo downmix mode: "+getDmixmodString(dmixmod))));
+				s.add(new KVP("dmixmod",dmixmod,"Preferred stereo downmix mode: "+getDmixmodString(dmixmod)));
 			}
 			if(((acmod & 0x1)!=0) && (acmod > 0x2)) /* if three front channels exist */
 			{
-				s.add(new DefaultMutableTreeNode(new KVP("ltrtcmixlev",ltrtcmixlev,"Lt/Rt center mix level: "+getCmixlevString(ltrtcmixlev))));
-				s.add(new DefaultMutableTreeNode(new KVP("lorocmixlev",lorocmixlev,"Lo/Ro center mix level: "+getCmixlevString(lorocmixlev))));
+				s.add(new KVP("ltrtcmixlev",ltrtcmixlev,"Lt/Rt center mix level: "+getCmixlevString(ltrtcmixlev)));
+				s.add(new KVP("lorocmixlev",lorocmixlev,"Lo/Ro center mix level: "+getCmixlevString(lorocmixlev)));
 			}
 			if((acmod & 0x4)!=0) /* if a surround channel exists */
 			{
-				s.add(new DefaultMutableTreeNode(new KVP("ltrtsurmixlev",ltrtsurmixlev,"Lt/Rt surround mix level: "+getSurmixlevString(ltrtsurmixlev))));
-				s.add(new DefaultMutableTreeNode(new KVP("lorosurmixlev",lorosurmixlev,"Lo/Ro surround mix level: "+getSurmixlevString(lorosurmixlev))));
+				s.add(new KVP("ltrtsurmixlev",ltrtsurmixlev,"Lt/Rt surround mix level: "+getSurmixlevString(ltrtsurmixlev)));
+				s.add(new KVP("lorosurmixlev",lorosurmixlev,"Lo/Ro surround mix level: "+getSurmixlevString(lorosurmixlev)));
 			}
 			if(lfeon!=0) /* if the LFE channel exists */
 			{
-				s.add(new DefaultMutableTreeNode(new KVP("lfemixlevcode",lfemixlevcode,"LFE mix level code "+doesExistString(lfemixlevcode))));
+				s.add(new KVP("lfemixlevcode",lfemixlevcode,"LFE mix level code "+doesExistString(lfemixlevcode)));
 				if(lfemixlevcode!=0) {
-					s.add(new DefaultMutableTreeNode(new KVP("lfemixlevcod",lfemixlevcod,"LFE mix level (dB): "+(10-lfemixlevcod))));
+					s.add(new KVP("lfemixlevcod",lfemixlevcod,"LFE mix level (dB): "+(10-lfemixlevcod)));
 				}
 			}
 			if(strmtyp == 0x0) /* if independent stream */
 			{
-				s.add(new DefaultMutableTreeNode(new KVP("pgmscle",pgmscle,"Programme scale factor "+doesExistString(pgmscle))));
+				s.add(new KVP("pgmscle",pgmscle,"Programme scale factor "+doesExistString(pgmscle)));
 				if(pgmscle!=0) {
-					s.add(new DefaultMutableTreeNode(new KVP("pgmscl",pgmscl,"Programme scale factor: "+getProgrammeScaleFactorString(pgmscl))));
+					s.add(new KVP("pgmscl",pgmscl,"Programme scale factor: "+getProgrammeScaleFactorString(pgmscl)));
 				}
 				if(acmod == 0x0) /* if 1+1 mode (dual mono, so some items need a second value) */
 				{
-					s.add(new DefaultMutableTreeNode(new KVP("pgmscl2e",pgmscl2e,"Programme scale factor #2 "+doesExistString(pgmscl2e))));
+					s.add(new KVP("pgmscl2e",pgmscl2e,"Programme scale factor #2 "+doesExistString(pgmscl2e)));
 					if(pgmscl2e!=0) {
-						s.add(new DefaultMutableTreeNode(new KVP("pgmscl2",pgmscl2,"Programme scale factor #2: "+getProgrammeScaleFactorString(pgmscl2))));
+						s.add(new KVP("pgmscl2",pgmscl2,"Programme scale factor #2: "+getProgrammeScaleFactorString(pgmscl2)));
 					}
 				}
-				s.add(new DefaultMutableTreeNode(new KVP("extpgmscle",extpgmscle,"External programme scale factor "+doesExistString(extpgmscle))));
+				s.add(new KVP("extpgmscle",extpgmscle,"External programme scale factor "+doesExistString(extpgmscle)));
 				if(extpgmscle!=0) {
-					extpgmscl = bs.readBits(6);
-					s.add(new DefaultMutableTreeNode(new KVP("extpgmscl",extpgmscl,"External programme scale factor: "+getProgrammeScaleFactorString(extpgmscl))));
+					s.add(new KVP("extpgmscl",extpgmscl,"External programme scale factor: "+getProgrammeScaleFactorString(extpgmscl)));
 				}
-				s.add(new DefaultMutableTreeNode(new KVP("mixdef",mixdef,"Mix control type: "+getMixControlTypeString(mixdef))));
+				s.add(new KVP("mixdef",mixdef,"Mix control type: "+getMixControlTypeString(mixdef)));
 				if(mixdef == 0x1) /* mixing option 2 */
 				{
-					s.add(new DefaultMutableTreeNode(new KVP("premixcmpsel",premixcmpsel,null)));
-					s.add(new DefaultMutableTreeNode(new KVP("drcsrc",drcsrc,null)));
-					s.add(new DefaultMutableTreeNode(new KVP("premixcmpscl",premixcmpscl,null)));
+					s.add(new KVP("premixcmpsel",premixcmpsel));
+					s.add(new KVP("drcsrc",drcsrc));
+					s.add(new KVP("premixcmpscl",premixcmpscl));
 				}
 				else if(mixdef == 0x2) /* mixing option 3 */ {
-					s.add(new DefaultMutableTreeNode(new KVP("mixdata",mixdata,null)));
+					s.add(new KVP("mixdata",mixdata));
 				}else if(mixdef == 0x3) /* mixing option 4 */
 				{
-					s.add(new DefaultMutableTreeNode(new KVP("mixdeflen",mixdeflen,"Length of mixing parameter data field: "+(mixdeflen+2)+" bytes")));
-					s.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("mixing option 4")));
+					s.add(new KVP("mixdeflen",mixdeflen,"Length of mixing parameter data field: "+(mixdeflen+2)+" bytes"));
+					s.add(GuiUtils.getNotImplementedKVP("mixing option 4"));
 				}
 				if(acmod < 0x2) /* if mono or dual mono source */
 				{
-					s.add(new DefaultMutableTreeNode(new KVP("paninfoe",paninfoe,"Pan information "+doesExistString(paninfoe))));
+					s.add(new KVP("paninfoe",paninfoe,"Pan information "+doesExistString(paninfoe)));
 					if(paninfoe!=0)
 					{
-						s.add(new DefaultMutableTreeNode(new KVP("panmean",panmean,"Pan mean direction index: "+(panmean*1.5)+" degrees")));
-						s.add(new DefaultMutableTreeNode(new KVP("paninfo",paninfo,"paninfo - reserved")));
+						s.add(new KVP("panmean",panmean,"Pan mean direction index: "+(panmean*1.5)+" degrees"));
+						s.add(new KVP("paninfo",paninfo,"paninfo - reserved"));
 					}
 					if(acmod == 0x0) /* if 1+1 mode (dual mono, so some items need a second value) */
 					{
-						s.add(new DefaultMutableTreeNode(new KVP("paninfo2e",paninfo2e,"Pan information #2 "+doesExistString(paninfo2e))));
+						s.add(new KVP("paninfo2e",paninfo2e,"Pan information #2 "+doesExistString(paninfo2e)));
 						if(paninfo2e!=0)
 						{
-							s.add(new DefaultMutableTreeNode(new KVP("panmean2",panmean2,"Pan mean direction index: "+(panmean2*1.5)+" degrees")));
-							s.add(new DefaultMutableTreeNode(new KVP("paninfo2",paninfo2,"paninfo2 - reserved")));
+							s.add(new KVP("panmean2",panmean2,"Pan mean direction index: "+(panmean2*1.5)+" degrees"));
+							s.add(new KVP("paninfo2",paninfo2,"paninfo2 - reserved"));
 						}
 					}
 				}
 
-				s.add(new DefaultMutableTreeNode(new KVP("frmmixcfginfoe",frmmixcfginfoe,"Frame mixing configuration information "+doesExistString(frmmixcfginfoe))));
+				s.add(new KVP("frmmixcfginfoe",frmmixcfginfoe,"Frame mixing configuration information "+doesExistString(frmmixcfginfoe)));
 				if(frmmixcfginfoe!=0){ /* mixing configuration information */
 					if(numblkscod == 0x0) {
-						s.add(new DefaultMutableTreeNode(new KVP("blkmixcfginfo",blkmixcfginfo[0],"Block mixing configuration information")));
+						s.add(new KVP("blkmixcfginfo",blkmixcfginfo[0],"Block mixing configuration information"));
 					}else{
 						int number_of_blocks_per_sync_frame = getNumBlocks(numblkscod);
 						for(int blk = 0; blk < number_of_blocks_per_sync_frame; blk++){
-							s.add(new DefaultMutableTreeNode(new KVP("blkmixcfginfoe["+blk+"]",blkmixcfginfoe[blk],"Block mixing configuration information["+blk+"] "+doesExistString(blkmixcfginfoe[blk]))));
+							s.add(new KVP("blkmixcfginfoe["+blk+"]",blkmixcfginfoe[blk],"Block mixing configuration information["+blk+"] "+doesExistString(blkmixcfginfoe[blk])));
 							if(blkmixcfginfoe[blk]!=0){
-								s.add(new DefaultMutableTreeNode(new KVP("blkmixcfginfo["+blk+"]",blkmixcfginfo[blk],"Block mixing configuration information")));
+								s.add(new KVP("blkmixcfginfo["+blk+"]",blkmixcfginfo[blk],"Block mixing configuration information"));
 							}
 						}
 					}
@@ -453,55 +448,53 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 
 
 			}// END if(strmtyp == 0x0) /* if independent stream */
-			s.add(new DefaultMutableTreeNode(new KVP("infomdate",infomdate,"Informational metadata "+doesExistString(infomdate))));
+			s.add(new KVP("infomdate",infomdate,"Informational metadata "+doesExistString(infomdate)));
 			if(infomdate!=0){ /* informational metadata */
-				s.add(new DefaultMutableTreeNode(new KVP("bsmod",bsmod,"Bit stream mode: "+getBsModString(bsmod, acmod))));
-				s.add(new DefaultMutableTreeNode(new KVP("copyrightb",copyrightb,"Copyright bit: "+(copyrightb==1?"information in the bit stream is indicated as protected by copyright":"information is not indicated as protected"))));
-				s.add(new DefaultMutableTreeNode(new KVP("origbs",origbs,origbs==1?"original bit stream":"copy of another bit stream")));
+				s.add(new KVP("bsmod",bsmod,"Bit stream mode: "+getBsModString(bsmod, acmod)));
+				s.add(new KVP("copyrightb",copyrightb,"Copyright bit: "+(copyrightb==1?"information in the bit stream is indicated as protected by copyright":"information is not indicated as protected")));
+				s.add(new KVP("origbs",origbs,origbs==1?"original bit stream":"copy of another bit stream"));
 				if(acmod == 0x2){ /* if in 2/0 mode */
 
-					s.add(new DefaultMutableTreeNode(new KVP("dsurmod",dsurmod,"Dolby Surround mode: "+getDsurmodString(dsurmod))));
-					s.add(new DefaultMutableTreeNode(new KVP("dheadphonmod",dheadphonmod,"Dolby Headphone mode: "+getDheadphonmodString(dheadphonmod))));
+					s.add(new KVP("dsurmod",dsurmod,"Dolby Surround mode: "+getDsurmodString(dsurmod)));
+					s.add(new KVP("dheadphonmod",dheadphonmod,"Dolby Headphone mode: "+getDheadphonmodString(dheadphonmod)));
 				}
 				if(acmod >= 0x6){ /* if both surround channels exist */
-					s.add(new DefaultMutableTreeNode(new KVP("dsurexmod",dsurexmod,"Dolby Surround EX mode: "+getDsurexmodString(dsurexmod))));
+					s.add(new KVP("dsurexmod",dsurexmod,"Dolby Surround EX mode: "+getDsurexmodString(dsurexmod)));
 				}
-				s.add(new DefaultMutableTreeNode(new KVP("audprodie",audprodie,"Audio production information "+doesExistString(audprodie))));
+				s.add(new KVP("audprodie",audprodie,"Audio production information "+doesExistString(audprodie)));
 
 				if(audprodie!=0){
-					s.add(new DefaultMutableTreeNode(new KVP("mixlevel",mixlevel,"Mixing level: "+(80+mixlevel)+" dB")));
-					s.add(new DefaultMutableTreeNode(new KVP("roomtyp","Room type: "+roomtyp,getRoomTypeString(roomtyp))));
-					s.add(new DefaultMutableTreeNode(new KVP("adconvtyp",adconvtyp,"A/D converter type: "+(adconvtyp==1?"HDCD":"standard"))));
+					s.add(new KVP("mixlevel",mixlevel,"Mixing level: "+(80+mixlevel)+" dB"));
+					s.add(new KVP("roomtyp","Room type: "+roomtyp,getRoomTypeString(roomtyp)));
+					s.add(new KVP("adconvtyp",adconvtyp,"A/D converter type: "+(adconvtyp==1?"HDCD":"standard")));
 				}
 				if(acmod == 0x0){ /* if 1+1 mode (dual mono, so some items need a second value) */
-					s.add(new DefaultMutableTreeNode(new KVP("mixdata",mixdata,null)));
-					audprodi2e = bs.readBits(1);
+					s.add(new KVP("mixdata",mixdata));
 					if(audprodi2e!=0){
-						s.add(new DefaultMutableTreeNode(new KVP("mixlevel2",mixlevel2,"peak mixing level during the final audio mixing session: "+(80+mixlevel2)+" dB")));
-						s.add(new DefaultMutableTreeNode(new KVP("roomtyp2",roomtyp2,getRoomTypeString(roomtyp))));
-						s.add(new DefaultMutableTreeNode(new KVP("adconvtyp2",adconvtyp2,"A/D converter type: "+(adconvtyp2==1?"HDCD":"standard"))));
+						s.add(new KVP("mixlevel2",mixlevel2,"peak mixing level during the final audio mixing session: "+(80+mixlevel2)+" dB"));
+						s.add(new KVP("roomtyp2",roomtyp2,getRoomTypeString(roomtyp)));
+						s.add(new KVP("adconvtyp2",adconvtyp2,"A/D converter type: "+(adconvtyp2==1?"HDCD":"standard")));
 					}
 				}
 				if(fscod < 0x3){ /* if not half sample rate */
-					s.add(new DefaultMutableTreeNode(new KVP("sourcefscod",sourcefscod,"Source sample rate code"+(sourcefscod==1?" the source material was sampled at twice the rate indicated by fscod":" the source material was NOT sampled at twice the rate indicated by fscod"))));
+					s.add(new KVP("sourcefscod",sourcefscod,"Source sample rate code"+(sourcefscod==1?" the source material was sampled at twice the rate indicated by fscod":" the source material was NOT sampled at twice the rate indicated by fscod")));
 				}
 				if( (strmtyp == 0x0) && (numblkscod != 0x3) ) {
-					s.add(new DefaultMutableTreeNode(new KVP("convsync",convsync,"Converter synchronization flag. This bit is used for synchronization by a device that converts an Enhanced AC-3 bit stream to a bit stream compliant with a legacy AC-3 decoder")));
+					s.add(new KVP("convsync",convsync,"Converter synchronization flag. This bit is used for synchronization by a device that converts an Enhanced AC-3 bit stream to a bit stream compliant with a legacy AC-3 decoder"));
 				}
 				if(strmtyp == 0x2){ /* if bit stream converted from AC-3 */
 					if(numblkscod == 0x3) /* 6 blocks per frame */ {
-						s.add(new DefaultMutableTreeNode(new KVP("blkid",blkid,"Block identification: the first block in this Enhanced AC-3 frame was the first block in the original standard AC-3 frame: implicit because numblkscod == 0x3 (6 blocks per frame)")));
+						s.add(new KVP("blkid",blkid,"Block identification: the first block in this Enhanced AC-3 frame was the first block in the original standard AC-3 frame: implicit because numblkscod == 0x3 (6 blocks per frame)"));
 					}else {
-						s.add(new DefaultMutableTreeNode(new KVP("blkid",blkid,"Block identification: "+(blkid==1?"the first block in this Enhanced AC-3 frame was the first block in the original standard AC-3 frame":"the first block in this Enhanced AC-3 frame was NOT the first block in the original standard AC-3 frame"))));
+						s.add(new KVP("blkid",blkid,"Block identification: "+(blkid==1?"the first block in this Enhanced AC-3 frame was the first block in the original standard AC-3 frame":"the first block in this Enhanced AC-3 frame was NOT the first block in the original standard AC-3 frame")));
 					}
 					if(blkid!=0) {
-						s.add(new DefaultMutableTreeNode(new KVP("frmsizecod",frmsizecod,"Frame size code: "+getFrmsizecodString(fscod, frmsizecod))));
+						s.add(new KVP("frmsizecod",frmsizecod,"Frame size code: "+getFrmsizecodString(fscod, frmsizecod)));
 					}
 				}
-				addbsie = bs.readBits(1);
-				s.add(new DefaultMutableTreeNode(new KVP("addbsie",addbsie,addbsie==1?"Additional bit stream information exists":"Additional bit stream information does not exist")));
+				s.add(new KVP("addbsie",addbsie,addbsie==1?"Additional bit stream information exists":"Additional bit stream information does not exist"));
 				if(addbsie!=0){
-					s.add(new DefaultMutableTreeNode(new KVP("addbsil",addbsil,"Additional bit stream information length")));
+					s.add(new KVP("addbsil",addbsil,"Additional bit stream information length"));
 				}
 
 			}
@@ -521,291 +514,192 @@ public class EAC3SyncFrame extends AbstractAC3SyncFrame implements TreeNode {
 
 	}
 
-
 	public static String getProgrammeScaleFactorString(int pgmscl) {
 		if(pgmscl==0){
 			return "mute";
-		}else{
-			return (pgmscl-51)+" dB";
 		}
+		return (pgmscl-51)+" dB";
 	}
 
-
 	public static String getStreamTypeString(final int strmtyp) {
-		switch (strmtyp) {
-		case 0:
-			return "Type 0: These frames comprise an independent stream or substream. The programme may be decoded independently of any other substreams that might exist in the bit stream.";
-		case 1:
-			return "Type 1: These frames comprise a dependent substream. The programme must be decoded in conjunction with the independent substream with which it is associated.";
-		case 2:
-			return "Type 2: These frames comprise an independent stream or substream that was previously coded in AC-3. Type 2 streams must be independently decodable, and may not have any dependent streams associated with them.";
-		case 3:
-			return "Type 3: Reserved";
-
-		default:
-			return "illegal value";
-		}
+		return switch (strmtyp) {
+		case 0 -> "Type 0: These frames comprise an independent stream or substream. The programme may be decoded independently of any other substreams that might exist in the bit stream.";
+		case 1 -> "Type 1: These frames comprise a dependent substream. The programme must be decoded in conjunction with the independent substream with which it is associated.";
+		case 2 -> "Type 2: These frames comprise an independent stream or substream that was previously coded in AC-3. Type 2 streams must be independently decodable, and may not have any dependent streams associated with them.";
+		case 3 -> "Type 3: Reserved";
+		default -> "illegal value";
+		};
 	}
 
 	public static String getNumblkscodString(final int numblkscod) {
-		switch (numblkscod) {
-		case 0:
-			return "1 block per syncframe";
-		case 1:
-			return "2 blocks per syncframe";
-		case 2:
-			return "3 blocks per syncframe";
-		case 3:
-			return "6 blocks per syncframe";
-
-		default:
-			return "illegal value";
-		}
+		return switch (numblkscod) {
+		case 0 -> "1 block per syncframe";
+		case 1 -> "2 blocks per syncframe";
+		case 2 -> "3 blocks per syncframe";
+		case 3 -> "6 blocks per syncframe";
+		default -> "illegal value";
+		};
 	}
 
 	public static String getReducedSampleRateCodeString(final int fscod2) {
-		switch (fscod2) {
-		case 0:
-			return "24 kHz";
-		case 1:
-			return "22,05 kHz";
-		case 2:
-			return "16 kHz";
-		case 3:
-			return "Reserved";
-
-		default:
-			return "illegal value";
-		}
+		return switch (fscod2) {
+		case 0 -> "24 kHz";
+		case 1 -> "22,05 kHz";
+		case 2 -> "16 kHz";
+		case 3 -> "Reserved";
+		default -> "illegal value";
+		};
 	}
 
 	public static  int getNumBlocks(int numblkscod) {
-		switch (numblkscod) {
-		case 0:
-			return 1;
-		case 1:
-			return 2;
-		case 2:
-			return 3;
-		case 3:
-			return 6;
-
-		default:
-			return 0;
-		}
+		return switch (numblkscod) {
+		case 0 -> 1;
+		case 1 -> 2;
+		case 2 -> 3;
+		case 3 -> 6;
+		default -> 0;
+		};
 	}
-
-
 
 	public int getStrmtyp() {
 		return strmtyp;
 	}
 
-
-
 	public int getLfemixlevcode() {
 		return lfemixlevcode;
 	}
-
-
 
 	public int getLfemixlevcod() {
 		return lfemixlevcod;
 	}
 
-
-
 	public int getSubstreamid() {
 		return substreamid;
 	}
-
-
 
 	public int getFrmsiz() {
 		return frmsiz;
 	}
 
-
-
 	public int getFscod2() {
 		return fscod2;
 	}
-
-
 
 	public int getNumblkscod() {
 		return numblkscod;
 	}
 
-
-
 	public int getChanmape() {
 		return chanmape;
 	}
-
-
 
 	public int getChanmap() {
 		return chanmap;
 	}
 
-
-
 	public int getMixmdate() {
 		return mixmdate;
 	}
-
-
 
 	public int getPgmscle() {
 		return pgmscle;
 	}
 
-
-
 	public int getPgmscl() {
 		return pgmscl;
 	}
-
-
 
 	public int getPgmscl2e() {
 		return pgmscl2e;
 	}
 
-
-
 	public int getPgmscl2() {
 		return pgmscl2;
 	}
-
-
 
 	public int getExtpgmscle() {
 		return extpgmscle;
 	}
 
-
-
 	public int getExtpgmscl() {
 		return extpgmscl;
 	}
-
-
 
 	public int getMixdef() {
 		return mixdef;
 	}
 
-
-
 	public int getPremixcmpsel() {
 		return premixcmpsel;
 	}
-
-
 
 	public int getDrcsrc() {
 		return drcsrc;
 	}
 
-
-
 	public int getPremixcmpscl() {
 		return premixcmpscl;
 	}
-
-
 
 	public int getMixdata() {
 		return mixdata;
 	}
 
-
-
 	public int getMixdeflen() {
 		return mixdeflen;
 	}
-
-
 
 	public int getPaninfoe() {
 		return paninfoe;
 	}
 
-
-
 	public int getPanmean() {
 		return panmean;
 	}
-
-
 
 	public int getPaninfo() {
 		return paninfo;
 	}
 
-
-
 	public int getPaninfo2e() {
 		return paninfo2e;
 	}
-
-
 
 	public int getPanmean2() {
 		return panmean2;
 	}
 
-
-
 	public int getPaninfo2() {
 		return paninfo2;
 	}
-
-
 
 	public int getFrmmixcfginfoe() {
 		return frmmixcfginfoe;
 	}
 
-
-
 	public int[] getBlkmixcfginfo() {
 		return blkmixcfginfo;
 	}
-
-
 
 	public int[] getBlkmixcfginfoe() {
 		return blkmixcfginfoe;
 	}
 
-
-
 	public int getInfomdate() {
 		return infomdate;
 	}
-
-
 
 	public int getAdconvtyp2() {
 		return adconvtyp2;
 	}
 
-
-
 	public int getSourcefscod() {
 		return sourcefscod;
 	}
 
-
-
 	public int getBlkid() {
 		return blkid;
 	}
-
-
 
 	public int getConvsync() {
 		return convsync;

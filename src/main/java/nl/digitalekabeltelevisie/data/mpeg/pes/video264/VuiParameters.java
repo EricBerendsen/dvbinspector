@@ -28,9 +28,9 @@
 package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import static nl.digitalekabeltelevisie.data.mpeg.pes.video.common.VideoHandler.getClockTickString;
-import javax.swing.tree.DefaultMutableTreeNode;
 
-import nl.digitalekabeltelevisie.controller.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.AbstractVuiParamters;
 import nl.digitalekabeltelevisie.util.BitSource;
 
@@ -93,39 +93,39 @@ public class VuiParameters extends AbstractVuiParamters implements TreeNode {
 	}
 
 	@Override
-	public DefaultMutableTreeNode getJTreeNode(final int modus) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("vui_parameters"));
+	public KVP getJTreeNode(int modus) {
+		KVP t = new KVP("vui_parameters");
 		addCommonFields(t);
-		t.add(new DefaultMutableTreeNode(new KVP("timing_info_present_flag",timing_info_present_flag,null)));
+		t.add(new KVP("timing_info_present_flag",timing_info_present_flag));
 		if( timing_info_present_flag !=0) {
-			t.add(new DefaultMutableTreeNode(new KVP("num_units_in_tick",num_units_in_tick,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("time_scale",time_scale,getClockTickString(num_units_in_tick, time_scale))));
-			t.add(new DefaultMutableTreeNode(new KVP("fixed_frame_rate_flag",fixed_frame_rate_flag,null)));
+			t.add(new KVP("num_units_in_tick",num_units_in_tick));
+			t.add(new KVP("time_scale",time_scale,getClockTickString(num_units_in_tick, time_scale)));
+			t.add(new KVP("fixed_frame_rate_flag",fixed_frame_rate_flag));
 		}
 
 
-		t.add(new DefaultMutableTreeNode(new KVP("nal_hrd_parameters_present_flag",nal_hrd_parameters_present_flag,null)));
+		t.add(new KVP("nal_hrd_parameters_present_flag",nal_hrd_parameters_present_flag));
 		if( nal_hrd_parameters_present_flag!=0 ){
 			t.add(nal_hrd_parameters.getJTreeNode(modus));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("vcl_hrd_parameters_present_flag",vcl_hrd_parameters_present_flag,null)));
+		t.add(new KVP("vcl_hrd_parameters_present_flag",vcl_hrd_parameters_present_flag));
 		if( vcl_hrd_parameters_present_flag!=0 ){
 			t.add(vcl_hrd_parameters.getJTreeNode(modus));
 		}
 		if( (nal_hrd_parameters_present_flag!=0) || (vcl_hrd_parameters_present_flag!=0) ){
-			t.add(new DefaultMutableTreeNode(new KVP("low_delay_hrd_flag",low_delay_hrd_flag,null)));
+			t.add(new KVP("low_delay_hrd_flag",low_delay_hrd_flag));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("pic_struct_present_flag",pic_struct_present_flag,null)));
+		t.add(new KVP("pic_struct_present_flag",pic_struct_present_flag));
 
-		t.add(new DefaultMutableTreeNode(new KVP("bitstream_restriction_flag",bitstream_restriction_flag,null)));
+		t.add(new KVP("bitstream_restriction_flag",bitstream_restriction_flag));
 		if(bitstream_restriction_flag!=0){
-			t.add(new DefaultMutableTreeNode(new KVP("motion_vectors_over_pic_boundaries_flag",motion_vectors_over_pic_boundaries_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("max_bytes_per_pic_denom",max_bytes_per_pic_denom,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("max_bits_per_mb_denom",max_bits_per_mb_denom,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("log2_max_mv_length_horizontal",log2_max_mv_length_horizontal,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("log2_max_mv_length_vertical",log2_max_mv_length_vertical,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("num_reorder_frames",num_reorder_frames,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("max_dec_frame_buffering",max_dec_frame_buffering,null)));
+			t.add(new KVP("motion_vectors_over_pic_boundaries_flag",motion_vectors_over_pic_boundaries_flag));
+			t.add(new KVP("max_bytes_per_pic_denom",max_bytes_per_pic_denom));
+			t.add(new KVP("max_bits_per_mb_denom",max_bits_per_mb_denom));
+			t.add(new KVP("log2_max_mv_length_horizontal",log2_max_mv_length_horizontal));
+			t.add(new KVP("log2_max_mv_length_vertical",log2_max_mv_length_vertical));
+			t.add(new KVP("num_reorder_frames",num_reorder_frames));
+			t.add(new KVP("max_dec_frame_buffering",max_dec_frame_buffering));
 		}
 
 		return t;
