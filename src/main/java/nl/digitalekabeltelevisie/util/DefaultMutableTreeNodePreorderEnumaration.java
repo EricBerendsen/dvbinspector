@@ -1,14 +1,12 @@
 package nl.digitalekabeltelevisie.util;
 
-import java.util.Enumeration;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.*;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 
 public class DefaultMutableTreeNodePreorderEnumaration implements Enumeration<KVP>{
 
-    private final Stack<Enumeration<KVP>> stack = new Stack<>();
+    private final Deque<Enumeration<KVP>> stack = new ArrayDeque<>();
 
     public DefaultMutableTreeNodePreorderEnumaration(KVP rootNode) {
         super();
@@ -20,7 +18,7 @@ public class DefaultMutableTreeNodePreorderEnumaration implements Enumeration<KV
     
 	@Override
     public boolean hasMoreElements() {
-        return (!stack.empty() && stack.peek().hasMoreElements());
+        return (!stack.isEmpty() && stack.peek().hasMoreElements());
     }
 
 	@Override
