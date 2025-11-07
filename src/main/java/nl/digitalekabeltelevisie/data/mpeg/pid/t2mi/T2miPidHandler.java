@@ -27,13 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
-import static nl.digitalekabeltelevisie.util.Utils.*;
+import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
+import static nl.digitalekabeltelevisie.util.Utils.addToList;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
@@ -57,19 +57,18 @@ public class T2miPidHandler extends GeneralPidHandler {
 		KVP t = new KVP("T2MI");
 		addListJTree(t,t2miPackets,modus,"T2MI Packets");
 		KVP plpsTree =new KVP("PLPs");
-		final Iterator<Integer> plpIter = new TreeSet<>(plps.keySet()).iterator();
+		Iterator<Integer> plpIter = new TreeSet<>(plps.keySet()).iterator();
 		while(plpIter.hasNext()){
 			final Integer plpId=plpIter.next();
 			List<T2miPacket> itemList = plps.get(plpId);
 			if((itemList!=null)&&(itemList.size()!=0)){
 					KVP kvp = new KVP("plp:"+plpId +": "+ itemList.size()+" entries");
-					final DefaultMutableTreeNode plpListNode = new DefaultMutableTreeNode(kvp);
-					final JMenuItem objectMenu = new JMenuItem("Save embedded TS as...");
+					JMenuItem objectMenu = new JMenuItem("Save embedded TS as...");
 					objectMenu.setActionCommand(DVBtree.T2MI);
 					kvp.setSubMenuAndOwner(objectMenu,new PlpHandler(pid.getPid(), plpId, itemList));
 
-					addToList(plpListNode, itemList, modus);
-					plpsTree.add(plpListNode);
+					addToList(kvp, itemList, modus);
+					plpsTree.add(kvp);
 			}
 		}
 		t.add(plpsTree);

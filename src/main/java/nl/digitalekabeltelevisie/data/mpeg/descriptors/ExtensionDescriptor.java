@@ -45,9 +45,6 @@ public abstract class ExtensionDescriptor extends Descriptor {
 		selector_byte=getBytes(b, PRIVATE_DATA_OFFSET + 1, descriptorLength-1);
 	}
 
-	/**
-	 * This will always return a KVP, but to not break interface it still is declared as DefaultMutableTreeNode
-	 */
 	@Override
 	public KVP getJTreeNode(int modus){
 

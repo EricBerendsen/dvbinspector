@@ -30,15 +30,19 @@ package nl.digitalekabeltelevisie.data.mpeg.descriptors;
 import static java.lang.Byte.toUnsignedInt;
 import static nl.digitalekabeltelevisie.util.Utils.stripLeadingZeros;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import nl.digitalekabeltelevisie.controller.*;
-import nl.digitalekabeltelevisie.data.mpeg.*;
+import nl.digitalekabeltelevisie.controller.KVP;
+import nl.digitalekabeltelevisie.controller.TreeNode;
+import nl.digitalekabeltelevisie.data.mpeg.PID;
+import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
-import nl.digitalekabeltelevisie.util.*;
+import nl.digitalekabeltelevisie.util.LookUpList;
+import nl.digitalekabeltelevisie.util.Utils;
 
 /**
  * @author Eric Berendsen
@@ -363,7 +367,7 @@ public class Descriptor implements TreeNode {
 	 * @param modus
 	 * @param t
 	 */
-	protected void addGeneralDescriptorInfo(int modus, DefaultMutableTreeNode t) {
+	protected void addGeneralDescriptorInfo(int modus, KVP t) {
 		if (!Utils.simpleModus(modus)) { // not simple layout, so show
 			// details
 			t.add(new KVP("descriptor_tag", descriptorTag, getDescriptorname()));

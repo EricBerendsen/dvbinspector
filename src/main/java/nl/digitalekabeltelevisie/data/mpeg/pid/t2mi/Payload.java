@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pid.t2mi;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.*;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 
@@ -49,7 +47,7 @@ public class Payload implements TreeNode {
 	@Override
 	public KVP getJTreeNode(int modus) {
 		KVP payloadNode = new KVP("payload");
-		payloadNode.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP(packetType)));
+		payloadNode.add(GuiUtils.getNotImplementedKVP(packetType));
 		return payloadNode;
 	}
 

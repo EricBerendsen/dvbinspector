@@ -51,7 +51,6 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -1095,12 +1094,12 @@ public final class Utils {
 	 * @param modus
 	 * @param label
 	 */
-	public static void addListJTree(DefaultMutableTreeNode parent, Collection<? extends TreeNode> itemList, int modus, String label) {
+	public static void addListJTree(KVP parent, Collection<? extends TreeNode> itemList, int modus, String label) {
 		addListJTree(parent, itemList, modus, label, null);
 	}
 
 	
-	public static void addListJTree(DefaultMutableTreeNode parent,
+	public static void addListJTree(KVP parent,
                                     Collection<? extends TreeNode> itemCollection, int modus, String label, TableSource tableSource) {
 		if ((itemCollection != null) && (!itemCollection.isEmpty())) {
 			if (simpleModus(modus)) { // simple layout
@@ -1118,15 +1117,13 @@ public final class Utils {
 	}
 
 
-	public static void addToList(DefaultMutableTreeNode parent,
+	public static void addToList(KVP parent,
                                  Collection<? extends TreeNode> itemCollection, int modus) {
 		if(countListModus(modus)){
 			int count = 0;
 			for (TreeNode treeNode : itemCollection) {
-				DefaultMutableTreeNode node = treeNode.getJTreeNode(modus);
-				if (node.getUserObject() instanceof KVP kvp) {
-					kvp.appendLabel(" ["+ count++ +"]");
-				}
+				KVP node = treeNode.getJTreeNode(modus);
+				node.appendLabel(" ["+ count++ +"]");
 				parent.add(node);
 			}
 		}else{
@@ -2004,15 +2001,14 @@ public final class Utils {
 
 	}
 
-	public static StringBuilder getChildrenAsHTML(DefaultMutableTreeNode dmtn) {
+	public static StringBuilder getChildrenAsHTML(KVP dmtn) {
 		final String lineSep = "<br>";
 		StringBuilder res = new StringBuilder();
 		Enumeration<javax.swing.tree.TreeNode> children = dmtn.children();
 		while(children.hasMoreElements()){
-			Object next = children.nextElement();
-			if(next instanceof DefaultMutableTreeNode child){
-				KVP chKVP = (KVP)child.getUserObject();
-				res.append(chKVP.toString(KVP.STRING_DISPLAY.HTML_FRAGMENTS, KVP.NUMBER_DISPLAY.BOTH)).append(lineSep);
+			javax.swing.tree.TreeNode next = children.nextElement();
+			if(next instanceof KVP child){
+				res.append(child.toString(KVP.STRING_DISPLAY.HTML_FRAGMENTS, KVP.NUMBER_DISPLAY.BOTH)).append(lineSep);
 				if(!child.isLeaf()){
 					res.append(getChildrenAsHTML(child));
 				}

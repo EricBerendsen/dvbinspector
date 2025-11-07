@@ -42,7 +42,6 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import javax.swing.JMenuItem;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -175,7 +174,7 @@ public class ServiceDSMCC implements TreeNode {
 		private CarouselIdentifierDescriptor carouselIdentifierDesc;
 
 		// recursive find all biopMessagases, and add as flat list
-		private  void addToTree(BIOPMessage biopMessage, String label, DefaultMutableTreeNode s, int modus){
+		private  void addToTree(BIOPMessage biopMessage, String label, KVP s, int modus){
 			if(biopMessage!=null){
 				if(biopMessage instanceof BIOPDirectoryMessage dir){
                     s.add(dir.getJTreeNode(modus,label));

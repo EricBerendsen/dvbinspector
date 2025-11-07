@@ -34,8 +34,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.junit.BeforeClass;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -84,12 +82,7 @@ public class PesHandlerSetup {
 		map.put(pid, transportStream.getPID(pid).getPidHandler());
 	}
 
-	protected static void validatePreviewImageSize(DefaultMutableTreeNode tree, int height, int width, String msg) {
-		Object o = tree.getUserObject();
-		assertNotNull(msg,o);
-		
-		assertEquals(KVP.class, o.getClass());
-		KVP kvp = (KVP)o;
+	protected static void validatePreviewImageSize(KVP kvp, int height, int width, String msg) {
 		List<DetailView> detailViews = kvp.getDetailViews();
 		assertNotEquals(0, detailViews.size()); 
 		

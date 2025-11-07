@@ -2,8 +2,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -116,60 +114,60 @@ public class Seq_parameter_set_mvc_extension{
 	}
 
 	
-	public DefaultMutableTreeNode getJTreeNode(int modus, int profile_idc) {
-		final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("seq_parameter_set_mvc_extension"));
+	public KVP getJTreeNode(int modus, int profile_idc) {
+		KVP t = new KVP("seq_parameter_set_mvc_extension");
 		
-		DefaultMutableTreeNode numViewsMinus1 = new DefaultMutableTreeNode(new KVP("num_views_minus1",num_views_minus1,"number of coded views: "+(num_views_minus1+1)));
+		KVP numViewsMinus1 = new KVP("num_views_minus1",num_views_minus1,"number of coded views: "+(num_views_minus1+1));
 		t.add(numViewsMinus1);
 		for(int i = 0; i <= num_views_minus1; i++ ){
-			numViewsMinus1.add(new DefaultMutableTreeNode(new KVP("view_id["+i+"]",view_id[ i ],null)));
+			numViewsMinus1.add(new KVP("view_id["+i+"]",view_id[ i ]));
 		}
 		
 
 		for(int i = 1; i <= num_views_minus1; i++ ) {
-			DefaultMutableTreeNode num_anchor_refs_l0Node = new DefaultMutableTreeNode(new KVP("num_anchor_refs_l0["+i+"]",num_anchor_refs_l0[ i ],null));
+			KVP num_anchor_refs_l0Node = new KVP("num_anchor_refs_l0["+i+"]",num_anchor_refs_l0[ i ]);
 			t.add(num_anchor_refs_l0Node);
 			for(int j = 0; j < num_anchor_refs_l0[ i ]; j++ ){
-				num_anchor_refs_l0Node.add(new DefaultMutableTreeNode(new KVP("anchor_ref_l0["+i+","+j+"]",anchor_ref_l0[i][j],null)));
+				num_anchor_refs_l0Node.add(new KVP("anchor_ref_l0["+i+","+j+"]",anchor_ref_l0[i][j]));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("num_anchor_refs_l1["+i+"]",num_anchor_refs_l1[ i ],null)));
+			t.add(new KVP("num_anchor_refs_l1["+i+"]",num_anchor_refs_l1[ i ]));
 			for(int j = 0; j < num_anchor_refs_l1[ i ]; j++ ){
-				num_anchor_refs_l0Node.add(new DefaultMutableTreeNode(new KVP("anchor_ref_l1["+i+","+j+"]",anchor_ref_l1[i][j],null)));
+				num_anchor_refs_l0Node.add(new KVP("anchor_ref_l1["+i+","+j+"]",anchor_ref_l1[i][j]));
 			}
 		}
 		
 		for(int i = 1; i <= num_views_minus1; i++ ) {
-			DefaultMutableTreeNode num_non_anchor_refs_l0Node = new DefaultMutableTreeNode(new KVP("num_non_anchor_refs_l0["+i+"]",num_non_anchor_refs_l0[ i ],null));
+			KVP num_non_anchor_refs_l0Node = new KVP("num_non_anchor_refs_l0["+i+"]",num_non_anchor_refs_l0[ i ]);
 			t.add(num_non_anchor_refs_l0Node);
 			for(int j = 0; j < num_non_anchor_refs_l0[i]; j++ ){
-				num_non_anchor_refs_l0Node.add(new DefaultMutableTreeNode(new KVP("non_anchor_ref_l0["+i+","+j+"]",non_anchor_ref_l0[i][j],null)));
+				num_non_anchor_refs_l0Node.add(new KVP("non_anchor_ref_l0["+i+","+j+"]",non_anchor_ref_l0[i][j]));
 			}
-			DefaultMutableTreeNode num_non_anchor_refs_l1Node = new DefaultMutableTreeNode(new KVP("num_non_anchor_refs_l1["+i+"]",num_non_anchor_refs_l1[ i ],null));
+			KVP num_non_anchor_refs_l1Node = new KVP("num_non_anchor_refs_l1["+i+"]",num_non_anchor_refs_l1[ i ]);
 			t.add(num_non_anchor_refs_l1Node);
 			for(int j = 0; j < num_non_anchor_refs_l1[ i ]; j++ ){
-				num_non_anchor_refs_l1Node.add(new DefaultMutableTreeNode(new KVP("non_anchor_ref_l1["+i+","+j+"]",non_anchor_ref_l1[i][j],null)));
+				num_non_anchor_refs_l1Node.add(new KVP("non_anchor_ref_l1["+i+","+j+"]",non_anchor_ref_l1[i][j]));
 			}
 		}
-		DefaultMutableTreeNode numLevelValuesNode = new DefaultMutableTreeNode(new KVP("num_level_values_signalled_minus1",num_level_values_signalled_minus1,null));
+		KVP numLevelValuesNode = new KVP("num_level_values_signalled_minus1",num_level_values_signalled_minus1);
 		t.add(numLevelValuesNode);
 
 		for (int i = 0; i <= num_level_values_signalled_minus1; i++) {
-			numLevelValuesNode.add(new DefaultMutableTreeNode(new KVP("level_idc["+i+"]",level_idc[i],null)));
-			DefaultMutableTreeNode num_applicable_ops_minus1Node = new DefaultMutableTreeNode(new KVP("num_applicable_ops_minus1["+i+"]",num_applicable_ops_minus1[i],null));
+			numLevelValuesNode.add(new KVP("level_idc["+i+"]",level_idc[i]));
+			KVP num_applicable_ops_minus1Node = new KVP("num_applicable_ops_minus1["+i+"]",num_applicable_ops_minus1[i]);
 			numLevelValuesNode.add(num_applicable_ops_minus1Node);
 			for (int j = 0; j <= num_applicable_ops_minus1[i]; j++) {
-				num_applicable_ops_minus1Node.add(new DefaultMutableTreeNode(new KVP("applicable_op_temporal_id["+i+","+j+"]",applicable_op_temporal_id[i][j],null)));
-				DefaultMutableTreeNode applicable_op_num_target_views_minus1Node = new DefaultMutableTreeNode(new KVP("applicable_op_num_target_views_minus1["+i+","+j+"]",applicable_op_num_target_views_minus1[i][j],null));
+				num_applicable_ops_minus1Node.add(new KVP("applicable_op_temporal_id["+i+","+j+"]",applicable_op_temporal_id[i][j]));
+				KVP applicable_op_num_target_views_minus1Node = new KVP("applicable_op_num_target_views_minus1["+i+","+j+"]",applicable_op_num_target_views_minus1[i][j]);
 				num_applicable_ops_minus1Node.add(applicable_op_num_target_views_minus1Node);
 				for (int k = 0; k <= applicable_op_num_target_views_minus1[i][j]; k++) {
-					applicable_op_num_target_views_minus1Node.add(new DefaultMutableTreeNode(new KVP("applicable_op_target_view_id["+i+","+j+","+k+"]",applicable_op_target_view_id[i][j][k],null)));
+					applicable_op_num_target_views_minus1Node.add(new KVP("applicable_op_target_view_id["+i+","+j+","+k+"]",applicable_op_target_view_id[i][j][k]));
 				}
-				num_applicable_ops_minus1Node.add(new DefaultMutableTreeNode(new KVP("applicable_op_num_views_minus1["+i+","+j+"]",applicable_op_num_views_minus1[i][j],null)));
+				num_applicable_ops_minus1Node.add(new KVP("applicable_op_num_views_minus1["+i+","+j+"]",applicable_op_num_views_minus1[i][j]));
 			}
 		}
 		
 		if (profile_idc == 134) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("profile_idc == 134")));
+			t.add(GuiUtils.getNotImplementedKVP("profile_idc == 134"));
 		}
 
 		return t;

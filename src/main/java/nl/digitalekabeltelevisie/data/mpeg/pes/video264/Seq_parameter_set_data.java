@@ -29,8 +29,6 @@ package nl.digitalekabeltelevisie.data.mpeg.pes.video264;
 
 import java.util.logging.Logger;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video26x.RBSP;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
@@ -156,33 +154,33 @@ public class Seq_parameter_set_data {
 		}
 	}
 
-	public void addToJTree(DefaultMutableTreeNode t, int modus) {
-		t.add(new DefaultMutableTreeNode(new KVP("profile_idc",profile_idc,getProfileIdcString(profile_idc))));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set0_flag",constraint_set0_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set1_flag",constraint_set1_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set2_flag",constraint_set2_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set3_flag",constraint_set3_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set4_flag",constraint_set4_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("constraint_set5_flag",constraint_set5_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("reserved_zero_2bits",reserved_zero_2bits,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("level_idc",level_idc,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("seq_parameter_set_id",seq_parameter_set_id,null)));
+	public void addToJTree(KVP t, int modus) {
+		t.add(new KVP("profile_idc",profile_idc,getProfileIdcString(profile_idc)));
+		t.add(new KVP("constraint_set0_flag",constraint_set0_flag));
+		t.add(new KVP("constraint_set1_flag",constraint_set1_flag));
+		t.add(new KVP("constraint_set2_flag",constraint_set2_flag));
+		t.add(new KVP("constraint_set3_flag",constraint_set3_flag));
+		t.add(new KVP("constraint_set4_flag",constraint_set4_flag));
+		t.add(new KVP("constraint_set5_flag",constraint_set5_flag));
+		t.add(new KVP("reserved_zero_2bits",reserved_zero_2bits));
+		t.add(new KVP("level_idc",level_idc));
+		t.add(new KVP("seq_parameter_set_id",seq_parameter_set_id));
 		if( (profile_idc == 100) || (profile_idc == 110) ||
 				(profile_idc == 122) || (profile_idc == 244) || (profile_idc == 44) ||
 				(profile_idc == 83) || (profile_idc == 86) || (profile_idc == 118) ||
 				(profile_idc == 128) ) {
-			t.add(new DefaultMutableTreeNode(new KVP("chroma_format_idc",chroma_format_idc,RBSP.getChroma_format_idcString(chroma_format_idc))));
+			t.add(new KVP("chroma_format_idc",chroma_format_idc,RBSP.getChroma_format_idcString(chroma_format_idc)));
 			if( chroma_format_idc == 3 ){
-				t.add(new DefaultMutableTreeNode(new KVP("separate_colour_plane_flag",separate_colour_plane_flag,null)));
+				t.add(new KVP("separate_colour_plane_flag",separate_colour_plane_flag));
 			}
-			t.add(new DefaultMutableTreeNode(new KVP("bit_depth_luma_minus8",bit_depth_luma_minus8,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("bit_depth_chroma_minus8",bit_depth_chroma_minus8,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("qpprime_y_zero_transform_bypass_flag",qpprime_y_zero_transform_bypass_flag,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("seq_scaling_matrix_present_flag",seq_scaling_matrix_present_flag,null)));
+			t.add(new KVP("bit_depth_luma_minus8",bit_depth_luma_minus8));
+			t.add(new KVP("bit_depth_chroma_minus8",bit_depth_chroma_minus8));
+			t.add(new KVP("qpprime_y_zero_transform_bypass_flag",qpprime_y_zero_transform_bypass_flag));
+			t.add(new KVP("seq_scaling_matrix_present_flag",seq_scaling_matrix_present_flag));
 
 			if( seq_scaling_matrix_present_flag==1 ){
 				for( int i = 0; i < ( ( chroma_format_idc != 3 ) ? 8 : 12 ); i++ ) { // Rec. ITU-T H.264 (03/2010) 7.3.2.1.1 Sequence parameter set data syntax
-					t.add(new DefaultMutableTreeNode(new KVP("seq_scaling_list_present_flag["+i+"]",seq_scaling_list_present_flag[ i ],null)));
+					t.add(new KVP("seq_scaling_list_present_flag["+i+"]",seq_scaling_list_present_flag[ i ]));
 					if( seq_scaling_list_present_flag[ i ]!=0 ){
 						if( i < 6 ){
 							t.add(RBSP.getScalingListJTree( delta_scale[i], i, 16,deltas_read[i]));
@@ -193,35 +191,35 @@ public class Seq_parameter_set_data {
 				}
 			}
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("log2_max_frame_num_minus4",log2_max_frame_num_minus4,"MaxFrameNum="+BitSource.powerOf2[log2_max_frame_num_minus4+4])));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_order_cnt_type",pic_order_cnt_type,null)));
+		t.add(new KVP("log2_max_frame_num_minus4",log2_max_frame_num_minus4,"MaxFrameNum="+BitSource.powerOf2[log2_max_frame_num_minus4+4]));
+		t.add(new KVP("pic_order_cnt_type",pic_order_cnt_type));
 
 		if(pic_order_cnt_type == 0){
-			t.add(new DefaultMutableTreeNode(new KVP("log2_max_pic_order_cnt_lsb_minus4",log2_max_pic_order_cnt_lsb_minus4,null)));
+			t.add(new KVP("log2_max_pic_order_cnt_lsb_minus4",log2_max_pic_order_cnt_lsb_minus4));
 		}else if( pic_order_cnt_type == 1 ) {
-			t.add(new DefaultMutableTreeNode(GuiUtils.getNotImplementedKVP("pic_order_cnt_type == 1")));
+			t.add(GuiUtils.getNotImplementedKVP("pic_order_cnt_type == 1"));
 
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("max_num_ref_frames",max_num_ref_frames,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("gaps_in_frame_num_value_allowed_flag",gaps_in_frame_num_value_allowed_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_width_in_mbs_minus1",pic_width_in_mbs_minus1,"PicWidthInSamples="+(16*(pic_width_in_mbs_minus1+1)))));
-		t.add(new DefaultMutableTreeNode(new KVP("pic_height_in_map_units_minus1",pic_height_in_map_units_minus1,"PicHeightInSamples="+(( 2-frame_mbs_only_flag ) * (pic_height_in_map_units_minus1 + 1)*16))));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_mbs_only_flag",frame_mbs_only_flag,frame_mbs_only_flag==0?"coded pictures of the coded video sequence may either be coded fields or coded frames":"every coded picture of the coded video sequence is a coded frame containing only frame macroblocks")));
+		t.add(new KVP("max_num_ref_frames",max_num_ref_frames));
+		t.add(new KVP("gaps_in_frame_num_value_allowed_flag",gaps_in_frame_num_value_allowed_flag));
+		t.add(new KVP("pic_width_in_mbs_minus1",pic_width_in_mbs_minus1,"PicWidthInSamples="+(16*(pic_width_in_mbs_minus1+1))));
+		t.add(new KVP("pic_height_in_map_units_minus1",pic_height_in_map_units_minus1,"PicHeightInSamples="+(( 2-frame_mbs_only_flag ) * (pic_height_in_map_units_minus1 + 1)*16)));
+		t.add(new KVP("frame_mbs_only_flag",frame_mbs_only_flag,frame_mbs_only_flag==0?"coded pictures of the coded video sequence may either be coded fields or coded frames":"every coded picture of the coded video sequence is a coded frame containing only frame macroblocks"));
 		if(frame_mbs_only_flag==0 ){
-			t.add(new DefaultMutableTreeNode(new KVP("mb_adaptive_frame_field_flag",mb_adaptive_frame_field_flag,mb_adaptive_frame_field_flag==0?"no switching between frame and field macroblocks within a picture":"possible use of switching between frame and field macroblocks within frames" )));
+			t.add(new KVP("mb_adaptive_frame_field_flag",mb_adaptive_frame_field_flag,mb_adaptive_frame_field_flag==0?"no switching between frame and field macroblocks within a picture":"possible use of switching between frame and field macroblocks within frames" ));
 		}
 
-		t.add(new DefaultMutableTreeNode(new KVP("direct_8x8_inference_flag",direct_8x8_inference_flag,null)));
-		t.add(new DefaultMutableTreeNode(new KVP("frame_cropping_flag",frame_cropping_flag,null)));
+		t.add(new KVP("direct_8x8_inference_flag",direct_8x8_inference_flag));
+		t.add(new KVP("frame_cropping_flag",frame_cropping_flag));
 
 		if( frame_cropping_flag!=0 ) {
-			t.add(new DefaultMutableTreeNode(new KVP("frame_crop_left_offset",frame_crop_left_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("frame_crop_right_offset",frame_crop_right_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("frame_crop_top_offset",frame_crop_top_offset,null)));
-			t.add(new DefaultMutableTreeNode(new KVP("frame_crop_bottom_offset",frame_crop_bottom_offset,null)));
+			t.add(new KVP("frame_crop_left_offset",frame_crop_left_offset));
+			t.add(new KVP("frame_crop_right_offset",frame_crop_right_offset));
+			t.add(new KVP("frame_crop_top_offset",frame_crop_top_offset));
+			t.add(new KVP("frame_crop_bottom_offset",frame_crop_bottom_offset));
 		}
-		t.add(new DefaultMutableTreeNode(new KVP("vui_parameters_present_flag",vui_parameters_present_flag,null)));
+		t.add(new KVP("vui_parameters_present_flag",vui_parameters_present_flag));
 		if(vui_parameters_present_flag!=0){
 			t.add(vui_parameters.getJTreeNode(modus));
 		}

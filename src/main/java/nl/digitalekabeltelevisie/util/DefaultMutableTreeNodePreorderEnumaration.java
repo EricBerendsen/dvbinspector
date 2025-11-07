@@ -1,16 +1,18 @@
 package nl.digitalekabeltelevisie.util;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Stack;
+import java.util.Vector;
 
-import javax.swing.tree.*;
+import nl.digitalekabeltelevisie.controller.KVP;
 
-public class DefaultMutableTreeNodePreorderEnumaration implements Enumeration<DefaultMutableTreeNode>{
+public class DefaultMutableTreeNodePreorderEnumaration implements Enumeration<KVP>{
 
-    private final Stack<Enumeration<DefaultMutableTreeNode>> stack = new Stack<Enumeration<DefaultMutableTreeNode>>();
+    private final Stack<Enumeration<KVP>> stack = new Stack<>();
 
-    public DefaultMutableTreeNodePreorderEnumaration(DefaultMutableTreeNode rootNode) {
+    public DefaultMutableTreeNodePreorderEnumaration(KVP rootNode) {
         super();
-        Vector<DefaultMutableTreeNode> v = new Vector<DefaultMutableTreeNode>(1);
+        Vector<KVP> v = new Vector<>(1);
         v.addElement(rootNode);     // PENDING: don't really need a vector
         stack.push(v.elements());
     }
@@ -22,27 +24,27 @@ public class DefaultMutableTreeNodePreorderEnumaration implements Enumeration<De
     }
 
 	@Override
-	public DefaultMutableTreeNode nextElement() {
-        Enumeration<?> enumer = stack.peek();
-        DefaultMutableTreeNode    node = (DefaultMutableTreeNode)enumer.nextElement();
-        Enumeration<?> children = node.children();
+	public KVP nextElement() {
+		Enumeration<?> enumer = stack.peek();
+		KVP node = (KVP) enumer.nextElement();
+		Enumeration<?> children = node.children();
 
-        if (!enumer.hasMoreElements()) {
-            stack.pop();
-        }
-        if (children.hasMoreElements()) {
-        	Vector<DefaultMutableTreeNode> v = new Vector<DefaultMutableTreeNode>();
-        	while(children.hasMoreElements()){
-        		Object nextChild = children.nextElement();
-        		if(nextChild instanceof DefaultMutableTreeNode){
-        			v.addElement((DefaultMutableTreeNode)nextChild);
-        		}
-        	}
-        	if(!v.isEmpty()){	
-        		stack.push(v.elements());
-        	}
-        }
-        return node;
-    }
+		if (!enumer.hasMoreElements()) {
+			stack.pop();
+		}
+		if (children.hasMoreElements()) {
+			Vector<KVP> v = new Vector<>();
+			while (children.hasMoreElements()) {
+				Object nextChild = children.nextElement();
+				if (nextChild instanceof KVP childKvp) {
+					v.addElement(childKvp);
+				}
+			}
+			if (!v.isEmpty()) {
+				stack.push(v.elements());
+			}
+		}
+		return node;
+	}
 
 }

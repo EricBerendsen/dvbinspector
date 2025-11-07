@@ -33,7 +33,7 @@ import nl.digitalekabeltelevisie.util.BitSource;
 
 /**
  * Class responsible for decoding a JPEG-XS video descriptor from a byte array
- * into a {@link DefaultMutableTreeNode}.
+ * into a {@link KVP}.
  *
  * @author Simon Provost
  */

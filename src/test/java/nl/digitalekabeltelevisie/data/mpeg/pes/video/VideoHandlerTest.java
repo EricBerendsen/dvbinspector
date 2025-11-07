@@ -31,11 +31,10 @@ import static org.junit.Assert.*;
 
 import java.util.*;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 //import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.*;
 import nl.digitalekabeltelevisie.data.mpeg.pes.video.common.AuxiliaryData;
@@ -116,7 +115,7 @@ public class VideoHandlerTest extends PesHandlerSetup{
 		assertEquals(0,auxData.getActive_format()); // reserved
 
 		
-		DefaultMutableTreeNode tree = pesPacketData.getJTreeNode(0);
+		KVP tree = pesPacketData.getJTreeNode(0);
 		
 		assertEquals("child count of tree, very likely to change when changing presentation",22,tree.getChildCount());
 		

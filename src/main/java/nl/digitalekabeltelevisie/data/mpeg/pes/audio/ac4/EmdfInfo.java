@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.audio.ac4;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -121,7 +119,7 @@ public class EmdfInfo implements TreeNode {
 			emdf_info_node.add(new KVP("substream_index", substream_index));
 		}
 
-		DefaultMutableTreeNode emdf_protection_node = new KVP("emdf_protection");
+		KVP emdf_protection_node = new KVP("emdf_protection");
 		emdf_protection_node.add(new KVP("protection_length_primary", protection_length_primary, protection_length_list.get(protection_length_primary)));
 		emdf_protection_node.add(new KVP("protection_length_secondary", protection_length_secondary, protection_length_list.get(protection_length_secondary)));
 

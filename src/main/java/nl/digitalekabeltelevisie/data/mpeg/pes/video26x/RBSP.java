@@ -27,8 +27,6 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.pes.video26x;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.util.BitSource;
@@ -36,16 +34,13 @@ import nl.digitalekabeltelevisie.util.BitSource;
 public abstract class RBSP implements TreeNode {
 
 	public static String getChroma_format_idcString(int chroma_format_idc) {
-		switch (chroma_format_idc) {
-		case 0: return "monochrome";
-		case 1: return "4:2:0";
-		case 2: return "4:2:2";
-		case 3: return "4:4:4";
-	
-	
-		default:
-			return "error";
-		}
+		return switch (chroma_format_idc) {
+		case 0 -> "monochrome";
+		case 1 -> "4:2:0";
+		case 2 -> "4:2:2";
+		case 3 -> "4:4:4";
+		default -> "error";
+		};
 	
 	}
 
@@ -85,17 +80,17 @@ public abstract class RBSP implements TreeNode {
 
 	// used in Pic_parameter_set_rbsp and Seq_parameter_set_rbsp
 
-	public static DefaultMutableTreeNode getScalingListJTree(int[] deltaScalingList, int i,
+	public static KVP getScalingListJTree(int[] deltaScalingList, int i,
 			int sizeOfScalingList, int deltas_read) {
 
-				final DefaultMutableTreeNode t = new DefaultMutableTreeNode(new KVP("scaling_list["+i+"]"));
+				KVP t = new KVP("scaling_list["+i+"]");
 
 				int lastScale = 8;
 				int nextScale = 8;
 				for(int j = 0; j < deltas_read; j++ ) {
 					if( nextScale != 0 ) {
 						nextScale = ( lastScale + deltaScalingList[j] + 256 ) % 256;
-						t.add(new DefaultMutableTreeNode(new KVP("delta_scale",deltaScalingList[j],"scaling_list["+i+"]["+j+"]="+nextScale)));
+						t.add(new KVP("delta_scale",deltaScalingList[j],"scaling_list["+i+"]["+j+"]="+nextScale));
 
 					}
 					lastScale = ( nextScale == 0 ) ? lastScale : nextScale; // scalingList[ j ];

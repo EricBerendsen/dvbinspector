@@ -34,8 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.TransportStream;
 import nl.digitalekabeltelevisie.gui.DVBtree;
@@ -98,15 +96,14 @@ public class ExportTree {
 			TransportStream transportStream = new TransportStream(tsFile);
 			transportStream.parseStream(null);
 			
-			DefaultMutableTreeNode node = transportStream.getJTreeNode(2); // psi only
+			KVP kvp = transportStream.getJTreeNode(2); // psi only
 			
-			KVP kvp = (KVP)node.getUserObject();
 
 			final String lineSep = System.getProperty("line.separator");
 			final StringBuilder res = new StringBuilder(kvp.getPlainText());
 			res.append(lineSep);
 
-			res.append(DVBtree.getEntireTree(node,""));
+			res.append(DVBtree.getEntireTree(kvp,""));
 			String treeString = res.toString();
 			
 			File exportTreeFile = exportFile.toFile();
