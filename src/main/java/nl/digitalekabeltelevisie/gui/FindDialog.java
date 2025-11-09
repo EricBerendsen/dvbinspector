@@ -33,7 +33,7 @@ import java.beans.*;
 import javax.swing.*;
 
 import nl.digitalekabeltelevisie.main.DVBinspector;
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.KvpPreorderEnumaration;
 
 class FindDialog extends JDialog
                    implements ActionListener,
@@ -45,7 +45,7 @@ class FindDialog extends JDialog
 
     private String buttonString1 = "Search";
     private String buttonString2 = "Cancel";
-	private DefaultMutableTreeNodePreorderEnumaration enummeration;
+	private KvpPreorderEnumaration enummeration;
 
 
 

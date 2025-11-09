@@ -29,6 +29,8 @@ package nl.digitalekabeltelevisie.util;
 
 import static org.junit.Assert.assertEquals;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,11 +39,11 @@ import nl.digitalekabeltelevisie.controller.KVP;
 /**
  * 
  */
-public class DefaultMutableTreeNodePreorderEnumarationTest {
+public class KvpPreorderEnumarationTest {
 	
 	
 	
-	DefaultMutableTreeNodePreorderEnumaration enumaration;
+	KvpPreorderEnumaration enumaration;
 	@Before
 	public void setup() {
 
@@ -53,6 +55,7 @@ public class DefaultMutableTreeNodePreorderEnumarationTest {
 		KVP b = new KVP("b");
 		b.add(new KVP("1"));
 		b.add(new KVP("2"));
+		b.add(new DefaultMutableTreeNode("ignore"));
 		b.add(new KVP("3"));
 		b.add(new KVP("4"));
 		root.add(b);
@@ -72,8 +75,16 @@ public class DefaultMutableTreeNodePreorderEnumarationTest {
 		KVP c3 = new KVP("3");
 		c.add(c3);
 		
+		DefaultMutableTreeNode d = new DefaultMutableTreeNode("d");
+		d.add(new KVP("ignore d 1"));
+		d.add(new KVP("ignore d 2"));
 		
-		enumaration = new DefaultMutableTreeNodePreorderEnumaration(root);
+		root.add(d);
+		
+		KVP e = new KVP("e");
+		root.add(e);
+		
+		enumaration = new KvpPreorderEnumaration(root);
 	}
 
 	@Test
@@ -98,7 +109,8 @@ public class DefaultMutableTreeNodePreorderEnumarationTest {
 								"first",
 								"second",
 								"third",
-							"3"};
+							"3",
+						"e"};
 		while(enumaration.hasMoreElements()) {
 			assertEquals(t[i], enumaration.nextElement().getPlainText());
 			i++;

@@ -71,7 +71,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.gui.*;
 import nl.digitalekabeltelevisie.gui.exception.NotAnMPEGFileException;
 import nl.digitalekabeltelevisie.gui.utils.RecentFiles;
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.KvpPreorderEnumaration;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 import nl.digitalekabeltelevisie.util.Utils;
 
@@ -109,7 +109,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	private FindNextAction findNextAction;
 
 
-	private DefaultMutableTreeNodePreorderEnumaration searchEnummeration;
+	private KvpPreorderEnumaration searchEnummeration;
 	private String searchString;
 
 
@@ -767,7 +767,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 	}
 
 
-	public void setSearchEnumeration(DefaultMutableTreeNodePreorderEnumaration enummeration) {
+	public void setSearchEnumeration(KvpPreorderEnumaration enummeration) {
 		this.searchEnummeration = enummeration;
 		if(enummeration==null){
 			findNextAction.setEnabled(false);
@@ -777,7 +777,7 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		
 	}
 
-	public DefaultMutableTreeNodePreorderEnumaration getSearchEnumeration() {
+	public KvpPreorderEnumaration getSearchEnumeration() {
 		return searchEnummeration;
 	}
 

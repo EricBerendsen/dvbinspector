@@ -28,7 +28,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import nl.digitalekabeltelevisie.main.DVBinspector;
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.KvpPreorderEnumaration;
 
 public class FindNextAction extends AbstractAction {
 
@@ -43,7 +43,7 @@ public class FindNextAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 
 		String searchText = controller.getSearchString();
-		DefaultMutableTreeNodePreorderEnumaration enummeration = controller.getSearchEnumeration();
+		KvpPreorderEnumaration enummeration = controller.getSearchEnumeration();
 		if ((searchText != null) && (enummeration != null)) {
 			boolean found = controller.getTreeView().findAndShow(searchText, enummeration);
 			if (!found) {

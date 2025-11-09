@@ -80,7 +80,7 @@ import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.PlpHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.main.DVBinspector;
-import nl.digitalekabeltelevisie.util.DefaultMutableTreeNodePreorderEnumaration;
+import nl.digitalekabeltelevisie.util.KvpPreorderEnumaration;
 import nl.digitalekabeltelevisie.util.JTreeLazyList;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
 
@@ -885,7 +885,7 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 
 	}
 
-	public boolean findAndShow(String s,DefaultMutableTreeNodePreorderEnumaration enumeration) {
+	public boolean findAndShow(String s,KvpPreorderEnumaration enumeration) {
 		
         KVP node = searchNode(s.toLowerCase(),enumeration);
         if (node != null) {
@@ -907,11 +907,11 @@ public class DVBtree extends JPanel implements HyperlinkListener, TransportStrea
 		tree.setSelectionPath(path);
 	}
 
-	public DefaultMutableTreeNodePreorderEnumaration createNewDefaultMutableTreeNodePreorderEnumaration(){
-		return new DefaultMutableTreeNodePreorderEnumaration((KVP)model.getRoot());
+	public KvpPreorderEnumaration createNewDefaultMutableTreeNodePreorderEnumaration(){
+		return new KvpPreorderEnumaration((KVP)model.getRoot());
 	}
 
-	private static KVP searchNode(String targetString, DefaultMutableTreeNodePreorderEnumaration enumeration) {
+	private static KVP searchNode(String targetString, KvpPreorderEnumaration enumeration) {
 		while (enumeration.hasMoreElements()) {
 			KVP node = enumeration.nextElement();
 			if (node != null){
