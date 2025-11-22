@@ -338,7 +338,7 @@ public class PID implements TreeNode{
 			if (isNormalPacket(packet, adaptationField)) {
 				handleNormalPacket(packet);
 
-				if (packet.hasAdaptationField()) {
+				if (adaptationField != null) {
 					processTEMI(adaptationField, temiMap, packet.getPacketNo());
 				}
 				if (packet.isPayloadUnitStartIndicator() && type != PSI) {
