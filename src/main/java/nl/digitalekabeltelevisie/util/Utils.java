@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2026 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -2017,6 +2017,13 @@ public final class Utils {
 		return res;
 	}
 	
+	
+	public static String formatDuration(long seconds) {
+		long hh = seconds / 3600;
+		long mm = (seconds % 3600) / 60;
+		long ss = seconds % 60;
+		return String.format("%02dh%02dm%02d", hh, mm, ss);
+	}
 	
 	public static String formatDuration(String duration){
 		if((duration==null)||(duration.length()!=6)){

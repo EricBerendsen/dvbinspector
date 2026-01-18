@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2026 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -509,11 +509,13 @@ public class TransportStream implements TreeNode{
 		t.add(new KVP("Sync Errors",sync_errors));
 		if(bitRate!= -1L){
 			t.add(new KVP("bitrate",bitRate));
-			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRate));
+			long length = (file.length()* 8L)/bitRate;
+			t.add(new KVP("length (secs)",length, Utils.formatDuration(length)));
 		}
 		if(bitRateTDT!= -1L){
 			t.add(new KVP("bitrate based on TDT",bitRateTDT));
-			t.add(new KVP("length (secs)",(file.length()* 8L)/bitRateTDT));
+			long length = (file.length()* 8L)/bitRateTDT; 
+			t.add(new KVP("length (secs)",length, Utils.formatDuration(length)));
 		}
 
 		t.add(psi.getJTreeNode(modus));
