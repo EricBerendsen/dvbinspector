@@ -369,7 +369,7 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); // ignore result
 				}
 			}
-		} while (bytes_read == packetLength);
+		 } while ((bytes_read == packetLength) && (count < 1_000_000));
 	}
 
 	public void postProcess() {
