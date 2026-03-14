@@ -69,19 +69,21 @@ public class TEMIXYDataset implements XYDataset {
 		
 		PID pcrPid = transportStream.getPID(pmt.getPcrPid());
 		PCR firstPCR = pcrPid.getFirstPCR();
-		firstPcrPacketNo = pcrPid.getFirstPCRpacketNo();
-		pcrBase = firstPCR.getProgram_clock_reference_base();
+		if (firstPCR != null) {
+			firstPcrPacketNo = pcrPid.getFirstPCRpacketNo();
+			pcrBase = firstPCR.getProgram_clock_reference_base();
 
-		for (Component c : pmt.getComponentenList()) {
-			short componentPid = (short) c.getElementaryPID();
-			String componentLabel = componentPid + " - " + transportStream.getShortLabel(componentPid);
-			PID pid = transportStream.getPID(componentPid);
-			if (pid != null) {
-				Map<Integer, ArrayList<TemiTimeStamp>> temiMap = pid.getTemiMap();
-				for (Entry<Integer, ArrayList<TemiTimeStamp>> entry : temiMap.entrySet()) {
-					int time_line_id = entry.getKey();
-					List<TemiTimeStamp> value = entry.getValue();
-					addToSeriesList(value, componentLabel + " TEMI time_line_id:" + time_line_id);
+			for (Component c : pmt.getComponentenList()) {
+				short componentPid = (short) c.getElementaryPID();
+				String componentLabel = componentPid + " - " + transportStream.getShortLabel(componentPid);
+				PID pid = transportStream.getPID(componentPid);
+				if (pid != null) {
+					Map<Integer, ArrayList<TemiTimeStamp>> temiMap = pid.getTemiMap();
+					for (Entry<Integer, ArrayList<TemiTimeStamp>> entry : temiMap.entrySet()) {
+						int time_line_id = entry.getKey();
+						List<TemiTimeStamp> value = entry.getValue();
+						addToSeriesList(value, componentLabel + " TEMI time_line_id:" + time_line_id);
+					}
 				}
 			}
 		}
