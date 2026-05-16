@@ -7,6 +7,7 @@ import org.junit.Test;
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 
@@ -176,6 +177,32 @@ public class ATSCTableSectionTest {
 		assertEquals(0x03, channel.getServiceType());
 		assertEquals(0x1002, channel.getSourceId());
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void parsesCaptionServiceDescriptor() {
+		CaptionServiceDescriptor descriptor = new CaptionServiceDescriptor(new byte[] {
+				(byte) 0x86, 0x0D,
+				(byte) 0xE2,
+				0x65, 0x6E, 0x67,
+				(byte) 0x81, (byte) 0xC0, (byte) 0xFF,
+				0x73, 0x70, 0x61,
+				0x3F, 0x00, (byte) 0xFF
+		}, null);
+
+		assertEquals(2, descriptor.getNumberOfServices());
+		CaptionServiceDescriptor.CaptionService cea708 = descriptor.getServices().get(0);
+		assertEquals("eng", cea708.getLanguage());
+		assertEquals(1, cea708.getDigitalCc());
+		assertEquals(1, cea708.getCaptionServiceNumber());
+		assertEquals(1, cea708.getEasyReader());
+		assertEquals(1, cea708.getWideAspectRatio());
+		CaptionServiceDescriptor.CaptionService cea608 = descriptor.getServices().get(1);
+		assertEquals("spa", cea608.getLanguage());
+		assertEquals(0, cea608.getDigitalCc());
+		assertEquals(1, cea608.getLine21Field());
+		assertEquals(0, cea608.getEasyReader());
+		assertEquals(0, cea608.getWideAspectRatio());
 	}
 
 	private static byte[] withCrc(byte[] section) {

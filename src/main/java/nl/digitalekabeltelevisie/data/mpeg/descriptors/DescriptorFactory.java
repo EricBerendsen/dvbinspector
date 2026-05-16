@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
@@ -213,6 +214,7 @@ public final class DescriptorFactory {
 	private static Descriptor getAtscDescriptor(final byte[] data, final TableSection tableSection) {
 		int descriptorTag = toUnsignedInt(data[0]);
         return switch (descriptorTag) {
+            case 0x86 -> new CaptionServiceDescriptor(data, tableSection);
             case 0xA0 -> new ExtendedChannelNameDescriptor(data, tableSection);
             case 0xA1 -> new ServiceLocationDescriptor(data, tableSection);
             default -> {
