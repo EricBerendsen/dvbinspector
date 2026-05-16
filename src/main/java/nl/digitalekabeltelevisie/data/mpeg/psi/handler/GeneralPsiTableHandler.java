@@ -38,6 +38,7 @@ import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCEITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable.TableSectionOccurrence;
 import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
 import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.CVCTsection;
@@ -202,6 +203,8 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 				handleATSCTVCT(section);
 			} else if (tableID == 0xC9) { // ATSC Cable Virtual Channel Table
 				handleATSCCVCT(section);
+			} else if (tableID == 0xCB) { // ATSC Event Information Table
+				handleATSCEIT(section);
 			} else if (tableID == 0xCD) { // ATSC System Time Table
 				handleATSCSTT(section);
 			} else if (tableID == 0xFC) { // SCTE-35
@@ -430,6 +433,15 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 			atsc = new ATSCTables(getTransportStream().getPsi());
 		}
 		CVCTsection s = new CVCTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCEIT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		ATSCEITsection s = new ATSCEITsection(section.getRaw_data(), pid);
 		copyMetaData(section, s);
 		atsc.update(s);
 	}

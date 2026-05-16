@@ -44,6 +44,7 @@ public class ATSCTables extends AbstractPSITabel {
 	private final MGT mgt;
 	private final VCT<TVCTsection> tvct;
 	private final VCT<CVCTsection> cvct;
+	private final ATSCEIT eit;
 
 	public ATSCTables(final PSI parentPSI) {
 		super(parentPSI);
@@ -51,6 +52,7 @@ public class ATSCTables extends AbstractPSITabel {
 		mgt = new MGT(parentPSI);
 		tvct = new VCT<>(parentPSI, "TVCT");
 		cvct = new VCT<>(parentPSI, "CVCT");
+		eit = new ATSCEIT(parentPSI);
 	}
 
 	public void update(final STTsection section) {
@@ -69,6 +71,14 @@ public class ATSCTables extends AbstractPSITabel {
 		cvct.update(section);
 	}
 
+	public void update(final ATSCEITsection section) {
+		int tableType = 0x0100;
+		if (section.getParentPID() != null) {
+			tableType = getTableTypeForPid(section.getParentPID().getPid(), 0x0100, 0x017F).orElse(tableType);
+		}
+		eit.update(section, tableType);
+	}
+
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("ATSC PSIP");
@@ -76,6 +86,7 @@ public class ATSCTables extends AbstractPSITabel {
 		kvp.add(mgt.getJTreeNode(modus));
 		kvp.add(tvct.getJTreeNode(modus));
 		kvp.add(cvct.getJTreeNode(modus));
+		kvp.add(eit.getJTreeNode(modus));
 		return kvp;
 	}
 
@@ -93,6 +104,31 @@ public class ATSCTables extends AbstractPSITabel {
 
 	public VCT<CVCTsection> getCvct() {
 		return cvct;
+	}
+
+	public ATSCEIT getEit() {
+		return eit;
+	}
+
+	public boolean isAtscEitPid(final int pid) {
+		return getTableTypeForPid(pid, 0x0100, 0x017F).isPresent();
+	}
+
+	public boolean isAtscEttPid(final int pid) {
+		return getTableTypeForPid(pid, 0x0004, 0x0004).isPresent()
+				|| getTableTypeForPid(pid, 0x0200, 0x027F).isPresent();
+	}
+
+	public Optional<Integer> getTableTypeForPid(final int pid, final int lowerInclusive, final int upperInclusive) {
+		MGTsection mgtSection = mgt.getMgtSection();
+		if (mgtSection == null) {
+			return Optional.empty();
+		}
+		return mgtSection.getTableTypeEntries().stream()
+				.filter(e -> e.getTableTypePid() == pid)
+				.map(MGTsection.TableTypeEntry::getTableType)
+				.filter(tableType -> (lowerInclusive <= tableType) && (tableType <= upperInclusive))
+				.findFirst();
 	}
 
 	public Optional<String> getServiceNameOptional(final int programNumber) {

@@ -60,6 +60,8 @@ public class ATSCTableSectionTest {
 
 		MGTsection mgt = new MGTsection(new PsiSectionData(section), null);
 		MGTsection.TableTypeEntry entry = mgt.getTableTypeEntries().getFirst();
+		ATSCTables atscTables = new ATSCTables(null);
+		atscTables.update(mgt);
 
 		assertEquals(0xC7, mgt.getTableId());
 		assertEquals(3, mgt.getVersion());
@@ -72,6 +74,39 @@ public class ATSCTableSectionTest {
 		assertEquals(4, entry.getTableTypeVersionNumber());
 		assertEquals(300L, entry.getNumberBytes());
 		assertEquals(0, entry.getTableTypeDescriptorsLength());
+		assertEquals(true, atscTables.isAtscEitPid(0x1FFB));
+		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void parsesEventInformationTable() {
+		byte[] section = withCrc(new byte[] {
+				(byte) 0xCB, (byte) 0xF0, 0x23,
+				0x10, 0x01, (byte) 0xC1, 0x00, 0x00,
+				0x00, 0x01,
+				(byte) 0xC1, 0x23,
+				0x00, 0x00, 0x03, (byte) 0xE8,
+				(byte) 0xD0, 0x07, 0x08,
+				0x0C,
+				0x01, 0x65, 0x6E, 0x67, 0x01, 0x00, 0x00, 0x04,
+				0x4E, 0x65, 0x77, 0x73,
+				(byte) 0xF0, 0x00,
+				0x00, 0x00, 0x00, 0x00
+		});
+
+		ATSCEITsection eit = new ATSCEITsection(new PsiSectionData(section), null);
+		ATSCEITsection.Event event = eit.getEvents().getFirst();
+
+		assertEquals(0xCB, eit.getTableId());
+		assertEquals(0x1001, eit.getSourceId());
+		assertEquals(0, eit.getProtocolVersion());
+		assertEquals(1, eit.getNumEventsInSection());
+		assertEquals(0x0123, event.getEventId());
+		assertEquals(1000L, event.getStartTime());
+		assertEquals(1, event.getEtmLocation());
+		assertEquals(1800, event.getLengthInSeconds());
+		assertEquals("News", event.getTitle());
+		assertEquals(0, event.getDescriptorsLength());
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
 	}
 
