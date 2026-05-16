@@ -8,6 +8,7 @@ import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 
@@ -203,6 +204,29 @@ public class ATSCTableSectionTest {
 		assertEquals(1, cea608.getLine21Field());
 		assertEquals(0, cea608.getEasyReader());
 		assertEquals(0, cea608.getWideAspectRatio());
+	}
+
+	@Test
+	public void parsesContentAdvisoryDescriptor() {
+		ContentAdvisoryDescriptor descriptor = new ContentAdvisoryDescriptor(new byte[] {
+				(byte) 0x87, 0x11,
+				(byte) 0xC1,
+				0x01, 0x02,
+				0x00, (byte) 0xF3,
+				0x01, (byte) 0xF4,
+				0x0A,
+				0x01, 0x65, 0x6E, 0x67, 0x01, 0x00, 0x00, 0x02, 0x54, 0x56
+		}, null);
+
+		assertEquals(1, descriptor.getRatingRegionCount());
+		ContentAdvisoryDescriptor.RatingRegion region = descriptor.getRatingRegions().get(0);
+		assertEquals(1, region.getRatingRegion());
+		assertEquals(2, region.getRatedDimensions());
+		assertEquals(0, region.getDimensions().get(0).ratingDimension());
+		assertEquals(3, region.getDimensions().get(0).ratingValue());
+		assertEquals(1, region.getDimensions().get(1).ratingDimension());
+		assertEquals(4, region.getDimensions().get(1).ratingValue());
+		assertEquals("TV", region.getRatingDescriptionText().getText());
 	}
 
 	private static byte[] withCrc(byte[] section) {
