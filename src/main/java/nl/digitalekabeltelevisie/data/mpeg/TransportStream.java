@@ -71,6 +71,8 @@ import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.MGTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.ONTSection;
@@ -734,6 +736,7 @@ public class TransportStream implements TreeNode{
 		}
 
 		setLabelMakerBase(8191,"NULL Packets (Stuffing)");
+		labelAtscPsipTables();
 
 		// now the streams referenced from the CAT
 		if(pids[1]!=null){
@@ -765,6 +768,19 @@ public class TransportStream implements TreeNode{
 		}
 		
 
+	}
+
+	private void labelAtscPsipTables() {
+		setLabelMakerBase(ATSCTables.BASE_PID, "ATSC PSIP");
+		MGTsection mgtSection = psi.getAtsc().getMgt().getMgtSection();
+		if (mgtSection == null) {
+			return;
+		}
+		for (MGTsection.TableTypeEntry entry : mgtSection.getTableTypeEntries()) {
+			int pid = entry.getTableTypePid();
+			setLabelMakerBase(pid, "ATSC PSIP");
+			addLabelMakerComponent(pid, "ATSC table", MGTsection.getTableTypeDescription(entry.getTableType()));
+		}
 	}
 
 	private Optional<String> getServiceNameOptional(final int serviceId) {
