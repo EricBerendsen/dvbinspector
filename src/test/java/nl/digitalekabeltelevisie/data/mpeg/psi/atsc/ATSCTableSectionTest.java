@@ -10,6 +10,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.GenreDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 
 public class ATSCTableSectionTest {
@@ -227,6 +228,20 @@ public class ATSCTableSectionTest {
 		assertEquals(1, region.getDimensions().get(1).ratingDimension());
 		assertEquals(4, region.getDimensions().get(1).ratingValue());
 		assertEquals("TV", region.getRatingDescriptionText().getText());
+	}
+
+	@Test
+	public void parsesGenreDescriptor() {
+		GenreDescriptor descriptor = new GenreDescriptor(new byte[] {
+				(byte) 0xAB, 0x04,
+				(byte) 0xE3,
+				0x20, 0x21, 0x22
+		}, null);
+
+		assertEquals(3, descriptor.getAttributeCount());
+		assertEquals(0x20, descriptor.getAttributes().get(0).attribute());
+		assertEquals(0x21, descriptor.getAttributes().get(1).attribute());
+		assertEquals(0x22, descriptor.getAttributes().get(2).attribute());
 	}
 
 	private static byte[] withCrc(byte[] section) {
