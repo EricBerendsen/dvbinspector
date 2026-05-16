@@ -27,6 +27,8 @@
 
 package nl.digitalekabeltelevisie.data.mpeg;
 
+import java.util.Optional;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
@@ -193,5 +195,10 @@ public class PSI {
 	}
 	public ATSCTables getAtsc() {
 		return atsc;
+	}
+
+	public Optional<String> getServiceNameOptional(final int serviceId) {
+		return sdt.getServiceNameForActualTransportStreamOptional(serviceId)
+				.or(() -> atsc.getServiceNameOptional(serviceId));
 	}
 }

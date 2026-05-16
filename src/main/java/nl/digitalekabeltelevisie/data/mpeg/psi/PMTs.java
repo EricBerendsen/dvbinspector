@@ -92,7 +92,8 @@ public class PMTs extends AbstractPSITabel implements Iterable<PMTsection []>{
 
 		for (Integer programNumber : serviceIds) {
 			PMTsection[] sections = pmts.get(programNumber);
-			KVP kvp = new KVP("program", programNumber, getParentPSI().getSdt().getServiceNameForActualTransportStream(programNumber));
+			KVP kvp = new KVP("program", programNumber,
+					getParentPSI().getServiceNameOptional(programNumber).orElse(null));
 			kvp.addTableSource(() -> getTableForProgram(programNumber), "Components");
 			for (PMTsection pmtSection : sections) {
 				if (pmtSection != null) {

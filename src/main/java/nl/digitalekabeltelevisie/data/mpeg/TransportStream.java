@@ -784,8 +784,7 @@ public class TransportStream implements TreeNode{
 	}
 
 	private Optional<String> getServiceNameOptional(final int serviceId) {
-		return psi.getSdt().getServiceNameForActualTransportStreamOptional(serviceId)
-				.or(() -> psi.getAtsc().getServiceNameOptional(serviceId));
+		return psi.getServiceNameOptional(serviceId);
 	}
 
 	private void setGeneralPsiTableHandlers() {
