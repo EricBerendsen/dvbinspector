@@ -30,11 +30,14 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class ATSCEIT extends AbstractPSITabel {
 
@@ -45,6 +48,8 @@ public class ATSCEIT extends AbstractPSITabel {
 	}
 
 	public void update(final ATSCEITsection section, final int tableType) {
+		section.setTableType(tableType);
+		section.setGpsUtcOffset(getGpsUtcOffset());
 		TreeMap<Integer, ATSCEITsection[]> sources = tables.computeIfAbsent(tableType, k -> new TreeMap<>());
 		ATSCEITsection[] sections = sources.computeIfAbsent(section.getSourceId(),
 				k -> new ATSCEITsection[section.getSectionLastNumber() + 1]);
@@ -65,11 +70,14 @@ public class ATSCEIT extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("EIT");
+		kvp.addTableSource(this::getTableModel, "EPG Events");
 		for (Entry<Integer, TreeMap<Integer, ATSCEITsection[]>> tableEntry : tables.entrySet()) {
 			KVP tableNode = new KVP("table_type", tableEntry.getKey(), MGTsection.getTableTypeDescription(tableEntry.getKey()));
+			tableNode.addTableSource(() -> getTableModel(tableEntry.getValue()), "EPG Events");
 			kvp.add(tableNode);
 			for (Entry<Integer, ATSCEITsection[]> sourceEntry : tableEntry.getValue().entrySet()) {
 				KVP sourceNode = new KVP("source_id", sourceEntry.getKey());
+				sourceNode.addTableSource(() -> getTableModel(sourceEntry.getValue()), "EPG Events");
 				tableNode.add(sourceNode);
 				for (ATSCEITsection section : sourceEntry.getValue()) {
 					if (section != null) {
@@ -87,5 +95,51 @@ public class ATSCEIT extends AbstractPSITabel {
 
 	public TreeMap<Integer, TreeMap<Integer, ATSCEITsection[]>> getTables() {
 		return tables;
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<ATSCEITsection, ATSCEITsection.Event> tableModel = new FlexTableModel<>(ATSCEITsection.buildEitTableHeader());
+		for (TreeMap<Integer, ATSCEITsection[]> sources : tables.values()) {
+			addSectionsToTableModel(tableModel, sources);
+		}
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static TableModel getTableModel(final TreeMap<Integer, ATSCEITsection[]> sources) {
+		FlexTableModel<ATSCEITsection, ATSCEITsection.Event> tableModel = new FlexTableModel<>(ATSCEITsection.buildEitTableHeader());
+		addSectionsToTableModel(tableModel, sources);
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static TableModel getTableModel(final ATSCEITsection[] sections) {
+		FlexTableModel<ATSCEITsection, ATSCEITsection.Event> tableModel = new FlexTableModel<>(ATSCEITsection.buildEitTableHeader());
+		addSectionsToTableModel(tableModel, sections);
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static void addSectionsToTableModel(final FlexTableModel<ATSCEITsection, ATSCEITsection.Event> tableModel,
+			final TreeMap<Integer, ATSCEITsection[]> sources) {
+		for (ATSCEITsection[] sections : sources.values()) {
+			addSectionsToTableModel(tableModel, sections);
+		}
+	}
+
+	private static void addSectionsToTableModel(final FlexTableModel<ATSCEITsection, ATSCEITsection.Event> tableModel,
+			final ATSCEITsection[] sections) {
+		for (ATSCEITsection section : sections) {
+			if (section != null) {
+				tableModel.addData(section, section.getEvents());
+			}
+		}
+	}
+
+	private int getGpsUtcOffset() {
+		if ((parentPSI == null) || parentPSI.getAtsc().getStt().getSttSectionList().isEmpty()) {
+			return 0;
+		}
+		return parentPSI.getAtsc().getStt().getSttSectionList().getFirst().getGpsUtcOffset();
 	}
 }

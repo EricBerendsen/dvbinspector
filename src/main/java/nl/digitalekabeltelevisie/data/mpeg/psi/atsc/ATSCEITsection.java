@@ -39,6 +39,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
@@ -47,6 +49,9 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscMultipleString;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class ATSCEITsection extends TableSectionExtendedSyntax {
 
@@ -55,6 +60,8 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 	private final int protocolVersion;
 	private final int numEventsInSection;
 	private final List<Event> events = new ArrayList<>();
+	private int tableType = -1;
+	private int gpsUtcOffset;
 
 	public ATSCEITsection(final PsiSectionData rawData, final PID parent) {
 		super(rawData, parent);
@@ -74,6 +81,7 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "EPG Events");
 		t.add(new KVP("protocol_version", protocolVersion));
 		t.add(new KVP("num_events_in_section", numEventsInSection));
 		addListJTree(t, events, modus, "events");
@@ -101,6 +109,47 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 		return events;
 	}
 
+	public int getTableType() {
+		return tableType;
+	}
+
+	void setTableType(final int tableType) {
+		this.tableType = tableType;
+	}
+
+	public int getGpsUtcOffset() {
+		return gpsUtcOffset;
+	}
+
+	void setGpsUtcOffset(final int gpsUtcOffset) {
+		this.gpsUtcOffset = gpsUtcOffset;
+	}
+
+	public String getTableTypeDescription() {
+		return MGTsection.getTableTypeDescription(tableType);
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<ATSCEITsection, Event> tableModel = new FlexTableModel<>(buildEitTableHeader());
+		tableModel.addData(this, events);
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<ATSCEITsection, Event> buildEitTableHeader() {
+		return new TableHeaderBuilder<ATSCEITsection, Event>()
+				.addRequiredBaseColumn("table_type", ATSCEITsection::getTableTypeDescription, String.class)
+				.addRequiredBaseColumn("source_id", ATSCEITsection::getSourceId, Integer.class)
+				.addRequiredBaseColumn("section", ATSCEITsection::getSectionNumber, Integer.class)
+				.addRequiredRowColumn("event_id", Event::getEventId, Integer.class)
+				.addRequiredRowColumn("start_time", Event::getUtcStartTimeString, String.class)
+				.addRequiredRowColumn("duration_sec", Event::getLengthInSeconds, Integer.class)
+				.addRequiredRowColumn("title", Event::getTitle, String.class)
+				.addOptionalRowColumn("ETM_location", Event::getEtmLocationString, String.class)
+				.addOptionalRowColumn("descriptors_length", Event::getDescriptorsLength, Integer.class)
+				.build();
+	}
+
 	public static String getUtcTimeString(final long gpsSeconds, final int gpsUtcOffset) {
 		return GPS_EPOCH.plusSeconds(gpsSeconds - gpsUtcOffset).toString();
 	}
@@ -116,8 +165,10 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 		private final int descriptorsLength;
 		private final List<Descriptor> descriptorList;
 		private final int length;
+		private final ATSCEITsection parent;
 
 		Event(final byte[] data, final int offset, final ATSCEITsection parent) {
+			this.parent = parent;
 			eventId = getInt(data, offset, 2, MASK_14BITS);
 			startTime = getLong(data, offset + 2, 4, 0xFFFF_FFFFL);
 			long flagsAndLength = getLong(data, offset + 6, 3, 0xFF_FFFFL);
@@ -156,6 +207,14 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 
 		public int getEtmLocation() {
 			return etmLocation;
+		}
+
+		public String getEtmLocationString() {
+			return VCTsection.getEtmLocationString(etmLocation);
+		}
+
+		public String getUtcStartTimeString() {
+			return getUtcTimeString(startTime, parent.getGpsUtcOffset());
 		}
 
 		public int getLengthInSeconds() {

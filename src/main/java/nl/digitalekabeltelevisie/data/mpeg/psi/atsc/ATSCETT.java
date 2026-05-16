@@ -27,14 +27,18 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import javax.swing.table.TableModel;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class ATSCETT extends AbstractPSITabel {
 
@@ -45,6 +49,7 @@ public class ATSCETT extends AbstractPSITabel {
 	}
 
 	public void update(final ATSCETTsection section, final int tableType) {
+		section.setTableType(tableType);
 		TreeMap<Long, ATSCETTsection[]> etms = tables.computeIfAbsent(tableType, k -> new TreeMap<>());
 		ATSCETTsection[] sections = etms.computeIfAbsent(section.getEtmId(),
 				k -> new ATSCETTsection[section.getSectionLastNumber() + 1]);
@@ -65,11 +70,14 @@ public class ATSCETT extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("ETT");
+		kvp.addTableSource(this::getTableModel, "EPG Text");
 		for (Entry<Integer, TreeMap<Long, ATSCETTsection[]>> tableEntry : tables.entrySet()) {
 			KVP tableNode = new KVP("table_type", tableEntry.getKey(), MGTsection.getTableTypeDescription(tableEntry.getKey()));
+			tableNode.addTableSource(() -> getTableModel(tableEntry.getValue()), "EPG Text");
 			kvp.add(tableNode);
 			for (Entry<Long, ATSCETTsection[]> etmEntry : tableEntry.getValue().entrySet()) {
 				KVP etmNode = new KVP("ETM_id", etmEntry.getKey());
+				etmNode.addTableSource(() -> getTableModel(etmEntry.getValue()), "EPG Text");
 				tableNode.add(etmNode);
 				for (ATSCETTsection section : etmEntry.getValue()) {
 					if (section != null) {
@@ -87,5 +95,44 @@ public class ATSCETT extends AbstractPSITabel {
 
 	public TreeMap<Integer, TreeMap<Long, ATSCETTsection[]>> getTables() {
 		return tables;
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel = new FlexTableModel<>(ATSCETTsection.buildEttTableHeader());
+		for (TreeMap<Long, ATSCETTsection[]> etms : tables.values()) {
+			addSectionsToTableModel(tableModel, etms);
+		}
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static TableModel getTableModel(final TreeMap<Long, ATSCETTsection[]> etms) {
+		FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel = new FlexTableModel<>(ATSCETTsection.buildEttTableHeader());
+		addSectionsToTableModel(tableModel, etms);
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static TableModel getTableModel(final ATSCETTsection[] sections) {
+		FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel = new FlexTableModel<>(ATSCETTsection.buildEttTableHeader());
+		addSectionsToTableModel(tableModel, sections);
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static void addSectionsToTableModel(final FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel,
+			final TreeMap<Long, ATSCETTsection[]> etms) {
+		for (ATSCETTsection[] sections : etms.values()) {
+			addSectionsToTableModel(tableModel, sections);
+		}
+	}
+
+	private static void addSectionsToTableModel(final FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel,
+			final ATSCETTsection[] sections) {
+		for (ATSCETTsection section : sections) {
+			if (section != null) {
+				tableModel.addData(section, List.of(section));
+			}
+		}
 	}
 }

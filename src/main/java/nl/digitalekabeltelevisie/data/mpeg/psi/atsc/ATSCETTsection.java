@@ -31,11 +31,16 @@ import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import static nl.digitalekabeltelevisie.util.Utils.getLong;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscMultipleString;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class ATSCETTsection extends TableSectionExtendedSyntax {
 
@@ -43,6 +48,7 @@ public class ATSCETTsection extends TableSectionExtendedSyntax {
 	private final long etmId;
 	private final int extendedTextMessageLength;
 	private final AtscMultipleString extendedTextMessage;
+	private int tableType = -1;
 
 	public ATSCETTsection(final PsiSectionData rawData, final PID parent) {
 		super(rawData, parent);
@@ -57,6 +63,7 @@ public class ATSCETTsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "EPG Text");
 		t.add(new KVP("protocol_version", protocolVersion));
 		t.add(new KVP("ETM_id", etmId));
 		t.add(new KVP("source_id", getSourceId()));
@@ -80,6 +87,18 @@ public class ATSCETTsection extends TableSectionExtendedSyntax {
 		return etmId;
 	}
 
+	public int getTableType() {
+		return tableType;
+	}
+
+	void setTableType(final int tableType) {
+		this.tableType = tableType;
+	}
+
+	public String getTableTypeDescription() {
+		return MGTsection.getTableTypeDescription(tableType);
+	}
+
 	public int getSourceId() {
 		return (int) ((etmId >> 16) & 0xFFFF);
 	}
@@ -98,5 +117,24 @@ public class ATSCETTsection extends TableSectionExtendedSyntax {
 
 	public String getExtendedText() {
 		return extendedTextMessage.getText();
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel = new FlexTableModel<>(buildEttTableHeader());
+		tableModel.addData(this, java.util.List.of(this));
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<ATSCETTsection, ATSCETTsection> buildEttTableHeader() {
+		return new TableHeaderBuilder<ATSCETTsection, ATSCETTsection>()
+				.addRequiredRowColumn("table_type", ATSCETTsection::getTableTypeDescription, String.class)
+				.addRequiredRowColumn("ETM_id", ATSCETTsection::getEtmId, Long.class)
+				.addRequiredRowColumn("source_id", ATSCETTsection::getSourceId, Integer.class)
+				.addRequiredRowColumn("event_id", ATSCETTsection::getEventId, Integer.class)
+				.addRequiredRowColumn("extended_text_message", ATSCETTsection::getExtendedText, String.class)
+				.addOptionalRowColumn("message_length", ATSCETTsection::getExtendedTextMessageLength, Integer.class)
+				.addOptionalRowColumn("section", ATSCETTsection::getSectionNumber, Integer.class)
+				.build();
 	}
 }

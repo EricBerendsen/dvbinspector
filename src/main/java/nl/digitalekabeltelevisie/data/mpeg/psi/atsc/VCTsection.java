@@ -36,10 +36,14 @@ import static nl.digitalekabeltelevisie.util.Utils.MASK_8BITS;
 import static nl.digitalekabeltelevisie.util.Utils.addListJTree;
 import static nl.digitalekabeltelevisie.util.Utils.getInt;
 import static nl.digitalekabeltelevisie.util.Utils.getLong;
+import static nl.digitalekabeltelevisie.util.Utils.getStreamTypeShortString;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.swing.table.TableModel;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.controller.TreeNode;
@@ -47,7 +51,11 @@ import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
+import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class VCTsection extends TableSectionExtendedSyntax {
 
@@ -81,6 +89,7 @@ public class VCTsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "Virtual Channels");
 		t.add(new KVP("protocol_version", protocolVersion));
 		t.add(new KVP("num_channels_in_section", numChannelsInSection));
 		addListJTree(t, virtualChannels, modus, "virtual_channels");
@@ -116,6 +125,36 @@ public class VCTsection extends TableSectionExtendedSyntax {
 
 	public List<Descriptor> getAdditionalDescriptorList() {
 		return additionalDescriptorList;
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<VCTsection, VirtualChannel> tableModel = new FlexTableModel<>(buildVctTableHeader());
+		tableModel.addData(this, virtualChannels);
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<VCTsection, VirtualChannel> buildVctTableHeader() {
+		return new TableHeaderBuilder<VCTsection, VirtualChannel>()
+				.addRequiredBaseColumn("transport_stream_id", VCTsection::getTableIdExtension, Integer.class)
+				.addRequiredBaseColumn("section", VCTsection::getSectionNumber, Integer.class)
+				.addRequiredRowColumn("channel", VirtualChannel::getChannelNumberString, String.class)
+				.addRequiredRowColumn("short_name", VirtualChannel::getShortName, String.class)
+				.addRequiredRowColumn("program_number", VirtualChannel::getProgramNumber, Integer.class)
+				.addRequiredRowColumn("source_id", VirtualChannel::getSourceId, Integer.class)
+				.addRequiredRowColumn("service_type", VirtualChannel::getServiceTypeString, String.class)
+				.addOptionalRowColumn("PMT_PID", VirtualChannel::getPmtPid, Integer.class)
+				.addOptionalRowColumn("PCR_PID", VirtualChannel::getPcrPid, Integer.class)
+				.addOptionalRowColumn("video_PIDs", VirtualChannel::getVideoPidsString, String.class)
+				.addOptionalRowColumn("audio_PIDs", VirtualChannel::getAudioPidsString, String.class)
+				.addOptionalRowColumn("elementary_streams", VirtualChannel::getElementaryStreamsString, String.class)
+				.addOptionalRowColumn("modulation_mode", VirtualChannel::getModulationModeString, String.class)
+				.addOptionalRowColumn("ETM_location", VirtualChannel::getEtmLocationString, String.class)
+				.addOptionalRowColumn("access_controlled", VirtualChannel::getAccessControlled, Integer.class)
+				.addOptionalRowColumn("hidden", VirtualChannel::getHidden, Integer.class)
+				.addOptionalRowColumn("hide_guide", VirtualChannel::getHideGuide, Integer.class)
+				.addOptionalRowColumn("descriptors_length", VirtualChannel::getDescriptorsLength, Integer.class)
+				.build();
 	}
 
 	public static String getModulationModeString(final int modulationMode) {
@@ -176,8 +215,10 @@ public class VCTsection extends TableSectionExtendedSyntax {
 		private final List<Descriptor> descriptorList;
 		private final int length;
 		private final boolean cable;
+		private final VCTsection parent;
 
 		VirtualChannel(final byte[] data, final int offset, final VCTsection parent, final boolean cable) {
+			this.parent = parent;
 			this.cable = cable;
 			shortName = getShortName(data, offset);
 			int channelNumbers = getInt(data, offset + 14, 3, MASK_24BITS);
@@ -220,11 +261,17 @@ public class VCTsection extends TableSectionExtendedSyntax {
 			if (cable && isOnePartChannelNumber()) {
 				t.add(new KVP("one_part_channel_number", getOnePartChannelNumber()));
 			}
-			t.add(new KVP("modulation_mode", modulationMode, getModulationModeString(modulationMode)));
+			t.add(new KVP("modulation_mode", modulationMode, VCTsection.getModulationModeString(modulationMode)));
 			t.add(new KVP("carrier_frequency", carrierFrequency));
 			t.add(new KVP("channel_TSID", channelTsid));
 			t.add(new KVP("program_number", programNumber));
-			t.add(new KVP("ETM_location", etmLocation, getEtmLocationString(etmLocation)));
+			PMTsection pmt = getLinkedPmt();
+			if (pmt != null) {
+				t.add(new KVP("PMT_PID", pmt.getParentPID().getPid()));
+				t.add(new KVP("PCR_PID", pmt.getPcrPid()));
+				t.add(new KVP("elementary_streams", getElementaryStreamsString()));
+			}
+			t.add(new KVP("ETM_location", etmLocation, VCTsection.getEtmLocationString(etmLocation)));
 			t.add(new KVP("access_controlled", accessControlled));
 			t.add(new KVP("hidden", hidden));
 			if (cable) {
@@ -308,6 +355,98 @@ public class VCTsection extends TableSectionExtendedSyntax {
 
 		public int getServiceType() {
 			return serviceType;
+		}
+
+		public String getServiceTypeString() {
+			return getAtscServiceTypeString(serviceType);
+		}
+
+		public String getModulationModeString() {
+			return VCTsection.getModulationModeString(modulationMode);
+		}
+
+		public String getEtmLocationString() {
+			return VCTsection.getEtmLocationString(etmLocation);
+		}
+
+		public Integer getPmtPid() {
+			PMTsection pmt = getLinkedPmt();
+			if (pmt == null) {
+				return null;
+			}
+			return pmt.getParentPID().getPid();
+		}
+
+		public Integer getPcrPid() {
+			PMTsection pmt = getLinkedPmt();
+			if (pmt == null) {
+				return null;
+			}
+			return pmt.getPcrPid();
+		}
+
+		public String getVideoPidsString() {
+			return getComponentPidString(true);
+		}
+
+		public String getAudioPidsString() {
+			return getComponentPidString(false);
+		}
+
+		public String getElementaryStreamsString() {
+			PMTsection pmt = getLinkedPmt();
+			if ((pmt == null) || pmt.getComponentenList().isEmpty()) {
+				return null;
+			}
+			return pmt.getComponentenList().stream()
+					.map(component -> formatPid(component.getElementaryPID()) + " " + getStreamTypeShortString(component.getStreamtype()))
+					.collect(Collectors.joining(", "));
+		}
+
+		private String getComponentPidString(final boolean video) {
+			PMTsection pmt = getLinkedPmt();
+			if (pmt == null) {
+				return null;
+			}
+			String value = pmt.getComponentenList().stream()
+					.filter(component -> video ? isVideoStreamType(component.getStreamtype()) : isAudioStreamType(component.getStreamtype()))
+					.map(component -> formatPid(component.getElementaryPID()))
+					.collect(Collectors.joining(", "));
+			return value.isEmpty() ? null : value;
+		}
+
+		private PMTsection getLinkedPmt() {
+			if ((parent == null) || (parent.getPSI() == null) || (parent.getPSI().getPmts() == null)) {
+				return null;
+			}
+			PMTsection[] sections = parent.getPSI().getPmts().getPmts().get(programNumber);
+			if (sections == null) {
+				return null;
+			}
+			for (PMTsection section : sections) {
+				if (section != null) {
+					return section;
+				}
+			}
+			return null;
+		}
+
+		private static boolean isVideoStreamType(final int streamType) {
+			return switch (streamType) {
+				case 0x01, 0x02, 0x10, 0x1B, 0x20, 0x24, 0x42 -> true;
+				default -> false;
+			};
+		}
+
+		private static boolean isAudioStreamType(final int streamType) {
+			return switch (streamType) {
+				case 0x03, 0x04, 0x0F, 0x11, 0x81, 0x87 -> true;
+				default -> false;
+			};
+		}
+
+		private static String formatPid(final int pid) {
+			return String.format("0x%04X", pid);
 		}
 
 		public int getSourceId() {

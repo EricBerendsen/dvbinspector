@@ -27,11 +27,14 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
 import nl.digitalekabeltelevisie.util.Utils;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class VCT<T extends VCTsection> extends AbstractPSITabel {
 
@@ -58,6 +61,7 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP(label);
+		kvp.addTableSource(this::getTableModel, "Virtual Channels");
 		if (sections != null) {
 			for (VCTsection section : sections) {
 				if (section != null) {
@@ -74,5 +78,18 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 
 	public VCTsection[] getSections() {
 		return sections;
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel = new FlexTableModel<>(VCTsection.buildVctTableHeader());
+		if (sections != null) {
+			for (VCTsection section : sections) {
+				if (section != null) {
+					tableModel.addData(section, section.getVirtualChannels());
+				}
+			}
+		}
+		tableModel.process();
+		return tableModel;
 	}
 }
