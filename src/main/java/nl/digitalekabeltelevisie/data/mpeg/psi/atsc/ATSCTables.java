@@ -27,8 +27,13 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
+import static nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor.findGenericDescriptorsInList;
+
+import java.util.Optional;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 
 public class ATSCTables extends AbstractPSITabel {
@@ -88,5 +93,40 @@ public class ATSCTables extends AbstractPSITabel {
 
 	public VCT<CVCTsection> getCvct() {
 		return cvct;
+	}
+
+	public Optional<String> getServiceNameOptional(final int programNumber) {
+		return findServiceName(tvct, programNumber).or(() -> findServiceName(cvct, programNumber));
+	}
+
+	private static Optional<String> findServiceName(final VCT<? extends VCTsection> vct, final int programNumber) {
+		VCTsection[] sections = vct.getSections();
+		if (sections == null) {
+			return Optional.empty();
+		}
+		for (VCTsection section : sections) {
+			if (section == null) {
+				continue;
+			}
+			for (VCTsection.VirtualChannel channel : section.getVirtualChannels()) {
+				if (channel.getProgramNumber() == programNumber) {
+					return Optional.of(getChannelLabel(channel));
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private static String getChannelLabel(final VCTsection.VirtualChannel channel) {
+		String name = findGenericDescriptorsInList(channel.getDescriptorList(), ExtendedChannelNameDescriptor.class)
+				.stream()
+				.findFirst()
+				.map(ExtendedChannelNameDescriptor::getLongChannelName)
+				.filter(s -> !s.isBlank())
+				.orElse(channel.getShortName());
+		if (name == null || name.isBlank()) {
+			return channel.getChannelNumberString();
+		}
+		return channel.getChannelNumberString() + " " + name;
 	}
 }

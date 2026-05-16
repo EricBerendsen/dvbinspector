@@ -555,14 +555,15 @@ public class TransportStream implements TreeNode{
 
 		for (Integer programNumber : serviceIds) {
 			PMTsection[] sections = pmts.get(programNumber);
-			
+			Optional<String> serviceName = getServiceNameOptional(programNumber);
+
 			sb.append("<li>program: ")
 			.append("<a href=\"root/psi/pmts/program:")
 			.append(programNumber)
 			.append("\">")
 			.append(programNumber)
 			.append("</a>");
-			psi.getSdt().getServiceNameForActualTransportStreamOptional(programNumber).ifPresent(s -> sb.append(" (").append(s).append(')'));
+			serviceName.ifPresent(s -> sb.append(" (").append(s).append(')'));
 			sb.append("<br/>");
 			
 			PMTsection pmtSection = sections[0];
@@ -746,7 +747,7 @@ public class TransportStream implements TreeNode{
 			PMTsection pmtSection = pmt[0];
 			while(pmtSection!=null){
 				int service_id=pmtSection.getProgramNumber();
-				String service_name = psi.getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
+				String service_name = getServiceNameOptional(service_id).orElse("Service "+service_id);
 
 				labelPmtForProgram(pmtSection, service_name);
 				labelEcmForProgram(pmtSection, service_name);
@@ -764,6 +765,11 @@ public class TransportStream implements TreeNode{
 		}
 		
 
+	}
+
+	private Optional<String> getServiceNameOptional(final int serviceId) {
+		return psi.getSdt().getServiceNameForActualTransportStreamOptional(serviceId)
+				.or(() -> psi.getAtsc().getServiceNameOptional(serviceId));
 	}
 
 	private void setGeneralPsiTableHandlers() {

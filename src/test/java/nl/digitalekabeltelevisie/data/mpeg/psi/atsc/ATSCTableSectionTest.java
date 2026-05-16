@@ -100,6 +100,8 @@ public class ATSCTableSectionTest {
 
 		TVCTsection tvct = new TVCTsection(new PsiSectionData(section), null);
 		VCTsection.VirtualChannel channel = tvct.getVirtualChannels().getFirst();
+		ATSCTables atscTables = new ATSCTables(null);
+		atscTables.update(tvct);
 
 		assertEquals(0xC8, tvct.getTableId());
 		assertEquals(0x1234, tvct.getTableIdExtension());
@@ -133,6 +135,7 @@ public class ATSCTableSectionTest {
 		assertEquals(0x81, serviceLocationDescriptor.getElements().get(1).getStreamType());
 		assertEquals(0x34, serviceLocationDescriptor.getElements().get(1).getElementaryPid());
 		assertEquals("eng", serviceLocationDescriptor.getElements().get(1).getIso639LanguageCode());
+		assertEquals("7.1 WXYZ DT", atscTables.getServiceNameOptional(3).orElseThrow());
 		assertEquals(0, tvct.getAdditionalDescriptorsLength());
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
 	}
