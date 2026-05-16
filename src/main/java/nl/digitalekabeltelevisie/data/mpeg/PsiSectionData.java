@@ -42,6 +42,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DataBroadcastIDDescriptor.OUIEntry;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGTsection;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
@@ -169,6 +170,10 @@ public class PsiSectionData {
 					transportStream.getPsi().getBat().update(new BATsection(this,parentPID));
 				}else if((0x4E<=tableId)&&(tableId<=0x6F)&&(pid==0x12)){
 					transportStream.getPsi().getEit().update(new EITsection(this,parentPID));
+				}else if((pid==ATSCTables.BASE_PID) && (tableId==0xC7)){
+					transportStream.getPsi().getAtsc().update(new MGTsection(this,parentPID));
+				}else if((pid==ATSCTables.BASE_PID) && (tableId==0xCD)){
+					transportStream.getPsi().getAtsc().update(new STTsection(this,parentPID));
 				}else if((pid==0x14) &&(tableId==0x70)){
 					transportStream.getPsi().getTdt().update(new TDTsection(this,parentPID));
 				}else if((pid==0x14) &&(tableId==0x73)){

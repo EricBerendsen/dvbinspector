@@ -974,6 +974,8 @@ public class TransportStream implements TreeNode{
 				case 0x27 -> new TEMIPesHandler();
 				case 0x33 -> new H266Handler();
 				case 0x32 -> new JpegXsHandler();
+				case 0x81 -> new AC3Handler();
+				case 0x87 -> new EAC3Handler();
 				default -> new GeneralPesHandler();
 			};
 		}

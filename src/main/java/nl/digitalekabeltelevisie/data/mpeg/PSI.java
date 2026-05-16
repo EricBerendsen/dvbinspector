@@ -30,6 +30,7 @@ package nl.digitalekabeltelevisie.data.mpeg;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.ses.SGT;
 import nl.digitalekabeltelevisie.util.PreferencesManager;
@@ -62,7 +63,8 @@ public class PSI {
 	private final DSMCCs dsm_table = new DSMCCs(this);
 	private final SCTE35 scte35_table = new SCTE35(this);
 	private final DFITs dfit_table = new DFITs(this);
-	
+	private final ATSCTables atsc = new ATSCTables(this);
+
 	private final M7Fastscan m7fastscan = new M7Fastscan(this);
 	
 	private final SGT sgt = new SGT(this);
@@ -90,6 +92,7 @@ public class PSI {
 		t.add(dsm_table.getJTreeNode(modus));
 		t.add(scte35_table.getJTreeNode(modus));
 		t.add(dfit_table.getJTreeNode(modus));
+		t.add(atsc.getJTreeNode(modus));
 		if(PreferencesManager.isEnableM7Fastscan()) {
 			t.add(m7fastscan.getJTreeNode(modus));
 		}
@@ -187,5 +190,8 @@ public class PSI {
 	}
 	public SGT getSgt() {
 		return sgt;
+	}
+	public ATSCTables getAtsc() {
+		return atsc;
 	}
 }
