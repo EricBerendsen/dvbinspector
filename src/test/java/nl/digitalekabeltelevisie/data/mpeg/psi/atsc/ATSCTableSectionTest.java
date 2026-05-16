@@ -69,6 +69,87 @@ public class ATSCTableSectionTest {
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
 	}
 
+	@Test
+	public void parsesTerrestrialVirtualChannelTable() {
+		byte[] section = withCrc(new byte[] {
+				(byte) 0xC8, (byte) 0xF0, 0x2D,
+				0x12, 0x34, (byte) 0xC1, 0x00, 0x00,
+				0x00, 0x01,
+				0x00, 0x57, 0x00, 0x58, 0x00, 0x59, 0x00, 0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				(byte) 0xF0, 0x1C, 0x01,
+				0x04,
+				0x00, 0x00, 0x00, 0x00,
+				0x12, 0x34,
+				0x00, 0x03,
+				0x4D, (byte) 0xC2,
+				0x10, 0x01,
+				(byte) 0xFC, 0x00,
+				(byte) 0xFC, 0x00,
+				0x00, 0x00, 0x00, 0x00
+		});
+
+		TVCTsection tvct = new TVCTsection(new PsiSectionData(section), null);
+		VCTsection.VirtualChannel channel = tvct.getVirtualChannels().getFirst();
+
+		assertEquals(0xC8, tvct.getTableId());
+		assertEquals(0x1234, tvct.getTableIdExtension());
+		assertEquals(1, tvct.getNumChannelsInSection());
+		assertEquals("WXYZ", channel.getShortName());
+		assertEquals(7, channel.getMajorChannelNumber());
+		assertEquals(1, channel.getMinorChannelNumber());
+		assertEquals("7.1", channel.getChannelNumberString());
+		assertEquals(0x04, channel.getModulationMode());
+		assertEquals(0x1234, channel.getChannelTsid());
+		assertEquals(3, channel.getProgramNumber());
+		assertEquals(1, channel.getEtmLocation());
+		assertEquals(0, channel.getAccessControlled());
+		assertEquals(0, channel.getHidden());
+		assertEquals(0, channel.getHideGuide());
+		assertEquals(0x02, channel.getServiceType());
+		assertEquals(0x1001, channel.getSourceId());
+		assertEquals(0, channel.getDescriptorsLength());
+		assertEquals(0, tvct.getAdditionalDescriptorsLength());
+		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void parsesCableVirtualChannelTableOnePartChannelNumber() {
+		byte[] section = withCrc(new byte[] {
+				(byte) 0xC9, (byte) 0xF0, 0x2D,
+				0x12, 0x34, (byte) 0xC1, 0x00, 0x00,
+				0x00, 0x01,
+				0x00, 0x43, 0x00, 0x41, 0x00, 0x42, 0x00, 0x4C, 0x00, 0x45, 0x00, 0x00, 0x00, 0x00,
+				(byte) 0xFF, (byte) 0xC8, 0x05,
+				0x03,
+				0x00, 0x00, 0x00, 0x00,
+				0x12, 0x34,
+				0x00, 0x04,
+				(byte) 0xBB, (byte) 0xC3,
+				0x10, 0x02,
+				(byte) 0xFC, 0x00,
+				(byte) 0xFC, 0x00,
+				0x00, 0x00, 0x00, 0x00
+		});
+
+		CVCTsection cvct = new CVCTsection(new PsiSectionData(section), null);
+		VCTsection.VirtualChannel channel = cvct.getVirtualChannels().getFirst();
+
+		assertEquals(0xC9, cvct.getTableId());
+		assertEquals("CABLE", channel.getShortName());
+		assertEquals(0x3F2, channel.getMajorChannelNumber());
+		assertEquals(5, channel.getMinorChannelNumber());
+		assertEquals(2053, channel.getOnePartChannelNumber());
+		assertEquals("2053", channel.getChannelNumberString());
+		assertEquals(1, channel.getAccessControlled());
+		assertEquals(1, channel.getHidden());
+		assertEquals(1, channel.getPathSelect());
+		assertEquals(0, channel.getOutOfBand());
+		assertEquals(1, channel.getHideGuide());
+		assertEquals(0x03, channel.getServiceType());
+		assertEquals(0x1002, channel.getSourceId());
+		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
 	private static byte[] withCrc(byte[] section) {
 		long crc = CRCcheck.crc32(section, section.length - 4);
 		int offset = section.length - 4;

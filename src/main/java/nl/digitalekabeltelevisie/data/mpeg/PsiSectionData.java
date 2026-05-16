@@ -172,6 +172,10 @@ public class PsiSectionData {
 					transportStream.getPsi().getEit().update(new EITsection(this,parentPID));
 				}else if((pid==ATSCTables.BASE_PID) && (tableId==0xC7)){
 					transportStream.getPsi().getAtsc().update(new MGTsection(this,parentPID));
+				}else if((pid==ATSCTables.BASE_PID) && (tableId==0xC8)){
+					transportStream.getPsi().getAtsc().update(new TVCTsection(this,parentPID));
+				}else if((pid==ATSCTables.BASE_PID) && (tableId==0xC9)){
+					transportStream.getPsi().getAtsc().update(new CVCTsection(this,parentPID));
 				}else if((pid==ATSCTables.BASE_PID) && (tableId==0xCD)){
 					transportStream.getPsi().getAtsc().update(new STTsection(this,parentPID));
 				}else if((pid==0x14) &&(tableId==0x70)){

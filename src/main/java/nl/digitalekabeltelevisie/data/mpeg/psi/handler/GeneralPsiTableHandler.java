@@ -40,8 +40,10 @@ import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable.TableSectionOccurrence;
 import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.CVCTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.MGTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.STTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.TVCTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FNTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FSTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.M7Fastscan;
@@ -196,6 +198,10 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 
 			} else if (tableID == 0xC7) { // ATSC Master Guide Table
 				handleATSCMGT(section);
+			} else if (tableID == 0xC8) { // ATSC Terrestrial Virtual Channel Table
+				handleATSCTVCT(section);
+			} else if (tableID == 0xC9) { // ATSC Cable Virtual Channel Table
+				handleATSCCVCT(section);
 			} else if (tableID == 0xCD) { // ATSC System Time Table
 				handleATSCSTT(section);
 			} else if (tableID == 0xFC) { // SCTE-35
@@ -406,6 +412,24 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 			atsc = new ATSCTables(getTransportStream().getPsi());
 		}
 		MGTsection s = new MGTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCTVCT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		TVCTsection s = new TVCTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCCVCT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		CVCTsection s = new CVCTsection(section.getRaw_data(), pid);
 		copyMetaData(section, s);
 		atsc.update(s);
 	}

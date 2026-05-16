@@ -30,63 +30,49 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
+import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.util.Utils;
 
-public class ATSCTables extends AbstractPSITabel {
+public class VCT<T extends VCTsection> extends AbstractPSITabel {
 
-	public static final int BASE_PID = 0x1FFB;
+	private final String label;
+	private VCTsection[] sections;
 
-	private final STT stt;
-	private final MGT mgt;
-	private final VCT<TVCTsection> tvct;
-	private final VCT<CVCTsection> cvct;
-
-	public ATSCTables(final PSI parentPSI) {
+	public VCT(final PSI parentPSI, final String label) {
 		super(parentPSI);
-		stt = new STT(parentPSI);
-		mgt = new MGT(parentPSI);
-		tvct = new VCT<>(parentPSI, "TVCT");
-		cvct = new VCT<>(parentPSI, "CVCT");
+		this.label = label;
 	}
 
-	public void update(final STTsection section) {
-		stt.update(section);
-	}
-
-	public void update(final MGTsection section) {
-		mgt.update(section);
-	}
-
-	public void update(final TVCTsection section) {
-		tvct.update(section);
-	}
-
-	public void update(final CVCTsection section) {
-		cvct.update(section);
+	public void update(final T section) {
+		if (sections == null) {
+			sections = new VCTsection[section.getSectionLastNumber() + 1];
+		}
+		if (sections[section.getSectionNumber()] == null) {
+			sections[section.getSectionNumber()] = section;
+		} else {
+			TableSection last = sections[section.getSectionNumber()];
+			updateSectionVersion(section, last);
+		}
 	}
 
 	@Override
 	public KVP getJTreeNode(final int modus) {
-		KVP kvp = new KVP("ATSC PSIP");
-		kvp.add(stt.getJTreeNode(modus));
-		kvp.add(mgt.getJTreeNode(modus));
-		kvp.add(tvct.getJTreeNode(modus));
-		kvp.add(cvct.getJTreeNode(modus));
+		KVP kvp = new KVP(label);
+		if (sections != null) {
+			for (VCTsection section : sections) {
+				if (section != null) {
+					if (Utils.simpleModus(modus)) {
+						kvp.add(section.getJTreeNode(modus));
+					} else {
+						addSectionVersionsToJTree(kvp, section, modus);
+					}
+				}
+			}
+		}
 		return kvp;
 	}
 
-	public STT getStt() {
-		return stt;
-	}
-
-	public MGT getMgt() {
-		return mgt;
-	}
-
-	public VCT<TVCTsection> getTvct() {
-		return tvct;
-	}
-
-	public VCT<CVCTsection> getCvct() {
-		return cvct;
+	public VCTsection[] getSections() {
+		return sections;
 	}
 }
