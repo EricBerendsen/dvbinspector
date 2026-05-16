@@ -45,6 +45,7 @@ public class ATSCTables extends AbstractPSITabel {
 	private final VCT<TVCTsection> tvct;
 	private final VCT<CVCTsection> cvct;
 	private final ATSCEIT eit;
+	private final ATSCETT ett;
 
 	public ATSCTables(final PSI parentPSI) {
 		super(parentPSI);
@@ -53,6 +54,7 @@ public class ATSCTables extends AbstractPSITabel {
 		tvct = new VCT<>(parentPSI, "TVCT");
 		cvct = new VCT<>(parentPSI, "CVCT");
 		eit = new ATSCEIT(parentPSI);
+		ett = new ATSCETT(parentPSI);
 	}
 
 	public void update(final STTsection section) {
@@ -79,6 +81,16 @@ public class ATSCTables extends AbstractPSITabel {
 		eit.update(section, tableType);
 	}
 
+	public void update(final ATSCETTsection section) {
+		int tableType = section.getEventId() == 0 ? 0x0004 : 0x0200;
+		if (section.getParentPID() != null) {
+			tableType = getTableTypeForPid(section.getParentPID().getPid(), 0x0004, 0x0004)
+					.or(() -> getTableTypeForPid(section.getParentPID().getPid(), 0x0200, 0x027F))
+					.orElse(tableType);
+		}
+		ett.update(section, tableType);
+	}
+
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("ATSC PSIP");
@@ -87,6 +99,7 @@ public class ATSCTables extends AbstractPSITabel {
 		kvp.add(tvct.getJTreeNode(modus));
 		kvp.add(cvct.getJTreeNode(modus));
 		kvp.add(eit.getJTreeNode(modus));
+		kvp.add(ett.getJTreeNode(modus));
 		return kvp;
 	}
 
@@ -108,6 +121,10 @@ public class ATSCTables extends AbstractPSITabel {
 
 	public ATSCEIT getEit() {
 		return eit;
+	}
+
+	public ATSCETT getEtt() {
+		return ett;
 	}
 
 	public boolean isAtscEitPid(final int pid) {

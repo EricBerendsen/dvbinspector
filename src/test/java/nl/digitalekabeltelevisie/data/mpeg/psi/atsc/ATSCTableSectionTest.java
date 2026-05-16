@@ -111,6 +111,48 @@ public class ATSCTableSectionTest {
 	}
 
 	@Test
+	public void parsesExtendedTextTable() {
+		byte[] mgtSection = withCrc(new byte[] {
+				(byte) 0xC7, (byte) 0xF0, 0x19,
+				0x00, 0x00, (byte) 0xC1, 0x00, 0x00,
+				0x00,
+				0x00, 0x01,
+				0x02, 0x00,
+				(byte) 0xFF, (byte) 0xFA,
+				(byte) 0xE4,
+				0x00, 0x00, 0x00, 0x64,
+				(byte) 0xF0, 0x00,
+				(byte) 0xF0, 0x00,
+				0x00, 0x00, 0x00, 0x00
+		});
+		byte[] section = withCrc(new byte[] {
+				(byte) 0xCC, (byte) 0xF0, 0x26,
+				0x02, 0x00, (byte) 0xC1, 0x00, 0x00,
+				0x00,
+				0x10, 0x01, 0x04, (byte) 0x8E,
+				0x01, 0x65, 0x6E, 0x67, 0x01, 0x00, 0x00, 0x10,
+				0x4C, 0x6F, 0x6E, 0x67, 0x20, 0x64, 0x65, 0x73,
+				0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6F, 0x6E,
+				0x00, 0x00, 0x00, 0x00
+		});
+
+		ATSCETTsection ett = new ATSCETTsection(new PsiSectionData(section), null);
+		ATSCTables atscTables = new ATSCTables(null);
+		atscTables.update(new MGTsection(new PsiSectionData(mgtSection), null));
+		atscTables.update(ett);
+
+		assertEquals(0xCC, ett.getTableId());
+		assertEquals(0x0200, ett.getTableIdExtension());
+		assertEquals(0, ett.getProtocolVersion());
+		assertEquals(0x1001048EL, ett.getEtmId());
+		assertEquals(0x1001, ett.getSourceId());
+		assertEquals(0x0123, ett.getEventId());
+		assertEquals("Long description", ett.getExtendedText());
+		assertEquals(true, atscTables.isAtscEttPid(0x1FFA));
+		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
 	public void parsesTerrestrialVirtualChannelTable() {
 		byte[] section = withCrc(new byte[] {
 				(byte) 0xC8, (byte) 0xF0, 0x4F,
