@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.JpegXsVideoDescriptor;
@@ -167,6 +170,9 @@ public final class DescriptorFactory {
 				// the CUVV video stream descriptor include 'cuvv' as a watermark
 				return new CUVVVideoStreamDescriptor(data, tableSection); 
 			}
+			if (descriptorTag >= 0x80 && isAtscPSIPTable(tableSection)) {
+				return getAtscDescriptor(data, tableSection);
+			}
 			if (descriptorTag >= 0x80 && tableSection.getTableId() >= 0xBC && tableSection.getTableId() <= 0xBE
 					&& PreferencesManager.isEnableM7Fastscan()) {
 				return getM7Descriptor(data, tableSection);
@@ -196,7 +202,28 @@ public final class DescriptorFactory {
 					+ ",) data=" + d.getRawDataString()+", RuntimeException:"+iae);
 			return d;
 		}
-		
+
+	}
+
+	private static boolean isAtscPSIPTable(final TableSection tableSection) {
+		int tableId = tableSection.getTableId();
+		return (0xC7 <= tableId) && (tableId <= 0xD4);
+	}
+
+	private static Descriptor getAtscDescriptor(final byte[] data, final TableSection tableSection) {
+		int descriptorTag = toUnsignedInt(data[0]);
+        return switch (descriptorTag) {
+            case 0xA0 -> new ExtendedChannelNameDescriptor(data, tableSection);
+            case 0xA1 -> new ServiceLocationDescriptor(data, tableSection);
+            default -> {
+                Descriptor d = new AtscDescriptor(data, tableSection);
+                logger.info("Not implemented AtscDescriptor:" + descriptorTag + " ("
+                        + AtscDescriptor.getDescriptorname(descriptorTag) + ") in section "
+                        + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data="
+                        + d.getRawDataString());
+                yield d;
+            }
+        };
 	}
 
 	/**

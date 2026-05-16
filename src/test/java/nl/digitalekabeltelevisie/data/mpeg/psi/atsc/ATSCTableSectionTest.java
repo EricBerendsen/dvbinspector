@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 
 public class ATSCTableSectionTest {
 
@@ -72,7 +75,7 @@ public class ATSCTableSectionTest {
 	@Test
 	public void parsesTerrestrialVirtualChannelTable() {
 		byte[] section = withCrc(new byte[] {
-				(byte) 0xC8, (byte) 0xF0, 0x2D,
+				(byte) 0xC8, (byte) 0xF0, 0x4F,
 				0x12, 0x34, (byte) 0xC1, 0x00, 0x00,
 				0x00, 0x01,
 				0x00, 0x57, 0x00, 0x58, 0x00, 0x59, 0x00, 0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -83,7 +86,14 @@ public class ATSCTableSectionTest {
 				0x00, 0x03,
 				0x4D, (byte) 0xC2,
 				0x10, 0x01,
-				(byte) 0xFC, 0x00,
+				(byte) 0xFC, 0x22,
+				(byte) 0xA0, 0x0F,
+				0x01, 0x65, 0x6E, 0x67, 0x01, 0x00, 0x00, 0x07,
+				0x57, 0x58, 0x59, 0x5A, 0x20, 0x44, 0x54,
+				(byte) 0xA1, 0x0F,
+				(byte) 0xE0, 0x31, 0x02,
+				0x02, (byte) 0xE0, 0x31, 0x00, 0x00, 0x00,
+				(byte) 0x81, (byte) 0xE0, 0x34, 0x65, 0x6E, 0x67,
 				(byte) 0xFC, 0x00,
 				0x00, 0x00, 0x00, 0x00
 		});
@@ -107,7 +117,22 @@ public class ATSCTableSectionTest {
 		assertEquals(0, channel.getHideGuide());
 		assertEquals(0x02, channel.getServiceType());
 		assertEquals(0x1001, channel.getSourceId());
-		assertEquals(0, channel.getDescriptorsLength());
+		assertEquals(0x22, channel.getDescriptorsLength());
+		assertEquals(2, channel.getDescriptorList().size());
+		Descriptor firstDescriptor = channel.getDescriptorList().get(0);
+		Descriptor secondDescriptor = channel.getDescriptorList().get(1);
+		assertEquals(ExtendedChannelNameDescriptor.class, firstDescriptor.getClass());
+		assertEquals(ServiceLocationDescriptor.class, secondDescriptor.getClass());
+		assertEquals("WXYZ DT", ((ExtendedChannelNameDescriptor) firstDescriptor).getLongChannelName());
+		ServiceLocationDescriptor serviceLocationDescriptor = (ServiceLocationDescriptor) secondDescriptor;
+		assertEquals(0x31, serviceLocationDescriptor.getPcrPid());
+		assertEquals(2, serviceLocationDescriptor.getNumberElements());
+		assertEquals(0x02, serviceLocationDescriptor.getElements().get(0).getStreamType());
+		assertEquals(0x31, serviceLocationDescriptor.getElements().get(0).getElementaryPid());
+		assertEquals("\0\0\0", serviceLocationDescriptor.getElements().get(0).getIso639LanguageCode());
+		assertEquals(0x81, serviceLocationDescriptor.getElements().get(1).getStreamType());
+		assertEquals(0x34, serviceLocationDescriptor.getElements().get(1).getElementaryPid());
+		assertEquals("eng", serviceLocationDescriptor.getElements().get(1).getIso639LanguageCode());
 		assertEquals(0, tvct.getAdditionalDescriptorsLength());
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
 	}
