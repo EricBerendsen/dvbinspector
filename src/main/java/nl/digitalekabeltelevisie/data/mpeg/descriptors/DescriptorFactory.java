@@ -37,7 +37,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
@@ -216,11 +218,13 @@ public final class DescriptorFactory {
 	private static Descriptor getAtscDescriptor(final byte[] data, final TableSection tableSection) {
 		int descriptorTag = toUnsignedInt(data[0]);
         return switch (descriptorTag) {
+            case 0x81 -> new AtscAC3AudioStreamDescriptor(data, tableSection);
             case 0x86 -> new CaptionServiceDescriptor(data, tableSection);
             case 0x87 -> new ContentAdvisoryDescriptor(data, tableSection);
             case 0xA0 -> new ExtendedChannelNameDescriptor(data, tableSection);
             case 0xA1 -> new ServiceLocationDescriptor(data, tableSection);
             case 0xAB -> new GenreDescriptor(data, tableSection);
+            case 0xCC -> new AtscEnhancedAC3AudioDescriptor(data, tableSection);
             default -> {
                 Descriptor d = new AtscDescriptor(data, tableSection);
                 logger.info("Not implemented AtscDescriptor:" + descriptorTag + " ("

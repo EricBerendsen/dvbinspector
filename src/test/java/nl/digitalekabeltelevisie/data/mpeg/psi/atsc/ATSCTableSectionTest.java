@@ -12,6 +12,8 @@ import org.junit.Test;
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
@@ -297,6 +299,73 @@ public class ATSCTableSectionTest {
 		assertEquals("MPAA", tableModel.getValueAt(0, findColumn(tableModel, "dimension_name")));
 		assertEquals("PG-13", tableModel.getValueAt(1, findColumn(tableModel, "rating_value_text")));
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void parsesAtscAc3AudioStreamDescriptor() {
+		AtscAC3AudioStreamDescriptor descriptor = new AtscAC3AudioStreamDescriptor(new byte[] {
+				(byte) 0x81, 0x0D,
+				0x08,
+				0x3A,
+				0x05,
+				(byte) 0xFF,
+				0x6F,
+				0x05, 0x45, 0x4E,
+				(byte) 0xBF,
+				0x65, 0x6E, 0x67,
+				0x55
+		}, null);
+
+		assertEquals(0, descriptor.getSampleRateCode());
+		assertEquals(8, descriptor.getBsid());
+		assertEquals(14, descriptor.getBitRateCode());
+		assertEquals(2, descriptor.getSurroundMode());
+		assertEquals(0, descriptor.getBsmod());
+		assertEquals(2, descriptor.getNumChannels());
+		assertEquals(1, descriptor.getFullSvc());
+		assertEquals(Integer.valueOf(0xFF), descriptor.getLangcod());
+		assertEquals(Integer.valueOf(3), descriptor.getMainid());
+		assertEquals(Integer.valueOf(1), descriptor.getPriority());
+		assertEquals("EN", descriptor.getText());
+		assertEquals("eng", descriptor.getLanguage());
+		assertEquals(1, descriptor.getAdditionalInfo().length);
+	}
+
+	@Test
+	public void parsesAtscEnhancedAc3AudioDescriptor() {
+		AtscEnhancedAC3AudioDescriptor descriptor = new AtscEnhancedAC3AudioDescriptor(new byte[] {
+				(byte) 0xCC, 0x0D,
+				(byte) 0xFC,
+				(byte) 0xD4,
+				(byte) 0xB0,
+				(byte) 0xEB,
+				0x01,
+				0x42,
+				0x65, 0x6E, 0x67,
+				0x73, 0x70, 0x61,
+				(byte) 0x99
+		}, null);
+
+		assertEquals(1, descriptor.getBsidFlag());
+		assertEquals(1, descriptor.getMainidFlag());
+		assertEquals(1, descriptor.getAsvcFlag());
+		assertEquals(1, descriptor.getMixinfoexists());
+		assertEquals(1, descriptor.getSubstream1Flag());
+		assertEquals(0, descriptor.getSubstream2Flag());
+		assertEquals(0, descriptor.getSubstream3Flag());
+		assertEquals(1, descriptor.getFullServiceFlag());
+		assertEquals(2, descriptor.getAudioServiceType());
+		assertEquals(4, descriptor.getNumberOfChannels());
+		assertEquals(1, descriptor.getLanguageFlag());
+		assertEquals(0, descriptor.getLanguageFlag2());
+		assertEquals(16, descriptor.getBsidOrZeroBits());
+		assertEquals(Integer.valueOf(1), descriptor.getPriority());
+		assertEquals(Integer.valueOf(3), descriptor.getMainid());
+		assertEquals(Integer.valueOf(1), descriptor.getAsvc());
+		assertEquals(Integer.valueOf(0x42), descriptor.getSubstream1());
+		assertEquals("eng", descriptor.getLanguage());
+		assertEquals("spa", descriptor.getSubstream1Lang());
+		assertEquals(1, descriptor.getAdditionalInfo().length);
 	}
 
 	@Test
