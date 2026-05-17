@@ -15,10 +15,12 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.GenreDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.TimeShiftedServiceDescriptor;
 
 public class ATSCTableSectionTest {
 
@@ -366,6 +368,41 @@ public class ATSCTableSectionTest {
 		assertEquals("eng", descriptor.getLanguage());
 		assertEquals("spa", descriptor.getSubstream1Lang());
 		assertEquals(1, descriptor.getAdditionalInfo().length);
+	}
+
+	@Test
+	public void parsesTimeShiftedServiceDescriptor() {
+		TimeShiftedServiceDescriptor descriptor = new TimeShiftedServiceDescriptor(new byte[] {
+				(byte) 0xA2, 0x06,
+				(byte) 0xE1,
+				(byte) 0xFC, 0x78,
+				(byte) 0xF0, 0x28, 0x03
+		}, null);
+
+		assertEquals(7, descriptor.getReserved());
+		assertEquals(1, descriptor.getNumberOfServices());
+		assertEquals(1, descriptor.getServices().size());
+		TimeShiftedServiceDescriptor.Service service = descriptor.getServices().getFirst();
+		assertEquals(63, service.getReserved1());
+		assertEquals(120, service.getTimeShift());
+		assertEquals(15, service.getReserved2());
+		assertEquals(10, service.getMajorChannelNumber());
+		assertEquals(3, service.getMinorChannelNumber());
+	}
+
+	@Test
+	public void parsesComponentNameDescriptor() {
+		ComponentNameDescriptor descriptor = new ComponentNameDescriptor(new byte[] {
+				(byte) 0xA3, 0x0C,
+				0x01,
+				0x65, 0x6E, 0x67,
+				0x01,
+				0x00, 0x00, 0x04,
+				0x4D, 0x61, 0x69, 0x6E
+		}, null);
+
+		assertEquals("Main", descriptor.getComponentName());
+		assertEquals(1, descriptor.getComponentNameString().getNumberStrings());
 	}
 
 	@Test

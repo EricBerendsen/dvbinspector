@@ -41,10 +41,12 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDe
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.GenreDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.TimeShiftedServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.JpegXsVideoDescriptor;
@@ -223,6 +225,8 @@ public final class DescriptorFactory {
             case 0x87 -> new ContentAdvisoryDescriptor(data, tableSection);
             case 0xA0 -> new ExtendedChannelNameDescriptor(data, tableSection);
             case 0xA1 -> new ServiceLocationDescriptor(data, tableSection);
+            case 0xA2 -> new TimeShiftedServiceDescriptor(data, tableSection);
+            case 0xA3 -> new ComponentNameDescriptor(data, tableSection);
             case 0xAB -> new GenreDescriptor(data, tableSection);
             case 0xCC -> new AtscEnhancedAC3AudioDescriptor(data, tableSection);
             default -> {
