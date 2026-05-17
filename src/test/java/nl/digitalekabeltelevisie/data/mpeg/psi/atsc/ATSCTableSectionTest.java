@@ -2,6 +2,11 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+
+import javax.swing.table.TableModel;
+
 import org.junit.Test;
 
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
@@ -259,6 +264,42 @@ public class ATSCTableSectionTest {
 	}
 
 	@Test
+	public void parsesRatingRegionTable() {
+		byte[] section = withCrc(rrtSection());
+
+		RRTsection rrt = new RRTsection(new PsiSectionData(section), null);
+		RRTsection.Dimension dimension = rrt.getDimensions().getFirst();
+		RRTsection.RatingValue unrated = dimension.getRatingValues().getFirst();
+		RRTsection.RatingValue pg13 = dimension.getRatingValues().get(1);
+		ATSCTables atscTables = new ATSCTables(null);
+		atscTables.update(rrt);
+		TableModel tableModel = atscTables.getRrt().getTableModel();
+
+		assertEquals(0xCA, rrt.getTableId());
+		assertEquals(0xFF01, rrt.getTableIdExtension());
+		assertEquals(1, rrt.getRatingRegion());
+		assertEquals(0, rrt.getProtocolVersion());
+		assertEquals("US", rrt.getRatingRegionName());
+		assertEquals(1, rrt.getDimensionsDefined());
+		assertEquals(0, dimension.getDimensionIndex());
+		assertEquals("MPAA", dimension.getDimensionName());
+		assertEquals(1, dimension.getGraduatedScale());
+		assertEquals(2, dimension.getValuesDefined());
+		assertEquals(0, unrated.getRatingValue());
+		assertEquals("NR", unrated.getAbbrevRatingValue());
+		assertEquals("Not Rated", unrated.getRatingValueTextString());
+		assertEquals(1, pg13.getRatingValue());
+		assertEquals("PG13", pg13.getAbbrevRatingValue());
+		assertEquals("PG-13", pg13.getRatingValueTextString());
+		assertEquals(0, rrt.getDescriptorsLength());
+		assertEquals(2, tableModel.getRowCount());
+		assertEquals("US", tableModel.getValueAt(0, findColumn(tableModel, "rating_region_name")));
+		assertEquals("MPAA", tableModel.getValueAt(0, findColumn(tableModel, "dimension_name")));
+		assertEquals("PG-13", tableModel.getValueAt(1, findColumn(tableModel, "rating_value_text")));
+		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
 	public void parsesCaptionServiceDescriptor() {
 		CaptionServiceDescriptor descriptor = new CaptionServiceDescriptor(new byte[] {
 				(byte) 0x86, 0x0D,
@@ -319,6 +360,64 @@ public class ATSCTableSectionTest {
 		assertEquals(0x20, descriptor.getAttributes().get(0).attribute());
 		assertEquals(0x21, descriptor.getAttributes().get(1).attribute());
 		assertEquals(0x22, descriptor.getAttributes().get(2).attribute());
+	}
+
+	private static byte[] rrtSection() {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xCA);
+		out.write(0xF0);
+		out.write(0x00);
+		out.write(0xFF);
+		out.write(0x01);
+		out.write(0xC1);
+		out.write(0x00);
+		out.write(0x00);
+		out.write(0x00);
+		byte[] regionName = atscString("US");
+		out.write(regionName.length);
+		out.writeBytes(regionName);
+		out.write(0x01);
+		byte[] dimensionName = atscString("MPAA");
+		out.write(dimensionName.length);
+		out.writeBytes(dimensionName);
+		out.write(0xF2);
+		writeRatingValue(out, "NR", "Not Rated");
+		writeRatingValue(out, "PG13", "PG-13");
+		out.write(0xFC);
+		out.write(0x00);
+		out.writeBytes(new byte[4]);
+		byte[] section = out.toByteArray();
+		int sectionLength = section.length - 3;
+		section[1] = (byte) (0xF0 | ((sectionLength >> 8) & 0x0F));
+		section[2] = (byte) sectionLength;
+		return section;
+	}
+
+	private static void writeRatingValue(final ByteArrayOutputStream out, final String abbrev, final String rating) {
+		byte[] abbrevText = atscString(abbrev);
+		out.write(abbrevText.length);
+		out.writeBytes(abbrevText);
+		byte[] ratingText = atscString(rating);
+		out.write(ratingText.length);
+		out.writeBytes(ratingText);
+	}
+
+	private static byte[] atscString(final String text) {
+		byte[] bytes = text.getBytes(StandardCharsets.ISO_8859_1);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0x01);
+		out.writeBytes(new byte[] { 0x65, 0x6E, 0x67, 0x01, 0x00, 0x00, (byte) bytes.length });
+		out.writeBytes(bytes);
+		return out.toByteArray();
+	}
+
+	private static int findColumn(final TableModel tableModel, final String name) {
+		for (int i = 0; i < tableModel.getColumnCount(); i++) {
+			if (name.equals(tableModel.getColumnName(i))) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	private static byte[] withCrc(byte[] section) {

@@ -46,6 +46,7 @@ public class ATSCTables extends AbstractPSITabel {
 	private final VCT<CVCTsection> cvct;
 	private final ATSCEIT eit;
 	private final ATSCETT ett;
+	private final RRT rrt;
 
 	public ATSCTables(final PSI parentPSI) {
 		super(parentPSI);
@@ -55,6 +56,7 @@ public class ATSCTables extends AbstractPSITabel {
 		cvct = new VCT<>(parentPSI, "CVCT");
 		eit = new ATSCEIT(parentPSI);
 		ett = new ATSCETT(parentPSI);
+		rrt = new RRT(parentPSI);
 	}
 
 	public void update(final STTsection section) {
@@ -91,6 +93,10 @@ public class ATSCTables extends AbstractPSITabel {
 		ett.update(section, tableType);
 	}
 
+	public void update(final RRTsection section) {
+		rrt.update(section);
+	}
+
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("ATSC PSIP");
@@ -100,6 +106,7 @@ public class ATSCTables extends AbstractPSITabel {
 		kvp.add(cvct.getJTreeNode(modus));
 		kvp.add(eit.getJTreeNode(modus));
 		kvp.add(ett.getJTreeNode(modus));
+		kvp.add(rrt.getJTreeNode(modus));
 		return kvp;
 	}
 
@@ -125,6 +132,10 @@ public class ATSCTables extends AbstractPSITabel {
 
 	public ATSCETT getEtt() {
 		return ett;
+	}
+
+	public RRT getRrt() {
+		return rrt;
 	}
 
 	public boolean isAtscEitPid(final int pid) {
