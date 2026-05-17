@@ -43,9 +43,12 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3Audio
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.DCCRequestDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.GenreDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.RedistributionControlDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.StuffingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.TimeShiftedServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
@@ -220,6 +223,7 @@ public final class DescriptorFactory {
 	private static Descriptor getAtscDescriptor(final byte[] data, final TableSection tableSection) {
 		int descriptorTag = toUnsignedInt(data[0]);
         return switch (descriptorTag) {
+            case 0x80 -> new StuffingDescriptor(data, tableSection);
             case 0x81 -> new AtscAC3AudioStreamDescriptor(data, tableSection);
             case 0x86 -> new CaptionServiceDescriptor(data, tableSection);
             case 0x87 -> new ContentAdvisoryDescriptor(data, tableSection);
@@ -227,6 +231,8 @@ public final class DescriptorFactory {
             case 0xA1 -> new ServiceLocationDescriptor(data, tableSection);
             case 0xA2 -> new TimeShiftedServiceDescriptor(data, tableSection);
             case 0xA3 -> new ComponentNameDescriptor(data, tableSection);
+            case 0xA8, 0xA9 -> new DCCRequestDescriptor(data, tableSection);
+            case 0xAA -> new RedistributionControlDescriptor(data, tableSection);
             case 0xAB -> new GenreDescriptor(data, tableSection);
             case 0xCC -> new AtscEnhancedAC3AudioDescriptor(data, tableSection);
             default -> {

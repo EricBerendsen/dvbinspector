@@ -17,9 +17,12 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3Audio
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.DCCRequestDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.GenreDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.RedistributionControlDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.StuffingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.TimeShiftedServiceDescriptor;
 
 public class ATSCTableSectionTest {
@@ -403,6 +406,47 @@ public class ATSCTableSectionTest {
 
 		assertEquals("Main", descriptor.getComponentName());
 		assertEquals(1, descriptor.getComponentNameString().getNumberStrings());
+	}
+
+	@Test
+	public void parsesStuffingDescriptor() {
+		StuffingDescriptor descriptor = new StuffingDescriptor(new byte[] {
+				(byte) 0x80, 0x03,
+				0x11, 0x22, 0x33
+		}, null);
+
+		assertEquals(3, descriptor.getStuffingBytes().length);
+		assertEquals(0x22, descriptor.getStuffingBytes()[1]);
+	}
+
+	@Test
+	public void parsesDccRequestDescriptor() {
+		DCCRequestDescriptor descriptor = new DCCRequestDescriptor(new byte[] {
+				(byte) 0xA8, 0x0C,
+				0x02,
+				0x0A,
+				0x01,
+				0x65, 0x6E, 0x67,
+				0x01,
+				0x00, 0x00, 0x02,
+				0x47, 0x6F
+		}, null);
+
+		assertEquals(2, descriptor.getRequestType());
+		assertEquals(10, descriptor.getRequestTextLength());
+		assertEquals("Go", descriptor.getRequestText());
+		assertEquals(1, descriptor.getRequestTextStructure().getNumberStrings());
+	}
+
+	@Test
+	public void parsesRedistributionControlDescriptor() {
+		RedistributionControlDescriptor descriptor = new RedistributionControlDescriptor(new byte[] {
+				(byte) 0xAA, 0x02,
+				0x12, 0x34
+		}, null);
+
+		assertEquals(2, descriptor.getRcInformation().length);
+		assertEquals(0x34, descriptor.getRcInformation()[1]);
 	}
 
 	@Test
