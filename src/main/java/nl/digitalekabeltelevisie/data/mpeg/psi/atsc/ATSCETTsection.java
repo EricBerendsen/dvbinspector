@@ -131,10 +131,19 @@ public class ATSCETTsection extends TableSectionExtendedSyntax {
 				.addRequiredRowColumn("table_type", ATSCETTsection::getTableTypeDescription, String.class)
 				.addRequiredRowColumn("ETM_id", ATSCETTsection::getEtmId, Long.class)
 				.addRequiredRowColumn("source_id", ATSCETTsection::getSourceId, Integer.class)
+				.addRequiredRowColumn("channel", ATSCETTsection::getChannelName, String.class)
 				.addRequiredRowColumn("event_id", ATSCETTsection::getEventId, Integer.class)
 				.addRequiredRowColumn("extended_text_message", ATSCETTsection::getExtendedText, String.class)
 				.addOptionalRowColumn("message_length", ATSCETTsection::getExtendedTextMessageLength, Integer.class)
 				.addOptionalRowColumn("section", ATSCETTsection::getSectionNumber, Integer.class)
 				.build();
+	}
+
+	public String getChannelName() {
+		try {
+			return getPSI().getAtsc().getChannelNameOptional(getSourceId()).orElse(null);
+		} catch (RuntimeException e) {
+			return null;
+		}
 	}
 }

@@ -163,6 +163,10 @@ public class ATSCTables extends AbstractPSITabel {
 		return findServiceName(tvct, programNumber).or(() -> findServiceName(cvct, programNumber));
 	}
 
+	public Optional<String> getChannelNameOptional(final int sourceId) {
+		return findChannelName(tvct, sourceId).or(() -> findChannelName(cvct, sourceId));
+	}
+
 	private static Optional<String> findServiceName(final VCT<? extends VCTsection> vct, final int programNumber) {
 		VCTsection[] sections = vct.getSections();
 		if (sections == null) {
@@ -174,6 +178,24 @@ public class ATSCTables extends AbstractPSITabel {
 			}
 			for (VCTsection.VirtualChannel channel : section.getVirtualChannels()) {
 				if (channel.getProgramNumber() == programNumber) {
+					return Optional.of(getChannelLabel(channel));
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private static Optional<String> findChannelName(final VCT<? extends VCTsection> vct, final int sourceId) {
+		VCTsection[] sections = vct.getSections();
+		if (sections == null) {
+			return Optional.empty();
+		}
+		for (VCTsection section : sections) {
+			if (section == null) {
+				continue;
+			}
+			for (VCTsection.VirtualChannel channel : section.getVirtualChannels()) {
+				if (channel.getSourceId() == sourceId) {
 					return Optional.of(getChannelLabel(channel));
 				}
 			}

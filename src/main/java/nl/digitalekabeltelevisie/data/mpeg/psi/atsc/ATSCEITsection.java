@@ -140,6 +140,7 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 		return new TableHeaderBuilder<ATSCEITsection, Event>()
 				.addRequiredBaseColumn("table_type", ATSCEITsection::getTableTypeDescription, String.class)
 				.addRequiredBaseColumn("source_id", ATSCEITsection::getSourceId, Integer.class)
+				.addRequiredBaseColumn("channel", ATSCEITsection::getChannelName, String.class)
 				.addRequiredBaseColumn("section", ATSCEITsection::getSectionNumber, Integer.class)
 				.addRequiredRowColumn("event_id", Event::getEventId, Integer.class)
 				.addRequiredRowColumn("start_time", Event::getUtcStartTimeString, String.class)
@@ -148,6 +149,14 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 				.addOptionalRowColumn("ETM_location", Event::getEtmLocationString, String.class)
 				.addOptionalRowColumn("descriptors_length", Event::getDescriptorsLength, Integer.class)
 				.build();
+	}
+
+	public String getChannelName() {
+		try {
+			return getPSI().getAtsc().getChannelNameOptional(getSourceId()).orElse(null);
+		} catch (RuntimeException e) {
+			return null;
+		}
 	}
 
 	public static String getUtcTimeString(final long gpsSeconds, final int gpsUtcOffset) {
