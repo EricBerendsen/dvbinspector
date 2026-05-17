@@ -40,6 +40,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscPrivateInformationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
@@ -234,6 +235,7 @@ public final class DescriptorFactory {
             case 0xA8, 0xA9 -> new DCCRequestDescriptor(data, tableSection);
             case 0xAA -> new RedistributionControlDescriptor(data, tableSection);
             case 0xAB -> new GenreDescriptor(data, tableSection);
+            case 0xAD -> new AtscPrivateInformationDescriptor(data, tableSection);
             case 0xCC -> new AtscEnhancedAC3AudioDescriptor(data, tableSection);
             default -> {
                 Descriptor d = new AtscDescriptor(data, tableSection);

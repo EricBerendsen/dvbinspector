@@ -14,6 +14,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscPrivateInformationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
@@ -447,6 +448,20 @@ public class ATSCTableSectionTest {
 
 		assertEquals(2, descriptor.getRcInformation().length);
 		assertEquals(0x34, descriptor.getRcInformation()[1]);
+	}
+
+	@Test
+	public void parsesAtscPrivateInformationDescriptor() {
+		AtscPrivateInformationDescriptor descriptor = new AtscPrivateInformationDescriptor(new byte[] {
+				(byte) 0xAD, 0x06,
+				0x54, 0x45, 0x53, 0x54,
+				0x12, 0x34
+		}, null);
+
+		assertEquals(4, descriptor.getFormatIdentifier().length);
+		assertEquals(0x54, descriptor.getFormatIdentifier()[0]);
+		assertEquals(2, descriptor.getPrivateDataBytes().length);
+		assertEquals(0x34, descriptor.getPrivateDataBytes()[1]);
 	}
 
 	@Test
