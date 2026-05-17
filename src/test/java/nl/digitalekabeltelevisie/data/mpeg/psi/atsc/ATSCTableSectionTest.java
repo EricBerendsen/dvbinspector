@@ -346,6 +346,10 @@ public class ATSCTableSectionTest {
 		assertEquals(1, region.getDimensions().get(1).ratingDimension());
 		assertEquals(4, region.getDimensions().get(1).ratingValue());
 		assertEquals("TV", region.getRatingDescriptionText().getText());
+		ContentAdvisoryDescriptor.RatedDimension ratedDimension =
+				new ContentAdvisoryDescriptor.RatedDimension(2, 5);
+		assertEquals(2, ratedDimension.ratingDimension());
+		assertEquals(5, ratedDimension.ratingValue());
 	}
 
 	@Test

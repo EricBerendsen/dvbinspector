@@ -48,7 +48,7 @@ public class ContentAdvisoryDescriptor extends AtscDescriptor {
 		ratingRegionCount = getInt(b, PRIVATE_DATA_OFFSET, 1, 0x3F);
 		int offset = PRIVATE_DATA_OFFSET + 1;
 		for (int i = 0; i < ratingRegionCount; i++) {
-			RatingRegion ratingRegion = new RatingRegion(b, offset);
+			RatingRegion ratingRegion = new RatingRegion(b, offset, this);
 			ratingRegions.add(ratingRegion);
 			offset += ratingRegion.getLength();
 		}
@@ -70,8 +70,25 @@ public class ContentAdvisoryDescriptor extends AtscDescriptor {
 		return ratingRegions;
 	}
 
+	private String getRatingDimensionName(final int ratingRegion, final int ratingDimension) {
+		try {
+			return getPSI().getAtsc().getRrt().getRatingDimensionName(ratingRegion, ratingDimension);
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
+
+	private String getRatingValueText(final int ratingRegion, final int ratingDimension, final int ratingValue) {
+		try {
+			return getPSI().getAtsc().getRrt().getRatingValueText(ratingRegion, ratingDimension, ratingValue);
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
+
 	public static class RatingRegion implements TreeNode {
 
+		private final ContentAdvisoryDescriptor parent;
 		private final int ratingRegion;
 		private final int ratedDimensions;
 		private final List<RatedDimension> dimensions = new ArrayList<>();
@@ -79,12 +96,13 @@ public class ContentAdvisoryDescriptor extends AtscDescriptor {
 		private final AtscMultipleString ratingDescriptionText;
 		private final int length;
 
-		RatingRegion(final byte[] data, final int offset) {
+		RatingRegion(final byte[] data, final int offset, final ContentAdvisoryDescriptor parent) {
+			this.parent = parent;
 			ratingRegion = getInt(data, offset, 1, MASK_8BITS);
 			ratedDimensions = getInt(data, offset + 1, 1, MASK_8BITS);
 			int localOffset = offset + 2;
 			for (int i = 0; i < ratedDimensions; i++) {
-				dimensions.add(new RatedDimension(data, localOffset));
+				dimensions.add(new RatedDimension(data, localOffset, this));
 				localOffset += 2;
 			}
 			ratingDescriptionLength = getInt(data, localOffset, 1, MASK_8BITS);
@@ -126,19 +144,39 @@ public class ContentAdvisoryDescriptor extends AtscDescriptor {
 		int getLength() {
 			return length;
 		}
+
+		private String getRatingDimensionName(final int ratingDimension) {
+			return parent.getRatingDimensionName(ratingRegion, ratingDimension);
+		}
+
+		private String getRatingValueText(final int ratingDimension, final int ratingValue) {
+			return parent.getRatingValueText(ratingRegion, ratingDimension, ratingValue);
+		}
 	}
 
-	public record RatedDimension(int ratingDimension, int ratingValue) implements TreeNode {
+	public record RatedDimension(int ratingDimension, int ratingValue, RatingRegion parent) implements TreeNode {
 
-		RatedDimension(final byte[] data, final int offset) {
-			this(getInt(data, offset, 1, MASK_8BITS), getInt(data, offset + 1, 1, 0x0F));
+		public RatedDimension(final int ratingDimension, final int ratingValue) {
+			this(ratingDimension, ratingValue, null);
+		}
+
+		RatedDimension(final byte[] data, final int offset, final RatingRegion parent) {
+			this(getInt(data, offset, 1, MASK_8BITS), getInt(data, offset + 1, 1, 0x0F), parent);
 		}
 
 		@Override
 		public KVP getJTreeNode(final int modus) {
-			KVP t = new KVP("rated_dimension", ratingDimension);
-			t.add(new KVP("rating_value", ratingValue));
+			KVP t = new KVP("rated_dimension", ratingDimension, getRatingDimensionName());
+			t.add(new KVP("rating_value", ratingValue, getRatingValueText()));
 			return t;
+		}
+
+		private String getRatingDimensionName() {
+			return parent == null ? null : parent.getRatingDimensionName(ratingDimension);
+		}
+
+		private String getRatingValueText() {
+			return parent == null ? null : parent.getRatingValueText(ratingDimension, ratingValue);
 		}
 	}
 }
