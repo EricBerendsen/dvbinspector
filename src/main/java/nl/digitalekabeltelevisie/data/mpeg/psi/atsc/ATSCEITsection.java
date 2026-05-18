@@ -151,6 +151,23 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 				.build();
 	}
 
+	static TableHeader<ATSCEITsection, ATSCEITsection> buildEitSectionTableHeader() {
+		return new TableHeaderBuilder<ATSCEITsection, ATSCEITsection>()
+				.addRequiredRowColumn("table_type", ATSCEITsection::getTableTypeDescription, String.class)
+				.addRequiredRowColumn("source_id", ATSCEITsection::getSourceId, Integer.class)
+				.addRequiredRowColumn("channel", ATSCEITsection::getChannelName, String.class)
+				.addRequiredRowColumn("version", ATSCEITsection::getVersion, Integer.class)
+				.addRequiredRowColumn("current_next", ATSCEITsection::getCurrentNext, Integer.class)
+				.addRequiredRowColumn("section", ATSCEITsection::getSectionNumber, Integer.class)
+				.addRequiredRowColumn("last_section", ATSCEITsection::getSectionLastNumber, Integer.class)
+				.addRequiredRowColumn("num_events", ATSCEITsection::getNumEventsInSection, Integer.class)
+				.addRequiredRowColumn("protocol_version", ATSCEITsection::getProtocolVersion, Integer.class)
+				.addOptionalRowColumn("first_packet_no", ATSCEITsection::getFirst_packet_no, Integer.class)
+				.addOptionalRowColumn("last_packet_no", ATSCEITsection::getLast_packet_no, Integer.class)
+				.addOptionalRowColumn("occurrence_count", ATSCEITsection::getOccurrence_count, Integer.class)
+				.build();
+	}
+
 	public String getChannelName() {
 		try {
 			return getPSI().getAtsc().getChannelNameOptional(getSourceId()).orElse(null);

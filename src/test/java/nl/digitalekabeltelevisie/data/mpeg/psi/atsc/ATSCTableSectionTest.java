@@ -146,6 +146,10 @@ public class ATSCTableSectionTest {
 		TableModel allVersionsTable = atscTables.getEit().getAllVersionsTableModel();
 		assertEquals(3, allVersionsTable.getRowCount());
 
+		TableModel sectionTable = atscTables.getEit().getSectionTableModel();
+		assertEquals(2, sectionTable.getRowCount());
+		assertEquals(1, sectionTable.getValueAt(0, findColumn(sectionTable, "num_events")));
+
 		KVP treeNode = atscTables.getEit().getJTreeNode(0);
 		KVP tableNode = (KVP) treeNode.getChildAt(0);
 		KVP sourceNode = (KVP) tableNode.getChildAt(0);
@@ -159,6 +163,30 @@ public class ATSCTableSectionTest {
 		KVP sectionOneNode = (KVP) versionThreeNode.getChildAt(1);
 		TableSource defaultTableSource = (TableSource) sectionOneNode.getDetailViews().get(0).detailSource();
 		assertEquals(2, defaultTableSource.getTableModel().getRowCount());
+	}
+
+	@Test
+	public void showsEmptyEitSectionsInSectionSummaryTable() {
+		ATSCEIT eit = new ATSCEIT(null);
+
+		eit.update(new ATSCEITsection(new PsiSectionData(eitSection(5, 0, 0, 0x1001)), null), 0x0101);
+
+		TableModel eventsTable = eit.getTableModel();
+		assertEquals(0, eventsTable.getRowCount());
+
+		TableModel sectionTable = eit.getSectionTableModel();
+		assertEquals(1, sectionTable.getRowCount());
+		assertEquals("Event Information Table 1", sectionTable.getValueAt(0, findColumn(sectionTable, "table_type")));
+		assertEquals(0, sectionTable.getValueAt(0, findColumn(sectionTable, "num_events")));
+
+		KVP treeNode = eit.getJTreeNode(0);
+		assertEquals("EIT Sections (latest complete versions)", treeNode.getDetailViews().get(0).label());
+		KVP tableNode = (KVP) treeNode.getChildAt(0);
+		assertEquals("EIT Sections (latest complete versions)", tableNode.getDetailViews().get(0).label());
+		KVP sourceNode = (KVP) tableNode.getChildAt(0);
+		assertEquals("EIT Sections (latest complete versions)", sourceNode.getDetailViews().get(0).label());
+		KVP versionNode = (KVP) sourceNode.getChildAt(0);
+		assertEquals("EIT Sections", versionNode.getDetailViews().get(0).label());
 	}
 
 	@Test
@@ -670,6 +698,26 @@ public class ATSCTableSectionTest {
 		out.write(0x00);
 		out.write(0x01);
 		writeEitEvent(out, eventId, title);
+		out.writeBytes(new byte[4]);
+		byte[] section = out.toByteArray();
+		int sectionLength = section.length - 3;
+		section[1] = (byte) (0xF0 | ((sectionLength >> 8) & 0x0F));
+		section[2] = (byte) sectionLength;
+		return withCrc(section);
+	}
+
+	private static byte[] eitSection(final int version, final int sectionNumber, final int lastSectionNumber,
+			final int sourceId) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xCB);
+		out.write(0xF0);
+		out.write(0x00);
+		write16(out, sourceId);
+		out.write(0xC0 | ((version & 0x1F) << 1) | 0x01);
+		out.write(sectionNumber);
+		out.write(lastSectionNumber);
+		out.write(0x00);
+		out.write(0x00);
 		out.writeBytes(new byte[4]);
 		byte[] section = out.toByteArray();
 		int sectionLength = section.length - 3;
