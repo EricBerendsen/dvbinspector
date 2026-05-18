@@ -89,7 +89,7 @@ public class VCTsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP t = super.getJTreeNode(modus);
-		t.addTableSource(this::getTableModel, "Virtual Channels");
+		t.addTableSource(this::getTableModel, "Virtual Channels (section " + getSectionNumber() + ", version " + getVersion() + ")");
 		t.add(new KVP("protocol_version", protocolVersion));
 		t.add(new KVP("num_channels_in_section", numChannelsInSection));
 		addListJTree(t, virtualChannels, modus, "virtual_channels");
@@ -138,6 +138,11 @@ public class VCTsection extends TableSectionExtendedSyntax {
 		return new TableHeaderBuilder<VCTsection, VirtualChannel>()
 				.addRequiredBaseColumn("transport_stream_id", VCTsection::getTableIdExtension, Integer.class)
 				.addRequiredBaseColumn("section", VCTsection::getSectionNumber, Integer.class)
+				.addRequiredBaseColumn("version", VCTsection::getVersion, Integer.class)
+				.addRequiredBaseColumn("current_next", VCTsection::getCurrentNext, Integer.class)
+				.addOptionalBaseColumn("first_packet_no", VCTsection::getFirst_packet_no, Integer.class)
+				.addOptionalBaseColumn("last_packet_no", VCTsection::getLast_packet_no, Integer.class)
+				.addOptionalBaseColumn("occurrence_count", VCTsection::getOccurrence_count, Integer.class)
 				.addRequiredRowColumn("channel", VirtualChannel::getChannelNumberString, String.class)
 				.addRequiredRowColumn("short_name", VirtualChannel::getShortName, String.class)
 				.addRequiredRowColumn("program_number", VirtualChannel::getProgramNumber, Integer.class)

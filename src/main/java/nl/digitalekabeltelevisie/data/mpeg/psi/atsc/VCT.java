@@ -61,7 +61,8 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP(label);
-		kvp.addTableSource(this::getTableModel, "Virtual Channels");
+		kvp.addTableSource(this::getTableModel, "Virtual Channels (latest version)");
+		kvp.addTableSource(this::getAllVersionsTableModel, "Virtual Channels (all versions)");
 		if (sections != null) {
 			for (VCTsection section : sections) {
 				if (section != null) {
@@ -85,11 +86,37 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 		if (sections != null) {
 			for (VCTsection section : sections) {
 				if (section != null) {
-					tableModel.addData(section, section.getVirtualChannels());
+					VCTsection latestSection = getLatestVersion(section);
+					tableModel.addData(latestSection, latestSection.getVirtualChannels());
 				}
 			}
 		}
 		tableModel.process();
 		return tableModel;
+	}
+
+	public TableModel getAllVersionsTableModel() {
+		FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel = new FlexTableModel<>(VCTsection.buildVctTableHeader());
+		if (sections != null) {
+			for (VCTsection section : sections) {
+				VCTsection sectionVersion = section;
+				while (sectionVersion != null) {
+					tableModel.addData(sectionVersion, sectionVersion.getVirtualChannels());
+					sectionVersion = (VCTsection) sectionVersion.getNextVersion();
+				}
+			}
+		}
+		tableModel.process();
+		return tableModel;
+	}
+
+	private static VCTsection getLatestVersion(final VCTsection section) {
+		VCTsection latestSection = section;
+		VCTsection nextSection = (VCTsection) latestSection.getNextVersion();
+		while (nextSection != null) {
+			latestSection = nextSection;
+			nextSection = (VCTsection) latestSection.getNextVersion();
+		}
+		return latestSection;
 	}
 }
