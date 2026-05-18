@@ -9,6 +9,7 @@ import javax.swing.table.TableModel;
 
 import org.junit.Test;
 
+import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
@@ -25,6 +26,7 @@ import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.RedistributionContro
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.StuffingDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.TimeShiftedServiceDescriptor;
+import nl.digitalekabeltelevisie.gui.TableSource;
 
 public class ATSCTableSectionTest {
 
@@ -121,6 +123,42 @@ public class ATSCTableSectionTest {
 		assertEquals("News", event.getTitle());
 		assertEquals(0, event.getDescriptorsLength());
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void keepsEitSectionsGroupedByLatestCompleteVersion() {
+		ATSCTables atscTables = new ATSCTables(null);
+
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(2, 0, 0, 0x1001, 0x0101, "Base")), null));
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(3, 0, 1, 0x1001, 0x0201, "Morning")), null));
+
+		TableModel latestCompleteTable = atscTables.getEit().getTableModel();
+		assertEquals(1, latestCompleteTable.getRowCount());
+		assertEquals("Base", latestCompleteTable.getValueAt(0, findColumn(latestCompleteTable, "title")));
+
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(3, 1, 1, 0x1001, 0x0202, "Evening")), null));
+
+		TableModel latestVersionTable = atscTables.getEit().getTableModel();
+		assertEquals(2, latestVersionTable.getRowCount());
+		assertEquals("Morning", latestVersionTable.getValueAt(0, findColumn(latestVersionTable, "title")));
+		assertEquals("Evening", latestVersionTable.getValueAt(1, findColumn(latestVersionTable, "title")));
+
+		TableModel allVersionsTable = atscTables.getEit().getAllVersionsTableModel();
+		assertEquals(3, allVersionsTable.getRowCount());
+
+		KVP treeNode = atscTables.getEit().getJTreeNode(0);
+		KVP tableNode = (KVP) treeNode.getChildAt(0);
+		KVP sourceNode = (KVP) tableNode.getChildAt(0);
+		assertEquals("version 2", sourceNode.getChildAt(0).toString());
+		assertEquals("version 3", sourceNode.getChildAt(1).toString());
+
+		KVP versionThreeNode = (KVP) sourceNode.getChildAt(1);
+		TableSource versionTableSource = (TableSource) versionThreeNode.getDetailViews().get(0).detailSource();
+		assertEquals(2, versionTableSource.getTableModel().getRowCount());
+
+		KVP sectionOneNode = (KVP) versionThreeNode.getChildAt(1);
+		TableSource defaultTableSource = (TableSource) sectionOneNode.getDetailViews().get(0).detailSource();
+		assertEquals(2, defaultTableSource.getTableModel().getRowCount());
 	}
 
 	@Test
@@ -231,6 +269,45 @@ public class ATSCTableSectionTest {
 		assertEquals("7.1 WXYZ DT", atscTables.getServiceNameOptional(3).orElseThrow());
 		assertEquals(0, tvct.getAdditionalDescriptorsLength());
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void keepsVctSectionsWhenLaterVersionAddsSection() {
+		ATSCTables atscTables = new ATSCTables(null);
+
+		atscTables.update(new TVCTsection(new PsiSectionData(tvctSection(2, 0, 0, "BASE", 7, 1, 3, 0x1001)), null));
+		atscTables.update(new TVCTsection(new PsiSectionData(tvctSection(3, 0, 1, "WXYZ", 7, 1, 3, 0x1001)), null));
+
+		TableModel latestCompleteTable = atscTables.getTvct().getTableModel();
+		assertEquals(1, latestCompleteTable.getRowCount());
+		assertEquals("BASE", latestCompleteTable.getValueAt(0, findColumn(latestCompleteTable, "short_name")));
+
+		atscTables.update(new TVCTsection(new PsiSectionData(tvctSection(3, 1, 1, "KNEW", 7, 2, 4, 0x1002)), null));
+
+		VCTsection[] sections = atscTables.getTvct().getSections();
+		assertEquals(2, sections.length);
+		assertEquals(0, sections[0].getSectionNumber());
+		assertEquals(1, sections[1].getSectionNumber());
+
+		TableModel latestVersionTable = atscTables.getTvct().getTableModel();
+		assertEquals(2, latestVersionTable.getRowCount());
+		assertEquals("WXYZ", latestVersionTable.getValueAt(0, findColumn(latestVersionTable, "short_name")));
+		assertEquals("KNEW", latestVersionTable.getValueAt(1, findColumn(latestVersionTable, "short_name")));
+
+		TableModel allVersionsTable = atscTables.getTvct().getAllVersionsTableModel();
+		assertEquals(3, allVersionsTable.getRowCount());
+
+		KVP treeNode = atscTables.getTvct().getJTreeNode(0);
+		assertEquals("version 2", treeNode.getChildAt(0).toString());
+		assertEquals("version 3", treeNode.getChildAt(1).toString());
+
+		KVP versionThreeNode = (KVP) treeNode.getChildAt(1);
+		TableSource versionTableSource = (TableSource) versionThreeNode.getDetailViews().get(0).detailSource();
+		assertEquals(2, versionTableSource.getTableModel().getRowCount());
+
+		KVP sectionOneNode = (KVP) versionThreeNode.getChildAt(1);
+		TableSource defaultTableSource = (TableSource) sectionOneNode.getDetailViews().get(0).detailSource();
+		assertEquals(2, defaultTableSource.getTableModel().getRowCount());
 	}
 
 	@Test
@@ -578,6 +655,94 @@ public class ATSCTableSectionTest {
 		out.writeBytes(new byte[] { 0x65, 0x6E, 0x67, 0x01, 0x00, 0x00, (byte) bytes.length });
 		out.writeBytes(bytes);
 		return out.toByteArray();
+	}
+
+	private static byte[] eitSection(final int version, final int sectionNumber, final int lastSectionNumber,
+			final int sourceId, final int eventId, final String title) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xCB);
+		out.write(0xF0);
+		out.write(0x00);
+		write16(out, sourceId);
+		out.write(0xC0 | ((version & 0x1F) << 1) | 0x01);
+		out.write(sectionNumber);
+		out.write(lastSectionNumber);
+		out.write(0x00);
+		out.write(0x01);
+		writeEitEvent(out, eventId, title);
+		out.writeBytes(new byte[4]);
+		byte[] section = out.toByteArray();
+		int sectionLength = section.length - 3;
+		section[1] = (byte) (0xF0 | ((sectionLength >> 8) & 0x0F));
+		section[2] = (byte) sectionLength;
+		return withCrc(section);
+	}
+
+	private static void writeEitEvent(final ByteArrayOutputStream out, final int eventId, final String title) {
+		write16(out, 0xC000 | (eventId & 0x3FFF));
+		write32(out, 1000 + eventId);
+		write24(out, 0xC00000 | (0x01 << 20) | 1800);
+		byte[] titleBytes = atscString(title);
+		out.write(titleBytes.length);
+		out.writeBytes(titleBytes);
+		write16(out, 0xF000);
+	}
+
+	private static byte[] tvctSection(final int version, final int sectionNumber, final int lastSectionNumber,
+			final String shortName, final int majorChannelNumber, final int minorChannelNumber,
+			final int programNumber, final int sourceId) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xC8);
+		out.write(0xF0);
+		out.write(0x00);
+		write16(out, 0x1234);
+		out.write(0xC0 | ((version & 0x1F) << 1) | 0x01);
+		out.write(sectionNumber);
+		out.write(lastSectionNumber);
+		out.write(0x00);
+		out.write(0x01);
+		writeTvctChannel(out, shortName, majorChannelNumber, minorChannelNumber, programNumber, sourceId);
+		write16(out, 0xFC00);
+		out.writeBytes(new byte[4]);
+		byte[] section = out.toByteArray();
+		int sectionLength = section.length - 3;
+		section[1] = (byte) (0xF0 | ((sectionLength >> 8) & 0x0F));
+		section[2] = (byte) sectionLength;
+		return withCrc(section);
+	}
+
+	private static void writeTvctChannel(final ByteArrayOutputStream out, final String shortName,
+			final int majorChannelNumber, final int minorChannelNumber, final int programNumber, final int sourceId) {
+		byte[] name = shortName.getBytes(StandardCharsets.UTF_16BE);
+		for (int i = 0; i < 14; i++) {
+			out.write(i < name.length ? name[i] : 0);
+		}
+		write24(out, 0xF00000 | ((majorChannelNumber & 0x3FF) << 10) | (minorChannelNumber & 0x3FF));
+		out.write(0x04);
+		write32(out, 0);
+		write16(out, 0x1234);
+		write16(out, programNumber);
+		write16(out, 0x0002);
+		write16(out, sourceId);
+		write16(out, 0xFC00);
+	}
+
+	private static void write16(final ByteArrayOutputStream out, final int value) {
+		out.write((value >> 8) & 0xFF);
+		out.write(value & 0xFF);
+	}
+
+	private static void write24(final ByteArrayOutputStream out, final int value) {
+		out.write((value >> 16) & 0xFF);
+		out.write((value >> 8) & 0xFF);
+		out.write(value & 0xFF);
+	}
+
+	private static void write32(final ByteArrayOutputStream out, final long value) {
+		out.write((int) ((value >> 24) & 0xFF));
+		out.write((int) ((value >> 16) & 0xFF));
+		out.write((int) ((value >> 8) & 0xFF));
+		out.write((int) (value & 0xFF));
 	}
 
 	private static int findColumn(final TableModel tableModel, final String name) {

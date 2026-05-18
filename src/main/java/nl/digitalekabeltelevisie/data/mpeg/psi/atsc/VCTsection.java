@@ -421,7 +421,8 @@ public class VCTsection extends TableSectionExtendedSyntax {
 		}
 
 		private PMTsection getLinkedPmt() {
-			if ((parent == null) || (parent.getPSI() == null) || (parent.getPSI().getPmts() == null)) {
+			if ((parent == null) || (parent.getParentPID() == null) || (parent.getPSI() == null)
+					|| (parent.getPSI().getPmts() == null)) {
 				return null;
 			}
 			PMTsection[] sections = parent.getPSI().getPmts().getPmts().get(programNumber);

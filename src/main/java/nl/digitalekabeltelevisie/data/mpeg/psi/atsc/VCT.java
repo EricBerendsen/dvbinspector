@@ -27,6 +27,11 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+
 import javax.swing.table.TableModel;
 
 import nl.digitalekabeltelevisie.controller.KVP;
@@ -47,8 +52,13 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 	}
 
 	public void update(final T section) {
+		int requiredLength = Math.max(section.getSectionLastNumber() + 1, section.getSectionNumber() + 1);
 		if (sections == null) {
-			sections = new VCTsection[section.getSectionLastNumber() + 1];
+			sections = new VCTsection[requiredLength];
+		} else if (sections.length < requiredLength) {
+			VCTsection[] resizedSections = new VCTsection[requiredLength];
+			System.arraycopy(sections, 0, resizedSections, 0, sections.length);
+			sections = resizedSections;
 		}
 		if (sections[section.getSectionNumber()] == null) {
 			sections[section.getSectionNumber()] = section;
@@ -61,17 +71,17 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP(label);
-		kvp.addTableSource(this::getTableModel, "Virtual Channels (latest version)");
+		kvp.addTableSource(this::getTableModel, "Virtual Channels (latest complete version)");
 		kvp.addTableSource(this::getAllVersionsTableModel, "Virtual Channels (all versions)");
-		if (sections != null) {
-			for (VCTsection section : sections) {
-				if (section != null) {
-					if (Utils.simpleModus(modus)) {
-						kvp.add(section.getJTreeNode(modus));
-					} else {
-						addSectionVersionsToJTree(kvp, section, modus);
-					}
-				}
+		Map<Integer, VCTsection[]> versionSections = getVersionSections();
+		if (Utils.simpleModus(modus)) {
+			Entry<Integer, VCTsection[]> latestCompleteVersion = getLatestCompleteVersionEntry(versionSections);
+			if (latestCompleteVersion != null) {
+				addVersionToJTree(kvp, latestCompleteVersion, modus);
+			}
+		} else {
+			for (Entry<Integer, VCTsection[]> versionEntry : versionSections.entrySet()) {
+				addVersionToJTree(kvp, versionEntry, modus);
 			}
 		}
 		return kvp;
@@ -83,13 +93,9 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 
 	public TableModel getTableModel() {
 		FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel = new FlexTableModel<>(VCTsection.buildVctTableHeader());
-		if (sections != null) {
-			for (VCTsection section : sections) {
-				if (section != null) {
-					VCTsection latestSection = getLatestVersion(section);
-					tableModel.addData(latestSection, latestSection.getVirtualChannels());
-				}
-			}
+		Entry<Integer, VCTsection[]> latestCompleteVersion = getLatestCompleteVersionEntry(getVersionSections());
+		if (latestCompleteVersion != null) {
+			addSectionsToTableModel(tableModel, latestCompleteVersion.getValue());
 		}
 		tableModel.process();
 		return tableModel;
@@ -97,26 +103,107 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 
 	public TableModel getAllVersionsTableModel() {
 		FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel = new FlexTableModel<>(VCTsection.buildVctTableHeader());
-		if (sections != null) {
-			for (VCTsection section : sections) {
-				VCTsection sectionVersion = section;
-				while (sectionVersion != null) {
-					tableModel.addData(sectionVersion, sectionVersion.getVirtualChannels());
-					sectionVersion = (VCTsection) sectionVersion.getNextVersion();
-				}
-			}
+		for (VCTsection[] sectionsForVersion : getVersionSections().values()) {
+			addSectionsToTableModel(tableModel, sectionsForVersion);
 		}
 		tableModel.process();
 		return tableModel;
 	}
 
-	private static VCTsection getLatestVersion(final VCTsection section) {
-		VCTsection latestSection = section;
-		VCTsection nextSection = (VCTsection) latestSection.getNextVersion();
-		while (nextSection != null) {
-			latestSection = nextSection;
-			nextSection = (VCTsection) latestSection.getNextVersion();
+	private TableModel getVersionTableModel(final int version) {
+		FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel = new FlexTableModel<>(VCTsection.buildVctTableHeader());
+		addSectionsToTableModel(tableModel, getVersionSections().get(version));
+		tableModel.process();
+		return tableModel;
+	}
+
+	private Map<Integer, VCTsection[]> getVersionSections() {
+		Map<Integer, VCTsection[]> versionSections = new LinkedHashMap<>();
+		forEachSectionVersion(section -> {
+			int requiredLength = Math.max(section.getSectionLastNumber() + 1, section.getSectionNumber() + 1);
+			VCTsection[] sectionsForVersion = versionSections.get(section.getVersion());
+			if (sectionsForVersion == null) {
+				sectionsForVersion = new VCTsection[requiredLength];
+				versionSections.put(section.getVersion(), sectionsForVersion);
+			} else if (sectionsForVersion.length < requiredLength) {
+				VCTsection[] resizedSections = new VCTsection[requiredLength];
+				System.arraycopy(sectionsForVersion, 0, resizedSections, 0, sectionsForVersion.length);
+				sectionsForVersion = resizedSections;
+				versionSections.put(section.getVersion(), sectionsForVersion);
+			}
+			sectionsForVersion[section.getSectionNumber()] = section;
+		});
+		return versionSections;
+	}
+
+	private void forEachSectionVersion(final Consumer<VCTsection> consumer) {
+		if (sections != null) {
+			for (VCTsection section : sections) {
+				VCTsection sectionVersion = section;
+				while (sectionVersion != null) {
+					consumer.accept(sectionVersion);
+					sectionVersion = (VCTsection) sectionVersion.getNextVersion();
+				}
+			}
 		}
-		return latestSection;
+	}
+
+	private void addVersionToJTree(final KVP kvp, final Entry<Integer, VCTsection[]> versionEntry, final int modus) {
+		String versionLabel = "version " + versionEntry.getKey();
+		if (!isCompleteVersion(versionEntry.getValue())) {
+			versionLabel += " (incomplete)";
+		}
+		KVP versionNode = new KVP(versionLabel);
+		versionNode.addTableSource(() -> getVersionTableModel(versionEntry.getKey()), "Virtual Channels");
+		for (VCTsection section : versionEntry.getValue()) {
+			if (section != null) {
+				addSectionToJTree(versionNode, section, modus);
+			}
+		}
+		kvp.add(versionNode);
+	}
+
+	private void addSectionToJTree(final KVP kvp, final VCTsection section, final int modus) {
+		KVP sectionNode = section.getJTreeNode(modus);
+		sectionNode.addTableSourceFirst(() -> getVersionTableModel(section.getVersion()),
+				"Virtual Channels (version " + section.getVersion() + ", all sections)");
+		kvp.add(sectionNode);
+	}
+
+	private static void addSectionsToTableModel(final FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel,
+			final VCTsection[] sectionsForVersion) {
+		if (sectionsForVersion == null) {
+			return;
+		}
+		for (VCTsection section : sectionsForVersion) {
+			if (section != null) {
+				tableModel.addData(section, section.getVirtualChannels());
+			}
+		}
+	}
+
+	private static Entry<Integer, VCTsection[]> getLatestCompleteVersionEntry(
+			final Map<Integer, VCTsection[]> versionSections) {
+		Entry<Integer, VCTsection[]> latestAvailableVersion = null;
+		Entry<Integer, VCTsection[]> latestCompleteVersion = null;
+		for (Entry<Integer, VCTsection[]> versionEntry : versionSections.entrySet()) {
+			latestAvailableVersion = versionEntry;
+			if (isCompleteVersion(versionEntry.getValue())) {
+				latestCompleteVersion = versionEntry;
+			}
+		}
+		return latestCompleteVersion != null ? latestCompleteVersion : latestAvailableVersion;
+	}
+
+	private static boolean isCompleteVersion(final VCTsection[] sectionsForVersion) {
+		if ((sectionsForVersion == null) || (sectionsForVersion.length == 0)) {
+			return false;
+		}
+		for (VCTsection section : sectionsForVersion) {
+			if ((section == null) || (section.getSectionLastNumber() != (sectionsForVersion.length - 1))) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
