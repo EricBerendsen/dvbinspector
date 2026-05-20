@@ -97,6 +97,17 @@ public class ATSCETT extends AbstractPSITabel {
 		return tables;
 	}
 
+	public String getChannelText(final int sourceId) {
+		return findText(section -> section.getSourceId() == sourceId
+				&& ((section.getTableType() == 0x0004) || (section.getEventId() == 0)));
+	}
+
+	public String getEventText(final int sourceId, final int eventId) {
+		return findText(section -> section.getSourceId() == sourceId
+				&& section.getEventId() == eventId
+				&& section.getTableType() != 0x0004);
+	}
+
 	public TableModel getTableModel() {
 		FlexTableModel<ATSCETTsection, ATSCETTsection> tableModel = new FlexTableModel<>(ATSCETTsection.buildEttTableHeader());
 		for (TreeMap<Long, ATSCETTsection[]> etms : tables.values()) {
@@ -134,5 +145,38 @@ public class ATSCETT extends AbstractPSITabel {
 				tableModel.addData(section, List.of(section));
 			}
 		}
+	}
+
+	private String findText(final java.util.function.Predicate<ATSCETTsection> predicate) {
+		for (TreeMap<Long, ATSCETTsection[]> etms : tables.values()) {
+			for (ATSCETTsection[] sections : etms.values()) {
+				String text = joinText(sections, predicate);
+				if (text != null) {
+					return text;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static String joinText(final ATSCETTsection[] sections,
+			final java.util.function.Predicate<ATSCETTsection> predicate) {
+		StringBuilder text = new StringBuilder();
+		for (ATSCETTsection section : sections) {
+			ATSCETTsection sectionVersion = section;
+			while (sectionVersion != null) {
+				if (predicate.test(sectionVersion)) {
+					String sectionText = sectionVersion.getExtendedText();
+					if ((sectionText != null) && !sectionText.isBlank()) {
+						if (!text.isEmpty()) {
+							text.append(' ');
+						}
+						text.append(sectionText);
+					}
+				}
+				sectionVersion = (ATSCETTsection) sectionVersion.getNextVersion();
+			}
+		}
+		return text.isEmpty() ? null : text.toString();
 	}
 }

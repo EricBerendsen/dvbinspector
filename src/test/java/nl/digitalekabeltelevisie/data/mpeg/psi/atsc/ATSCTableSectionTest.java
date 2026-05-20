@@ -54,7 +54,31 @@ public class ATSCTableSectionTest {
 		assertEquals(23, stt.getDsHour());
 		assertEquals("1980-01-06T00:16:22Z", stt.getUtcTimeString());
 		assertEquals(0, stt.getDescriptorList().size());
+		assertEquals("1980-01-06T00:16:22Z",
+				stt.getTableModel().getValueAt(0, findColumn(stt.getTableModel(), "UTC_time")));
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
+	}
+
+	@Test
+	public void showsSystemTimeTableSummary() {
+		STT stt = new STT(null);
+		byte[] section = withCrc(new byte[] {
+				(byte) 0xCD, (byte) 0xF0, 0x11,
+				0x00, 0x00, (byte) 0xC1, 0x00, 0x00,
+				0x00,
+				0x00, 0x00, 0x03, (byte) 0xE8,
+				0x12,
+				(byte) 0x81, 0x17,
+				0x00, 0x00, 0x00, 0x00
+		});
+
+		stt.update(new STTsection(new PsiSectionData(section), null));
+
+		TableModel tableModel = stt.getTableModel();
+		assertEquals(1, tableModel.getRowCount());
+		assertEquals(1000L, tableModel.getValueAt(0, findColumn(tableModel, "system_time")));
+		assertEquals(18, tableModel.getValueAt(0, findColumn(tableModel, "GPS_UTC_offset")));
+		assertEquals("1980-01-06T00:16:22Z", tableModel.getValueAt(0, findColumn(tableModel, "UTC_time")));
 	}
 
 	@Test
@@ -232,6 +256,17 @@ public class ATSCTableSectionTest {
 	}
 
 	@Test
+	public void separatesChannelAndEventExtendedText() {
+		ATSCTables atscTables = new ATSCTables(null);
+
+		atscTables.update(new ATSCETTsection(new PsiSectionData(ettSection(0x0004, 0x1001, 0, "Channel text")), null));
+		atscTables.update(new ATSCETTsection(new PsiSectionData(ettSection(0x0200, 0x1001, 0x0123, "Event text")), null));
+
+		assertEquals("Channel text", atscTables.getEtt().getChannelText(0x1001));
+		assertEquals("Event text", atscTables.getEtt().getEventText(0x1001, 0x0123));
+	}
+
+	@Test
 	public void parsesTerrestrialVirtualChannelTable() {
 		byte[] section = withCrc(new byte[] {
 				(byte) 0xC8, (byte) 0xF0, 0x4F,
@@ -336,6 +371,27 @@ public class ATSCTableSectionTest {
 		KVP sectionOneNode = (KVP) versionThreeNode.getChildAt(1);
 		TableSource defaultTableSource = (TableSource) sectionOneNode.getDetailViews().get(0).detailSource();
 		assertEquals(2, defaultTableSource.getTableModel().getRowCount());
+	}
+
+	@Test
+	public void showsAtscProgramsAndChannelsSummary() {
+		ATSCTables atscTables = new ATSCTables(null);
+
+		atscTables.update(new TVCTsection(new PsiSectionData(tvctSection(2, 0, 0, "WXYZ", 7, 1, 3, 0x1001)), null));
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(2, 0, 0, 0x1001, 0x0101, "Morning News")), null));
+
+		TableModel tableModel = atscTables.getProgramsTableModel();
+		assertEquals(1, tableModel.getRowCount());
+		assertEquals("TVCT", tableModel.getValueAt(0, findColumn(tableModel, "VCT")));
+		assertEquals("7.1", tableModel.getValueAt(0, findColumn(tableModel, "channel")));
+		assertEquals("WXYZ", tableModel.getValueAt(0, findColumn(tableModel, "short_name")));
+		assertEquals(3, tableModel.getValueAt(0, findColumn(tableModel, "program_number")));
+		assertEquals(0x1001, tableModel.getValueAt(0, findColumn(tableModel, "source_id")));
+		assertEquals(1, tableModel.getValueAt(0, findColumn(tableModel, "events")));
+		assertEquals("Morning News", tableModel.getValueAt(0, findColumn(tableModel, "current_event")));
+
+		KVP treeNode = atscTables.getJTreeNode(0);
+		assertEquals("Programs / Channels", treeNode.getDetailViews().get(0).label());
 	}
 
 	@Test
@@ -616,6 +672,8 @@ public class ATSCTableSectionTest {
 		assertEquals(1, region.getDimensions().get(1).ratingDimension());
 		assertEquals(4, region.getDimensions().get(1).ratingValue());
 		assertEquals("TV", region.getRatingDescriptionText().getText());
+		assertEquals("region 1 dimension 0 value 3, region 1 dimension 1 value 4, TV",
+				descriptor.getRatingSummaryString());
 		ContentAdvisoryDescriptor.RatedDimension ratedDimension =
 				new ContentAdvisoryDescriptor.RatedDimension(2, 5);
 		assertEquals(2, ratedDimension.ratingDimension());
@@ -734,6 +792,28 @@ public class ATSCTableSectionTest {
 		out.write(titleBytes.length);
 		out.writeBytes(titleBytes);
 		write16(out, 0xF000);
+	}
+
+	private static byte[] ettSection(final int tableIdExtension, final int sourceId, final int eventId,
+			final String text) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xCC);
+		out.write(0xF0);
+		out.write(0x00);
+		write16(out, tableIdExtension);
+		out.write(0xC1);
+		out.write(0x00);
+		out.write(0x00);
+		out.write(0x00);
+		write32(out, ((long) sourceId << 16) | ((long) eventId << 2) | (eventId == 0 ? 0 : 0x02));
+		byte[] textBytes = atscString(text);
+		out.writeBytes(textBytes);
+		out.writeBytes(new byte[4]);
+		byte[] section = out.toByteArray();
+		int sectionLength = section.length - 3;
+		section[1] = (byte) (0xF0 | ((sectionLength >> 8) & 0x0F));
+		section[2] = (byte) sectionLength;
+		return withCrc(section);
 	}
 
 	private static byte[] tvctSection(final int version, final int sectionNumber, final int lastSectionNumber,

@@ -91,6 +91,11 @@ public class VCT<T extends VCTsection> extends AbstractPSITabel {
 		return sections;
 	}
 
+	public VCTsection[] getLatestCompleteSections() {
+		Entry<Integer, VCTsection[]> latestCompleteVersion = getLatestCompleteVersionEntry(getVersionSections());
+		return latestCompleteVersion == null ? new VCTsection[0] : latestCompleteVersion.getValue();
+	}
+
 	public TableModel getTableModel() {
 		FlexTableModel<VCTsection, VCTsection.VirtualChannel> tableModel = new FlexTableModel<>(VCTsection.buildVctTableHeader());
 		Entry<Integer, VCTsection[]> latestCompleteVersion = getLatestCompleteVersionEntry(getVersionSections());

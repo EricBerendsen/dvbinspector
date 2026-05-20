@@ -114,6 +114,27 @@ public class ATSCEIT extends AbstractPSITabel {
 		return tables;
 	}
 
+	public List<ATSCEITsection.Event> getEventsForSource(final int sourceId) {
+		List<ATSCEITsection.Event> events = new java.util.ArrayList<>();
+		for (TreeMap<Integer, ATSCEITsection[]> sources : tables.values()) {
+			ATSCEITsection[] sections = sources.get(sourceId);
+			if (sections == null) {
+				continue;
+			}
+			Entry<Integer, ATSCEITsection[]> latestCompleteVersion =
+					getLatestCompleteVersionEntry(getVersionSections(sections));
+			if (latestCompleteVersion != null) {
+				for (ATSCEITsection section : latestCompleteVersion.getValue()) {
+					if (section != null) {
+						events.addAll(section.getEvents());
+					}
+				}
+			}
+		}
+		events.sort(java.util.Comparator.comparingLong(ATSCEITsection.Event::getStartTime));
+		return events;
+	}
+
 	public TableModel getTableModel() {
 		FlexTableModel<ATSCEITsection, ATSCEITsection.Event> tableModel = new FlexTableModel<>(ATSCEITsection.buildEitTableHeader());
 		for (TreeMap<Integer, ATSCEITsection[]> sources : tables.values()) {

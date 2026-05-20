@@ -36,12 +36,17 @@ import static nl.digitalekabeltelevisie.util.Utils.getLong;
 import java.time.Instant;
 import java.util.List;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PID;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
+import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 public class STTsection extends TableSectionExtendedSyntax {
 
@@ -74,6 +79,7 @@ public class STTsection extends TableSectionExtendedSyntax {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP t = super.getJTreeNode(modus);
+		t.addTableSource(this::getTableModel, "System Time");
 		t.add(new KVP("protocol_version", protocolVersion));
 		t.add(new KVP("system_time", systemTime, getUtcTimeString()));
 		t.add(new KVP("GPS_UTC_offset", gpsUtcOffset));
@@ -83,6 +89,28 @@ public class STTsection extends TableSectionExtendedSyntax {
 		t.add(new KVP("DS_hour", dsHour));
 		addListJTree(t, descriptorList, modus, "descriptors");
 		return t;
+	}
+
+	public TableModel getTableModel() {
+		FlexTableModel<STTsection, STTsection> tableModel = new FlexTableModel<>(buildSttTableHeader());
+		tableModel.addData(this, List.of(this));
+		tableModel.process();
+		return tableModel;
+	}
+
+	static TableHeader<STTsection, STTsection> buildSttTableHeader() {
+		return new TableHeaderBuilder<STTsection, STTsection>()
+				.addRequiredRowColumn("UTC_time", STTsection::getUtcTimeString, String.class)
+				.addRequiredRowColumn("system_time", STTsection::getSystemTime, Long.class)
+				.addRequiredRowColumn("GPS_UTC_offset", STTsection::getGpsUtcOffset, Integer.class)
+				.addRequiredRowColumn("DS_status", STTsection::getDsStatus, Integer.class)
+				.addRequiredRowColumn("DS_day_of_month", STTsection::getDsDayOfMonth, Integer.class)
+				.addRequiredRowColumn("DS_hour", STTsection::getDsHour, Integer.class)
+				.addRequiredRowColumn("protocol_version", STTsection::getProtocolVersion, Integer.class)
+				.addOptionalRowColumn("first_packet_no", STTsection::getFirst_packet_no, Integer.class)
+				.addOptionalRowColumn("last_packet_no", STTsection::getLast_packet_no, Integer.class)
+				.addOptionalRowColumn("occurrence_count", STTsection::getOccurrence_count, Integer.class)
+				.build();
 	}
 
 	public int getProtocolVersion() {

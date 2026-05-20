@@ -30,9 +30,12 @@ package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.table.TableModel;
+
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
+import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 
 public class STT extends AbstractPSITabel {
 
@@ -49,13 +52,30 @@ public class STT extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("STT");
+		kvp.addTableSource(this::getTableModel, "System Time");
 		for (STTsection sttSection : sttSectionList) {
 			kvp.add(sttSection.getJTreeNode(modus));
 		}
 		return kvp;
 	}
 
+	public TableModel getTableModel() {
+		FlexTableModel<STTsection, STTsection> tableModel = new FlexTableModel<>(STTsection.buildSttTableHeader());
+		for (STTsection section : sttSectionList) {
+			tableModel.addData(section, List.of(section));
+		}
+		tableModel.process();
+		return tableModel;
+	}
+
 	public List<STTsection> getSttSectionList() {
 		return sttSectionList;
+	}
+
+	public STTsection getLatestSttSection() {
+		if (sttSectionList.isEmpty()) {
+			return null;
+		}
+		return sttSectionList.getLast();
 	}
 }

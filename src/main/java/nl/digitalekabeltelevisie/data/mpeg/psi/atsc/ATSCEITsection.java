@@ -48,6 +48,7 @@ import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.DescriptorFactory;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscMultipleString;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSectionExtendedSyntax;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
 import nl.digitalekabeltelevisie.util.tablemodel.TableHeader;
@@ -146,6 +147,8 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 				.addRequiredRowColumn("start_time", Event::getUtcStartTimeString, String.class)
 				.addRequiredRowColumn("duration_sec", Event::getLengthInSeconds, Integer.class)
 				.addRequiredRowColumn("title", Event::getTitle, String.class)
+				.addOptionalRowColumn("extended_text_message", Event::getExtendedText, String.class)
+				.addOptionalRowColumn("content_advisory", Event::getContentAdvisory, String.class)
 				.addOptionalRowColumn("ETM_location", Event::getEtmLocationString, String.class)
 				.addOptionalRowColumn("descriptors_length", Event::getDescriptorsLength, Integer.class)
 				.build();
@@ -257,6 +260,27 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 
 		public String getTitle() {
 			return titleText.getText();
+		}
+
+		public String getExtendedText() {
+			try {
+				return parent.getPSI().getAtsc().getEtt().getEventText(parent.getSourceId(), eventId);
+			} catch (RuntimeException e) {
+				return null;
+			}
+		}
+
+		public String getContentAdvisory() {
+			List<String> ratings = new ArrayList<>();
+			for (Descriptor descriptor : descriptorList) {
+				if (descriptor instanceof ContentAdvisoryDescriptor contentAdvisoryDescriptor) {
+					String rating = contentAdvisoryDescriptor.getRatingSummaryString();
+					if ((rating != null) && !rating.isBlank()) {
+						ratings.add(rating);
+					}
+				}
+			}
+			return ratings.isEmpty() ? null : String.join("; ", ratings);
 		}
 
 		public int getDescriptorsLength() {

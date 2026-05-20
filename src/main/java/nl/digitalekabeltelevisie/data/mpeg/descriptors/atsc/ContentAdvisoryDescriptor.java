@@ -70,6 +70,25 @@ public class ContentAdvisoryDescriptor extends AtscDescriptor {
 		return ratingRegions;
 	}
 
+	public String getRatingSummaryString() {
+		List<String> values = new ArrayList<>();
+		for (RatingRegion region : ratingRegions) {
+			for (RatedDimension dimension : region.getDimensions()) {
+				String text = dimension.getRatingValueText();
+				if ((text == null) || text.isBlank()) {
+					text = "region " + region.getRatingRegion() + " dimension " + dimension.ratingDimension()
+							+ " value " + dimension.ratingValue();
+				}
+				values.add(text);
+			}
+			String description = region.getRatingDescriptionText().getText();
+			if ((description != null) && !description.isBlank()) {
+				values.add(description);
+			}
+		}
+		return values.isEmpty() ? null : String.join(", ", values);
+	}
+
 	private String getRatingDimensionName(final int ratingRegion, final int ratingDimension) {
 		try {
 			return getPSI().getAtsc().getRrt().getRatingDimensionName(ratingRegion, ratingDimension);
@@ -171,11 +190,11 @@ public class ContentAdvisoryDescriptor extends AtscDescriptor {
 			return t;
 		}
 
-		private String getRatingDimensionName() {
+		public String getRatingDimensionName() {
 			return parent == null ? null : parent.getRatingDimensionName(ratingDimension);
 		}
 
-		private String getRatingValueText() {
+		public String getRatingValueText() {
 			return parent == null ? null : parent.getRatingValueText(ratingDimension, ratingValue);
 		}
 	}
