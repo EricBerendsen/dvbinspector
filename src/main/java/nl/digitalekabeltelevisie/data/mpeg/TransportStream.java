@@ -985,6 +985,14 @@ public class TransportStream implements TreeNode{
 		int componentElementaryPID = component.getElementaryPID();
 		PID pid = pids[componentElementaryPID];
 		if ((pid != null) && (!pid.isScrambled()) && (pid.getType() == PID.PES)){
+			if (psi.getAtsc().hasPsipTables()) {
+				if (streamType == 0x81) {
+					return new AC3Handler();
+				}
+				if (streamType == 0x87) {
+					return new EAC3Handler();
+				}
+			}
 			return switch(streamType){
 				case 1,2 -> new Video138182Handler();
 				case 3,4 -> new Audio138183Handler(getAncillaryDataIdentifier(component));
@@ -995,8 +1003,6 @@ public class TransportStream implements TreeNode{
 				case 0x27 -> new TEMIPesHandler();
 				case 0x33 -> new H266Handler();
 				case 0x32 -> new JpegXsHandler();
-				case 0x81 -> new AC3Handler();
-				case 0x87 -> new EAC3Handler();
 				default -> new GeneralPesHandler();
 			};
 		}

@@ -176,6 +176,11 @@ public class ATSCTables extends AbstractPSITabel {
 		return rrt;
 	}
 
+	public boolean hasPsipTables() {
+		return (stt.getLatestSttSection() != null) || (mgt.getMgtSection() != null)
+				|| hasSections(tvct) || hasSections(cvct) || !eit.getTables().isEmpty() || !ett.getTables().isEmpty();
+	}
+
 	public boolean isAtscEitPid(final int pid) {
 		return getTableTypeForPid(pid, 0x0100, 0x017F).isPresent();
 	}
@@ -195,6 +200,19 @@ public class ATSCTables extends AbstractPSITabel {
 				.map(MGTsection.TableTypeEntry::getTableType)
 				.filter(tableType -> (lowerInclusive <= tableType) && (tableType <= upperInclusive))
 				.findFirst();
+	}
+
+	private static boolean hasSections(final VCT<? extends VCTsection> vct) {
+		VCTsection[] sections = vct.getSections();
+		if (sections == null) {
+			return false;
+		}
+		for (VCTsection section : sections) {
+			if (section != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private List<ProgramChannel> getProgramChannels() {
