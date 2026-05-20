@@ -31,7 +31,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import javax.swing.table.TableModel;
@@ -112,6 +114,14 @@ public class ATSCEIT extends AbstractPSITabel {
 
 	public TreeMap<Integer, TreeMap<Integer, ATSCEITsection[]>> getTables() {
 		return tables;
+	}
+
+	public Set<Integer> getSourceIds() {
+		Set<Integer> sourceIds = new TreeSet<>();
+		for (TreeMap<Integer, ATSCEITsection[]> sources : tables.values()) {
+			sourceIds.addAll(sources.keySet());
+		}
+		return sourceIds;
 	}
 
 	public List<ATSCEITsection.Event> getEventsForSource(final int sourceId) {
