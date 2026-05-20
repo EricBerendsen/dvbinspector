@@ -42,6 +42,7 @@ import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.psi.AbstractPSITabel;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TableSection;
+import nl.digitalekabeltelevisie.gui.EITableImage;
 import nl.digitalekabeltelevisie.gui.TableSource;
 import nl.digitalekabeltelevisie.util.Utils;
 import nl.digitalekabeltelevisie.util.tablemodel.FlexTableModel;
@@ -78,10 +79,12 @@ public class ATSCEIT extends AbstractPSITabel {
 	@Override
 	public KVP getJTreeNode(final int modus) {
 		KVP kvp = new KVP("EIT");
+		addGridImageSource(kvp, getEventsBySource());
 		addEitTableSources(kvp, this::getTableModel, this::getAllVersionsTableModel, this::getSectionTableModel,
 				this::getAllVersionsSectionTableModel, hasEventsInLatestCompleteTableVersions(tables));
 		for (Entry<Integer, TreeMap<Integer, ATSCEITsection[]>> tableEntry : tables.entrySet()) {
 			KVP tableNode = new KVP("table_type", tableEntry.getKey(), MGTsection.getTableTypeDescription(tableEntry.getKey()));
+			addGridImageSource(tableNode, getEventsBySource(tableEntry.getKey()));
 			addEitTableSources(tableNode, () -> getTableModel(tableEntry.getValue()),
 					() -> getAllVersionsTableModel(tableEntry.getValue()),
 					() -> getSectionTableModel(tableEntry.getValue()),
@@ -90,6 +93,7 @@ public class ATSCEIT extends AbstractPSITabel {
 			kvp.add(tableNode);
 			for (Entry<Integer, ATSCEITsection[]> sourceEntry : tableEntry.getValue().entrySet()) {
 				KVP sourceNode = new KVP("source_id", sourceEntry.getKey());
+				addGridImageSource(sourceNode, getEventsBySource(tableEntry.getKey(), sourceEntry.getKey()));
 				addEitTableSources(sourceNode, () -> getTableModel(sourceEntry.getValue()),
 						() -> getAllVersionsTableModel(sourceEntry.getValue()),
 						() -> getSectionTableModel(sourceEntry.getValue()),
@@ -112,6 +116,12 @@ public class ATSCEIT extends AbstractPSITabel {
 		return kvp;
 	}
 
+	private void addGridImageSource(final KVP kvp, final Map<Integer, List<ATSCEITsection.Event>> sourceEvents) {
+		if ((getParentPSI() != null) && !sourceEvents.isEmpty()) {
+			kvp.addImageSource(new EITableImage(getParentPSI().getAtsc(), sourceEvents), "Grid");
+		}
+	}
+
 	public TreeMap<Integer, TreeMap<Integer, ATSCEITsection[]>> getTables() {
 		return tables;
 	}
@@ -124,24 +134,76 @@ public class ATSCEIT extends AbstractPSITabel {
 		return sourceIds;
 	}
 
+	public Set<Integer> getSourceIds(final int tableType) {
+		TreeMap<Integer, ATSCEITsection[]> sources = tables.get(tableType);
+		return sources == null ? Set.of() : new TreeSet<>(sources.keySet());
+	}
+
+	public Map<Integer, List<ATSCEITsection.Event>> getEventsBySource() {
+		Map<Integer, List<ATSCEITsection.Event>> eventsBySource = new LinkedHashMap<>();
+		for (Integer sourceId : getSourceIds()) {
+			List<ATSCEITsection.Event> sourceEvents = getEventsForSource(sourceId);
+			if (!sourceEvents.isEmpty()) {
+				eventsBySource.put(sourceId, sourceEvents);
+			}
+		}
+		return eventsBySource;
+	}
+
+	public Map<Integer, List<ATSCEITsection.Event>> getEventsBySource(final int tableType) {
+		Map<Integer, List<ATSCEITsection.Event>> eventsBySource = new LinkedHashMap<>();
+		for (Integer sourceId : getSourceIds(tableType)) {
+			List<ATSCEITsection.Event> sourceEvents = getEventsForSource(tableType, sourceId);
+			if (!sourceEvents.isEmpty()) {
+				eventsBySource.put(sourceId, sourceEvents);
+			}
+		}
+		return eventsBySource;
+	}
+
+	public Map<Integer, List<ATSCEITsection.Event>> getEventsBySource(final int tableType, final int sourceId) {
+		List<ATSCEITsection.Event> sourceEvents = getEventsForSource(tableType, sourceId);
+		if (sourceEvents.isEmpty()) {
+			return Map.of();
+		}
+		Map<Integer, List<ATSCEITsection.Event>> eventsBySource = new LinkedHashMap<>();
+		eventsBySource.put(sourceId, sourceEvents);
+		return eventsBySource;
+	}
+
 	public List<ATSCEITsection.Event> getEventsForSource(final int sourceId) {
 		List<ATSCEITsection.Event> events = new java.util.ArrayList<>();
 		for (TreeMap<Integer, ATSCEITsection[]> sources : tables.values()) {
-			ATSCEITsection[] sections = sources.get(sourceId);
-			if (sections == null) {
-				continue;
-			}
-			Entry<Integer, ATSCEITsection[]> latestCompleteVersion =
-					getLatestCompleteVersionEntry(getVersionSections(sections));
-			if (latestCompleteVersion != null) {
-				for (ATSCEITsection section : latestCompleteVersion.getValue()) {
-					if (section != null) {
-						events.addAll(section.getEvents());
-					}
+			events.addAll(getEventsFromLatestCompleteVersion(sources.get(sourceId)));
+		}
+		events.sort(java.util.Comparator.comparingLong(ATSCEITsection.Event::getStartTime));
+		return events;
+	}
+
+	public List<ATSCEITsection.Event> getEventsForSource(final int tableType, final int sourceId) {
+		TreeMap<Integer, ATSCEITsection[]> sources = tables.get(tableType);
+		if (sources == null) {
+			return List.of();
+		}
+		List<ATSCEITsection.Event> events = getEventsFromLatestCompleteVersion(sources.get(sourceId));
+		events.sort(java.util.Comparator.comparingLong(ATSCEITsection.Event::getStartTime));
+		return events;
+	}
+
+	private static List<ATSCEITsection.Event> getEventsFromLatestCompleteVersion(final ATSCEITsection[] sections) {
+		List<ATSCEITsection.Event> events = new java.util.ArrayList<>();
+		if (sections == null) {
+			return events;
+		}
+		Entry<Integer, ATSCEITsection[]> latestCompleteVersion =
+				getLatestCompleteVersionEntry(getVersionSections(sections));
+		if (latestCompleteVersion != null) {
+			for (ATSCEITsection section : latestCompleteVersion.getValue()) {
+				if (section != null) {
+					events.addAll(section.getEvents());
 				}
 			}
 		}
-		events.sort(java.util.Comparator.comparingLong(ATSCEITsection.Event::getStartTime));
 		return events;
 	}
 

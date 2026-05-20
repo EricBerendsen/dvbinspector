@@ -126,6 +126,17 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		this.milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
 	}
 
+	/**
+	 * Constructor for use from DVBTree, for ATSC EIT ImageSource detail views.
+	 *
+	 * @param atsc
+	 * @param sourceEvents
+	 */
+	public EITableImage(ATSCTables atsc, Map<Integer, List<ATSCEITsection.Event>> sourceEvents){
+		this.milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
+		loadAtscEit(atsc, getTransportStreamId(atsc), sourceEvents);
+	}
+
 
 	/**
 	 * Constructor for use from EITPanel, for use as JPanel
@@ -163,7 +174,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 			if (hasDvbEvents(servicesTable)) {
 				this.serviceOrder = new TreeSet<>(servicesTable.keySet());
 				this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
-			} else if (!loadAtscEit(stream)) {
+			} else if (!loadAtscEit(stream.getPsi().getAtsc(), getTransportStreamId(stream),
+					stream.getPsi().getAtsc().getEit().getEventsBySource())) {
 				this.serviceOrder = new TreeSet<>();
 				this.interval = null;
 			}
@@ -238,15 +250,15 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		return img;
 	}
 
-	private boolean loadAtscEit(final TransportStream stream) {
-		ATSCTables atsc = stream.getPsi().getAtsc();
+	private boolean loadAtscEit(final ATSCTables atsc, final int transportStreamId,
+			final Map<Integer, List<ATSCEITsection.Event>> sourceEventsBySource) {
 		Map<ServiceIdentification, List<AtscEitEvent>> atscTable = new HashMap<>();
 		Map<ServiceIdentification, String> names = new HashMap<>();
 		SortedSet<ServiceIdentification> order = new TreeSet<>();
-		int transportStreamId = getTransportStreamId(stream);
 		long currentTime = getAtscCurrentTime(atsc);
-		for (Integer sourceId : atsc.getEit().getSourceIds()) {
-			List<ATSCEITsection.Event> sourceEvents = atsc.getEit().getEventsForSource(sourceId);
+		for (Map.Entry<Integer, List<ATSCEITsection.Event>> sourceEntry : sourceEventsBySource.entrySet()) {
+			Integer sourceId = sourceEntry.getKey();
+			List<ATSCEITsection.Event> sourceEvents = sourceEntry.getValue();
 			if (!selectedSchedule) {
 				sourceEvents = getAtscPresentFollowingEvents(sourceEvents, currentTime);
 			}
@@ -297,6 +309,14 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	private static int getTransportStreamId(final TransportStream stream) {
 		try {
 			return stream.getPsi().getPat().getTransportStreamId();
+		} catch (RuntimeException e) {
+			return 0;
+		}
+	}
+
+	private static int getTransportStreamId(final ATSCTables atsc) {
+		try {
+			return atsc.getParentPSI().getPat().getTransportStreamId();
 		} catch (RuntimeException e) {
 			return 0;
 		}
