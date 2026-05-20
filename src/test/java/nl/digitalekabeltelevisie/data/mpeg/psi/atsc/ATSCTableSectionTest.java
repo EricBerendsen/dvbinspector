@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import nl.digitalekabeltelevisie.controller.KVP;
 import nl.digitalekabeltelevisie.data.mpeg.CRCcheck;
+import nl.digitalekabeltelevisie.data.mpeg.PSI;
 import nl.digitalekabeltelevisie.data.mpeg.PsiSectionData;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.Descriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
@@ -99,7 +100,7 @@ public class ATSCTableSectionTest {
 
 		MGTsection mgt = new MGTsection(new PsiSectionData(section), null);
 		MGTsection.TableTypeEntry entry = mgt.getTableTypeEntries().getFirst();
-		ATSCTables atscTables = new ATSCTables(null);
+		ATSCTables atscTables = new PSI().getAtsc();
 		atscTables.update(mgt);
 
 		assertEquals(0xC7, mgt.getTableId());
@@ -114,6 +115,21 @@ public class ATSCTableSectionTest {
 		assertEquals(300L, entry.getNumberBytes());
 		assertEquals(0, entry.getTableTypeDescriptorsLength());
 		assertEquals(true, atscTables.isAtscEitPid(0x1FFB));
+		TableModel guideTable = atscTables.getMgt().getGuideTableModel();
+		assertEquals(1, guideTable.getRowCount());
+		assertEquals(0x0100, guideTable.getValueAt(0, findColumn(guideTable, "table_type")));
+		assertEquals("Event Information Table 0", guideTable.getValueAt(0, findColumn(guideTable, "description")));
+		assertEquals(0x1FFB, guideTable.getValueAt(0, findColumn(guideTable, "PID")));
+		assertEquals("declared, not parsed", guideTable.getValueAt(0, findColumn(guideTable, "status")));
+		assertEquals(0, guideTable.getValueAt(0, findColumn(guideTable, "parsed_sections")));
+		assertEquals("EIT-0", guideTable.getValueAt(0, findColumn(guideTable, "target")));
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(4, 0, 0, 0x1001, 0x0101, "News")), null));
+		TableModel parsedGuideTable = atscTables.getMgt().getGuideTableModel();
+		assertEquals("parsed", parsedGuideTable.getValueAt(0, findColumn(parsedGuideTable, "status")));
+		assertEquals(4, parsedGuideTable.getValueAt(0, findColumn(parsedGuideTable, "parsed_version")));
+		assertEquals(1, parsedGuideTable.getValueAt(0, findColumn(parsedGuideTable, "parsed_sections")));
+		assertEquals(1, parsedGuideTable.getValueAt(0, findColumn(parsedGuideTable, "parsed_items")));
+		assertEquals("events", parsedGuideTable.getValueAt(0, findColumn(parsedGuideTable, "item_type")));
 		assertEquals(0L, CRCcheck.crc32(section, section.length));
 	}
 
