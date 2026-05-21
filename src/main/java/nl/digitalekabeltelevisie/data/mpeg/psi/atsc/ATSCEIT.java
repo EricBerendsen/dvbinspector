@@ -533,9 +533,10 @@ public class ATSCEIT extends AbstractPSITabel {
 	}
 
 	private int getGpsUtcOffset() {
-		if ((parentPSI == null) || parentPSI.getAtsc().getStt().getSttSectionList().isEmpty()) {
+		if (parentPSI == null) {
 			return 0;
 		}
-		return parentPSI.getAtsc().getStt().getSttSectionList().getFirst().getGpsUtcOffset();
+		STTsection latestStt = parentPSI.getAtsc().getStt().getLatestSttSection();
+		return latestStt == null ? 0 : latestStt.getGpsUtcOffset();
 	}
 }

@@ -1,6 +1,7 @@
 package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -283,6 +284,42 @@ public class ATSCTableSectionTest {
 	}
 
 	@Test
+	public void doesNotUseEventZeroTextAsChannelText() {
+		ATSCTables atscTables = new ATSCTables(null);
+
+		atscTables.update(new ATSCETTsection(new PsiSectionData(ettSection(0x0200, 0x1001, 0, "Event zero text")),
+				null));
+
+		assertNull(atscTables.getEtt().getChannelText(0x1001));
+		assertEquals("Event zero text", atscTables.getEtt().getEventText(0x0100, 0x1001, 0));
+	}
+
+	@Test
+	public void usesMatchingEventEttTableForEventText() {
+		ATSCETT ett = new ATSCETT(null);
+
+		ett.update(new ATSCETTsection(new PsiSectionData(ettSection(0x0200, 0x1001, 0x0123, "Table zero text")),
+				null), 0x0200);
+		ett.update(new ATSCETTsection(new PsiSectionData(ettSection(0x0201, 0x1001, 0x0123, "Table one text")),
+				null), 0x0201);
+
+		assertEquals("Table zero text", ett.getEventText(0x0100, 0x1001, 0x0123));
+		assertEquals("Table one text", ett.getEventText(0x0101, 0x1001, 0x0123));
+	}
+
+	@Test
+	public void usesLatestEttTextVersion() {
+		ATSCETT ett = new ATSCETT(null);
+
+		ett.update(new ATSCETTsection(new PsiSectionData(ettSection(1, 0, 0, 0x0200, 0x1001, 0x0123, "Old text")),
+				null), 0x0200);
+		ett.update(new ATSCETTsection(new PsiSectionData(ettSection(2, 0, 0, 0x0200, 0x1001, 0x0123, "New text")),
+				null), 0x0200);
+
+		assertEquals("New text", ett.getEventText(0x0100, 0x1001, 0x0123));
+	}
+
+	@Test
 	public void parsesTerrestrialVirtualChannelTable() {
 		byte[] section = withCrc(new byte[] {
 				(byte) 0xC8, (byte) 0xF0, 0x4F,
@@ -360,6 +397,7 @@ public class ATSCTableSectionTest {
 		TableModel latestCompleteTable = atscTables.getTvct().getTableModel();
 		assertEquals(1, latestCompleteTable.getRowCount());
 		assertEquals("BASE", latestCompleteTable.getValueAt(0, findColumn(latestCompleteTable, "short_name")));
+		assertEquals("7.1 BASE", atscTables.getChannelNameOptional(0x1001).orElseThrow());
 
 		atscTables.update(new TVCTsection(new PsiSectionData(tvctSection(3, 1, 1, "KNEW", 7, 2, 4, 0x1002)), null));
 
@@ -372,6 +410,8 @@ public class ATSCTableSectionTest {
 		assertEquals(2, latestVersionTable.getRowCount());
 		assertEquals("WXYZ", latestVersionTable.getValueAt(0, findColumn(latestVersionTable, "short_name")));
 		assertEquals("KNEW", latestVersionTable.getValueAt(1, findColumn(latestVersionTable, "short_name")));
+		assertEquals("7.1 WXYZ", atscTables.getChannelNameOptional(0x1001).orElseThrow());
+		assertEquals("7.2 KNEW", atscTables.getServiceNameOptional(4).orElseThrow());
 
 		TableModel allVersionsTable = atscTables.getTvct().getAllVersionsTableModel();
 		assertEquals(3, allVersionsTable.getRowCount());
@@ -408,6 +448,34 @@ public class ATSCTableSectionTest {
 
 		KVP treeNode = atscTables.getJTreeNode(0);
 		assertEquals("Programs / Channels", treeNode.getDetailViews().get(0).label());
+	}
+
+	@Test
+	public void doesNotUseCurrentEventAsNextEvent() {
+		ATSCTables atscTables = new ATSCTables(null);
+
+		atscTables.update(new STTsection(new PsiSectionData(sttSection(1001, 18)), null));
+		atscTables.update(new TVCTsection(new PsiSectionData(tvctSection(2, 0, 0, "WXYZ", 7, 1, 3, 0x1001)), null));
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(2, 0, 1, 0x1001, 0x0001, "Current")),
+				null));
+		atscTables.update(new ATSCEITsection(new PsiSectionData(eitSection(2, 1, 1, 0x1001, 0x0400, "Next")),
+				null));
+
+		TableModel tableModel = atscTables.getProgramsTableModel();
+		assertEquals("Current", tableModel.getValueAt(0, findColumn(tableModel, "current_event")));
+		assertEquals("Next", tableModel.getValueAt(0, findColumn(tableModel, "next_event")));
+	}
+
+	@Test
+	public void usesLatestMasterGuideTableVersion() {
+		MGT mgt = new MGT(null);
+
+		mgt.update(new MGTsection(new PsiSectionData(mgtSection(1, 0x0100, 0x1FFA, 2)), null));
+		mgt.update(new MGTsection(new PsiSectionData(mgtSection(2, 0x0101, 0x1FFB, 3)), null));
+
+		TableModel guideTable = mgt.getGuideTableModel();
+		assertEquals(2, mgt.getMgtSection().getVersion());
+		assertEquals(0x0101, guideTable.getValueAt(0, findColumn(guideTable, "table_type")));
 	}
 
 	@Test
@@ -759,6 +827,49 @@ public class ATSCTableSectionTest {
 		return out.toByteArray();
 	}
 
+	private static byte[] sttSection(final long systemTime, final int gpsUtcOffset) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xCD);
+		out.write(0xF0);
+		out.write(0x11);
+		write16(out, 0x0000);
+		out.write(0xC1);
+		out.write(0x00);
+		out.write(0x00);
+		out.write(0x00);
+		write32(out, systemTime);
+		out.write(gpsUtcOffset);
+		write16(out, 0x0000);
+		out.writeBytes(new byte[4]);
+		return withCrc(out.toByteArray());
+	}
+
+	private static byte[] mgtSection(final int version, final int tableType, final int pid,
+			final int tableTypeVersion) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		out.write(0xC7);
+		out.write(0xF0);
+		out.write(0x00);
+		write16(out, 0x0000);
+		out.write(0xC0 | ((version & 0x1F) << 1) | 0x01);
+		out.write(0x00);
+		out.write(0x00);
+		out.write(0x00);
+		write16(out, 0x0001);
+		write16(out, tableType);
+		write16(out, 0xE000 | (pid & 0x1FFF));
+		out.write(0xE0 | (tableTypeVersion & 0x1F));
+		write32(out, 300);
+		write16(out, 0xF000);
+		write16(out, 0xF000);
+		out.writeBytes(new byte[4]);
+		byte[] section = out.toByteArray();
+		int sectionLength = section.length - 3;
+		section[1] = (byte) (0xF0 | ((sectionLength >> 8) & 0x0F));
+		section[2] = (byte) sectionLength;
+		return withCrc(section);
+	}
+
 	private static byte[] eitSection(final int version, final int sectionNumber, final int lastSectionNumber,
 			final int sourceId, final int eventId, final String title) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -812,14 +923,19 @@ public class ATSCTableSectionTest {
 
 	private static byte[] ettSection(final int tableIdExtension, final int sourceId, final int eventId,
 			final String text) {
+		return ettSection(0, 0, 0, tableIdExtension, sourceId, eventId, text);
+	}
+
+	private static byte[] ettSection(final int version, final int sectionNumber, final int lastSectionNumber,
+			final int tableIdExtension, final int sourceId, final int eventId, final String text) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		out.write(0xCC);
 		out.write(0xF0);
 		out.write(0x00);
 		write16(out, tableIdExtension);
-		out.write(0xC1);
-		out.write(0x00);
-		out.write(0x00);
+		out.write(0xC0 | ((version & 0x1F) << 1) | 0x01);
+		out.write(sectionNumber);
+		out.write(lastSectionNumber);
 		out.write(0x00);
 		write32(out, ((long) sourceId << 16) | ((long) eventId << 2) | (eventId == 0 ? 0 : 0x02));
 		byte[] textBytes = atscString(text);

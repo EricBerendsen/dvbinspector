@@ -92,7 +92,10 @@ public class ATSCTables extends AbstractPSITabel {
 	}
 
 	public void update(final ATSCETTsection section) {
-		int tableType = section.getEventId() == 0 ? 0x0004 : 0x0200;
+		int tableType = section.getTableIdExtension();
+		if (tableType == 0) {
+			tableType = section.getEventId() == 0 ? 0x0004 : 0x0200;
+		}
 		if (section.getParentPID() != null) {
 			tableType = getTableTypeForPid(section.getParentPID().getPid(), 0x0004, 0x0004)
 					.or(() -> getTableTypeForPid(section.getParentPID().getPid(), 0x0200, 0x027F))
@@ -247,10 +250,7 @@ public class ATSCTables extends AbstractPSITabel {
 	}
 
 	private static Optional<String> findServiceName(final VCT<? extends VCTsection> vct, final int programNumber) {
-		VCTsection[] sections = vct.getSections();
-		if (sections == null) {
-			return Optional.empty();
-		}
+		VCTsection[] sections = vct.getLatestCompleteSections();
 		for (VCTsection section : sections) {
 			if (section == null) {
 				continue;
@@ -265,10 +265,7 @@ public class ATSCTables extends AbstractPSITabel {
 	}
 
 	private static Optional<String> findChannelName(final VCT<? extends VCTsection> vct, final int sourceId) {
-		VCTsection[] sections = vct.getSections();
-		if (sections == null) {
-			return Optional.empty();
-		}
+		VCTsection[] sections = vct.getLatestCompleteSections();
 		for (VCTsection section : sections) {
 			if (section == null) {
 				continue;
@@ -316,7 +313,7 @@ public class ATSCTables extends AbstractPSITabel {
 				currentTime = latestStt.getSystemTime();
 			}
 			currentEvent = findCurrentEvent(events, currentTime);
-			nextEvent = findNextEvent(events, currentTime);
+			nextEvent = findNextEvent(events, currentTime, currentEvent);
 		}
 
 		public String getVctName() {
@@ -410,9 +407,21 @@ public class ATSCTables extends AbstractPSITabel {
 		}
 
 		private static ATSCEITsection.Event findNextEvent(final List<ATSCEITsection.Event> events,
-				final long currentTime) {
+				final long currentTime, final ATSCEITsection.Event currentEvent) {
 			if (currentTime < 0) {
 				return events.size() > 1 ? events.get(1) : null;
+			}
+			if (currentEvent != null) {
+				boolean foundCurrentEvent = false;
+				for (ATSCEITsection.Event event : events) {
+					if (foundCurrentEvent) {
+						return event;
+					}
+					if (event == currentEvent) {
+						foundCurrentEvent = true;
+					}
+				}
+				return null;
 			}
 			for (ATSCEITsection.Event event : events) {
 				if (event.getStartTime() >= currentTime) {

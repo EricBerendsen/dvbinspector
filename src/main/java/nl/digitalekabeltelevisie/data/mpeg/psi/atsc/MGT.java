@@ -66,7 +66,11 @@ public class MGT extends AbstractPSITabel {
 	}
 
 	public MGTsection getMgtSection() {
-		return mgtSection;
+		MGTsection latest = mgtSection;
+		while ((latest != null) && (latest.getNextVersion() != null)) {
+			latest = (MGTsection) latest.getNextVersion();
+		}
+		return latest;
 	}
 
 	public TableModel getGuideTableModel() {
@@ -77,10 +81,11 @@ public class MGT extends AbstractPSITabel {
 	}
 
 	private List<GuideRow> getGuideRows() {
-		if (mgtSection == null) {
+		MGTsection latestMgtSection = getMgtSection();
+		if (latestMgtSection == null) {
 			return List.of();
 		}
-		return mgtSection.getTableTypeEntries().stream()
+		return latestMgtSection.getTableTypeEntries().stream()
 				.map(entry -> new GuideRow(entry, getParentPSI() == null ? null : getParentPSI().getAtsc()))
 				.toList();
 	}

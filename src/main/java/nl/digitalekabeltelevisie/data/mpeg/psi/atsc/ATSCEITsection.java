@@ -119,6 +119,14 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 	}
 
 	public int getGpsUtcOffset() {
+		try {
+			STTsection latestStt = getPSI().getAtsc().getStt().getLatestSttSection();
+			if (latestStt != null) {
+				return latestStt.getGpsUtcOffset();
+			}
+		} catch (RuntimeException e) {
+			// Fall back to the offset observed when this section was parsed.
+		}
 		return gpsUtcOffset;
 	}
 
@@ -264,7 +272,8 @@ public class ATSCEITsection extends TableSectionExtendedSyntax {
 
 		public String getExtendedText() {
 			try {
-				return parent.getPSI().getAtsc().getEtt().getEventText(parent.getSourceId(), eventId);
+				return parent.getPSI().getAtsc().getEtt().getEventText(parent.getTableType(),
+						parent.getSourceId(), eventId);
 			} catch (RuntimeException e) {
 				return null;
 			}

@@ -27,9 +27,12 @@
 
 package nl.digitalekabeltelevisie.data.mpeg.psi.atsc;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 
 import javax.swing.table.TableModel;
 
@@ -51,10 +54,11 @@ public class ATSCETT extends AbstractPSITabel {
 	public void update(final ATSCETTsection section, final int tableType) {
 		section.setTableType(tableType);
 		TreeMap<Long, ATSCETTsection[]> etms = tables.computeIfAbsent(tableType, k -> new TreeMap<>());
+		int requiredLength = Math.max(section.getSectionLastNumber() + 1, section.getSectionNumber() + 1);
 		ATSCETTsection[] sections = etms.computeIfAbsent(section.getEtmId(),
-				k -> new ATSCETTsection[section.getSectionLastNumber() + 1]);
-		if (sections.length <= section.getSectionNumber()) {
-			ATSCETTsection[] resized = new ATSCETTsection[section.getSectionNumber() + 1];
+				k -> new ATSCETTsection[requiredLength]);
+		if (sections.length < requiredLength) {
+			ATSCETTsection[] resized = new ATSCETTsection[requiredLength];
 			System.arraycopy(sections, 0, resized, 0, sections.length);
 			sections = resized;
 			etms.put(section.getEtmId(), sections);
@@ -98,8 +102,12 @@ public class ATSCETT extends AbstractPSITabel {
 	}
 
 	public String getChannelText(final int sourceId) {
-		return findText(section -> section.getSourceId() == sourceId
-				&& ((section.getTableType() == 0x0004) || (section.getEventId() == 0)));
+		return findText(0x0004, section -> section.getSourceId() == sourceId);
+	}
+
+	public String getEventText(final int eitTableType, final int sourceId, final int eventId) {
+		return findText(getEventEttTableType(eitTableType),
+				section -> section.getSourceId() == sourceId && section.getEventId() == eventId);
 	}
 
 	public String getEventText(final int sourceId, final int eventId) {
@@ -147,36 +155,109 @@ public class ATSCETT extends AbstractPSITabel {
 		}
 	}
 
-	private String findText(final java.util.function.Predicate<ATSCETTsection> predicate) {
+	private String findText(final int tableType, final Predicate<ATSCETTsection> predicate) {
+		TreeMap<Long, ATSCETTsection[]> etms = tables.get(tableType);
+		return etms == null ? null : findText(etms, predicate);
+	}
+
+	private String findText(final Predicate<ATSCETTsection> predicate) {
 		for (TreeMap<Long, ATSCETTsection[]> etms : tables.values()) {
-			for (ATSCETTsection[] sections : etms.values()) {
-				String text = joinText(sections, predicate);
-				if (text != null) {
-					return text;
-				}
+			String text = findText(etms, predicate);
+			if (text != null) {
+				return text;
 			}
 		}
 		return null;
 	}
 
-	private static String joinText(final ATSCETTsection[] sections,
-			final java.util.function.Predicate<ATSCETTsection> predicate) {
+	private static String findText(final TreeMap<Long, ATSCETTsection[]> etms,
+			final Predicate<ATSCETTsection> predicate) {
+		for (ATSCETTsection[] sections : etms.values()) {
+			String text = joinText(sections, predicate);
+			if (text != null) {
+				return text;
+			}
+		}
+		return null;
+	}
+
+	private static String joinText(final ATSCETTsection[] sections, final Predicate<ATSCETTsection> predicate) {
+		Entry<Integer, ATSCETTsection[]> latestCompleteVersion =
+				getLatestCompleteVersionEntry(getVersionSections(sections));
+		if (latestCompleteVersion == null) {
+			return null;
+		}
 		StringBuilder text = new StringBuilder();
-		for (ATSCETTsection section : sections) {
-			ATSCETTsection sectionVersion = section;
-			while (sectionVersion != null) {
-				if (predicate.test(sectionVersion)) {
-					String sectionText = sectionVersion.getExtendedText();
-					if ((sectionText != null) && !sectionText.isBlank()) {
-						if (!text.isEmpty()) {
-							text.append(' ');
-						}
-						text.append(sectionText);
+		for (ATSCETTsection section : latestCompleteVersion.getValue()) {
+			if ((section != null) && predicate.test(section)) {
+				String sectionText = section.getExtendedText();
+				if ((sectionText != null) && !sectionText.isBlank()) {
+					if (!text.isEmpty()) {
+						text.append(' ');
 					}
+					text.append(sectionText);
 				}
-				sectionVersion = (ATSCETTsection) sectionVersion.getNextVersion();
 			}
 		}
 		return text.isEmpty() ? null : text.toString();
+	}
+
+	private static Map<Integer, ATSCETTsection[]> getVersionSections(final ATSCETTsection[] sections) {
+		Map<Integer, ATSCETTsection[]> versionSections = new LinkedHashMap<>();
+		for (ATSCETTsection section : sections) {
+			ATSCETTsection sectionVersion = section;
+			while (sectionVersion != null) {
+				int requiredLength = Math.max(sectionVersion.getSectionLastNumber() + 1,
+						sectionVersion.getSectionNumber() + 1);
+				ATSCETTsection[] sectionsForVersion = versionSections.get(sectionVersion.getVersion());
+				if (sectionsForVersion == null) {
+					sectionsForVersion = new ATSCETTsection[requiredLength];
+					versionSections.put(sectionVersion.getVersion(), sectionsForVersion);
+				} else if (sectionsForVersion.length < requiredLength) {
+					ATSCETTsection[] resizedSections = new ATSCETTsection[requiredLength];
+					System.arraycopy(sectionsForVersion, 0, resizedSections, 0, sectionsForVersion.length);
+					sectionsForVersion = resizedSections;
+					versionSections.put(sectionVersion.getVersion(), sectionsForVersion);
+				}
+				sectionsForVersion[sectionVersion.getSectionNumber()] = sectionVersion;
+				sectionVersion = (ATSCETTsection) sectionVersion.getNextVersion();
+			}
+		}
+		return versionSections;
+	}
+
+	private static Entry<Integer, ATSCETTsection[]> getLatestCompleteVersionEntry(
+			final Map<Integer, ATSCETTsection[]> versionSections) {
+		Entry<Integer, ATSCETTsection[]> latestAvailableVersion = null;
+		Entry<Integer, ATSCETTsection[]> latestCompleteVersion = null;
+		for (Entry<Integer, ATSCETTsection[]> versionEntry : versionSections.entrySet()) {
+			latestAvailableVersion = versionEntry;
+			if (isCompleteVersion(versionEntry.getValue())) {
+				latestCompleteVersion = versionEntry;
+			}
+		}
+		return latestCompleteVersion != null ? latestCompleteVersion : latestAvailableVersion;
+	}
+
+	private static boolean isCompleteVersion(final ATSCETTsection[] sectionsForVersion) {
+		if ((sectionsForVersion == null) || (sectionsForVersion.length == 0)) {
+			return false;
+		}
+		for (ATSCETTsection section : sectionsForVersion) {
+			if ((section == null) || (section.getSectionLastNumber() != (sectionsForVersion.length - 1))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static int getEventEttTableType(final int eitTableType) {
+		if ((0x0100 <= eitTableType) && (eitTableType <= 0x017F)) {
+			return 0x0200 + (eitTableType - 0x0100);
+		}
+		if ((0x0200 <= eitTableType) && (eitTableType <= 0x027F)) {
+			return eitTableType;
+		}
+		return 0x0200;
 	}
 }
