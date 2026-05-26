@@ -38,7 +38,15 @@ import nl.digitalekabeltelevisie.data.mpeg.TSPacket;
 import nl.digitalekabeltelevisie.data.mpeg.dsmcc.DSMCCs;
 import nl.digitalekabeltelevisie.data.mpeg.pes.GeneralPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCEITsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCETTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.GeneralPSITable.TableSectionOccurrence;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.CVCTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.MGTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.RRTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.STTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.TVCTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FNTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.FSTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.M7Fastscan;
@@ -75,6 +83,7 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 	private SCTE35 scte35_table;
 	// private DFITs dfit_table;// INT and DFIT use same tableID, both not supported here
 	private DFITs dfit_table; 
+	private ATSCTables atsc;
 	
 	private M7Fastscan m7fastscan;
 	
@@ -102,6 +111,7 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 		addToNodeIfNotNull(node, scte35_table, modus);
 		addToNodeIfNotNull(node, dfit_table, modus);
 		addToNodeIfNotNull(node, dsm_table, modus);
+		addToNodeIfNotNull(node, atsc, modus);
 		addToNodeIfNotNull(node, m7fastscan, modus);
 		addToNodeIfNotNull(node, sgt, modus);
 		return node;
@@ -189,6 +199,20 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 			} else if ((tableID >= 0xBC) && (tableID <= 0xBE)) {
 				handleFastScan(section);
 
+			} else if (tableID == 0xC7) { // ATSC Master Guide Table
+				handleATSCMGT(section);
+			} else if (tableID == 0xC8) { // ATSC Terrestrial Virtual Channel Table
+				handleATSCTVCT(section);
+			} else if (tableID == 0xC9) { // ATSC Cable Virtual Channel Table
+				handleATSCCVCT(section);
+			} else if (tableID == 0xCA) { // ATSC Rating Region Table
+				handleATSCRRT(section);
+			} else if (tableID == 0xCB) { // ATSC Event Information Table
+				handleATSCEIT(section);
+			} else if (tableID == 0xCC) { // ATSC Extended Text Table
+				handleATSCETT(section);
+			} else if (tableID == 0xCD) { // ATSC System Time Table
+				handleATSCSTT(section);
 			} else if (tableID == 0xFC) { // SCTE-35
 				handleSCTE35(section);
 			}
@@ -391,6 +415,69 @@ public class GeneralPsiTableHandler extends GeneralPidHandler {
 			m7fastscan.update(s);
 		}
 	}	
+
+	private void handleATSCMGT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		MGTsection s = new MGTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCTVCT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		TVCTsection s = new TVCTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCCVCT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		CVCTsection s = new CVCTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCRRT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		RRTsection s = new RRTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCEIT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		ATSCEITsection s = new ATSCEITsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCETT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		ATSCETTsection s = new ATSCETTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
+
+	private void handleATSCSTT(final TableSection section) {
+		if (atsc == null) {
+			atsc = new ATSCTables(getTransportStream().getPsi());
+		}
+		STTsection s = new STTsection(section.getRaw_data(), pid);
+		copyMetaData(section, s);
+		atsc.update(s);
+	}
 	
 	private static void copyMetaData(TableSection source, TableSection dest) {
 

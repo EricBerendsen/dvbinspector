@@ -32,6 +32,7 @@ import static nl.digitalekabeltelevisie.util.Utils.getUTCLocalDateTime;
 import static nl.digitalekabeltelevisie.util.Utils.isUndefined;
 import static nl.digitalekabeltelevisie.util.Utils.roundHourDown;
 import static nl.digitalekabeltelevisie.util.Utils.roundHourUp;
+import static nl.digitalekabeltelevisie.util.Utils.escapeHTML;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -44,9 +45,14 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -64,6 +70,9 @@ import nl.digitalekabeltelevisie.data.mpeg.psi.EIT;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.TDTsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCEITsection;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.STTsection;
 import nl.digitalekabeltelevisie.gui.utils.GuiUtils;
 import nl.digitalekabeltelevisie.util.Interval;
 import nl.digitalekabeltelevisie.util.ServiceIdentification;
@@ -89,8 +98,12 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 
 
 	private EIT eit;
+	private TransportStream transportStream;
+	private boolean atscMode;
 	private long milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
 	private Map<ServiceIdentification, EITsection[]> servicesTable = null;
+	private Map<ServiceIdentification, List<AtscEitEvent>> atscServicesTable = Map.of();
+	private Map<ServiceIdentification, String> serviceNames = Map.of();
 	private SortedSet<ServiceIdentification> serviceOrder = null;
 	private Interval interval;
 	private boolean selectedSchedule = true;
@@ -111,6 +124,17 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		serviceOrder = new TreeSet<>(table.keySet());
 		this.interval = EIT.getSpanningInterval(serviceOrder, table);
 		this.milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
+	}
+
+	/**
+	 * Constructor for use from DVBTree, for ATSC EIT ImageSource detail views.
+	 *
+	 * @param atsc
+	 * @param sourceEvents
+	 */
+	public EITableImage(ATSCTables atsc, Map<Integer, List<ATSCEITsection.Event>> sourceEvents){
+		this.milliSecsPerPixel = DEFAULT_MILLI_SECS_PER_PIXEL;
+		loadAtscEit(atsc, getTransportStreamId(atsc), sourceEvents);
 	}
 
 
@@ -135,6 +159,10 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
      */
 	public final void setTransportStream(TransportStream stream) {
 
+		transportStream = stream;
+		atscMode = false;
+		atscServicesTable = Map.of();
+		serviceNames = Map.of();
 		if(stream!=null){
 			eit = stream.getPsi().getEit();
 			if(selectedSchedule ){
@@ -143,10 +171,18 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 				servicesTable = eit.getCombinedPresentFollowing();
 			}
 
-			this.serviceOrder = new TreeSet<>(servicesTable.keySet());
-			this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+			if (hasDvbEvents(servicesTable)) {
+				this.serviceOrder = new TreeSet<>(servicesTable.keySet());
+				this.interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
+			} else if (!loadAtscEit(stream.getPsi().getAtsc(), getTransportStreamId(stream),
+					stream.getPsi().getAtsc().getEit().getEventsBySource())) {
+				this.serviceOrder = new TreeSet<>();
+				this.interval = null;
+			}
 		} else {
 			eit = null;
+			servicesTable = null;
+			serviceOrder = new TreeSet<>();
 			interval = null;
 		}
 		setSize(getDimension());
@@ -208,11 +244,154 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		// draw grid
 		gd.setFont(font);
 		for(ServiceIdentification serviceNo : serviceOrder){
-			EITsection[] eiTsections = servicesTable.get(serviceNo);
-			drawServiceEvents(gd, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
+			drawEventsForService(gd, startDate, SERVICE_NAME_WIDTH, offset, char_descend, serviceNo);
 			offset+=LINE_HEIGHT;
 		}
 		return img;
+	}
+
+	private boolean loadAtscEit(final ATSCTables atsc, final int transportStreamId,
+			final Map<Integer, List<ATSCEITsection.Event>> sourceEventsBySource) {
+		Map<ServiceIdentification, List<AtscEitEvent>> atscTable = new HashMap<>();
+		Map<ServiceIdentification, String> names = new HashMap<>();
+		SortedSet<ServiceIdentification> order = new TreeSet<>();
+		long currentTime = getAtscCurrentTime(atsc);
+		for (Map.Entry<Integer, List<ATSCEITsection.Event>> sourceEntry : sourceEventsBySource.entrySet()) {
+			Integer sourceId = sourceEntry.getKey();
+			List<ATSCEITsection.Event> sourceEvents = sourceEntry.getValue();
+			if (!selectedSchedule) {
+				sourceEvents = getAtscPresentFollowingEvents(sourceEvents, currentTime);
+			}
+			List<AtscEitEvent> events = new ArrayList<>();
+			for (ATSCEITsection.Event event : sourceEvents) {
+				AtscEitEvent atscEvent = toAtscEitEvent(event);
+				if (atscEvent != null) {
+					events.add(atscEvent);
+				}
+			}
+			if (!events.isEmpty()) {
+				ServiceIdentification service = new ServiceIdentification(0, transportStreamId, sourceId);
+				atscTable.put(service, events);
+				names.put(service, atsc.getChannelNameOptional(sourceId).orElse("Source " + sourceId));
+				order.add(service);
+			}
+		}
+		Interval atscInterval = getAtscSpanningInterval(order, atscTable);
+		if (atscInterval == null) {
+			return false;
+		}
+		atscMode = true;
+		servicesTable = null;
+		atscServicesTable = atscTable;
+		serviceNames = names;
+		serviceOrder = order;
+		interval = atscInterval;
+		return true;
+	}
+
+	private static boolean hasDvbEvents(final Map<ServiceIdentification, EITsection[]> table) {
+		if (table == null) {
+			return false;
+		}
+		for (EITsection[] sections : table.values()) {
+			if (sections == null) {
+				continue;
+			}
+			for (EITsection section : sections) {
+				if ((section != null) && !section.getEventList().isEmpty()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static int getTransportStreamId(final TransportStream stream) {
+		try {
+			return stream.getPsi().getPat().getTransportStreamId();
+		} catch (RuntimeException e) {
+			return 0;
+		}
+	}
+
+	private static int getTransportStreamId(final ATSCTables atsc) {
+		try {
+			return atsc.getParentPSI().getPat().getTransportStreamId();
+		} catch (RuntimeException e) {
+			return 0;
+		}
+	}
+
+	private static long getAtscCurrentTime(final ATSCTables atsc) {
+		STTsection latestStt = atsc.getStt().getLatestSttSection();
+		return latestStt == null ? -1 : latestStt.getSystemTime();
+	}
+
+	private static List<ATSCEITsection.Event> getAtscPresentFollowingEvents(
+			final List<ATSCEITsection.Event> events, final long currentTime) {
+		List<ATSCEITsection.Event> presentFollowing = new ArrayList<>();
+		if (currentTime < 0) {
+			for (int i = 0; (i < events.size()) && (i < 2); i++) {
+				presentFollowing.add(events.get(i));
+			}
+			return presentFollowing;
+		}
+		for (ATSCEITsection.Event event : events) {
+			long start = event.getStartTime();
+			long end = start + event.getLengthInSeconds();
+			if ((start <= currentTime) && (currentTime < end)) {
+				presentFollowing.add(event);
+			} else if (start >= currentTime) {
+				presentFollowing.add(event);
+			}
+			if (presentFollowing.size() == 2) {
+				break;
+			}
+		}
+		return presentFollowing;
+	}
+
+	private static AtscEitEvent toAtscEitEvent(final ATSCEITsection.Event event) {
+		try {
+			LocalDateTime start = Instant.parse(event.getUtcStartTimeString()).atZone(ZoneOffset.UTC).toLocalDateTime();
+			return new AtscEitEvent(event, start);
+		} catch (DateTimeParseException e) {
+			logger.log(Level.WARNING, "ATSC EIT event start_time is not a valid UTC instant;", e);
+			return null;
+		}
+	}
+
+	private static Interval getAtscSpanningInterval(final SortedSet<ServiceIdentification> order,
+			final Map<ServiceIdentification, List<AtscEitEvent>> table) {
+		LocalDateTime start = null;
+		LocalDateTime end = null;
+		for (ServiceIdentification service : order) {
+			for (AtscEitEvent event : table.get(service)) {
+				if ((start == null) || event.start().isBefore(start)) {
+					start = event.start();
+				}
+				LocalDateTime eventEnd = event.end();
+				if ((end == null) || eventEnd.isAfter(end)) {
+					end = eventEnd;
+				}
+			}
+		}
+		return start == null ? null : new Interval(start, end);
+	}
+
+	private void drawEventsForService(Graphics2D gd, LocalDateTime startDate, int x, int y, int char_descend,
+			ServiceIdentification serviceNo) {
+		if (atscMode) {
+			List<AtscEitEvent> events = atscServicesTable.get(serviceNo);
+			if (events != null) {
+				for (AtscEitEvent event : events) {
+					drawEventBlock(gd, startDate, event.start(), event.durationSeconds(), event.title(), x, y, char_descend);
+				}
+			}
+		} else {
+			EITsection[] eiTsections = servicesTable.get(serviceNo);
+			drawServiceEvents(gd, startDate, x, y, char_descend, eiTsections);
+		}
 	}
 
 
@@ -257,30 +436,34 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		LocalDateTime eventStart = getUTCLocalDateTime(startTime);
 
 		try{
-		int w = (int)(getDurationSeconds(event.getDuration())*1000L/milliSecsPerPixel);
-			int eventX = x+(int)(startDate.until(eventStart, ChronoUnit.MILLIS)/milliSecsPerPixel);
-			String eventName= event.getEventName();
-
-			// FIll gray
-			gd.setColor(Color.GRAY);
-			gd.fillRect(eventX, y, w, LINE_HEIGHT);
-
-			// black border
-			gd.setColor(Color.BLACK);
-			gd.drawRect(eventX, y, w, LINE_HEIGHT);
-			// title
-
-
-			Graphics2D gd2 = (Graphics2D)gd.create();
-			gd2.clipRect(eventX+5, y, w-10, LINE_HEIGHT);
-
-			gd2.setColor(Color.WHITE);
-			gd2.drawString(eventName, eventX+5,y+char_descend);
-			gd2.dispose();
+			drawEventBlock(gd, startDate, eventStart, getDurationSeconds(event.getDuration()),
+					event.getEventName(), x, y, char_descend);
 		}catch(NumberFormatException nfe){
 			logger.log(Level.WARNING, "drawEvent: Event.duration is not a valid BCD number;", nfe);
 
 		}
+	}
+
+	private void drawEventBlock(Graphics2D gd, LocalDateTime startDate, LocalDateTime eventStart,
+			long durationSeconds, String eventName, int x, int y, int char_descend) {
+		int w = (int)(durationSeconds*1000L/milliSecsPerPixel);
+		int eventX = x+(int)(startDate.until(eventStart, ChronoUnit.MILLIS)/milliSecsPerPixel);
+
+		// FIll gray
+		gd.setColor(Color.GRAY);
+		gd.fillRect(eventX, y, w, LINE_HEIGHT);
+
+		// black border
+		gd.setColor(Color.BLACK);
+		gd.drawRect(eventX, y, w, LINE_HEIGHT);
+		// title
+
+		Graphics2D gd2 = (Graphics2D)gd.create();
+		gd2.clipRect(eventX+5, y, w-10, LINE_HEIGHT);
+
+		gd2.setColor(Color.WHITE);
+		gd2.drawString(eventName == null ? "" : eventName, eventX+5,y+char_descend);
+		gd2.dispose();
 	}
 
 
@@ -302,12 +485,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		gd.setFont(nameFont);
 
 		for(ServiceIdentification serviceNo : serviceSet){
-			String serviceName = this.eit.
-					getParentPSI().
-					getSdt().
-					getServiceNameDVBString(serviceNo).
-					map(DVBString::toString).
-					orElse("Service " + serviceNo.serviceId());
+			String serviceName = getServiceName(serviceNo);
 			gd.setColor(Color.BLUE);
 			gd.fillRect(x, labelY, SERVICE_NAME_WIDTH, LINE_HEIGHT);
 			gd.setColor(Color.WHITE);
@@ -332,19 +510,35 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @param legendHeight
 	 */
 	private void drawActualTime(Graphics2D gd, LocalDateTime startDate, int x, int y, int legendHeight) {
+		LocalDateTime sectionStart = getActualTime();
+		if(sectionStart!=null){
+			gd.setColor(Color.RED);
+			int labelX = x+(int)(startDate.until(sectionStart,ChronoUnit.SECONDS) * 1000L/milliSecsPerPixel);
+			gd.drawLine(labelX, y, labelX, (y+legendHeight)-1);
+		}
+	}
+
+	private LocalDateTime getActualTime() {
+		if (atscMode && (transportStream != null)) {
+			STTsection latestStt = transportStream.getPsi().getAtsc().getStt().getLatestSttSection();
+			if (latestStt != null) {
+				try {
+					return Instant.parse(latestStt.getUtcTimeString()).atZone(ZoneOffset.UTC).toLocalDateTime();
+				} catch (DateTimeParseException e) {
+					logger.log(Level.WARNING, "ATSC STT UTC_time is not a valid UTC instant;", e);
+				}
+			}
+			return null;
+		}
 		// do we have a current time in the TDT?
-		if(this.eit.getParentPSI().getTdt()!=null){
+		if((this.eit != null) && (this.eit.getParentPSI().getTdt()!=null)){
 			List<TDTsection> tdtSectionList  = this.eit.getParentPSI().getTdt().getTdtSectionList();
 			if(!tdtSectionList.isEmpty()){
 				TDTsection first = tdtSectionList.getFirst();
-				LocalDateTime sectionStart = getUTCLocalDateTime(first.getUTC_time());
-				if(sectionStart!=null){
-					gd.setColor(Color.RED);
-					int labelX = x+(int)(startDate.until(sectionStart,ChronoUnit.SECONDS) * 1000L/milliSecsPerPixel);
-					gd.drawLine(labelX, y, labelX, (y+legendHeight)-1);
-				}
+				return getUTCLocalDateTime(first.getUTC_time());
 			}
 		}
+		return null;
 	}
 
 
@@ -384,7 +578,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 * @return
 	 */
 	public final Dimension getDimension(){
-		if((eit!=null)&&(interval!=null)){
+		if(interval!=null){
 			// Round up/down to nearest hour
 			LocalDateTime startDate = roundHourDown(interval.start());
 			LocalDateTime endDate = roundHourUp(interval.end());
@@ -414,7 +608,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	@Override
 	public String getToolTipText(MouseEvent e){
 		StringBuilder r1=new StringBuilder();
-		if((eit!=null)&&(interval!=null)){
+		if(interval!=null){
 			int x=e.getX();
 			int y=e.getY();
 			if( y>(translatedY+LEGEND_HEIGHT)){ // mouse not over legend?
@@ -424,42 +618,84 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 					r1.append("<html><b>");
 					ServiceIdentification serviceIdent = serviceOrder.toArray(new ServiceIdentification[0])[row];
 
-					if(x>(translatedX+SERVICE_NAME_WIDTH)) { // over event line 
-						String name = eit.getParentPSI().
-								getSdt().
-								getServiceNameDVBString(serviceIdent).
-								map(DVBString::toEscapedHTML).
-								orElse("Service "+serviceIdent.serviceId());
+					if(x>(translatedX+SERVICE_NAME_WIDTH)) { // over event line
+						String name = getServiceNameHTML(serviceIdent);
 						r1.append(name).append("</b><br><br>");
 						LocalDateTime thisDate =roundHourDown(interval.start()).plusSeconds(milliSecsPerPixel *(x-SERVICE_NAME_WIDTH) / 1000L);
-						Event event = findEvent(serviceIdent, thisDate);
-						if(event!=null){
-							r1.append(event.getHTML());
-						}else{ // NO event found, just display time
-							String timeString =   String.format(TIME_FORMAT,thisDate);
-							String dateString =   String.format(DATE_FORMAT,thisDate);
-
-							r1.append(dateString).append("&nbsp;").append(timeString);
+						if (atscMode) {
+							AtscEitEvent event = findAtscEvent(serviceIdent, thisDate);
+							if(event!=null){
+								r1.append(event.getHTML());
+							}else{ // NO event found, just display time
+								appendTime(r1, thisDate);
+							}
+						} else {
+							Event event = findEvent(serviceIdent, thisDate);
+							if(event!=null){
+								r1.append(event.getHTML());
+							}else{ // NO event found, just display time
+								appendTime(r1, thisDate);
+							}
 						}
 					}else { // over service names
-						String name = eit.getParentPSI().
-								getSdt().
-								getServiceNameDVBString(serviceIdent).
-								map(DVBString::toEscapedHTML).
-								orElse("[Name not in SDT]<br><br>");
-						r1.append(name).
-						append("</b><br><br>original_network_id:").
-						append(serviceIdent.originalNetworkId()).
-						append("<br>transport_stream_id:").
-						append(serviceIdent.transportStreamId()).
-						append("<br>service_id:").
-						append(serviceIdent.serviceId());
+						if (atscMode) {
+							r1.append(getServiceNameHTML(serviceIdent));
+							r1.append("</b><br><br>transport_stream_id:").
+							append(serviceIdent.transportStreamId()).
+							append("<br>source_id:").
+							append(serviceIdent.serviceId());
+						}else{
+							r1.append(getDvbServiceNameHTMLForLabel(serviceIdent)).
+							append("</b><br><br>original_network_id:").
+							append(serviceIdent.originalNetworkId()).
+							append("<br>transport_stream_id:").
+							append(serviceIdent.transportStreamId()).
+							append("<br>service_id:").
+							append(serviceIdent.serviceId());
+						}
 					}
 					r1.append("</html>");
 				}
 			}
 		}
 		return r1.toString();
+	}
+
+	private String getServiceName(final ServiceIdentification serviceNo) {
+		if (atscMode) {
+			return serviceNames.getOrDefault(serviceNo, "Source " + serviceNo.serviceId());
+		}
+		return this.eit.
+				getParentPSI().
+				getSdt().
+				getServiceNameDVBString(serviceNo).
+				map(DVBString::toString).
+				orElse("Service " + serviceNo.serviceId());
+	}
+
+	private String getServiceNameHTML(final ServiceIdentification serviceNo) {
+		if (atscMode) {
+			return escapeHTML(getServiceName(serviceNo));
+		}
+		return eit.getParentPSI().
+				getSdt().
+				getServiceNameDVBString(serviceNo).
+				map(DVBString::toEscapedHTML).
+				orElse("Service "+serviceNo.serviceId());
+	}
+
+	private String getDvbServiceNameHTMLForLabel(final ServiceIdentification serviceNo) {
+		return eit.getParentPSI().
+				getSdt().
+				getServiceNameDVBString(serviceNo).
+				map(DVBString::toEscapedHTML).
+				orElse("[Name not in SDT]<br><br>");
+	}
+
+	private static void appendTime(final StringBuilder target, final LocalDateTime thisDate) {
+		String timeString = String.format(TIME_FORMAT,thisDate);
+		String dateString = String.format(DATE_FORMAT,thisDate);
+		target.append(dateString).append("&nbsp;").append(timeString);
 	}
 
 	/**
@@ -485,6 +721,22 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 							}
 						}
 					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private AtscEitEvent findAtscEvent(ServiceIdentification serviceID, LocalDateTime date){
+		List<AtscEitEvent> list = atscServicesTable.get(serviceID);
+		if (list == null) {
+			return null;
+		}
+		for(AtscEitEvent event: list){
+			if(date.isAfter(event.start())||date.equals(event.start())){
+				if(event.end().isAfter(date)){
+					return event;
 				}
 			}
 		}
@@ -541,7 +793,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 		int viewWidth = rect.width;
 		int viewHeight = rect.height;
 
-		if((eit!=null)&&(interval!=null)){ // there are services in the EIT
+		if(interval!=null){ // there are services in the EIT
 			LocalDateTime startDate = roundHourDown(interval.start());
 			LocalDateTime endDate = roundHourUp(interval.end());
 
@@ -577,8 +829,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 
 			SortedSet<ServiceIdentification> order = serviceOrder;
 			for(ServiceIdentification serviceNo : order){
-				EITsection[] eiTsections = servicesTable.get(serviceNo);
-				drawServiceEvents(gd2, startDate, SERVICE_NAME_WIDTH, offset, char_descend, eiTsections);
+				drawEventsForService(gd2, startDate, SERVICE_NAME_WIDTH, offset, char_descend, serviceNo);
 				offset+=LINE_HEIGHT;
 			}
 
@@ -603,12 +854,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	public void selectPresentFollowing() {
 		selectedSchedule = false;
-		if(eit!=null){
-			servicesTable = eit.getCombinedPresentFollowing();
-			serviceOrder = new TreeSet<>(servicesTable.keySet());
-			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
-			setSize(getDimension());
-			repaint();
+		if(transportStream!=null){
+			setTransportStream(transportStream);
 		}
 	}
 
@@ -621,12 +868,8 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	public void selectSchedule() {
 		selectedSchedule = true;
-		if(eit!=null){
-			servicesTable = eit.getCombinedSchedule();
-			serviceOrder = new TreeSet<>(servicesTable.keySet());
-			interval = EIT.getSpanningInterval(serviceOrder, servicesTable);
-			setSize(getDimension());
-			repaint();
+		if(transportStream!=null){
+			setTransportStream(transportStream);
 		}
 	}
 
@@ -693,7 +936,7 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	@Override
 	public boolean getScrollableTracksViewportWidth() {
-		return (eit==null)||(interval==null);
+		return interval==null;
 	}
 
 
@@ -702,7 +945,40 @@ public class EITableImage extends JPanel implements ComponentListener,ImageSourc
 	 */
 	@Override
 	public boolean getScrollableTracksViewportHeight() {
-		return (eit==null)||(interval==null);
+		return interval==null;
+	}
+
+	private record AtscEitEvent(ATSCEITsection.Event event, LocalDateTime start) {
+
+		long durationSeconds() {
+			return event.getLengthInSeconds();
+		}
+
+		LocalDateTime end() {
+			return start.plusSeconds(durationSeconds());
+		}
+
+		String title() {
+			return event.getTitle();
+		}
+
+		String getHTML() {
+			StringBuilder html = new StringBuilder();
+			html.append("event_id: ").append(event.getEventId()).
+					append("<br>start_time: ").append(escapeHTML(event.getUtcStartTimeString())).
+					append("<br>duration_sec: ").append(event.getLengthInSeconds()).
+					append("<br>title: ").append(escapeHTML(event.getTitle()));
+			String extendedText = event.getExtendedText();
+			if ((extendedText != null) && !extendedText.isBlank()) {
+				html.append("<br>extended_text_message: ").append(escapeHTML(extendedText));
+			}
+			String contentAdvisory = event.getContentAdvisory();
+			if ((contentAdvisory != null) && !contentAdvisory.isBlank()) {
+				html.append("<br>content_advisory: ").append(escapeHTML(contentAdvisory));
+			}
+			html.append("<br>ETM_location: ").append(escapeHTML(event.getEtmLocationString()));
+			return html.toString();
+		}
 	}
 
 }

@@ -80,9 +80,14 @@ public class PATsection extends TableSectionExtendedSyntax implements TableSourc
 		}
 
 		public String getServiceNameOrNit() {
-			String serviceName = getParentPID().getParentTransportStream().getPsi().getSdt().getServiceNameForActualTransportStream(program_number);
+			String serviceName = getParentPID().getParentTransportStream().getPsi()
+					.getSdt().getServiceNameForActualTransportStream(program_number);
 			if(serviceName==null && program_map_PID==16) {
 				serviceName = "NIT";
+			}
+			if(serviceName==null) {
+				serviceName = getParentPID().getParentTransportStream().getPsi()
+						.getAtsc().getServiceNameOptional(program_number).orElse(null);
 			}
 			return serviceName;
 		}

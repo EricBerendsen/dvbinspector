@@ -37,6 +37,20 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.aitable.*;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscAC3AudioStreamDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscEnhancedAC3AudioDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.AtscPrivateInformationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.CaptionServiceDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ComponentNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ContentAdvisoryDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.DCCRequestDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ExtendedChannelNameDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.GenreDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.RedistributionControlDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.ServiceLocationDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.StuffingDescriptor;
+import nl.digitalekabeltelevisie.data.mpeg.descriptors.atsc.TimeShiftedServiceDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.dvb.*;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.HEVCTimingAndHRDDescriptor;
 import nl.digitalekabeltelevisie.data.mpeg.descriptors.extension.mpeg.JpegXsVideoDescriptor;
@@ -167,6 +181,9 @@ public final class DescriptorFactory {
 				// the CUVV video stream descriptor include 'cuvv' as a watermark
 				return new CUVVVideoStreamDescriptor(data, tableSection); 
 			}
+			if (descriptorTag >= 0x80 && isAtscPSIPTable(tableSection)) {
+				return getAtscDescriptor(data, tableSection);
+			}
 			if (descriptorTag >= 0x80 && tableSection.getTableId() >= 0xBC && tableSection.getTableId() <= 0xBE
 					&& PreferencesManager.isEnableM7Fastscan()) {
 				return getM7Descriptor(data, tableSection);
@@ -196,7 +213,39 @@ public final class DescriptorFactory {
 					+ ",) data=" + d.getRawDataString()+", RuntimeException:"+iae);
 			return d;
 		}
-		
+
+	}
+
+	private static boolean isAtscPSIPTable(final TableSection tableSection) {
+		int tableId = tableSection.getTableId();
+		return (0xC7 <= tableId) && (tableId <= 0xD4);
+	}
+
+	private static Descriptor getAtscDescriptor(final byte[] data, final TableSection tableSection) {
+		int descriptorTag = toUnsignedInt(data[0]);
+        return switch (descriptorTag) {
+            case 0x80 -> new StuffingDescriptor(data, tableSection);
+            case 0x81 -> new AtscAC3AudioStreamDescriptor(data, tableSection);
+            case 0x86 -> new CaptionServiceDescriptor(data, tableSection);
+            case 0x87 -> new ContentAdvisoryDescriptor(data, tableSection);
+            case 0xA0 -> new ExtendedChannelNameDescriptor(data, tableSection);
+            case 0xA1 -> new ServiceLocationDescriptor(data, tableSection);
+            case 0xA2 -> new TimeShiftedServiceDescriptor(data, tableSection);
+            case 0xA3 -> new ComponentNameDescriptor(data, tableSection);
+            case 0xA8, 0xA9 -> new DCCRequestDescriptor(data, tableSection);
+            case 0xAA -> new RedistributionControlDescriptor(data, tableSection);
+            case 0xAB -> new GenreDescriptor(data, tableSection);
+            case 0xAD -> new AtscPrivateInformationDescriptor(data, tableSection);
+            case 0xCC -> new AtscEnhancedAC3AudioDescriptor(data, tableSection);
+            default -> {
+                Descriptor d = new AtscDescriptor(data, tableSection);
+                logger.info("Not implemented AtscDescriptor:" + descriptorTag + " ("
+                        + AtscDescriptor.getDescriptorname(descriptorTag) + ") in section "
+                        + TableSection.getTableType(tableSection.getTableId()) + " (" + tableSection + ",) data="
+                        + d.getRawDataString());
+                yield d;
+            }
+        };
 	}
 
 	/**
