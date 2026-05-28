@@ -83,7 +83,7 @@ import nl.digitalekabeltelevisie.util.tablemodel.TableHeaderBuilder;
 
 
 /**
- * TransportStream is responsible for parsing a file containing a transport stream, dividing it into 188 byte TSPackets, and handing them over to the correct PID.
+ * TransportStream is responsible for parsing a file containing a transport stream, dividing it into TSPackets, and handing them over to the correct PID.
  *
  */
 public class TransportStream implements TreeNode{
@@ -294,6 +294,7 @@ public class TransportStream implements TreeNode{
 		int count = 0;
 		int bytes_read = 0;
 		int lastHandledSyncErrorPacket = -1;
+		int maxPackets = calculateMaxPackets();
 		byte[] buf = new byte[packetLength];
 		do {
 			long offset = fileStream.getPosition();
@@ -322,7 +323,7 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); // ignore result
 				}
 			}
-		} while (bytes_read == packetLength);
+		} while ((bytes_read == packetLength)&& (count < maxPackets));
 	}
 
 	private void readAVCHDPackets(PositionPushbackInputStream fileStream) throws IOException {
@@ -330,6 +331,7 @@ public class TransportStream implements TreeNode{
 		int bytes_read = 0;
 		int lastHandledSyncErrorPacket = -1;
 		byte[] buf = new byte[AVCHD_PACKET_LENGTH];
+		int maxPackets = calculateMaxPackets();
 		
 		int lastArrivalTimeStamp = Integer.MAX_VALUE;
 		long currentRollOver = -1L;
@@ -369,7 +371,11 @@ public class TransportStream implements TreeNode{
 					fileStream.read(); // ignore result
 				}
 			}
-		 } while ((bytes_read == packetLength) && (count < 1_000_000));
+		 } while ((bytes_read == packetLength) && (count < maxPackets));
+	}
+
+	private int calculateMaxPackets() {
+		return PreferencesManager.isReadPartialFile()? 1_000_000: packet_pid.length;
 	}
 
 	public void postProcess() {
@@ -503,7 +509,7 @@ public class TransportStream implements TreeNode{
 		t.add(new KVP("size",file.length()));
 
 		t.add(new KVP("modified",String.format("%1$tc", file.lastModified())));
-		t.add(new KVP("TS packets",no_packets));
+		t.add(new KVP("TS packets",no_packets).setDescription((PreferencesManager.getReadPartialFile() &&  packet_pid.length>1_000_000)?"(limited by setting)":null));
 		t.add(new KVP("packet size",packetLength).setDescription(PreferencesManager.getPacketLengthModus()==0?"(detected)":"(forced)"));
 		t.add(new KVP("Error packets",error_packets));
 		t.add(new KVP("Sync Errors",sync_errors));

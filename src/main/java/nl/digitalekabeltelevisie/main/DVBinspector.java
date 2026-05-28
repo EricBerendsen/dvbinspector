@@ -429,6 +429,11 @@ public class DVBinspector implements ChangeListener, ActionListener{
 		enablePcrPtsView.setSelected(PreferencesManager.isEnablePcrPtsView());
 		settingsMenu.add(enablePcrPtsView);
 		
+		final JCheckBoxMenuItem enablePartialFile = new JCheckBoxMenuItem(new EnablePartialFileAction(this));
+		enablePartialFile.setMnemonic(KeyEvent.VK_F);
+		enablePartialFile.setSelected(PreferencesManager.isReadPartialFile());
+		settingsMenu.add(enablePartialFile);
+		
 		final JMenu timestampPresentationMenu = new JMenu("Timestamp format");
 		timestampPresentationMenu.setMnemonic(KeyEvent.VK_T);
 		boolean showSeconds = PreferencesManager.getEnableSecondsTimestamp();

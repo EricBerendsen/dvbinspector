@@ -2,7 +2,7 @@
  *
  *  http://www.digitalekabeltelevisie.nl/dvb_inspector
  *
- *  This code is Copyright 2009-2024 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
+ *  This code is Copyright 2009-2026 by Eric Berendsen (e_berendsen@digitalekabeltelevisie.nl)
  *
  *  This file is part of DVB Inspector.
  *
@@ -64,6 +64,8 @@ public class PreferencesManager {
 	private static final String ENABLE_SECONDS_TIMESTAMP_FORMAT = "enable_seconds_timestamp_format";
 
 	private static final String PACKET_LENGTH_MODUS = "packet_length_modus";
+
+	private static final String READ_PARTIAL_FILE = "read_partial_file";
 
 	// private constructor to avoid client applications to use constructor
 	private PreferencesManager() {
@@ -213,7 +215,6 @@ public class PreferencesManager {
 	
 	public static void setSelectMpegFileFilter(boolean enabled) {
 		prefs.putBoolean(SELECT_MPEG_FILE_FILTER, enabled);
-
 	}
 
 	public static boolean getSelectMpegFileFilter() {
@@ -243,6 +244,20 @@ public class PreferencesManager {
 
 	public static void setPacketLengthModus(int mod) {
 		prefs.putInt(PACKET_LENGTH_MODUS, mod);
+	}
+
+	
+	
+	public static void setReadPartialFile(boolean enabled) {
+		prefs.putBoolean(READ_PARTIAL_FILE, enabled);
+	}
+
+	public static boolean getReadPartialFile() {
+		return prefs.getBoolean(READ_PARTIAL_FILE, false);
+	}
+
+	public static boolean isReadPartialFile() {
+		return getReadPartialFile();
 	}
 
 }
