@@ -1747,6 +1747,7 @@ public class SubPage implements TreeNode, ImageSource, TextConstants, SaveAble{
 							bgColor[actRow][actCol]=bgCol;
 						}
 					}else if (mode == 0xF) { //Character from the G2 Supplementary Set
+						// TODO determine which G2 Set, not always 0
 						txt[actRow][actCol] = (char) TxtTriplet.G2_sets[0][data];
 						if(objectType==PASSIVE_OBJECT_TYPE){
 							fgColor[actRow][actCol]=fgCol;
