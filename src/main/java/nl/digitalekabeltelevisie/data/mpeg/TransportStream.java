@@ -71,6 +71,8 @@ import nl.digitalekabeltelevisie.data.mpeg.pid.t2mi.T2miPidHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.*;
 import nl.digitalekabeltelevisie.data.mpeg.psi.EITsection.Event;
 import nl.digitalekabeltelevisie.data.mpeg.psi.PMTsection.Component;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.ATSCTables;
+import nl.digitalekabeltelevisie.data.mpeg.psi.atsc.MGTsection;
 import nl.digitalekabeltelevisie.data.mpeg.psi.handler.GeneralPsiTableHandler;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.M7Fastscan;
 import nl.digitalekabeltelevisie.data.mpeg.psi.m7fastscan.ONTSection;
@@ -555,14 +557,15 @@ public class TransportStream implements TreeNode{
 
 		for (Integer programNumber : serviceIds) {
 			PMTsection[] sections = pmts.get(programNumber);
-			
+			Optional<String> serviceName = getServiceNameOptional(programNumber);
+
 			sb.append("<li>program: ")
 			.append("<a href=\"root/psi/pmts/program:")
 			.append(programNumber)
 			.append("\">")
 			.append(programNumber)
 			.append("</a>");
-			psi.getSdt().getServiceNameForActualTransportStreamOptional(programNumber).ifPresent(s -> sb.append(" (").append(s).append(')'));
+			serviceName.ifPresent(s -> sb.append(" (").append(s).append(')'));
 			sb.append("<br/>");
 			
 			PMTsection pmtSection = sections[0];
@@ -733,6 +736,7 @@ public class TransportStream implements TreeNode{
 		}
 
 		setLabelMakerBase(8191,"NULL Packets (Stuffing)");
+		labelAtscPsipTables();
 
 		// now the streams referenced from the CAT
 		if(pids[1]!=null){
@@ -746,7 +750,7 @@ public class TransportStream implements TreeNode{
 			PMTsection pmtSection = pmt[0];
 			while(pmtSection!=null){
 				int service_id=pmtSection.getProgramNumber();
-				String service_name = psi.getSdt().getServiceNameForActualTransportStreamOptional(service_id).orElse("Service "+service_id);
+				String service_name = getServiceNameOptional(service_id).orElse("Service "+service_id);
 
 				labelPmtForProgram(pmtSection, service_name);
 				labelEcmForProgram(pmtSection, service_name);
@@ -764,6 +768,23 @@ public class TransportStream implements TreeNode{
 		}
 		
 
+	}
+
+	private void labelAtscPsipTables() {
+		setLabelMakerBase(ATSCTables.BASE_PID, "ATSC PSIP");
+		MGTsection mgtSection = psi.getAtsc().getMgt().getMgtSection();
+		if (mgtSection == null) {
+			return;
+		}
+		for (MGTsection.TableTypeEntry entry : mgtSection.getTableTypeEntries()) {
+			int pid = entry.getTableTypePid();
+			setLabelMakerBase(pid, "ATSC PSIP");
+			addLabelMakerComponent(pid, "ATSC table", MGTsection.getTableTypeDescription(entry.getTableType()));
+		}
+	}
+
+	private Optional<String> getServiceNameOptional(final int serviceId) {
+		return psi.getServiceNameOptional(serviceId);
 	}
 
 	private void setGeneralPsiTableHandlers() {
@@ -964,6 +985,14 @@ public class TransportStream implements TreeNode{
 		int componentElementaryPID = component.getElementaryPID();
 		PID pid = pids[componentElementaryPID];
 		if ((pid != null) && (!pid.isScrambled()) && (pid.getType() == PID.PES)){
+			if (psi.getAtsc().hasPsipTables()) {
+				if (streamType == 0x81) {
+					return new AC3Handler();
+				}
+				if (streamType == 0x87) {
+					return new EAC3Handler();
+				}
+			}
 			return switch(streamType){
 				case 1,2 -> new Video138182Handler();
 				case 3,4 -> new Audio138183Handler(getAncillaryDataIdentifier(component));

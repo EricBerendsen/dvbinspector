@@ -506,6 +506,11 @@ public class KVP extends DefaultMutableTreeNode{
 		return this;
 	}
 
+	public KVP addTableSourceFirst(TableSource tableSource, String label) {
+		detailViews.add(0, new DetailView(tableSource, label));
+		return this;
+	}
+
 	public KVP addXMLSource(XMLSource xmlSource, String label) {
 		detailViews.add(new DetailView(xmlSource, label));
 		return this;
